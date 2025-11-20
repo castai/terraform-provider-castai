@@ -90,7 +90,7 @@ func TestCommitmentsResourceCreateAndUpdate(t *testing.T) {
 					AllowedUsage:    lo.ToPtr[float32](0.6),
 					Prioritization:  lo.ToPtr(true),
 					ScalingStrategy: lo.ToPtr(sdk.CPUBased),
-					Status:          lo.ToPtr(sdk.Active),
+					Status:          lo.ToPtr(sdk.CastaiInventoryV1beta1CommitmentStatusActive),
 				},
 				mockImportedCommitment: sdk.CastaiInventoryV1beta1Commitment{
 					EndDate: lo.ToPtr(time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)),
@@ -106,7 +106,7 @@ func TestCommitmentsResourceCreateAndUpdate(t *testing.T) {
 					},
 					Region:       lo.ToPtr("https://www.googleapis.com/compute/v1/projects/test-project/regions/us-central1"),
 					StartDate:    lo.ToPtr(time.Date(2023, 1, 1, 0, 0, 0, 0, time.UTC)),
-					Status:       lo.ToPtr(sdk.Active),
+					Status:       lo.ToPtr(sdk.CastaiInventoryV1beta1CommitmentStatusActive),
 					AllowedUsage: lo.ToPtr[float32](1),
 				},
 			}
@@ -159,7 +159,7 @@ test,3b3de39c-bc44-4d69-be2d-69527dfe9958,630226bb-5170-4b95-90b0-f222757130c1,S
 					AllowedUsage:    lo.ToPtr[float32](0.7),
 					Prioritization:  lo.ToPtr(true),
 					ScalingStrategy: lo.ToPtr(sdk.Default),
-					Status:          lo.ToPtr(sdk.Active),
+					Status:          lo.ToPtr(sdk.CastaiInventoryV1beta1CommitmentStatusActive),
 				},
 				mockImportedCommitment: sdk.CastaiInventoryV1beta1Commitment{
 					EndDate: lo.ToPtr(time.Date(2050, 1, 1, 0, 0, 0, 0, time.UTC)),

@@ -176,6 +176,134 @@ type ClientInterface interface {
 
 	AllocationGroupAPIUpdateAllocationGroup(ctx context.Context, id string, body AllocationGroupAPIUpdateAllocationGroupJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// DboAPIListAccounts request
+	DboAPIListAccounts(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// DboAPIDeleteAccount request
+	DboAPIDeleteAccount(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// DboAPIListCacheGroups request
+	DboAPIListCacheGroups(ctx context.Context, params *DboAPIListCacheGroupsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// DboAPICreateCacheGroupWithBody request with any body
+	DboAPICreateCacheGroupWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	DboAPICreateCacheGroup(ctx context.Context, body DboAPICreateCacheGroupJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// DboAPIListCacheConfigurations request
+	DboAPIListCacheConfigurations(ctx context.Context, groupId string, params *DboAPIListCacheConfigurationsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// DboAPICreateCacheConfigurationWithBody request with any body
+	DboAPICreateCacheConfigurationWithBody(ctx context.Context, groupId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	DboAPICreateCacheConfiguration(ctx context.Context, groupId string, body DboAPICreateCacheConfigurationJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// DboAPIGetCacheEfficiency request
+	DboAPIGetCacheEfficiency(ctx context.Context, groupId string, cacheId string, params *DboAPIGetCacheEfficiencyParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// DboAPIGetCacheQueries request
+	DboAPIGetCacheQueries(ctx context.Context, groupId string, cacheId string, params *DboAPIGetCacheQueriesParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// DboAPIGetCacheQuery request
+	DboAPIGetCacheQuery(ctx context.Context, groupId string, cacheId string, templateHash string, params *DboAPIGetCacheQueryParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// DboAPIGetCacheQueryInsights request
+	DboAPIGetCacheQueryInsights(ctx context.Context, groupId string, cacheId string, templateHash string, params *DboAPIGetCacheQueryInsightsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// DboAPIGetCacheQueryTemplate request
+	DboAPIGetCacheQueryTemplate(ctx context.Context, groupId string, cacheId string, templateHash string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// DboAPIListCacheTTLs request
+	DboAPIListCacheTTLs(ctx context.Context, groupId string, cacheId string, params *DboAPIListCacheTTLsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// DboAPIDeleteCacheTTL request
+	DboAPIDeleteCacheTTL(ctx context.Context, groupId string, cacheId string, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// DboAPIUpdateCacheTTLWithBody request with any body
+	DboAPIUpdateCacheTTLWithBody(ctx context.Context, groupId string, cacheId string, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	DboAPIUpdateCacheTTL(ctx context.Context, groupId string, cacheId string, id string, body DboAPIUpdateCacheTTLJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// DboAPIGetCacheSummary request
+	DboAPIGetCacheSummary(ctx context.Context, groupId string, cacheId string, params *DboAPIGetCacheSummaryParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// DboAPIDeleteCacheConfiguration request
+	DboAPIDeleteCacheConfiguration(ctx context.Context, groupId string, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// DboAPIUpdateCacheConfigurationWithBody request with any body
+	DboAPIUpdateCacheConfigurationWithBody(ctx context.Context, groupId string, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	DboAPIUpdateCacheConfiguration(ctx context.Context, groupId string, id string, body DboAPIUpdateCacheConfigurationJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// DboAPICreateCacheTTLWithBody request with any body
+	DboAPICreateCacheTTLWithBody(ctx context.Context, groupId string, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	DboAPICreateCacheTTL(ctx context.Context, groupId string, id string, body DboAPICreateCacheTTLJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// DboAPICreateCacheDiagnosticUploadURL request
+	DboAPICreateCacheDiagnosticUploadURL(ctx context.Context, groupId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// DboAPIDeleteCacheGroup request
+	DboAPIDeleteCacheGroup(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// DboAPIGetCacheGroup request
+	DboAPIGetCacheGroup(ctx context.Context, id string, params *DboAPIGetCacheGroupParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// DboAPIUpdateCacheGroupWithBody request with any body
+	DboAPIUpdateCacheGroupWithBody(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	DboAPIUpdateCacheGroup(ctx context.Context, id string, body DboAPIUpdateCacheGroupJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// DboAPIGetCacheGroupPerformance request
+	DboAPIGetCacheGroupPerformance(ctx context.Context, id string, params *DboAPIGetCacheGroupPerformanceParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// DboAPIExchangeCacheStateWithBody request with any body
+	DboAPIExchangeCacheStateWithBody(ctx context.Context, cacheGroupId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	DboAPIExchangeCacheState(ctx context.Context, cacheGroupId string, body DboAPIExchangeCacheStateJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// DboAPIGetDatabaseCluster request
+	DboAPIGetDatabaseCluster(ctx context.Context, clusterId string, params *DboAPIGetDatabaseClusterParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// DboAPIListDatabaseComponents request
+	DboAPIListDatabaseComponents(ctx context.Context, params *DboAPIListDatabaseComponentsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// DboAPIListDatabaseInstances request
+	DboAPIListDatabaseInstances(ctx context.Context, params *DboAPIListDatabaseInstancesParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// DboAPIGetDatabaseInstance request
+	DboAPIGetDatabaseInstance(ctx context.Context, instanceId string, params *DboAPIGetDatabaseInstanceParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// DboAPIGetDatabaseInstanceCachePerformance request
+	DboAPIGetDatabaseInstanceCachePerformance(ctx context.Context, instanceId string, params *DboAPIGetDatabaseInstanceCachePerformanceParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// DboAPIGetDatabaseInstanceInfrastructureMetrics request
+	DboAPIGetDatabaseInstanceInfrastructureMetrics(ctx context.Context, instanceId string, params *DboAPIGetDatabaseInstanceInfrastructureMetricsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// DboAPIDeleteLogicalDatabase request
+	DboAPIDeleteLogicalDatabase(ctx context.Context, instanceId string, name string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// DboAPICreateLogicalDatabasesWithBody request with any body
+	DboAPICreateLogicalDatabasesWithBody(ctx context.Context, instanceId string, params *DboAPICreateLogicalDatabasesParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	DboAPICreateLogicalDatabases(ctx context.Context, instanceId string, params *DboAPICreateLogicalDatabasesParams, body DboAPICreateLogicalDatabasesJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// DboAPICreateRegistrationWithBody request with any body
+	DboAPICreateRegistrationWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	DboAPICreateRegistration(ctx context.Context, body DboAPICreateRegistrationJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// DboAPIGetRegistrationScript request
+	DboAPIGetRegistrationScript(ctx context.Context, registrationId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// DboAPIGetRegistrationStatus request
+	DboAPIGetRegistrationStatus(ctx context.Context, registrationId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// DboAPICreateRegistrationStatusUpdateWithBody request with any body
+	DboAPICreateRegistrationStatusUpdateWithBody(ctx context.Context, registrationId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	DboAPICreateRegistrationStatusUpdate(ctx context.Context, registrationId string, body DboAPICreateRegistrationStatusUpdateJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// InventoryAPIListInstanceTypeNames request
 	InventoryAPIListInstanceTypeNames(ctx context.Context, params *InventoryAPIListInstanceTypeNamesParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -1227,6 +1355,558 @@ func (c *Client) AllocationGroupAPIUpdateAllocationGroupWithBody(ctx context.Con
 
 func (c *Client) AllocationGroupAPIUpdateAllocationGroup(ctx context.Context, id string, body AllocationGroupAPIUpdateAllocationGroupJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewAllocationGroupAPIUpdateAllocationGroupRequest(c.Server, id, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) DboAPIListAccounts(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDboAPIListAccountsRequest(c.Server)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) DboAPIDeleteAccount(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDboAPIDeleteAccountRequest(c.Server, id)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) DboAPIListCacheGroups(ctx context.Context, params *DboAPIListCacheGroupsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDboAPIListCacheGroupsRequest(c.Server, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) DboAPICreateCacheGroupWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDboAPICreateCacheGroupRequestWithBody(c.Server, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) DboAPICreateCacheGroup(ctx context.Context, body DboAPICreateCacheGroupJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDboAPICreateCacheGroupRequest(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) DboAPIListCacheConfigurations(ctx context.Context, groupId string, params *DboAPIListCacheConfigurationsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDboAPIListCacheConfigurationsRequest(c.Server, groupId, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) DboAPICreateCacheConfigurationWithBody(ctx context.Context, groupId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDboAPICreateCacheConfigurationRequestWithBody(c.Server, groupId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) DboAPICreateCacheConfiguration(ctx context.Context, groupId string, body DboAPICreateCacheConfigurationJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDboAPICreateCacheConfigurationRequest(c.Server, groupId, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) DboAPIGetCacheEfficiency(ctx context.Context, groupId string, cacheId string, params *DboAPIGetCacheEfficiencyParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDboAPIGetCacheEfficiencyRequest(c.Server, groupId, cacheId, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) DboAPIGetCacheQueries(ctx context.Context, groupId string, cacheId string, params *DboAPIGetCacheQueriesParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDboAPIGetCacheQueriesRequest(c.Server, groupId, cacheId, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) DboAPIGetCacheQuery(ctx context.Context, groupId string, cacheId string, templateHash string, params *DboAPIGetCacheQueryParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDboAPIGetCacheQueryRequest(c.Server, groupId, cacheId, templateHash, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) DboAPIGetCacheQueryInsights(ctx context.Context, groupId string, cacheId string, templateHash string, params *DboAPIGetCacheQueryInsightsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDboAPIGetCacheQueryInsightsRequest(c.Server, groupId, cacheId, templateHash, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) DboAPIGetCacheQueryTemplate(ctx context.Context, groupId string, cacheId string, templateHash string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDboAPIGetCacheQueryTemplateRequest(c.Server, groupId, cacheId, templateHash)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) DboAPIListCacheTTLs(ctx context.Context, groupId string, cacheId string, params *DboAPIListCacheTTLsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDboAPIListCacheTTLsRequest(c.Server, groupId, cacheId, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) DboAPIDeleteCacheTTL(ctx context.Context, groupId string, cacheId string, id string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDboAPIDeleteCacheTTLRequest(c.Server, groupId, cacheId, id)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) DboAPIUpdateCacheTTLWithBody(ctx context.Context, groupId string, cacheId string, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDboAPIUpdateCacheTTLRequestWithBody(c.Server, groupId, cacheId, id, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) DboAPIUpdateCacheTTL(ctx context.Context, groupId string, cacheId string, id string, body DboAPIUpdateCacheTTLJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDboAPIUpdateCacheTTLRequest(c.Server, groupId, cacheId, id, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) DboAPIGetCacheSummary(ctx context.Context, groupId string, cacheId string, params *DboAPIGetCacheSummaryParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDboAPIGetCacheSummaryRequest(c.Server, groupId, cacheId, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) DboAPIDeleteCacheConfiguration(ctx context.Context, groupId string, id string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDboAPIDeleteCacheConfigurationRequest(c.Server, groupId, id)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) DboAPIUpdateCacheConfigurationWithBody(ctx context.Context, groupId string, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDboAPIUpdateCacheConfigurationRequestWithBody(c.Server, groupId, id, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) DboAPIUpdateCacheConfiguration(ctx context.Context, groupId string, id string, body DboAPIUpdateCacheConfigurationJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDboAPIUpdateCacheConfigurationRequest(c.Server, groupId, id, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) DboAPICreateCacheTTLWithBody(ctx context.Context, groupId string, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDboAPICreateCacheTTLRequestWithBody(c.Server, groupId, id, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) DboAPICreateCacheTTL(ctx context.Context, groupId string, id string, body DboAPICreateCacheTTLJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDboAPICreateCacheTTLRequest(c.Server, groupId, id, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) DboAPICreateCacheDiagnosticUploadURL(ctx context.Context, groupId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDboAPICreateCacheDiagnosticUploadURLRequest(c.Server, groupId)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) DboAPIDeleteCacheGroup(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDboAPIDeleteCacheGroupRequest(c.Server, id)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) DboAPIGetCacheGroup(ctx context.Context, id string, params *DboAPIGetCacheGroupParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDboAPIGetCacheGroupRequest(c.Server, id, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) DboAPIUpdateCacheGroupWithBody(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDboAPIUpdateCacheGroupRequestWithBody(c.Server, id, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) DboAPIUpdateCacheGroup(ctx context.Context, id string, body DboAPIUpdateCacheGroupJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDboAPIUpdateCacheGroupRequest(c.Server, id, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) DboAPIGetCacheGroupPerformance(ctx context.Context, id string, params *DboAPIGetCacheGroupPerformanceParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDboAPIGetCacheGroupPerformanceRequest(c.Server, id, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) DboAPIExchangeCacheStateWithBody(ctx context.Context, cacheGroupId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDboAPIExchangeCacheStateRequestWithBody(c.Server, cacheGroupId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) DboAPIExchangeCacheState(ctx context.Context, cacheGroupId string, body DboAPIExchangeCacheStateJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDboAPIExchangeCacheStateRequest(c.Server, cacheGroupId, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) DboAPIGetDatabaseCluster(ctx context.Context, clusterId string, params *DboAPIGetDatabaseClusterParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDboAPIGetDatabaseClusterRequest(c.Server, clusterId, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) DboAPIListDatabaseComponents(ctx context.Context, params *DboAPIListDatabaseComponentsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDboAPIListDatabaseComponentsRequest(c.Server, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) DboAPIListDatabaseInstances(ctx context.Context, params *DboAPIListDatabaseInstancesParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDboAPIListDatabaseInstancesRequest(c.Server, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) DboAPIGetDatabaseInstance(ctx context.Context, instanceId string, params *DboAPIGetDatabaseInstanceParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDboAPIGetDatabaseInstanceRequest(c.Server, instanceId, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) DboAPIGetDatabaseInstanceCachePerformance(ctx context.Context, instanceId string, params *DboAPIGetDatabaseInstanceCachePerformanceParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDboAPIGetDatabaseInstanceCachePerformanceRequest(c.Server, instanceId, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) DboAPIGetDatabaseInstanceInfrastructureMetrics(ctx context.Context, instanceId string, params *DboAPIGetDatabaseInstanceInfrastructureMetricsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDboAPIGetDatabaseInstanceInfrastructureMetricsRequest(c.Server, instanceId, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) DboAPIDeleteLogicalDatabase(ctx context.Context, instanceId string, name string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDboAPIDeleteLogicalDatabaseRequest(c.Server, instanceId, name)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) DboAPICreateLogicalDatabasesWithBody(ctx context.Context, instanceId string, params *DboAPICreateLogicalDatabasesParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDboAPICreateLogicalDatabasesRequestWithBody(c.Server, instanceId, params, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) DboAPICreateLogicalDatabases(ctx context.Context, instanceId string, params *DboAPICreateLogicalDatabasesParams, body DboAPICreateLogicalDatabasesJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDboAPICreateLogicalDatabasesRequest(c.Server, instanceId, params, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) DboAPICreateRegistrationWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDboAPICreateRegistrationRequestWithBody(c.Server, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) DboAPICreateRegistration(ctx context.Context, body DboAPICreateRegistrationJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDboAPICreateRegistrationRequest(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) DboAPIGetRegistrationScript(ctx context.Context, registrationId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDboAPIGetRegistrationScriptRequest(c.Server, registrationId)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) DboAPIGetRegistrationStatus(ctx context.Context, registrationId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDboAPIGetRegistrationStatusRequest(c.Server, registrationId)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) DboAPICreateRegistrationStatusUpdateWithBody(ctx context.Context, registrationId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDboAPICreateRegistrationStatusUpdateRequestWithBody(c.Server, registrationId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) DboAPICreateRegistrationStatusUpdate(ctx context.Context, registrationId string, body DboAPICreateRegistrationStatusUpdateJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDboAPICreateRegistrationStatusUpdateRequest(c.Server, registrationId, body)
 	if err != nil {
 		return nil, err
 	}
@@ -5941,6 +6621,2230 @@ func NewAllocationGroupAPIUpdateAllocationGroupRequestWithBody(server string, id
 	}
 
 	req, err := http.NewRequest("PUT", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewDboAPIListAccountsRequest generates requests for DboAPIListAccounts
+func NewDboAPIListAccountsRequest(server string) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/dbo/accounts")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewDboAPIDeleteAccountRequest generates requests for DboAPIDeleteAccount
+func NewDboAPIDeleteAccountRequest(server string, id string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/dbo/accounts/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("DELETE", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewDboAPIListCacheGroupsRequest generates requests for DboAPIListCacheGroups
+func NewDboAPIListCacheGroupsRequest(server string, params *DboAPIListCacheGroupsParams) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/dbo/cache-groups")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if params.InstanceId != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "instanceId", runtime.ParamLocationQuery, *params.InstanceId); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.ClusterId != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "clusterId", runtime.ParamLocationQuery, *params.ClusterId); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.MetricsRangeStart != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "metricsRange.start", runtime.ParamLocationQuery, *params.MetricsRangeStart); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.MetricsRangeEnd != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "metricsRange.end", runtime.ParamLocationQuery, *params.MetricsRangeEnd); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.Deployed != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "deployed", runtime.ParamLocationQuery, *params.Deployed); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewDboAPICreateCacheGroupRequest calls the generic DboAPICreateCacheGroup builder with application/json body
+func NewDboAPICreateCacheGroupRequest(server string, body DboAPICreateCacheGroupJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewDboAPICreateCacheGroupRequestWithBody(server, "application/json", bodyReader)
+}
+
+// NewDboAPICreateCacheGroupRequestWithBody generates requests for DboAPICreateCacheGroup with any type of body
+func NewDboAPICreateCacheGroupRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/dbo/cache-groups")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewDboAPIListCacheConfigurationsRequest generates requests for DboAPIListCacheConfigurations
+func NewDboAPIListCacheConfigurationsRequest(server string, groupId string, params *DboAPIListCacheConfigurationsParams) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "groupId", runtime.ParamLocationPath, groupId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/dbo/cache-groups/%s/cache-configurations", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if params.DatabaseName != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "databaseName", runtime.ParamLocationQuery, *params.DatabaseName); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewDboAPICreateCacheConfigurationRequest calls the generic DboAPICreateCacheConfiguration builder with application/json body
+func NewDboAPICreateCacheConfigurationRequest(server string, groupId string, body DboAPICreateCacheConfigurationJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewDboAPICreateCacheConfigurationRequestWithBody(server, groupId, "application/json", bodyReader)
+}
+
+// NewDboAPICreateCacheConfigurationRequestWithBody generates requests for DboAPICreateCacheConfiguration with any type of body
+func NewDboAPICreateCacheConfigurationRequestWithBody(server string, groupId string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "groupId", runtime.ParamLocationPath, groupId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/dbo/cache-groups/%s/cache-configurations", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewDboAPIGetCacheEfficiencyRequest generates requests for DboAPIGetCacheEfficiency
+func NewDboAPIGetCacheEfficiencyRequest(server string, groupId string, cacheId string, params *DboAPIGetCacheEfficiencyParams) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "groupId", runtime.ParamLocationPath, groupId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "cacheId", runtime.ParamLocationPath, cacheId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/dbo/cache-groups/%s/cache-configurations/%s/efficiency", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "startTime", runtime.ParamLocationQuery, params.StartTime); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "endTime", runtime.ParamLocationQuery, params.EndTime); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "stepSeconds", runtime.ParamLocationQuery, params.StepSeconds); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+		if params.TemplateHash != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "templateHash", runtime.ParamLocationQuery, *params.TemplateHash); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewDboAPIGetCacheQueriesRequest generates requests for DboAPIGetCacheQueries
+func NewDboAPIGetCacheQueriesRequest(server string, groupId string, cacheId string, params *DboAPIGetCacheQueriesParams) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "groupId", runtime.ParamLocationPath, groupId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "cacheId", runtime.ParamLocationPath, cacheId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/dbo/cache-groups/%s/cache-configurations/%s/queries", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if params.PageLimit != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "page.limit", runtime.ParamLocationQuery, *params.PageLimit); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.PageCursor != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "page.cursor", runtime.ParamLocationQuery, *params.PageCursor); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.SortField != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "sort.field", runtime.ParamLocationQuery, *params.SortField); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.SortOrder != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "sort.order", runtime.ParamLocationQuery, *params.SortOrder); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.StartTime != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "startTime", runtime.ParamLocationQuery, *params.StartTime); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.EndTime != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "endTime", runtime.ParamLocationQuery, *params.EndTime); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.QueryContains != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "queryContains", runtime.ParamLocationQuery, *params.QueryContains); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewDboAPIGetCacheQueryRequest generates requests for DboAPIGetCacheQuery
+func NewDboAPIGetCacheQueryRequest(server string, groupId string, cacheId string, templateHash string, params *DboAPIGetCacheQueryParams) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "groupId", runtime.ParamLocationPath, groupId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "cacheId", runtime.ParamLocationPath, cacheId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam2 string
+
+	pathParam2, err = runtime.StyleParamWithLocation("simple", false, "templateHash", runtime.ParamLocationPath, templateHash)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/dbo/cache-groups/%s/cache-configurations/%s/queries/%s", pathParam0, pathParam1, pathParam2)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if params.MetricsRangeStart != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "metricsRange.start", runtime.ParamLocationQuery, *params.MetricsRangeStart); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.MetricsRangeEnd != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "metricsRange.end", runtime.ParamLocationQuery, *params.MetricsRangeEnd); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewDboAPIGetCacheQueryInsightsRequest generates requests for DboAPIGetCacheQueryInsights
+func NewDboAPIGetCacheQueryInsightsRequest(server string, groupId string, cacheId string, templateHash string, params *DboAPIGetCacheQueryInsightsParams) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "groupId", runtime.ParamLocationPath, groupId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "cacheId", runtime.ParamLocationPath, cacheId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam2 string
+
+	pathParam2, err = runtime.StyleParamWithLocation("simple", false, "templateHash", runtime.ParamLocationPath, templateHash)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/dbo/cache-groups/%s/cache-configurations/%s/queries/%s/insights", pathParam0, pathParam1, pathParam2)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if params.MetricsRangeStart != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "metricsRange.start", runtime.ParamLocationQuery, *params.MetricsRangeStart); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.MetricsRangeEnd != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "metricsRange.end", runtime.ParamLocationQuery, *params.MetricsRangeEnd); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "stepSeconds", runtime.ParamLocationQuery, params.StepSeconds); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewDboAPIGetCacheQueryTemplateRequest generates requests for DboAPIGetCacheQueryTemplate
+func NewDboAPIGetCacheQueryTemplateRequest(server string, groupId string, cacheId string, templateHash string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "groupId", runtime.ParamLocationPath, groupId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "cacheId", runtime.ParamLocationPath, cacheId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam2 string
+
+	pathParam2, err = runtime.StyleParamWithLocation("simple", false, "templateHash", runtime.ParamLocationPath, templateHash)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/dbo/cache-groups/%s/cache-configurations/%s/queries/%s/template", pathParam0, pathParam1, pathParam2)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewDboAPIListCacheTTLsRequest generates requests for DboAPIListCacheTTLs
+func NewDboAPIListCacheTTLsRequest(server string, groupId string, cacheId string, params *DboAPIListCacheTTLsParams) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "groupId", runtime.ParamLocationPath, groupId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "cacheId", runtime.ParamLocationPath, cacheId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/dbo/cache-groups/%s/cache-configurations/%s/rules", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if params.Table != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "table", runtime.ParamLocationQuery, *params.Table); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.TemplateHash != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "templateHash", runtime.ParamLocationQuery, *params.TemplateHash); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewDboAPIDeleteCacheTTLRequest generates requests for DboAPIDeleteCacheTTL
+func NewDboAPIDeleteCacheTTLRequest(server string, groupId string, cacheId string, id string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "groupId", runtime.ParamLocationPath, groupId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "cacheId", runtime.ParamLocationPath, cacheId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam2 string
+
+	pathParam2, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/dbo/cache-groups/%s/cache-configurations/%s/rules/%s", pathParam0, pathParam1, pathParam2)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("DELETE", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewDboAPIUpdateCacheTTLRequest calls the generic DboAPIUpdateCacheTTL builder with application/json body
+func NewDboAPIUpdateCacheTTLRequest(server string, groupId string, cacheId string, id string, body DboAPIUpdateCacheTTLJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewDboAPIUpdateCacheTTLRequestWithBody(server, groupId, cacheId, id, "application/json", bodyReader)
+}
+
+// NewDboAPIUpdateCacheTTLRequestWithBody generates requests for DboAPIUpdateCacheTTL with any type of body
+func NewDboAPIUpdateCacheTTLRequestWithBody(server string, groupId string, cacheId string, id string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "groupId", runtime.ParamLocationPath, groupId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "cacheId", runtime.ParamLocationPath, cacheId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam2 string
+
+	pathParam2, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/dbo/cache-groups/%s/cache-configurations/%s/rules/%s", pathParam0, pathParam1, pathParam2)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("PUT", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewDboAPIGetCacheSummaryRequest generates requests for DboAPIGetCacheSummary
+func NewDboAPIGetCacheSummaryRequest(server string, groupId string, cacheId string, params *DboAPIGetCacheSummaryParams) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "groupId", runtime.ParamLocationPath, groupId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "cacheId", runtime.ParamLocationPath, cacheId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/dbo/cache-groups/%s/cache-configurations/%s/summary", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if params.StartTime != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "startTime", runtime.ParamLocationQuery, *params.StartTime); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.EndTime != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "endTime", runtime.ParamLocationQuery, *params.EndTime); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewDboAPIDeleteCacheConfigurationRequest generates requests for DboAPIDeleteCacheConfiguration
+func NewDboAPIDeleteCacheConfigurationRequest(server string, groupId string, id string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "groupId", runtime.ParamLocationPath, groupId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/dbo/cache-groups/%s/cache-configurations/%s", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("DELETE", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewDboAPIUpdateCacheConfigurationRequest calls the generic DboAPIUpdateCacheConfiguration builder with application/json body
+func NewDboAPIUpdateCacheConfigurationRequest(server string, groupId string, id string, body DboAPIUpdateCacheConfigurationJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewDboAPIUpdateCacheConfigurationRequestWithBody(server, groupId, id, "application/json", bodyReader)
+}
+
+// NewDboAPIUpdateCacheConfigurationRequestWithBody generates requests for DboAPIUpdateCacheConfiguration with any type of body
+func NewDboAPIUpdateCacheConfigurationRequestWithBody(server string, groupId string, id string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "groupId", runtime.ParamLocationPath, groupId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/dbo/cache-groups/%s/cache-configurations/%s", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("PUT", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewDboAPICreateCacheTTLRequest calls the generic DboAPICreateCacheTTL builder with application/json body
+func NewDboAPICreateCacheTTLRequest(server string, groupId string, id string, body DboAPICreateCacheTTLJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewDboAPICreateCacheTTLRequestWithBody(server, groupId, id, "application/json", bodyReader)
+}
+
+// NewDboAPICreateCacheTTLRequestWithBody generates requests for DboAPICreateCacheTTL with any type of body
+func NewDboAPICreateCacheTTLRequestWithBody(server string, groupId string, id string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "groupId", runtime.ParamLocationPath, groupId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/dbo/cache-groups/%s/cache-configurations/%s/rules", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewDboAPICreateCacheDiagnosticUploadURLRequest generates requests for DboAPICreateCacheDiagnosticUploadURL
+func NewDboAPICreateCacheDiagnosticUploadURLRequest(server string, groupId string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "groupId", runtime.ParamLocationPath, groupId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/dbo/cache-groups/%s/diagnostics/upload-url", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewDboAPIDeleteCacheGroupRequest generates requests for DboAPIDeleteCacheGroup
+func NewDboAPIDeleteCacheGroupRequest(server string, id string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/dbo/cache-groups/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("DELETE", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewDboAPIGetCacheGroupRequest generates requests for DboAPIGetCacheGroup
+func NewDboAPIGetCacheGroupRequest(server string, id string, params *DboAPIGetCacheGroupParams) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/dbo/cache-groups/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if params.MetricsRangeStart != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "metricsRange.start", runtime.ParamLocationQuery, *params.MetricsRangeStart); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.MetricsRangeEnd != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "metricsRange.end", runtime.ParamLocationQuery, *params.MetricsRangeEnd); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewDboAPIUpdateCacheGroupRequest calls the generic DboAPIUpdateCacheGroup builder with application/json body
+func NewDboAPIUpdateCacheGroupRequest(server string, id string, body DboAPIUpdateCacheGroupJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewDboAPIUpdateCacheGroupRequestWithBody(server, id, "application/json", bodyReader)
+}
+
+// NewDboAPIUpdateCacheGroupRequestWithBody generates requests for DboAPIUpdateCacheGroup with any type of body
+func NewDboAPIUpdateCacheGroupRequestWithBody(server string, id string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/dbo/cache-groups/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("PUT", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewDboAPIGetCacheGroupPerformanceRequest generates requests for DboAPIGetCacheGroupPerformance
+func NewDboAPIGetCacheGroupPerformanceRequest(server string, id string, params *DboAPIGetCacheGroupPerformanceParams) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/dbo/cache-groups/%s/cache-performance", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "startTime", runtime.ParamLocationQuery, params.StartTime); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "endTime", runtime.ParamLocationQuery, params.EndTime); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "stepSeconds", runtime.ParamLocationQuery, params.StepSeconds); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewDboAPIExchangeCacheStateRequest calls the generic DboAPIExchangeCacheState builder with application/json body
+func NewDboAPIExchangeCacheStateRequest(server string, cacheGroupId string, body DboAPIExchangeCacheStateJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewDboAPIExchangeCacheStateRequestWithBody(server, cacheGroupId, "application/json", bodyReader)
+}
+
+// NewDboAPIExchangeCacheStateRequestWithBody generates requests for DboAPIExchangeCacheState with any type of body
+func NewDboAPIExchangeCacheStateRequestWithBody(server string, cacheGroupId string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "cacheGroupId", runtime.ParamLocationPath, cacheGroupId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/dbo/cache-state-exchange/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewDboAPIGetDatabaseClusterRequest generates requests for DboAPIGetDatabaseCluster
+func NewDboAPIGetDatabaseClusterRequest(server string, clusterId string, params *DboAPIGetDatabaseClusterParams) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "clusterId", runtime.ParamLocationPath, clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/dbo/db-clusters/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if params.StartTime != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "startTime", runtime.ParamLocationQuery, *params.StartTime); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.EndTime != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "endTime", runtime.ParamLocationQuery, *params.EndTime); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewDboAPIListDatabaseComponentsRequest generates requests for DboAPIListDatabaseComponents
+func NewDboAPIListDatabaseComponentsRequest(server string, params *DboAPIListDatabaseComponentsParams) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/dbo/db-components")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if params.StartTime != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "startTime", runtime.ParamLocationQuery, *params.StartTime); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.EndTime != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "endTime", runtime.ParamLocationQuery, *params.EndTime); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewDboAPIListDatabaseInstancesRequest generates requests for DboAPIListDatabaseInstances
+func NewDboAPIListDatabaseInstancesRequest(server string, params *DboAPIListDatabaseInstancesParams) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/dbo/db-instances")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if params.StartTime != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "startTime", runtime.ParamLocationQuery, *params.StartTime); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.EndTime != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "endTime", runtime.ParamLocationQuery, *params.EndTime); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewDboAPIGetDatabaseInstanceRequest generates requests for DboAPIGetDatabaseInstance
+func NewDboAPIGetDatabaseInstanceRequest(server string, instanceId string, params *DboAPIGetDatabaseInstanceParams) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "instanceId", runtime.ParamLocationPath, instanceId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/dbo/db-instances/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if params.StartTime != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "startTime", runtime.ParamLocationQuery, *params.StartTime); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.EndTime != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "endTime", runtime.ParamLocationQuery, *params.EndTime); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewDboAPIGetDatabaseInstanceCachePerformanceRequest generates requests for DboAPIGetDatabaseInstanceCachePerformance
+func NewDboAPIGetDatabaseInstanceCachePerformanceRequest(server string, instanceId string, params *DboAPIGetDatabaseInstanceCachePerformanceParams) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "instanceId", runtime.ParamLocationPath, instanceId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/dbo/db-instances/%s/cache-performance", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "startTime", runtime.ParamLocationQuery, params.StartTime); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "endTime", runtime.ParamLocationQuery, params.EndTime); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "stepSeconds", runtime.ParamLocationQuery, params.StepSeconds); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewDboAPIGetDatabaseInstanceInfrastructureMetricsRequest generates requests for DboAPIGetDatabaseInstanceInfrastructureMetrics
+func NewDboAPIGetDatabaseInstanceInfrastructureMetricsRequest(server string, instanceId string, params *DboAPIGetDatabaseInstanceInfrastructureMetricsParams) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "instanceId", runtime.ParamLocationPath, instanceId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/dbo/db-instances/%s/infrastructure-metrics", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "startTime", runtime.ParamLocationQuery, params.StartTime); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "endTime", runtime.ParamLocationQuery, params.EndTime); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "stepSeconds", runtime.ParamLocationQuery, params.StepSeconds); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewDboAPIDeleteLogicalDatabaseRequest generates requests for DboAPIDeleteLogicalDatabase
+func NewDboAPIDeleteLogicalDatabaseRequest(server string, instanceId string, name string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "instanceId", runtime.ParamLocationPath, instanceId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "name", runtime.ParamLocationPath, name)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/dbo/db-instances/%s/logical-db/%s", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("DELETE", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewDboAPICreateLogicalDatabasesRequest calls the generic DboAPICreateLogicalDatabases builder with application/json body
+func NewDboAPICreateLogicalDatabasesRequest(server string, instanceId string, params *DboAPICreateLogicalDatabasesParams, body DboAPICreateLogicalDatabasesJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewDboAPICreateLogicalDatabasesRequestWithBody(server, instanceId, params, "application/json", bodyReader)
+}
+
+// NewDboAPICreateLogicalDatabasesRequestWithBody generates requests for DboAPICreateLogicalDatabases with any type of body
+func NewDboAPICreateLogicalDatabasesRequestWithBody(server string, instanceId string, params *DboAPICreateLogicalDatabasesParams, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "instanceId", runtime.ParamLocationPath, instanceId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/dbo/db-instances/%s/logical-dbs", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if params.CreateCacheConfigurations != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "createCacheConfigurations", runtime.ParamLocationQuery, *params.CreateCacheConfigurations); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewDboAPICreateRegistrationRequest calls the generic DboAPICreateRegistration builder with application/json body
+func NewDboAPICreateRegistrationRequest(server string, body DboAPICreateRegistrationJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewDboAPICreateRegistrationRequestWithBody(server, "application/json", bodyReader)
+}
+
+// NewDboAPICreateRegistrationRequestWithBody generates requests for DboAPICreateRegistration with any type of body
+func NewDboAPICreateRegistrationRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/dbo/registrations")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewDboAPIGetRegistrationScriptRequest generates requests for DboAPIGetRegistrationScript
+func NewDboAPIGetRegistrationScriptRequest(server string, registrationId string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "registrationId", runtime.ParamLocationPath, registrationId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/dbo/registrations/%s/script", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewDboAPIGetRegistrationStatusRequest generates requests for DboAPIGetRegistrationStatus
+func NewDboAPIGetRegistrationStatusRequest(server string, registrationId string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "registrationId", runtime.ParamLocationPath, registrationId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/dbo/registrations/%s/status", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewDboAPICreateRegistrationStatusUpdateRequest calls the generic DboAPICreateRegistrationStatusUpdate builder with application/json body
+func NewDboAPICreateRegistrationStatusUpdateRequest(server string, registrationId string, body DboAPICreateRegistrationStatusUpdateJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewDboAPICreateRegistrationStatusUpdateRequestWithBody(server, registrationId, "application/json", bodyReader)
+}
+
+// NewDboAPICreateRegistrationStatusUpdateRequestWithBody generates requests for DboAPICreateRegistrationStatusUpdate with any type of body
+func NewDboAPICreateRegistrationStatusUpdateRequestWithBody(server string, registrationId string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "registrationId", runtime.ParamLocationPath, registrationId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/dbo/registrations/%s/status", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
 	if err != nil {
 		return nil, err
 	}
@@ -17051,6 +19955,134 @@ type ClientWithResponsesInterface interface {
 
 	AllocationGroupAPIUpdateAllocationGroupWithResponse(ctx context.Context, id string, body AllocationGroupAPIUpdateAllocationGroupJSONRequestBody) (*AllocationGroupAPIUpdateAllocationGroupResponse, error)
 
+	// DboAPIListAccounts request
+	DboAPIListAccountsWithResponse(ctx context.Context) (*DboAPIListAccountsResponse, error)
+
+	// DboAPIDeleteAccount request
+	DboAPIDeleteAccountWithResponse(ctx context.Context, id string) (*DboAPIDeleteAccountResponse, error)
+
+	// DboAPIListCacheGroups request
+	DboAPIListCacheGroupsWithResponse(ctx context.Context, params *DboAPIListCacheGroupsParams) (*DboAPIListCacheGroupsResponse, error)
+
+	// DboAPICreateCacheGroup request  with any body
+	DboAPICreateCacheGroupWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader) (*DboAPICreateCacheGroupResponse, error)
+
+	DboAPICreateCacheGroupWithResponse(ctx context.Context, body DboAPICreateCacheGroupJSONRequestBody) (*DboAPICreateCacheGroupResponse, error)
+
+	// DboAPIListCacheConfigurations request
+	DboAPIListCacheConfigurationsWithResponse(ctx context.Context, groupId string, params *DboAPIListCacheConfigurationsParams) (*DboAPIListCacheConfigurationsResponse, error)
+
+	// DboAPICreateCacheConfiguration request  with any body
+	DboAPICreateCacheConfigurationWithBodyWithResponse(ctx context.Context, groupId string, contentType string, body io.Reader) (*DboAPICreateCacheConfigurationResponse, error)
+
+	DboAPICreateCacheConfigurationWithResponse(ctx context.Context, groupId string, body DboAPICreateCacheConfigurationJSONRequestBody) (*DboAPICreateCacheConfigurationResponse, error)
+
+	// DboAPIGetCacheEfficiency request
+	DboAPIGetCacheEfficiencyWithResponse(ctx context.Context, groupId string, cacheId string, params *DboAPIGetCacheEfficiencyParams) (*DboAPIGetCacheEfficiencyResponse, error)
+
+	// DboAPIGetCacheQueries request
+	DboAPIGetCacheQueriesWithResponse(ctx context.Context, groupId string, cacheId string, params *DboAPIGetCacheQueriesParams) (*DboAPIGetCacheQueriesResponse, error)
+
+	// DboAPIGetCacheQuery request
+	DboAPIGetCacheQueryWithResponse(ctx context.Context, groupId string, cacheId string, templateHash string, params *DboAPIGetCacheQueryParams) (*DboAPIGetCacheQueryResponse, error)
+
+	// DboAPIGetCacheQueryInsights request
+	DboAPIGetCacheQueryInsightsWithResponse(ctx context.Context, groupId string, cacheId string, templateHash string, params *DboAPIGetCacheQueryInsightsParams) (*DboAPIGetCacheQueryInsightsResponse, error)
+
+	// DboAPIGetCacheQueryTemplate request
+	DboAPIGetCacheQueryTemplateWithResponse(ctx context.Context, groupId string, cacheId string, templateHash string) (*DboAPIGetCacheQueryTemplateResponse, error)
+
+	// DboAPIListCacheTTLs request
+	DboAPIListCacheTTLsWithResponse(ctx context.Context, groupId string, cacheId string, params *DboAPIListCacheTTLsParams) (*DboAPIListCacheTTLsResponse, error)
+
+	// DboAPIDeleteCacheTTL request
+	DboAPIDeleteCacheTTLWithResponse(ctx context.Context, groupId string, cacheId string, id string) (*DboAPIDeleteCacheTTLResponse, error)
+
+	// DboAPIUpdateCacheTTL request  with any body
+	DboAPIUpdateCacheTTLWithBodyWithResponse(ctx context.Context, groupId string, cacheId string, id string, contentType string, body io.Reader) (*DboAPIUpdateCacheTTLResponse, error)
+
+	DboAPIUpdateCacheTTLWithResponse(ctx context.Context, groupId string, cacheId string, id string, body DboAPIUpdateCacheTTLJSONRequestBody) (*DboAPIUpdateCacheTTLResponse, error)
+
+	// DboAPIGetCacheSummary request
+	DboAPIGetCacheSummaryWithResponse(ctx context.Context, groupId string, cacheId string, params *DboAPIGetCacheSummaryParams) (*DboAPIGetCacheSummaryResponse, error)
+
+	// DboAPIDeleteCacheConfiguration request
+	DboAPIDeleteCacheConfigurationWithResponse(ctx context.Context, groupId string, id string) (*DboAPIDeleteCacheConfigurationResponse, error)
+
+	// DboAPIUpdateCacheConfiguration request  with any body
+	DboAPIUpdateCacheConfigurationWithBodyWithResponse(ctx context.Context, groupId string, id string, contentType string, body io.Reader) (*DboAPIUpdateCacheConfigurationResponse, error)
+
+	DboAPIUpdateCacheConfigurationWithResponse(ctx context.Context, groupId string, id string, body DboAPIUpdateCacheConfigurationJSONRequestBody) (*DboAPIUpdateCacheConfigurationResponse, error)
+
+	// DboAPICreateCacheTTL request  with any body
+	DboAPICreateCacheTTLWithBodyWithResponse(ctx context.Context, groupId string, id string, contentType string, body io.Reader) (*DboAPICreateCacheTTLResponse, error)
+
+	DboAPICreateCacheTTLWithResponse(ctx context.Context, groupId string, id string, body DboAPICreateCacheTTLJSONRequestBody) (*DboAPICreateCacheTTLResponse, error)
+
+	// DboAPICreateCacheDiagnosticUploadURL request
+	DboAPICreateCacheDiagnosticUploadURLWithResponse(ctx context.Context, groupId string) (*DboAPICreateCacheDiagnosticUploadURLResponse, error)
+
+	// DboAPIDeleteCacheGroup request
+	DboAPIDeleteCacheGroupWithResponse(ctx context.Context, id string) (*DboAPIDeleteCacheGroupResponse, error)
+
+	// DboAPIGetCacheGroup request
+	DboAPIGetCacheGroupWithResponse(ctx context.Context, id string, params *DboAPIGetCacheGroupParams) (*DboAPIGetCacheGroupResponse, error)
+
+	// DboAPIUpdateCacheGroup request  with any body
+	DboAPIUpdateCacheGroupWithBodyWithResponse(ctx context.Context, id string, contentType string, body io.Reader) (*DboAPIUpdateCacheGroupResponse, error)
+
+	DboAPIUpdateCacheGroupWithResponse(ctx context.Context, id string, body DboAPIUpdateCacheGroupJSONRequestBody) (*DboAPIUpdateCacheGroupResponse, error)
+
+	// DboAPIGetCacheGroupPerformance request
+	DboAPIGetCacheGroupPerformanceWithResponse(ctx context.Context, id string, params *DboAPIGetCacheGroupPerformanceParams) (*DboAPIGetCacheGroupPerformanceResponse, error)
+
+	// DboAPIExchangeCacheState request  with any body
+	DboAPIExchangeCacheStateWithBodyWithResponse(ctx context.Context, cacheGroupId string, contentType string, body io.Reader) (*DboAPIExchangeCacheStateResponse, error)
+
+	DboAPIExchangeCacheStateWithResponse(ctx context.Context, cacheGroupId string, body DboAPIExchangeCacheStateJSONRequestBody) (*DboAPIExchangeCacheStateResponse, error)
+
+	// DboAPIGetDatabaseCluster request
+	DboAPIGetDatabaseClusterWithResponse(ctx context.Context, clusterId string, params *DboAPIGetDatabaseClusterParams) (*DboAPIGetDatabaseClusterResponse, error)
+
+	// DboAPIListDatabaseComponents request
+	DboAPIListDatabaseComponentsWithResponse(ctx context.Context, params *DboAPIListDatabaseComponentsParams) (*DboAPIListDatabaseComponentsResponse, error)
+
+	// DboAPIListDatabaseInstances request
+	DboAPIListDatabaseInstancesWithResponse(ctx context.Context, params *DboAPIListDatabaseInstancesParams) (*DboAPIListDatabaseInstancesResponse, error)
+
+	// DboAPIGetDatabaseInstance request
+	DboAPIGetDatabaseInstanceWithResponse(ctx context.Context, instanceId string, params *DboAPIGetDatabaseInstanceParams) (*DboAPIGetDatabaseInstanceResponse, error)
+
+	// DboAPIGetDatabaseInstanceCachePerformance request
+	DboAPIGetDatabaseInstanceCachePerformanceWithResponse(ctx context.Context, instanceId string, params *DboAPIGetDatabaseInstanceCachePerformanceParams) (*DboAPIGetDatabaseInstanceCachePerformanceResponse, error)
+
+	// DboAPIGetDatabaseInstanceInfrastructureMetrics request
+	DboAPIGetDatabaseInstanceInfrastructureMetricsWithResponse(ctx context.Context, instanceId string, params *DboAPIGetDatabaseInstanceInfrastructureMetricsParams) (*DboAPIGetDatabaseInstanceInfrastructureMetricsResponse, error)
+
+	// DboAPIDeleteLogicalDatabase request
+	DboAPIDeleteLogicalDatabaseWithResponse(ctx context.Context, instanceId string, name string) (*DboAPIDeleteLogicalDatabaseResponse, error)
+
+	// DboAPICreateLogicalDatabases request  with any body
+	DboAPICreateLogicalDatabasesWithBodyWithResponse(ctx context.Context, instanceId string, params *DboAPICreateLogicalDatabasesParams, contentType string, body io.Reader) (*DboAPICreateLogicalDatabasesResponse, error)
+
+	DboAPICreateLogicalDatabasesWithResponse(ctx context.Context, instanceId string, params *DboAPICreateLogicalDatabasesParams, body DboAPICreateLogicalDatabasesJSONRequestBody) (*DboAPICreateLogicalDatabasesResponse, error)
+
+	// DboAPICreateRegistration request  with any body
+	DboAPICreateRegistrationWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader) (*DboAPICreateRegistrationResponse, error)
+
+	DboAPICreateRegistrationWithResponse(ctx context.Context, body DboAPICreateRegistrationJSONRequestBody) (*DboAPICreateRegistrationResponse, error)
+
+	// DboAPIGetRegistrationScript request
+	DboAPIGetRegistrationScriptWithResponse(ctx context.Context, registrationId string) (*DboAPIGetRegistrationScriptResponse, error)
+
+	// DboAPIGetRegistrationStatus request
+	DboAPIGetRegistrationStatusWithResponse(ctx context.Context, registrationId string) (*DboAPIGetRegistrationStatusResponse, error)
+
+	// DboAPICreateRegistrationStatusUpdate request  with any body
+	DboAPICreateRegistrationStatusUpdateWithBodyWithResponse(ctx context.Context, registrationId string, contentType string, body io.Reader) (*DboAPICreateRegistrationStatusUpdateResponse, error)
+
+	DboAPICreateRegistrationStatusUpdateWithResponse(ctx context.Context, registrationId string, body DboAPICreateRegistrationStatusUpdateJSONRequestBody) (*DboAPICreateRegistrationStatusUpdateResponse, error)
+
 	// InventoryAPIListInstanceTypeNames request
 	InventoryAPIListInstanceTypeNamesWithResponse(ctx context.Context, params *InventoryAPIListInstanceTypeNamesParams) (*InventoryAPIListInstanceTypeNamesResponse, error)
 
@@ -18463,6 +21495,1086 @@ func (r AllocationGroupAPIUpdateAllocationGroupResponse) StatusCode() int {
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
 func (r AllocationGroupAPIUpdateAllocationGroupResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type DboAPIListAccountsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *[]DboV1Account
+}
+
+// Status returns HTTPResponse.Status
+func (r DboAPIListAccountsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r DboAPIListAccountsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r DboAPIListAccountsResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type DboAPIDeleteAccountResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *DboV1DeleteAccountResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r DboAPIDeleteAccountResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r DboAPIDeleteAccountResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r DboAPIDeleteAccountResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type DboAPIListCacheGroupsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *DboV1ListCacheGroupsResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r DboAPIListCacheGroupsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r DboAPIListCacheGroupsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r DboAPIListCacheGroupsResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type DboAPICreateCacheGroupResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *DboV1CacheGroup
+}
+
+// Status returns HTTPResponse.Status
+func (r DboAPICreateCacheGroupResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r DboAPICreateCacheGroupResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r DboAPICreateCacheGroupResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type DboAPIListCacheConfigurationsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *DboV1ListCacheConfigurationsResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r DboAPIListCacheConfigurationsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r DboAPIListCacheConfigurationsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r DboAPIListCacheConfigurationsResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type DboAPICreateCacheConfigurationResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *DboV1CacheConfiguration
+}
+
+// Status returns HTTPResponse.Status
+func (r DboAPICreateCacheConfigurationResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r DboAPICreateCacheConfigurationResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r DboAPICreateCacheConfigurationResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type DboAPIGetCacheEfficiencyResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *DboV1GetCacheEfficiencyResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r DboAPIGetCacheEfficiencyResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r DboAPIGetCacheEfficiencyResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r DboAPIGetCacheEfficiencyResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type DboAPIGetCacheQueriesResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *DboV1GetCacheQueriesResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r DboAPIGetCacheQueriesResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r DboAPIGetCacheQueriesResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r DboAPIGetCacheQueriesResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type DboAPIGetCacheQueryResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *DboV1CacheQuery
+}
+
+// Status returns HTTPResponse.Status
+func (r DboAPIGetCacheQueryResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r DboAPIGetCacheQueryResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r DboAPIGetCacheQueryResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type DboAPIGetCacheQueryInsightsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *DboV1GetCacheQueryInsightsResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r DboAPIGetCacheQueryInsightsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r DboAPIGetCacheQueryInsightsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r DboAPIGetCacheQueryInsightsResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type DboAPIGetCacheQueryTemplateResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *DboV1GetCacheQueryTemplateResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r DboAPIGetCacheQueryTemplateResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r DboAPIGetCacheQueryTemplateResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r DboAPIGetCacheQueryTemplateResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type DboAPIListCacheTTLsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *DboV1ListCacheTTLsResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r DboAPIListCacheTTLsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r DboAPIListCacheTTLsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r DboAPIListCacheTTLsResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type DboAPIDeleteCacheTTLResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *DboV1DeleteCacheTTLResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r DboAPIDeleteCacheTTLResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r DboAPIDeleteCacheTTLResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r DboAPIDeleteCacheTTLResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type DboAPIUpdateCacheTTLResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *DboV1TTLConfiguration
+}
+
+// Status returns HTTPResponse.Status
+func (r DboAPIUpdateCacheTTLResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r DboAPIUpdateCacheTTLResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r DboAPIUpdateCacheTTLResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type DboAPIGetCacheSummaryResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *DboV1GetCacheSummaryResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r DboAPIGetCacheSummaryResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r DboAPIGetCacheSummaryResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r DboAPIGetCacheSummaryResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type DboAPIDeleteCacheConfigurationResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *DboV1DeleteCacheConfigurationResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r DboAPIDeleteCacheConfigurationResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r DboAPIDeleteCacheConfigurationResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r DboAPIDeleteCacheConfigurationResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type DboAPIUpdateCacheConfigurationResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *DboV1CacheConfiguration
+}
+
+// Status returns HTTPResponse.Status
+func (r DboAPIUpdateCacheConfigurationResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r DboAPIUpdateCacheConfigurationResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r DboAPIUpdateCacheConfigurationResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type DboAPICreateCacheTTLResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *DboV1TTLConfiguration
+}
+
+// Status returns HTTPResponse.Status
+func (r DboAPICreateCacheTTLResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r DboAPICreateCacheTTLResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r DboAPICreateCacheTTLResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type DboAPICreateCacheDiagnosticUploadURLResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *DboV1CreateCacheDiagnosticUploadURLResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r DboAPICreateCacheDiagnosticUploadURLResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r DboAPICreateCacheDiagnosticUploadURLResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r DboAPICreateCacheDiagnosticUploadURLResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type DboAPIDeleteCacheGroupResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *DboV1DeleteCacheGroupResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r DboAPIDeleteCacheGroupResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r DboAPIDeleteCacheGroupResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r DboAPIDeleteCacheGroupResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type DboAPIGetCacheGroupResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *DboV1CacheGroup
+}
+
+// Status returns HTTPResponse.Status
+func (r DboAPIGetCacheGroupResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r DboAPIGetCacheGroupResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r DboAPIGetCacheGroupResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type DboAPIUpdateCacheGroupResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *DboV1CacheGroup
+}
+
+// Status returns HTTPResponse.Status
+func (r DboAPIUpdateCacheGroupResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r DboAPIUpdateCacheGroupResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r DboAPIUpdateCacheGroupResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type DboAPIGetCacheGroupPerformanceResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *DboV1GetCacheGroupPerformanceResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r DboAPIGetCacheGroupPerformanceResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r DboAPIGetCacheGroupPerformanceResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r DboAPIGetCacheGroupPerformanceResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type DboAPIExchangeCacheStateResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *DboV1ExchangeCacheStateResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r DboAPIExchangeCacheStateResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r DboAPIExchangeCacheStateResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r DboAPIExchangeCacheStateResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type DboAPIGetDatabaseClusterResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *DboV1DatabaseCluster
+}
+
+// Status returns HTTPResponse.Status
+func (r DboAPIGetDatabaseClusterResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r DboAPIGetDatabaseClusterResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r DboAPIGetDatabaseClusterResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type DboAPIListDatabaseComponentsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *DboV1ListDatabaseComponentsResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r DboAPIListDatabaseComponentsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r DboAPIListDatabaseComponentsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r DboAPIListDatabaseComponentsResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type DboAPIListDatabaseInstancesResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *DboV1ListDatabaseInstancesResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r DboAPIListDatabaseInstancesResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r DboAPIListDatabaseInstancesResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r DboAPIListDatabaseInstancesResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type DboAPIGetDatabaseInstanceResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *DboV1DatabaseInstance
+}
+
+// Status returns HTTPResponse.Status
+func (r DboAPIGetDatabaseInstanceResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r DboAPIGetDatabaseInstanceResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r DboAPIGetDatabaseInstanceResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type DboAPIGetDatabaseInstanceCachePerformanceResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *[]DboV1CachePerformanceTimeseries
+}
+
+// Status returns HTTPResponse.Status
+func (r DboAPIGetDatabaseInstanceCachePerformanceResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r DboAPIGetDatabaseInstanceCachePerformanceResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r DboAPIGetDatabaseInstanceCachePerformanceResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type DboAPIGetDatabaseInstanceInfrastructureMetricsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *[]DboV1InstanceMetrics
+}
+
+// Status returns HTTPResponse.Status
+func (r DboAPIGetDatabaseInstanceInfrastructureMetricsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r DboAPIGetDatabaseInstanceInfrastructureMetricsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r DboAPIGetDatabaseInstanceInfrastructureMetricsResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type DboAPIDeleteLogicalDatabaseResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *DboV1DeleteLogicalDatabaseResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r DboAPIDeleteLogicalDatabaseResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r DboAPIDeleteLogicalDatabaseResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r DboAPIDeleteLogicalDatabaseResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type DboAPICreateLogicalDatabasesResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *[]DboV1LogicalDatabase
+}
+
+// Status returns HTTPResponse.Status
+func (r DboAPICreateLogicalDatabasesResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r DboAPICreateLogicalDatabasesResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r DboAPICreateLogicalDatabasesResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type DboAPICreateRegistrationResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *DboV1Registration
+}
+
+// Status returns HTTPResponse.Status
+func (r DboAPICreateRegistrationResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r DboAPICreateRegistrationResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r DboAPICreateRegistrationResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type DboAPIGetRegistrationScriptResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *GoogleApiHttpBody
+}
+
+// Status returns HTTPResponse.Status
+func (r DboAPIGetRegistrationScriptResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r DboAPIGetRegistrationScriptResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r DboAPIGetRegistrationScriptResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type DboAPIGetRegistrationStatusResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *DboV1RegistrationStatusUpdate
+}
+
+// Status returns HTTPResponse.Status
+func (r DboAPIGetRegistrationStatusResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r DboAPIGetRegistrationStatusResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r DboAPIGetRegistrationStatusResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type DboAPICreateRegistrationStatusUpdateResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *DboV1CreateRegistrationStatusUpdateResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r DboAPICreateRegistrationStatusUpdateResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r DboAPICreateRegistrationStatusUpdateResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r DboAPICreateRegistrationStatusUpdateResponse) GetBody() []byte {
 	return r.Body
 }
 
@@ -24318,6 +28430,410 @@ func (c *ClientWithResponses) AllocationGroupAPIUpdateAllocationGroupWithRespons
 	return ParseAllocationGroupAPIUpdateAllocationGroupResponse(rsp)
 }
 
+// DboAPIListAccountsWithResponse request returning *DboAPIListAccountsResponse
+func (c *ClientWithResponses) DboAPIListAccountsWithResponse(ctx context.Context) (*DboAPIListAccountsResponse, error) {
+	rsp, err := c.DboAPIListAccounts(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDboAPIListAccountsResponse(rsp)
+}
+
+// DboAPIDeleteAccountWithResponse request returning *DboAPIDeleteAccountResponse
+func (c *ClientWithResponses) DboAPIDeleteAccountWithResponse(ctx context.Context, id string) (*DboAPIDeleteAccountResponse, error) {
+	rsp, err := c.DboAPIDeleteAccount(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDboAPIDeleteAccountResponse(rsp)
+}
+
+// DboAPIListCacheGroupsWithResponse request returning *DboAPIListCacheGroupsResponse
+func (c *ClientWithResponses) DboAPIListCacheGroupsWithResponse(ctx context.Context, params *DboAPIListCacheGroupsParams) (*DboAPIListCacheGroupsResponse, error) {
+	rsp, err := c.DboAPIListCacheGroups(ctx, params)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDboAPIListCacheGroupsResponse(rsp)
+}
+
+// DboAPICreateCacheGroupWithBodyWithResponse request with arbitrary body returning *DboAPICreateCacheGroupResponse
+func (c *ClientWithResponses) DboAPICreateCacheGroupWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader) (*DboAPICreateCacheGroupResponse, error) {
+	rsp, err := c.DboAPICreateCacheGroupWithBody(ctx, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDboAPICreateCacheGroupResponse(rsp)
+}
+
+func (c *ClientWithResponses) DboAPICreateCacheGroupWithResponse(ctx context.Context, body DboAPICreateCacheGroupJSONRequestBody) (*DboAPICreateCacheGroupResponse, error) {
+	rsp, err := c.DboAPICreateCacheGroup(ctx, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDboAPICreateCacheGroupResponse(rsp)
+}
+
+// DboAPIListCacheConfigurationsWithResponse request returning *DboAPIListCacheConfigurationsResponse
+func (c *ClientWithResponses) DboAPIListCacheConfigurationsWithResponse(ctx context.Context, groupId string, params *DboAPIListCacheConfigurationsParams) (*DboAPIListCacheConfigurationsResponse, error) {
+	rsp, err := c.DboAPIListCacheConfigurations(ctx, groupId, params)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDboAPIListCacheConfigurationsResponse(rsp)
+}
+
+// DboAPICreateCacheConfigurationWithBodyWithResponse request with arbitrary body returning *DboAPICreateCacheConfigurationResponse
+func (c *ClientWithResponses) DboAPICreateCacheConfigurationWithBodyWithResponse(ctx context.Context, groupId string, contentType string, body io.Reader) (*DboAPICreateCacheConfigurationResponse, error) {
+	rsp, err := c.DboAPICreateCacheConfigurationWithBody(ctx, groupId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDboAPICreateCacheConfigurationResponse(rsp)
+}
+
+func (c *ClientWithResponses) DboAPICreateCacheConfigurationWithResponse(ctx context.Context, groupId string, body DboAPICreateCacheConfigurationJSONRequestBody) (*DboAPICreateCacheConfigurationResponse, error) {
+	rsp, err := c.DboAPICreateCacheConfiguration(ctx, groupId, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDboAPICreateCacheConfigurationResponse(rsp)
+}
+
+// DboAPIGetCacheEfficiencyWithResponse request returning *DboAPIGetCacheEfficiencyResponse
+func (c *ClientWithResponses) DboAPIGetCacheEfficiencyWithResponse(ctx context.Context, groupId string, cacheId string, params *DboAPIGetCacheEfficiencyParams) (*DboAPIGetCacheEfficiencyResponse, error) {
+	rsp, err := c.DboAPIGetCacheEfficiency(ctx, groupId, cacheId, params)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDboAPIGetCacheEfficiencyResponse(rsp)
+}
+
+// DboAPIGetCacheQueriesWithResponse request returning *DboAPIGetCacheQueriesResponse
+func (c *ClientWithResponses) DboAPIGetCacheQueriesWithResponse(ctx context.Context, groupId string, cacheId string, params *DboAPIGetCacheQueriesParams) (*DboAPIGetCacheQueriesResponse, error) {
+	rsp, err := c.DboAPIGetCacheQueries(ctx, groupId, cacheId, params)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDboAPIGetCacheQueriesResponse(rsp)
+}
+
+// DboAPIGetCacheQueryWithResponse request returning *DboAPIGetCacheQueryResponse
+func (c *ClientWithResponses) DboAPIGetCacheQueryWithResponse(ctx context.Context, groupId string, cacheId string, templateHash string, params *DboAPIGetCacheQueryParams) (*DboAPIGetCacheQueryResponse, error) {
+	rsp, err := c.DboAPIGetCacheQuery(ctx, groupId, cacheId, templateHash, params)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDboAPIGetCacheQueryResponse(rsp)
+}
+
+// DboAPIGetCacheQueryInsightsWithResponse request returning *DboAPIGetCacheQueryInsightsResponse
+func (c *ClientWithResponses) DboAPIGetCacheQueryInsightsWithResponse(ctx context.Context, groupId string, cacheId string, templateHash string, params *DboAPIGetCacheQueryInsightsParams) (*DboAPIGetCacheQueryInsightsResponse, error) {
+	rsp, err := c.DboAPIGetCacheQueryInsights(ctx, groupId, cacheId, templateHash, params)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDboAPIGetCacheQueryInsightsResponse(rsp)
+}
+
+// DboAPIGetCacheQueryTemplateWithResponse request returning *DboAPIGetCacheQueryTemplateResponse
+func (c *ClientWithResponses) DboAPIGetCacheQueryTemplateWithResponse(ctx context.Context, groupId string, cacheId string, templateHash string) (*DboAPIGetCacheQueryTemplateResponse, error) {
+	rsp, err := c.DboAPIGetCacheQueryTemplate(ctx, groupId, cacheId, templateHash)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDboAPIGetCacheQueryTemplateResponse(rsp)
+}
+
+// DboAPIListCacheTTLsWithResponse request returning *DboAPIListCacheTTLsResponse
+func (c *ClientWithResponses) DboAPIListCacheTTLsWithResponse(ctx context.Context, groupId string, cacheId string, params *DboAPIListCacheTTLsParams) (*DboAPIListCacheTTLsResponse, error) {
+	rsp, err := c.DboAPIListCacheTTLs(ctx, groupId, cacheId, params)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDboAPIListCacheTTLsResponse(rsp)
+}
+
+// DboAPIDeleteCacheTTLWithResponse request returning *DboAPIDeleteCacheTTLResponse
+func (c *ClientWithResponses) DboAPIDeleteCacheTTLWithResponse(ctx context.Context, groupId string, cacheId string, id string) (*DboAPIDeleteCacheTTLResponse, error) {
+	rsp, err := c.DboAPIDeleteCacheTTL(ctx, groupId, cacheId, id)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDboAPIDeleteCacheTTLResponse(rsp)
+}
+
+// DboAPIUpdateCacheTTLWithBodyWithResponse request with arbitrary body returning *DboAPIUpdateCacheTTLResponse
+func (c *ClientWithResponses) DboAPIUpdateCacheTTLWithBodyWithResponse(ctx context.Context, groupId string, cacheId string, id string, contentType string, body io.Reader) (*DboAPIUpdateCacheTTLResponse, error) {
+	rsp, err := c.DboAPIUpdateCacheTTLWithBody(ctx, groupId, cacheId, id, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDboAPIUpdateCacheTTLResponse(rsp)
+}
+
+func (c *ClientWithResponses) DboAPIUpdateCacheTTLWithResponse(ctx context.Context, groupId string, cacheId string, id string, body DboAPIUpdateCacheTTLJSONRequestBody) (*DboAPIUpdateCacheTTLResponse, error) {
+	rsp, err := c.DboAPIUpdateCacheTTL(ctx, groupId, cacheId, id, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDboAPIUpdateCacheTTLResponse(rsp)
+}
+
+// DboAPIGetCacheSummaryWithResponse request returning *DboAPIGetCacheSummaryResponse
+func (c *ClientWithResponses) DboAPIGetCacheSummaryWithResponse(ctx context.Context, groupId string, cacheId string, params *DboAPIGetCacheSummaryParams) (*DboAPIGetCacheSummaryResponse, error) {
+	rsp, err := c.DboAPIGetCacheSummary(ctx, groupId, cacheId, params)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDboAPIGetCacheSummaryResponse(rsp)
+}
+
+// DboAPIDeleteCacheConfigurationWithResponse request returning *DboAPIDeleteCacheConfigurationResponse
+func (c *ClientWithResponses) DboAPIDeleteCacheConfigurationWithResponse(ctx context.Context, groupId string, id string) (*DboAPIDeleteCacheConfigurationResponse, error) {
+	rsp, err := c.DboAPIDeleteCacheConfiguration(ctx, groupId, id)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDboAPIDeleteCacheConfigurationResponse(rsp)
+}
+
+// DboAPIUpdateCacheConfigurationWithBodyWithResponse request with arbitrary body returning *DboAPIUpdateCacheConfigurationResponse
+func (c *ClientWithResponses) DboAPIUpdateCacheConfigurationWithBodyWithResponse(ctx context.Context, groupId string, id string, contentType string, body io.Reader) (*DboAPIUpdateCacheConfigurationResponse, error) {
+	rsp, err := c.DboAPIUpdateCacheConfigurationWithBody(ctx, groupId, id, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDboAPIUpdateCacheConfigurationResponse(rsp)
+}
+
+func (c *ClientWithResponses) DboAPIUpdateCacheConfigurationWithResponse(ctx context.Context, groupId string, id string, body DboAPIUpdateCacheConfigurationJSONRequestBody) (*DboAPIUpdateCacheConfigurationResponse, error) {
+	rsp, err := c.DboAPIUpdateCacheConfiguration(ctx, groupId, id, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDboAPIUpdateCacheConfigurationResponse(rsp)
+}
+
+// DboAPICreateCacheTTLWithBodyWithResponse request with arbitrary body returning *DboAPICreateCacheTTLResponse
+func (c *ClientWithResponses) DboAPICreateCacheTTLWithBodyWithResponse(ctx context.Context, groupId string, id string, contentType string, body io.Reader) (*DboAPICreateCacheTTLResponse, error) {
+	rsp, err := c.DboAPICreateCacheTTLWithBody(ctx, groupId, id, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDboAPICreateCacheTTLResponse(rsp)
+}
+
+func (c *ClientWithResponses) DboAPICreateCacheTTLWithResponse(ctx context.Context, groupId string, id string, body DboAPICreateCacheTTLJSONRequestBody) (*DboAPICreateCacheTTLResponse, error) {
+	rsp, err := c.DboAPICreateCacheTTL(ctx, groupId, id, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDboAPICreateCacheTTLResponse(rsp)
+}
+
+// DboAPICreateCacheDiagnosticUploadURLWithResponse request returning *DboAPICreateCacheDiagnosticUploadURLResponse
+func (c *ClientWithResponses) DboAPICreateCacheDiagnosticUploadURLWithResponse(ctx context.Context, groupId string) (*DboAPICreateCacheDiagnosticUploadURLResponse, error) {
+	rsp, err := c.DboAPICreateCacheDiagnosticUploadURL(ctx, groupId)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDboAPICreateCacheDiagnosticUploadURLResponse(rsp)
+}
+
+// DboAPIDeleteCacheGroupWithResponse request returning *DboAPIDeleteCacheGroupResponse
+func (c *ClientWithResponses) DboAPIDeleteCacheGroupWithResponse(ctx context.Context, id string) (*DboAPIDeleteCacheGroupResponse, error) {
+	rsp, err := c.DboAPIDeleteCacheGroup(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDboAPIDeleteCacheGroupResponse(rsp)
+}
+
+// DboAPIGetCacheGroupWithResponse request returning *DboAPIGetCacheGroupResponse
+func (c *ClientWithResponses) DboAPIGetCacheGroupWithResponse(ctx context.Context, id string, params *DboAPIGetCacheGroupParams) (*DboAPIGetCacheGroupResponse, error) {
+	rsp, err := c.DboAPIGetCacheGroup(ctx, id, params)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDboAPIGetCacheGroupResponse(rsp)
+}
+
+// DboAPIUpdateCacheGroupWithBodyWithResponse request with arbitrary body returning *DboAPIUpdateCacheGroupResponse
+func (c *ClientWithResponses) DboAPIUpdateCacheGroupWithBodyWithResponse(ctx context.Context, id string, contentType string, body io.Reader) (*DboAPIUpdateCacheGroupResponse, error) {
+	rsp, err := c.DboAPIUpdateCacheGroupWithBody(ctx, id, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDboAPIUpdateCacheGroupResponse(rsp)
+}
+
+func (c *ClientWithResponses) DboAPIUpdateCacheGroupWithResponse(ctx context.Context, id string, body DboAPIUpdateCacheGroupJSONRequestBody) (*DboAPIUpdateCacheGroupResponse, error) {
+	rsp, err := c.DboAPIUpdateCacheGroup(ctx, id, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDboAPIUpdateCacheGroupResponse(rsp)
+}
+
+// DboAPIGetCacheGroupPerformanceWithResponse request returning *DboAPIGetCacheGroupPerformanceResponse
+func (c *ClientWithResponses) DboAPIGetCacheGroupPerformanceWithResponse(ctx context.Context, id string, params *DboAPIGetCacheGroupPerformanceParams) (*DboAPIGetCacheGroupPerformanceResponse, error) {
+	rsp, err := c.DboAPIGetCacheGroupPerformance(ctx, id, params)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDboAPIGetCacheGroupPerformanceResponse(rsp)
+}
+
+// DboAPIExchangeCacheStateWithBodyWithResponse request with arbitrary body returning *DboAPIExchangeCacheStateResponse
+func (c *ClientWithResponses) DboAPIExchangeCacheStateWithBodyWithResponse(ctx context.Context, cacheGroupId string, contentType string, body io.Reader) (*DboAPIExchangeCacheStateResponse, error) {
+	rsp, err := c.DboAPIExchangeCacheStateWithBody(ctx, cacheGroupId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDboAPIExchangeCacheStateResponse(rsp)
+}
+
+func (c *ClientWithResponses) DboAPIExchangeCacheStateWithResponse(ctx context.Context, cacheGroupId string, body DboAPIExchangeCacheStateJSONRequestBody) (*DboAPIExchangeCacheStateResponse, error) {
+	rsp, err := c.DboAPIExchangeCacheState(ctx, cacheGroupId, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDboAPIExchangeCacheStateResponse(rsp)
+}
+
+// DboAPIGetDatabaseClusterWithResponse request returning *DboAPIGetDatabaseClusterResponse
+func (c *ClientWithResponses) DboAPIGetDatabaseClusterWithResponse(ctx context.Context, clusterId string, params *DboAPIGetDatabaseClusterParams) (*DboAPIGetDatabaseClusterResponse, error) {
+	rsp, err := c.DboAPIGetDatabaseCluster(ctx, clusterId, params)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDboAPIGetDatabaseClusterResponse(rsp)
+}
+
+// DboAPIListDatabaseComponentsWithResponse request returning *DboAPIListDatabaseComponentsResponse
+func (c *ClientWithResponses) DboAPIListDatabaseComponentsWithResponse(ctx context.Context, params *DboAPIListDatabaseComponentsParams) (*DboAPIListDatabaseComponentsResponse, error) {
+	rsp, err := c.DboAPIListDatabaseComponents(ctx, params)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDboAPIListDatabaseComponentsResponse(rsp)
+}
+
+// DboAPIListDatabaseInstancesWithResponse request returning *DboAPIListDatabaseInstancesResponse
+func (c *ClientWithResponses) DboAPIListDatabaseInstancesWithResponse(ctx context.Context, params *DboAPIListDatabaseInstancesParams) (*DboAPIListDatabaseInstancesResponse, error) {
+	rsp, err := c.DboAPIListDatabaseInstances(ctx, params)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDboAPIListDatabaseInstancesResponse(rsp)
+}
+
+// DboAPIGetDatabaseInstanceWithResponse request returning *DboAPIGetDatabaseInstanceResponse
+func (c *ClientWithResponses) DboAPIGetDatabaseInstanceWithResponse(ctx context.Context, instanceId string, params *DboAPIGetDatabaseInstanceParams) (*DboAPIGetDatabaseInstanceResponse, error) {
+	rsp, err := c.DboAPIGetDatabaseInstance(ctx, instanceId, params)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDboAPIGetDatabaseInstanceResponse(rsp)
+}
+
+// DboAPIGetDatabaseInstanceCachePerformanceWithResponse request returning *DboAPIGetDatabaseInstanceCachePerformanceResponse
+func (c *ClientWithResponses) DboAPIGetDatabaseInstanceCachePerformanceWithResponse(ctx context.Context, instanceId string, params *DboAPIGetDatabaseInstanceCachePerformanceParams) (*DboAPIGetDatabaseInstanceCachePerformanceResponse, error) {
+	rsp, err := c.DboAPIGetDatabaseInstanceCachePerformance(ctx, instanceId, params)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDboAPIGetDatabaseInstanceCachePerformanceResponse(rsp)
+}
+
+// DboAPIGetDatabaseInstanceInfrastructureMetricsWithResponse request returning *DboAPIGetDatabaseInstanceInfrastructureMetricsResponse
+func (c *ClientWithResponses) DboAPIGetDatabaseInstanceInfrastructureMetricsWithResponse(ctx context.Context, instanceId string, params *DboAPIGetDatabaseInstanceInfrastructureMetricsParams) (*DboAPIGetDatabaseInstanceInfrastructureMetricsResponse, error) {
+	rsp, err := c.DboAPIGetDatabaseInstanceInfrastructureMetrics(ctx, instanceId, params)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDboAPIGetDatabaseInstanceInfrastructureMetricsResponse(rsp)
+}
+
+// DboAPIDeleteLogicalDatabaseWithResponse request returning *DboAPIDeleteLogicalDatabaseResponse
+func (c *ClientWithResponses) DboAPIDeleteLogicalDatabaseWithResponse(ctx context.Context, instanceId string, name string) (*DboAPIDeleteLogicalDatabaseResponse, error) {
+	rsp, err := c.DboAPIDeleteLogicalDatabase(ctx, instanceId, name)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDboAPIDeleteLogicalDatabaseResponse(rsp)
+}
+
+// DboAPICreateLogicalDatabasesWithBodyWithResponse request with arbitrary body returning *DboAPICreateLogicalDatabasesResponse
+func (c *ClientWithResponses) DboAPICreateLogicalDatabasesWithBodyWithResponse(ctx context.Context, instanceId string, params *DboAPICreateLogicalDatabasesParams, contentType string, body io.Reader) (*DboAPICreateLogicalDatabasesResponse, error) {
+	rsp, err := c.DboAPICreateLogicalDatabasesWithBody(ctx, instanceId, params, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDboAPICreateLogicalDatabasesResponse(rsp)
+}
+
+func (c *ClientWithResponses) DboAPICreateLogicalDatabasesWithResponse(ctx context.Context, instanceId string, params *DboAPICreateLogicalDatabasesParams, body DboAPICreateLogicalDatabasesJSONRequestBody) (*DboAPICreateLogicalDatabasesResponse, error) {
+	rsp, err := c.DboAPICreateLogicalDatabases(ctx, instanceId, params, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDboAPICreateLogicalDatabasesResponse(rsp)
+}
+
+// DboAPICreateRegistrationWithBodyWithResponse request with arbitrary body returning *DboAPICreateRegistrationResponse
+func (c *ClientWithResponses) DboAPICreateRegistrationWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader) (*DboAPICreateRegistrationResponse, error) {
+	rsp, err := c.DboAPICreateRegistrationWithBody(ctx, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDboAPICreateRegistrationResponse(rsp)
+}
+
+func (c *ClientWithResponses) DboAPICreateRegistrationWithResponse(ctx context.Context, body DboAPICreateRegistrationJSONRequestBody) (*DboAPICreateRegistrationResponse, error) {
+	rsp, err := c.DboAPICreateRegistration(ctx, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDboAPICreateRegistrationResponse(rsp)
+}
+
+// DboAPIGetRegistrationScriptWithResponse request returning *DboAPIGetRegistrationScriptResponse
+func (c *ClientWithResponses) DboAPIGetRegistrationScriptWithResponse(ctx context.Context, registrationId string) (*DboAPIGetRegistrationScriptResponse, error) {
+	rsp, err := c.DboAPIGetRegistrationScript(ctx, registrationId)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDboAPIGetRegistrationScriptResponse(rsp)
+}
+
+// DboAPIGetRegistrationStatusWithResponse request returning *DboAPIGetRegistrationStatusResponse
+func (c *ClientWithResponses) DboAPIGetRegistrationStatusWithResponse(ctx context.Context, registrationId string) (*DboAPIGetRegistrationStatusResponse, error) {
+	rsp, err := c.DboAPIGetRegistrationStatus(ctx, registrationId)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDboAPIGetRegistrationStatusResponse(rsp)
+}
+
+// DboAPICreateRegistrationStatusUpdateWithBodyWithResponse request with arbitrary body returning *DboAPICreateRegistrationStatusUpdateResponse
+func (c *ClientWithResponses) DboAPICreateRegistrationStatusUpdateWithBodyWithResponse(ctx context.Context, registrationId string, contentType string, body io.Reader) (*DboAPICreateRegistrationStatusUpdateResponse, error) {
+	rsp, err := c.DboAPICreateRegistrationStatusUpdateWithBody(ctx, registrationId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDboAPICreateRegistrationStatusUpdateResponse(rsp)
+}
+
+func (c *ClientWithResponses) DboAPICreateRegistrationStatusUpdateWithResponse(ctx context.Context, registrationId string, body DboAPICreateRegistrationStatusUpdateJSONRequestBody) (*DboAPICreateRegistrationStatusUpdateResponse, error) {
+	rsp, err := c.DboAPICreateRegistrationStatusUpdate(ctx, registrationId, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDboAPICreateRegistrationStatusUpdateResponse(rsp)
+}
+
 // InventoryAPIListInstanceTypeNamesWithResponse request returning *InventoryAPIListInstanceTypeNamesResponse
 func (c *ClientWithResponses) InventoryAPIListInstanceTypeNamesWithResponse(ctx context.Context, params *InventoryAPIListInstanceTypeNamesParams) (*InventoryAPIListInstanceTypeNamesResponse, error) {
 	rsp, err := c.InventoryAPIListInstanceTypeNames(ctx, params)
@@ -27116,6 +31632,942 @@ func ParseAllocationGroupAPIUpdateAllocationGroupResponse(rsp *http.Response) (*
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest CostreportV1beta1AllocationGroup
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseDboAPIListAccountsResponse parses an HTTP response from a DboAPIListAccountsWithResponse call
+func ParseDboAPIListAccountsResponse(rsp *http.Response) (*DboAPIListAccountsResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &DboAPIListAccountsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest []DboV1Account
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseDboAPIDeleteAccountResponse parses an HTTP response from a DboAPIDeleteAccountWithResponse call
+func ParseDboAPIDeleteAccountResponse(rsp *http.Response) (*DboAPIDeleteAccountResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &DboAPIDeleteAccountResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest DboV1DeleteAccountResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseDboAPIListCacheGroupsResponse parses an HTTP response from a DboAPIListCacheGroupsWithResponse call
+func ParseDboAPIListCacheGroupsResponse(rsp *http.Response) (*DboAPIListCacheGroupsResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &DboAPIListCacheGroupsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest DboV1ListCacheGroupsResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseDboAPICreateCacheGroupResponse parses an HTTP response from a DboAPICreateCacheGroupWithResponse call
+func ParseDboAPICreateCacheGroupResponse(rsp *http.Response) (*DboAPICreateCacheGroupResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &DboAPICreateCacheGroupResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest DboV1CacheGroup
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseDboAPIListCacheConfigurationsResponse parses an HTTP response from a DboAPIListCacheConfigurationsWithResponse call
+func ParseDboAPIListCacheConfigurationsResponse(rsp *http.Response) (*DboAPIListCacheConfigurationsResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &DboAPIListCacheConfigurationsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest DboV1ListCacheConfigurationsResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseDboAPICreateCacheConfigurationResponse parses an HTTP response from a DboAPICreateCacheConfigurationWithResponse call
+func ParseDboAPICreateCacheConfigurationResponse(rsp *http.Response) (*DboAPICreateCacheConfigurationResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &DboAPICreateCacheConfigurationResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest DboV1CacheConfiguration
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseDboAPIGetCacheEfficiencyResponse parses an HTTP response from a DboAPIGetCacheEfficiencyWithResponse call
+func ParseDboAPIGetCacheEfficiencyResponse(rsp *http.Response) (*DboAPIGetCacheEfficiencyResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &DboAPIGetCacheEfficiencyResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest DboV1GetCacheEfficiencyResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseDboAPIGetCacheQueriesResponse parses an HTTP response from a DboAPIGetCacheQueriesWithResponse call
+func ParseDboAPIGetCacheQueriesResponse(rsp *http.Response) (*DboAPIGetCacheQueriesResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &DboAPIGetCacheQueriesResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest DboV1GetCacheQueriesResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseDboAPIGetCacheQueryResponse parses an HTTP response from a DboAPIGetCacheQueryWithResponse call
+func ParseDboAPIGetCacheQueryResponse(rsp *http.Response) (*DboAPIGetCacheQueryResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &DboAPIGetCacheQueryResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest DboV1CacheQuery
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseDboAPIGetCacheQueryInsightsResponse parses an HTTP response from a DboAPIGetCacheQueryInsightsWithResponse call
+func ParseDboAPIGetCacheQueryInsightsResponse(rsp *http.Response) (*DboAPIGetCacheQueryInsightsResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &DboAPIGetCacheQueryInsightsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest DboV1GetCacheQueryInsightsResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseDboAPIGetCacheQueryTemplateResponse parses an HTTP response from a DboAPIGetCacheQueryTemplateWithResponse call
+func ParseDboAPIGetCacheQueryTemplateResponse(rsp *http.Response) (*DboAPIGetCacheQueryTemplateResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &DboAPIGetCacheQueryTemplateResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest DboV1GetCacheQueryTemplateResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseDboAPIListCacheTTLsResponse parses an HTTP response from a DboAPIListCacheTTLsWithResponse call
+func ParseDboAPIListCacheTTLsResponse(rsp *http.Response) (*DboAPIListCacheTTLsResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &DboAPIListCacheTTLsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest DboV1ListCacheTTLsResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseDboAPIDeleteCacheTTLResponse parses an HTTP response from a DboAPIDeleteCacheTTLWithResponse call
+func ParseDboAPIDeleteCacheTTLResponse(rsp *http.Response) (*DboAPIDeleteCacheTTLResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &DboAPIDeleteCacheTTLResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest DboV1DeleteCacheTTLResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseDboAPIUpdateCacheTTLResponse parses an HTTP response from a DboAPIUpdateCacheTTLWithResponse call
+func ParseDboAPIUpdateCacheTTLResponse(rsp *http.Response) (*DboAPIUpdateCacheTTLResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &DboAPIUpdateCacheTTLResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest DboV1TTLConfiguration
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseDboAPIGetCacheSummaryResponse parses an HTTP response from a DboAPIGetCacheSummaryWithResponse call
+func ParseDboAPIGetCacheSummaryResponse(rsp *http.Response) (*DboAPIGetCacheSummaryResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &DboAPIGetCacheSummaryResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest DboV1GetCacheSummaryResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseDboAPIDeleteCacheConfigurationResponse parses an HTTP response from a DboAPIDeleteCacheConfigurationWithResponse call
+func ParseDboAPIDeleteCacheConfigurationResponse(rsp *http.Response) (*DboAPIDeleteCacheConfigurationResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &DboAPIDeleteCacheConfigurationResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest DboV1DeleteCacheConfigurationResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseDboAPIUpdateCacheConfigurationResponse parses an HTTP response from a DboAPIUpdateCacheConfigurationWithResponse call
+func ParseDboAPIUpdateCacheConfigurationResponse(rsp *http.Response) (*DboAPIUpdateCacheConfigurationResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &DboAPIUpdateCacheConfigurationResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest DboV1CacheConfiguration
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseDboAPICreateCacheTTLResponse parses an HTTP response from a DboAPICreateCacheTTLWithResponse call
+func ParseDboAPICreateCacheTTLResponse(rsp *http.Response) (*DboAPICreateCacheTTLResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &DboAPICreateCacheTTLResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest DboV1TTLConfiguration
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseDboAPICreateCacheDiagnosticUploadURLResponse parses an HTTP response from a DboAPICreateCacheDiagnosticUploadURLWithResponse call
+func ParseDboAPICreateCacheDiagnosticUploadURLResponse(rsp *http.Response) (*DboAPICreateCacheDiagnosticUploadURLResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &DboAPICreateCacheDiagnosticUploadURLResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest DboV1CreateCacheDiagnosticUploadURLResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseDboAPIDeleteCacheGroupResponse parses an HTTP response from a DboAPIDeleteCacheGroupWithResponse call
+func ParseDboAPIDeleteCacheGroupResponse(rsp *http.Response) (*DboAPIDeleteCacheGroupResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &DboAPIDeleteCacheGroupResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest DboV1DeleteCacheGroupResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseDboAPIGetCacheGroupResponse parses an HTTP response from a DboAPIGetCacheGroupWithResponse call
+func ParseDboAPIGetCacheGroupResponse(rsp *http.Response) (*DboAPIGetCacheGroupResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &DboAPIGetCacheGroupResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest DboV1CacheGroup
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseDboAPIUpdateCacheGroupResponse parses an HTTP response from a DboAPIUpdateCacheGroupWithResponse call
+func ParseDboAPIUpdateCacheGroupResponse(rsp *http.Response) (*DboAPIUpdateCacheGroupResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &DboAPIUpdateCacheGroupResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest DboV1CacheGroup
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseDboAPIGetCacheGroupPerformanceResponse parses an HTTP response from a DboAPIGetCacheGroupPerformanceWithResponse call
+func ParseDboAPIGetCacheGroupPerformanceResponse(rsp *http.Response) (*DboAPIGetCacheGroupPerformanceResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &DboAPIGetCacheGroupPerformanceResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest DboV1GetCacheGroupPerformanceResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseDboAPIExchangeCacheStateResponse parses an HTTP response from a DboAPIExchangeCacheStateWithResponse call
+func ParseDboAPIExchangeCacheStateResponse(rsp *http.Response) (*DboAPIExchangeCacheStateResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &DboAPIExchangeCacheStateResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest DboV1ExchangeCacheStateResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseDboAPIGetDatabaseClusterResponse parses an HTTP response from a DboAPIGetDatabaseClusterWithResponse call
+func ParseDboAPIGetDatabaseClusterResponse(rsp *http.Response) (*DboAPIGetDatabaseClusterResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &DboAPIGetDatabaseClusterResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest DboV1DatabaseCluster
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseDboAPIListDatabaseComponentsResponse parses an HTTP response from a DboAPIListDatabaseComponentsWithResponse call
+func ParseDboAPIListDatabaseComponentsResponse(rsp *http.Response) (*DboAPIListDatabaseComponentsResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &DboAPIListDatabaseComponentsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest DboV1ListDatabaseComponentsResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseDboAPIListDatabaseInstancesResponse parses an HTTP response from a DboAPIListDatabaseInstancesWithResponse call
+func ParseDboAPIListDatabaseInstancesResponse(rsp *http.Response) (*DboAPIListDatabaseInstancesResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &DboAPIListDatabaseInstancesResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest DboV1ListDatabaseInstancesResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseDboAPIGetDatabaseInstanceResponse parses an HTTP response from a DboAPIGetDatabaseInstanceWithResponse call
+func ParseDboAPIGetDatabaseInstanceResponse(rsp *http.Response) (*DboAPIGetDatabaseInstanceResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &DboAPIGetDatabaseInstanceResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest DboV1DatabaseInstance
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseDboAPIGetDatabaseInstanceCachePerformanceResponse parses an HTTP response from a DboAPIGetDatabaseInstanceCachePerformanceWithResponse call
+func ParseDboAPIGetDatabaseInstanceCachePerformanceResponse(rsp *http.Response) (*DboAPIGetDatabaseInstanceCachePerformanceResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &DboAPIGetDatabaseInstanceCachePerformanceResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest []DboV1CachePerformanceTimeseries
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseDboAPIGetDatabaseInstanceInfrastructureMetricsResponse parses an HTTP response from a DboAPIGetDatabaseInstanceInfrastructureMetricsWithResponse call
+func ParseDboAPIGetDatabaseInstanceInfrastructureMetricsResponse(rsp *http.Response) (*DboAPIGetDatabaseInstanceInfrastructureMetricsResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &DboAPIGetDatabaseInstanceInfrastructureMetricsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest []DboV1InstanceMetrics
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseDboAPIDeleteLogicalDatabaseResponse parses an HTTP response from a DboAPIDeleteLogicalDatabaseWithResponse call
+func ParseDboAPIDeleteLogicalDatabaseResponse(rsp *http.Response) (*DboAPIDeleteLogicalDatabaseResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &DboAPIDeleteLogicalDatabaseResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest DboV1DeleteLogicalDatabaseResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseDboAPICreateLogicalDatabasesResponse parses an HTTP response from a DboAPICreateLogicalDatabasesWithResponse call
+func ParseDboAPICreateLogicalDatabasesResponse(rsp *http.Response) (*DboAPICreateLogicalDatabasesResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &DboAPICreateLogicalDatabasesResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest []DboV1LogicalDatabase
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseDboAPICreateRegistrationResponse parses an HTTP response from a DboAPICreateRegistrationWithResponse call
+func ParseDboAPICreateRegistrationResponse(rsp *http.Response) (*DboAPICreateRegistrationResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &DboAPICreateRegistrationResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest DboV1Registration
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseDboAPIGetRegistrationScriptResponse parses an HTTP response from a DboAPIGetRegistrationScriptWithResponse call
+func ParseDboAPIGetRegistrationScriptResponse(rsp *http.Response) (*DboAPIGetRegistrationScriptResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &DboAPIGetRegistrationScriptResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest GoogleApiHttpBody
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseDboAPIGetRegistrationStatusResponse parses an HTTP response from a DboAPIGetRegistrationStatusWithResponse call
+func ParseDboAPIGetRegistrationStatusResponse(rsp *http.Response) (*DboAPIGetRegistrationStatusResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &DboAPIGetRegistrationStatusResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest DboV1RegistrationStatusUpdate
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseDboAPICreateRegistrationStatusUpdateResponse parses an HTTP response from a DboAPICreateRegistrationStatusUpdateWithResponse call
+func ParseDboAPICreateRegistrationStatusUpdateResponse(rsp *http.Response) (*DboAPICreateRegistrationStatusUpdateResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &DboAPICreateRegistrationStatusUpdateResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest DboV1CreateRegistrationStatusUpdateResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
