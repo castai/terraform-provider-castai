@@ -8018,7 +8018,10 @@ type WorkloadoptimizationV1Workload struct {
 	MatchingPodCount int32  `json:"matchingPodCount"`
 	Name             string `json:"name"`
 	Namespace        string `json:"namespace"`
-	OrganizationId   string `json:"organizationId"`
+
+	// NativeHpaUnsupportedReason Reason for unsupported HPA V2.
+	NativeHpaUnsupportedReason *string `json:"nativeHpaUnsupportedReason"`
+	OrganizationId             string  `json:"organizationId"`
 
 	// PodCount Pod count stores the *running* count of pods of the workload.
 	PodCount             int32                                         `json:"podCount"`

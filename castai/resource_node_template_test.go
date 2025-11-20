@@ -883,7 +883,7 @@ resource "castai_omni_cluster" "test_omni" {
 resource "castai_edge_location" "test_1" {
   organization_id = %[1]q
   cluster_id      = castai_omni_cluster.test_omni.id
-  name            = "%[2]s-edge-loc-1"
+  name            = "edge-loc-1"
   description     = "Test edge location 1"
   region          = "us-east-1"
   zones = [
@@ -915,7 +915,7 @@ resource "castai_edge_location" "test_1" {
 resource "castai_edge_location" "test_2" {
   organization_id = %[1]q
   cluster_id      = castai_omni_cluster.test_omni.id
-  name            = "%[2]s-edge-loc-2"
+  name            = "edge-loc-2"
   description     = "Test edge location 2"
   region          = "us-west-2"
   zones = [
@@ -938,7 +938,7 @@ resource "castai_edge_location" "test_2" {
     name_tag = "test-edge-location-2"
   }
 }
-`, organizationID, rName)
+`, organizationID)
 }
 
 func testNodeTemplateUpdated(rName, clusterName string) string {
