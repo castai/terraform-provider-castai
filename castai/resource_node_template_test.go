@@ -628,9 +628,9 @@ func TestAccEKS_ResourceNodeTemplate_basic(t *testing.T) {
 	clusterName, _ := lo.Coalesce(os.Getenv("CLUSTER_NAME"), "cost-terraform")
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:          func() { testAccPreCheck(t) },
-		ProviderFactories: providerFactories,
-		CheckDestroy:      testAccCheckNodeTemplateDestroy(rName),
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		CheckDestroy:             testAccCheckNodeTemplateDestroy(rName),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNodeTemplateConfig(rName, clusterName),
