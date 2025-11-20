@@ -43,7 +43,6 @@ func TestCacheGroupResource_Create(t *testing.T) {
 	state := terraform.NewInstanceStateShimmedFromValue(val, 0)
 	data := resource.Data(state)
 
-	// Mock create cache group response
 	createResponse := sdk.DboV1CacheGroup{
 		Id:           &cacheGroupID,
 		ProtocolType: sdk.DboV1CacheGroupProtocolType(protocolType),
@@ -59,7 +58,6 @@ func TestCacheGroupResource_Create(t *testing.T) {
 			Body:       io.NopCloser(bytes.NewReader(createBody)),
 		}, nil)
 
-	// Mock read cache group response
 	readResponse := sdk.DboV1CacheGroup{
 		Id:           &cacheGroupID,
 		ProtocolType: sdk.DboV1CacheGroupProtocolType(protocolType),
@@ -75,7 +73,6 @@ func TestCacheGroupResource_Create(t *testing.T) {
 			Body:       io.NopCloser(bytes.NewReader(readBody)),
 		}, nil)
 
-	// Create
 	diags := resourceCacheGroupCreate(ctx, data, provider)
 	r.Nil(diags)
 	r.NotEmpty(data.Id())
@@ -100,7 +97,6 @@ func TestCacheGroupResource_Read(t *testing.T) {
 	protocolType := "PostgreSQL"
 	name := "test-cache-group"
 
-	// Set up state with ID
 	val := cty.ObjectVal(map[string]cty.Value{
 		"id": cty.StringVal(cacheGroupID),
 	})
@@ -108,7 +104,6 @@ func TestCacheGroupResource_Read(t *testing.T) {
 	state.ID = cacheGroupID
 	data := resource.Data(state)
 
-	// Mock read cache group response
 	readResponse := sdk.DboV1CacheGroup{
 		Id:           &cacheGroupID,
 		ProtocolType: sdk.DboV1CacheGroupProtocolType(protocolType),
@@ -130,7 +125,6 @@ func TestCacheGroupResource_Read(t *testing.T) {
 			Body:       io.NopCloser(bytes.NewReader(readBody)),
 		}, nil)
 
-	// Read
 	diags := resourceCacheGroupRead(ctx, data, provider)
 	r.Nil(diags)
 	r.Equal(protocolType, data.Get(FieldCacheGroupProtocolType))
@@ -155,7 +149,6 @@ func TestCacheGroupResource_Update(t *testing.T) {
 	protocolType := "MySQL"
 	updatedName := "updated-cache-group"
 
-	// Set up state with ID
 	val := cty.ObjectVal(map[string]cty.Value{
 		"id": cty.StringVal(cacheGroupID),
 	})
@@ -163,7 +156,6 @@ func TestCacheGroupResource_Update(t *testing.T) {
 	state.ID = cacheGroupID
 	data := resource.Data(state)
 
-	// Mock read response (update calls read at the end)
 	readResponse := sdk.DboV1CacheGroup{
 		Id:           &cacheGroupID,
 		ProtocolType: sdk.DboV1CacheGroupProtocolType(protocolType),
@@ -178,7 +170,6 @@ func TestCacheGroupResource_Update(t *testing.T) {
 			Body:       io.NopCloser(bytes.NewReader(readBody)),
 		}, nil)
 
-	// Update (no changes detected, will just call read)
 	diags := resourceCacheGroupUpdate(ctx, data, provider)
 	r.Nil(diags)
 	r.Equal(updatedName, data.Get(FieldCacheGroupName))
@@ -207,7 +198,6 @@ func TestCacheGroupResource_Delete(t *testing.T) {
 	state.ID = cacheGroupID
 	data := resource.Data(state)
 
-	// Mock delete response
 	deleteResponse := sdk.DboV1DeleteCacheGroupResponse{}
 	deleteBody, _ := json.Marshal(deleteResponse)
 	mockClient.EXPECT().
@@ -218,7 +208,6 @@ func TestCacheGroupResource_Delete(t *testing.T) {
 			Body:       io.NopCloser(bytes.NewReader(deleteBody)),
 		}, nil)
 
-	// Delete
 	diags := resourceCacheGroupDelete(ctx, data, provider)
 	r.Nil(diags)
 }
@@ -246,7 +235,6 @@ func TestCacheGroupResource_NotFound(t *testing.T) {
 	state.ID = cacheGroupID
 	data := resource.Data(state)
 
-	// Mock 404 response
 	mockClient.EXPECT().
 		DboAPIGetCacheGroup(ctx, cacheGroupID, gomock.Any()).
 		Return(&http.Response{
@@ -255,7 +243,6 @@ func TestCacheGroupResource_NotFound(t *testing.T) {
 			Body:       io.NopCloser(bytes.NewReader([]byte("{}"))),
 		}, nil)
 
-	// Read should remove from state
 	diags := resourceCacheGroupRead(ctx, data, provider)
 	r.Nil(diags)
 	r.Empty(data.Id())
@@ -266,7 +253,6 @@ func TestCacheGroupResource_EndpointsValidation(t *testing.T) {
 
 	resource := resourceCacheGroup()
 
-	// Verify MinItems validation is set
 	endpointsSchema := resource.Schema[FieldCacheGroupEndpoints]
 	r.Equal(1, endpointsSchema.MinItems)
 }
