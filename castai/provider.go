@@ -72,6 +72,7 @@ func Provider(version string) *schema.Provider {
 			"castai_enterprise_group":              resourceEnterpriseGroup(),
 			"castai_enterprise_role_binding":       resourceEnterpriseRoleBinding(),
 			"castai_cache_group":                   resourceCacheGroup(),
+			"castai_cache_group_configuration":     resourceCacheConfiguration(),
 		},
 
 		DataSourcesMap: map[string]*schema.Resource{
