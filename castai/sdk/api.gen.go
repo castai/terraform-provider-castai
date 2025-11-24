@@ -2304,12 +2304,15 @@ type CastaiInventoryV1beta1UpdateCommitmentResponse struct {
 
 // CastaiInventoryV1beta1Usage defines model for castai.inventory.v1beta1.Usage.
 type CastaiInventoryV1beta1Usage struct {
-	CpuCommitted       *float64 `json:"cpuCommitted,omitempty"`
-	CpuUsed            *float64 `json:"cpuUsed,omitempty"`
-	CpuUsedPercent     *float64 `json:"cpuUsedPercent,omitempty"`
-	MemoryCommittedMib *float64 `json:"memoryCommittedMib,omitempty"`
-	MemoryUsedMib      *float64 `json:"memoryUsedMib,omitempty"`
-	MemoryUsedPercent  *float64 `json:"memoryUsedPercent,omitempty"`
+	CpuCommitted              *float64 `json:"cpuCommitted,omitempty"`
+	CpuUsed                   *float64 `json:"cpuUsed,omitempty"`
+	CpuUsedPercent            *float64 `json:"cpuUsedPercent,omitempty"`
+	MemoryCommittedMib        *float64 `json:"memoryCommittedMib,omitempty"`
+	MemoryUsedMib             *float64 `json:"memoryUsedMib,omitempty"`
+	MemoryUsedPercent         *float64 `json:"memoryUsedPercent,omitempty"`
+	MonetaryAmountCommitted   *float64 `json:"monetaryAmountCommitted,omitempty"`
+	MonetaryAmountUsed        *float64 `json:"monetaryAmountUsed,omitempty"`
+	MonetaryAmountUsedPercent *float64 `json:"monetaryAmountUsedPercent,omitempty"`
 }
 
 // CastaiInventoryV1beta1UsageAtTime defines model for castai.inventory.v1beta1.UsageAtTime.
@@ -7914,13 +7917,13 @@ type WorkloadoptimizationV1HorizontalOverrides struct {
 	ManagementOption *WorkloadoptimizationV1ManagementOption `json:"managementOption,omitempty"`
 
 	// MaxReplicas Max replicas a workload can have.
-	MaxReplicas int32 `json:"maxReplicas"`
+	MaxReplicas *int32 `json:"maxReplicas"`
 
 	// Metrics Metrics list which is scaled on.
 	Metrics *[]WorkloadoptimizationV1MetricSpec `json:"metrics,omitempty"`
 
 	// MinReplicas Min replicas a workload can have.
-	MinReplicas int32                                   `json:"minReplicas"`
+	MinReplicas *int32                                  `json:"minReplicas"`
 	ScaleDown   *WorkloadoptimizationV1ScalingBehaviour `json:"scaleDown,omitempty"`
 
 	// ShortAverageSeconds Defines the window of time to make a horizontal scaling decision.
