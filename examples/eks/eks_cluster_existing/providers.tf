@@ -4,6 +4,11 @@ provider "aws" {
   profile = var.profile
 }
 
+provider "aws" {
+  alias  = "eu_west_1"
+  region = "eu-west-1"
+}
+
 provider "castai" {
   api_url   = var.castai_api_url
   api_token = var.castai_api_token
