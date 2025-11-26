@@ -16,19 +16,19 @@ locals {
 resource "aws_eks_access_entry" "access_entry" {
   count         = local.access_entry ? 1 : 0
   cluster_name  = var.cluster_name
-  principal_arn = module.castai-eks-role-iam.instance_profile_role_arn
+  principal_arn = module.castai_eks_role_iam.instance_profile_role_arn
   type          = "EC2_LINUX"
 }
 
 # Create AWS IAM policies and a user to connect to CAST AI.
-module "castai-eks-role-iam" {
+module "castai_eks_role_iam" {
   source  = "castai/eks-role-iam/castai"
   version = "~> 2.0"
 
   aws_account_id     = data.aws_caller_identity.current.account_id
   aws_cluster_region = var.cluster_region
   aws_cluster_name   = var.cluster_name
-  aws_cluster_vpc_id = var.vpc_id
+  aws_cluster_vpc_id = data.aws_eks_cluster.existing_cluster.vpc_config[0].vpc_id
 
   castai_user_arn = castai_eks_user_arn.castai_user_arn.arn
 
@@ -42,9 +42,9 @@ resource "castai_eks_clusterid" "cluster_id" {
   cluster_name = var.cluster_name
 }
 
-module "castai-eks-cluster" {
+module "castai_eks_cluster" {
   source  = "castai/eks-cluster/castai"
-  version = "~> 13.0"
+  version = "~> 13.6"
 
   api_url                = var.castai_api_url
   castai_api_token       = var.castai_api_token
@@ -55,27 +55,26 @@ module "castai-eks-cluster" {
   aws_cluster_region = var.cluster_region
   aws_cluster_name   = var.cluster_name
 
-  aws_assume_role_arn        = module.castai-eks-role-iam.role_arn
+  aws_assume_role_arn        = module.castai_eks_role_iam.role_arn
   delete_nodes_on_disconnect = var.delete_nodes_on_disconnect
 
-  default_node_configuration = module.castai-eks-cluster.castai_node_configurations["default"]
+  default_node_configuration = module.castai_eks_cluster.castai_node_configurations["default"]
   node_configurations = {
     default = {
-      subnets = var.subnets
+      subnets = data.aws_eks_cluster.existing_cluster.vpc_config[0].subnet_ids
       tags    = var.tags
       security_groups = [
         var.cluster_security_group_id,
         var.node_security_group_id
       ]
-      instance_profile_arn = module.castai-eks-role-iam.instance_profile_arn
+      instance_profile_arn = module.castai_eks_role_iam.instance_profile_arn
     }
   }
-
 
   node_templates = {
     default_by_castai = {
       name             = "default-by-castai"
-      configuration_id = module.castai-eks-cluster.castai_node_configurations["default"]
+      configuration_id = module.castai_eks_cluster.castai_node_configurations["default"]
       is_default       = true
       is_enabled       = true
       should_taint     = false
@@ -93,7 +92,7 @@ module "castai-eks-cluster" {
       }
     }
     example_spot_template = {
-      configuration_id = module.castai-eks-cluster.castai_node_configurations["default"]
+      configuration_id = module.castai_eks_cluster.castai_node_configurations["default"]
       is_enabled       = true
       should_taint     = true
 
@@ -183,6 +182,9 @@ module "castai-eks-cluster" {
       }
     }
   }
+
+  # Installs Omni capability
+  install_omni = true
   # Installs Workload autoscaler
   install_workload_autoscaler = true
   # Installs network monitor
@@ -190,7 +192,7 @@ module "castai-eks-cluster" {
 
   # depends_on helps Terraform with creating proper dependencies graph in case of resource creation and in this case destroy.
   # module "castai-eks-cluster" has to be destroyed before module "castai-eks-role-iam".
-  depends_on = [module.castai-eks-role-iam]
+  depends_on = [module.castai_eks_role_iam]
 }
 
 resource "castai_rebalancing_schedule" "spots" {
@@ -228,5 +230,5 @@ resource "castai_rebalancing_job" "spots" {
   cluster_id              = castai_eks_clusterid.cluster_id.id
   rebalancing_schedule_id = castai_rebalancing_schedule.spots.id
   enabled                 = true
-  depends_on              = [module.castai-eks-cluster]
+  depends_on              = [module.castai_eks_cluster]
 }
