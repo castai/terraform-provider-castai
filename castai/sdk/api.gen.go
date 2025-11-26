@@ -1497,6 +1497,7 @@ type CastaiInventoryV1beta1AzureReservation struct {
 	// Plan - ONE_YEAR: 1 year commitment plan
 	//  - THREE_YEAR: 3 year commitment plan
 	Plan               *CastaiInventoryV1beta1AzureReservationReservationPlan `json:"plan,omitempty"`
+	PurchaseTime       *time.Time                                             `json:"purchaseTime"`
 	Scope              *string                                                `json:"scope,omitempty"`
 	ScopeResourceGroup *string                                                `json:"scopeResourceGroup,omitempty"`
 	ScopeSubscription  *string                                                `json:"scopeSubscription,omitempty"`
@@ -7699,6 +7700,7 @@ type WorkloadoptimizationV1GetWorkloadFiltersCounts struct {
 	RecommendationIsLowConfidence int32 `json:"recommendationIsLowConfidence"`
 	Total                         int32 `json:"total"`
 	WorkloadHasError              int32 `json:"workloadHasError"`
+	WorkloadIsStopped             int32 `json:"workloadIsStopped"`
 }
 
 // WorkloadoptimizationV1GetWorkloadFiltersResponse defines model for workloadoptimization.v1.GetWorkloadFiltersResponse.

@@ -4,13 +4,18 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"testing"
+	"time"
 
 	"github.com/golang/mock/gomock"
 	"github.com/hashicorp/go-cty/cty"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	tfterraform "github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/stretchr/testify/require"
 
 	"github.com/castai/terraform-provider-castai/castai/sdk"
@@ -392,4 +397,75 @@ func TestCacheConfigurationResource_ModeValidation(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestAccCloudAgnostic_ResourceCacheConfiguration(t *testing.T) {
+	rName := fmt.Sprintf("%v-cache-config-%v", ResourcePrefix, acctest.RandString(8))
+	dbName := fmt.Sprintf("testdb_%v", acctest.RandString(8))
+	resourceName := "castai_cache_configuration.test"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: providerFactories,
+		CheckDestroy:      testAccCacheConfigurationDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCreateCacheConfigurationConfig(rName, dbName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "database_name", dbName),
+					resource.TestCheckResourceAttr(resourceName, "mode", "Auto"),
+					resource.TestCheckResourceAttrSet(resourceName, "id"),
+					resource.TestCheckResourceAttrSet(resourceName, "cache_group_id"),
+				),
+			},
+		},
+	})
+}
+
+func testAccCreateCacheConfigurationConfig(groupName, dbName string) string {
+	return fmt.Sprintf(`
+resource "castai_cache_group" "test" {
+  name          = %[1]q
+  protocol_type = "PostgreSQL"
+}
+
+resource "castai_cache_configuration" "test" {
+  cache_group_id = castai_cache_group.test.id
+  database_name  = %[2]q
+  mode           = "Auto"
+}`, groupName, dbName)
+}
+
+func testAccCacheConfigurationDestroy(s *tfterraform.State) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	client := testAccProvider.Meta().(*ProviderConfig).api
+	for _, rs := range s.RootModule().Resources {
+		if rs.Type != "castai_cache_configuration" {
+			continue
+		}
+
+		cacheGroupID := rs.Primary.Attributes["cache_group_id"]
+		configID := rs.Primary.ID
+
+		response, err := client.DboAPIListCacheConfigurationsWithResponse(ctx, cacheGroupID, &sdk.DboAPIListCacheConfigurationsParams{})
+		if err != nil {
+			return err
+		}
+
+		if response.StatusCode() == http.StatusNotFound {
+			return nil
+		}
+
+		if response.JSON200 != nil && response.JSON200.Items != nil {
+			for _, cfg := range *response.JSON200.Items {
+				if cfg.Id != nil && *cfg.Id == configID {
+					return fmt.Errorf("cache configuration %s still exists", configID)
+				}
+			}
+		}
+	}
+
+	return nil
 }

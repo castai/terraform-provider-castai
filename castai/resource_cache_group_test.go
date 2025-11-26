@@ -4,13 +4,18 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"testing"
+	"time"
 
 	"github.com/golang/mock/gomock"
 	"github.com/hashicorp/go-cty/cty"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	tfterraform "github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/stretchr/testify/require"
 
 	"github.com/castai/terraform-provider-castai/castai/sdk"
@@ -420,4 +425,58 @@ func TestFlattenEndpoints(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestAccCloudAgnostic_ResourceCacheGroup(t *testing.T) {
+	rName := fmt.Sprintf("%v-cache-group-%v", ResourcePrefix, acctest.RandString(8))
+	resourceName := "castai_cache_group.test"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: providerFactories,
+		CheckDestroy:      testAccCacheGroupDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCreateCacheGroupConfig(rName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "name", rName),
+					resource.TestCheckResourceAttr(resourceName, "protocol_type", "PostgreSQL"),
+					resource.TestCheckResourceAttrSet(resourceName, "id"),
+				),
+			},
+		},
+	})
+}
+
+func testAccCreateCacheGroupConfig(name string) string {
+	return fmt.Sprintf(`
+resource "castai_cache_group" "test" {
+  name          = %[1]q
+  protocol_type = "PostgreSQL"
+}`, name)
+}
+
+func testAccCacheGroupDestroy(s *tfterraform.State) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	client := testAccProvider.Meta().(*ProviderConfig).api
+	for _, rs := range s.RootModule().Resources {
+		if rs.Type != "castai_cache_group" {
+			continue
+		}
+
+		response, err := client.DboAPIGetCacheGroupWithResponse(ctx, rs.Primary.ID, &sdk.DboAPIGetCacheGroupParams{})
+		if err != nil {
+			return err
+		}
+
+		if response.StatusCode() == http.StatusNotFound {
+			return nil
+		}
+
+		return fmt.Errorf("cache group %s still exists", rs.Primary.ID)
+	}
+
+	return nil
 }
