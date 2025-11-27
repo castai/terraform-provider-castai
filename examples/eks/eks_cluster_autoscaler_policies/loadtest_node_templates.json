@@ -1,0 +1,552 @@
+{
+  "items": [
+    {
+      "template": {
+        "configurationId": "de0b0fcf-6f71-4f10-a3bf-2ee2bc45dd19",
+        "configurationName": "hyperscale",
+        "edgeLocationIds": [],
+        "name": "hyperscale-demand",
+        "constraints": {
+          "minCpu": 0,
+          "minMemory": 0,
+          "spot": false,
+          "onDemand": true,
+          "useSpotFallbacks": false,
+          "fallbackRestoreRateSeconds": 0,
+          "enableSpotDiversity": false,
+          "spotDiversityPriceIncreaseLimitPercent": 0,
+          "enableSpotReliability": false,
+          "spotReliabilityPriceIncreaseLimitPercent": 0,
+          "spotInterruptionPredictionsEnabled": false,
+          "spotInterruptionPredictionsType": "",
+          "instanceFamilies": {
+            "include": [
+              "c5a",
+              "c5ad",
+              "c6a",
+              "c7a",
+              "m5a",
+              "m5ad",
+              "m6a",
+              "m7a",
+              "m8a",
+              "r5a",
+              "r5ad",
+              "r6a",
+              "r7a",
+              "r8a"
+            ],
+            "exclude": []
+          },
+          "isGpuOnly": false,
+          "architectures": [
+            "amd64"
+          ],
+          "os": [
+            "linux"
+          ],
+          "customPriority": [],
+          "dedicatedNodeAffinity": [],
+          "azs": [],
+          "burstable": "NOT_SET",
+          "customerSpecific": "NOT_SET",
+          "cpuManufacturers": [
+            "AMD"
+          ],
+          "architecturePriority": [],
+          "resourceLimits": {
+            "cpuLimitEnabled": false,
+            "cpuLimitMaxCores": 0
+          },
+          "lifecycleTaintsDisabled": false
+        },
+        "version": "4",
+        "shouldTaint": false,
+        "rebalancingConfig": {
+          "minNodes": 0
+        },
+        "customTaints": [],
+        "customLabels": {
+          "cloud.google.com/gke-nodepool": "default-pool",
+          "spark-nodeselect-instance-type": "amd64-64-16",
+          "spark-nodeselect-nodepool-group": "hyper",
+          "spark-nodeselect-preemptible": "false"
+        },
+        "customInstancesEnabled": false,
+        "customInstancesWithExtendedMemoryEnabled": false,
+        "isEnabled": true,
+        "isDefault": false,
+        "gpu": {
+          "enableTimeSharing": false,
+          "sharingConfiguration": {}
+        },
+        "clmEnabled": false
+      },
+      "stats": {
+        "countOnDemand": 2,
+        "countSpot": 0,
+        "countFallback": 0
+      }
+    },
+    {
+      "template": {
+        "configurationId": "6e528344-7b3b-4789-8362-ca9ece970686",
+        "configurationName": "default",
+        "edgeLocationIds": [],
+        "name": "default-by-castai",
+        "constraints": {
+          "spot": false,
+          "onDemand": true,
+          "useSpotFallbacks": false,
+          "fallbackRestoreRateSeconds": 0,
+          "enableSpotDiversity": false,
+          "spotDiversityPriceIncreaseLimitPercent": 0,
+          "enableSpotReliability": false,
+          "spotReliabilityPriceIncreaseLimitPercent": 0,
+          "spotInterruptionPredictionsEnabled": false,
+          "spotInterruptionPredictionsType": "",
+          "isGpuOnly": false,
+          "architectures": [
+            "amd64",
+            "arm64"
+          ],
+          "os": [
+            "linux"
+          ],
+          "customPriority": [],
+          "dedicatedNodeAffinity": [],
+          "azs": [],
+          "burstable": "NOT_SET",
+          "customerSpecific": "NOT_SET",
+          "cpuManufacturers": [],
+          "architecturePriority": [
+            "amd64",
+            "arm64"
+          ],
+          "resourceLimits": {
+            "cpuLimitEnabled": false,
+            "cpuLimitMaxCores": 0
+          },
+          "lifecycleTaintsDisabled": false
+        },
+        "version": "1",
+        "shouldTaint": false,
+        "rebalancingConfig": {
+          "minNodes": 0
+        },
+        "customTaints": [],
+        "customLabels": {},
+        "customInstancesEnabled": false,
+        "customInstancesWithExtendedMemoryEnabled": false,
+        "isEnabled": true,
+        "isDefault": true,
+        "gpu": {
+          "enableTimeSharing": false,
+          "sharingConfiguration": {}
+        },
+        "clmEnabled": false
+      },
+      "stats": {
+        "countOnDemand": 1,
+        "countSpot": 0,
+        "countFallback": 0
+      }
+    },
+    {
+      "template": {
+        "configurationId": "60e53c32-1014-4ae8-8ee5-5e98a85d693e",
+        "configurationName": "infra",
+        "edgeLocationIds": [],
+        "name": "infra",
+        "constraints": {
+          "minCpu": 0,
+          "minMemory": 0,
+          "spot": false,
+          "onDemand": true,
+          "useSpotFallbacks": false,
+          "fallbackRestoreRateSeconds": 0,
+          "enableSpotDiversity": false,
+          "spotDiversityPriceIncreaseLimitPercent": 0,
+          "enableSpotReliability": false,
+          "spotReliabilityPriceIncreaseLimitPercent": 0,
+          "spotInterruptionPredictionsEnabled": false,
+          "spotInterruptionPredictionsType": "",
+          "isGpuOnly": false,
+          "architectures": [
+            "amd64"
+          ],
+          "os": [
+            "linux"
+          ],
+          "customPriority": [],
+          "dedicatedNodeAffinity": [],
+          "azs": [],
+          "burstable": "NOT_SET",
+          "customerSpecific": "NOT_SET",
+          "cpuManufacturers": [
+            "AMD",
+            "INTEL"
+          ],
+          "architecturePriority": [],
+          "resourceLimits": {
+            "cpuLimitEnabled": false,
+            "cpuLimitMaxCores": 0
+          },
+          "lifecycleTaintsDisabled": false
+        },
+        "version": "3",
+        "shouldTaint": false,
+        "rebalancingConfig": {
+          "minNodes": 0
+        },
+        "customTaints": [],
+        "customLabels": {
+          "scheduling.cast.ai/node-template": "infra",
+          "sys-type": "infra"
+        },
+        "customInstancesEnabled": false,
+        "customInstancesWithExtendedMemoryEnabled": false,
+        "isEnabled": true,
+        "isDefault": false,
+        "gpu": {
+          "enableTimeSharing": false,
+          "sharingConfiguration": {}
+        },
+        "clmEnabled": false
+      },
+      "stats": {
+        "countOnDemand": 3,
+        "countSpot": 0,
+        "countFallback": 0
+      }
+    },
+    {
+      "template": {
+        "configurationId": "6e528344-7b3b-4789-8362-ca9ece970686",
+        "configurationName": "default",
+        "edgeLocationIds": [],
+        "name": "default",
+        "constraints": {
+          "minCpu": 0,
+          "minMemory": 0,
+          "spot": false,
+          "onDemand": true,
+          "useSpotFallbacks": false,
+          "fallbackRestoreRateSeconds": 0,
+          "enableSpotDiversity": false,
+          "spotDiversityPriceIncreaseLimitPercent": 0,
+          "enableSpotReliability": false,
+          "spotReliabilityPriceIncreaseLimitPercent": 0,
+          "spotInterruptionPredictionsEnabled": false,
+          "spotInterruptionPredictionsType": "",
+          "isGpuOnly": false,
+          "architectures": [
+            "amd64"
+          ],
+          "os": [
+            "linux"
+          ],
+          "customPriority": [],
+          "dedicatedNodeAffinity": [],
+          "azs": [],
+          "burstable": "NOT_SET",
+          "customerSpecific": "NOT_SET",
+          "cpuManufacturers": [
+            "AMD",
+            "INTEL"
+          ],
+          "architecturePriority": [],
+          "resourceLimits": {
+            "cpuLimitEnabled": false,
+            "cpuLimitMaxCores": 0
+          },
+          "lifecycleTaintsDisabled": false
+        },
+        "version": "3",
+        "shouldTaint": false,
+        "customLabel": {
+          "key": "scheduling.cast.ai/node-template",
+          "value": "default"
+        },
+        "rebalancingConfig": {
+          "minNodes": 0
+        },
+        "customTaints": [],
+        "customLabels": {
+          "scheduling.cast.ai/node-template": "default"
+        },
+        "customInstancesEnabled": false,
+        "customInstancesWithExtendedMemoryEnabled": false,
+        "isEnabled": true,
+        "isDefault": false,
+        "gpu": {
+          "enableTimeSharing": false,
+          "sharingConfiguration": {}
+        },
+        "clmEnabled": false
+      },
+      "stats": {
+        "countOnDemand": 0,
+        "countSpot": 0,
+        "countFallback": 0
+      }
+    },
+    {
+      "template": {
+        "configurationId": "de0b0fcf-6f71-4f10-a3bf-2ee2bc45dd19",
+        "configurationName": "hyperscale",
+        "edgeLocationIds": [],
+        "name": "hyperscale-spot",
+        "constraints": {
+          "minCpu": 0,
+          "minMemory": 0,
+          "spot": true,
+          "onDemand": false,
+          "useSpotFallbacks": false,
+          "fallbackRestoreRateSeconds": 0,
+          "enableSpotDiversity": false,
+          "spotDiversityPriceIncreaseLimitPercent": 0,
+          "enableSpotReliability": false,
+          "spotReliabilityPriceIncreaseLimitPercent": 0,
+          "spotInterruptionPredictionsEnabled": true,
+          "spotInterruptionPredictionsType": "",
+          "instanceFamilies": {
+            "include": [
+              "c5a",
+              "c5ad",
+              "c6a",
+              "c7a",
+              "m5a",
+              "m5ad",
+              "m6a",
+              "m7a",
+              "m8a",
+              "r5a",
+              "r5ad",
+              "r6a",
+              "r7a",
+              "r8a"
+            ],
+            "exclude": []
+          },
+          "isGpuOnly": false,
+          "architectures": [
+            "amd64"
+          ],
+          "os": [
+            "linux"
+          ],
+          "customPriority": [],
+          "dedicatedNodeAffinity": [],
+          "azs": [],
+          "burstable": "NOT_SET",
+          "customerSpecific": "NOT_SET",
+          "cpuManufacturers": [
+            "AMD"
+          ],
+          "architecturePriority": [],
+          "resourceLimits": {
+            "cpuLimitEnabled": false,
+            "cpuLimitMaxCores": 0
+          },
+          "lifecycleTaintsDisabled": false
+        },
+        "version": "3",
+        "shouldTaint": false,
+        "rebalancingConfig": {
+          "minNodes": 0
+        },
+        "customTaints": [],
+        "customLabels": {
+          "spark-nodeselect-instance-type": "amd64-64-16",
+          "spark-nodeselect-nodepool-group": "hyper",
+          "spark-nodeselect-preemptible": "true"
+        },
+        "customInstancesEnabled": false,
+        "customInstancesWithExtendedMemoryEnabled": false,
+        "isEnabled": true,
+        "isDefault": false,
+        "gpu": {
+          "enableTimeSharing": false,
+          "sharingConfiguration": {}
+        },
+        "clmEnabled": false
+      },
+      "stats": {
+        "countOnDemand": 0,
+        "countSpot": 0,
+        "countFallback": 0
+      }
+    },
+    {
+      "template": {
+        "configurationId": "de0b0fcf-6f71-4f10-a3bf-2ee2bc45dd19",
+        "configurationName": "hyperscale",
+        "edgeLocationIds": [],
+        "name": "hyper-scale-spot",
+        "constraints": {
+          "spot": true,
+          "onDemand": false,
+          "useSpotFallbacks": false,
+          "fallbackRestoreRateSeconds": 1800,
+          "enableSpotDiversity": false,
+          "spotDiversityPriceIncreaseLimitPercent": 20,
+          "enableSpotReliability": false,
+          "spotReliabilityPriceIncreaseLimitPercent": 20,
+          "spotInterruptionPredictionsEnabled": true,
+          "spotInterruptionPredictionsType": "interruption-predictions",
+          "instanceFamilies": {
+            "include": [
+              "c5a",
+              "c5ad",
+              "c6a",
+              "c7a",
+              "m5a",
+              "m5ad",
+              "m6a",
+              "m7a",
+              "m8a",
+              "r5a",
+              "r5ad",
+              "r6a",
+              "r7a",
+              "r8a"
+            ],
+            "exclude": []
+          },
+          "isGpuOnly": false,
+          "architectures": [
+            "amd64"
+          ],
+          "os": [
+            "linux"
+          ],
+          "customPriority": [],
+          "dedicatedNodeAffinity": [],
+          "azs": [],
+          "burstable": "NOT_SET",
+          "customerSpecific": "NOT_SET",
+          "cpuManufacturers": [
+            "AMD"
+          ],
+          "architecturePriority": [],
+          "resourceLimits": {
+            "cpuLimitEnabled": false,
+            "cpuLimitMaxCores": 0
+          },
+          "lifecycleTaintsDisabled": false
+        },
+        "version": "4",
+        "shouldTaint": false,
+        "rebalancingConfig": {
+          "minNodes": 0
+        },
+        "customTaints": [],
+        "customLabels": {
+          "spark-nodeselect-instance-type": "amd64-64-16",
+          "spark-nodeselect-nodepool-group": "hyper",
+          "spark-nodeselect-preemptible": "true"
+        },
+        "customInstancesEnabled": false,
+        "customInstancesWithExtendedMemoryEnabled": false,
+        "isEnabled": false,
+        "isDefault": false,
+        "gpu": {
+          "enableTimeSharing": false,
+          "sharingConfiguration": {}
+        },
+        "clmEnabled": false
+      },
+      "stats": {
+        "countOnDemand": 0,
+        "countSpot": 0,
+        "countFallback": 0
+      }
+    },
+    {
+      "template": {
+        "configurationId": "de0b0fcf-6f71-4f10-a3bf-2ee2bc45dd19",
+        "configurationName": "hyperscale",
+        "edgeLocationIds": [],
+        "name": "hyper-scale-demand",
+        "constraints": {
+          "spot": false,
+          "onDemand": true,
+          "useSpotFallbacks": true,
+          "fallbackRestoreRateSeconds": 1800,
+          "enableSpotDiversity": false,
+          "spotDiversityPriceIncreaseLimitPercent": 20,
+          "enableSpotReliability": true,
+          "spotReliabilityPriceIncreaseLimitPercent": 20,
+          "spotInterruptionPredictionsEnabled": true,
+          "spotInterruptionPredictionsType": "interruption-predictions",
+          "instanceFamilies": {
+            "include": [
+              "c5a",
+              "c5ad",
+              "c6a",
+              "c7a",
+              "m5a",
+              "m5ad",
+              "m6a",
+              "m7a",
+              "m8a",
+              "r5a",
+              "r5ad",
+              "r6a",
+              "r7a",
+              "r8a"
+            ],
+            "exclude": []
+          },
+          "isGpuOnly": false,
+          "architectures": [
+            "amd64"
+          ],
+          "os": [
+            "linux"
+          ],
+          "customPriority": [],
+          "dedicatedNodeAffinity": [],
+          "azs": [],
+          "burstable": "NOT_SET",
+          "customerSpecific": "NOT_SET",
+          "cpuManufacturers": [
+            "AMD"
+          ],
+          "architecturePriority": [],
+          "resourceLimits": {
+            "cpuLimitEnabled": false,
+            "cpuLimitMaxCores": 0
+          },
+          "lifecycleTaintsDisabled": false
+        },
+        "version": "4",
+        "shouldTaint": false,
+        "rebalancingConfig": {
+          "minNodes": 0
+        },
+        "customTaints": [],
+        "customLabels": {
+          "spark-nodeselect-instance-type": "amd64-64-16",
+          "spark-nodeselect-nodepool-group": "hyper",
+          "spark-nodeselect-preemptible": "false"
+        },
+        "customInstancesEnabled": false,
+        "customInstancesWithExtendedMemoryEnabled": false,
+        "isEnabled": false,
+        "isDefault": false,
+        "gpu": {
+          "enableTimeSharing": false,
+          "sharingConfiguration": {}
+        },
+        "clmEnabled": false
+      },
+      "stats": {
+        "countOnDemand": 0,
+        "countSpot": 0,
+        "countFallback": 0
+      }
+    }
+  ]
+}

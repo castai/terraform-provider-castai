@@ -1,0 +1,34 @@
+# monarch-prep - PREP phase workers (spot nodes)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: monarch-prep
+  namespace: default
+  labels:
+    app: monarch
+    workload: prep
+spec:
+  replicas: 0
+  selector:
+    matchLabels:
+      app: monarch-prep
+  template:
+    metadata:
+      labels:
+        app: monarch-prep
+        spark-nodeselect-instance-type: amd64-64-16
+        spark-nodeselect-nodepool-group: hyper
+    spec:
+      containers:
+      - name: monarch-prep
+        image: nginx:latest
+        resources:
+          requests:
+            cpu: "12800m"
+            memory: "44800Mi"
+            ephemeral-storage: "4Mi"
+      nodeSelector:
+        spark-nodeselect-instance-type: amd64-64-16
+        spark-nodeselect-nodepool-group: hyper
+        spark-nodeselect-preemptible: "true"
+      terminationGracePeriodSeconds: 10

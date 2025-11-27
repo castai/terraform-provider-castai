@@ -17,6 +17,18 @@ module "eks" {
     }
     vpc-cni = {
       most_recent = true
+      configuration_values = jsonencode({
+        env = {
+          # Enable prefix delegation for better IP efficiency
+          ENABLE_PREFIX_DELEGATION = "true"
+          # Allocate 1 warm prefix per node (/28 = 16 IPs)
+          WARM_PREFIX_TARGET = "1"
+          # Disable warm IP pool since we're using prefix mode
+          WARM_IP_TARGET = "0"
+          # Minimum IPs to maintain (in prefix mode, this is less critical)
+          MINIMUM_IP_TARGET = "2"
+        }
+      })
     }
   }
 
@@ -37,22 +49,12 @@ module "eks" {
     },
   ]
 
-  self_managed_node_groups = {
-    node_group_1 = {
-      name          = "${var.cluster_name}-ng-1"
-      instance_type = "m5.large"
-      max_size      = 5
-      min_size      = 2
-      desired_size  = 2
-    }
-  }
-
   eks_managed_node_groups = {
     node_group_spot = {
       name         = "${var.cluster_name}-spot"
-      min_size     = 1
+      min_size     = 3
       max_size     = 10
-      desired_size = 1
+      desired_size = 4
 
       instance_types = ["t3.large"]
       capacity_type  = "SPOT"
@@ -74,7 +76,7 @@ resource "aws_security_group" "additional" {
     to_port   = 22
     protocol  = "tcp"
     cidr_blocks = [
-      "10.0.0.0/8",
+      "100.64.0.0/16", # Match VPC CIDR range
     ]
   }
 }

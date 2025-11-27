@@ -1,0 +1,34 @@
+# monarch-master - Driver deployment (on-demand nodes)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: monarch-master
+  namespace: default
+  labels:
+    app: monarch
+    workload: master
+spec:
+  replicas: 0
+  selector:
+    matchLabels:
+      app: monarch-master
+  template:
+    metadata:
+      labels:
+        app: monarch-master
+        spark-nodeselect-instance-type: amd64-64-16
+        spark-nodeselect-nodepool-group: hyper
+    spec:
+      containers:
+      - name: monarch-master
+        image: nginx:latest
+        resources:
+          requests:
+            cpu: "500m"
+            memory: "1Gi"
+            ephemeral-storage: "4Mi"
+      nodeSelector:
+        spark-nodeselect-instance-type: amd64-64-16
+        spark-nodeselect-nodepool-group: hyper
+        spark-nodeselect-preemptible: "false"
+      terminationGracePeriodSeconds: 10

@@ -82,7 +82,7 @@ module "castai-eks-cluster" {
       instance_profile_arn = module.castai-eks-role-iam.instance_profile_arn
     }
 
-    test_node_config = {
+    hyperscale = {
       subnets = module.vpc.private_subnets
       tags    = var.tags
       security_groups = [
@@ -91,19 +91,50 @@ module "castai-eks-cluster" {
         aws_security_group.additional.id,
       ]
       instance_profile_arn = module.castai-eks-role-iam.instance_profile_arn
-      kubelet_config = jsonencode({
-        "registryBurst" : 20,
-        "registryPullQPS" : 10
-      })
-      container_runtime = "containerd"
-      volume_type       = "gp3"
-      volume_iops       = 3100
-      volume_throughput = 130
-      imds_v1           = true
+    }
+
+    infra = {
+      subnets = module.vpc.private_subnets
+      tags    = var.tags
+      security_groups = [
+        module.eks.cluster_security_group_id,
+        module.eks.node_security_group_id,
+        aws_security_group.additional.id,
+      ]
+      instance_profile_arn = module.castai-eks-role-iam.instance_profile_arn
     }
   }
 
   node_templates = {
+    # Template 1: hyperscale-demand (on-demand, AMD instances)
+    hyperscale_demand = {
+      name               = "hyperscale-demand"
+      configuration_name = "hyperscale"
+      is_default         = false
+      is_enabled         = true
+      should_taint       = false
+
+      custom_labels = {
+        "cloud.google.com/gke-nodepool"   = "default-pool"
+        "spark-nodeselect-instance-type"  = "amd64-64-16"
+        "spark-nodeselect-nodepool-group" = "hyper"
+        "spark-nodeselect-preemptible"    = "false"
+      }
+
+      constraints = {
+        on_demand          = true
+        spot               = false
+        use_spot_fallbacks = false
+
+        instance_families = {
+          include = ["c5a", "c5ad", "c6a", "c7a", "m5a", "m5ad", "m6a", "m7a", "m8a", "r5a", "r5ad", "r6a", "r7a", "r8a"]
+        }
+
+        architectures = ["amd64"]
+      }
+    }
+
+    # Template 2: default-by-castai (default template, on-demand, multi-arch)
     default_by_castai = {
       name               = "default-by-castai"
       configuration_name = "default"
@@ -113,66 +144,86 @@ module "castai-eks-cluster" {
 
       constraints = {
         on_demand          = true
-        spot               = true
-        use_spot_fallbacks = true
+        spot               = false
+        use_spot_fallbacks = false
 
-        enable_spot_diversity                       = false
-        spot_diversity_price_increase_limit_percent = 20
-
-        spot_interruption_predictions_enabled = true
-        spot_interruption_predictions_type    = "aws-rebalance-recommendations"
+        architectures = ["amd64", "arm64"]
       }
     }
-    spot_tmpl = {
-      configuration_name = "default"
+
+    # Template 3: infra (infrastructure nodes, on-demand, AMD/INTEL)
+    infra = {
+      name               = "infra"
+      configuration_name = "infra"
+      is_default         = false
       is_enabled         = true
-      should_taint       = true
+      should_taint       = false
 
       custom_labels = {
-        custom-label-key-1 = "custom-label-value-1"
-        custom-label-key-2 = "custom-label-value-2"
+        "scheduling.cast.ai/node-template" = "infra"
+        "sys-type"                         = "infra"
       }
 
-      custom_taints = [
-        {
-          key   = "custom-taint-key-1"
-          value = "custom-taint-value-1"
-        },
-        {
-          key   = "custom-taint-key-2"
-          value = "custom-taint-value-2"
-        }
-      ]
+      constraints = {
+        on_demand          = true
+        spot               = false
+        use_spot_fallbacks = false
+
+        architectures = ["amd64"]
+      }
+    }
+
+    # Template 4: default (on-demand, AMD/INTEL)
+    default = {
+      name               = "default"
+      configuration_name = "default"
+      is_default         = false
+      is_enabled         = true
+      should_taint       = false
+
+      custom_labels = {
+        "scheduling.cast.ai/node-template" = "default"
+      }
 
       constraints = {
-        fallback_restore_rate_seconds = 1800
-        spot                          = true
-        use_spot_fallbacks            = true
-        min_cpu                       = 4
-        max_cpu                       = 100
-        instance_families = {
-          exclude = ["m5"]
-        }
-        compute_optimized_state = "disabled"
-        storage_optimized_state = "disabled"
-        is_gpu_only             = false
+        on_demand          = true
+        spot               = false
+        use_spot_fallbacks = false
 
-        # Optional: define custom priority for instances selection.
-        #
-        # 1. Prioritize C5a and C5ad spot instances above all else, regardless of price.
-        # 2. If C5a is not available, try C6a family.
-        custom_priority = [
-          {
-            instance_families = ["c5a", "c5ad"]
-            spot              = true
-          },
-          {
-            instance_families = ["c6a"]
-            spot              = true
-          }
-          # 3. instances not matching any of custom priority groups will be tried after
-          # nothing matches from priority groups.
-        ]
+        architectures = ["amd64"]
+
+        cpu_manufacturers = ["AMD", "INTEL"]
+      }
+    }
+
+    # Template 5: hyperscale-spot (spot instances, AMD)
+    hyperscale_spot = {
+      name               = "hyperscale-spot"
+      configuration_name = "hyperscale"
+      is_default         = false
+      is_enabled         = true
+      should_taint       = false
+
+      custom_labels = {
+        "spark-nodeselect-instance-type"  = "amd64-64-16"
+        "spark-nodeselect-nodepool-group" = "hyper"
+        "spark-nodeselect-preemptible"    = "true"
+      }
+
+      constraints = {
+        on_demand          = false
+        spot               = true
+        use_spot_fallbacks = false
+
+        spot_interruption_predictions_enabled = true
+
+        instance_families = {
+          include = ["c5a", "c5ad", "c6a", "c7a", "m5a", "m5ad", "m6a", "m7a", "m8a", "r5a", "r5ad", "r6a", "r7a", "r8a"]
+        }
+
+        architectures = ["amd64"]
+
+        cpu_manufacturers = ["AMD"]
       }
     }
   }
