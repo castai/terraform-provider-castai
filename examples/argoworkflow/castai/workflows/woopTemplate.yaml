@@ -1,0 +1,89 @@
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: castai-autoscaling-policy
+spec:
+  entrypoint: create-autoscaling-policy
+  arguments:
+    parameters:
+      - name: api_key
+      - name: cluster_id
+      - name: policy_name
+      - name: cpu_function
+      - name: cpu_arg
+      - name: cpu_lookback
+      - name: memory_function
+      - name: memory_overhead
+      - name: memory_min
+      - name: startup_seconds
+      - name: confidence_threshold
+
+  templates:
+    - name: create-autoscaling-policy
+      inputs:
+        parameters:
+          - name: api_key
+          - name: cluster_id
+          - name: policy_name
+          - name: cpu_function
+          - name: cpu_arg
+          - name: cpu_lookback
+          - name: memory_function
+          - name: memory_overhead
+          - name: memory_min
+          - name: startup_seconds
+          - name: confidence_threshold
+      container:
+        image: curlimages/curl:8.8.0
+        command: [sh, -c]
+        args:
+          - |
+            echo "🚀 Creating CAST.AI autoscaling policy '{{inputs.parameters.policy_name}}' for cluster {{inputs.parameters.cluster_id}}"
+            curl --request POST \
+              --url https://api.cast.ai/v1/workload-autoscaling/clusters/{{inputs.parameters.cluster_id}}/policies \
+              --header "X-API-Key: {{inputs.parameters.api_key}}" \
+              --header 'accept: application/json' \
+              --header 'content-type: application/json' \
+              --data "{
+                \"recommendationPolicies\": {
+                  \"managementOption\": \"MANAGED\",
+                  \"applyType\": \"IMMEDIATE\",
+                  \"cpu\": {
+                    \"function\": \"{{inputs.parameters.cpu_function}}\",
+                    \"args\": [\"{{inputs.parameters.cpu_arg}}\"],
+                    \"overhead\": 0,
+                    \"applyThreshold\": 0,
+                    \"lookBackPeriodSeconds\": {{inputs.parameters.cpu_lookback}},
+                    \"min\": 0.01,
+                    \"limit\": {\"type\": \"NO_LIMIT\"},
+                    \"applyThresholdStrategy\": {\"defaultAdaptiveThreshold\": {}}
+                  },
+                  \"memory\": {
+                    \"function\": \"{{inputs.parameters.memory_function}}\",
+                    \"args\": [],
+                    \"overhead\": {{inputs.parameters.memory_overhead}},
+                    \"applyThreshold\": 0,
+                    \"lookBackPeriodSeconds\": 86400,
+                    \"min\": {{inputs.parameters.memory_min}},
+                    \"applyThresholdStrategy\": {\"defaultAdaptiveThreshold\": {}}
+                  },
+                  \"startup\": {
+                    \"periodSeconds\": {{inputs.parameters.startup_seconds}}
+                  },
+                  \"downscaling\": {
+                    \"applyType\": \"IMMEDIATE\"
+                  },
+                  \"antiAffinity\": {
+                    \"considerAntiAffinity\": false
+                  },
+                  \"confidence\": {
+                    \"threshold\": {{inputs.parameters.confidence_threshold}}
+                  },
+                  \"rolloutBehavior\": {
+                    \"type\": \"NO_DISRUPTION\",
+                    \"preferOneByOne\": true
+                  }
+                },
+                \"applyType\": \"IMMEDIATE\",
+                \"name\": \"{{inputs.parameters.policy_name}}\"
+              }"
