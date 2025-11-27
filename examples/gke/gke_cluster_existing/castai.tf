@@ -6,7 +6,7 @@ data "google_client_config" "default" {}
 
 data "google_container_cluster" "my_cluster" {
   name     = var.cluster_name
-  location = var.cluster_region
+  location = var.cluster_location
   project  = var.project_id
 }
 
@@ -20,8 +20,10 @@ module "castai-gke-iam" {
 }
 
 module "castai-gke-cluster" {
-  source  = "castai/gke-cluster/castai"
-  version = "~> 9.0"
+  // TODO: WIP
+  # source  = "castai/gke-cluster/castai"
+  # version = "~> 9.0"
+  source  = "../../../../terraform-castai-gke-cluster"
 
   api_url                = var.castai_api_url
   castai_api_token       = var.castai_api_token
@@ -30,22 +32,24 @@ module "castai-gke-cluster" {
 
   project_id           = var.project_id
   gke_cluster_name     = var.cluster_name
-  gke_cluster_location = var.cluster_region
+  gke_cluster_location = var.cluster_location
 
   gke_credentials            = module.castai-gke-iam.private_key
   delete_nodes_on_disconnect = var.delete_nodes_on_disconnect
 
   default_node_configuration  = module.castai-gke-cluster.castai_node_configurations["default"]
   install_workload_autoscaler = true
+  install_omni                = true
 
   node_configurations = {
     default = {
       min_disk_size  = 100
       disk_cpu_ratio = 0
-      subnets        = var.subnets
+      subnets        = [data.google_container_cluster.my_cluster.subnetwork]
       tags           = var.tags
     }
   }
+
   node_templates = {
     default_by_castai = {
       name             = "default-by-castai"
@@ -138,4 +142,12 @@ module "castai-gke-cluster" {
   // depends_on helps terraform with creating proper dependencies graph in case of resource creation and in this case destroy
   // module "castai-gke-cluster" has to be destroyed before module "castai-gke-iam" and "module.gke"
   depends_on = [data.google_container_cluster.my_cluster, module.castai-gke-iam]
+}
+
+module "castai_omni_edge_location_gcp" {
+  source = "github.com/castai/terraform-castai-omni-edge-location-gcp"
+
+  cluster_id      = module.castai-gke-cluster.cluster_id
+  organization_id = module.castai-gke-cluster.organization_id
+  region          = "europe-west4"
 }
