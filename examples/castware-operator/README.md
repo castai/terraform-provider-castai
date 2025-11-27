@@ -74,7 +74,7 @@ components:
 
 **Available components:**
 - `castai-agent` - Main Cast AI agent ([full configuration options](https://github.com/castai/helm-charts/tree/main/charts/castai-agent))
-- `spot-handler` - Cast AI spot handler daemon ([full configuration options](https://github.com/castai/helm-charts/tree/main/charts/castai-spot-handler)) *support added with Operator version 0.0.31
+- `spot-handler` - Cast AI spot handler daemon ([full configuration options](https://github.com/castai/helm-charts/tree/main/charts/castai-spot-handler)) *support added with Operator version v0.1.0
 
 ### 3. Deploy
 
