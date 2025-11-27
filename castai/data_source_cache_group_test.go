@@ -4,13 +4,16 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"testing"
 
 	"github.com/golang/mock/gomock"
 	"github.com/hashicorp/go-cty/cty"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/stretchr/testify/require"
 
 	"github.com/castai/terraform-provider-castai/castai/sdk"
@@ -157,4 +160,106 @@ func TestCacheGroupDataSourceReadNotFound(t *testing.T) {
 
 	result := resource.ReadContext(ctx, data, provider)
 	r.True(result.HasError())
+}
+
+func TestAccCloudAgnostic_DataSourceCacheGroup(t *testing.T) {
+	rName := fmt.Sprintf("%v-cache-group-%v", ResourcePrefix, acctest.RandString(8))
+	resourceName := "castai_cache_group.test"
+	dataSourceName := "data.castai_cache_group.test"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: providerFactories,
+		CheckDestroy:      testAccCacheGroupDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDataSourceCacheGroupConfig(rName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrPair(dataSourceName, "id", resourceName, "id"),
+					resource.TestCheckResourceAttrPair(dataSourceName, "name", resourceName, "name"),
+					resource.TestCheckResourceAttrPair(dataSourceName, "protocol_type", resourceName, "protocol_type"),
+					resource.TestCheckResourceAttr(dataSourceName, "name", rName),
+					resource.TestCheckResourceAttr(dataSourceName, "protocol_type", "PostgreSQL"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccCloudAgnostic_DataSourceCacheGroupWithEndpoints(t *testing.T) {
+	rName := fmt.Sprintf("%v-cache-group-%v", ResourcePrefix, acctest.RandString(8))
+	resourceName := "castai_cache_group.test"
+	dataSourceName := "data.castai_cache_group.test"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: providerFactories,
+		CheckDestroy:      testAccCacheGroupDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDataSourceCacheGroupWithEndpointsConfig(rName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrPair(dataSourceName, "id", resourceName, "id"),
+					resource.TestCheckResourceAttrPair(dataSourceName, "name", resourceName, "name"),
+					resource.TestCheckResourceAttrPair(dataSourceName, "protocol_type", resourceName, "protocol_type"),
+					resource.TestCheckResourceAttrPair(dataSourceName, "direct_mode", resourceName, "direct_mode"),
+					resource.TestCheckResourceAttr(dataSourceName, "name", rName),
+					resource.TestCheckResourceAttr(dataSourceName, "protocol_type", "PostgreSQL"),
+					resource.TestCheckResourceAttr(dataSourceName, "direct_mode", "true"),
+					// Verify endpoints
+					resource.TestCheckResourceAttr(dataSourceName, "endpoints.#", "2"),
+					resource.TestCheckResourceAttrPair(dataSourceName, "endpoints.0.hostname", resourceName, "endpoints.0.hostname"),
+					resource.TestCheckResourceAttrPair(dataSourceName, "endpoints.0.port", resourceName, "endpoints.0.port"),
+					resource.TestCheckResourceAttrPair(dataSourceName, "endpoints.0.name", resourceName, "endpoints.0.name"),
+					resource.TestCheckResourceAttr(dataSourceName, "endpoints.0.hostname", "primary.db.example.com"),
+					resource.TestCheckResourceAttr(dataSourceName, "endpoints.0.port", "5432"),
+					resource.TestCheckResourceAttr(dataSourceName, "endpoints.0.name", "primary"),
+					resource.TestCheckResourceAttrPair(dataSourceName, "endpoints.1.hostname", resourceName, "endpoints.1.hostname"),
+					resource.TestCheckResourceAttrPair(dataSourceName, "endpoints.1.port", resourceName, "endpoints.1.port"),
+					resource.TestCheckResourceAttrPair(dataSourceName, "endpoints.1.name", resourceName, "endpoints.1.name"),
+					resource.TestCheckResourceAttr(dataSourceName, "endpoints.1.hostname", "replica.db.example.com"),
+					resource.TestCheckResourceAttr(dataSourceName, "endpoints.1.port", "5433"),
+					resource.TestCheckResourceAttr(dataSourceName, "endpoints.1.name", "replica"),
+					// Note: connection_string is only available once DBO is deployed and running on the cluster
+				),
+			},
+		},
+	})
+}
+
+func testAccDataSourceCacheGroupConfig(name string) string {
+	return fmt.Sprintf(`
+resource "castai_cache_group" "test" {
+  name          = %[1]q
+  protocol_type = "PostgreSQL"
+}
+
+data "castai_cache_group" "test" {
+  id = castai_cache_group.test.id
+}`, name)
+}
+
+func testAccDataSourceCacheGroupWithEndpointsConfig(name string) string {
+	return fmt.Sprintf(`
+resource "castai_cache_group" "test" {
+  name          = %[1]q
+  protocol_type = "PostgreSQL"
+  direct_mode   = true
+
+  endpoints {
+    hostname = "primary.db.example.com"
+    port     = 5432
+    name     = "primary"
+  }
+
+  endpoints {
+    hostname = "replica.db.example.com"
+    port     = 5433
+    name     = "replica"
+  }
+}
+
+data "castai_cache_group" "test" {
+  id = castai_cache_group.test.id
+}`, name)
 }
