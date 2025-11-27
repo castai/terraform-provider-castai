@@ -21,7 +21,7 @@ Manual version control - you specify component versions explicitly.
 - You want to pin specific component versions
 - You need approval before upgrades
 - Testing new versions before rollout
-- You don't want the agent & spot-handler version to be bumped at Operator onboarding
+- You don't want the agent & spot-handler versions to be updated during Operator onboarding
 
 ```hcl
   set {
@@ -74,7 +74,7 @@ components:
 
 **Available components:**
 - `castai-agent` - Main Cast AI agent ([full configuration options](https://github.com/castai/helm-charts/tree/main/charts/castai-agent))
-- `spot-handler` - Cast AI spot handler daemon ([full configuration options](https://github.com/castai/helm-charts/tree/main/charts/castai-spot-handler)) *support added with operator version 0.0.31
+- `spot-handler` - Cast AI spot handler daemon ([full configuration options](https://github.com/castai/helm-charts/tree/main/charts/castai-spot-handler)) *support added with Operator version 0.0.31
 
 ### 3. Deploy
 
