@@ -63,7 +63,7 @@ func dataSourceCacheGroup() *schema.Resource {
 						FieldCacheGroupEndpointConnectionString: {
 							Type:        schema.TypeString,
 							Computed:    true,
-							Description: "Connection string for the endpoint.",
+							Description: "Connection string for the endpoint. Only available once DBO is deployed and running on the Kubernetes cluster.",
 						},
 					},
 				},
