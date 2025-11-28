@@ -54,7 +54,7 @@ resource "castai_eks_clusterid" "cluster_id" {
 
 module "castai-eks-cluster" {
   source  = "castai/eks-cluster/castai"
-  version = "~> 13.0"
+  version = "13.5.1"
 
   api_url                = var.castai_api_url
   castai_api_token       = var.castai_api_token
@@ -258,7 +258,7 @@ module "castai-eks-cluster" {
       enabled = true
 
       cpu = {
-        max_cores = 20
+        max_cores = 20000
         min_cores = 1
       }
     }
@@ -270,7 +270,7 @@ module "castai-eks-cluster" {
 }
 
 resource "castai_rebalancing_schedule" "spots" {
-  name = "rebalance spots at every 30th minute"
+  name = "spot-${var.cluster_name}"
   schedule {
     cron = "*/30 * * * *"
   }

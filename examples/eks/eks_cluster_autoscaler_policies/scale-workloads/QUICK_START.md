@@ -38,6 +38,9 @@ All workloads target nodes with labels:
 
 # Scale mig workers to 50 replicas (requires large nodes)
 ./scale.sh --size mig --replicas 50
+
+# Scale in a specific namespace
+./scale.sh --size prep --replicas 100 --namespace production
 ```
 
 ### Scale to Target Node Counts
@@ -72,6 +75,9 @@ All workloads target nodes with labels:
 # View deployment status
 kubectl get deployments -l app=monarch
 
+# View deployments in a specific namespace
+kubectl get deployments -l app=monarch -n production
+
 # Count running pods
 kubectl get pods -l app=monarch --field-selector=status.phase=Running | wc -l
 
@@ -102,6 +108,30 @@ kubectl get pods -l app=monarch -o wide
 - Actual pod density varies significantly with instance type
 - Always verify your node configuration supports the requested labels/taints
 
+## Troubleshooting
+
+### "error: no objects passed to scale"
+
+This error means the deployment doesn't exist. The script now checks for this and will show available deployments. To fix:
+
+```bash
+# Check what namespace your deployments are in
+kubectl get deployments --all-namespaces | grep monarch
+
+# Use the correct namespace
+./scale.sh --size prep --replicas 12 --namespace <your-namespace>
+
+# Or verify the deployment name pattern matches "monarch-<workload>"
+kubectl get deployments
+```
+
+### Deployments Not Found
+
+If `kubectl apply -f .` was successful but deployments aren't found:
+- Verify you're in the correct kubectl context: `kubectl config current-context`
+- Check if deployments are in a different namespace: `kubectl get deployments -A`
+- Ensure the YAML files were applied: `kubectl get deployments`
+
 ## Tips
 
 - Start with small replica counts to verify node provisioning works correctly
@@ -109,6 +139,7 @@ kubectl get pods -l app=monarch -o wide
 - Always clean up after testing: `./scale.sh --size all --replicas 0`
 - Check autoscaler logs: `kubectl logs -n kube-system -l app=cluster-autoscaler -f`
 - Verify node labels match workload requirements: `kubectl get nodes --show-labels | grep spark-nodeselect`
+- If you get "deployment not found" errors, the script will list available deployments to help debug
 
 ## Example Test Scenario
 
@@ -130,4 +161,6 @@ sleep 60
 
 # 6. Clean up everything
 ./scale.sh --size all --replicas 0
+
+# Note: Add --namespace <name> to any command to target a specific namespace
 ```
