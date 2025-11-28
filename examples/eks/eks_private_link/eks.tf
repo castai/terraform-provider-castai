@@ -35,7 +35,6 @@ module "eks" {
     }
   }
 
-  authentication_mode                      = "API_AND_CONFIG_MAP"
   enable_cluster_creator_admin_permissions = true
 }
 
@@ -45,4 +44,3 @@ resource "aws_eks_access_entry" "castai" {
   principal_arn = module.castai-eks-role-iam.instance_profile_role_arn
   type          = "EC2_LINUX"
 }
-

@@ -92,8 +92,6 @@ module "eks" {
     }
   }
 
-  authentication_mode = "API_AND_CONFIG_MAP"
-
   access_entries = var.eks_user_role_arn != null ? {
     admin = {
       principal_arn = var.eks_user_role_arn
