@@ -1,6 +1,4 @@
 cluster_name     = ""
-cluster_region   = ""
-cluster_zones    =  [""]
+cluster_location = ""
 castai_api_token = ""
 project_id       = ""
-subnets          = [""]
