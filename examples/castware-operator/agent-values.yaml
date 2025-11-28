@@ -8,3 +8,7 @@ components:
       additionalEnv:
         AKS_CLUSTER_NAME: ${aks_cluster_name}
         AKS_CLUSTER_REGION: ${aks_cluster_region}
+  spot-handler:
+    component: spot-handler
+    cluster: castai
+    enabled: true
