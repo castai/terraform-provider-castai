@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"os"
 	"reflect"
 	"strings"
 	"testing"
@@ -14,6 +15,7 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/samber/lo"
 	"github.com/stretchr/testify/require"
 
@@ -967,4 +969,137 @@ func JSONBytesEqual(a, b []byte) (bool, error) {
 		return false, err
 	}
 	return reflect.DeepEqual(j2, j), nil
+}
+
+func TestAccEKS_ResourceAutoscaler_basic(t *testing.T) {
+	clusterName, _ := lo.Coalesce(os.Getenv("CLUSTER_NAME"), "cost-terraform")
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() { testAccPreCheck(t) },
+
+		ProviderFactories: providerFactories,
+		Steps: []resource.TestStep{
+			// Step 1: Create autoscaler with initial settings
+			{
+				Config: testAccAutoscalerConfig(clusterName, true, false),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("castai_autoscaler.test", "autoscaler_settings.0.enabled", "true"),
+					resource.TestCheckResourceAttr("castai_autoscaler.test", "autoscaler_settings.0.is_scoped_mode", "false"),
+					resource.TestCheckResourceAttr("castai_autoscaler.test", "autoscaler_settings.0.node_templates_partial_matching_enabled", "false"),
+					resource.TestCheckResourceAttr("castai_autoscaler.test", "autoscaler_settings.0.unschedulable_pods.0.enabled", "true"),
+					resource.TestCheckResourceAttr("castai_autoscaler.test", "autoscaler_settings.0.cluster_limits.0.enabled", "true"),
+					resource.TestCheckResourceAttr("castai_autoscaler.test", "autoscaler_settings.0.cluster_limits.0.cpu.0.min_cores", "1"),
+					resource.TestCheckResourceAttr("castai_autoscaler.test", "autoscaler_settings.0.cluster_limits.0.cpu.0.max_cores", "100"),
+					resource.TestCheckResourceAttr("castai_autoscaler.test", "autoscaler_settings.0.node_downscaler.0.enabled", "true"),
+					resource.TestCheckResourceAttr("castai_autoscaler.test", "autoscaler_settings.0.node_downscaler.0.empty_nodes.0.enabled", "true"),
+					resource.TestCheckResourceAttr("castai_autoscaler.test", "autoscaler_settings.0.node_downscaler.0.empty_nodes.0.delay_seconds", "120"),
+				),
+			},
+			// Step 2: Update autoscaler settings
+			{
+				Config: testAccAutoscalerConfig(clusterName, false, true),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("castai_autoscaler.test", "autoscaler_settings.0.enabled", "false"),
+					resource.TestCheckResourceAttr("castai_autoscaler.test", "autoscaler_settings.0.is_scoped_mode", "true"),
+					resource.TestCheckResourceAttr("castai_autoscaler.test", "autoscaler_settings.0.node_templates_partial_matching_enabled", "true"),
+					resource.TestCheckResourceAttr("castai_autoscaler.test", "autoscaler_settings.0.unschedulable_pods.0.enabled", "false"),
+					resource.TestCheckResourceAttr("castai_autoscaler.test", "autoscaler_settings.0.cluster_limits.0.enabled", "false"),
+					resource.TestCheckResourceAttr("castai_autoscaler.test", "autoscaler_settings.0.cluster_limits.0.cpu.0.min_cores", "2"),
+					resource.TestCheckResourceAttr("castai_autoscaler.test", "autoscaler_settings.0.cluster_limits.0.cpu.0.max_cores", "200"),
+					resource.TestCheckResourceAttr("castai_autoscaler.test", "autoscaler_settings.0.node_downscaler.0.enabled", "false"),
+					resource.TestCheckResourceAttr("castai_autoscaler.test", "autoscaler_settings.0.node_downscaler.0.empty_nodes.0.enabled", "false"),
+					resource.TestCheckResourceAttr("castai_autoscaler.test", "autoscaler_settings.0.node_downscaler.0.empty_nodes.0.delay_seconds", "300"),
+				),
+			},
+			// Step 3: Import state
+			{
+				ResourceName:            "castai_autoscaler.test",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"autoscaler_policies_json"},
+			},
+		},
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"aws": {
+				Source:            "hashicorp/aws",
+				VersionConstraint: "~> 4.0",
+			},
+		},
+	})
+}
+
+func testAccAutoscalerConfig(clusterName string, enabled bool, updated bool) string {
+	isScopedMode := "false"
+	nodeTemplatesPartialMatchingEnabled := "false"
+	unschedulablePodsEnabled := "true"
+	clusterLimitsEnabled := "true"
+	minCores := 1
+	maxCores := 100
+	nodeDownscalerEnabled := "true"
+	emptyNodesEnabled := "true"
+	delaySeconds := 120
+
+	if updated {
+		isScopedMode = "true"
+		nodeTemplatesPartialMatchingEnabled = "true"
+		unschedulablePodsEnabled = "false"
+		clusterLimitsEnabled = "false"
+		minCores = 2
+		maxCores = 200
+		nodeDownscalerEnabled = "false"
+		emptyNodesEnabled = "false"
+		delaySeconds = 300
+	}
+
+	return ConfigCompose(testAccAutoscalerEKSConfig(clusterName), fmt.Sprintf(`
+resource "castai_autoscaler" "test" {
+  cluster_id = data.castai_eks_clusterid.test.id
+
+  autoscaler_settings {
+    enabled                                = %t
+    is_scoped_mode                         = %s
+    node_templates_partial_matching_enabled = %s
+
+    unschedulable_pods {
+      enabled = %s
+    }
+
+    cluster_limits {
+      enabled = %s
+
+      cpu {
+        min_cores = %d
+        max_cores = %d
+      }
+    }
+
+    node_downscaler {
+      enabled = %s
+
+      empty_nodes {
+        enabled       = %s
+        delay_seconds = %d
+      }
+    }
+  }
+}
+`, enabled, isScopedMode, nodeTemplatesPartialMatchingEnabled,
+		unschedulablePodsEnabled, clusterLimitsEnabled, minCores, maxCores,
+		nodeDownscalerEnabled, emptyNodesEnabled, delaySeconds))
+}
+
+func testAccAutoscalerEKSConfig(clusterName string) string {
+	return fmt.Sprintf(`
+provider "aws" {
+  region = "eu-central-1"
+}
+
+data "aws_caller_identity" "current" {}
+
+data "castai_eks_clusterid" "test" {
+  account_id   = data.aws_caller_identity.current.account_id
+  region       = "eu-central-1"
+  cluster_name = %q
+}
+`, clusterName)
 }
