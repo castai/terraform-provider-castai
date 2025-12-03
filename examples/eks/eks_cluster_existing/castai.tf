@@ -44,7 +44,7 @@ resource "castai_eks_clusterid" "cluster_id" {
 
 module "castai_eks_cluster" {
   source  = "castai/eks-cluster/castai"
-  version = "~> 13.6"
+  version = "~> 14.0"
 
   api_url                = var.castai_api_url
   castai_api_token       = var.castai_api_token
@@ -63,10 +63,10 @@ module "castai_eks_cluster" {
     default = {
       subnets = data.aws_eks_cluster.existing_cluster.vpc_config[0].subnet_ids
       tags    = var.tags
-      security_groups = [
-        var.cluster_security_group_id,
-        var.node_security_group_id
-      ]
+      security_groups = concat(
+        [data.aws_eks_cluster.existing_cluster.vpc_config[0].cluster_security_group_id],
+        tolist(data.aws_eks_cluster.existing_cluster.vpc_config[0].security_group_ids)
+      )
       instance_profile_arn = module.castai_eks_role_iam.instance_profile_arn
     }
   }

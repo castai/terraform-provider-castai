@@ -124,6 +124,8 @@ module "ebs_csi_irsa_role" {
 
 data "aws_eks_cluster" "eks" {
   name = module.eks.cluster_name
+
+  depends_on = [module.eks]
 }
 
 resource "kubernetes_storage_class" "ebs_csi" {

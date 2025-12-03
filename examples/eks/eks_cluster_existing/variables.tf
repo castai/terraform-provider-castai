@@ -44,13 +44,3 @@ variable "tags" {
   description = "Optional tags for new cluster nodes. This parameter applies only to new nodes - tags for old nodes are not reconciled."
   default     = {}
 }
-
-variable "cluster_security_group_id" {
-  type        = string
-  description = "EKS cluster security group ID"
-}
-
-variable "node_security_group_id" {
-  type        = string
-  description = "EKS cluster node security group ID"
-}
