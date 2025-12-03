@@ -6035,6 +6035,46 @@ func (mr *MockClientInterfaceMockRecorder) WorkloadOptimizationAPIAssignScalingP
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIAssignScalingPolicyWorkloadsWithBody", reflect.TypeOf((*MockClientInterface)(nil).WorkloadOptimizationAPIAssignScalingPolicyWorkloadsWithBody), varargs...)
 }
 
+// WorkloadOptimizationAPICreateCustomMetricsConfig mocks base method.
+func (m *MockClientInterface) WorkloadOptimizationAPICreateCustomMetricsConfig(ctx context.Context, clusterId string, body sdk.WorkloadOptimizationAPICreateCustomMetricsConfigJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "WorkloadOptimizationAPICreateCustomMetricsConfig", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// WorkloadOptimizationAPICreateCustomMetricsConfig indicates an expected call of WorkloadOptimizationAPICreateCustomMetricsConfig.
+func (mr *MockClientInterfaceMockRecorder) WorkloadOptimizationAPICreateCustomMetricsConfig(ctx, clusterId, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPICreateCustomMetricsConfig", reflect.TypeOf((*MockClientInterface)(nil).WorkloadOptimizationAPICreateCustomMetricsConfig), varargs...)
+}
+
+// WorkloadOptimizationAPICreateCustomMetricsConfigWithBody mocks base method.
+func (m *MockClientInterface) WorkloadOptimizationAPICreateCustomMetricsConfigWithBody(ctx context.Context, clusterId, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "WorkloadOptimizationAPICreateCustomMetricsConfigWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// WorkloadOptimizationAPICreateCustomMetricsConfigWithBody indicates an expected call of WorkloadOptimizationAPICreateCustomMetricsConfigWithBody.
+func (mr *MockClientInterfaceMockRecorder) WorkloadOptimizationAPICreateCustomMetricsConfigWithBody(ctx, clusterId, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPICreateCustomMetricsConfigWithBody", reflect.TypeOf((*MockClientInterface)(nil).WorkloadOptimizationAPICreateCustomMetricsConfigWithBody), varargs...)
+}
+
 // WorkloadOptimizationAPICreateWorkloadScalingPolicy mocks base method.
 func (m *MockClientInterface) WorkloadOptimizationAPICreateWorkloadScalingPolicy(ctx context.Context, clusterId string, body sdk.WorkloadOptimizationAPICreateWorkloadScalingPolicyJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
@@ -6073,6 +6113,26 @@ func (mr *MockClientInterfaceMockRecorder) WorkloadOptimizationAPICreateWorkload
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{ctx, clusterId, contentType, body}, reqEditors...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPICreateWorkloadScalingPolicyWithBody", reflect.TypeOf((*MockClientInterface)(nil).WorkloadOptimizationAPICreateWorkloadScalingPolicyWithBody), varargs...)
+}
+
+// WorkloadOptimizationAPIDeleteCustomMetricsConfig mocks base method.
+func (m *MockClientInterface) WorkloadOptimizationAPIDeleteCustomMetricsConfig(ctx context.Context, clusterId, id string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, id}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "WorkloadOptimizationAPIDeleteCustomMetricsConfig", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// WorkloadOptimizationAPIDeleteCustomMetricsConfig indicates an expected call of WorkloadOptimizationAPIDeleteCustomMetricsConfig.
+func (mr *MockClientInterfaceMockRecorder) WorkloadOptimizationAPIDeleteCustomMetricsConfig(ctx, clusterId, id interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, id}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIDeleteCustomMetricsConfig", reflect.TypeOf((*MockClientInterface)(nil).WorkloadOptimizationAPIDeleteCustomMetricsConfig), varargs...)
 }
 
 // WorkloadOptimizationAPIDeleteWorkloadScalingPolicy mocks base method.
@@ -6335,6 +6395,26 @@ func (mr *MockClientInterfaceMockRecorder) WorkloadOptimizationAPIGetWorkloadsSu
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIGetWorkloadsSummaryMetrics", reflect.TypeOf((*MockClientInterface)(nil).WorkloadOptimizationAPIGetWorkloadsSummaryMetrics), varargs...)
 }
 
+// WorkloadOptimizationAPIListCustomMetricsConfigs mocks base method.
+func (m *MockClientInterface) WorkloadOptimizationAPIListCustomMetricsConfigs(ctx context.Context, clusterId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "WorkloadOptimizationAPIListCustomMetricsConfigs", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// WorkloadOptimizationAPIListCustomMetricsConfigs indicates an expected call of WorkloadOptimizationAPIListCustomMetricsConfigs.
+func (mr *MockClientInterfaceMockRecorder) WorkloadOptimizationAPIListCustomMetricsConfigs(ctx, clusterId interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIListCustomMetricsConfigs", reflect.TypeOf((*MockClientInterface)(nil).WorkloadOptimizationAPIListCustomMetricsConfigs), varargs...)
+}
+
 // WorkloadOptimizationAPIListLimitRanges mocks base method.
 func (m *MockClientInterface) WorkloadOptimizationAPIListLimitRanges(ctx context.Context, clusterId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
@@ -6553,6 +6633,46 @@ func (mr *MockClientInterfaceMockRecorder) WorkloadOptimizationAPISetScalingPoli
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{ctx, clusterId, contentType, body}, reqEditors...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPISetScalingPoliciesOrderWithBody", reflect.TypeOf((*MockClientInterface)(nil).WorkloadOptimizationAPISetScalingPoliciesOrderWithBody), varargs...)
+}
+
+// WorkloadOptimizationAPIUpdateCustomMetricsConfig mocks base method.
+func (m *MockClientInterface) WorkloadOptimizationAPIUpdateCustomMetricsConfig(ctx context.Context, clusterId, id string, body sdk.WorkloadOptimizationAPIUpdateCustomMetricsConfigJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, id, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "WorkloadOptimizationAPIUpdateCustomMetricsConfig", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// WorkloadOptimizationAPIUpdateCustomMetricsConfig indicates an expected call of WorkloadOptimizationAPIUpdateCustomMetricsConfig.
+func (mr *MockClientInterfaceMockRecorder) WorkloadOptimizationAPIUpdateCustomMetricsConfig(ctx, clusterId, id, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, id, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIUpdateCustomMetricsConfig", reflect.TypeOf((*MockClientInterface)(nil).WorkloadOptimizationAPIUpdateCustomMetricsConfig), varargs...)
+}
+
+// WorkloadOptimizationAPIUpdateCustomMetricsConfigWithBody mocks base method.
+func (m *MockClientInterface) WorkloadOptimizationAPIUpdateCustomMetricsConfigWithBody(ctx context.Context, clusterId, id, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, id, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "WorkloadOptimizationAPIUpdateCustomMetricsConfigWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// WorkloadOptimizationAPIUpdateCustomMetricsConfigWithBody indicates an expected call of WorkloadOptimizationAPIUpdateCustomMetricsConfigWithBody.
+func (mr *MockClientInterfaceMockRecorder) WorkloadOptimizationAPIUpdateCustomMetricsConfigWithBody(ctx, clusterId, id, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, id, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIUpdateCustomMetricsConfigWithBody", reflect.TypeOf((*MockClientInterface)(nil).WorkloadOptimizationAPIUpdateCustomMetricsConfigWithBody), varargs...)
 }
 
 // WorkloadOptimizationAPIUpdateWorkloadScalingPolicy mocks base method.
@@ -17088,6 +17208,76 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) WorkloadOptimizationAPIA
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIAssignScalingPolicyWorkloadsWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).WorkloadOptimizationAPIAssignScalingPolicyWorkloadsWithResponse), ctx, clusterId, policyId, body)
 }
 
+// WorkloadOptimizationAPICreateCustomMetricsConfig mocks base method.
+func (m *MockClientWithResponsesInterface) WorkloadOptimizationAPICreateCustomMetricsConfig(ctx context.Context, clusterId string, body sdk.WorkloadOptimizationAPICreateCustomMetricsConfigJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "WorkloadOptimizationAPICreateCustomMetricsConfig", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// WorkloadOptimizationAPICreateCustomMetricsConfig indicates an expected call of WorkloadOptimizationAPICreateCustomMetricsConfig.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) WorkloadOptimizationAPICreateCustomMetricsConfig(ctx, clusterId, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPICreateCustomMetricsConfig", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).WorkloadOptimizationAPICreateCustomMetricsConfig), varargs...)
+}
+
+// WorkloadOptimizationAPICreateCustomMetricsConfigWithBody mocks base method.
+func (m *MockClientWithResponsesInterface) WorkloadOptimizationAPICreateCustomMetricsConfigWithBody(ctx context.Context, clusterId, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "WorkloadOptimizationAPICreateCustomMetricsConfigWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// WorkloadOptimizationAPICreateCustomMetricsConfigWithBody indicates an expected call of WorkloadOptimizationAPICreateCustomMetricsConfigWithBody.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) WorkloadOptimizationAPICreateCustomMetricsConfigWithBody(ctx, clusterId, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPICreateCustomMetricsConfigWithBody", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).WorkloadOptimizationAPICreateCustomMetricsConfigWithBody), varargs...)
+}
+
+// WorkloadOptimizationAPICreateCustomMetricsConfigWithBodyWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) WorkloadOptimizationAPICreateCustomMetricsConfigWithBodyWithResponse(ctx context.Context, clusterId, contentType string, body io.Reader) (*sdk.WorkloadOptimizationAPICreateCustomMetricsConfigResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "WorkloadOptimizationAPICreateCustomMetricsConfigWithBodyWithResponse", ctx, clusterId, contentType, body)
+	ret0, _ := ret[0].(*sdk.WorkloadOptimizationAPICreateCustomMetricsConfigResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// WorkloadOptimizationAPICreateCustomMetricsConfigWithBodyWithResponse indicates an expected call of WorkloadOptimizationAPICreateCustomMetricsConfigWithBodyWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) WorkloadOptimizationAPICreateCustomMetricsConfigWithBodyWithResponse(ctx, clusterId, contentType, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPICreateCustomMetricsConfigWithBodyWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).WorkloadOptimizationAPICreateCustomMetricsConfigWithBodyWithResponse), ctx, clusterId, contentType, body)
+}
+
+// WorkloadOptimizationAPICreateCustomMetricsConfigWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) WorkloadOptimizationAPICreateCustomMetricsConfigWithResponse(ctx context.Context, clusterId string, body sdk.WorkloadOptimizationAPICreateCustomMetricsConfigJSONRequestBody) (*sdk.WorkloadOptimizationAPICreateCustomMetricsConfigResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "WorkloadOptimizationAPICreateCustomMetricsConfigWithResponse", ctx, clusterId, body)
+	ret0, _ := ret[0].(*sdk.WorkloadOptimizationAPICreateCustomMetricsConfigResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// WorkloadOptimizationAPICreateCustomMetricsConfigWithResponse indicates an expected call of WorkloadOptimizationAPICreateCustomMetricsConfigWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) WorkloadOptimizationAPICreateCustomMetricsConfigWithResponse(ctx, clusterId, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPICreateCustomMetricsConfigWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).WorkloadOptimizationAPICreateCustomMetricsConfigWithResponse), ctx, clusterId, body)
+}
+
 // WorkloadOptimizationAPICreateWorkloadScalingPolicy mocks base method.
 func (m *MockClientWithResponsesInterface) WorkloadOptimizationAPICreateWorkloadScalingPolicy(ctx context.Context, clusterId string, body sdk.WorkloadOptimizationAPICreateWorkloadScalingPolicyJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
@@ -17156,6 +17346,41 @@ func (m *MockClientWithResponsesInterface) WorkloadOptimizationAPICreateWorkload
 func (mr *MockClientWithResponsesInterfaceMockRecorder) WorkloadOptimizationAPICreateWorkloadScalingPolicyWithResponse(ctx, clusterId, body interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPICreateWorkloadScalingPolicyWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).WorkloadOptimizationAPICreateWorkloadScalingPolicyWithResponse), ctx, clusterId, body)
+}
+
+// WorkloadOptimizationAPIDeleteCustomMetricsConfig mocks base method.
+func (m *MockClientWithResponsesInterface) WorkloadOptimizationAPIDeleteCustomMetricsConfig(ctx context.Context, clusterId, id string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, id}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "WorkloadOptimizationAPIDeleteCustomMetricsConfig", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// WorkloadOptimizationAPIDeleteCustomMetricsConfig indicates an expected call of WorkloadOptimizationAPIDeleteCustomMetricsConfig.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) WorkloadOptimizationAPIDeleteCustomMetricsConfig(ctx, clusterId, id interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, id}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIDeleteCustomMetricsConfig", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).WorkloadOptimizationAPIDeleteCustomMetricsConfig), varargs...)
+}
+
+// WorkloadOptimizationAPIDeleteCustomMetricsConfigWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) WorkloadOptimizationAPIDeleteCustomMetricsConfigWithResponse(ctx context.Context, clusterId, id string) (*sdk.WorkloadOptimizationAPIDeleteCustomMetricsConfigResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "WorkloadOptimizationAPIDeleteCustomMetricsConfigWithResponse", ctx, clusterId, id)
+	ret0, _ := ret[0].(*sdk.WorkloadOptimizationAPIDeleteCustomMetricsConfigResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// WorkloadOptimizationAPIDeleteCustomMetricsConfigWithResponse indicates an expected call of WorkloadOptimizationAPIDeleteCustomMetricsConfigWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) WorkloadOptimizationAPIDeleteCustomMetricsConfigWithResponse(ctx, clusterId, id interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIDeleteCustomMetricsConfigWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).WorkloadOptimizationAPIDeleteCustomMetricsConfigWithResponse), ctx, clusterId, id)
 }
 
 // WorkloadOptimizationAPIDeleteWorkloadScalingPolicy mocks base method.
@@ -17613,6 +17838,41 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) WorkloadOptimizationAPIG
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIGetWorkloadsSummaryWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).WorkloadOptimizationAPIGetWorkloadsSummaryWithResponse), ctx, clusterId, params)
 }
 
+// WorkloadOptimizationAPIListCustomMetricsConfigs mocks base method.
+func (m *MockClientWithResponsesInterface) WorkloadOptimizationAPIListCustomMetricsConfigs(ctx context.Context, clusterId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "WorkloadOptimizationAPIListCustomMetricsConfigs", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// WorkloadOptimizationAPIListCustomMetricsConfigs indicates an expected call of WorkloadOptimizationAPIListCustomMetricsConfigs.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) WorkloadOptimizationAPIListCustomMetricsConfigs(ctx, clusterId interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIListCustomMetricsConfigs", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).WorkloadOptimizationAPIListCustomMetricsConfigs), varargs...)
+}
+
+// WorkloadOptimizationAPIListCustomMetricsConfigsWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) WorkloadOptimizationAPIListCustomMetricsConfigsWithResponse(ctx context.Context, clusterId string) (*sdk.WorkloadOptimizationAPIListCustomMetricsConfigsResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "WorkloadOptimizationAPIListCustomMetricsConfigsWithResponse", ctx, clusterId)
+	ret0, _ := ret[0].(*sdk.WorkloadOptimizationAPIListCustomMetricsConfigsResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// WorkloadOptimizationAPIListCustomMetricsConfigsWithResponse indicates an expected call of WorkloadOptimizationAPIListCustomMetricsConfigsWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) WorkloadOptimizationAPIListCustomMetricsConfigsWithResponse(ctx, clusterId interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIListCustomMetricsConfigsWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).WorkloadOptimizationAPIListCustomMetricsConfigsWithResponse), ctx, clusterId)
+}
+
 // WorkloadOptimizationAPIListLimitRanges mocks base method.
 func (m *MockClientWithResponsesInterface) WorkloadOptimizationAPIListLimitRanges(ctx context.Context, clusterId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
@@ -17996,6 +18256,76 @@ func (m *MockClientWithResponsesInterface) WorkloadOptimizationAPISetScalingPoli
 func (mr *MockClientWithResponsesInterfaceMockRecorder) WorkloadOptimizationAPISetScalingPoliciesOrderWithResponse(ctx, clusterId, body interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPISetScalingPoliciesOrderWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).WorkloadOptimizationAPISetScalingPoliciesOrderWithResponse), ctx, clusterId, body)
+}
+
+// WorkloadOptimizationAPIUpdateCustomMetricsConfig mocks base method.
+func (m *MockClientWithResponsesInterface) WorkloadOptimizationAPIUpdateCustomMetricsConfig(ctx context.Context, clusterId, id string, body sdk.WorkloadOptimizationAPIUpdateCustomMetricsConfigJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, id, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "WorkloadOptimizationAPIUpdateCustomMetricsConfig", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// WorkloadOptimizationAPIUpdateCustomMetricsConfig indicates an expected call of WorkloadOptimizationAPIUpdateCustomMetricsConfig.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) WorkloadOptimizationAPIUpdateCustomMetricsConfig(ctx, clusterId, id, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, id, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIUpdateCustomMetricsConfig", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).WorkloadOptimizationAPIUpdateCustomMetricsConfig), varargs...)
+}
+
+// WorkloadOptimizationAPIUpdateCustomMetricsConfigWithBody mocks base method.
+func (m *MockClientWithResponsesInterface) WorkloadOptimizationAPIUpdateCustomMetricsConfigWithBody(ctx context.Context, clusterId, id, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, id, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "WorkloadOptimizationAPIUpdateCustomMetricsConfigWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// WorkloadOptimizationAPIUpdateCustomMetricsConfigWithBody indicates an expected call of WorkloadOptimizationAPIUpdateCustomMetricsConfigWithBody.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) WorkloadOptimizationAPIUpdateCustomMetricsConfigWithBody(ctx, clusterId, id, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, id, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIUpdateCustomMetricsConfigWithBody", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).WorkloadOptimizationAPIUpdateCustomMetricsConfigWithBody), varargs...)
+}
+
+// WorkloadOptimizationAPIUpdateCustomMetricsConfigWithBodyWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) WorkloadOptimizationAPIUpdateCustomMetricsConfigWithBodyWithResponse(ctx context.Context, clusterId, id, contentType string, body io.Reader) (*sdk.WorkloadOptimizationAPIUpdateCustomMetricsConfigResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "WorkloadOptimizationAPIUpdateCustomMetricsConfigWithBodyWithResponse", ctx, clusterId, id, contentType, body)
+	ret0, _ := ret[0].(*sdk.WorkloadOptimizationAPIUpdateCustomMetricsConfigResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// WorkloadOptimizationAPIUpdateCustomMetricsConfigWithBodyWithResponse indicates an expected call of WorkloadOptimizationAPIUpdateCustomMetricsConfigWithBodyWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) WorkloadOptimizationAPIUpdateCustomMetricsConfigWithBodyWithResponse(ctx, clusterId, id, contentType, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIUpdateCustomMetricsConfigWithBodyWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).WorkloadOptimizationAPIUpdateCustomMetricsConfigWithBodyWithResponse), ctx, clusterId, id, contentType, body)
+}
+
+// WorkloadOptimizationAPIUpdateCustomMetricsConfigWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) WorkloadOptimizationAPIUpdateCustomMetricsConfigWithResponse(ctx context.Context, clusterId, id string, body sdk.WorkloadOptimizationAPIUpdateCustomMetricsConfigJSONRequestBody) (*sdk.WorkloadOptimizationAPIUpdateCustomMetricsConfigResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "WorkloadOptimizationAPIUpdateCustomMetricsConfigWithResponse", ctx, clusterId, id, body)
+	ret0, _ := ret[0].(*sdk.WorkloadOptimizationAPIUpdateCustomMetricsConfigResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// WorkloadOptimizationAPIUpdateCustomMetricsConfigWithResponse indicates an expected call of WorkloadOptimizationAPIUpdateCustomMetricsConfigWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) WorkloadOptimizationAPIUpdateCustomMetricsConfigWithResponse(ctx, clusterId, id, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIUpdateCustomMetricsConfigWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).WorkloadOptimizationAPIUpdateCustomMetricsConfigWithResponse), ctx, clusterId, id, body)
 }
 
 // WorkloadOptimizationAPIUpdateWorkloadScalingPolicy mocks base method.
