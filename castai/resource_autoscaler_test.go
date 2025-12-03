@@ -1024,7 +1024,7 @@ func TestAccEKS_ResourceAutoscaler_basic(t *testing.T) {
 		ExternalProviders: map[string]resource.ExternalProvider{
 			"aws": {
 				Source:            "hashicorp/aws",
-				VersionConstraint: "~> 6.0",
+				VersionConstraint: "~> 5.0",
 			},
 		},
 	})
