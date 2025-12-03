@@ -14,6 +14,7 @@ import (
 
 	"github.com/golang/mock/gomock"
 	"github.com/hashicorp/go-cty/cty"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/samber/lo"
@@ -972,6 +973,7 @@ func JSONBytesEqual(a, b []byte) (bool, error) {
 }
 
 func TestAccEKS_ResourceAutoscaler_basic(t *testing.T) {
+	rName := fmt.Sprintf("%v-autoscaler-%v", ResourcePrefix, acctest.RandString(8))
 	clusterName, _ := lo.Coalesce(os.Getenv("CLUSTER_NAME"), "cost-terraform")
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -981,7 +983,7 @@ func TestAccEKS_ResourceAutoscaler_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Step 1: Create autoscaler with initial settings
 			{
-				Config: testAccAutoscalerConfig(clusterName, true, false),
+				Config: testAccAutoscalerConfig(rName, clusterName, true, false),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("castai_autoscaler.test", "autoscaler_settings.0.enabled", "true"),
 					resource.TestCheckResourceAttr("castai_autoscaler.test", "autoscaler_settings.0.is_scoped_mode", "false"),
@@ -997,7 +999,7 @@ func TestAccEKS_ResourceAutoscaler_basic(t *testing.T) {
 			},
 			// Step 2: Update autoscaler settings
 			{
-				Config: testAccAutoscalerConfig(clusterName, false, true),
+				Config: testAccAutoscalerConfig(rName, clusterName, false, true),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("castai_autoscaler.test", "autoscaler_settings.0.enabled", "false"),
 					resource.TestCheckResourceAttr("castai_autoscaler.test", "autoscaler_settings.0.is_scoped_mode", "true"),
@@ -1022,13 +1024,13 @@ func TestAccEKS_ResourceAutoscaler_basic(t *testing.T) {
 		ExternalProviders: map[string]resource.ExternalProvider{
 			"aws": {
 				Source:            "hashicorp/aws",
-				VersionConstraint: "~> 4.0",
+				VersionConstraint: "~> 6.0",
 			},
 		},
 	})
 }
 
-func testAccAutoscalerConfig(clusterName string, enabled bool, updated bool) string {
+func testAccAutoscalerConfig(rName, clusterName string, enabled bool, updated bool) string {
 	isScopedMode := "false"
 	nodeTemplatesPartialMatchingEnabled := "false"
 	unschedulablePodsEnabled := "true"
@@ -1051,7 +1053,7 @@ func testAccAutoscalerConfig(clusterName string, enabled bool, updated bool) str
 		delaySeconds = 300
 	}
 
-	return ConfigCompose(testAccAutoscalerEKSConfig(clusterName), fmt.Sprintf(`
+	return ConfigCompose(testAccEKSClusterConfig(rName, clusterName), fmt.Sprintf(`
 resource "castai_autoscaler" "test" {
   cluster_id = data.castai_eks_clusterid.test.id
 
@@ -1086,20 +1088,4 @@ resource "castai_autoscaler" "test" {
 `, enabled, isScopedMode, nodeTemplatesPartialMatchingEnabled,
 		unschedulablePodsEnabled, clusterLimitsEnabled, minCores, maxCores,
 		nodeDownscalerEnabled, emptyNodesEnabled, delaySeconds))
-}
-
-func testAccAutoscalerEKSConfig(clusterName string) string {
-	return fmt.Sprintf(`
-provider "aws" {
-  region = "eu-central-1"
-}
-
-data "aws_caller_identity" "current" {}
-
-data "castai_eks_clusterid" "test" {
-  account_id   = data.aws_caller_identity.current.account_id
-  region       = "eu-central-1"
-  cluster_name = %q
-}
-`, clusterName)
 }
