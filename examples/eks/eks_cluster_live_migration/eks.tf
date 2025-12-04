@@ -1,14 +1,13 @@
 # 2. Create EKS cluster.
 module "eks" {
-  source       = "terraform-aws-modules/eks/aws"
-  version      = "19.4.2"
-  putin_khuylo = true
+  source  = "terraform-aws-modules/eks/aws"
+  version = "~> 21.0"
 
-  cluster_name                   = var.cluster_name
-  cluster_version                = var.cluster_version
-  cluster_endpoint_public_access = true
+  name                   = var.cluster_name
+  kubernetes_version     = var.cluster_version
+  endpoint_public_access = true
 
-  cluster_addons = {
+  addons = {
     coredns = {
       most_recent = true
     }
@@ -20,7 +19,7 @@ module "eks" {
     }
     aws-ebs-csi-driver = {
       service_account_role_arn = module.ebs_csi_irsa_role.iam_role_arn
-      resolve_conflicts        = "OVERWRITE"
+      most_recent              = true
     }
   }
 
@@ -29,19 +28,7 @@ module "eks" {
   vpc_id     = module.vpc.vpc_id
   subnet_ids = module.vpc.private_subnets
 
-  manage_aws_auth_configmap = true
-
-  aws_auth_roles = [
-    # Add the CAST AI IAM role which required for CAST AI nodes to join the cluster.
-    {
-      rolearn  = module.castai-eks-role-iam[0].instance_profile_role_arn
-      username = "system:node:{{EC2PrivateDNSName}}"
-      groups = [
-        "system:bootstrappers",
-        "system:nodes",
-      ]
-    },
-  ]
+  authentication_mode = "API"
 
   self_managed_node_groups = {
     node_group_1 = {
@@ -99,4 +86,12 @@ resource "aws_security_group" "additional" {
       "10.0.0.0/8",
     ]
   }
+}
+
+# CAST AI access entry for nodes to join the cluster.
+resource "aws_eks_access_entry" "castai" {
+  count         = length(module.castai-eks-role-iam) > 0 ? 1 : 0
+  cluster_name  = module.eks.cluster_name
+  principal_arn = module.castai-eks-role-iam[0].instance_profile_role_arn
+  type          = "EC2_LINUX"
 }

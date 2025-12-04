@@ -1,14 +1,13 @@
 # 2. Create EKS cluster.
 module "eks" {
-  source       = "terraform-aws-modules/eks/aws"
-  version      = "19.4.2"
-  putin_khuylo = true
+  source  = "terraform-aws-modules/eks/aws"
+  version = "~> 21.0"
 
-  cluster_name                   = var.cluster_name
-  cluster_version                = var.cluster_version
-  cluster_endpoint_public_access = true
+  name                   = var.cluster_name
+  kubernetes_version     = var.cluster_version
+  endpoint_public_access = true
 
-  cluster_addons = {
+  addons = {
     coredns = {
       most_recent = true
     }
@@ -23,9 +22,7 @@ module "eks" {
   vpc_id     = module.vpc.vpc_id
   subnet_ids = module.vpc.private_subnets
 
-  # Self managed node groups will not automatically create the aws-auth configmap so we need to.
-  create_aws_auth_configmap = true
-  manage_aws_auth_configmap = true
+  authentication_mode = "API"
 
   self_managed_node_groups = {
     node_group_1 = {
