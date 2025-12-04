@@ -1055,7 +1055,7 @@ func testAccAutoscalerConfig(rName, clusterName string, enabled bool, updated bo
 
 	return ConfigCompose(testAccEKSClusterConfig(rName, clusterName), fmt.Sprintf(`
 resource "castai_autoscaler" "test" {
-  cluster_id = data.castai_eks_clusterid.test.id
+  cluster_id = castai_eks_cluster.test.id
 
   autoscaler_settings {
     enabled                                = %t
