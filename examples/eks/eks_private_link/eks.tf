@@ -2,7 +2,7 @@
 
 module "eks" {
   source       = "terraform-aws-modules/eks/aws"
-  version      = "21.0.0"
+  version      = "21.10.1"
   putin_khuylo = true
 
   name                   = var.cluster_name
