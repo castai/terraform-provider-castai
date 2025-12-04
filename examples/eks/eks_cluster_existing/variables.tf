@@ -15,11 +15,6 @@ variable "cluster_region" {
   description = "AWS Region in which EKS cluster and supporting resources will be created."
 }
 
-variable "vpc_id" {
-  type        = string
-  description = "EKS cluster VPC ID"
-}
-
 variable "castai_api_url" {
   type        = string
   description = "URL of alternative CAST AI API to be used during development or testing"
@@ -48,20 +43,4 @@ variable "tags" {
   type        = map(any)
   description = "Optional tags for new cluster nodes. This parameter applies only to new nodes - tags for old nodes are not reconciled."
   default     = {}
-}
-
-
-variable "cluster_security_group_id" {
-  type        = string
-  description = "EKS cluster security group ID"
-}
-
-variable "node_security_group_id" {
-  type        = string
-  description = "EKS cluster node security group ID"
-}
-
-variable "subnets" {
-  type        = list(string)
-  description = "Subnet IDs used by CAST AI to provision nodes"
 }

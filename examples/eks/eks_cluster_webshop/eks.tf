@@ -1,54 +1,50 @@
+locals {
+  eks_node_group_common = {
+    ami_type              = "AL2_x86_64"
+    disk_size             = 50
+    root_volume_type      = "gp2"
+    create_security_group = false
+  }
+}
+
 #2. create EKS cluster
 module "eks" {
-  source  = "terraform-aws-modules/eks/aws"
-  version = "18.31.1"
+  source       = "terraform-aws-modules/eks/aws"
+  version      = "21.10.1"
+  putin_khuylo = true
 
-  cluster_name    = var.cluster_name
-  cluster_version = "1.23"
+  name                   = var.cluster_name
+  kubernetes_version     = "1.23"
+  endpoint_public_access = true
 
   vpc_id     = module.vpc.vpc_id
   subnet_ids = module.vpc.private_subnets
 
-  cluster_endpoint_private_access = true
-  cluster_endpoint_public_access  = true
+  enable_cluster_creator_admin_permissions = true
+  authentication_mode                      = "API_AND_CONFIG_MAP"
 
-  eks_managed_node_group_defaults = {
-    ami_type  = "AL2_x86_64"
-    disk_size = 50
-  }
-
-  self_managed_node_group_defaults = {
-    root_volume_type      = "gp2"
-    create_security_group = false
-  }
-  cluster_addons = {
-    coredns = {
-      resolve_conflicts = "OVERWRITE"
-    }
+  addons = {
+    coredns    = {}
     kube-proxy = {}
-    vpc-cni = {
-      resolve_conflicts = "OVERWRITE"
-    }
+    vpc-cni    = {}
     aws-ebs-csi-driver = {
       service_account_role_arn = module.ebs_csi_irsa_role.iam_role_arn
-      resolve_conflicts        = "OVERWRITE"
     }
   }
 
-
   self_managed_node_groups = {
-    default_node_group = {}
-    worker-group-1 = {
+    default_node_group = merge(local.eks_node_group_common, {})
+    worker-group-1 = merge(local.eks_node_group_common, {
       instance_type = "t3.medium"
       max_size      = 5
       min_size      = 3
       desired_size  = 3
       eni_delete    = "true"
-    },
+    })
   }
 
   # Extend cluster security group rules
-  cluster_security_group_additional_rules = {
+  security_group_additional_rules = {
     egress_nodes_ephemeral_ports_tcp = {
       description                = "To node 1025-65535"
       protocol                   = "tcp"
@@ -95,11 +91,33 @@ module "eks" {
       description                   = "Allow access from control plane to webhook port of nginx-ingress controller"
     }
   }
+}
 
-  aws_auth_roles = local.aws_auth_roles
+# Add the CAST AI IAM role which is required for CAST AI nodes to join the cluster.
+resource "aws_eks_access_entry" "castai" {
+  cluster_name  = module.eks.cluster_name
+  principal_arn = module.castai-eks-role-iam.instance_profile_role_arn
+  type          = "EC2_LINUX"
+}
 
-  create_aws_auth_configmap = true
-  manage_aws_auth_configmap = true
+# Add additional admin role if specified
+resource "aws_eks_access_entry" "admin" {
+  count         = var.eks_user_role_arn != null ? 1 : 0
+  cluster_name  = module.eks.cluster_name
+  principal_arn = var.eks_user_role_arn
+}
+
+resource "aws_eks_access_policy_association" "admin" {
+  count         = var.eks_user_role_arn != null ? 1 : 0
+  cluster_name  = module.eks.cluster_name
+  principal_arn = var.eks_user_role_arn
+  policy_arn    = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
+
+  access_scope {
+    type = "cluster"
+  }
+
+  depends_on = [aws_eks_access_entry.admin]
 }
 
 module "ebs_csi_irsa_role" {
@@ -118,7 +136,9 @@ module "ebs_csi_irsa_role" {
 }
 
 data "aws_eks_cluster" "eks" {
-  name = module.eks.cluster_id
+  name = module.eks.cluster_name
+
+  depends_on = [module.eks]
 }
 
 resource "kubernetes_storage_class" "ebs_csi" {
@@ -128,18 +148,4 @@ resource "kubernetes_storage_class" "ebs_csi" {
   storage_provisioner = "ebs.csi.aws.com"
   reclaim_policy      = "Retain"
   volume_binding_mode = "WaitForFirstConsumer"
-}
-
-locals {
-  aws_auth_roles_cast = {
-    rolearn  = module.castai-eks-role-iam.instance_profile_role_arn
-    username = "system:node:{{EC2PrivateDNSName}}"
-    groups   = ["system:bootstrappers", "system:nodes"]
-  }
-
-  aws_auth_roles = concat([local.aws_auth_roles_cast], var.eks_user_role_arn != null ? [{
-    rolearn  = var.eks_user_role_arn,
-    username = "admin"
-    groups   = ["system:masters"]
-  }] : [])
 }
