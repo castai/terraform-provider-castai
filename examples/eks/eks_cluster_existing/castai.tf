@@ -23,7 +23,7 @@ resource "aws_eks_access_entry" "access_entry" {
 # Create AWS IAM policies and a user to connect to CAST AI.
 module "castai-eks-role-iam" {
   source  = "castai/eks-role-iam/castai"
-  version = "~> 2.0"
+  version = "1.3.0"
 
   aws_account_id     = data.aws_caller_identity.current.account_id
   aws_cluster_region = var.cluster_region
@@ -44,7 +44,7 @@ resource "castai_eks_clusterid" "cluster_id" {
 
 module "castai-eks-cluster" {
   source  = "castai/eks-cluster/castai"
-  version = "~> 13.0"
+  version = "13.6.2"
 
   api_url                = var.castai_api_url
   castai_api_token       = var.castai_api_token

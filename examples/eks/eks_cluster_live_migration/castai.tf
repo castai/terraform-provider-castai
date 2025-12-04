@@ -15,7 +15,7 @@ resource "castai_eks_user_arn" "castai_user_arn" {
 # Create AWS IAM policies and a user to connect to CAST AI.
 module "castai-eks-role-iam" {
   source  = "castai/eks-role-iam/castai"
-  version = "~> 2.0"
+  version = "1.3.0"
   count   = var.enable_castai ? 1 : 0
 
   aws_account_id     = data.aws_caller_identity.current.account_id

@@ -51,7 +51,7 @@ resource "castai_eks_user_arn" "castai_user_arn" {
 
 module "castai-eks-role-iam" {
   source  = "castai/eks-role-iam/castai"
-  version = "~> 2.0"
+  version = "1.3.0"
 
   aws_account_id     = data.aws_caller_identity.current.account_id
   aws_cluster_region = var.cluster_region
@@ -65,7 +65,7 @@ module "castai-eks-role-iam" {
 
 module "castai-eks-cluster" {
   source  = "castai/eks-cluster/castai"
-  version = "~> 12.0"
+  version = "13.6.2"
 
   api_url = var.castai_api_url
 
