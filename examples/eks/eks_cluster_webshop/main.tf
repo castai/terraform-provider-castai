@@ -36,7 +36,7 @@ provider "kubectl" {
 data "aws_caller_identity" "current" {}
 
 data "aws_eks_cluster_auth" "eks" {
-  name = module.eks.cluster_id
+  name = module.eks.cluster_name
 }
 
 resource "castai_eks_clusterid" "cluster_id" {
@@ -71,7 +71,7 @@ module "castai-eks-cluster" {
 
   aws_account_id      = data.aws_caller_identity.current.account_id
   aws_cluster_region  = var.cluster_region
-  aws_cluster_name    = module.eks.cluster_id
+  aws_cluster_name    = module.eks.cluster_name
   aws_assume_role_arn = module.castai-eks-role-iam.role_arn
 
   default_node_configuration = module.castai-eks-cluster.castai_node_configurations["default"]

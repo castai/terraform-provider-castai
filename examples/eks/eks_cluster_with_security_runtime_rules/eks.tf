@@ -1,15 +1,14 @@
 # 2. Create EKS cluster.
 
 module "eks" {
-  source       = "terraform-aws-modules/eks/aws"
-  version      = "19.4.2"
-  putin_khuylo = true
+  source  = "terraform-aws-modules/eks/aws"
+  version = "~> 21.0"
 
-  cluster_name                   = var.cluster_name
-  cluster_version                = var.cluster_version
-  cluster_endpoint_public_access = true
+  name                   = var.cluster_name
+  kubernetes_version     = var.cluster_version
+  endpoint_public_access = true
 
-  cluster_addons = {
+  addons = {
     coredns = {
       most_recent = true
     }
@@ -32,18 +31,13 @@ module "eks" {
     }
   }
 
-  manage_aws_auth_configmap = true
+  authentication_mode                      = "API_AND_CONFIG_MAP"
+  enable_cluster_creator_admin_permissions = true
+}
 
-  aws_auth_roles = [
-    # Add the CAST AI IAM role which required for CAST AI nodes to join the cluster.
-    {
-      rolearn  = module.castai-eks-role-iam.instance_profile_role_arn
-      username = "system:node:{{EC2PrivateDNSName}}"
-      groups = [
-        "system:bootstrappers",
-        "system:nodes",
-      ]
-    }
-  ]
-
+# CAST AI access entry for nodes to join the cluster.
+resource "aws_eks_access_entry" "castai" {
+  cluster_name  = module.eks.cluster_name
+  principal_arn = module.castai-eks-role-iam.instance_profile_role_arn
+  type          = "EC2_LINUX"
 }
