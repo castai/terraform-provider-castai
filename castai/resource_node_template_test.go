@@ -363,6 +363,101 @@ func Test_flattenNodeAffinity(t *testing.T) {
 	}
 }
 
+func Test_flattenPriceAdjustmentConfiguration(t *testing.T) {
+	tt := []struct {
+		name  string
+		input *sdk.NodetemplatesV1PriceAdjustmentConfiguration
+		want  []map[string]any
+	}{
+		{
+			name:  "nil input returns nil",
+			input: nil,
+			want:  nil,
+		},
+		{
+			name:  "empty configuration",
+			input: &sdk.NodetemplatesV1PriceAdjustmentConfiguration{},
+			want:  []map[string]any{{}},
+		},
+		{
+			name: "configuration with adjustments",
+			input: &sdk.NodetemplatesV1PriceAdjustmentConfiguration{
+				InstanceTypeAdjustments: &map[string]string{
+					"r7a.xlarge":  "1.0",
+					"r7i.xlarge":  "1.20",
+					"c6a.xlarge":  "0.90",
+				},
+			},
+			want: []map[string]any{
+				{
+					FieldNodeTemplateInstanceTypeAdjustments: map[string]string{
+						"r7a.xlarge":  "1.0",
+						"r7i.xlarge":  "1.20",
+						"c6a.xlarge":  "0.90",
+					},
+				},
+			},
+		},
+	}
+
+	for _, tc := range tt {
+		t.Run(tc.name, func(t *testing.T) {
+			r := require.New(t)
+			got := flattenPriceAdjustmentConfiguration(tc.input)
+			r.Equal(tc.want, got)
+		})
+	}
+}
+
+func Test_toPriceAdjustmentConfiguration(t *testing.T) {
+	tt := []struct {
+		name  string
+		input map[string]any
+		want  *sdk.NodetemplatesV1PriceAdjustmentConfiguration
+	}{
+		{
+			name:  "nil input returns nil",
+			input: nil,
+			want:  nil,
+		},
+		{
+			name:  "empty map returns empty configuration",
+			input: map[string]any{},
+			want:  &sdk.NodetemplatesV1PriceAdjustmentConfiguration{},
+		},
+		{
+			name: "map with adjustments",
+			input: map[string]any{
+				FieldNodeTemplateInstanceTypeAdjustments: map[string]any{
+					"r7a.xlarge": "1.0",
+					"r7i.xlarge": "1.20",
+				},
+			},
+			want: &sdk.NodetemplatesV1PriceAdjustmentConfiguration{
+				InstanceTypeAdjustments: &map[string]string{
+					"r7a.xlarge": "1.0",
+					"r7i.xlarge": "1.20",
+				},
+			},
+		},
+		{
+			name: "empty adjustments map",
+			input: map[string]any{
+				FieldNodeTemplateInstanceTypeAdjustments: map[string]any{},
+			},
+			want: &sdk.NodetemplatesV1PriceAdjustmentConfiguration{},
+		},
+	}
+
+	for _, tc := range tt {
+		t.Run(tc.name, func(t *testing.T) {
+			r := require.New(t)
+			got := toPriceAdjustmentConfiguration(tc.input)
+			r.Equal(tc.want, got)
+		})
+	}
+}
+
 func TestNodeTemplateResourceReadContextEmptyList(t *testing.T) {
 	r := require.New(t)
 	mockctrl := gomock.NewController(t)
@@ -699,6 +794,11 @@ func TestAccEKS_ResourceNodeTemplate_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "edge_location_ids.#", "2"),
 					resource.TestCheckResourceAttrSet(resourceName, "edge_location_ids.0"),
 					resource.TestCheckResourceAttrSet(resourceName, "edge_location_ids.1"),
+					resource.TestCheckResourceAttr(resourceName, "price_adjustment_configuration.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "price_adjustment_configuration.0.instance_type_adjustments.%", "3"),
+					resource.TestCheckResourceAttr(resourceName, "price_adjustment_configuration.0.instance_type_adjustments.m5.xlarge", "1.0"),
+					resource.TestCheckResourceAttr(resourceName, "price_adjustment_configuration.0.instance_type_adjustments.m5.2xlarge", "1.10"),
+					resource.TestCheckResourceAttr(resourceName, "price_adjustment_configuration.0.instance_type_adjustments.c5.xlarge", "0.95"),
 				),
 			},
 			{
@@ -781,6 +881,10 @@ func TestAccEKS_ResourceNodeTemplate_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "gpu.0.enable_time_sharing", "false"),
 					resource.TestCheckResourceAttr(resourceName, "edge_location_ids.#", "1"),
 					resource.TestCheckResourceAttrSet(resourceName, "edge_location_ids.0"),
+					resource.TestCheckResourceAttr(resourceName, "price_adjustment_configuration.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "price_adjustment_configuration.0.instance_type_adjustments.%", "2"),
+					resource.TestCheckResourceAttr(resourceName, "price_adjustment_configuration.0.instance_type_adjustments.m5.xlarge", "1.05"),
+					resource.TestCheckResourceAttr(resourceName, "price_adjustment_configuration.0.instance_type_adjustments.r5.xlarge", "0.90"),
 				),
 			},
 		},
@@ -829,6 +933,14 @@ func testAccNodeTemplateConfig(rName, clusterName string) string {
 			}
 
 			edge_location_ids = [castai_edge_location.test_1.id, castai_edge_location.test_2.id]
+
+			price_adjustment_configuration {
+				instance_type_adjustments = {
+					"m5.xlarge"  = "1.0"
+					"m5.2xlarge" = "1.10"
+					"c5.xlarge"  = "0.95"
+				}
+			}
 
 			constraints {
 				fallback_restore_rate_seconds = 1800
@@ -972,6 +1084,13 @@ func testNodeTemplateUpdated(rName, clusterName string) string {
 			}
 
 			edge_location_ids = [castai_edge_location.test_2.id]
+
+			price_adjustment_configuration {
+				instance_type_adjustments = {
+					"m5.xlarge"   = "1.05"
+					"r5.xlarge"   = "0.90"
+				}
+			}
 
 			constraints {
 				use_spot_fallbacks = true
