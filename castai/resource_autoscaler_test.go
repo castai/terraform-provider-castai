@@ -976,7 +976,7 @@ func TestAccEKS_ResourceAutoscaler_basic(t *testing.T) {
 	rName := fmt.Sprintf("%v-autoscaler-%v", ResourcePrefix, acctest.RandString(8))
 	clusterName, _ := lo.Coalesce(os.Getenv("CLUSTER_NAME"), "cost-terraform")
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck: func() { testAccPreCheck(t) },
 
 		ProviderFactories: providerFactories,
