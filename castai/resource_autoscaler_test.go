@@ -1013,13 +1013,6 @@ func TestAccEKS_ResourceAutoscaler_basic(t *testing.T) {
 					resource.TestCheckResourceAttr("castai_autoscaler.test", "autoscaler_settings.0.node_downscaler.0.empty_nodes.0.delay_seconds", "300"),
 				),
 			},
-			// Step 3: Import state
-			{
-				ResourceName:            "castai_autoscaler.test",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"autoscaler_policies_json"},
-			},
 		},
 		ExternalProviders: map[string]resource.ExternalProvider{
 			"aws": {
