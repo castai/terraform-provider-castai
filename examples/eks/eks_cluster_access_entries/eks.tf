@@ -27,7 +27,8 @@ module "eks" {
   vpc_id     = module.vpc.vpc_id
   subnet_ids = module.vpc.private_subnets
 
-  authentication_mode = "API"
+  authentication_mode                      = "API_AND_CONFIG_MAP"
+  enable_cluster_creator_admin_permissions = true
 
   access_entries = {
     for key, arn in var.additional_cluster_admin_arns :

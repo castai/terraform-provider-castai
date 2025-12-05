@@ -22,7 +22,8 @@ module "eks" {
   vpc_id     = module.vpc.vpc_id
   subnet_ids = module.vpc.private_subnets
 
-  authentication_mode = "API"
+  authentication_mode                      = "API_AND_CONFIG_MAP"
+  enable_cluster_creator_admin_permissions = true
 
   self_managed_node_groups = {
     node_group_1 = {
@@ -31,6 +32,12 @@ module "eks" {
       max_size      = 5
       min_size      = 2
       desired_size  = 2
+
+      metadata_options = {
+        http_endpoint               = "enabled"
+        http_tokens                 = "required"
+        http_put_response_hop_limit = 2
+      }
     }
   }
 

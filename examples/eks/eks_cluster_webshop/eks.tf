@@ -12,6 +12,8 @@ module "eks" {
   endpoint_private_access = true
   endpoint_public_access  = true
 
+  enable_cluster_creator_admin_permissions = true
+
   addons = {
     coredns = {
       most_recent = true
@@ -89,7 +91,7 @@ module "eks" {
     }
   }
 
-  authentication_mode = "API"
+  authentication_mode = "API_AND_CONFIG_MAP"
 
   access_entries = var.eks_user_role_arn != null ? {
     admin = {
