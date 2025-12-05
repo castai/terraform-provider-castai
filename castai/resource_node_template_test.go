@@ -627,7 +627,7 @@ func TestAccEKS_ResourceNodeTemplate_basic(t *testing.T) {
 	resourceName := "castai_node_template.test"
 	clusterName, _ := lo.Coalesce(os.Getenv("CLUSTER_NAME"), "cost-terraform")
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
 		CheckDestroy:             testAccCheckNodeTemplateDestroy(rName),
