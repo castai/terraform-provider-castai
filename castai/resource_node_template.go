@@ -88,6 +88,8 @@ const (
 	FieldNodeTemplateSharedGpuName                            = "gpu_name"
 	FieldNodeTemplateClmEnabled                               = "clm_enabled"
 	FieldNodeTemplateEdgeLocationIDs                          = "edge_location_ids"
+	FieldNodeTemplatePriceAdjustmentConfiguration             = "price_adjustment_configuration"
+	FieldNodeTemplateInstanceTypeAdjustments                  = "instance_type_adjustments"
 )
 
 const (
@@ -719,6 +721,24 @@ func resourceNodeTemplate() *schema.Resource {
 				},
 				Description: "List of edge location IDs to associate with this node template. Must be valid UUIDs referencing castai_edge_location resources.",
 			},
+			FieldNodeTemplatePriceAdjustmentConfiguration: {
+				Type:        schema.TypeList,
+				MaxItems:    1,
+				Optional:    true,
+				Description: "Configuration for adjusting instance type prices during autoscaling. Adjustments only affect placement decisions, not cost reporting.",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						FieldNodeTemplateInstanceTypeAdjustments: {
+							Type:     schema.TypeMap,
+							Optional: true,
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
+							},
+							Description: "Map of instance type names to price adjustment multipliers (as strings). Example: {\"r7a.xlarge\": \"1.0\", \"r7i.xlarge\": \"1.20\"}",
+						},
+					},
+				},
+			},
 		},
 	}
 }
@@ -814,7 +834,27 @@ func resourceNodeTemplateRead(ctx context.Context, d *schema.ResourceData, meta 
 		}
 	}
 
+	if nodeTemplate.PriceAdjustmentConfiguration != nil {
+		priceAdjustment := flattenPriceAdjustmentConfiguration(nodeTemplate.PriceAdjustmentConfiguration)
+		if err := d.Set(FieldNodeTemplatePriceAdjustmentConfiguration, priceAdjustment); err != nil {
+			return diag.FromErr(fmt.Errorf("setting price adjustment configuration: %w", err))
+		}
+	}
+
 	return nil
+}
+
+func flattenPriceAdjustmentConfiguration(pac *sdk.NodetemplatesV1PriceAdjustmentConfiguration) []map[string]any {
+	if pac == nil {
+		return nil
+	}
+
+	out := make(map[string]any)
+	if pac.InstanceTypeAdjustments != nil {
+		out[FieldNodeTemplateInstanceTypeAdjustments] = *pac.InstanceTypeAdjustments
+	}
+
+	return []map[string]any{out}
 }
 
 func flattenGpuSettings(g *sdk.NodetemplatesV1GPU) ([]map[string]any, error) {
@@ -1123,6 +1163,7 @@ func updateNodeTemplate(ctx context.Context, d *schema.ResourceData, meta any, s
 		FieldNodeTemplateSharedClientsPerGpu,
 		FieldNodeTemplateClmEnabled,
 		FieldNodeTemplateEdgeLocationIDs,
+		FieldNodeTemplatePriceAdjustmentConfiguration,
 	) {
 		log.Printf("[INFO] Nothing to update in node template")
 		return nil
@@ -1202,6 +1243,12 @@ func updateNodeTemplate(ctx context.Context, d *schema.ResourceData, meta any, s
 
 	if v, ok := d.Get(FieldNodeTemplateEdgeLocationIDs).([]any); ok && len(v) > 0 {
 		req.EdgeLocationIds = toPtr(toStringList(v))
+	}
+
+	if v, ok := d.Get(FieldNodeTemplatePriceAdjustmentConfiguration).([]any); ok && len(v) > 0 {
+		req.PriceAdjustmentConfiguration = toPriceAdjustmentConfiguration(v[0].(map[string]any))
+	} else if d.HasChange(FieldNodeTemplatePriceAdjustmentConfiguration) {
+		req.PriceAdjustmentConfiguration = &sdk.NodetemplatesV1PriceAdjustmentConfiguration{}
 	}
 
 	resp, err := client.NodeTemplatesAPIUpdateNodeTemplateWithResponse(ctx, clusterID, name, req)
@@ -1284,6 +1331,10 @@ func resourceNodeTemplateCreate(ctx context.Context, d *schema.ResourceData, met
 
 	if v, ok := d.Get(FieldNodeTemplateGpu).([]any); ok && len(v) > 0 {
 		req.Gpu = toTemplateGpu(v[0].(map[string]any))
+	}
+
+	if v, ok := d.Get(FieldNodeTemplatePriceAdjustmentConfiguration).([]any); ok && len(v) > 0 {
+		req.PriceAdjustmentConfiguration = toPriceAdjustmentConfiguration(v[0].(map[string]any))
 	}
 
 	resp, err := client.NodeTemplatesAPICreateNodeTemplateWithResponse(ctx, clusterID, req)
@@ -1786,6 +1837,23 @@ func toTemplateConstraintsNodeAffinity(o map[string]any) *sdk.NodetemplatesV1Tem
 	}
 
 	return &out
+}
+
+func toPriceAdjustmentConfiguration(obj map[string]any) *sdk.NodetemplatesV1PriceAdjustmentConfiguration {
+	if obj == nil {
+		return nil
+	}
+
+	out := &sdk.NodetemplatesV1PriceAdjustmentConfiguration{}
+	if v, ok := obj[FieldNodeTemplateInstanceTypeAdjustments].(map[string]any); ok && len(v) > 0 {
+		adjustments := make(map[string]string)
+		for k, val := range v {
+			adjustments[k] = val.(string)
+		}
+		out.InstanceTypeAdjustments = &adjustments
+	}
+
+	return out
 }
 
 // compareLists compares state of two lists
