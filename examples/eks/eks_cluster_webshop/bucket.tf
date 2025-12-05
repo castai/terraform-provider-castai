@@ -39,11 +39,6 @@ resource "aws_s3_bucket_versioning" "versioning" {
   }
 }
 
-resource "aws_s3_bucket_acl" "example" {
-  bucket = aws_s3_bucket.chunks.id
-  acl    = "private"
-}
-
 module "eks_iam_role_s3" {
   source = "cloudposse/eks-iam-role/aws"
 
