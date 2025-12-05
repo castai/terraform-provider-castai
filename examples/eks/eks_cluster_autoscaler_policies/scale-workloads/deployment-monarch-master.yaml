@@ -1,4 +1,4 @@
-# monarch-master - Driver deployment (on-demand nodes)
+# CAST AI Node Template: hyperscale_spot
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -30,5 +30,5 @@ spec:
       nodeSelector:
         spark-nodeselect-instance-type: amd64-64-16
         spark-nodeselect-nodepool-group: hyper
-        spark-nodeselect-preemptible: "false"
+        spark-nodeselect-preemptible: "true"
       terminationGracePeriodSeconds: 10

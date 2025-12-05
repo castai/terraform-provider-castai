@@ -1,4 +1,4 @@
-# monarch-accumall - ACCUMALL phase workers (spot nodes)
+# CAST AI Node Template: hyperscale_spot 
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -24,9 +24,9 @@ spec:
         image: nginx:latest
         resources:
           requests:
-            cpu: "12800m"
-            memory: "44800Mi"
-            ephemeral-storage: "4Mi"
+            cpu: "2"
+            memory: "4Gi"
+            ephemeral-storage: "16Mi"
       nodeSelector:
         spark-nodeselect-instance-type: amd64-64-16
         spark-nodeselect-nodepool-group: hyper

@@ -52,9 +52,9 @@ module "eks" {
   eks_managed_node_groups = {
     node_group_spot = {
       name         = "${var.cluster_name}-spot"
-      min_size     = 3
+      min_size     = 1
       max_size     = 10
-      desired_size = 4
+      desired_size = 1
 
       instance_types = ["t3.large"]
       capacity_type  = "SPOT"

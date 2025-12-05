@@ -80,6 +80,7 @@ module "castai-eks-cluster" {
         aws_security_group.additional.id,
       ]
       instance_profile_arn = module.castai-eks-role-iam.instance_profile_arn
+      min_disk_size        = 30
     }
 
     hyperscale = {
@@ -91,6 +92,7 @@ module "castai-eks-cluster" {
         aws_security_group.additional.id,
       ]
       instance_profile_arn = module.castai-eks-role-iam.instance_profile_arn
+      min_disk_size        = 30
     }
 
     infra = {
@@ -102,6 +104,7 @@ module "castai-eks-cluster" {
         aws_security_group.additional.id,
       ]
       instance_profile_arn = module.castai-eks-role-iam.instance_profile_arn
+      min_disk_size        = 30
     }
   }
 
@@ -115,7 +118,6 @@ module "castai-eks-cluster" {
       should_taint       = false
 
       custom_labels = {
-        "cloud.google.com/gke-nodepool"   = "default-pool"
         "spark-nodeselect-instance-type"  = "amd64-64-16"
         "spark-nodeselect-nodepool-group" = "hyper"
         "spark-nodeselect-preemptible"    = "false"
@@ -127,10 +129,10 @@ module "castai-eks-cluster" {
         use_spot_fallbacks = false
 
         instance_families = {
-          include = ["c5a", "c5ad", "c6a", "c7a", "m5a", "m5ad", "m6a", "m7a", "m8a", "r5a", "r5ad", "r6a", "r7a", "r8a"]
         }
 
         architectures = ["amd64"]
+        max_cpu       = 8
       }
     }
 
@@ -148,6 +150,49 @@ module "castai-eks-cluster" {
         use_spot_fallbacks = false
 
         architectures = ["amd64", "arm64"]
+        max_cpu       = 8
+        instance_families = {
+          exclude = [
+            "dl1",
+            "dl2q",
+            "f1",
+            "f2",
+            "g2",
+            "g3",
+            "g3s",
+            "g4ad",
+            "g4dn",
+            "g5",
+            "g5g",
+            "g6",
+            "g6e",
+            "g6f",
+            "gr6",
+            "gr6f",
+            "vt1",
+            "inf1",
+            "inf2",
+            "p4d",
+            "p4de",
+            "p3",
+            "p3dn",
+            "p2",
+            "p5",
+            "p5e",
+            "p5en",
+            "trn1",
+            "trn1n",
+            "trn2",
+            "x1",
+            "x1e",
+            "x2gd",
+            "x2idn",
+            "x2iedn",
+            "x2iezn",
+            "x8aedz",
+            "x8g",
+          ]
+        }
       }
     }
 
@@ -170,6 +215,49 @@ module "castai-eks-cluster" {
         use_spot_fallbacks = false
 
         architectures = ["amd64"]
+        max_cpu       = 8
+        instance_families = {
+          exclude = [
+            "dl1",
+            "dl2q",
+            "f1",
+            "f2",
+            "g2",
+            "g3",
+            "g3s",
+            "g4ad",
+            "g4dn",
+            "g5",
+            "g5g",
+            "g6",
+            "g6e",
+            "g6f",
+            "gr6",
+            "gr6f",
+            "vt1",
+            "inf1",
+            "inf2",
+            "p4d",
+            "p4de",
+            "p3",
+            "p3dn",
+            "p2",
+            "p5",
+            "p5e",
+            "p5en",
+            "trn1",
+            "trn1n",
+            "trn2",
+            "x1",
+            "x1e",
+            "x2gd",
+            "x2idn",
+            "x2iedn",
+            "x2iezn",
+            "x8aedz",
+            "x8g",
+          ]
+        }
       }
     }
 
@@ -193,6 +281,52 @@ module "castai-eks-cluster" {
         architectures = ["amd64"]
 
         cpu_manufacturers = ["AMD", "INTEL"]
+        max_cpu           = 8
+
+        instance_families = {
+          exclude = [
+            "dl1",
+            "dl2q",
+            "f1",
+            "f2",
+            "g2",
+            "g3",
+            "g3s",
+            "g4ad",
+            "g4dn",
+            "g5",
+            "g5g",
+            "g6",
+            "g6e",
+            "g6f",
+            "gr6",
+            "gr6f",
+            "vt1",
+            "inf1",
+            "inf2",
+            "p4d",
+            "p4de",
+            "p3",
+            "p3dn",
+            "p2",
+            "p5",
+            "p5e",
+            "p5en",
+            "trn1",
+            "trn1n",
+            "trn2",
+            "x1",
+            "x1e",
+            "x2gd",
+            "x2idn",
+            "x2iedn",
+            "x2iezn",
+            "x8aedz",
+            "x8g",
+          ]
+        }
+
+
       }
     }
 
@@ -213,17 +347,57 @@ module "castai-eks-cluster" {
       constraints = {
         on_demand          = false
         spot               = true
-        use_spot_fallbacks = false
+        use_spot_fallbacks = true
 
         spot_interruption_predictions_enabled = true
 
         instance_families = {
-          include = ["c5a", "c5ad", "c6a", "c7a", "m5a", "m5ad", "m6a", "m7a", "m8a", "r5a", "r5ad", "r6a", "r7a", "r8a"]
+          exclude = [
+            "dl1",
+            "dl2q",
+            "f1",
+            "f2",
+            "g2",
+            "g3",
+            "g3s",
+            "g4ad",
+            "g4dn",
+            "g5",
+            "g5g",
+            "g6",
+            "g6e",
+            "g6f",
+            "gr6",
+            "gr6f",
+            "vt1",
+            "inf1",
+            "inf2",
+            "p4d",
+            "p4de",
+            "p3",
+            "p3dn",
+            "p2",
+            "p5",
+            "p5e",
+            "p5en",
+            "trn1",
+            "trn1n",
+            "trn2",
+            "x1",
+            "x1e",
+            "x2gd",
+            "x2idn",
+            "x2iedn",
+            "x2iezn",
+            "x8aedz",
+            "x8g",
+          ]
         }
 
         architectures = ["amd64"]
 
-        cpu_manufacturers = ["AMD"]
+        cpu_manufacturers = ["AMD", "INTEL"]
+        max_cpu           = 8
       }
     }
   }
@@ -258,7 +432,7 @@ module "castai-eks-cluster" {
       enabled = true
 
       cpu = {
-        max_cores = 20000
+        max_cores = 300000
         min_cores = 1
       }
     }
@@ -269,40 +443,3 @@ module "castai-eks-cluster" {
   depends_on = [module.castai-eks-role-iam]
 }
 
-resource "castai_rebalancing_schedule" "spots" {
-  name = "spot-${var.cluster_name}"
-  schedule {
-    cron = "*/30 * * * *"
-  }
-  trigger_conditions {
-    savings_percentage = 20
-  }
-  launch_configuration {
-    # only consider instances older than 5 minutes
-    node_ttl_seconds         = 300
-    num_targeted_nodes       = 3
-    rebalancing_min_nodes    = 2
-    keep_drain_timeout_nodes = false
-    selector = jsonencode({
-      nodeSelectorTerms = [{
-        matchExpressions = [
-          {
-            key      = "scheduling.cast.ai/spot"
-            operator = "Exists"
-          }
-        ]
-      }]
-    })
-    execution_conditions {
-      enabled                     = true
-      achieved_savings_percentage = 10
-    }
-  }
-}
-
-resource "castai_rebalancing_job" "spots" {
-  cluster_id              = castai_eks_clusterid.cluster_id.id
-  rebalancing_schedule_id = castai_rebalancing_schedule.spots.id
-  enabled                 = true
-  depends_on              = [module.castai-eks-cluster]
-}
