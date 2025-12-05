@@ -1,0 +1,42 @@
+# Production-specific cluster agent values
+
+apiKey: ""  # Managed by Sealed Secrets or External Secrets Operator
+clusterID: "prod-cluster-12345"
+
+provider: eks
+region: us-east-1
+
+# Production resource allocations
+resources:
+  requests:
+    cpu: 200m
+    memory: 256Mi
+  limits:
+    cpu: 2000m
+    memory: 1Gi
+
+# High availability for production
+replicaCount: 3
+
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 2
+
+# Anti-affinity for pod distribution
+affinity:
+  podAntiAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      - labelSelector:
+          matchExpressions:
+            - key: app
+              operator: In
+              values:
+                - castai-agent
+        topologyKey: kubernetes.io/hostname
+
+# Additional monitoring
+serviceMonitor:
+  enabled: true
+
+autoscaling:
+  enabled: false

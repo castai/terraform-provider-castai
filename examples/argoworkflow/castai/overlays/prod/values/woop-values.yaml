@@ -1,0 +1,14 @@
+# Submit using the parameters file:
+#argo submit --from workflowtemplate/castai-autoscaling-policy --parameter-file castai-autoscaling-policy-params.yaml -n argo
+  
+api_key: "83b21b352f564be3d37d14685cc46aa3489f421267f4d844fdd3f7a0134645dd"
+cluster_id: "e14faa43-d9cd-403b-84cb-5bf7b1234567"
+policy_name: "default-sensedia"
+cpu_function: "QUANTILE"
+cpu_arg: "0.8"
+cpu_lookback: "86400"
+memory_function: "MAX"
+memory_overhead: "0.1"
+memory_min: "10.239999771118164"
+startup_seconds: "120"
+confidence_threshold: "0.9"

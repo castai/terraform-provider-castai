@@ -1,0 +1,23 @@
+# Default values for cluster agent
+# Override these in environment-specific overlays
+
+apiKey: ""  # Set via sealed secret or external secrets
+clusterID: ""
+
+provider: eks
+
+# Resource limits
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 1000m
+    memory: 512Mi
+
+# High availability
+replicaCount: 2
+
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 1
