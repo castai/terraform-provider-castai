@@ -37,6 +37,12 @@ module "eks" {
       min_size      = 3
       desired_size  = 3
 
+      metadata_options = {
+        http_endpoint               = "enabled"
+        http_tokens                 = "required"
+        http_put_response_hop_limit = 2
+      }
+
       block_device_mappings = {
         xvda = {
           device_name = "/dev/xvda"
