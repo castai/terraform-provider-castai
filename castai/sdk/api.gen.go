@@ -3538,6 +3538,18 @@ type CostreportV1beta1GetAllocationGroupCostSummariesResponseSummary struct {
 	// RamGib Average RAM GiB used for the given time period.
 	RamGib *string `json:"ramGib,omitempty"`
 
+	// RequestedCpuHours Total requested CPU hours for the given time period.
+	RequestedCpuHours *string `json:"requestedCpuHours,omitempty"`
+
+	// RequestedGpuHours Total requested GPU hours for the given time period.
+	RequestedGpuHours *string `json:"requestedGpuHours,omitempty"`
+
+	// RequestedRamGibHours Total requested RAM GiB hours for the given time period.
+	RequestedRamGibHours *string `json:"requestedRamGibHours,omitempty"`
+
+	// RequestedStorageGibHours Total requested storage GiB hours for the given time period.
+	RequestedStorageGibHours *string `json:"requestedStorageGibHours,omitempty"`
+
 	// TotalCostOnDemand Total cost of on-demand instances for the given time period.
 	TotalCostOnDemand *string `json:"totalCostOnDemand,omitempty"`
 
@@ -3588,6 +3600,18 @@ type CostreportV1beta1GetAllocationGroupCostTimedSummariesResponseSummary struct
 
 	// RamGib Average RAM GiB used for the given time period.
 	RamGib *string `json:"ramGib,omitempty"`
+
+	// RequestedCpuHours Total requested CPU hours for the given time period.
+	RequestedCpuHours *string `json:"requestedCpuHours,omitempty"`
+
+	// RequestedGpuHours Total requested GPU hours for the given time period.
+	RequestedGpuHours *string `json:"requestedGpuHours,omitempty"`
+
+	// RequestedRamGibHours Total requested RAM GiB hours for the given time period.
+	RequestedRamGibHours *string `json:"requestedRamGibHours,omitempty"`
+
+	// RequestedStorageGibHours Total requested storage GiB hours for the given time period.
+	RequestedStorageGibHours *string `json:"requestedStorageGibHours,omitempty"`
 
 	// Timestamp Timestamp of entry.
 	Timestamp *time.Time `json:"timestamp,omitempty"`
