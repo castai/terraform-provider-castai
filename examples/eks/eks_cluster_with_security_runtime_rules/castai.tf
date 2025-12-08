@@ -32,7 +32,7 @@ module "castai-eks-role-iam" {
 # Install CAST AI with enabled Kvisor security agent.
 module "castai-eks-cluster" {
   source  = "castai/eks-cluster/castai"
-  version = "~> 13.0"
+  version = "~> 14.0"
 
   kvisor_grpc_addr = var.kvisor_grpc_addr
 

@@ -24,7 +24,6 @@ module "eks" {
   subnet_ids = module.vpc.private_subnets
 
   enable_cluster_creator_admin_permissions = true
-  authentication_mode                      = "API_AND_CONFIG_MAP"
 
   self_managed_node_groups = {
     node_group_1 = {

@@ -27,7 +27,6 @@ module "eks" {
   vpc_id     = module.vpc.vpc_id
   subnet_ids = module.vpc.private_subnets
 
-  authentication_mode                      = "API_AND_CONFIG_MAP"
   enable_cluster_creator_admin_permissions = true
 
   access_entries = {
@@ -85,4 +84,3 @@ resource "aws_eks_access_entry" "castai" {
   principal_arn = module.castai-eks-role-iam.instance_profile_role_arn
   type          = "EC2_LINUX"
 }
-
