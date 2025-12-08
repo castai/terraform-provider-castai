@@ -19,6 +19,13 @@ spec:
         spark-nodeselect-instance-type: amd64-64-16
         spark-nodeselect-nodepool-group: hyper
     spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchLabels:
+                  spark-nodeselect-nodepool-group: hyper
+              topologyKey: kubernetes.io/hostname
       containers:
       - name: monarch-mig
         image: nginx:latest
