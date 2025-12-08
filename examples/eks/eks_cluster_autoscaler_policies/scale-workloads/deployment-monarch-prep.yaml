@@ -28,7 +28,16 @@ spec:
               topologyKey: kubernetes.io/hostname
       containers:
       - name: monarch-prep
-        image: nginx:latest
+        image: public.ecr.aws/docker/library/busybox:stable
+        command: ["/bin/sh", "-c"]
+        args:
+          - |
+            counter=0
+            while true; do
+              echo "Counter: $counter"
+              counter=$((counter + 1))
+              sleep 1
+            done
         resources:
           requests:
             cpu: "1"
