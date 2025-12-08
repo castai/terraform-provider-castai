@@ -72,7 +72,10 @@ func resourceAutoscaler() *schema.Resource {
 		UpdateContext: resourceCastaiAutoscalerUpdate,
 		DeleteContext: resourceCastaiAutoscalerDelete,
 		CustomizeDiff: resourceCastaiAutoscalerDiff,
-		Description:   "CAST AI autoscaler resource to manage autoscaler settings",
+		Importer: &schema.ResourceImporter{
+			StateContext: schema.ImportStatePassthroughContext,
+		},
+		Description: "CAST AI autoscaler resource to manage autoscaler settings",
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(2 * time.Minute),
@@ -639,9 +642,41 @@ func readAutoscalerPolicies(ctx context.Context, data *schema.ResourceData, meta
 		return err
 	}
 
-	err = data.Set(FieldAutoscalerPolicies, string(currentPolicies))
+	// Set cluster_id if not already set (e.g., during import)
+	if _, ok := data.GetOk(FieldClusterId); !ok {
+		if err := data.Set(FieldClusterId, clusterId); err != nil {
+			log.Printf("[ERROR] Failed to set cluster_id field: %v", err)
+			return err
+		}
+	}
+
+	// Filter out API-managed fields before storing in autoscaler_policies
+	// to prevent drift detection on fields that change independently of user config
+	var policyMap map[string]interface{}
+	if err := json.Unmarshal(currentPolicies, &policyMap); err != nil {
+		return fmt.Errorf("unmarshaling policies: %w", err)
+	}
+	delete(policyMap, "defaultNodeTemplateVersion")
+
+	filteredPolicies, err := json.Marshal(policyMap)
 	if err != nil {
-		log.Printf("[ERROR] Failed to set field: %v", err)
+		return fmt.Errorf("marshaling filtered policies: %w", err)
+	}
+
+	if err := data.Set(FieldAutoscalerPolicies, string(filteredPolicies)); err != nil {
+		log.Printf("[ERROR] Failed to set autoscaler_policies field: %v", err)
+		return err
+	}
+
+	// Populate autoscaler_settings from API response for import and drift detection
+	autoscalerSettings, err := flattenAutoscalerPolicy(currentPolicies)
+	if err != nil {
+		log.Printf("[ERROR] Failed to flatten autoscaler policy: %v", err)
+		return err
+	}
+
+	if err := data.Set(FieldAutoscalerSettings, autoscalerSettings); err != nil {
+		log.Printf("[ERROR] Failed to set autoscaler_settings field: %v", err)
 		return err
 	}
 
@@ -650,11 +685,16 @@ func readAutoscalerPolicies(ctx context.Context, data *schema.ResourceData, meta
 
 func getClusterId(data types.ResourceProvider) string {
 	value, found := data.GetOk(FieldClusterId)
-	if !found {
-		return ""
+	if found {
+		return value.(string)
 	}
 
-	return value.(string)
+	// Fallback to resource ID for import scenarios where cluster_id attribute isn't set yet
+	if rd, ok := data.(*schema.ResourceData); ok {
+		return rd.Id()
+	}
+
+	return ""
 }
 
 func getChangedPolicies(ctx context.Context, data types.ResourceProvider, meta interface{}, clusterId string) ([]byte, error) {
@@ -703,7 +743,20 @@ func getChangedPolicies(ctx context.Context, data types.ResourceProvider, meta i
 		return nil, fmt.Errorf("failed to merge policies: %v", err)
 	}
 
-	return normalizeJSON(policies)
+	// Filter out API-managed fields to prevent drift detection
+	// on fields that change independently of user config
+	var policyMap map[string]interface{}
+	if err := json.Unmarshal(policies, &policyMap); err != nil {
+		return nil, fmt.Errorf("unmarshaling merged policies: %w", err)
+	}
+	delete(policyMap, "defaultNodeTemplateVersion")
+
+	filteredPolicies, err := json.Marshal(policyMap)
+	if err != nil {
+		return nil, fmt.Errorf("marshaling filtered policies: %w", err)
+	}
+
+	return normalizeJSON(filteredPolicies)
 }
 
 func validateAutoscalerPolicyJSON() schema.SchemaValidateDiagFunc {
@@ -774,4 +827,182 @@ func toAutoscalerPolicy(data types.ResourceProvider) (*types.AutoscalerPolicy, e
 	}
 
 	return &policy, nil
+}
+
+// flattenAutoscalerPolicy converts API JSON response to autoscaler_settings schema format.
+// This is the reverse of toAutoscalerPolicy and is used during Read/Import operations.
+func flattenAutoscalerPolicy(policyJSON []byte) ([]map[string]interface{}, error) {
+	if len(policyJSON) == 0 {
+		return nil, nil
+	}
+
+	var policy types.AutoscalerPolicy
+	if err := json.Unmarshal(policyJSON, &policy); err != nil {
+		return nil, fmt.Errorf("unmarshaling policy JSON: %w", err)
+	}
+
+	settings := map[string]interface{}{
+		FieldEnabled:                             policy.Enabled,
+		FieldIsScopedMode:                        policy.IsScopedMode,
+		FieldNodeTemplatesPartialMatchingEnabled: policy.NodeTemplatesPartialMatching,
+	}
+
+	if policy.UnschedulablePods != nil {
+		unschedulablePods := map[string]interface{}{
+			FieldEnabled: policy.UnschedulablePods.Enabled,
+		}
+
+		if policy.UnschedulablePods.Headroom != nil {
+			h := policy.UnschedulablePods.Headroom
+			// Only include if has non-zero percentages (meaningful values)
+			if h.CPUPercentage > 0 || h.MemoryPercentage > 0 {
+				unschedulablePods[FieldHeadroom] = []map[string]interface{}{
+					{
+						FieldEnabled:          h.Enabled,
+						FieldCPUPercentage:    h.CPUPercentage,
+						FieldMemoryPercentage: h.MemoryPercentage,
+					},
+				}
+			}
+		}
+
+		if policy.UnschedulablePods.HeadroomSpot != nil {
+			hs := policy.UnschedulablePods.HeadroomSpot
+			// Only include if has non-zero percentages (meaningful values)
+			if hs.CPUPercentage > 0 || hs.MemoryPercentage > 0 {
+				unschedulablePods[FieldHeadroomSpot] = []map[string]interface{}{
+					{
+						FieldEnabled:          hs.Enabled,
+						FieldCPUPercentage:    hs.CPUPercentage,
+						FieldMemoryPercentage: hs.MemoryPercentage,
+					},
+				}
+			}
+		}
+
+		if policy.UnschedulablePods.NodeConstraints != nil {
+			nc := policy.UnschedulablePods.NodeConstraints
+			// Only include if user enabled the feature or set minimum constraints.
+			// Max values are always returned by API as defaults, so they're not meaningful
+			// indicators of user configuration. Min values > 0 indicate user set constraints.
+			if nc.Enabled || nc.MinCPUCores > 0 || nc.MinRAMMiB > 0 {
+				unschedulablePods[FieldNodeConstraints] = []map[string]interface{}{
+					{
+						FieldEnabled:     nc.Enabled,
+						FieldMinCPUCores: nc.MinCPUCores,
+						FieldMaxCPUCores: nc.MaxCPUCores,
+						FieldMinRAMMiB:   nc.MinRAMMiB,
+						FieldMaxRAMMiB:   nc.MaxRAMMiB,
+					},
+				}
+			}
+		}
+
+		if policy.UnschedulablePods.CustomInstances != nil {
+			unschedulablePods[FieldCustomInstancesEnabled] = *policy.UnschedulablePods.CustomInstances
+		}
+
+		// Only include PodPinner if enabled
+		if policy.UnschedulablePods.PodPinner != nil && policy.UnschedulablePods.PodPinner.Enabled {
+			unschedulablePods[FieldPodPinner] = []map[string]interface{}{
+				{
+					FieldEnabled: policy.UnschedulablePods.PodPinner.Enabled,
+				},
+			}
+		}
+
+		settings[FieldUnschedulablePods] = []map[string]interface{}{unschedulablePods}
+	}
+
+	if policy.ClusterLimits != nil {
+		clusterLimits := map[string]interface{}{
+			FieldEnabled: policy.ClusterLimits.Enabled,
+		}
+
+		if policy.ClusterLimits.CPU != nil {
+			clusterLimits[FieldCPU] = []map[string]interface{}{
+				{
+					FieldMinCores: policy.ClusterLimits.CPU.MinCores,
+					FieldMaxCores: policy.ClusterLimits.CPU.MaxCores,
+				},
+			}
+		}
+
+		settings[FieldClusterLimits] = []map[string]interface{}{clusterLimits}
+	}
+
+	if policy.SpotInstances != nil {
+		si := policy.SpotInstances
+		// Only include SpotInstances if it has meaningful settings
+		hasSpotBackups := si.SpotBackups != nil && si.SpotBackups.Enabled
+		hasInterruptionPredictions := si.SpotInterruptionPredictions != nil && si.SpotInterruptionPredictions.Enabled
+		if si.Enabled || si.MaxReclaimRate > 0 || si.SpotDiversityEnabled || hasSpotBackups || hasInterruptionPredictions {
+			spotInstances := map[string]interface{}{
+				FieldEnabled:                         si.Enabled,
+				FieldMaxReclaimRate:                  si.MaxReclaimRate,
+				FieldSpotDiversityEnabled:            si.SpotDiversityEnabled,
+				FieldSpotDiversityPriceIncreaseLimit: si.SpotDiversityPriceIncrease,
+			}
+
+			// Only include SpotBackups if enabled
+			if hasSpotBackups {
+				spotInstances[FieldSpotBackups] = []map[string]interface{}{
+					{
+						FieldEnabled:                      si.SpotBackups.Enabled,
+						FieldSpotBackupRestoreRateSeconds: si.SpotBackups.SpotBackupRestoreRateSeconds,
+					},
+				}
+			}
+
+			// Only include SpotInterruptionPredictions if enabled
+			if hasInterruptionPredictions {
+				spotInstances[FieldSpotInterruptionPredictions] = []map[string]interface{}{
+					{
+						FieldEnabled:                         si.SpotInterruptionPredictions.Enabled,
+						FieldSpotInterruptionPredictionsType: si.SpotInterruptionPredictions.SpotInterruptionPredictionsType,
+					},
+				}
+			}
+
+			settings[FieldSpotInstances] = []map[string]interface{}{spotInstances}
+		}
+	}
+
+	if policy.NodeDownscaler != nil {
+		nodeDownscaler := map[string]interface{}{
+			FieldEnabled: policy.NodeDownscaler.Enabled,
+		}
+
+		if policy.NodeDownscaler.EmptyNodes != nil {
+			nodeDownscaler[FieldEmptyNodes] = []map[string]interface{}{
+				{
+					FieldEnabled:      policy.NodeDownscaler.EmptyNodes.Enabled,
+					FieldDelaySeconds: policy.NodeDownscaler.EmptyNodes.DelaySeconds,
+				},
+			}
+		}
+
+		// Only include Evictor if enabled or has non-default settings
+		if policy.NodeDownscaler.Evictor != nil {
+			e := policy.NodeDownscaler.Evictor
+			if e.Enabled || e.DryRun || e.AggressiveMode || e.ScopedMode {
+				nodeDownscaler[FieldEvictor] = []map[string]interface{}{
+					{
+						FieldEnabled:                                  e.Enabled,
+						FieldEvictorDryRun:                            e.DryRun,
+						FieldEvictorAggressiveMode:                    e.AggressiveMode,
+						FieldEvictorScopedMode:                        e.ScopedMode,
+						FieldEvictorCycleInterval:                     e.CycleInterval,
+						FieldEvictorNodeGracePeriodMinutes:            e.NodeGracePeriodMinutes,
+						FieldEvictorPodEvictionFailureBackOffInterval: e.PodEvictionFailureBackOffInterval,
+						FieldEvictorIgnorePodDisruptionBudgets:        e.IgnorePodDisruptionBudgets,
+					},
+				}
+			}
+		}
+
+		settings[FieldNodeDownscaler] = []map[string]interface{}{nodeDownscaler}
+	}
+
+	return []map[string]interface{}{settings}, nil
 }
