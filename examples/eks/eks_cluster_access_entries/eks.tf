@@ -81,6 +81,6 @@ resource "aws_security_group" "additional" {
 # CAST AI access entry for nodes to join the cluster.
 resource "aws_eks_access_entry" "castai" {
   cluster_name  = module.eks.cluster_name
-  principal_arn = module.castai-eks-role-iam.instance_profile_role_arn
+  principal_arn = module.castai_eks_role_iam.instance_profile_role_arn
   type          = "EC2_LINUX"
 }
