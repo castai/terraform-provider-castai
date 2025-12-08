@@ -152,46 +152,7 @@ module "castai-eks-cluster" {
         architectures = ["amd64", "arm64"]
         max_cpu       = 8
         instance_families = {
-          exclude = [
-            "dl1",
-            "dl2q",
-            "f1",
-            "f2",
-            "g2",
-            "g3",
-            "g3s",
-            "g4ad",
-            "g4dn",
-            "g5",
-            "g5g",
-            "g6",
-            "g6e",
-            "g6f",
-            "gr6",
-            "gr6f",
-            "vt1",
-            "inf1",
-            "inf2",
-            "p4d",
-            "p4de",
-            "p3",
-            "p3dn",
-            "p2",
-            "p5",
-            "p5e",
-            "p5en",
-            "trn1",
-            "trn1n",
-            "trn2",
-            "x1",
-            "x1e",
-            "x2gd",
-            "x2idn",
-            "x2iedn",
-            "x2iezn",
-            "x8aedz",
-            "x8g",
-          ]
+          include = ["c5a", "c5ad", "c6a", "c7a", "m5a", "m5ad", "m6a", "m7a", "m8a", "r5a", "r5ad", "r6a", "r7a", "r8a"]
         }
       }
     }
@@ -217,46 +178,7 @@ module "castai-eks-cluster" {
         architectures = ["amd64"]
         max_cpu       = 8
         instance_families = {
-          exclude = [
-            "dl1",
-            "dl2q",
-            "f1",
-            "f2",
-            "g2",
-            "g3",
-            "g3s",
-            "g4ad",
-            "g4dn",
-            "g5",
-            "g5g",
-            "g6",
-            "g6e",
-            "g6f",
-            "gr6",
-            "gr6f",
-            "vt1",
-            "inf1",
-            "inf2",
-            "p4d",
-            "p4de",
-            "p3",
-            "p3dn",
-            "p2",
-            "p5",
-            "p5e",
-            "p5en",
-            "trn1",
-            "trn1n",
-            "trn2",
-            "x1",
-            "x1e",
-            "x2gd",
-            "x2idn",
-            "x2iedn",
-            "x2iezn",
-            "x8aedz",
-            "x8g",
-          ]
+          include = ["c5a", "c5ad", "c6a", "c7a", "m5a", "m5ad", "m6a", "m7a", "m8a", "r5a", "r5ad", "r6a", "r7a", "r8a"]
         }
       }
     }
@@ -284,46 +206,7 @@ module "castai-eks-cluster" {
         max_cpu           = 8
 
         instance_families = {
-          exclude = [
-            "dl1",
-            "dl2q",
-            "f1",
-            "f2",
-            "g2",
-            "g3",
-            "g3s",
-            "g4ad",
-            "g4dn",
-            "g5",
-            "g5g",
-            "g6",
-            "g6e",
-            "g6f",
-            "gr6",
-            "gr6f",
-            "vt1",
-            "inf1",
-            "inf2",
-            "p4d",
-            "p4de",
-            "p3",
-            "p3dn",
-            "p2",
-            "p5",
-            "p5e",
-            "p5en",
-            "trn1",
-            "trn1n",
-            "trn2",
-            "x1",
-            "x1e",
-            "x2gd",
-            "x2idn",
-            "x2iedn",
-            "x2iezn",
-            "x8aedz",
-            "x8g",
-          ]
+          include = ["c5a", "c5ad", "c6a", "c7a", "m5a", "m5ad", "m6a", "m7a", "m8a", "r5a", "r5ad", "r6a", "r7a", "r8a"]
         }
 
 
