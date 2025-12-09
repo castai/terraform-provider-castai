@@ -1026,6 +1026,20 @@ func TestAccEKS_ResourceAutoscaler_basic(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
+			// Step 4: Modify default node template and verify autoscaler doesn't drift
+			// This tests the policy - node template sync behavior - when the default node template
+			// is modified, the autoscaler should not show drift due to defaultNodeTemplateVersion changing.
+			{
+				Config: testAccAutoscalerWithNodeTemplateConfig(rName, clusterName),
+				Check: resource.ComposeTestCheckFunc(
+					// Verify autoscaler state is unchanged despite node template modification
+					resource.TestCheckResourceAttr("castai_autoscaler.test", "autoscaler_settings.0.enabled", "false"),
+					resource.TestCheckResourceAttr("castai_autoscaler.test", "autoscaler_settings.0.is_scoped_mode", "true"),
+					// Verify node template was created/updated
+					resource.TestCheckResourceAttr("castai_node_template.default", "name", "default-by-castai"),
+					resource.TestCheckResourceAttr("castai_node_template.default", "constraints.0.spot", "true"),
+				),
+			},
 		},
 		ExternalProviders: map[string]resource.ExternalProvider{
 			"aws": {
@@ -1094,6 +1108,24 @@ resource "castai_autoscaler" "test" {
 `, enabled, isScopedMode, nodeTemplatesPartialMatchingEnabled,
 		unschedulablePodsEnabled, clusterLimitsEnabled, minCores, maxCores,
 		nodeDownscalerEnabled, emptyNodesEnabled, delaySeconds))
+}
+
+// testAccAutoscalerWithNodeTemplateConfig returns a config that includes both autoscaler and
+// the default node template. This tests the policy↔node template sync behavior.
+func testAccAutoscalerWithNodeTemplateConfig(rName, clusterName string) string {
+	return ConfigCompose(testAccAutoscalerConfig(rName, clusterName, false, true), `
+resource "castai_node_template" "default" {
+  cluster_id = castai_eks_cluster.test.id
+  name       = "default-by-castai"
+  is_default = true
+  is_enabled = true
+
+  constraints {
+    on_demand = true
+    spot      = true
+  }
+}
+`)
 }
 
 func TestAutoscalerResource_FlattenAutoscalerSettings(t *testing.T) {
@@ -1306,4 +1338,54 @@ func TestAutoscalerResource_FlattenEvictor(t *testing.T) {
 	r.Equal(5, result["node_grace_period_minutes"])
 	r.Equal("5s", result["pod_eviction_failure_back_off_interval"])
 	r.Equal(false, result["ignore_pod_disruption_budgets"])
+}
+
+func TestAutoscalerResource_FilterVolatileFields(t *testing.T) {
+	tests := []struct {
+		name        string
+		input       string
+		shouldExist []string
+		shouldGone  []string
+	}{
+		{
+			name:        "removes defaultNodeTemplateVersion",
+			input:       `{"enabled":true,"defaultNodeTemplateVersion":"5","isScopedMode":false}`,
+			shouldExist: []string{"enabled", "isScopedMode"},
+			shouldGone:  []string{"defaultNodeTemplateVersion"},
+		},
+		{
+			name:        "handles missing defaultNodeTemplateVersion",
+			input:       `{"enabled":true,"isScopedMode":false}`,
+			shouldExist: []string{"enabled", "isScopedMode"},
+			shouldGone:  []string{"defaultNodeTemplateVersion"},
+		},
+		{
+			name:        "preserves nested structures",
+			input:       `{"enabled":true,"defaultNodeTemplateVersion":"10","nodeDownscaler":{"enabled":true}}`,
+			shouldExist: []string{"enabled", "nodeDownscaler"},
+			shouldGone:  []string{"defaultNodeTemplateVersion"},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			r := require.New(t)
+
+			result := filterVolatileFields([]byte(tt.input))
+
+			var filtered map[string]interface{}
+			err := json.Unmarshal(result, &filtered)
+			r.NoError(err)
+
+			for _, key := range tt.shouldExist {
+				_, exists := filtered[key]
+				r.True(exists, "expected key %q to exist", key)
+			}
+
+			for _, key := range tt.shouldGone {
+				_, exists := filtered[key]
+				r.False(exists, "expected key %q to be removed", key)
+			}
+		})
+	}
 }
