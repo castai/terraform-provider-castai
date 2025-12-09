@@ -8382,6 +8382,9 @@ type WorkloadoptimizationV1MetricTarget struct {
 // UTILIZATION - A percentage of the requested resource utilization (e.g., 80).
 type WorkloadoptimizationV1MetricTargetType string
 
+// WorkloadoptimizationV1MigrateClusterToHPAV2Response defines model for workloadoptimization.v1.MigrateClusterToHPAV2Response.
+type WorkloadoptimizationV1MigrateClusterToHPAV2Response = map[string]interface{}
+
 // WorkloadoptimizationV1NewCustomMetricsConfig defines model for workloadoptimization.v1.NewCustomMetricsConfig.
 type WorkloadoptimizationV1NewCustomMetricsConfig struct {
 	Data WorkloadoptimizationV1CustomMetricsConfigData `json:"data"`

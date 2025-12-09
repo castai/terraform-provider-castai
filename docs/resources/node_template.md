@@ -88,6 +88,7 @@ resource "castai_node_template" "default_by_castai" {
 - `gpu` (Block List, Max: 1) GPU configuration. (see [below for nested schema](#nestedblock--gpu))
 - `is_default` (Boolean) Flag whether the node template is default.
 - `is_enabled` (Boolean) Flag whether the node template is enabled and considered for autoscaling.
+- `price_adjustment_configuration` (Block List, Max: 1) Configuration for adjusting instance type prices during autoscaling. Adjustments only affect placement decisions, not cost reporting. (see [below for nested schema](#nestedblock--price_adjustment_configuration))
 - `rebalancing_config_min_nodes` (Number) Minimum nodes that will be kept when rebalancing nodes using this node template.
 - `should_taint` (Boolean) Marks whether the templated nodes will have a taint.
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
@@ -235,6 +236,14 @@ Required:
 - `gpu_name` (String) GPU name.
 - `shared_clients_per_gpu` (Number) Defines number of shared clients for specific GPU device.
 
+
+
+<a id="nestedblock--price_adjustment_configuration"></a>
+### Nested Schema for `price_adjustment_configuration`
+
+Optional:
+
+- `instance_type_adjustments` (Map of String) Map of instance type names to price adjustment multipliers (as strings). Example: {"r7a.xlarge": "1.0", "r7i.xlarge": "1.20"}
 
 
 <a id="nestedblock--timeouts"></a>
