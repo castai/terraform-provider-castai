@@ -29,6 +29,12 @@ module "eks" {
       desired_size   = 2
       subnets        = module.vpc.private_subnets
 
+      metadata_options = {
+        http_endpoint               = "enabled"
+        http_tokens                 = "required"
+        http_put_response_hop_limit = 2
+      }
+
       iam_role_additional_policies = {
         ssm = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
       }

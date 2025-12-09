@@ -12,7 +12,8 @@ module "eks" {
       most_recent = true
     }
     kube-proxy = {
-      most_recent = true
+      most_recent    = true
+      before_compute = true
     }
     vpc-cni = {
       most_recent    = true
@@ -50,6 +51,12 @@ module "eks" {
 
       instance_types = ["t3.large"]
       capacity_type  = "SPOT"
+
+      metadata_options = {
+        http_endpoint               = "enabled"
+        http_tokens                 = "required"
+        http_put_response_hop_limit = 2
+      }
 
       update_config = {
         max_unavailable_percentage = 50 # or set `max_unavailable`
