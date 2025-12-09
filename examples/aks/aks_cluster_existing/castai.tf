@@ -7,9 +7,9 @@ data "azurerm_kubernetes_cluster" "example" {
 }
 
 # Configure AKS cluster connection to CAST AI using CAST AI aks-cluster module.
-module "castai-aks-cluster" {
+module "castai_aks_cluster" {
   source  = "castai/aks/castai"
-  version = "~> 9.0"
+  version = "~> 10.0"
 
   api_url                = var.castai_api_url
   castai_api_token       = var.castai_api_token
@@ -25,8 +25,7 @@ module "castai-aks-cluster" {
   subscription_id = data.azurerm_subscription.current.subscription_id
   tenant_id       = data.azurerm_subscription.current.tenant_id
 
-
-  default_node_configuration  = module.castai-aks-cluster.castai_node_configurations["default"]
+  default_node_configuration  = module.castai_aks_cluster.castai_node_configurations["default"]
   install_workload_autoscaler = true
 
   node_configurations = {
@@ -41,7 +40,7 @@ module "castai-aks-cluster" {
   node_templates = {
     default_by_castai = {
       name             = "default-by-castai"
-      configuration_id = module.castai-aks-cluster.castai_node_configurations["default"]
+      configuration_id = module.castai_aks_cluster.castai_node_configurations["default"]
       is_default       = true
       is_enabled       = true
       should_taint     = false
@@ -50,8 +49,9 @@ module "castai-aks-cluster" {
         on_demand = true
       }
     }
+
     example_spot_template = {
-      configuration_id = module.castai-aks-cluster.castai_node_configurations["default"]
+      configuration_id = module.castai_aks_cluster.castai_node_configurations["default"]
       is_enabled       = true
       should_taint     = true
 
@@ -72,6 +72,7 @@ module "castai-aks-cluster" {
           effect = "NoSchedule"
         }
       ]
+
       constraints = {
         spot                          = true
         use_spot_fallbacks            = true
@@ -125,8 +126,8 @@ module "castai-aks-cluster" {
     }
   }
 
+  install_omni = true
 }
-
 
 resource "castai_rebalancing_schedule" "default" {
   name = "rebalance nodes at every 30th minute"
@@ -150,7 +151,7 @@ resource "castai_rebalancing_schedule" "default" {
 }
 
 resource "castai_rebalancing_job" "default" {
-  cluster_id              = module.castai-aks-cluster.cluster_id
+  cluster_id              = module.castai_aks_cluster.cluster_id
   rebalancing_schedule_id = castai_rebalancing_schedule.default.id
   enabled                 = true
 }

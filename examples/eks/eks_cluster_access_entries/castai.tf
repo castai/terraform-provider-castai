@@ -1,9 +1,5 @@
 # 3. Connect EKS cluster to CAST AI.
 
-locals {
-  role_name = "castai-eks-role"
-}
-
 # Configure Data sources and providers required for CAST AI connection.
 data "aws_caller_identity" "current" {}
 
@@ -30,7 +26,7 @@ provider "helm" {
 }
 
 # Create AWS IAM policies and a user to connect to CAST AI.
-module "castai-eks-role-iam" {
+module "castai_eks_role_iam" {
   source  = "castai/eks-role-iam/castai"
   version = "~> 2.0"
 
@@ -51,9 +47,9 @@ resource "castai_eks_clusterid" "cluster_id" {
   cluster_name = var.cluster_name
 }
 
-module "castai-eks-cluster" {
+module "castai_eks_cluster" {
   source                 = "castai/eks-cluster/castai"
-  version                = "~> 13.0"
+  version                = "~> 14.0"
   api_url                = var.castai_api_url
   castai_api_token       = var.castai_api_token
   grpc_url               = var.castai_grpc_url
@@ -63,10 +59,10 @@ module "castai-eks-cluster" {
   aws_cluster_region = var.cluster_region
   aws_cluster_name   = module.eks.cluster_name
 
-  aws_assume_role_arn        = module.castai-eks-role-iam.role_arn
+  aws_assume_role_arn        = module.castai_eks_role_iam.role_arn
   delete_nodes_on_disconnect = var.delete_nodes_on_disconnect
 
-  default_node_configuration = module.castai-eks-cluster.castai_node_configurations["default"]
+  default_node_configuration = module.castai_eks_cluster.castai_node_configurations["default"]
 
   node_configurations = {
     default = {
@@ -77,11 +73,11 @@ module "castai-eks-cluster" {
         module.eks.node_security_group_id,
         aws_security_group.additional.id,
       ]
-      instance_profile_arn = module.castai-eks-role-iam.instance_profile_arn
+      instance_profile_arn = module.castai_eks_role_iam.instance_profile_arn
     }
   }
 
   // depends_on helps Terraform with creating proper dependencies graph in case of resource creation and in this case destroy.
-  // module "castai-eks-cluster" has to be destroyed before module "castai-eks-role-iam".
-  depends_on = [module.castai-eks-role-iam]
+  // module "castai-eks-cluster" has to be destroyed before module "castai_eks_role_iam".
+  depends_on = [module.castai_eks_role_iam]
 }

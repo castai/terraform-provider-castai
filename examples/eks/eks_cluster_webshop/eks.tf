@@ -22,7 +22,8 @@ module "eks" {
       most_recent = true
     }
     vpc-cni = {
-      most_recent = true
+      most_recent    = true
+      before_compute = true
     }
     aws-ebs-csi-driver = {
       service_account_role_arn = module.ebs_csi_irsa_role.iam_role_arn
@@ -91,8 +92,6 @@ module "eks" {
     }
   }
 
-  authentication_mode = "API_AND_CONFIG_MAP"
-
   access_entries = var.eks_user_role_arn != null ? {
     admin = {
       principal_arn = var.eks_user_role_arn
@@ -125,6 +124,8 @@ module "ebs_csi_irsa_role" {
 
 data "aws_eks_cluster" "eks" {
   name = module.eks.cluster_name
+
+  depends_on = [module.eks]
 }
 
 resource "kubernetes_storage_class" "ebs_csi" {

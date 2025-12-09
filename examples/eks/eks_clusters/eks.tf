@@ -15,14 +15,14 @@ module "eks" {
       most_recent = true
     }
     vpc-cni = {
-      most_recent = true
+      most_recent    = true
+      before_compute = true
     }
   }
 
   vpc_id     = module.vpc.vpc_id
   subnet_ids = module.vpc.private_subnets
 
-  authentication_mode                      = "API_AND_CONFIG_MAP"
   enable_cluster_creator_admin_permissions = true
 
   self_managed_node_groups = {
