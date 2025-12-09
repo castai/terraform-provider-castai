@@ -978,8 +978,7 @@ func TestAccEKS_ResourceAutoscaler_basic(t *testing.T) {
 	clusterName, _ := lo.Coalesce(os.Getenv("CLUSTER_NAME"), "cost-terraform")
 
 	resource.Test(t, resource.TestCase{
-		PreCheck: func() { testAccPreCheck(t) },
-
+		PreCheck:          func() { testAccPreCheck(t) },
 		ProviderFactories: providerFactories,
 		Steps: []resource.TestStep{
 			// Step 1: Create autoscaler with initial settings
@@ -1013,6 +1012,19 @@ func TestAccEKS_ResourceAutoscaler_basic(t *testing.T) {
 					resource.TestCheckResourceAttr("castai_autoscaler.test", "autoscaler_settings.0.node_downscaler.0.empty_nodes.0.enabled", "false"),
 					resource.TestCheckResourceAttr("castai_autoscaler.test", "autoscaler_settings.0.node_downscaler.0.empty_nodes.0.delay_seconds", "300"),
 				),
+			},
+			// Step 3: Import the resource
+			{
+				ResourceName: "castai_autoscaler.test",
+				ImportStateIdFunc: func(s *testingterraform.State) (string, error) {
+					rs, ok := s.RootModule().Resources["castai_eks_cluster.test"]
+					if !ok {
+						return "", fmt.Errorf("castai_eks_cluster.test not found in state")
+					}
+					return rs.Primary.ID, nil
+				},
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 		ExternalProviders: map[string]resource.ExternalProvider{
@@ -1294,50 +1306,4 @@ func TestAutoscalerResource_FlattenEvictor(t *testing.T) {
 	r.Equal(5, result["node_grace_period_minutes"])
 	r.Equal("5s", result["pod_eviction_failure_back_off_interval"])
 	r.Equal(false, result["ignore_pod_disruption_budgets"])
-}
-
-func TestAccEKS_ResourceAutoscaler_Import(t *testing.T) {
-	rName := fmt.Sprintf("%v-autoscaler-import-%v", ResourcePrefix, acctest.RandString(8))
-	clusterName, _ := lo.Coalesce(os.Getenv("CLUSTER_NAME"), "cost-terraform")
-
-	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { testAccPreCheck(t) },
-		ProviderFactories: providerFactories,
-		Steps: []resource.TestStep{
-			// Step 1: Create autoscaler resource
-			{
-				Config: testAccAutoscalerConfig(rName, clusterName, true, false),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("castai_autoscaler.test", "autoscaler_settings.0.enabled", "true"),
-				),
-			},
-			// Step 2: Import the resource
-			{
-				ResourceName: "castai_autoscaler.test",
-				ImportStateIdFunc: func(s *testingterraform.State) (string, error) {
-					rs, ok := s.RootModule().Resources["castai_eks_cluster.test"]
-					if !ok {
-						return "", fmt.Errorf("castai_eks_cluster.test not found in state")
-					}
-					return rs.Primary.ID, nil
-				},
-				ImportState:       true,
-				ImportStateVerify: true,
-				// Deprecated fields won't be populated during import, so ignore them
-				ImportStateVerifyIgnore: []string{
-					"autoscaler_settings.0.unschedulable_pods.0.headroom",
-					"autoscaler_settings.0.unschedulable_pods.0.headroom_spot",
-					"autoscaler_settings.0.unschedulable_pods.0.node_constraints",
-					"autoscaler_settings.0.unschedulable_pods.0.custom_instances_enabled",
-					"autoscaler_settings.0.spot_instances",
-				},
-			},
-		},
-		ExternalProviders: map[string]resource.ExternalProvider{
-			"aws": {
-				Source:            "hashicorp/aws",
-				VersionConstraint: "~> 5.0",
-			},
-		},
-	})
 }
