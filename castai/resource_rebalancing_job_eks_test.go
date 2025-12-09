@@ -76,11 +76,11 @@ resource "castai_rebalancing_job" "test" {
 }
 
 func makeInitialRebalancingJobConfig(rName, clusterName string) string {
-	return ConfigCompose(testAccEKSClusterConfig(rName, clusterName), makeRebalancingJobConfig(rName, ""))
+	return concatenateConfigs(testAccEKSClusterConfig(rName, clusterName), makeRebalancingJobConfig(rName, ""))
 }
 
 func makeUpdatedRebalancingJobConfig(rName, clusterName string) string {
-	return ConfigCompose(testAccEKSClusterConfig(rName, clusterName), makeRebalancingJobConfig(rName, "enabled=false"))
+	return concatenateConfigs(testAccEKSClusterConfig(rName, clusterName), makeRebalancingJobConfig(rName, "enabled=false"))
 }
 
 func TestAccEKS_ResourceRebalancingJobWithDataSource(t *testing.T) {
@@ -165,5 +165,5 @@ resource "castai_rebalancing_job" "test-with-data-source" {
 }
 
 func makeRebalancingJobWithDataSource(rName, clusterName string) string {
-	return ConfigCompose(testAccEKSClusterConfig(rName, clusterName), makeRebalancingJobWithDataSourceConfig(rName))
+	return concatenateConfigs(testAccEKSClusterConfig(rName, clusterName), makeRebalancingJobWithDataSourceConfig(rName))
 }

@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"os"
 	"testing"
 
 	"github.com/golang/mock/gomock"
@@ -414,7 +415,7 @@ func TestAKSClusterResourceUpdateContext(t *testing.T) {
 	})
 }
 
-func TestAccAKS_ResourceAKSCluster(t *testing.T) {
+func TestAccAKS_ResourceAKSCluster_SecretFlow(t *testing.T) {
 	rName := fmt.Sprintf("%v-aks-%v", ResourcePrefix, acctest.RandString(8))
 	clusterResourceName := "castai_aks_cluster.test"
 	resourceName := "castai_node_configuration.test"
@@ -489,7 +490,7 @@ func TestAccAKS_ResourceAKSCluster(t *testing.T) {
 }
 
 func testAccAKSClusterConfig(rName string, clusterName string, resourceGroupName, nodeResourceGroup string) string {
-	return ConfigCompose(testAccAzureConfig(rName, resourceGroupName, nodeResourceGroup), fmt.Sprintf(`
+	return concatenateConfigs(testAccAzureConfigUsingClientSecret(rName, resourceGroupName, nodeResourceGroup), fmt.Sprintf(`
 resource "castai_aks_cluster" "test" {
   name            = %[1]q
 
@@ -505,7 +506,52 @@ resource "castai_aks_cluster" "test" {
 `, clusterName, nodeResourceGroup))
 }
 
-func testAccAzureConfig(rName, rgName, ngName string) string {
+func TestAccAKS_ResourceAKSCluster_ImpersonationFlow(t *testing.T) {
+	const resourceName = "castai_aks_cluster.test"
+	const clusterName = "terraform-tests-december-2025"
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: providerFactories,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccAzureClusterWithFederationID(clusterName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "name", clusterName),
+					resource.TestCheckResourceAttrSet(resourceName, "credentials_id"),
+					resource.TestCheckResourceAttr(resourceName, "region", "westeurope"),
+					resource.TestCheckResourceAttrSet(resourceName, "cluster_token"),
+				),
+			},
+		},
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"azurerm": {
+				Source: "hashicorp/azurerm",
+			},
+		},
+	})
+}
+
+func testAccAzureClusterWithFederationID(clusterName string) string {
+	subscriptionID := os.Getenv("ARM_SUBSCRIPTION_ID")
+	federationID := os.Getenv("AZURE_TF_ACCEPTANCE_TEST_FEDERATION_ID")
+	tenantID := os.Getenv("AZURE_TF_ACCEPTANCE_TEST_FEDERATION_TENANT_ID")
+	clientID := os.Getenv("AZURE_TF_ACCEPTANCE_TEST_FEDERATION_CLIENT_ID")
+
+	return fmt.Sprintf(`
+resource "castai_aks_cluster" "test" {
+  name = %[3]q
+
+  region              = "westeurope"
+  subscription_id     = %[1]q
+  tenant_id           = %[4]q
+  client_id           = %[5]q
+  federation_id       = %[2]q
+  node_resource_group = "%[3]s-ng"
+}
+`, subscriptionID, federationID, clusterName, tenantID, clientID)
+}
+
+func testAccAzureConfigUsingClientSecret(rName, rgName, ngName string) string {
 	return fmt.Sprintf(`
 provider "azurerm" {
   features {}

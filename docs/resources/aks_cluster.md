@@ -34,7 +34,6 @@ resource "castai_aks_cluster" "this" {
 ### Required
 
 - `client_id` (String) Azure AD application ID that is created and used by CAST AI.
-- `client_secret` (String, Sensitive) Azure AD application password that will be used by CAST AI.
 - `name` (String) AKS cluster name.
 - `node_resource_group` (String) Azure resource group in which nodes are and will be created.
 - `region` (String) AKS cluster region.
@@ -43,7 +42,9 @@ resource "castai_aks_cluster" "this" {
 
 ### Optional
 
+- `client_secret` (String, Sensitive) Azure AD application password that will be used by CAST AI.
 - `delete_nodes_on_disconnect` (Boolean) Should CAST AI remove nodes managed by CAST.AI on disconnect.
+- `federation_id` (String) Azure federation used by CAST AI for secretless auth via impersonation.
 - `http_proxy_config` (Block List, Max: 1) HTTP proxy configuration for CAST AI nodes and node components. (see [below for nested schema](#nestedblock--http_proxy_config))
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 

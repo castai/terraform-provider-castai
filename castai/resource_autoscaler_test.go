@@ -1046,7 +1046,7 @@ func testAccAutoscalerConfig(rName, clusterName string, enabled bool, updated bo
 		delaySeconds = 300
 	}
 
-	return ConfigCompose(testAccEKSClusterConfig(rName, clusterName), fmt.Sprintf(`
+	return concatenateConfigs(testAccEKSClusterConfig(rName, clusterName), fmt.Sprintf(`
 resource "castai_autoscaler" "test" {
   cluster_id = castai_eks_cluster.test.id
 

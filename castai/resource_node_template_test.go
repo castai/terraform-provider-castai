@@ -383,17 +383,17 @@ func Test_flattenPriceAdjustmentConfiguration(t *testing.T) {
 			name: "configuration with adjustments",
 			input: &sdk.NodetemplatesV1PriceAdjustmentConfiguration{
 				InstanceTypeAdjustments: &map[string]string{
-					"r7a.xlarge":  "1.0",
-					"r7i.xlarge":  "1.20",
-					"c6a.xlarge":  "0.90",
+					"r7a.xlarge": "1.0",
+					"r7i.xlarge": "1.20",
+					"c6a.xlarge": "0.90",
 				},
 			},
 			want: []map[string]any{
 				{
 					FieldNodeTemplateInstanceTypeAdjustments: map[string]string{
-						"r7a.xlarge":  "1.0",
-						"r7i.xlarge":  "1.20",
-						"c6a.xlarge":  "0.90",
+						"r7a.xlarge": "1.0",
+						"r7i.xlarge": "1.20",
+						"c6a.xlarge": "0.90",
 					},
 				},
 			},
@@ -898,7 +898,7 @@ func TestAccEKS_ResourceNodeTemplate_basic(t *testing.T) {
 }
 
 func testAccNodeTemplateConfig(rName, clusterName string) string {
-	return ConfigCompose(testAccEKSClusterConfig(rName, clusterName), testAccNodeConfig(rName), testAccEdgeLocationsConfig(rName, clusterName), fmt.Sprintf(`
+	return concatenateConfigs(testAccEKSClusterConfig(rName, clusterName), testAccNodeConfig(rName), testAccEdgeLocationsConfig(rName, clusterName), fmt.Sprintf(`
 		resource "castai_node_template" "test" {
 			cluster_id        = castai_eks_cluster.test.id
 			name = %[1]q
@@ -1054,7 +1054,7 @@ resource "castai_edge_location" "test_2" {
 }
 
 func testNodeTemplateUpdated(rName, clusterName string) string {
-	return ConfigCompose(testAccEKSClusterConfig(rName, clusterName), testAccNodeConfig(rName), testAccEdgeLocationsConfig(rName, clusterName), fmt.Sprintf(`
+	return concatenateConfigs(testAccEKSClusterConfig(rName, clusterName), testAccNodeConfig(rName), testAccEdgeLocationsConfig(rName, clusterName), fmt.Sprintf(`
 		resource "castai_node_template" "test" {
 			cluster_id        = castai_eks_cluster.test.id
 			name = %[1]q
@@ -1170,7 +1170,7 @@ func testAccCheckNodeTemplateDestroy(templateName string) func(s *terraform.Stat
 }
 
 func testAccNodeConfig(rName string) string {
-	return ConfigCompose(fmt.Sprintf(`
+	return concatenateConfigs(fmt.Sprintf(`
 data "aws_subnets" "cost" {
 	tags = {
 		Name = "*cost-terraform-cluster/SubnetPublic*"

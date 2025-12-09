@@ -238,7 +238,7 @@ func clusterComponentsConfig(clusterName, projectID, name string) string {
 			value = castai_gke_cluster.test.id
 		}
 	}`, getAPIToken(), getAPIUrl())
-	return ConfigCompose(clusterConnectConfig(clusterName, projectID, name), cfg)
+	return concatenateConfigs(clusterConnectConfig(clusterName, projectID, name), cfg)
 }
 
 func scalingPolicyConfig(clusterName, projectID, name string) string {
@@ -308,7 +308,7 @@ func scalingPolicyConfig(clusterName, projectID, name string) string {
 		}
 	}`, name)
 
-	return ConfigCompose(clusterComponentsConfig(clusterName, projectID, name), cfg)
+	return concatenateConfigs(clusterComponentsConfig(clusterName, projectID, name), cfg)
 }
 
 func scalingPolicyConfigUpdated(clusterName, projectID, name string) string {
@@ -388,7 +388,7 @@ func scalingPolicyConfigUpdated(clusterName, projectID, name string) string {
 		}
 	}`, updatedName)
 
-	return ConfigCompose(clusterComponentsConfig(clusterName, projectID, name), cfg)
+	return concatenateConfigs(clusterComponentsConfig(clusterName, projectID, name), cfg)
 }
 
 func testAccCheckScalingPolicyDestroy(s *terraform.State) error {

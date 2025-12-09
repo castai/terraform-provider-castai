@@ -88,8 +88,8 @@ func testAccPreCheck(t *testing.T) {
 	})
 }
 
-// ConfigCompose can be called to concatenate multiple strings to build test configurations
-func ConfigCompose(config ...string) string {
+// concatenateConfigs can be called to concatenate multiple strings to build test configurations
+func concatenateConfigs(config ...string) string {
 	var str strings.Builder
 	for _, conf := range config {
 		str.WriteString(conf)

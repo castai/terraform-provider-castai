@@ -5,7 +5,7 @@ import (
 )
 
 func testAccAKSNodeConfigurationConfig(rName, clusterName, rgName, ngName string) string {
-	return ConfigCompose(testAccAKSClusterConfig(rName, clusterName, rgName, ngName), fmt.Sprintf(`
+	return concatenateConfigs(testAccAKSClusterConfig(rName, clusterName, rgName, ngName), fmt.Sprintf(`
 resource "castai_node_configuration" "test" {
   name   		    = %[1]q
   cluster_id        = castai_aks_cluster.test.id
@@ -29,7 +29,7 @@ resource "castai_node_configuration_default" "test" {
 }
 
 func testAccAKSNodeConfigurationUpdated(rName, clusterName, rgName, ngName string) string {
-	return ConfigCompose(testAccAKSClusterConfig(rName, clusterName, rgName, ngName), fmt.Sprintf(`
+	return concatenateConfigs(testAccAKSClusterConfig(rName, clusterName, rgName, ngName), fmt.Sprintf(`
 resource "castai_node_configuration" "test" {
   name   		    = %[2]q
   cluster_id        = castai_aks_cluster.test.id
