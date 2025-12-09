@@ -426,6 +426,11 @@ type ClientInterface interface {
 	// ExternalClusterAPIGetListNodesFilters request
 	ExternalClusterAPIGetListNodesFilters(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// ExternalClusterAPIImpersonationServiceAccountWithBody request with any body
+	ExternalClusterAPIImpersonationServiceAccountWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	ExternalClusterAPIImpersonationServiceAccount(ctx context.Context, body ExternalClusterAPIImpersonationServiceAccountJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// ExternalClusterAPIGetConnectAndEnableCASTAICmd request
 	ExternalClusterAPIGetConnectAndEnableCASTAICmd(ctx context.Context, params *ExternalClusterAPIGetConnectAndEnableCASTAICmdParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -902,6 +907,22 @@ type ClientInterface interface {
 
 	// WorkloadOptimizationAPIGetAgentStatus request
 	WorkloadOptimizationAPIGetAgentStatus(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// WorkloadOptimizationAPIListCustomMetricsConfigs request
+	WorkloadOptimizationAPIListCustomMetricsConfigs(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// WorkloadOptimizationAPICreateCustomMetricsConfigWithBody request with any body
+	WorkloadOptimizationAPICreateCustomMetricsConfigWithBody(ctx context.Context, clusterId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	WorkloadOptimizationAPICreateCustomMetricsConfig(ctx context.Context, clusterId string, body WorkloadOptimizationAPICreateCustomMetricsConfigJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// WorkloadOptimizationAPIDeleteCustomMetricsConfig request
+	WorkloadOptimizationAPIDeleteCustomMetricsConfig(ctx context.Context, clusterId string, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// WorkloadOptimizationAPIUpdateCustomMetricsConfigWithBody request with any body
+	WorkloadOptimizationAPIUpdateCustomMetricsConfigWithBody(ctx context.Context, clusterId string, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	WorkloadOptimizationAPIUpdateCustomMetricsConfig(ctx context.Context, clusterId string, id string, body WorkloadOptimizationAPIUpdateCustomMetricsConfigJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// WorkloadOptimizationAPIListLimitRanges request
 	WorkloadOptimizationAPIListLimitRanges(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -2447,6 +2468,30 @@ func (c *Client) ExternalClusterAPIRegisterCluster(ctx context.Context, body Ext
 
 func (c *Client) ExternalClusterAPIGetListNodesFilters(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewExternalClusterAPIGetListNodesFiltersRequest(c.Server)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) ExternalClusterAPIImpersonationServiceAccountWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewExternalClusterAPIImpersonationServiceAccountRequestWithBody(c.Server, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) ExternalClusterAPIImpersonationServiceAccount(ctx context.Context, body ExternalClusterAPIImpersonationServiceAccountJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewExternalClusterAPIImpersonationServiceAccountRequest(c.Server, body)
 	if err != nil {
 		return nil, err
 	}
@@ -4535,6 +4580,78 @@ func (c *Client) ScheduledRebalancingAPIListAvailableRebalancingTZ(ctx context.C
 
 func (c *Client) WorkloadOptimizationAPIGetAgentStatus(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewWorkloadOptimizationAPIGetAgentStatusRequest(c.Server, clusterId)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) WorkloadOptimizationAPIListCustomMetricsConfigs(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewWorkloadOptimizationAPIListCustomMetricsConfigsRequest(c.Server, clusterId)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) WorkloadOptimizationAPICreateCustomMetricsConfigWithBody(ctx context.Context, clusterId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewWorkloadOptimizationAPICreateCustomMetricsConfigRequestWithBody(c.Server, clusterId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) WorkloadOptimizationAPICreateCustomMetricsConfig(ctx context.Context, clusterId string, body WorkloadOptimizationAPICreateCustomMetricsConfigJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewWorkloadOptimizationAPICreateCustomMetricsConfigRequest(c.Server, clusterId, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) WorkloadOptimizationAPIDeleteCustomMetricsConfig(ctx context.Context, clusterId string, id string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewWorkloadOptimizationAPIDeleteCustomMetricsConfigRequest(c.Server, clusterId, id)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) WorkloadOptimizationAPIUpdateCustomMetricsConfigWithBody(ctx context.Context, clusterId string, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewWorkloadOptimizationAPIUpdateCustomMetricsConfigRequestWithBody(c.Server, clusterId, id, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) WorkloadOptimizationAPIUpdateCustomMetricsConfig(ctx context.Context, clusterId string, id string, body WorkloadOptimizationAPIUpdateCustomMetricsConfigJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewWorkloadOptimizationAPIUpdateCustomMetricsConfigRequest(c.Server, clusterId, id, body)
 	if err != nil {
 		return nil, err
 	}
@@ -10302,6 +10419,46 @@ func NewExternalClusterAPIGetListNodesFiltersRequest(server string) (*http.Reque
 	if err != nil {
 		return nil, err
 	}
+
+	return req, nil
+}
+
+// NewExternalClusterAPIImpersonationServiceAccountRequest calls the generic ExternalClusterAPIImpersonationServiceAccount builder with application/json body
+func NewExternalClusterAPIImpersonationServiceAccountRequest(server string, body ExternalClusterAPIImpersonationServiceAccountJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewExternalClusterAPIImpersonationServiceAccountRequestWithBody(server, "application/json", bodyReader)
+}
+
+// NewExternalClusterAPIImpersonationServiceAccountRequestWithBody generates requests for ExternalClusterAPIImpersonationServiceAccount with any type of body
+func NewExternalClusterAPIImpersonationServiceAccountRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/kubernetes/external-clusters/impersonation-service-account")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
 
 	return req, nil
 }
@@ -18025,6 +18182,182 @@ func NewWorkloadOptimizationAPIGetAgentStatusRequest(server string, clusterId st
 	return req, nil
 }
 
+// NewWorkloadOptimizationAPIListCustomMetricsConfigsRequest generates requests for WorkloadOptimizationAPIListCustomMetricsConfigs
+func NewWorkloadOptimizationAPIListCustomMetricsConfigsRequest(server string, clusterId string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "clusterId", runtime.ParamLocationPath, clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/workload-autoscaling/clusters/%s/custom-metrics/configs", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewWorkloadOptimizationAPICreateCustomMetricsConfigRequest calls the generic WorkloadOptimizationAPICreateCustomMetricsConfig builder with application/json body
+func NewWorkloadOptimizationAPICreateCustomMetricsConfigRequest(server string, clusterId string, body WorkloadOptimizationAPICreateCustomMetricsConfigJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewWorkloadOptimizationAPICreateCustomMetricsConfigRequestWithBody(server, clusterId, "application/json", bodyReader)
+}
+
+// NewWorkloadOptimizationAPICreateCustomMetricsConfigRequestWithBody generates requests for WorkloadOptimizationAPICreateCustomMetricsConfig with any type of body
+func NewWorkloadOptimizationAPICreateCustomMetricsConfigRequestWithBody(server string, clusterId string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "clusterId", runtime.ParamLocationPath, clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/workload-autoscaling/clusters/%s/custom-metrics/configs", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewWorkloadOptimizationAPIDeleteCustomMetricsConfigRequest generates requests for WorkloadOptimizationAPIDeleteCustomMetricsConfig
+func NewWorkloadOptimizationAPIDeleteCustomMetricsConfigRequest(server string, clusterId string, id string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "clusterId", runtime.ParamLocationPath, clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/workload-autoscaling/clusters/%s/custom-metrics/configs/%s", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("DELETE", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewWorkloadOptimizationAPIUpdateCustomMetricsConfigRequest calls the generic WorkloadOptimizationAPIUpdateCustomMetricsConfig builder with application/json body
+func NewWorkloadOptimizationAPIUpdateCustomMetricsConfigRequest(server string, clusterId string, id string, body WorkloadOptimizationAPIUpdateCustomMetricsConfigJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewWorkloadOptimizationAPIUpdateCustomMetricsConfigRequestWithBody(server, clusterId, id, "application/json", bodyReader)
+}
+
+// NewWorkloadOptimizationAPIUpdateCustomMetricsConfigRequestWithBody generates requests for WorkloadOptimizationAPIUpdateCustomMetricsConfig with any type of body
+func NewWorkloadOptimizationAPIUpdateCustomMetricsConfigRequestWithBody(server string, clusterId string, id string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "clusterId", runtime.ParamLocationPath, clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/workload-autoscaling/clusters/%s/custom-metrics/configs/%s", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("PATCH", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
 // NewWorkloadOptimizationAPIListLimitRangesRequest generates requests for WorkloadOptimizationAPIListLimitRanges
 func NewWorkloadOptimizationAPIListLimitRangesRequest(server string, clusterId string) (*http.Request, error) {
 	var err error
@@ -20205,6 +20538,11 @@ type ClientWithResponsesInterface interface {
 	// ExternalClusterAPIGetListNodesFilters request
 	ExternalClusterAPIGetListNodesFiltersWithResponse(ctx context.Context) (*ExternalClusterAPIGetListNodesFiltersResponse, error)
 
+	// ExternalClusterAPIImpersonationServiceAccount request  with any body
+	ExternalClusterAPIImpersonationServiceAccountWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader) (*ExternalClusterAPIImpersonationServiceAccountResponse, error)
+
+	ExternalClusterAPIImpersonationServiceAccountWithResponse(ctx context.Context, body ExternalClusterAPIImpersonationServiceAccountJSONRequestBody) (*ExternalClusterAPIImpersonationServiceAccountResponse, error)
+
 	// ExternalClusterAPIGetConnectAndEnableCASTAICmd request
 	ExternalClusterAPIGetConnectAndEnableCASTAICmdWithResponse(ctx context.Context, params *ExternalClusterAPIGetConnectAndEnableCASTAICmdParams) (*ExternalClusterAPIGetConnectAndEnableCASTAICmdResponse, error)
 
@@ -20681,6 +21019,22 @@ type ClientWithResponsesInterface interface {
 
 	// WorkloadOptimizationAPIGetAgentStatus request
 	WorkloadOptimizationAPIGetAgentStatusWithResponse(ctx context.Context, clusterId string) (*WorkloadOptimizationAPIGetAgentStatusResponse, error)
+
+	// WorkloadOptimizationAPIListCustomMetricsConfigs request
+	WorkloadOptimizationAPIListCustomMetricsConfigsWithResponse(ctx context.Context, clusterId string) (*WorkloadOptimizationAPIListCustomMetricsConfigsResponse, error)
+
+	// WorkloadOptimizationAPICreateCustomMetricsConfig request  with any body
+	WorkloadOptimizationAPICreateCustomMetricsConfigWithBodyWithResponse(ctx context.Context, clusterId string, contentType string, body io.Reader) (*WorkloadOptimizationAPICreateCustomMetricsConfigResponse, error)
+
+	WorkloadOptimizationAPICreateCustomMetricsConfigWithResponse(ctx context.Context, clusterId string, body WorkloadOptimizationAPICreateCustomMetricsConfigJSONRequestBody) (*WorkloadOptimizationAPICreateCustomMetricsConfigResponse, error)
+
+	// WorkloadOptimizationAPIDeleteCustomMetricsConfig request
+	WorkloadOptimizationAPIDeleteCustomMetricsConfigWithResponse(ctx context.Context, clusterId string, id string) (*WorkloadOptimizationAPIDeleteCustomMetricsConfigResponse, error)
+
+	// WorkloadOptimizationAPIUpdateCustomMetricsConfig request  with any body
+	WorkloadOptimizationAPIUpdateCustomMetricsConfigWithBodyWithResponse(ctx context.Context, clusterId string, id string, contentType string, body io.Reader) (*WorkloadOptimizationAPIUpdateCustomMetricsConfigResponse, error)
+
+	WorkloadOptimizationAPIUpdateCustomMetricsConfigWithResponse(ctx context.Context, clusterId string, id string, body WorkloadOptimizationAPIUpdateCustomMetricsConfigJSONRequestBody) (*WorkloadOptimizationAPIUpdateCustomMetricsConfigResponse, error)
 
 	// WorkloadOptimizationAPIListLimitRanges request
 	WorkloadOptimizationAPIListLimitRangesWithResponse(ctx context.Context, clusterId string) (*WorkloadOptimizationAPIListLimitRangesResponse, error)
@@ -23535,6 +23889,36 @@ func (r ExternalClusterAPIGetListNodesFiltersResponse) StatusCode() int {
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
 func (r ExternalClusterAPIGetListNodesFiltersResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type ExternalClusterAPIImpersonationServiceAccountResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *ExternalclusterV1ImpersonationServiceAccountResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r ExternalClusterAPIImpersonationServiceAccountResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r ExternalClusterAPIImpersonationServiceAccountResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r ExternalClusterAPIImpersonationServiceAccountResponse) GetBody() []byte {
 	return r.Body
 }
 
@@ -27409,6 +27793,126 @@ func (r WorkloadOptimizationAPIGetAgentStatusResponse) GetBody() []byte {
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
+type WorkloadOptimizationAPIListCustomMetricsConfigsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *WorkloadoptimizationV1ListCustomMetricsConfigsResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r WorkloadOptimizationAPIListCustomMetricsConfigsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r WorkloadOptimizationAPIListCustomMetricsConfigsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r WorkloadOptimizationAPIListCustomMetricsConfigsResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type WorkloadOptimizationAPICreateCustomMetricsConfigResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *WorkloadoptimizationV1CustomMetricsConfig
+}
+
+// Status returns HTTPResponse.Status
+func (r WorkloadOptimizationAPICreateCustomMetricsConfigResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r WorkloadOptimizationAPICreateCustomMetricsConfigResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r WorkloadOptimizationAPICreateCustomMetricsConfigResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type WorkloadOptimizationAPIDeleteCustomMetricsConfigResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *map[string]interface{}
+}
+
+// Status returns HTTPResponse.Status
+func (r WorkloadOptimizationAPIDeleteCustomMetricsConfigResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r WorkloadOptimizationAPIDeleteCustomMetricsConfigResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r WorkloadOptimizationAPIDeleteCustomMetricsConfigResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type WorkloadOptimizationAPIUpdateCustomMetricsConfigResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *WorkloadoptimizationV1CustomMetricsConfig
+}
+
+// Status returns HTTPResponse.Status
+func (r WorkloadOptimizationAPIUpdateCustomMetricsConfigResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r WorkloadOptimizationAPIUpdateCustomMetricsConfigResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r WorkloadOptimizationAPIUpdateCustomMetricsConfigResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
 type WorkloadOptimizationAPIListLimitRangesResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -29226,6 +29730,23 @@ func (c *ClientWithResponses) ExternalClusterAPIGetListNodesFiltersWithResponse(
 	return ParseExternalClusterAPIGetListNodesFiltersResponse(rsp)
 }
 
+// ExternalClusterAPIImpersonationServiceAccountWithBodyWithResponse request with arbitrary body returning *ExternalClusterAPIImpersonationServiceAccountResponse
+func (c *ClientWithResponses) ExternalClusterAPIImpersonationServiceAccountWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader) (*ExternalClusterAPIImpersonationServiceAccountResponse, error) {
+	rsp, err := c.ExternalClusterAPIImpersonationServiceAccountWithBody(ctx, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseExternalClusterAPIImpersonationServiceAccountResponse(rsp)
+}
+
+func (c *ClientWithResponses) ExternalClusterAPIImpersonationServiceAccountWithResponse(ctx context.Context, body ExternalClusterAPIImpersonationServiceAccountJSONRequestBody) (*ExternalClusterAPIImpersonationServiceAccountResponse, error) {
+	rsp, err := c.ExternalClusterAPIImpersonationServiceAccount(ctx, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseExternalClusterAPIImpersonationServiceAccountResponse(rsp)
+}
+
 // ExternalClusterAPIGetConnectAndEnableCASTAICmdWithResponse request returning *ExternalClusterAPIGetConnectAndEnableCASTAICmdResponse
 func (c *ClientWithResponses) ExternalClusterAPIGetConnectAndEnableCASTAICmdWithResponse(ctx context.Context, params *ExternalClusterAPIGetConnectAndEnableCASTAICmdParams) (*ExternalClusterAPIGetConnectAndEnableCASTAICmdResponse, error) {
 	rsp, err := c.ExternalClusterAPIGetConnectAndEnableCASTAICmd(ctx, params)
@@ -30745,6 +31266,58 @@ func (c *ClientWithResponses) WorkloadOptimizationAPIGetAgentStatusWithResponse(
 		return nil, err
 	}
 	return ParseWorkloadOptimizationAPIGetAgentStatusResponse(rsp)
+}
+
+// WorkloadOptimizationAPIListCustomMetricsConfigsWithResponse request returning *WorkloadOptimizationAPIListCustomMetricsConfigsResponse
+func (c *ClientWithResponses) WorkloadOptimizationAPIListCustomMetricsConfigsWithResponse(ctx context.Context, clusterId string) (*WorkloadOptimizationAPIListCustomMetricsConfigsResponse, error) {
+	rsp, err := c.WorkloadOptimizationAPIListCustomMetricsConfigs(ctx, clusterId)
+	if err != nil {
+		return nil, err
+	}
+	return ParseWorkloadOptimizationAPIListCustomMetricsConfigsResponse(rsp)
+}
+
+// WorkloadOptimizationAPICreateCustomMetricsConfigWithBodyWithResponse request with arbitrary body returning *WorkloadOptimizationAPICreateCustomMetricsConfigResponse
+func (c *ClientWithResponses) WorkloadOptimizationAPICreateCustomMetricsConfigWithBodyWithResponse(ctx context.Context, clusterId string, contentType string, body io.Reader) (*WorkloadOptimizationAPICreateCustomMetricsConfigResponse, error) {
+	rsp, err := c.WorkloadOptimizationAPICreateCustomMetricsConfigWithBody(ctx, clusterId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseWorkloadOptimizationAPICreateCustomMetricsConfigResponse(rsp)
+}
+
+func (c *ClientWithResponses) WorkloadOptimizationAPICreateCustomMetricsConfigWithResponse(ctx context.Context, clusterId string, body WorkloadOptimizationAPICreateCustomMetricsConfigJSONRequestBody) (*WorkloadOptimizationAPICreateCustomMetricsConfigResponse, error) {
+	rsp, err := c.WorkloadOptimizationAPICreateCustomMetricsConfig(ctx, clusterId, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseWorkloadOptimizationAPICreateCustomMetricsConfigResponse(rsp)
+}
+
+// WorkloadOptimizationAPIDeleteCustomMetricsConfigWithResponse request returning *WorkloadOptimizationAPIDeleteCustomMetricsConfigResponse
+func (c *ClientWithResponses) WorkloadOptimizationAPIDeleteCustomMetricsConfigWithResponse(ctx context.Context, clusterId string, id string) (*WorkloadOptimizationAPIDeleteCustomMetricsConfigResponse, error) {
+	rsp, err := c.WorkloadOptimizationAPIDeleteCustomMetricsConfig(ctx, clusterId, id)
+	if err != nil {
+		return nil, err
+	}
+	return ParseWorkloadOptimizationAPIDeleteCustomMetricsConfigResponse(rsp)
+}
+
+// WorkloadOptimizationAPIUpdateCustomMetricsConfigWithBodyWithResponse request with arbitrary body returning *WorkloadOptimizationAPIUpdateCustomMetricsConfigResponse
+func (c *ClientWithResponses) WorkloadOptimizationAPIUpdateCustomMetricsConfigWithBodyWithResponse(ctx context.Context, clusterId string, id string, contentType string, body io.Reader) (*WorkloadOptimizationAPIUpdateCustomMetricsConfigResponse, error) {
+	rsp, err := c.WorkloadOptimizationAPIUpdateCustomMetricsConfigWithBody(ctx, clusterId, id, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseWorkloadOptimizationAPIUpdateCustomMetricsConfigResponse(rsp)
+}
+
+func (c *ClientWithResponses) WorkloadOptimizationAPIUpdateCustomMetricsConfigWithResponse(ctx context.Context, clusterId string, id string, body WorkloadOptimizationAPIUpdateCustomMetricsConfigJSONRequestBody) (*WorkloadOptimizationAPIUpdateCustomMetricsConfigResponse, error) {
+	rsp, err := c.WorkloadOptimizationAPIUpdateCustomMetricsConfig(ctx, clusterId, id, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseWorkloadOptimizationAPIUpdateCustomMetricsConfigResponse(rsp)
 }
 
 // WorkloadOptimizationAPIListLimitRangesWithResponse request returning *WorkloadOptimizationAPIListLimitRangesResponse
@@ -33400,6 +33973,32 @@ func ParseExternalClusterAPIGetListNodesFiltersResponse(rsp *http.Response) (*Ex
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest ExternalclusterV1GetListNodesFiltersResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseExternalClusterAPIImpersonationServiceAccountResponse parses an HTTP response from a ExternalClusterAPIImpersonationServiceAccountWithResponse call
+func ParseExternalClusterAPIImpersonationServiceAccountResponse(rsp *http.Response) (*ExternalClusterAPIImpersonationServiceAccountResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &ExternalClusterAPIImpersonationServiceAccountResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest ExternalclusterV1ImpersonationServiceAccountResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -36735,6 +37334,110 @@ func ParseWorkloadOptimizationAPIGetAgentStatusResponse(rsp *http.Response) (*Wo
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest WorkloadoptimizationV1GetAgentStatusResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseWorkloadOptimizationAPIListCustomMetricsConfigsResponse parses an HTTP response from a WorkloadOptimizationAPIListCustomMetricsConfigsWithResponse call
+func ParseWorkloadOptimizationAPIListCustomMetricsConfigsResponse(rsp *http.Response) (*WorkloadOptimizationAPIListCustomMetricsConfigsResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &WorkloadOptimizationAPIListCustomMetricsConfigsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest WorkloadoptimizationV1ListCustomMetricsConfigsResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseWorkloadOptimizationAPICreateCustomMetricsConfigResponse parses an HTTP response from a WorkloadOptimizationAPICreateCustomMetricsConfigWithResponse call
+func ParseWorkloadOptimizationAPICreateCustomMetricsConfigResponse(rsp *http.Response) (*WorkloadOptimizationAPICreateCustomMetricsConfigResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &WorkloadOptimizationAPICreateCustomMetricsConfigResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest WorkloadoptimizationV1CustomMetricsConfig
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseWorkloadOptimizationAPIDeleteCustomMetricsConfigResponse parses an HTTP response from a WorkloadOptimizationAPIDeleteCustomMetricsConfigWithResponse call
+func ParseWorkloadOptimizationAPIDeleteCustomMetricsConfigResponse(rsp *http.Response) (*WorkloadOptimizationAPIDeleteCustomMetricsConfigResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &WorkloadOptimizationAPIDeleteCustomMetricsConfigResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest map[string]interface{}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseWorkloadOptimizationAPIUpdateCustomMetricsConfigResponse parses an HTTP response from a WorkloadOptimizationAPIUpdateCustomMetricsConfigWithResponse call
+func ParseWorkloadOptimizationAPIUpdateCustomMetricsConfigResponse(rsp *http.Response) (*WorkloadOptimizationAPIUpdateCustomMetricsConfigResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &WorkloadOptimizationAPIUpdateCustomMetricsConfigResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest WorkloadoptimizationV1CustomMetricsConfig
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
