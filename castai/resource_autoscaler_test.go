@@ -17,6 +17,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	testingterraform "github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/samber/lo"
 	"github.com/stretchr/testify/require"
 
@@ -1081,4 +1082,262 @@ resource "castai_autoscaler" "test" {
 `, enabled, isScopedMode, nodeTemplatesPartialMatchingEnabled,
 		unschedulablePodsEnabled, clusterLimitsEnabled, minCores, maxCores,
 		nodeDownscalerEnabled, emptyNodesEnabled, delaySeconds))
+}
+
+func TestAutoscalerResource_FlattenAutoscalerSettings(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    string
+		expected map[string]interface{}
+	}{
+		{
+			name: "basic policy with top-level fields",
+			input: `{
+				"enabled": true,
+				"isScopedMode": false,
+				"nodeTemplatesPartialMatchingEnabled": true
+			}`,
+			expected: map[string]interface{}{
+				"enabled":        true,
+				"is_scoped_mode": false,
+				"node_templates_partial_matching_enabled": true,
+			},
+		},
+		{
+			name: "policy with deprecated fields omitted",
+			input: `{
+				"enabled": true,
+				"unschedulablePods": {
+					"enabled": true,
+					"headroom": {"cpuPercentage": 10, "memoryPercentage": 10, "enabled": true},
+					"headroomSpot": {"cpuPercentage": 5, "memoryPercentage": 5, "enabled": false},
+					"nodeConstraints": {"minCpuCores": 2, "maxCpuCores": 32, "enabled": true},
+					"customInstancesEnabled": true,
+					"podPinner": {"enabled": true}
+				},
+				"spotInstances": {"enabled": true, "maxReclaimRate": 10}
+			}`,
+			expected: map[string]interface{}{
+				"enabled": true,
+				"unschedulable_pods": []interface{}{
+					map[string]interface{}{
+						"enabled": true,
+						"pod_pinner": []interface{}{
+							map[string]interface{}{
+								"enabled": true,
+							},
+						},
+					},
+				},
+			},
+		},
+		{
+			name: "policy with cluster limits",
+			input: `{
+				"enabled": true,
+				"clusterLimits": {
+					"enabled": true,
+					"cpu": {
+						"minCores": 1,
+						"maxCores": 100
+					}
+				}
+			}`,
+			expected: map[string]interface{}{
+				"enabled": true,
+				"cluster_limits": []interface{}{
+					map[string]interface{}{
+						"enabled": true,
+						"cpu": []interface{}{
+							map[string]interface{}{
+								"min_cores": float64(1),
+								"max_cores": float64(100),
+							},
+						},
+					},
+				},
+			},
+		},
+		{
+			name: "policy with node downscaler and evictor",
+			input: `{
+				"enabled": true,
+				"nodeDownscaler": {
+					"enabled": true,
+					"emptyNodes": {
+						"enabled": true,
+						"delaySeconds": 300
+					},
+					"evictor": {
+						"enabled": true,
+						"dryRun": false,
+						"aggressiveMode": true,
+						"scopedMode": false,
+						"cycleInterval": "5m",
+						"nodeGracePeriodMinutes": 10,
+						"podEvictionFailureBackOffInterval": "10s",
+						"ignorePodDisruptionBudgets": false
+					}
+				}
+			}`,
+			expected: map[string]interface{}{
+				"enabled": true,
+				"node_downscaler": []interface{}{
+					map[string]interface{}{
+						"enabled": true,
+						"empty_nodes": []interface{}{
+							map[string]interface{}{
+								"enabled":       true,
+								"delay_seconds": float64(300),
+							},
+						},
+						"evictor": []interface{}{
+							map[string]interface{}{
+								"enabled":                                true,
+								"dry_run":                                false,
+								"aggressive_mode":                        true,
+								"scoped_mode":                            false,
+								"cycle_interval":                         "5m",
+								"node_grace_period_minutes":              float64(10),
+								"pod_eviction_failure_back_off_interval": "10s",
+								"ignore_pod_disruption_budgets":          false,
+							},
+						},
+					},
+				},
+			},
+		},
+		{
+			name: "disabled evictor and pod_pinner are not included",
+			input: `{
+				"enabled": true,
+				"unschedulablePods": {
+					"enabled": true,
+					"podPinner": {"enabled": false}
+				},
+				"nodeDownscaler": {
+					"enabled": true,
+					"emptyNodes": {"enabled": true, "delaySeconds": 120},
+					"evictor": {"enabled": false, "dryRun": false}
+				}
+			}`,
+			expected: map[string]interface{}{
+				"enabled": true,
+				"unschedulable_pods": []interface{}{
+					map[string]interface{}{
+						"enabled": true,
+					},
+				},
+				"node_downscaler": []interface{}{
+					map[string]interface{}{
+						"enabled": true,
+						"empty_nodes": []interface{}{
+							map[string]interface{}{
+								"enabled":       true,
+								"delay_seconds": float64(120),
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			r := require.New(t)
+
+			result, err := flattenAutoscalerSettings([]byte(tt.input))
+			r.NoError(err)
+			r.NotNil(result)
+			r.Len(result, 1)
+
+			// Compare each key in expected with result
+			for key, expectedValue := range tt.expected {
+				actualValue, ok := result[0][key]
+				r.True(ok, "expected key %s not found in result", key)
+				r.Equal(expectedValue, actualValue, "mismatch for key %s", key)
+			}
+		})
+	}
+}
+
+func TestAutoscalerResource_FlattenAutoscalerSettings_InvalidJSON(t *testing.T) {
+	r := require.New(t)
+
+	_, err := flattenAutoscalerSettings([]byte("invalid json"))
+	r.Error(err)
+	r.Contains(err.Error(), "unmarshaling policies JSON")
+}
+
+func TestAutoscalerResource_FlattenEvictor(t *testing.T) {
+	r := require.New(t)
+
+	input := map[string]interface{}{
+		"enabled":                           true,
+		"dryRun":                            false,
+		"aggressiveMode":                    true,
+		"scopedMode":                        false,
+		"cycleInterval":                     "1m",
+		"nodeGracePeriodMinutes":            5,
+		"podEvictionFailureBackOffInterval": "5s",
+		"ignorePodDisruptionBudgets":        false,
+	}
+
+	result := flattenEvictor(input)
+
+	r.Equal(true, result["enabled"])
+	r.Equal(false, result["dry_run"])
+	r.Equal(true, result["aggressive_mode"])
+	r.Equal(false, result["scoped_mode"])
+	r.Equal("1m", result["cycle_interval"])
+	r.Equal(5, result["node_grace_period_minutes"])
+	r.Equal("5s", result["pod_eviction_failure_back_off_interval"])
+	r.Equal(false, result["ignore_pod_disruption_budgets"])
+}
+
+func TestAccEKS_ResourceAutoscaler_Import(t *testing.T) {
+	rName := fmt.Sprintf("%v-autoscaler-import-%v", ResourcePrefix, acctest.RandString(8))
+	clusterName, _ := lo.Coalesce(os.Getenv("CLUSTER_NAME"), "cost-terraform")
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: providerFactories,
+		Steps: []resource.TestStep{
+			// Step 1: Create autoscaler resource
+			{
+				Config: testAccAutoscalerConfig(rName, clusterName, true, false),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("castai_autoscaler.test", "autoscaler_settings.0.enabled", "true"),
+				),
+			},
+			// Step 2: Import the resource
+			{
+				ResourceName: "castai_autoscaler.test",
+				ImportStateIdFunc: func(s *testingterraform.State) (string, error) {
+					rs, ok := s.RootModule().Resources["castai_eks_cluster.test"]
+					if !ok {
+						return "", fmt.Errorf("castai_eks_cluster.test not found in state")
+					}
+					return rs.Primary.ID, nil
+				},
+				ImportState:       true,
+				ImportStateVerify: true,
+				// Deprecated fields won't be populated during import, so ignore them
+				ImportStateVerifyIgnore: []string{
+					"autoscaler_settings.0.unschedulable_pods.0.headroom",
+					"autoscaler_settings.0.unschedulable_pods.0.headroom_spot",
+					"autoscaler_settings.0.unschedulable_pods.0.node_constraints",
+					"autoscaler_settings.0.unschedulable_pods.0.custom_instances_enabled",
+					"autoscaler_settings.0.spot_instances",
+				},
+			},
+		},
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"aws": {
+				Source:            "hashicorp/aws",
+				VersionConstraint: "~> 5.0",
+			},
+		},
+	})
 }
