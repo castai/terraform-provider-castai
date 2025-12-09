@@ -39,7 +39,7 @@ locals {
 
 resource "aws_eks_access_entry" "access_entry" {
   count         = local.access_entry ? 1 : 0
-  cluster_name  = var.aws_cluster_name
+  cluster_name  = data.aws_eks_cluster.existing_cluster.name
   principal_arn = module.castai-eks-role-iam.instance_profile_role_arn
   type          = "EC2_LINUX"
 }
