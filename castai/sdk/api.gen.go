@@ -265,6 +265,13 @@ const (
 	DboV1CacheGroupProtocolTypeUnspecified DboV1CacheGroupProtocolType = "Unspecified"
 )
 
+// Defines values for DboV1CachePerformanceTimeseriesEventType.
+const (
+	DIRECTMODEDISABLED   DboV1CachePerformanceTimeseriesEventType = "DIRECT_MODE_DISABLED"
+	DIRECTMODEENABLED    DboV1CachePerformanceTimeseriesEventType = "DIRECT_MODE_ENABLED"
+	EVENTTYPEUNSPECIFIED DboV1CachePerformanceTimeseriesEventType = "EVENT_TYPE_UNSPECIFIED"
+)
+
 // Defines values for DboV1CacheStatus.
 const (
 	DboV1CacheStatusActive     DboV1CacheStatus = "Active"
@@ -4125,11 +4132,24 @@ type DboV1CachePerformanceTimeseriesCachePerformance struct {
 	ProjectedCacheHits string `json:"projectedCacheHits"`
 }
 
+// DboV1CachePerformanceTimeseriesEvent Event describes single event that happened within time bucket.
+type DboV1CachePerformanceTimeseriesEvent struct {
+	// EventType EventType defines different types of events for the metric.events list.
+	EventType DboV1CachePerformanceTimeseriesEventType `json:"eventType"`
+	Timestamp time.Time                                `json:"timestamp"`
+}
+
+// DboV1CachePerformanceTimeseriesEventType EventType defines different types of events for the metric.events list.
+type DboV1CachePerformanceTimeseriesEventType string
+
 // DboV1CachePerformanceTimeseriesTimeseries defines model for dbo.v1.CachePerformanceTimeseries.Timeseries.
 type DboV1CachePerformanceTimeseriesTimeseries struct {
 	// Databases Cache performance for a cache configuration.
 	Databases *[]DboV1CachePerformanceTimeseriesCachePerformance `json:"databases,omitempty"`
-	Timestamp time.Time                                          `json:"timestamp"`
+
+	// Events Events that occurred in this time bucket since previous timestamp.
+	Events    *[]DboV1CachePerformanceTimeseriesEvent `json:"events,omitempty"`
+	Timestamp time.Time                               `json:"timestamp"`
 }
 
 // DboV1CacheQuery defines model for dbo.v1.CacheQuery.
@@ -8337,6 +8357,9 @@ type WorkloadoptimizationV1MetricTarget struct {
 // AVERAGE_VALUE - A metric value averaged across all pods (e.g., 200Mi).
 // UTILIZATION - A percentage of the requested resource utilization (e.g., 80).
 type WorkloadoptimizationV1MetricTargetType string
+
+// WorkloadoptimizationV1MigrateClusterToHPAV2Response defines model for workloadoptimization.v1.MigrateClusterToHPAV2Response.
+type WorkloadoptimizationV1MigrateClusterToHPAV2Response = map[string]interface{}
 
 // WorkloadoptimizationV1NewCustomMetricsConfig defines model for workloadoptimization.v1.NewCustomMetricsConfig.
 type WorkloadoptimizationV1NewCustomMetricsConfig struct {
