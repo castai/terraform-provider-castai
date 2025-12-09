@@ -980,9 +980,6 @@ type ClientInterface interface {
 	// WorkloadOptimizationAPIGetWorkloadFilters request
 	WorkloadOptimizationAPIGetWorkloadFilters(ctx context.Context, clusterId string, params *WorkloadOptimizationAPIGetWorkloadFiltersParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// WorkloadOptimizationAPIMigrateClusterToHPAV2 request
-	WorkloadOptimizationAPIMigrateClusterToHPAV2(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error)
-
 	// WorkloadOptimizationAPIGetWorkload request
 	WorkloadOptimizationAPIGetWorkload(ctx context.Context, clusterId string, workloadId string, params *WorkloadOptimizationAPIGetWorkloadParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -4895,18 +4892,6 @@ func (c *Client) WorkloadOptimizationAPIGetWorkloadsSummaryMetrics(ctx context.C
 
 func (c *Client) WorkloadOptimizationAPIGetWorkloadFilters(ctx context.Context, clusterId string, params *WorkloadOptimizationAPIGetWorkloadFiltersParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewWorkloadOptimizationAPIGetWorkloadFiltersRequest(c.Server, clusterId, params)
-	if err != nil {
-		return nil, err
-	}
-	req = req.WithContext(ctx)
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
-}
-
-func (c *Client) WorkloadOptimizationAPIMigrateClusterToHPAV2(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewWorkloadOptimizationAPIMigrateClusterToHPAV2Request(c.Server, clusterId)
 	if err != nil {
 		return nil, err
 	}
@@ -19650,40 +19635,6 @@ func NewWorkloadOptimizationAPIGetWorkloadFiltersRequest(server string, clusterI
 	return req, nil
 }
 
-// NewWorkloadOptimizationAPIMigrateClusterToHPAV2Request generates requests for WorkloadOptimizationAPIMigrateClusterToHPAV2
-func NewWorkloadOptimizationAPIMigrateClusterToHPAV2Request(server string, clusterId string) (*http.Request, error) {
-	var err error
-
-	var pathParam0 string
-
-	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "clusterId", runtime.ParamLocationPath, clusterId)
-	if err != nil {
-		return nil, err
-	}
-
-	serverURL, err := url.Parse(server)
-	if err != nil {
-		return nil, err
-	}
-
-	operationPath := fmt.Sprintf("/v1/workload-autoscaling/clusters/%s/workloads/migrate-to-hpa-v2", pathParam0)
-	if operationPath[0] == '/' {
-		operationPath = "." + operationPath
-	}
-
-	queryURL, err := serverURL.Parse(operationPath)
-	if err != nil {
-		return nil, err
-	}
-
-	req, err := http.NewRequest("POST", queryURL.String(), nil)
-	if err != nil {
-		return nil, err
-	}
-
-	return req, nil
-}
-
 // NewWorkloadOptimizationAPIGetWorkloadRequest generates requests for WorkloadOptimizationAPIGetWorkload
 func NewWorkloadOptimizationAPIGetWorkloadRequest(server string, clusterId string, workloadId string, params *WorkloadOptimizationAPIGetWorkloadParams) (*http.Request, error) {
 	var err error
@@ -21172,9 +21123,6 @@ type ClientWithResponsesInterface interface {
 
 	// WorkloadOptimizationAPIGetWorkloadFilters request
 	WorkloadOptimizationAPIGetWorkloadFiltersWithResponse(ctx context.Context, clusterId string, params *WorkloadOptimizationAPIGetWorkloadFiltersParams) (*WorkloadOptimizationAPIGetWorkloadFiltersResponse, error)
-
-	// WorkloadOptimizationAPIMigrateClusterToHPAV2 request
-	WorkloadOptimizationAPIMigrateClusterToHPAV2WithResponse(ctx context.Context, clusterId string) (*WorkloadOptimizationAPIMigrateClusterToHPAV2Response, error)
 
 	// WorkloadOptimizationAPIGetWorkload request
 	WorkloadOptimizationAPIGetWorkloadWithResponse(ctx context.Context, clusterId string, workloadId string, params *WorkloadOptimizationAPIGetWorkloadParams) (*WorkloadOptimizationAPIGetWorkloadResponse, error)
@@ -28477,36 +28425,6 @@ func (r WorkloadOptimizationAPIGetWorkloadFiltersResponse) GetBody() []byte {
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
-type WorkloadOptimizationAPIMigrateClusterToHPAV2Response struct {
-	Body         []byte
-	HTTPResponse *http.Response
-	JSON200      *WorkloadoptimizationV1MigrateClusterToHPAV2Response
-}
-
-// Status returns HTTPResponse.Status
-func (r WorkloadOptimizationAPIMigrateClusterToHPAV2Response) Status() string {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.Status
-	}
-	return http.StatusText(0)
-}
-
-// StatusCode returns HTTPResponse.StatusCode
-func (r WorkloadOptimizationAPIMigrateClusterToHPAV2Response) StatusCode() int {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.StatusCode
-	}
-	return 0
-}
-
-// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-// Body returns body of byte array
-func (r WorkloadOptimizationAPIMigrateClusterToHPAV2Response) GetBody() []byte {
-	return r.Body
-}
-
-// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-
 type WorkloadOptimizationAPIGetWorkloadResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -31608,15 +31526,6 @@ func (c *ClientWithResponses) WorkloadOptimizationAPIGetWorkloadFiltersWithRespo
 		return nil, err
 	}
 	return ParseWorkloadOptimizationAPIGetWorkloadFiltersResponse(rsp)
-}
-
-// WorkloadOptimizationAPIMigrateClusterToHPAV2WithResponse request returning *WorkloadOptimizationAPIMigrateClusterToHPAV2Response
-func (c *ClientWithResponses) WorkloadOptimizationAPIMigrateClusterToHPAV2WithResponse(ctx context.Context, clusterId string) (*WorkloadOptimizationAPIMigrateClusterToHPAV2Response, error) {
-	rsp, err := c.WorkloadOptimizationAPIMigrateClusterToHPAV2(ctx, clusterId)
-	if err != nil {
-		return nil, err
-	}
-	return ParseWorkloadOptimizationAPIMigrateClusterToHPAV2Response(rsp)
 }
 
 // WorkloadOptimizationAPIGetWorkloadWithResponse request returning *WorkloadOptimizationAPIGetWorkloadResponse
@@ -37977,32 +37886,6 @@ func ParseWorkloadOptimizationAPIGetWorkloadFiltersResponse(rsp *http.Response) 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest WorkloadoptimizationV1GetWorkloadFiltersResponse
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON200 = &dest
-
-	}
-
-	return response, nil
-}
-
-// ParseWorkloadOptimizationAPIMigrateClusterToHPAV2Response parses an HTTP response from a WorkloadOptimizationAPIMigrateClusterToHPAV2WithResponse call
-func ParseWorkloadOptimizationAPIMigrateClusterToHPAV2Response(rsp *http.Response) (*WorkloadOptimizationAPIMigrateClusterToHPAV2Response, error) {
-	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
-	if err != nil {
-		return nil, err
-	}
-
-	response := &WorkloadOptimizationAPIMigrateClusterToHPAV2Response{
-		Body:         bodyBytes,
-		HTTPResponse: rsp,
-	}
-
-	switch {
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest WorkloadoptimizationV1MigrateClusterToHPAV2Response
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}

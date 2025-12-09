@@ -613,7 +613,7 @@ func flattenAutoscalerSettings(policiesJSON []byte) ([]map[string]interface{}, e
 
 // flattenUnschedulablePods converts the unschedulablePods API response to Terraform structure.
 // Deprecated fields (headroom, headroomSpot, nodeConstraints, customInstancesEnabled) are omitted.
-// Only includes pod_pinner if enabled to avoid state mismatch with configs that don't specify it.
+// podPinner is included if present in API response so users can track changes made via UI/API.
 func flattenUnschedulablePods(unschedulablePods map[string]interface{}) map[string]interface{} {
 	up := make(map[string]interface{})
 
@@ -623,7 +623,7 @@ func flattenUnschedulablePods(unschedulablePods map[string]interface{}) map[stri
 
 	// Note: Omitting headroom, headroomSpot, nodeConstraints, customInstancesEnabled (deprecated)
 
-	// Pod Pinner - only include if enabled to avoid state mismatch
+	// Pod Pinner - include if enabled so users can track changes
 	if podPinner, ok := unschedulablePods["podPinner"].(map[string]interface{}); ok {
 		if enabled, ok := podPinner["enabled"].(bool); ok && enabled {
 			pp := map[string]interface{}{
@@ -893,6 +893,18 @@ func filterVolatileFields(policiesJSON []byte) []byte {
 	if up, ok := policies["unschedulablePods"].(map[string]interface{}); ok {
 		delete(up, "nodeConstraints")        // synced with node template min/max CPU/RAM
 		delete(up, "customInstancesEnabled") // synced with node template
+
+		// Remove API-computed status fields that change based on cluster state
+		if podPinner, ok := up["podPinner"].(map[string]interface{}); ok {
+			delete(podPinner, "status")
+		}
+	}
+
+	// Remove API-computed status field from evictor
+	if nd, ok := policies["nodeDownscaler"].(map[string]interface{}); ok {
+		if evictor, ok := nd["evictor"].(map[string]interface{}); ok {
+			delete(evictor, "status")
+		}
 	}
 
 	filtered, err := json.Marshal(policies)

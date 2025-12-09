@@ -1058,6 +1058,10 @@ func TestAccEKS_ResourceAutoscaler_basic(t *testing.T) {
 				},
 				ImportState:       true,
 				ImportStateVerify: true,
+				// Ignore pod_pinner in verification - API returns it by default even when not configured
+				ImportStateVerifyIgnore: []string{
+					"autoscaler_settings.0.unschedulable_pods.0.pod_pinner",
+				},
 			},
 			// Step 4: Modify default node template and verify autoscaler doesn't drift
 			// This tests the policy - node template sync behavior - when the default node template
@@ -1477,4 +1481,131 @@ func TestAutoscalerResource_FilterVolatileFields_NestedDeprecated(t *testing.T) 
 	// customInstancesEnabled should be removed (synced with node template)
 	_, exists = up["customInstancesEnabled"]
 	r.False(exists, "unschedulablePods.customInstancesEnabled should be removed")
+}
+
+func TestAutoscalerResource_FilterVolatileFields_StatusFields(t *testing.T) {
+	r := require.New(t)
+
+	tests := []struct {
+		name    string
+		input   string
+		checkFn func(map[string]interface{})
+	}{
+		{
+			name: "removes podPinner status",
+			input: `{
+				"enabled": true,
+				"unschedulablePods": {
+					"enabled": true,
+					"podPinner": {
+						"enabled": true,
+						"status": "PodPinnerStatus_Unknown"
+					}
+				}
+			}`,
+			checkFn: func(filtered map[string]interface{}) {
+				up, ok := filtered["unschedulablePods"].(map[string]interface{})
+				r.True(ok, "unschedulablePods should exist")
+
+				podPinner, ok := up["podPinner"].(map[string]interface{})
+				r.True(ok, "podPinner should exist")
+
+				// enabled should be preserved
+				enabled, exists := podPinner["enabled"]
+				r.True(exists, "podPinner.enabled should exist")
+				r.True(enabled.(bool), "podPinner.enabled should be true")
+
+				// status should be removed
+				_, exists = podPinner["status"]
+				r.False(exists, "podPinner.status should be removed")
+			},
+		},
+		{
+			name: "removes evictor status",
+			input: `{
+				"enabled": true,
+				"nodeDownscaler": {
+					"enabled": true,
+					"evictor": {
+						"enabled": true,
+						"dryRun": false,
+						"status": "Unknown"
+					}
+				}
+			}`,
+			checkFn: func(filtered map[string]interface{}) {
+				nd, ok := filtered["nodeDownscaler"].(map[string]interface{})
+				r.True(ok, "nodeDownscaler should exist")
+
+				evictor, ok := nd["evictor"].(map[string]interface{})
+				r.True(ok, "evictor should exist")
+
+				// enabled and dryRun should be preserved
+				enabled, exists := evictor["enabled"]
+				r.True(exists, "evictor.enabled should exist")
+				r.True(enabled.(bool), "evictor.enabled should be true")
+
+				dryRun, exists := evictor["dryRun"]
+				r.True(exists, "evictor.dryRun should exist")
+				r.False(dryRun.(bool), "evictor.dryRun should be false")
+
+				// status should be removed
+				_, exists = evictor["status"]
+				r.False(exists, "evictor.status should be removed")
+			},
+		},
+		{
+			name: "removes both podPinner and evictor status",
+			input: `{
+				"enabled": true,
+				"unschedulablePods": {
+					"enabled": true,
+					"podPinner": {
+						"enabled": true,
+						"status": "PodPinnerStatus_Missing"
+					}
+				},
+				"nodeDownscaler": {
+					"enabled": true,
+					"evictor": {
+						"enabled": true,
+						"status": "Missing"
+					}
+				}
+			}`,
+			checkFn: func(filtered map[string]interface{}) {
+				// Check podPinner
+				up, ok := filtered["unschedulablePods"].(map[string]interface{})
+				r.True(ok, "unschedulablePods should exist")
+
+				podPinner, ok := up["podPinner"].(map[string]interface{})
+				r.True(ok, "podPinner should exist")
+
+				_, exists := podPinner["status"]
+				r.False(exists, "podPinner.status should be removed")
+
+				// Check evictor
+				nd, ok := filtered["nodeDownscaler"].(map[string]interface{})
+				r.True(ok, "nodeDownscaler should exist")
+
+				evictor, ok := nd["evictor"].(map[string]interface{})
+				r.True(ok, "evictor should exist")
+
+				_, exists = evictor["status"]
+				r.False(exists, "evictor.status should be removed")
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := filterVolatileFields([]byte(tt.input))
+
+			var filtered map[string]interface{}
+			err := json.Unmarshal(result, &filtered)
+			r.NoError(err, "should unmarshal filtered result")
+
+			tt.checkFn(filtered)
+		})
+	}
 }
