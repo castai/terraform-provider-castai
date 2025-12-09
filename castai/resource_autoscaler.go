@@ -741,6 +741,9 @@ func resourceCastaiAutoscalerDiff(ctx context.Context, d *schema.ResourceDiff, m
 		return nil
 	}
 
+	// Filter out volatile fields that change independently on API side
+	policies = filterVolatileFields(policies)
+
 	return d.SetNew(FieldAutoscalerPolicies, string(policies))
 }
 
