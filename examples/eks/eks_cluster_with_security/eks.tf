@@ -29,6 +29,12 @@ module "eks" {
       name           = "${var.cluster_name}-ng-1"
       instance_types = ["m5.large", "m5.xlarge", "t3.large"]
       desired_size   = 2
+
+      metadata_options = {
+        http_endpoint               = "enabled"
+        http_tokens                 = "required"
+        http_put_response_hop_limit = 2
+      }
     }
   }
 
