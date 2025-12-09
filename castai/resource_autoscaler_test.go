@@ -405,8 +405,8 @@ func TestAutoscalerResource_ReadPoliciesAction(t *testing.T) {
 		},
 	}
 
-	currentPoliciesBytes, err := normalizeJSON([]byte(`
-		{
+	// API returns full policies including deprecated/synced fields
+	apiPolicies := `{
 		    "enabled": true,
 		    "isScopedMode": false,
 		    "unschedulablePods": {
@@ -443,10 +443,43 @@ func TestAutoscalerResource_ReadPoliciesAction(t *testing.T) {
 		            "delaySeconds": 0
 		        }
 		    }
+		}`
+
+	// Expected output has volatile/synced fields filtered out (nodeConstraints removed)
+	expectedPoliciesBytes, err := normalizeJSON([]byte(`{
+		    "enabled": true,
+		    "isScopedMode": false,
+		    "unschedulablePods": {
+		        "enabled": true,
+		        "headroom": {
+		            "cpuPercentage": 10,
+		            "memoryPercentage": 10,
+		            "enabled": true
+		        },
+		        "headroomSpot": {
+		            "cpuPercentage": 10,
+		            "memoryPercentage": 10,
+		            "enabled": true
+		        },
+		        "diskGibToCpuRatio": 25
+		    },
+		    "clusterLimits": {
+		        "enabled": false,
+		        "cpu": {
+		            "minCores": 1,
+		            "maxCores": 20
+		        }
+		    },
+		    "nodeDownscaler": {
+		        "emptyNodes": {
+		            "enabled": false,
+		            "delaySeconds": 0
+		        }
+		    }
 		}`))
 	r.NoError(err)
+	expectedPolicies := string(expectedPoliciesBytes)
 
-	currentPolicies := string(currentPoliciesBytes)
 	resource := resourceAutoscaler()
 
 	clusterId := "cluster_id"
@@ -456,7 +489,7 @@ func TestAutoscalerResource_ReadPoliciesAction(t *testing.T) {
 	state := terraform.NewInstanceStateShimmedFromValue(val, 0)
 	data := resource.Data(state)
 
-	body := io.NopCloser(bytes.NewReader([]byte(currentPolicies)))
+	body := io.NopCloser(bytes.NewReader([]byte(apiPolicies)))
 	response := &http.Response{StatusCode: 200, Body: body}
 
 	mockClient.EXPECT().PoliciesAPIGetClusterPolicies(gomock.Any(), clusterId, gomock.Any()).Return(response, nil).Times(1)
@@ -465,7 +498,7 @@ func TestAutoscalerResource_ReadPoliciesAction(t *testing.T) {
 
 	result := resource.ReadContext(ctx, data, provider)
 	r.Nil(result)
-	r.Equal(currentPolicies, data.Get(FieldAutoscalerPolicies))
+	r.Equal(expectedPolicies, data.Get(FieldAutoscalerPolicies))
 }
 
 func TestAutoscalerResource_CustomizeDiff(t *testing.T) {
@@ -1124,6 +1157,15 @@ resource "castai_node_template" "default" {
     on_demand = true
     spot      = true
   }
+
+  # Ignore computed fields that are populated by the API
+  lifecycle {
+    ignore_changes = [
+      configuration_id,
+      constraints[0].azs,
+      constraints[0].cpu_manufacturers,
+    ]
+  }
 }
 `)
 }
@@ -1354,13 +1396,19 @@ func TestAutoscalerResource_FilterVolatileFields(t *testing.T) {
 			shouldGone:  []string{"defaultNodeTemplateVersion"},
 		},
 		{
+			name:        "removes spotInstances (synced with node template)",
+			input:       `{"enabled":true,"spotInstances":{"enabled":true,"maxReclaimRate":50}}`,
+			shouldExist: []string{"enabled"},
+			shouldGone:  []string{"spotInstances"},
+		},
+		{
 			name:        "handles missing defaultNodeTemplateVersion",
 			input:       `{"enabled":true,"isScopedMode":false}`,
 			shouldExist: []string{"enabled", "isScopedMode"},
 			shouldGone:  []string{"defaultNodeTemplateVersion"},
 		},
 		{
-			name:        "preserves nested structures",
+			name:        "preserves nested structures except deprecated fields",
 			input:       `{"enabled":true,"defaultNodeTemplateVersion":"10","nodeDownscaler":{"enabled":true}}`,
 			shouldExist: []string{"enabled", "nodeDownscaler"},
 			shouldGone:  []string{"defaultNodeTemplateVersion"},
@@ -1388,4 +1436,45 @@ func TestAutoscalerResource_FilterVolatileFields(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestAutoscalerResource_FilterVolatileFields_NestedDeprecated(t *testing.T) {
+	r := require.New(t)
+
+	// Test that nested deprecated fields in unschedulablePods are removed
+	input := `{
+		"enabled": true,
+		"unschedulablePods": {
+			"enabled": true,
+			"nodeConstraints": {"minCpuCores": 2, "maxCpuCores": 96},
+			"customInstancesEnabled": true,
+			"headroom": {"cpuPercentage": 10}
+		}
+	}`
+
+	result := filterVolatileFields([]byte(input))
+
+	var filtered map[string]interface{}
+	err := json.Unmarshal(result, &filtered)
+	r.NoError(err)
+
+	// unschedulablePods should still exist
+	up, ok := filtered["unschedulablePods"].(map[string]interface{})
+	r.True(ok, "unschedulablePods should exist")
+
+	// enabled should be preserved
+	_, exists := up["enabled"]
+	r.True(exists, "unschedulablePods.enabled should be preserved")
+
+	// headroom should be preserved (not a synced field)
+	_, exists = up["headroom"]
+	r.True(exists, "unschedulablePods.headroom should be preserved")
+
+	// nodeConstraints should be removed (synced with node template)
+	_, exists = up["nodeConstraints"]
+	r.False(exists, "unschedulablePods.nodeConstraints should be removed")
+
+	// customInstancesEnabled should be removed (synced with node template)
+	_, exists = up["customInstancesEnabled"]
+	r.False(exists, "unschedulablePods.customInstancesEnabled should be removed")
 }

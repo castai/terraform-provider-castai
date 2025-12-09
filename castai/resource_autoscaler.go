@@ -878,13 +878,23 @@ func getClusterId(data types.ResourceProvider) string {
 }
 
 // filterVolatileFields removes API-computed fields that change independently and cause unnecessary drift.
+// This includes fields that are bidirectionally synced with node templates.
 func filterVolatileFields(policiesJSON []byte) []byte {
 	var policies map[string]interface{}
 	if err := json.Unmarshal(policiesJSON, &policies); err != nil {
 		return policiesJSON // return as-is if unmarshal fails
 	}
-	// Remove fields that change independently on API side
+
+	// Remove fields that change due to policy↔node template sync
 	delete(policies, "defaultNodeTemplateVersion")
+	delete(policies, "spotInstances") // synced with node template spot settings
+
+	// Remove nested deprecated fields that sync with node templates
+	if up, ok := policies["unschedulablePods"].(map[string]interface{}); ok {
+		delete(up, "nodeConstraints")        // synced with node template min/max CPU/RAM
+		delete(up, "customInstancesEnabled") // synced with node template
+	}
+
 	filtered, err := json.Marshal(policies)
 	if err != nil {
 		return policiesJSON
