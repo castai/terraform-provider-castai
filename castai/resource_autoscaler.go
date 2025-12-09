@@ -538,6 +538,9 @@ func autoscalerStateImporter(ctx context.Context, d *schema.ResourceData, meta i
 		return nil, fmt.Errorf("fetching autoscaler policies for cluster %s: %w", clusterID, err)
 	}
 
+	// Filter out volatile fields that change independently on API side
+	currentPolicies = filterVolatileFields(currentPolicies)
+
 	// Set the computed autoscaler_policies field
 	if err := d.Set(FieldAutoscalerPolicies, string(currentPolicies)); err != nil {
 		return nil, fmt.Errorf("setting autoscaler_policies: %w", err)
@@ -850,6 +853,9 @@ func readAutoscalerPolicies(ctx context.Context, data *schema.ResourceData, meta
 		return err
 	}
 
+	// Filter out volatile fields that change independently on API side
+	currentPolicies = filterVolatileFields(currentPolicies)
+
 	err = data.Set(FieldAutoscalerPolicies, string(currentPolicies))
 	if err != nil {
 		log.Printf("[ERROR] Failed to set field: %v", err)
@@ -866,6 +872,21 @@ func getClusterId(data types.ResourceProvider) string {
 	}
 
 	return value.(string)
+}
+
+// filterVolatileFields removes API-computed fields that change independently and cause unnecessary drift.
+func filterVolatileFields(policiesJSON []byte) []byte {
+	var policies map[string]interface{}
+	if err := json.Unmarshal(policiesJSON, &policies); err != nil {
+		return policiesJSON // return as-is if unmarshal fails
+	}
+	// Remove fields that change independently on API side
+	delete(policies, "defaultNodeTemplateVersion")
+	filtered, err := json.Marshal(policies)
+	if err != nil {
+		return policiesJSON
+	}
+	return filtered
 }
 
 func getChangedPolicies(ctx context.Context, data types.ResourceProvider, meta interface{}, clusterId string) ([]byte, error) {
