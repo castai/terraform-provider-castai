@@ -5227,6 +5227,38 @@ func NewCommitmentsAPIGetCommitmentUsageHistoryRequest(server string, organizati
 			}
 		}
 
+		if params.Cloud != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "cloud", runtime.ParamLocationQuery, *params.Cloud); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.CommitmentType != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "commitmentType", runtime.ParamLocationQuery, *params.CommitmentType); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
 		queryURL.RawQuery = queryValues.Encode()
 	}
 

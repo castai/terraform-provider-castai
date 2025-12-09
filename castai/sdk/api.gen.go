@@ -487,11 +487,11 @@ const (
 
 // Defines values for NodetemplatesV1TemplateConstraintsCPUManufacturer.
 const (
-	AMD    NodetemplatesV1TemplateConstraintsCPUManufacturer = "AMD"
-	AMPERE NodetemplatesV1TemplateConstraintsCPUManufacturer = "AMPERE"
-	APPLE  NodetemplatesV1TemplateConstraintsCPUManufacturer = "APPLE"
-	AWS    NodetemplatesV1TemplateConstraintsCPUManufacturer = "AWS"
-	INTEL  NodetemplatesV1TemplateConstraintsCPUManufacturer = "INTEL"
+	NodetemplatesV1TemplateConstraintsCPUManufacturerAMD    NodetemplatesV1TemplateConstraintsCPUManufacturer = "AMD"
+	NodetemplatesV1TemplateConstraintsCPUManufacturerAMPERE NodetemplatesV1TemplateConstraintsCPUManufacturer = "AMPERE"
+	NodetemplatesV1TemplateConstraintsCPUManufacturerAPPLE  NodetemplatesV1TemplateConstraintsCPUManufacturer = "APPLE"
+	NodetemplatesV1TemplateConstraintsCPUManufacturerAWS    NodetemplatesV1TemplateConstraintsCPUManufacturer = "AWS"
+	NodetemplatesV1TemplateConstraintsCPUManufacturerINTEL  NodetemplatesV1TemplateConstraintsCPUManufacturer = "INTEL"
 )
 
 // Defines values for NodetemplatesV1TemplateConstraintsConstraintState.
@@ -830,6 +830,30 @@ const (
 	AGGREGATIONINTERVALUNSPECIFIED CommitmentsAPIGetCommitmentUsageHistoryParamsAggregationInterval = "AGGREGATION_INTERVAL_UNSPECIFIED"
 	DAY                            CommitmentsAPIGetCommitmentUsageHistoryParamsAggregationInterval = "DAY"
 	HOUR                           CommitmentsAPIGetCommitmentUsageHistoryParamsAggregationInterval = "HOUR"
+)
+
+// Defines values for CommitmentsAPIGetCommitmentUsageHistoryParamsCloud.
+const (
+	CommitmentsAPIGetCommitmentUsageHistoryParamsCloudAWS     CommitmentsAPIGetCommitmentUsageHistoryParamsCloud = "AWS"
+	CommitmentsAPIGetCommitmentUsageHistoryParamsCloudAZURE   CommitmentsAPIGetCommitmentUsageHistoryParamsCloud = "AZURE"
+	CommitmentsAPIGetCommitmentUsageHistoryParamsCloudAws     CommitmentsAPIGetCommitmentUsageHistoryParamsCloud = "aws"
+	CommitmentsAPIGetCommitmentUsageHistoryParamsCloudAzure   CommitmentsAPIGetCommitmentUsageHistoryParamsCloud = "azure"
+	CommitmentsAPIGetCommitmentUsageHistoryParamsCloudGCP     CommitmentsAPIGetCommitmentUsageHistoryParamsCloud = "GCP"
+	CommitmentsAPIGetCommitmentUsageHistoryParamsCloudGcp     CommitmentsAPIGetCommitmentUsageHistoryParamsCloud = "gcp"
+	CommitmentsAPIGetCommitmentUsageHistoryParamsCloudINVALID CommitmentsAPIGetCommitmentUsageHistoryParamsCloud = "INVALID"
+	CommitmentsAPIGetCommitmentUsageHistoryParamsCloudInvalid CommitmentsAPIGetCommitmentUsageHistoryParamsCloud = "invalid"
+	CommitmentsAPIGetCommitmentUsageHistoryParamsCloudUNKNOWN CommitmentsAPIGetCommitmentUsageHistoryParamsCloud = "UNKNOWN"
+	CommitmentsAPIGetCommitmentUsageHistoryParamsCloudUnknown CommitmentsAPIGetCommitmentUsageHistoryParamsCloud = "unknown"
+)
+
+// Defines values for CommitmentsAPIGetCommitmentUsageHistoryParamsCommitmentType.
+const (
+	CAPACITYBLOCK               CommitmentsAPIGetCommitmentUsageHistoryParamsCommitmentType = "CAPACITY_BLOCK"
+	COMMITMENTTYPEUNSPECIFIED   CommitmentsAPIGetCommitmentUsageHistoryParamsCommitmentType = "COMMITMENT_TYPE_UNSPECIFIED"
+	ONDEMANDCAPACITYRESERVATION CommitmentsAPIGetCommitmentUsageHistoryParamsCommitmentType = "ON_DEMAND_CAPACITY_RESERVATION"
+	RESERVEDINSTANCE            CommitmentsAPIGetCommitmentUsageHistoryParamsCommitmentType = "RESERVED_INSTANCE"
+	RESOURCECUD                 CommitmentsAPIGetCommitmentUsageHistoryParamsCommitmentType = "RESOURCE_CUD"
+	SAVINGSPLAN                 CommitmentsAPIGetCommitmentUsageHistoryParamsCommitmentType = "SAVINGS_PLAN"
 )
 
 // Defines values for CommitmentsAPIImportAWSReservedInstancesParamsBehaviour.
@@ -9334,10 +9358,28 @@ type CommitmentsAPIGetCommitmentUsageHistoryParams struct {
 	StartTime           time.Time                                                        `form:"startTime" json:"startTime"`
 	EndTime             time.Time                                                        `form:"endTime" json:"endTime"`
 	AggregationInterval CommitmentsAPIGetCommitmentUsageHistoryParamsAggregationInterval `form:"aggregationInterval" json:"aggregationInterval"`
+
+	// Cloud Filter by cloud provider. If not specified, data for all clouds will be returned.
+	//
+	//  - invalid: Invalid.
+	//  - aws: Amazon web services.
+	//  - gcp: Google cloud provider.
+	//  - azure: Microsoft Azure.
+	//  - unknown: Unknown.
+	Cloud *CommitmentsAPIGetCommitmentUsageHistoryParamsCloud `form:"cloud,omitempty" json:"cloud,omitempty"`
+
+	// CommitmentType Filter by commitment type. If not specified, data for all commitment types will be returned.
+	CommitmentType *CommitmentsAPIGetCommitmentUsageHistoryParamsCommitmentType `form:"commitmentType,omitempty" json:"commitmentType,omitempty"`
 }
 
 // CommitmentsAPIGetCommitmentUsageHistoryParamsAggregationInterval defines parameters for CommitmentsAPIGetCommitmentUsageHistory.
 type CommitmentsAPIGetCommitmentUsageHistoryParamsAggregationInterval string
+
+// CommitmentsAPIGetCommitmentUsageHistoryParamsCloud defines parameters for CommitmentsAPIGetCommitmentUsageHistory.
+type CommitmentsAPIGetCommitmentUsageHistoryParamsCloud string
+
+// CommitmentsAPIGetCommitmentUsageHistoryParamsCommitmentType defines parameters for CommitmentsAPIGetCommitmentUsageHistory.
+type CommitmentsAPIGetCommitmentUsageHistoryParamsCommitmentType string
 
 // CommitmentsAPIGetAWSReservedInstancesImportCMDParams defines parameters for CommitmentsAPIGetAWSReservedInstancesImportCMD.
 type CommitmentsAPIGetAWSReservedInstancesImportCMDParams struct {
