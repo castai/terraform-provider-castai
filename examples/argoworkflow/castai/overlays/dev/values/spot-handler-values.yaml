@@ -1,0 +1,17 @@
+# Dev spot handler configuration
+
+clusterID: "dev-cluster-12345"
+
+resources:
+  requests:
+    cpu: 20m
+    memory: 64Mi
+  limits:
+    cpu: 200m
+    memory: 256Mi
+
+# Run on all nodes
+tolerations:
+  - operator: Exists
+
+priorityClassName: system-node-critical

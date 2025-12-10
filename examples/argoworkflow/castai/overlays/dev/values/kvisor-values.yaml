@@ -1,0 +1,42 @@
+# Dev kvisor security configuration
+
+clusterID: "dev-cluster-12345"
+apiKey: ""  # Managed by secrets
+
+castai:
+  apiURL: "https://api.cast.ai"
+  grpcURL: "grpc.cast.ai:443"
+
+controller:
+  enabled: true
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+  
+  replicaCount: 2
+
+agent:
+  enabled: true
+  tolerations:
+    - operator: Exists
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+# Enable security features
+imageScanning:
+  enabled: true
+
+runtimeSecurity:
+  enabled: true
+
+networkPolicy:
+  enabled: true
