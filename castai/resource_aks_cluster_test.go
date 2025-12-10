@@ -536,9 +536,9 @@ func TestAccAKS_ResourceAKSCluster(t *testing.T) {
 
 func testAccAKSWithClientSecretConfig(clusterName string) string {
 	subscriptionID := os.Getenv("ARM_SUBSCRIPTION_ID")
-	tenantID := os.Getenv("AZURE_TF_ACCEPTANCE_TEST_APP_REGISTRATION_TENANT_ID")
-	clientID := os.Getenv("AZURE_TF_ACCEPTANCE_TEST_APP_REGISTRATION_CLIENT_ID")
-	clientSecret := os.Getenv("AZURE_TF_ACCEPTANCE_TEST_APP_REGISTRATION_CLIENT_SECRET")
+	tenantID := os.Getenv("ARM_TENANT_ID")
+	clientID := os.Getenv("ARM_CLIENT_ID")
+	clientSecret := os.Getenv("ARM_CLIENT_SECRET")
 	return fmt.Sprintf(`
 resource "castai_aks_cluster" "test" {
   name            = %[1]q
