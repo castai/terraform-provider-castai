@@ -4,8 +4,8 @@ import (
 	"fmt"
 )
 
-func testAccAKSNodeConfigurationConfig(rName, clusterName, rgName, ngName string) string {
-	return concatenateConfigs(testAccAKSClusterConfig(rName, clusterName, rgName, ngName), fmt.Sprintf(`
+func testAccAKSNodeConfigurationConfig(rName, clusterName string) string {
+	return concatenateConfigs(testAccAKSWithFederationIDConfig(clusterName), fmt.Sprintf(`
 resource "castai_node_configuration" "test" {
   name   		    = %[1]q
   cluster_id        = castai_aks_cluster.test.id
@@ -28,10 +28,10 @@ resource "castai_node_configuration_default" "test" {
 `, rName))
 }
 
-func testAccAKSNodeConfigurationUpdated(rName, clusterName, rgName, ngName string) string {
-	return concatenateConfigs(testAccAKSClusterConfig(rName, clusterName, rgName, ngName), fmt.Sprintf(`
+func testAccAKSNodeConfigurationUpdated(rName, clusterName string) string {
+	return concatenateConfigs(testAccAKSWithFederationIDConfig(clusterName), fmt.Sprintf(`
 resource "castai_node_configuration" "test" {
-  name   		    = %[2]q
+  name   		    = %[1]q
   cluster_id        = castai_aks_cluster.test.id
   disk_cpu_ratio    = 0
   min_disk_size     = 121
@@ -64,5 +64,5 @@ resource "castai_node_configuration" "test" {
    pod_subnet_id = data.azurerm_subnet.internal.id
   }
 }
-`, rgName, rName))
+`, rName))
 }

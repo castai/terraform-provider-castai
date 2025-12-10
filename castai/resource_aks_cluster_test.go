@@ -415,13 +415,13 @@ func TestAKSClusterResourceUpdateContext(t *testing.T) {
 	})
 }
 
-func TestAccAKS_ResourceAKSCluster_SecretFlow(t *testing.T) {
-	rName := fmt.Sprintf("%v-aks-%v", ResourcePrefix, acctest.RandString(8))
-	clusterResourceName := "castai_aks_cluster.test"
-	resourceName := "castai_node_configuration.test"
-	clusterName := "core-tf-acc"
-	resourceGroupName := "core-tf-acc"
-	nodeResourceGroupName := "core-tf-acc-ng"
+func TestAccAKS_ResourceAKSCluster(t *testing.T) {
+	rName := fmt.Sprintf("%v-node-cfg-aks-%v", ResourcePrefix, acctest.RandString(8))
+	const clusterResourceName = "castai_aks_cluster.test"
+	const clusterName = "terraform-tests-december-2025"
+	const resourceGroupName = "terraform-tests-december-2025"
+	const resourceName = "castai_aks_cluster.test"
+	const nodeResourceGroupName = "terraform-tests-december-2025-ng"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
@@ -431,7 +431,7 @@ func TestAccAKS_ResourceAKSCluster_SecretFlow(t *testing.T) {
 		//CheckDestroy:      testAccCheckAKSClusterDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccAKSClusterConfig(rName, clusterName, resourceGroupName, nodeResourceGroupName),
+				Config: testAccAKSWithClientSecretConfig(clusterName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(clusterResourceName, "name", clusterName),
 					resource.TestCheckResourceAttrSet(clusterResourceName, "credentials_id"),
@@ -440,7 +440,7 @@ func TestAccAKS_ResourceAKSCluster_SecretFlow(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccAKSNodeConfigurationConfig(rName, clusterName, resourceGroupName, nodeResourceGroupName),
+				Config: testAccAKSNodeConfigurationConfig(rName, clusterName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "name", rName),
 					resource.TestCheckResourceAttr(resourceName, "disk_cpu_ratio", "35"),
@@ -453,7 +453,52 @@ func TestAccAKS_ResourceAKSCluster_SecretFlow(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccAKSNodeConfigurationUpdated(rName, clusterName, resourceGroupName, nodeResourceGroupName),
+				Config: testAccAKSNodeConfigurationUpdated(rName, clusterName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "name", rName),
+					resource.TestCheckResourceAttr(resourceName, "disk_cpu_ratio", "0"),
+					resource.TestCheckResourceAttr(resourceName, "min_disk_size", "121"),
+					resource.TestCheckResourceAttr(resourceName, "aks.0.max_pods_per_node", "32"),
+					resource.TestCheckResourceAttr(resourceName, "aks.0.aks_image_family", "azure-linux"),
+					resource.TestCheckResourceAttr(resourceName, "aks.0.ephemeral_os_disk.0.placement", "cacheDisk"),
+					resource.TestCheckResourceAttr(resourceName, "aks.0.ephemeral_os_disk.0.cache", "ReadOnly"),
+					resource.TestCheckResourceAttr(resourceName, "aks.0.loadbalancers.0.name", "test-lb"),
+					resource.TestCheckResourceAttr(resourceName, "aks.0.loadbalancers.0.ip_based_backend_pools.0.name", "test"),
+					resource.TestCheckResourceAttr(resourceName, "aks.0.network_security_group", "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg/providers/Microsoft.Network/networkSecurityGroups/test-nsg"),
+					resource.TestCheckResourceAttr(resourceName, "aks.0.application_security_groups.0", "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg/providers/Microsoft.Network/applicationSecurityGroups/test-asg"),
+					resource.TestCheckResourceAttr(resourceName, "aks.0.public_ip.0.public_ip_prefix", "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg/providers/Microsoft.Network/publicIPAddresses/test-ip"),
+					resource.TestCheckResourceAttr(resourceName, "aks.0.public_ip.0.tags.FirstPartyUsage", "something"),
+					resource.TestCheckResourceAttr(resourceName, "aks.0.public_ip.0.idle_timeout_in_minutes", "10"),
+					resource.TestCheckResourceAttrSet(resourceName, "aks.0.pod_subnet_id"),
+					resource.TestCheckResourceAttr(resourceName, "eks.#", "0"),
+					resource.TestCheckResourceAttr(resourceName, "kops.#", "0"),
+					resource.TestCheckResourceAttr(resourceName, "gke.#", "0"),
+				),
+			},
+			{
+				Config: testAccAKSWithFederationIDConfig(clusterName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "name", clusterName),
+					resource.TestCheckResourceAttrSet(resourceName, "credentials_id"),
+					resource.TestCheckResourceAttr(resourceName, "region", "westeurope"),
+					resource.TestCheckResourceAttrSet(resourceName, "cluster_token"),
+				),
+			},
+			{
+				Config: testAccAKSNodeConfigurationConfig(rName, clusterName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "name", rName),
+					resource.TestCheckResourceAttr(resourceName, "disk_cpu_ratio", "35"),
+					resource.TestCheckResourceAttr(resourceName, "min_disk_size", "122"),
+					resource.TestCheckResourceAttr(resourceName, "aks.0.max_pods_per_node", "31"),
+					resource.TestCheckResourceAttr(resourceName, "aks.0.aks_image_family", "ubuntu"),
+					resource.TestCheckResourceAttr(resourceName, "eks.#", "0"),
+					resource.TestCheckResourceAttr(resourceName, "kops.#", "0"),
+					resource.TestCheckResourceAttr(resourceName, "gke.#", "0"),
+				),
+			},
+			{
+				Config: testAccAKSNodeConfigurationUpdated(rName, clusterName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "name", rName),
 					resource.TestCheckResourceAttr(resourceName, "disk_cpu_ratio", "0"),
@@ -489,49 +534,28 @@ func TestAccAKS_ResourceAKSCluster_SecretFlow(t *testing.T) {
 	})
 }
 
-func testAccAKSClusterConfig(rName string, clusterName string, resourceGroupName, nodeResourceGroup string) string {
-	return concatenateConfigs(testAccAzureConfigUsingClientSecret(rName, resourceGroupName, nodeResourceGroup), fmt.Sprintf(`
+func testAccAKSWithClientSecretConfig(clusterName string) string {
+	subscriptionID := os.Getenv("ARM_SUBSCRIPTION_ID")
+	tenantID := os.Getenv("AZURE_TF_ACCEPTANCE_TEST_APP_REGISTRATION_TENANT_ID")
+	clientID := os.Getenv("AZURE_TF_ACCEPTANCE_TEST_APP_REGISTRATION_CLIENT_ID")
+	clientSecret := os.Getenv("AZURE_TF_ACCEPTANCE_TEST_APP_REGISTRATION_CLIENT_SECRET")
+	return fmt.Sprintf(`
 resource "castai_aks_cluster" "test" {
   name            = %[1]q
 
   region          = "westeurope"
-  subscription_id = data.azurerm_subscription.current.subscription_id 
-  tenant_id       = data.azurerm_subscription.current.tenant_id
-  client_id       = azuread_application.castai.application_id
-  client_secret   = azuread_application_password.castai.value
-  node_resource_group        = %[2]q
+  subscription_id = %[2]q
+  tenant_id       = %[3]q
+  client_id       = %[4]q
+  client_secret   = %[5]q
+  node_resource_group = "%[1]s-ng"
 
 }
 
-`, clusterName, nodeResourceGroup))
+`, clusterName, subscriptionID, tenantID, clientID, clientSecret)
 }
 
-func TestAccAKS_ResourceAKSCluster_ImpersonationFlow(t *testing.T) {
-	const resourceName = "castai_aks_cluster.test"
-	const clusterName = "terraform-tests-december-2025"
-	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { testAccPreCheck(t) },
-		ProviderFactories: providerFactories,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccAzureClusterWithFederationID(clusterName),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceName, "name", clusterName),
-					resource.TestCheckResourceAttrSet(resourceName, "credentials_id"),
-					resource.TestCheckResourceAttr(resourceName, "region", "westeurope"),
-					resource.TestCheckResourceAttrSet(resourceName, "cluster_token"),
-				),
-			},
-		},
-		ExternalProviders: map[string]resource.ExternalProvider{
-			"azurerm": {
-				Source: "hashicorp/azurerm",
-			},
-		},
-	})
-}
-
-func testAccAzureClusterWithFederationID(clusterName string) string {
+func testAccAKSWithFederationIDConfig(clusterName string) string {
 	subscriptionID := os.Getenv("ARM_SUBSCRIPTION_ID")
 	federationID := os.Getenv("AZURE_TF_ACCEPTANCE_TEST_FEDERATION_ID")
 	tenantID := os.Getenv("AZURE_TF_ACCEPTANCE_TEST_FEDERATION_TENANT_ID")
@@ -549,115 +573,4 @@ resource "castai_aks_cluster" "test" {
   node_resource_group = "%[3]s-ng"
 }
 `, subscriptionID, federationID, clusterName, tenantID, clientID)
-}
-
-func testAccAzureConfigUsingClientSecret(rName, rgName, ngName string) string {
-	return fmt.Sprintf(`
-provider "azurerm" {
-  features {}
-}
-
-data "azurerm_subscription" "current" {}
-
-data "azurerm_subnet" "internal" {
-  name                 =  "internal"
-  virtual_network_name = "%[2]s-network"
-  resource_group_name  = %[2]q 
-}
-
-provider "azuread" {}
-
-// Azure RM
-resource "azurerm_role_definition" "castai" {
-  name            = %[1]q
-  description = "Role used by CAST AI"
-
-  scope = "/subscriptions/${data.azurerm_subscription.current.subscription_id}/resourceGroups/%[2]s"
-
-  permissions {
-    actions = [
-      "Microsoft.Compute/*/read",
-      "Microsoft.Compute/virtualMachines/*",
-      "Microsoft.Compute/virtualMachineScaleSets/*",
-      "Microsoft.Compute/disks/write",
-      "Microsoft.Compute/disks/delete",
-      "Microsoft.Compute/disks/beginGetAccess/action",
-      "Microsoft.Compute/galleries/write",
-      "Microsoft.Compute/galleries/delete",
-      "Microsoft.Compute/galleries/images/write",
-      "Microsoft.Compute/galleries/images/delete",
-      "Microsoft.Compute/galleries/images/versions/write",
-      "Microsoft.Compute/galleries/images/versions/delete",
-      "Microsoft.Compute/snapshots/write",
-      "Microsoft.Compute/snapshots/delete",
-      "Microsoft.Network/*/read",
-      "Microsoft.Network/networkInterfaces/write",
-      "Microsoft.Network/networkInterfaces/delete",
-      "Microsoft.Network/networkInterfaces/join/action",
-      "Microsoft.Network/networkSecurityGroups/join/action",
-      "Microsoft.Network/publicIPAddresses/write",
-      "Microsoft.Network/publicIPAddresses/delete",
-      "Microsoft.Network/publicIPAddresses/join/action",
-      "Microsoft.Network/virtualNetworks/subnets/join/action",
-      "Microsoft.Network/virtualNetworks/subnets/write",
-      "Microsoft.Network/applicationGateways/backendhealth/action",
-      "Microsoft.Network/applicationGateways/backendAddressPools/join/action",
-      "Microsoft.Network/applicationSecurityGroups/joinIpConfiguration/action",
-      "Microsoft.Network/loadBalancers/backendAddressPools/write",
-      "Microsoft.Network/loadBalancers/backendAddressPools/join/action",
-      "Microsoft.ContainerService/*/read",
-      "Microsoft.ContainerService/managedClusters/start/action",
-      "Microsoft.ContainerService/managedClusters/stop/action",
-      "Microsoft.ContainerService/managedClusters/runCommand/action",
-      "Microsoft.ContainerService/managedClusters/agentPools/*",
-      "Microsoft.Resources/*/read",
-      "Microsoft.Resources/tags/write",
-      "Microsoft.Authorization/locks/read",
-      "Microsoft.Authorization/roleAssignments/read",
-      "Microsoft.Authorization/roleDefinitions/read",
-      "Microsoft.ManagedIdentity/userAssignedIdentities/assign/action"
-    ]
-    not_actions = []
-  }
-
-  assignable_scopes = [
-    "/subscriptions/${data.azurerm_subscription.current.subscription_id}/resourceGroups/%[2]s",
-    "/subscriptions/${data.azurerm_subscription.current.subscription_id}/resourceGroups/%[3]s"
-  ]
-}
-
-
-resource "azurerm_role_assignment" "castai_resource_group" {
-  principal_id       = azuread_service_principal.castai.id
-  role_definition_id = azurerm_role_definition.castai.role_definition_resource_id
-
-  scope = "/subscriptions/${data.azurerm_subscription.current.subscription_id}/resourceGroups/%[2]s"
-}
-
-resource "azurerm_role_assignment" "castai_node_resource_group" {
-  principal_id       = azuread_service_principal.castai.id
-  role_definition_id = azurerm_role_definition.castai.role_definition_resource_id
-
-  scope = "/subscriptions/${data.azurerm_subscription.current.subscription_id}/resourceGroups/%[3]s"
-}
-
-// Azure AD
-
-data "azuread_client_config" "current" {}
-
-resource "azuread_application" "castai" {
-  display_name = %[1]q
-}
-
-resource "azuread_application_password" "castai" {
-  application_object_id = azuread_application.castai.object_id
-}
-
-resource "azuread_service_principal" "castai" {
-  application_id               = azuread_application.castai.application_id
-  app_role_assignment_required = false
-  owners                       = [data.azuread_client_config.current.object_id]
-}
-
-`, rName, rgName, ngName)
 }
