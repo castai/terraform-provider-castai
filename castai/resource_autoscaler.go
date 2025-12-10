@@ -623,11 +623,10 @@ func flattenUnschedulablePods(unschedulablePods map[string]interface{}) map[stri
 
 	// Note: Omitting headroom, headroomSpot, nodeConstraints, customInstancesEnabled (deprecated)
 
-	// Pod Pinner - include if enabled so users can track changes
 	if podPinner, ok := unschedulablePods["podPinner"].(map[string]interface{}); ok {
-		if enabled, ok := podPinner["enabled"].(bool); ok && enabled {
+		if enabled, ok := podPinner["enabled"].(bool); ok {
 			pp := map[string]interface{}{
-				FieldEnabled: true,
+				FieldEnabled: enabled,
 			}
 			up[FieldPodPinner] = []interface{}{pp}
 		}
@@ -661,7 +660,6 @@ func flattenClusterLimits(clusterLimits map[string]interface{}) map[string]inter
 }
 
 // flattenNodeDownscaler converts the nodeDownscaler API response to Terraform structure.
-// Only includes evictor if enabled to avoid state mismatch with configs that don't specify it.
 func flattenNodeDownscaler(nodeDownscaler map[string]interface{}) map[string]interface{} {
 	nd := make(map[string]interface{})
 
@@ -682,13 +680,10 @@ func flattenNodeDownscaler(nodeDownscaler map[string]interface{}) map[string]int
 		}
 	}
 
-	// Evictor - only include if enabled to avoid state mismatch
 	if evictor, ok := nodeDownscaler["evictor"].(map[string]interface{}); ok {
-		if enabled, ok := evictor["enabled"].(bool); ok && enabled {
-			ev := flattenEvictor(evictor)
-			if len(ev) > 0 {
-				nd[FieldEvictor] = []interface{}{ev}
-			}
+		ev := flattenEvictor(evictor)
+		if len(ev) > 0 {
+			nd[FieldEvictor] = []interface{}{ev}
 		}
 	}
 

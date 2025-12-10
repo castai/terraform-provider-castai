@@ -1014,36 +1014,64 @@ func TestAccEKS_ResourceAutoscaler_basic(t *testing.T) {
 		PreCheck:          func() { testAccPreCheck(t) },
 		ProviderFactories: providerFactories,
 		Steps: []resource.TestStep{
-			// Step 1: Create autoscaler with initial settings
+			// Step 1: Create autoscaler with initial settings (pod_pinner and evictor disabled)
 			{
-				Config: testAccAutoscalerConfig(rName, clusterName, true, false),
+				Config: testAccAutoscalerConfig(
+					rName, clusterName,
+					true,    // enabled
+					"false", // nodeTemplatesPartialMatchingEnabled
+					"true",  // unschedulablePodsEnabled
+					false,   // podPinnerEnabled
+					"true",  // clusterLimitsEnabled
+					1,       // minCores
+					100,     // maxCores
+					"true",  // nodeDownscalerEnabled
+					"true",  // emptyNodesEnabled
+					120,     // delaySeconds
+					false,   // evictorEnabled
+				),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("castai_autoscaler.test", "autoscaler_settings.0.enabled", "true"),
-					resource.TestCheckResourceAttr("castai_autoscaler.test", "autoscaler_settings.0.is_scoped_mode", "false"),
 					resource.TestCheckResourceAttr("castai_autoscaler.test", "autoscaler_settings.0.node_templates_partial_matching_enabled", "false"),
 					resource.TestCheckResourceAttr("castai_autoscaler.test", "autoscaler_settings.0.unschedulable_pods.0.enabled", "true"),
+					resource.TestCheckResourceAttr("castai_autoscaler.test", "autoscaler_settings.0.unschedulable_pods.0.pod_pinner.0.enabled", "false"),
 					resource.TestCheckResourceAttr("castai_autoscaler.test", "autoscaler_settings.0.cluster_limits.0.enabled", "true"),
 					resource.TestCheckResourceAttr("castai_autoscaler.test", "autoscaler_settings.0.cluster_limits.0.cpu.0.min_cores", "1"),
 					resource.TestCheckResourceAttr("castai_autoscaler.test", "autoscaler_settings.0.cluster_limits.0.cpu.0.max_cores", "100"),
 					resource.TestCheckResourceAttr("castai_autoscaler.test", "autoscaler_settings.0.node_downscaler.0.enabled", "true"),
 					resource.TestCheckResourceAttr("castai_autoscaler.test", "autoscaler_settings.0.node_downscaler.0.empty_nodes.0.enabled", "true"),
 					resource.TestCheckResourceAttr("castai_autoscaler.test", "autoscaler_settings.0.node_downscaler.0.empty_nodes.0.delay_seconds", "120"),
+					resource.TestCheckResourceAttr("castai_autoscaler.test", "autoscaler_settings.0.node_downscaler.0.evictor.0.enabled", "false"),
 				),
 			},
-			// Step 2: Update autoscaler settings
+			// Step 2: Update autoscaler settings (pod_pinner and evictor still disabled)
 			{
-				Config: testAccAutoscalerConfig(rName, clusterName, false, true),
+				Config: testAccAutoscalerConfig(
+					rName, clusterName,
+					false,   // enabled
+					"true",  // nodeTemplatesPartialMatchingEnabled
+					"false", // unschedulablePodsEnabled
+					false,   // podPinnerEnabled
+					"false", // clusterLimitsEnabled
+					2,       // minCores
+					200,     // maxCores
+					"false", // nodeDownscalerEnabled
+					"false", // emptyNodesEnabled
+					300,     // delaySeconds
+					false,   // evictorEnabled
+				),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("castai_autoscaler.test", "autoscaler_settings.0.enabled", "false"),
-					resource.TestCheckResourceAttr("castai_autoscaler.test", "autoscaler_settings.0.is_scoped_mode", "true"),
 					resource.TestCheckResourceAttr("castai_autoscaler.test", "autoscaler_settings.0.node_templates_partial_matching_enabled", "true"),
 					resource.TestCheckResourceAttr("castai_autoscaler.test", "autoscaler_settings.0.unschedulable_pods.0.enabled", "false"),
+					resource.TestCheckResourceAttr("castai_autoscaler.test", "autoscaler_settings.0.unschedulable_pods.0.pod_pinner.0.enabled", "false"),
 					resource.TestCheckResourceAttr("castai_autoscaler.test", "autoscaler_settings.0.cluster_limits.0.enabled", "false"),
 					resource.TestCheckResourceAttr("castai_autoscaler.test", "autoscaler_settings.0.cluster_limits.0.cpu.0.min_cores", "2"),
 					resource.TestCheckResourceAttr("castai_autoscaler.test", "autoscaler_settings.0.cluster_limits.0.cpu.0.max_cores", "200"),
 					resource.TestCheckResourceAttr("castai_autoscaler.test", "autoscaler_settings.0.node_downscaler.0.enabled", "false"),
 					resource.TestCheckResourceAttr("castai_autoscaler.test", "autoscaler_settings.0.node_downscaler.0.empty_nodes.0.enabled", "false"),
 					resource.TestCheckResourceAttr("castai_autoscaler.test", "autoscaler_settings.0.node_downscaler.0.empty_nodes.0.delay_seconds", "300"),
+					resource.TestCheckResourceAttr("castai_autoscaler.test", "autoscaler_settings.0.node_downscaler.0.evictor.0.enabled", "false"),
 				),
 			},
 			// Step 3: Import the resource
@@ -1058,20 +1086,38 @@ func TestAccEKS_ResourceAutoscaler_basic(t *testing.T) {
 				},
 				ImportState:       true,
 				ImportStateVerify: true,
-				// Ignore pod_pinner in verification - API returns it by default even when not configured
-				ImportStateVerifyIgnore: []string{
-					"autoscaler_settings.0.unschedulable_pods.0.pod_pinner",
-				},
 			},
-			// Step 4: Modify default node template and verify autoscaler doesn't drift
+			// Step 4: Enable pod_pinner and evictor and verify state reflects changes
+			{
+				Config: testAccAutoscalerConfig(
+					rName, clusterName,
+					true,    // enabled
+					"false", // nodeTemplatesPartialMatchingEnabled
+					"true",  // unschedulablePodsEnabled
+					true,    // podPinnerEnabled
+					"true",  // clusterLimitsEnabled
+					1,       // minCores
+					100,     // maxCores
+					"true",  // nodeDownscalerEnabled
+					"true",  // emptyNodesEnabled
+					120,     // delaySeconds
+					true,    // evictorEnabled
+				),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("castai_autoscaler.test", "autoscaler_settings.0.enabled", "true"),
+					resource.TestCheckResourceAttr("castai_autoscaler.test", "autoscaler_settings.0.unschedulable_pods.0.enabled", "true"),
+					resource.TestCheckResourceAttr("castai_autoscaler.test", "autoscaler_settings.0.unschedulable_pods.0.pod_pinner.0.enabled", "true"),
+					resource.TestCheckResourceAttr("castai_autoscaler.test", "autoscaler_settings.0.node_downscaler.0.enabled", "true"),
+					resource.TestCheckResourceAttr("castai_autoscaler.test", "autoscaler_settings.0.node_downscaler.0.evictor.0.enabled", "true"),
+					resource.TestCheckResourceAttr("castai_autoscaler.test", "autoscaler_settings.0.node_downscaler.0.evictor.0.dry_run", "true"),
+				),
+			},
+			// Step 5: Modify default node template and verify autoscaler doesn't drift
 			// This tests the policy - node template sync behavior - when the default node template
 			// is modified, the autoscaler should not show drift due to defaultNodeTemplateVersion changing.
 			{
 				Config: testAccAutoscalerWithNodeTemplateConfig(rName, clusterName),
 				Check: resource.ComposeTestCheckFunc(
-					// Verify autoscaler state is unchanged despite node template modification
-					resource.TestCheckResourceAttr("castai_autoscaler.test", "autoscaler_settings.0.enabled", "false"),
-					resource.TestCheckResourceAttr("castai_autoscaler.test", "autoscaler_settings.0.is_scoped_mode", "true"),
 					// Verify node template was created/updated
 					resource.TestCheckResourceAttr("castai_node_template.default", "name", "default-by-castai"),
 					resource.TestCheckResourceAttr("castai_node_template.default", "constraints.0.spot", "true"),
@@ -1087,27 +1133,36 @@ func TestAccEKS_ResourceAutoscaler_basic(t *testing.T) {
 	})
 }
 
-func testAccAutoscalerConfig(rName, clusterName string, enabled bool, updated bool) string {
-	isScopedMode := "false"
-	nodeTemplatesPartialMatchingEnabled := "false"
-	unschedulablePodsEnabled := "true"
-	clusterLimitsEnabled := "true"
-	minCores := 1
-	maxCores := 100
-	nodeDownscalerEnabled := "true"
-	emptyNodesEnabled := "true"
-	delaySeconds := 120
+// testAccAutoscalerConfig returns a config with configurable settings.
+// podPinnerEnabled and evictorEnabled control whether these features are enabled.
+// If evictorEnabled is true, evictor is configured with dry_run=true.
+func testAccAutoscalerConfig(
+	rName, clusterName string,
+	enabled bool,
+	nodeTemplatesPartialMatchingEnabled string,
+	unschedulablePodsEnabled string,
+	podPinnerEnabled bool,
+	clusterLimitsEnabled string,
+	minCores int,
+	maxCores int,
+	nodeDownscalerEnabled string,
+	emptyNodesEnabled string,
+	delaySeconds int,
+	evictorEnabled bool,
+) string {
 
-	if updated {
-		isScopedMode = "true"
-		nodeTemplatesPartialMatchingEnabled = "true"
-		unschedulablePodsEnabled = "false"
-		clusterLimitsEnabled = "false"
-		minCores = 2
-		maxCores = 200
-		nodeDownscalerEnabled = "false"
-		emptyNodesEnabled = "false"
-		delaySeconds = 300
+	evictorBlock := ""
+	if evictorEnabled {
+		evictorBlock = `
+      evictor {
+        enabled  = true
+        dry_run  = true
+      }`
+	} else {
+		evictorBlock = `
+      evictor {
+        enabled = false
+      }`
 	}
 
 	return ConfigCompose(testAccEKSClusterConfig(rName, clusterName), fmt.Sprintf(`
@@ -1116,11 +1171,14 @@ resource "castai_autoscaler" "test" {
 
   autoscaler_settings {
     enabled                                = %t
-    is_scoped_mode                         = %s
     node_templates_partial_matching_enabled = %s
 
     unschedulable_pods {
       enabled = %s
+
+      pod_pinner {
+        enabled = %t
+      }
     }
 
     cluster_limits {
@@ -1139,23 +1197,38 @@ resource "castai_autoscaler" "test" {
         enabled       = %s
         delay_seconds = %d
       }
+%s
     }
   }
 }
-`, enabled, isScopedMode, nodeTemplatesPartialMatchingEnabled,
-		unschedulablePodsEnabled, clusterLimitsEnabled, minCores, maxCores,
-		nodeDownscalerEnabled, emptyNodesEnabled, delaySeconds))
+`, enabled, nodeTemplatesPartialMatchingEnabled,
+		unschedulablePodsEnabled, podPinnerEnabled, clusterLimitsEnabled, minCores, maxCores,
+		nodeDownscalerEnabled, emptyNodesEnabled, delaySeconds, evictorBlock))
 }
 
 // testAccAutoscalerWithNodeTemplateConfig returns a config that includes both autoscaler and
 // the default node template. This tests the policy↔node template sync behavior.
 func testAccAutoscalerWithNodeTemplateConfig(rName, clusterName string) string {
-	return ConfigCompose(testAccAutoscalerConfig(rName, clusterName, false, true), `
+	return ConfigCompose(testAccAutoscalerConfig(
+		rName, clusterName,
+		false,   // enabled
+		"true",  // nodeTemplatesPartialMatchingEnabled
+		"false", // unschedulablePodsEnabled
+		false,   // podPinnerEnabled
+		"false", // clusterLimitsEnabled
+		2,       // minCores
+		200,     // maxCores
+		"false", // nodeDownscalerEnabled
+		"false", // emptyNodesEnabled
+		300,     // delaySeconds
+		false,   // evictorEnabled
+	), `
 resource "castai_node_template" "default" {
-  cluster_id = castai_eks_cluster.test.id
-  name       = "default-by-castai"
-  is_default = true
-  is_enabled = true
+  cluster_id   = castai_eks_cluster.test.id
+  name         = "default-by-castai"
+  is_default   = true
+  is_enabled   = true
+  should_taint = true
 
   constraints {
     on_demand = true
@@ -1298,7 +1371,7 @@ func TestAutoscalerResource_FlattenAutoscalerSettings(t *testing.T) {
 			},
 		},
 		{
-			name: "disabled evictor and pod_pinner are not included",
+			name: "disabled evictor and pod_pinner are included",
 			input: `{
 				"enabled": true,
 				"unschedulablePods": {
@@ -1316,6 +1389,11 @@ func TestAutoscalerResource_FlattenAutoscalerSettings(t *testing.T) {
 				"unschedulable_pods": []interface{}{
 					map[string]interface{}{
 						"enabled": true,
+						"pod_pinner": []interface{}{
+							map[string]interface{}{
+								"enabled": false,
+							},
+						},
 					},
 				},
 				"node_downscaler": []interface{}{
@@ -1325,6 +1403,12 @@ func TestAutoscalerResource_FlattenAutoscalerSettings(t *testing.T) {
 							map[string]interface{}{
 								"enabled":       true,
 								"delay_seconds": float64(120),
+							},
+						},
+						"evictor": []interface{}{
+							map[string]interface{}{
+								"enabled": false,
+								"dry_run": false,
 							},
 						},
 					},
