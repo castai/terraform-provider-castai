@@ -4,8 +4,14 @@ import (
 	"fmt"
 )
 
-func testAccAKSNodeConfigurationConfig(rName, clusterName string) string {
+func testAccAKSNodeConfigurationConfig(rName, clusterName, resourceGroupName string) string {
 	return concatenateConfigs(testAccAKSWithFederationIDConfig(clusterName), fmt.Sprintf(`
+data "azurerm_subnet" "internal" {
+  name                 =  "internal"
+  virtual_network_name = "%[2]s-network"
+  resource_group_name  = %[2]q 
+}
+
 resource "castai_node_configuration" "test" {
   name   		    = %[1]q
   cluster_id        = castai_aks_cluster.test.id
@@ -25,11 +31,17 @@ resource "castai_node_configuration_default" "test" {
   cluster_id       = castai_aks_cluster.test.id
   configuration_id = castai_node_configuration.test.id
 }
-`, rName))
+`, rName, resourceGroupName))
 }
 
-func testAccAKSNodeConfigurationUpdated(rName, clusterName string) string {
+func testAccAKSNodeConfigurationUpdated(rName, clusterName, resourceGroupName string) string {
 	return concatenateConfigs(testAccAKSWithFederationIDConfig(clusterName), fmt.Sprintf(`
+data "azurerm_subnet" "internal" {
+  name                 =  "internal"
+  virtual_network_name = "%[2]s-network"
+  resource_group_name  = %[2]q 
+}
+
 resource "castai_node_configuration" "test" {
   name   		    = %[1]q
   cluster_id        = castai_aks_cluster.test.id
@@ -64,5 +76,5 @@ resource "castai_node_configuration" "test" {
    pod_subnet_id = data.azurerm_subnet.internal.id
   }
 }
-`, rName))
+`, rName, resourceGroupName))
 }
