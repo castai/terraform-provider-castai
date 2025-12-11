@@ -417,10 +417,12 @@ func TestAKSClusterResourceUpdateContext(t *testing.T) {
 
 func TestAccAKS_ResourceAKSCluster(t *testing.T) {
 	rName := fmt.Sprintf("%v-node-cfg-aks-%v", ResourcePrefix, acctest.RandString(8))
-	const clusterResourceName = "castai_aks_cluster.test"
-	const clusterName = "terraform-tests-december-2025"
-	const resourceGroupName = "terraform-tests-december-2025"
-	const nodeConfResourceName = "castai_aks_cluster.test"
+	const (
+		clusterResourceName  = "castai_aks_cluster.test"
+		clusterName          = "terraform-tests-december-2025"
+		resourceGroupName    = "terraform-tests-december-2025"
+		nodeConfResourceName = "castai_node_configuration.test"
+	)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
