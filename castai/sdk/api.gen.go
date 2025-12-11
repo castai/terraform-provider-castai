@@ -638,13 +638,6 @@ const (
 	PODSSCALINGPOLICY               WorkloadoptimizationV1HPAScalingPolicyType = "PODS_SCALING_POLICY"
 )
 
-// Defines values for WorkloadoptimizationV1HPAUnsupportedReasonType.
-const (
-	HPAUNSUPPORTEDREASONTAKEOWNERSHIP WorkloadoptimizationV1HPAUnsupportedReasonType = "HPA_UNSUPPORTED_REASON_TAKE_OWNERSHIP"
-	HPAUNSUPPORTEDREASONUNKNOWN       WorkloadoptimizationV1HPAUnsupportedReasonType = "HPA_UNSUPPORTED_REASON_UNKNOWN"
-	HPAUNSUPPORTEDREASONWORKLOADTYPE  WorkloadoptimizationV1HPAUnsupportedReasonType = "HPA_UNSUPPORTED_REASON_WORKLOAD_TYPE"
-)
-
 // Defines values for WorkloadoptimizationV1InPlaceResizeStatus.
 const (
 	ERROR                      WorkloadoptimizationV1InPlaceResizeStatus = "ERROR"
@@ -4030,16 +4023,17 @@ type DboV1CacheEfficiency struct {
 // DboV1CacheGroup defines model for dbo.v1.CacheGroup.
 type DboV1CacheGroup struct {
 	// CacheStatus CacheStatus specifies status of the cache deployment.
-	CacheStatus      *DboV1CacheStatus          `json:"cacheStatus,omitempty"`
-	ClusterId        *string                    `json:"clusterId"`
-	Configurations   *[]DboV1CacheConfiguration `json:"configurations,omitempty"`
-	DirectMode       *bool                      `json:"directMode"`
-	Endpoints        *[]DboV1Endpoint           `json:"endpoints,omitempty"`
-	HelmChartVersion *string                    `json:"helmChartVersion"`
-	Id               *string                    `json:"id,omitempty"`
-	InstanceId       *string                    `json:"instanceId"`
-	Metrics          *DboV1CacheMetrics         `json:"metrics,omitempty"`
-	Name             *string                    `json:"name"`
+	CacheStatus           *DboV1CacheStatus          `json:"cacheStatus,omitempty"`
+	ClusterId             *string                    `json:"clusterId"`
+	Configurations        *[]DboV1CacheConfiguration `json:"configurations,omitempty"`
+	DirectMode            *bool                      `json:"directMode"`
+	DirectModeLastChanged *time.Time                 `json:"directModeLastChanged"`
+	Endpoints             *[]DboV1Endpoint           `json:"endpoints,omitempty"`
+	HelmChartVersion      *string                    `json:"helmChartVersion"`
+	Id                    *string                    `json:"id,omitempty"`
+	InstanceId            *string                    `json:"instanceId"`
+	Metrics               *DboV1CacheMetrics         `json:"metrics,omitempty"`
+	Name                  *string                    `json:"name"`
 
 	// ProtocolType ProtocolType specifies the protocol type used by the database.
 	ProtocolType     DboV1CacheGroupProtocolType      `json:"protocolType"`
@@ -8135,24 +8129,6 @@ type WorkloadoptimizationV1HPASpec struct {
 	TargetCpuUtilizationPercentage *int32 `json:"targetCpuUtilizationPercentage"`
 }
 
-// WorkloadoptimizationV1HPAUnsupportedReason HPAUnsupportedReason contains categorized type and description for why native HPA is unsupported.
-type WorkloadoptimizationV1HPAUnsupportedReason struct {
-	// Description Description of why native HPA is unsupported.
-	Description string `json:"description"`
-
-	// Type HPAUnsupportedReasonType explains why native HPA is unsupported for the workload.
-	//
-	//  - HPA_UNSUPPORTED_REASON_WORKLOAD_TYPE: Workload type/kind is not supported for HPA.
-	//  - HPA_UNSUPPORTED_REASON_TAKE_OWNERSHIP: Cannot take ownership of existing HPA (e.g. owned by third party or has unsupported metrics).
-	Type WorkloadoptimizationV1HPAUnsupportedReasonType `json:"type"`
-}
-
-// WorkloadoptimizationV1HPAUnsupportedReasonType HPAUnsupportedReasonType explains why native HPA is unsupported for the workload.
-//
-//   - HPA_UNSUPPORTED_REASON_WORKLOAD_TYPE: Workload type/kind is not supported for HPA.
-//   - HPA_UNSUPPORTED_REASON_TAKE_OWNERSHIP: Cannot take ownership of existing HPA (e.g. owned by third party or has unsupported metrics).
-type WorkloadoptimizationV1HPAUnsupportedReasonType string
-
 // WorkloadoptimizationV1HorizontalOverrides defines model for workloadoptimization.v1.HorizontalOverrides.
 type WorkloadoptimizationV1HorizontalOverrides struct {
 	// Behavior HorizontalPodAutoscalerBehavior configures the scaling behavior of the target
@@ -9194,9 +9170,9 @@ type WorkloadoptimizationV1Workload struct {
 	Name             string `json:"name"`
 	Namespace        string `json:"namespace"`
 
-	// NativeHpaUnsupportedReason HPAUnsupportedReason contains categorized type and description for why native HPA is unsupported.
-	NativeHpaUnsupportedReason *WorkloadoptimizationV1HPAUnsupportedReason `json:"nativeHpaUnsupportedReason,omitempty"`
-	OrganizationId             string                                      `json:"organizationId"`
+	// NativeHpaUnsupportedReason Reason for unsupported HPA V2.
+	NativeHpaUnsupportedReason *string `json:"nativeHpaUnsupportedReason"`
+	OrganizationId             string  `json:"organizationId"`
 
 	// PodCount Pod count stores the *running* count of pods of the workload.
 	PodCount             int32                                         `json:"podCount"`
