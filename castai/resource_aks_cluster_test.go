@@ -416,7 +416,8 @@ func TestAKSClusterResourceUpdateContext(t *testing.T) {
 
 func TestAccAKS_ResourceAKSCluster(t *testing.T) {
 	rName := fmt.Sprintf("%v-aks-%v", ResourcePrefix, acctest.RandString(8))
-	resourceName := "castai_aks_cluster.test"
+	clusterResourceName := "castai_aks_cluster.test"
+	resourceName := "castai_node_configuration.test"
 	clusterName := "core-tf-acc"
 	resourceGroupName := "core-tf-acc"
 	nodeResourceGroupName := "core-tf-acc-ng"
@@ -431,10 +432,46 @@ func TestAccAKS_ResourceAKSCluster(t *testing.T) {
 			{
 				Config: testAccAKSClusterConfig(rName, clusterName, resourceGroupName, nodeResourceGroupName),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceName, "name", clusterName),
-					resource.TestCheckResourceAttrSet(resourceName, "credentials_id"),
-					resource.TestCheckResourceAttr(resourceName, "region", "westeurope"),
-					resource.TestCheckResourceAttrSet(resourceName, "cluster_token"),
+					resource.TestCheckResourceAttr(clusterResourceName, "name", clusterName),
+					resource.TestCheckResourceAttrSet(clusterResourceName, "credentials_id"),
+					resource.TestCheckResourceAttr(clusterResourceName, "region", "westeurope"),
+					resource.TestCheckResourceAttrSet(clusterResourceName, "cluster_token"),
+				),
+			},
+			{
+				Config: testAccAKSNodeConfigurationConfig(rName, clusterName, resourceGroupName, nodeResourceGroupName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "name", rName),
+					resource.TestCheckResourceAttr(resourceName, "disk_cpu_ratio", "35"),
+					resource.TestCheckResourceAttr(resourceName, "min_disk_size", "122"),
+					resource.TestCheckResourceAttr(resourceName, "aks.0.max_pods_per_node", "31"),
+					resource.TestCheckResourceAttr(resourceName, "aks.0.aks_image_family", "ubuntu"),
+					resource.TestCheckResourceAttr(resourceName, "eks.#", "0"),
+					resource.TestCheckResourceAttr(resourceName, "kops.#", "0"),
+					resource.TestCheckResourceAttr(resourceName, "gke.#", "0"),
+				),
+			},
+			{
+				Config: testAccAKSNodeConfigurationUpdated(rName, clusterName, resourceGroupName, nodeResourceGroupName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "name", rName),
+					resource.TestCheckResourceAttr(resourceName, "disk_cpu_ratio", "0"),
+					resource.TestCheckResourceAttr(resourceName, "min_disk_size", "121"),
+					resource.TestCheckResourceAttr(resourceName, "aks.0.max_pods_per_node", "32"),
+					resource.TestCheckResourceAttr(resourceName, "aks.0.aks_image_family", "azure-linux"),
+					resource.TestCheckResourceAttr(resourceName, "aks.0.ephemeral_os_disk.0.placement", "cacheDisk"),
+					resource.TestCheckResourceAttr(resourceName, "aks.0.ephemeral_os_disk.0.cache", "ReadOnly"),
+					resource.TestCheckResourceAttr(resourceName, "aks.0.loadbalancers.0.name", "test-lb"),
+					resource.TestCheckResourceAttr(resourceName, "aks.0.loadbalancers.0.ip_based_backend_pools.0.name", "test"),
+					resource.TestCheckResourceAttr(resourceName, "aks.0.network_security_group", "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg/providers/Microsoft.Network/networkSecurityGroups/test-nsg"),
+					resource.TestCheckResourceAttr(resourceName, "aks.0.application_security_groups.0", "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg/providers/Microsoft.Network/applicationSecurityGroups/test-asg"),
+					resource.TestCheckResourceAttr(resourceName, "aks.0.public_ip.0.public_ip_prefix", "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg/providers/Microsoft.Network/publicIPAddresses/test-ip"),
+					resource.TestCheckResourceAttr(resourceName, "aks.0.public_ip.0.tags.FirstPartyUsage", "something"),
+					resource.TestCheckResourceAttr(resourceName, "aks.0.public_ip.0.idle_timeout_in_minutes", "10"),
+					resource.TestCheckResourceAttrSet(resourceName, "aks.0.pod_subnet_id"),
+					resource.TestCheckResourceAttr(resourceName, "eks.#", "0"),
+					resource.TestCheckResourceAttr(resourceName, "kops.#", "0"),
+					resource.TestCheckResourceAttr(resourceName, "gke.#", "0"),
 				),
 			},
 		},
