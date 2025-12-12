@@ -383,17 +383,17 @@ func Test_flattenPriceAdjustmentConfiguration(t *testing.T) {
 			name: "configuration with adjustments",
 			input: &sdk.NodetemplatesV1PriceAdjustmentConfiguration{
 				InstanceTypeAdjustments: &map[string]string{
-					"r7a.xlarge": "1.0",
-					"r7i.xlarge": "1.20",
-					"c6a.xlarge": "0.90",
+					"r7a.xlarge":  "1.0",
+					"r7i.xlarge":  "1.20",
+					"c6a.xlarge":  "0.90",
 				},
 			},
 			want: []map[string]any{
 				{
 					FieldNodeTemplateInstanceTypeAdjustments: map[string]string{
-						"r7a.xlarge": "1.0",
-						"r7i.xlarge": "1.20",
-						"c6a.xlarge": "0.90",
+						"r7a.xlarge":  "1.0",
+						"r7i.xlarge":  "1.20",
+						"c6a.xlarge":  "0.90",
 					},
 				},
 			},
