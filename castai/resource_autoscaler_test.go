@@ -17,6 +17,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	testingterraform "github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/samber/lo"
 	"github.com/stretchr/testify/require"
 
@@ -404,8 +405,8 @@ func TestAutoscalerResource_ReadPoliciesAction(t *testing.T) {
 		},
 	}
 
-	currentPoliciesBytes, err := normalizeJSON([]byte(`
-		{
+	// API returns full policies including deprecated/synced fields
+	apiPolicies := `{
 		    "enabled": true,
 		    "isScopedMode": false,
 		    "unschedulablePods": {
@@ -442,10 +443,43 @@ func TestAutoscalerResource_ReadPoliciesAction(t *testing.T) {
 		            "delaySeconds": 0
 		        }
 		    }
+		}`
+
+	// Expected output has volatile/synced fields filtered out (nodeConstraints removed)
+	expectedPoliciesBytes, err := normalizeJSON([]byte(`{
+		    "enabled": true,
+		    "isScopedMode": false,
+		    "unschedulablePods": {
+		        "enabled": true,
+		        "headroom": {
+		            "cpuPercentage": 10,
+		            "memoryPercentage": 10,
+		            "enabled": true
+		        },
+		        "headroomSpot": {
+		            "cpuPercentage": 10,
+		            "memoryPercentage": 10,
+		            "enabled": true
+		        },
+		        "diskGibToCpuRatio": 25
+		    },
+		    "clusterLimits": {
+		        "enabled": false,
+		        "cpu": {
+		            "minCores": 1,
+		            "maxCores": 20
+		        }
+		    },
+		    "nodeDownscaler": {
+		        "emptyNodes": {
+		            "enabled": false,
+		            "delaySeconds": 0
+		        }
+		    }
 		}`))
 	r.NoError(err)
+	expectedPolicies := string(expectedPoliciesBytes)
 
-	currentPolicies := string(currentPoliciesBytes)
 	resource := resourceAutoscaler()
 
 	clusterId := "cluster_id"
@@ -455,7 +489,7 @@ func TestAutoscalerResource_ReadPoliciesAction(t *testing.T) {
 	state := terraform.NewInstanceStateShimmedFromValue(val, 0)
 	data := resource.Data(state)
 
-	body := io.NopCloser(bytes.NewReader([]byte(currentPolicies)))
+	body := io.NopCloser(bytes.NewReader([]byte(apiPolicies)))
 	response := &http.Response{StatusCode: 200, Body: body}
 
 	mockClient.EXPECT().PoliciesAPIGetClusterPolicies(gomock.Any(), clusterId, gomock.Any()).Return(response, nil).Times(1)
@@ -464,7 +498,7 @@ func TestAutoscalerResource_ReadPoliciesAction(t *testing.T) {
 
 	result := resource.ReadContext(ctx, data, provider)
 	r.Nil(result)
-	r.Equal(currentPolicies, data.Get(FieldAutoscalerPolicies))
+	r.Equal(expectedPolicies, data.Get(FieldAutoscalerPolicies))
 }
 
 func TestAutoscalerResource_CustomizeDiff(t *testing.T) {
@@ -977,40 +1011,116 @@ func TestAccEKS_ResourceAutoscaler_basic(t *testing.T) {
 	clusterName, _ := lo.Coalesce(os.Getenv("CLUSTER_NAME"), "cost-terraform")
 
 	resource.Test(t, resource.TestCase{
-		PreCheck: func() { testAccPreCheck(t) },
-
+		PreCheck:          func() { testAccPreCheck(t) },
 		ProviderFactories: providerFactories,
 		Steps: []resource.TestStep{
-			// Step 1: Create autoscaler with initial settings
+			// Step 1: Create autoscaler with initial settings (pod_pinner and evictor disabled)
 			{
-				Config: testAccAutoscalerConfig(rName, clusterName, true, false),
+				Config: testAccAutoscalerConfig(
+					rName, clusterName,
+					true,    // enabled
+					"false", // nodeTemplatesPartialMatchingEnabled
+					"true",  // unschedulablePodsEnabled
+					false,   // podPinnerEnabled
+					"true",  // clusterLimitsEnabled
+					1,       // minCores
+					100,     // maxCores
+					"true",  // nodeDownscalerEnabled
+					"true",  // emptyNodesEnabled
+					120,     // delaySeconds
+					false,   // evictorEnabled
+				),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("castai_autoscaler.test", "autoscaler_settings.0.enabled", "true"),
-					resource.TestCheckResourceAttr("castai_autoscaler.test", "autoscaler_settings.0.is_scoped_mode", "false"),
 					resource.TestCheckResourceAttr("castai_autoscaler.test", "autoscaler_settings.0.node_templates_partial_matching_enabled", "false"),
 					resource.TestCheckResourceAttr("castai_autoscaler.test", "autoscaler_settings.0.unschedulable_pods.0.enabled", "true"),
+					resource.TestCheckResourceAttr("castai_autoscaler.test", "autoscaler_settings.0.unschedulable_pods.0.pod_pinner.0.enabled", "false"),
 					resource.TestCheckResourceAttr("castai_autoscaler.test", "autoscaler_settings.0.cluster_limits.0.enabled", "true"),
 					resource.TestCheckResourceAttr("castai_autoscaler.test", "autoscaler_settings.0.cluster_limits.0.cpu.0.min_cores", "1"),
 					resource.TestCheckResourceAttr("castai_autoscaler.test", "autoscaler_settings.0.cluster_limits.0.cpu.0.max_cores", "100"),
 					resource.TestCheckResourceAttr("castai_autoscaler.test", "autoscaler_settings.0.node_downscaler.0.enabled", "true"),
 					resource.TestCheckResourceAttr("castai_autoscaler.test", "autoscaler_settings.0.node_downscaler.0.empty_nodes.0.enabled", "true"),
 					resource.TestCheckResourceAttr("castai_autoscaler.test", "autoscaler_settings.0.node_downscaler.0.empty_nodes.0.delay_seconds", "120"),
+					resource.TestCheckResourceAttr("castai_autoscaler.test", "autoscaler_settings.0.node_downscaler.0.evictor.0.enabled", "false"),
 				),
 			},
-			// Step 2: Update autoscaler settings
+			// Step 2: Update autoscaler settings (pod_pinner and evictor still disabled)
 			{
-				Config: testAccAutoscalerConfig(rName, clusterName, false, true),
+				Config: testAccAutoscalerConfig(
+					rName, clusterName,
+					false,   // enabled
+					"true",  // nodeTemplatesPartialMatchingEnabled
+					"false", // unschedulablePodsEnabled
+					false,   // podPinnerEnabled
+					"false", // clusterLimitsEnabled
+					2,       // minCores
+					200,     // maxCores
+					"false", // nodeDownscalerEnabled
+					"false", // emptyNodesEnabled
+					300,     // delaySeconds
+					false,   // evictorEnabled
+				),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("castai_autoscaler.test", "autoscaler_settings.0.enabled", "false"),
-					resource.TestCheckResourceAttr("castai_autoscaler.test", "autoscaler_settings.0.is_scoped_mode", "true"),
 					resource.TestCheckResourceAttr("castai_autoscaler.test", "autoscaler_settings.0.node_templates_partial_matching_enabled", "true"),
 					resource.TestCheckResourceAttr("castai_autoscaler.test", "autoscaler_settings.0.unschedulable_pods.0.enabled", "false"),
+					resource.TestCheckResourceAttr("castai_autoscaler.test", "autoscaler_settings.0.unschedulable_pods.0.pod_pinner.0.enabled", "false"),
 					resource.TestCheckResourceAttr("castai_autoscaler.test", "autoscaler_settings.0.cluster_limits.0.enabled", "false"),
 					resource.TestCheckResourceAttr("castai_autoscaler.test", "autoscaler_settings.0.cluster_limits.0.cpu.0.min_cores", "2"),
 					resource.TestCheckResourceAttr("castai_autoscaler.test", "autoscaler_settings.0.cluster_limits.0.cpu.0.max_cores", "200"),
 					resource.TestCheckResourceAttr("castai_autoscaler.test", "autoscaler_settings.0.node_downscaler.0.enabled", "false"),
 					resource.TestCheckResourceAttr("castai_autoscaler.test", "autoscaler_settings.0.node_downscaler.0.empty_nodes.0.enabled", "false"),
 					resource.TestCheckResourceAttr("castai_autoscaler.test", "autoscaler_settings.0.node_downscaler.0.empty_nodes.0.delay_seconds", "300"),
+					resource.TestCheckResourceAttr("castai_autoscaler.test", "autoscaler_settings.0.node_downscaler.0.evictor.0.enabled", "false"),
+				),
+			},
+			// Step 3: Import the resource
+			{
+				ResourceName: "castai_autoscaler.test",
+				ImportStateIdFunc: func(s *testingterraform.State) (string, error) {
+					rs, ok := s.RootModule().Resources["castai_eks_cluster.test"]
+					if !ok {
+						return "", fmt.Errorf("castai_eks_cluster.test not found in state")
+					}
+					return rs.Primary.ID, nil
+				},
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			// Step 4: Enable pod_pinner and evictor and verify state reflects changes
+			{
+				Config: testAccAutoscalerConfig(
+					rName, clusterName,
+					true,    // enabled
+					"false", // nodeTemplatesPartialMatchingEnabled
+					"true",  // unschedulablePodsEnabled
+					true,    // podPinnerEnabled
+					"true",  // clusterLimitsEnabled
+					1,       // minCores
+					100,     // maxCores
+					"true",  // nodeDownscalerEnabled
+					"true",  // emptyNodesEnabled
+					120,     // delaySeconds
+					true,    // evictorEnabled
+				),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("castai_autoscaler.test", "autoscaler_settings.0.enabled", "true"),
+					resource.TestCheckResourceAttr("castai_autoscaler.test", "autoscaler_settings.0.unschedulable_pods.0.enabled", "true"),
+					resource.TestCheckResourceAttr("castai_autoscaler.test", "autoscaler_settings.0.unschedulable_pods.0.pod_pinner.0.enabled", "true"),
+					resource.TestCheckResourceAttr("castai_autoscaler.test", "autoscaler_settings.0.node_downscaler.0.enabled", "true"),
+					resource.TestCheckResourceAttr("castai_autoscaler.test", "autoscaler_settings.0.node_downscaler.0.evictor.0.enabled", "true"),
+					resource.TestCheckResourceAttr("castai_autoscaler.test", "autoscaler_settings.0.node_downscaler.0.evictor.0.dry_run", "true"),
+				),
+			},
+			// Step 5: Modify default node template and verify autoscaler doesn't drift
+			// This tests the policy - node template sync behavior - when the default node template
+			// is modified, the autoscaler should not show drift due to defaultNodeTemplateVersion changing.
+			{
+				Config: testAccAutoscalerWithNodeTemplateConfig(rName, clusterName),
+				Check: resource.ComposeTestCheckFunc(
+					// Verify node template was created/updated
+					resource.TestCheckResourceAttr("castai_node_template.default", "name", "default-by-castai"),
+					resource.TestCheckResourceAttr("castai_node_template.default", "constraints.0.spot", "true"),
 				),
 			},
 		},
@@ -1023,27 +1133,36 @@ func TestAccEKS_ResourceAutoscaler_basic(t *testing.T) {
 	})
 }
 
-func testAccAutoscalerConfig(rName, clusterName string, enabled bool, updated bool) string {
-	isScopedMode := "false"
-	nodeTemplatesPartialMatchingEnabled := "false"
-	unschedulablePodsEnabled := "true"
-	clusterLimitsEnabled := "true"
-	minCores := 1
-	maxCores := 100
-	nodeDownscalerEnabled := "true"
-	emptyNodesEnabled := "true"
-	delaySeconds := 120
+// testAccAutoscalerConfig returns a config with configurable settings.
+// podPinnerEnabled and evictorEnabled control whether these features are enabled.
+// If evictorEnabled is true, evictor is configured with dry_run=true.
+func testAccAutoscalerConfig(
+	rName, clusterName string,
+	enabled bool,
+	nodeTemplatesPartialMatchingEnabled string,
+	unschedulablePodsEnabled string,
+	podPinnerEnabled bool,
+	clusterLimitsEnabled string,
+	minCores int,
+	maxCores int,
+	nodeDownscalerEnabled string,
+	emptyNodesEnabled string,
+	delaySeconds int,
+	evictorEnabled bool,
+) string {
 
-	if updated {
-		isScopedMode = "true"
-		nodeTemplatesPartialMatchingEnabled = "true"
-		unschedulablePodsEnabled = "false"
-		clusterLimitsEnabled = "false"
-		minCores = 2
-		maxCores = 200
-		nodeDownscalerEnabled = "false"
-		emptyNodesEnabled = "false"
-		delaySeconds = 300
+	evictorBlock := ""
+	if evictorEnabled {
+		evictorBlock = `
+      evictor {
+        enabled  = true
+        dry_run  = true
+      }`
+	} else {
+		evictorBlock = `
+      evictor {
+        enabled = false
+      }`
 	}
 
 	return ConfigCompose(testAccEKSClusterConfig(rName, clusterName), fmt.Sprintf(`
@@ -1052,11 +1171,14 @@ resource "castai_autoscaler" "test" {
 
   autoscaler_settings {
     enabled                                = %t
-    is_scoped_mode                         = %s
     node_templates_partial_matching_enabled = %s
 
     unschedulable_pods {
       enabled = %s
+
+      pod_pinner {
+        enabled = %t
+      }
     }
 
     cluster_limits {
@@ -1075,10 +1197,499 @@ resource "castai_autoscaler" "test" {
         enabled       = %s
         delay_seconds = %d
       }
+%s
     }
   }
 }
-`, enabled, isScopedMode, nodeTemplatesPartialMatchingEnabled,
-		unschedulablePodsEnabled, clusterLimitsEnabled, minCores, maxCores,
-		nodeDownscalerEnabled, emptyNodesEnabled, delaySeconds))
+`, enabled, nodeTemplatesPartialMatchingEnabled,
+		unschedulablePodsEnabled, podPinnerEnabled, clusterLimitsEnabled, minCores, maxCores,
+		nodeDownscalerEnabled, emptyNodesEnabled, delaySeconds, evictorBlock))
+}
+
+// testAccAutoscalerWithNodeTemplateConfig returns a config that includes both autoscaler and
+// the default node template. This tests the policy↔node template sync behavior.
+func testAccAutoscalerWithNodeTemplateConfig(rName, clusterName string) string {
+	return ConfigCompose(testAccAutoscalerConfig(
+		rName, clusterName,
+		false,   // enabled
+		"true",  // nodeTemplatesPartialMatchingEnabled
+		"false", // unschedulablePodsEnabled
+		false,   // podPinnerEnabled
+		"false", // clusterLimitsEnabled
+		2,       // minCores
+		200,     // maxCores
+		"false", // nodeDownscalerEnabled
+		"false", // emptyNodesEnabled
+		300,     // delaySeconds
+		false,   // evictorEnabled
+	), `
+resource "castai_node_template" "default" {
+  cluster_id   = castai_eks_cluster.test.id
+  name         = "default-by-castai"
+  is_default   = true
+  is_enabled   = true
+  should_taint = true
+
+  constraints {
+    on_demand = true
+    spot      = true
+  }
+
+  # Ignore computed fields that are populated by the API
+  lifecycle {
+    ignore_changes = [
+      configuration_id,
+      constraints[0].azs,
+      constraints[0].cpu_manufacturers,
+    ]
+  }
+}
+`)
+}
+
+func TestAutoscalerResource_FlattenAutoscalerSettings(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    string
+		expected map[string]interface{}
+	}{
+		{
+			name: "basic policy with top-level fields",
+			input: `{
+				"enabled": true,
+				"isScopedMode": false,
+				"nodeTemplatesPartialMatchingEnabled": true
+			}`,
+			expected: map[string]interface{}{
+				"enabled":        true,
+				"is_scoped_mode": false,
+				"node_templates_partial_matching_enabled": true,
+			},
+		},
+		{
+			name: "policy with deprecated fields omitted",
+			input: `{
+				"enabled": true,
+				"unschedulablePods": {
+					"enabled": true,
+					"headroom": {"cpuPercentage": 10, "memoryPercentage": 10, "enabled": true},
+					"headroomSpot": {"cpuPercentage": 5, "memoryPercentage": 5, "enabled": false},
+					"nodeConstraints": {"minCpuCores": 2, "maxCpuCores": 32, "enabled": true},
+					"customInstancesEnabled": true,
+					"podPinner": {"enabled": true}
+				},
+				"spotInstances": {"enabled": true, "maxReclaimRate": 10}
+			}`,
+			expected: map[string]interface{}{
+				"enabled": true,
+				"unschedulable_pods": []interface{}{
+					map[string]interface{}{
+						"enabled": true,
+						"pod_pinner": []interface{}{
+							map[string]interface{}{
+								"enabled": true,
+							},
+						},
+					},
+				},
+			},
+		},
+		{
+			name: "policy with cluster limits",
+			input: `{
+				"enabled": true,
+				"clusterLimits": {
+					"enabled": true,
+					"cpu": {
+						"minCores": 1,
+						"maxCores": 100
+					}
+				}
+			}`,
+			expected: map[string]interface{}{
+				"enabled": true,
+				"cluster_limits": []interface{}{
+					map[string]interface{}{
+						"enabled": true,
+						"cpu": []interface{}{
+							map[string]interface{}{
+								"min_cores": float64(1),
+								"max_cores": float64(100),
+							},
+						},
+					},
+				},
+			},
+		},
+		{
+			name: "policy with node downscaler and evictor",
+			input: `{
+				"enabled": true,
+				"nodeDownscaler": {
+					"enabled": true,
+					"emptyNodes": {
+						"enabled": true,
+						"delaySeconds": 300
+					},
+					"evictor": {
+						"enabled": true,
+						"dryRun": false,
+						"aggressiveMode": true,
+						"scopedMode": false,
+						"cycleInterval": "5m",
+						"nodeGracePeriodMinutes": 10,
+						"podEvictionFailureBackOffInterval": "10s",
+						"ignorePodDisruptionBudgets": false
+					}
+				}
+			}`,
+			expected: map[string]interface{}{
+				"enabled": true,
+				"node_downscaler": []interface{}{
+					map[string]interface{}{
+						"enabled": true,
+						"empty_nodes": []interface{}{
+							map[string]interface{}{
+								"enabled":       true,
+								"delay_seconds": float64(300),
+							},
+						},
+						"evictor": []interface{}{
+							map[string]interface{}{
+								"enabled":                                true,
+								"dry_run":                                false,
+								"aggressive_mode":                        true,
+								"scoped_mode":                            false,
+								"cycle_interval":                         "5m",
+								"node_grace_period_minutes":              float64(10),
+								"pod_eviction_failure_back_off_interval": "10s",
+								"ignore_pod_disruption_budgets":          false,
+							},
+						},
+					},
+				},
+			},
+		},
+		{
+			name: "disabled evictor and pod_pinner are included",
+			input: `{
+				"enabled": true,
+				"unschedulablePods": {
+					"enabled": true,
+					"podPinner": {"enabled": false}
+				},
+				"nodeDownscaler": {
+					"enabled": true,
+					"emptyNodes": {"enabled": true, "delaySeconds": 120},
+					"evictor": {"enabled": false, "dryRun": false}
+				}
+			}`,
+			expected: map[string]interface{}{
+				"enabled": true,
+				"unschedulable_pods": []interface{}{
+					map[string]interface{}{
+						"enabled": true,
+						"pod_pinner": []interface{}{
+							map[string]interface{}{
+								"enabled": false,
+							},
+						},
+					},
+				},
+				"node_downscaler": []interface{}{
+					map[string]interface{}{
+						"enabled": true,
+						"empty_nodes": []interface{}{
+							map[string]interface{}{
+								"enabled":       true,
+								"delay_seconds": float64(120),
+							},
+						},
+						"evictor": []interface{}{
+							map[string]interface{}{
+								"enabled": false,
+								"dry_run": false,
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			r := require.New(t)
+
+			result, err := flattenAutoscalerSettings([]byte(tt.input))
+			r.NoError(err)
+			r.NotNil(result)
+			r.Len(result, 1)
+
+			// Compare each key in expected with result
+			for key, expectedValue := range tt.expected {
+				actualValue, ok := result[0][key]
+				r.True(ok, "expected key %s not found in result", key)
+				r.Equal(expectedValue, actualValue, "mismatch for key %s", key)
+			}
+		})
+	}
+}
+
+func TestAutoscalerResource_FlattenAutoscalerSettings_InvalidJSON(t *testing.T) {
+	r := require.New(t)
+
+	_, err := flattenAutoscalerSettings([]byte("invalid json"))
+	r.Error(err)
+	r.Contains(err.Error(), "unmarshaling policies JSON")
+}
+
+func TestAutoscalerResource_FlattenEvictor(t *testing.T) {
+	r := require.New(t)
+
+	input := map[string]interface{}{
+		"enabled":                           true,
+		"dryRun":                            false,
+		"aggressiveMode":                    true,
+		"scopedMode":                        false,
+		"cycleInterval":                     "1m",
+		"nodeGracePeriodMinutes":            5,
+		"podEvictionFailureBackOffInterval": "5s",
+		"ignorePodDisruptionBudgets":        false,
+	}
+
+	result := flattenEvictor(input)
+
+	r.Equal(true, result["enabled"])
+	r.Equal(false, result["dry_run"])
+	r.Equal(true, result["aggressive_mode"])
+	r.Equal(false, result["scoped_mode"])
+	r.Equal("1m", result["cycle_interval"])
+	r.Equal(5, result["node_grace_period_minutes"])
+	r.Equal("5s", result["pod_eviction_failure_back_off_interval"])
+	r.Equal(false, result["ignore_pod_disruption_budgets"])
+}
+
+func TestAutoscalerResource_FilterVolatileFields(t *testing.T) {
+	tests := []struct {
+		name        string
+		input       string
+		shouldExist []string
+		shouldGone  []string
+	}{
+		{
+			name:        "removes defaultNodeTemplateVersion",
+			input:       `{"enabled":true,"defaultNodeTemplateVersion":"5","isScopedMode":false}`,
+			shouldExist: []string{"enabled", "isScopedMode"},
+			shouldGone:  []string{"defaultNodeTemplateVersion"},
+		},
+		{
+			name:        "removes spotInstances (synced with node template)",
+			input:       `{"enabled":true,"spotInstances":{"enabled":true,"maxReclaimRate":50}}`,
+			shouldExist: []string{"enabled"},
+			shouldGone:  []string{"spotInstances"},
+		},
+		{
+			name:        "handles missing defaultNodeTemplateVersion",
+			input:       `{"enabled":true,"isScopedMode":false}`,
+			shouldExist: []string{"enabled", "isScopedMode"},
+			shouldGone:  []string{"defaultNodeTemplateVersion"},
+		},
+		{
+			name:        "preserves nested structures except deprecated fields",
+			input:       `{"enabled":true,"defaultNodeTemplateVersion":"10","nodeDownscaler":{"enabled":true}}`,
+			shouldExist: []string{"enabled", "nodeDownscaler"},
+			shouldGone:  []string{"defaultNodeTemplateVersion"},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			r := require.New(t)
+
+			result := filterVolatileFields([]byte(tt.input))
+
+			var filtered map[string]interface{}
+			err := json.Unmarshal(result, &filtered)
+			r.NoError(err)
+
+			for _, key := range tt.shouldExist {
+				_, exists := filtered[key]
+				r.True(exists, "expected key %q to exist", key)
+			}
+
+			for _, key := range tt.shouldGone {
+				_, exists := filtered[key]
+				r.False(exists, "expected key %q to be removed", key)
+			}
+		})
+	}
+}
+
+func TestAutoscalerResource_FilterVolatileFields_NestedDeprecated(t *testing.T) {
+	r := require.New(t)
+
+	// Test that nested deprecated fields in unschedulablePods are removed
+	input := `{
+		"enabled": true,
+		"unschedulablePods": {
+			"enabled": true,
+			"nodeConstraints": {"minCpuCores": 2, "maxCpuCores": 96},
+			"customInstancesEnabled": true,
+			"headroom": {"cpuPercentage": 10}
+		}
+	}`
+
+	result := filterVolatileFields([]byte(input))
+
+	var filtered map[string]interface{}
+	err := json.Unmarshal(result, &filtered)
+	r.NoError(err)
+
+	// unschedulablePods should still exist
+	up, ok := filtered["unschedulablePods"].(map[string]interface{})
+	r.True(ok, "unschedulablePods should exist")
+
+	// enabled should be preserved
+	_, exists := up["enabled"]
+	r.True(exists, "unschedulablePods.enabled should be preserved")
+
+	// headroom should be preserved (not a synced field)
+	_, exists = up["headroom"]
+	r.True(exists, "unschedulablePods.headroom should be preserved")
+
+	// nodeConstraints should be removed (synced with node template)
+	_, exists = up["nodeConstraints"]
+	r.False(exists, "unschedulablePods.nodeConstraints should be removed")
+
+	// customInstancesEnabled should be removed (synced with node template)
+	_, exists = up["customInstancesEnabled"]
+	r.False(exists, "unschedulablePods.customInstancesEnabled should be removed")
+}
+
+func TestAutoscalerResource_FilterVolatileFields_StatusFields(t *testing.T) {
+	r := require.New(t)
+
+	tests := []struct {
+		name    string
+		input   string
+		checkFn func(map[string]interface{})
+	}{
+		{
+			name: "removes podPinner status",
+			input: `{
+				"enabled": true,
+				"unschedulablePods": {
+					"enabled": true,
+					"podPinner": {
+						"enabled": true,
+						"status": "PodPinnerStatus_Unknown"
+					}
+				}
+			}`,
+			checkFn: func(filtered map[string]interface{}) {
+				up, ok := filtered["unschedulablePods"].(map[string]interface{})
+				r.True(ok, "unschedulablePods should exist")
+
+				podPinner, ok := up["podPinner"].(map[string]interface{})
+				r.True(ok, "podPinner should exist")
+
+				// enabled should be preserved
+				enabled, exists := podPinner["enabled"]
+				r.True(exists, "podPinner.enabled should exist")
+				r.True(enabled.(bool), "podPinner.enabled should be true")
+
+				// status should be removed
+				_, exists = podPinner["status"]
+				r.False(exists, "podPinner.status should be removed")
+			},
+		},
+		{
+			name: "removes evictor status",
+			input: `{
+				"enabled": true,
+				"nodeDownscaler": {
+					"enabled": true,
+					"evictor": {
+						"enabled": true,
+						"dryRun": false,
+						"status": "Unknown"
+					}
+				}
+			}`,
+			checkFn: func(filtered map[string]interface{}) {
+				nd, ok := filtered["nodeDownscaler"].(map[string]interface{})
+				r.True(ok, "nodeDownscaler should exist")
+
+				evictor, ok := nd["evictor"].(map[string]interface{})
+				r.True(ok, "evictor should exist")
+
+				// enabled and dryRun should be preserved
+				enabled, exists := evictor["enabled"]
+				r.True(exists, "evictor.enabled should exist")
+				r.True(enabled.(bool), "evictor.enabled should be true")
+
+				dryRun, exists := evictor["dryRun"]
+				r.True(exists, "evictor.dryRun should exist")
+				r.False(dryRun.(bool), "evictor.dryRun should be false")
+
+				// status should be removed
+				_, exists = evictor["status"]
+				r.False(exists, "evictor.status should be removed")
+			},
+		},
+		{
+			name: "removes both podPinner and evictor status",
+			input: `{
+				"enabled": true,
+				"unschedulablePods": {
+					"enabled": true,
+					"podPinner": {
+						"enabled": true,
+						"status": "PodPinnerStatus_Missing"
+					}
+				},
+				"nodeDownscaler": {
+					"enabled": true,
+					"evictor": {
+						"enabled": true,
+						"status": "Missing"
+					}
+				}
+			}`,
+			checkFn: func(filtered map[string]interface{}) {
+				// Check podPinner
+				up, ok := filtered["unschedulablePods"].(map[string]interface{})
+				r.True(ok, "unschedulablePods should exist")
+
+				podPinner, ok := up["podPinner"].(map[string]interface{})
+				r.True(ok, "podPinner should exist")
+
+				_, exists := podPinner["status"]
+				r.False(exists, "podPinner.status should be removed")
+
+				// Check evictor
+				nd, ok := filtered["nodeDownscaler"].(map[string]interface{})
+				r.True(ok, "nodeDownscaler should exist")
+
+				evictor, ok := nd["evictor"].(map[string]interface{})
+				r.True(ok, "evictor should exist")
+
+				_, exists = evictor["status"]
+				r.False(exists, "evictor.status should be removed")
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := filterVolatileFields([]byte(tt.input))
+
+			var filtered map[string]interface{}
+			err := json.Unmarshal(result, &filtered)
+			r.NoError(err, "should unmarshal filtered result")
+
+			tt.checkFn(filtered)
+		})
+	}
 }

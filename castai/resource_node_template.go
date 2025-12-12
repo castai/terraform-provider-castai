@@ -143,7 +143,13 @@ func resourceNodeTemplate() *schema.Resource {
 	supportedArchitectures := []string{ArchAMD64, ArchARM64}
 	supportedOs := []string{OsLinux, OsWindows}
 	supportedSelectorOperations := nodeSelectorOperators
-	supportedCPUManufacturers := []string{string(sdk.NodetemplatesV1TemplateConstraintsCPUManufacturerAMD), string(sdk.NodetemplatesV1TemplateConstraintsCPUManufacturerAMPERE), string(sdk.NodetemplatesV1TemplateConstraintsCPUManufacturerAPPLE), string(sdk.NodetemplatesV1TemplateConstraintsCPUManufacturerAWS), string(sdk.NodetemplatesV1TemplateConstraintsCPUManufacturerINTEL)}
+	supportedCPUManufacturers := []string{
+		string(sdk.NodetemplatesV1TemplateConstraintsCPUManufacturerAMD),
+		string(sdk.NodetemplatesV1TemplateConstraintsCPUManufacturerAMPERE),
+		string(sdk.NodetemplatesV1TemplateConstraintsCPUManufacturerAPPLE),
+		string(sdk.NodetemplatesV1TemplateConstraintsCPUManufacturerAWS),
+		string(sdk.NodetemplatesV1TemplateConstraintsCPUManufacturerINTEL),
+	}
 
 	return &schema.Resource{
 		CreateContext: resourceNodeTemplateCreate,
