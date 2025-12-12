@@ -4,8 +4,17 @@ import (
 	"fmt"
 )
 
-func testAccAKSNodeConfigurationConfig(rName, clusterName, rgName, ngName string) string {
-	return ConfigCompose(testAccAKSClusterConfig(rName, clusterName, rgName, ngName), fmt.Sprintf(`
+func testAccAKSNodeConfigurationConfig(rName, clusterName, resourceGroupName string) string {
+	return ConfigCompose(testAccAKSWithClientSecretConfig(clusterName), fmt.Sprintf(`
+provider "azurerm" {
+	features {}		
+}
+data "azurerm_subnet" "internal" {
+  name                 =  "internal"
+  virtual_network_name = "%[2]s-network"
+  resource_group_name  = %[2]q 
+}
+
 resource "castai_node_configuration" "test" {
   name   		    = %[1]q
   cluster_id        = castai_aks_cluster.test.id
@@ -25,13 +34,22 @@ resource "castai_node_configuration_default" "test" {
   cluster_id       = castai_aks_cluster.test.id
   configuration_id = castai_node_configuration.test.id
 }
-`, rName))
+`, rName, resourceGroupName))
 }
 
-func testAccAKSNodeConfigurationUpdated(rName, clusterName, rgName, ngName string) string {
-	return ConfigCompose(testAccAKSClusterConfig(rName, clusterName, rgName, ngName), fmt.Sprintf(`
+func testAccAKSNodeConfigurationUpdated(rName, clusterName, resourceGroupName string) string {
+	return ConfigCompose(testAccAKSWithClientSecretConfig(clusterName), fmt.Sprintf(`
+provider "azurerm" {
+	features {}		
+}
+data "azurerm_subnet" "internal" {
+  name                 =  "internal"
+  virtual_network_name = "%[2]s-network"
+  resource_group_name  = %[2]q 
+}
+
 resource "castai_node_configuration" "test" {
-  name   		    = %[2]q
+  name   		    = %[1]q
   cluster_id        = castai_aks_cluster.test.id
   disk_cpu_ratio    = 0
   min_disk_size     = 121
@@ -64,5 +82,5 @@ resource "castai_node_configuration" "test" {
    pod_subnet_id = data.azurerm_subnet.internal.id
   }
 }
-`, rgName, rName))
+`, rName, resourceGroupName))
 }
