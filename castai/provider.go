@@ -77,13 +77,14 @@ func Provider(version string) *schema.Provider {
 		},
 
 		DataSourcesMap: map[string]*schema.Resource{
-			"castai_eks_settings":                  dataSourceEKSSettings(),
-			"castai_gke_user_policies":             dataSourceGKEPolicies(),
-			"castai_organization":                  dataSourceOrganization(),
-			"castai_rebalancing_schedule":          dataSourceRebalancingSchedule(),
-			"castai_hibernation_schedule":          dataSourceHibernationSchedule(),
-			"castai_workload_scaling_policy_order": dataSourceWorkloadScalingPolicyOrder(),
-			"castai_cache_group":                   dataSourceCacheGroup(),
+			"castai_eks_settings":                   dataSourceEKSSettings(),
+			"castai_gke_user_policies":              dataSourceGKEPolicies(),
+			"castai_organization":                   dataSourceOrganization(),
+			"castai_rebalancing_schedule":           dataSourceRebalancingSchedule(),
+			"castai_hibernation_schedule":           dataSourceHibernationSchedule(),
+			"castai_workload_scaling_policy_order":  dataSourceWorkloadScalingPolicyOrder(),
+			"castai_cache_group":                    dataSourceCacheGroup(),
+			"castai_impersonation_service_account":  dataSourceImpersonationServiceAccount(),
 		},
 
 		ConfigureContextFunc: providerConfigure(version),
