@@ -69,7 +69,7 @@ resource "castai_autoscaler" "castai_autoscaler_policy" {
 
 ### Read-Only
 
-- `autoscaler_policies` (String) computed value to store full policies configuration
+- `autoscaler_policies` (String, Deprecated) computed value to store full policies configuration
 - `id` (String) The ID of this resource.
 
 <a id="nestedblock--autoscaler_settings"></a>

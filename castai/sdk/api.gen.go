@@ -4023,16 +4023,17 @@ type DboV1CacheEfficiency struct {
 // DboV1CacheGroup defines model for dbo.v1.CacheGroup.
 type DboV1CacheGroup struct {
 	// CacheStatus CacheStatus specifies status of the cache deployment.
-	CacheStatus      *DboV1CacheStatus          `json:"cacheStatus,omitempty"`
-	ClusterId        *string                    `json:"clusterId"`
-	Configurations   *[]DboV1CacheConfiguration `json:"configurations,omitempty"`
-	DirectMode       *bool                      `json:"directMode"`
-	Endpoints        *[]DboV1Endpoint           `json:"endpoints,omitempty"`
-	HelmChartVersion *string                    `json:"helmChartVersion"`
-	Id               *string                    `json:"id,omitempty"`
-	InstanceId       *string                    `json:"instanceId"`
-	Metrics          *DboV1CacheMetrics         `json:"metrics,omitempty"`
-	Name             *string                    `json:"name"`
+	CacheStatus           *DboV1CacheStatus          `json:"cacheStatus,omitempty"`
+	ClusterId             *string                    `json:"clusterId"`
+	Configurations        *[]DboV1CacheConfiguration `json:"configurations,omitempty"`
+	DirectMode            *bool                      `json:"directMode"`
+	DirectModeLastChanged *time.Time                 `json:"directModeLastChanged"`
+	Endpoints             *[]DboV1Endpoint           `json:"endpoints,omitempty"`
+	HelmChartVersion      *string                    `json:"helmChartVersion"`
+	Id                    *string                    `json:"id,omitempty"`
+	InstanceId            *string                    `json:"instanceId"`
+	Metrics               *DboV1CacheMetrics         `json:"metrics,omitempty"`
+	Name                  *string                    `json:"name"`
 
 	// ProtocolType ProtocolType specifies the protocol type used by the database.
 	ProtocolType     DboV1CacheGroupProtocolType      `json:"protocolType"`
