@@ -21,6 +21,7 @@ const (
 	FieldAKSClusterNodeResourceGroup = "node_resource_group"
 	FieldAKSClusterClientID          = "client_id"
 	FieldAKSClusterClientSecret      = "client_secret"
+	FieldAKSClusterFederationID      = "federation_id"
 	FieldAKSClusterTenantID          = "tenant_id"
 	FieldAKSHttpProxyConfig          = "http_proxy_config"
 	FieldAKSHttpProxyDestination     = "http_proxy"
@@ -84,10 +85,18 @@ func resourceAKSCluster() *schema.Resource {
 			},
 			FieldAKSClusterClientSecret: {
 				Type:             schema.TypeString,
-				Required:         true,
+				Optional:         true,
 				Sensitive:        true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 				Description:      "Azure AD application password that will be used by CAST AI.",
+				ExactlyOneOf:     []string{FieldAKSClusterClientSecret, FieldAKSClusterFederationID},
+			},
+			FieldAKSClusterFederationID: {
+				Type:             schema.TypeString,
+				Optional:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
+				Description:      "Azure federation used by CAST AI for secretless auth via impersonation.",
+				ExactlyOneOf:     []string{FieldAKSClusterClientSecret, FieldAKSClusterFederationID},
 			},
 			FieldClusterToken: {
 				Type:        schema.TypeString,
@@ -256,13 +265,14 @@ func updateAKSClusterSettings(ctx context.Context, data *schema.ResourceData, cl
 	if !data.HasChanges(
 		FieldAKSClusterClientID,
 		FieldAKSClusterClientSecret,
-		FieldAKSClusterTenantID,
+		FieldAKSClusterFederationID,
 		FieldAKSClusterSubscriptionID,
-		FieldClusterCredentialsId,
+		FieldAKSClusterTenantID,
 		FieldAKSHttpProxyConfig,
 		FieldAKSHttpProxyDestination,
 		FieldAKSHttpsProxyDestination,
 		FieldAKSNoProxyDestinations,
+		FieldClusterCredentialsId,
 	) {
 		log.Printf("[INFO] Nothing to update in cluster setttings.")
 		return nil
@@ -275,9 +285,10 @@ func updateAKSClusterSettings(ctx context.Context, data *schema.ResourceData, cl
 	clientID := data.Get(FieldAKSClusterClientID).(string)
 	tenantID := data.Get(FieldAKSClusterTenantID).(string)
 	clientSecret := data.Get(FieldAKSClusterClientSecret).(string)
+	federationId := data.Get(FieldAKSClusterFederationID).(string)
 	subscriptionID := data.Get(FieldAKSClusterSubscriptionID).(string)
 
-	credentials, err := sdk.ToCloudCredentialsAzure(clientID, clientSecret, tenantID, subscriptionID)
+	credentials, err := sdk.ToCloudCredentialsAzure(clientID, clientSecret, federationId, tenantID, subscriptionID)
 	if err != nil {
 		return err
 	}
