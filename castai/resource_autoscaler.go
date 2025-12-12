@@ -11,6 +11,7 @@ import (
 	"time"
 
 	jsonpatch "github.com/evanphx/json-patch"
+	"github.com/google/uuid"
 	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -72,7 +73,10 @@ func resourceAutoscaler() *schema.Resource {
 		UpdateContext: resourceCastaiAutoscalerUpdate,
 		DeleteContext: resourceCastaiAutoscalerDelete,
 		CustomizeDiff: resourceCastaiAutoscalerDiff,
-		Description:   "CAST AI autoscaler resource to manage autoscaler settings",
+		Importer: &schema.ResourceImporter{
+			StateContext: autoscalerStateImporter,
+		},
+		Description: "CAST AI autoscaler resource to manage autoscaler settings",
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(2 * time.Minute),
@@ -97,6 +101,7 @@ func resourceAutoscaler() *schema.Resource {
 				Type:        schema.TypeString,
 				Computed:    true,
 				Description: "computed value to store full policies configuration",
+				Deprecated:  "This field is deprecated and will be removed in the next major version. Use autoscaler_settings to configure and manage autoscaler policies.",
 			},
 			FieldAutoscalerSettings: {
 				Type:          schema.TypeList,
@@ -513,6 +518,210 @@ func resourceCastaiAutoscalerDelete(ctx context.Context, data *schema.ResourceDa
 	return nil
 }
 
+func autoscalerStateImporter(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	clusterID := d.Id()
+
+	// Validate cluster ID is a UUID
+	if _, err := uuid.Parse(clusterID); err != nil {
+		return nil, fmt.Errorf("expected cluster_id to be a valid UUID, got: %q", clusterID)
+	}
+
+	// Set the cluster_id field
+	if err := d.Set(FieldClusterId, clusterID); err != nil {
+		return nil, fmt.Errorf("setting cluster_id: %w", err)
+	}
+
+	// Fetch current policies from API
+	client := meta.(*ProviderConfig).api
+	currentPolicies, err := getCurrentPolicies(ctx, client, clusterID)
+	if err != nil {
+		return nil, fmt.Errorf("fetching autoscaler policies for cluster %s: %w", clusterID, err)
+	}
+
+	// Filter out volatile fields that change independently on API side
+	currentPolicies = filterVolatileFields(currentPolicies)
+
+	// Set the computed autoscaler_policies field
+	if err := d.Set(FieldAutoscalerPolicies, string(currentPolicies)); err != nil {
+		return nil, fmt.Errorf("setting autoscaler_policies: %w", err)
+	}
+
+	// Convert API response to autoscaler_settings structure
+	settings, err := flattenAutoscalerSettings(currentPolicies)
+	if err != nil {
+		return nil, fmt.Errorf("converting policies to autoscaler_settings: %w", err)
+	}
+
+	if settings != nil {
+		if err := d.Set(FieldAutoscalerSettings, settings); err != nil {
+			return nil, fmt.Errorf("setting autoscaler_settings: %w", err)
+		}
+	}
+
+	return []*schema.ResourceData{d}, nil
+}
+
+// flattenAutoscalerSettings converts API JSON response to autoscaler_settings Terraform structure.
+// It omits deprecated fields to encourage users to migrate to castai_node_template.
+func flattenAutoscalerSettings(policiesJSON []byte) ([]map[string]interface{}, error) {
+	var apiPolicy map[string]interface{}
+	if err := json.Unmarshal(policiesJSON, &apiPolicy); err != nil {
+		return nil, fmt.Errorf("unmarshaling policies JSON: %w", err)
+	}
+
+	settings := make(map[string]interface{})
+
+	// Top-level fields
+	if v, ok := apiPolicy["enabled"]; ok {
+		settings[FieldEnabled] = v
+	}
+	if v, ok := apiPolicy["isScopedMode"]; ok {
+		settings[FieldIsScopedMode] = v
+	}
+	if v, ok := apiPolicy["nodeTemplatesPartialMatchingEnabled"]; ok {
+		settings[FieldNodeTemplatesPartialMatchingEnabled] = v
+	}
+
+	// Unschedulable Pods (excluding deprecated fields: headroom, headroomSpot, nodeConstraints, customInstancesEnabled)
+	if unschedulablePods, ok := apiPolicy["unschedulablePods"].(map[string]interface{}); ok {
+		up := flattenUnschedulablePods(unschedulablePods)
+		if len(up) > 0 {
+			settings[FieldUnschedulablePods] = []interface{}{up}
+		}
+	}
+
+	// Cluster Limits
+	if clusterLimits, ok := apiPolicy["clusterLimits"].(map[string]interface{}); ok {
+		cl := flattenClusterLimits(clusterLimits)
+		if len(cl) > 0 {
+			settings[FieldClusterLimits] = []interface{}{cl}
+		}
+	}
+
+	// Node Downscaler (excluding spot_instances which is deprecated at top level)
+	if nodeDownscaler, ok := apiPolicy["nodeDownscaler"].(map[string]interface{}); ok {
+		nd := flattenNodeDownscaler(nodeDownscaler)
+		if len(nd) > 0 {
+			settings[FieldNodeDownscaler] = []interface{}{nd}
+		}
+	}
+
+	// Note: Omitting spotInstances entirely (deprecated)
+
+	return []map[string]interface{}{settings}, nil
+}
+
+// flattenUnschedulablePods converts the unschedulablePods API response to Terraform structure.
+// Deprecated fields (headroom, headroomSpot, nodeConstraints, customInstancesEnabled) are omitted.
+// podPinner is included if present in API response so users can track changes made via UI/API.
+func flattenUnschedulablePods(unschedulablePods map[string]interface{}) map[string]interface{} {
+	up := make(map[string]interface{})
+
+	if v, ok := unschedulablePods["enabled"]; ok {
+		up[FieldEnabled] = v
+	}
+
+	// Note: Omitting headroom, headroomSpot, nodeConstraints, customInstancesEnabled (deprecated)
+
+	if podPinner, ok := unschedulablePods["podPinner"].(map[string]interface{}); ok {
+		if enabled, ok := podPinner["enabled"].(bool); ok {
+			pp := map[string]interface{}{
+				FieldEnabled: enabled,
+			}
+			up[FieldPodPinner] = []interface{}{pp}
+		}
+	}
+
+	return up
+}
+
+// flattenClusterLimits converts the clusterLimits API response to Terraform structure.
+func flattenClusterLimits(clusterLimits map[string]interface{}) map[string]interface{} {
+	cl := make(map[string]interface{})
+
+	if v, ok := clusterLimits["enabled"]; ok {
+		cl[FieldEnabled] = v
+	}
+
+	if cpu, ok := clusterLimits["cpu"].(map[string]interface{}); ok {
+		cpuMap := make(map[string]interface{})
+		if v, ok := cpu["minCores"]; ok {
+			cpuMap[FieldMinCores] = v
+		}
+		if v, ok := cpu["maxCores"]; ok {
+			cpuMap[FieldMaxCores] = v
+		}
+		if len(cpuMap) > 0 {
+			cl[FieldCPU] = []interface{}{cpuMap}
+		}
+	}
+
+	return cl
+}
+
+// flattenNodeDownscaler converts the nodeDownscaler API response to Terraform structure.
+func flattenNodeDownscaler(nodeDownscaler map[string]interface{}) map[string]interface{} {
+	nd := make(map[string]interface{})
+
+	if v, ok := nodeDownscaler["enabled"]; ok {
+		nd[FieldEnabled] = v
+	}
+
+	if emptyNodes, ok := nodeDownscaler["emptyNodes"].(map[string]interface{}); ok {
+		en := make(map[string]interface{})
+		if v, ok := emptyNodes["enabled"]; ok {
+			en[FieldEnabled] = v
+		}
+		if v, ok := emptyNodes["delaySeconds"]; ok {
+			en[FieldDelaySeconds] = v
+		}
+		if len(en) > 0 {
+			nd[FieldEmptyNodes] = []interface{}{en}
+		}
+	}
+
+	if evictor, ok := nodeDownscaler["evictor"].(map[string]interface{}); ok {
+		ev := flattenEvictor(evictor)
+		if len(ev) > 0 {
+			nd[FieldEvictor] = []interface{}{ev}
+		}
+	}
+
+	return nd
+}
+
+// flattenEvictor converts the evictor API response to Terraform structure.
+func flattenEvictor(evictor map[string]interface{}) map[string]interface{} {
+	ev := make(map[string]interface{})
+
+	if v, ok := evictor["enabled"]; ok {
+		ev[FieldEnabled] = v
+	}
+	if v, ok := evictor["dryRun"]; ok {
+		ev[FieldEvictorDryRun] = v
+	}
+	if v, ok := evictor["aggressiveMode"]; ok {
+		ev[FieldEvictorAggressiveMode] = v
+	}
+	if v, ok := evictor["scopedMode"]; ok {
+		ev[FieldEvictorScopedMode] = v
+	}
+	if v, ok := evictor["cycleInterval"]; ok {
+		ev[FieldEvictorCycleInterval] = v
+	}
+	if v, ok := evictor["nodeGracePeriodMinutes"]; ok {
+		ev[FieldEvictorNodeGracePeriodMinutes] = v
+	}
+	if v, ok := evictor["podEvictionFailureBackOffInterval"]; ok {
+		ev[FieldEvictorPodEvictionFailureBackOffInterval] = v
+	}
+	if v, ok := evictor["ignorePodDisruptionBudgets"]; ok {
+		ev[FieldEvictorIgnorePodDisruptionBudgets] = v
+	}
+
+	return ev
+}
+
 func resourceCastaiAutoscalerDiff(ctx context.Context, d *schema.ResourceDiff, meta interface{}) error {
 	clusterId := getClusterId(d)
 	if clusterId == "" {
@@ -526,6 +735,9 @@ func resourceCastaiAutoscalerDiff(ctx context.Context, d *schema.ResourceDiff, m
 	if policies == nil {
 		return nil
 	}
+
+	// Filter out volatile fields that change independently on API side
+	policies = filterVolatileFields(policies)
 
 	return d.SetNew(FieldAutoscalerPolicies, string(policies))
 }
@@ -639,6 +851,9 @@ func readAutoscalerPolicies(ctx context.Context, data *schema.ResourceData, meta
 		return err
 	}
 
+	// Filter out volatile fields that change independently on API side
+	currentPolicies = filterVolatileFields(currentPolicies)
+
 	err = data.Set(FieldAutoscalerPolicies, string(currentPolicies))
 	if err != nil {
 		log.Printf("[ERROR] Failed to set field: %v", err)
@@ -655,6 +870,43 @@ func getClusterId(data types.ResourceProvider) string {
 	}
 
 	return value.(string)
+}
+
+// filterVolatileFields removes API-computed fields that change independently and cause unnecessary drift.
+// This includes fields that are bidirectionally synced with node templates.
+func filterVolatileFields(policiesJSON []byte) []byte {
+	var policies map[string]interface{}
+	if err := json.Unmarshal(policiesJSON, &policies); err != nil {
+		return policiesJSON // return as-is if unmarshal fails
+	}
+
+	// Remove fields that change due to policy↔node template sync
+	delete(policies, "defaultNodeTemplateVersion")
+	delete(policies, "spotInstances") // synced with node template spot settings
+
+	// Remove nested deprecated fields that sync with node templates
+	if up, ok := policies["unschedulablePods"].(map[string]interface{}); ok {
+		delete(up, "nodeConstraints")        // synced with node template min/max CPU/RAM
+		delete(up, "customInstancesEnabled") // synced with node template
+
+		// Remove API-computed status fields that change based on cluster state
+		if podPinner, ok := up["podPinner"].(map[string]interface{}); ok {
+			delete(podPinner, "status")
+		}
+	}
+
+	// Remove API-computed status field from evictor
+	if nd, ok := policies["nodeDownscaler"].(map[string]interface{}); ok {
+		if evictor, ok := nd["evictor"].(map[string]interface{}); ok {
+			delete(evictor, "status")
+		}
+	}
+
+	filtered, err := json.Marshal(policies)
+	if err != nil {
+		return policiesJSON
+	}
+	return filtered
 }
 
 func getChangedPolicies(ctx context.Context, data types.ResourceProvider, meta interface{}, clusterId string) ([]byte, error) {
@@ -749,10 +1001,41 @@ func createValidationError(field, value string) error {
 // and their values are now stored in pre-existing states, so we cannot use the policies stored in state as-is. We null
 // those fields in case they are not specified in the configuration.
 func adjustPolicyForDrift(data types.ResourceProvider, policy *types.AutoscalerPolicy) {
-	if policy != nil && policy.UnschedulablePods != nil {
-		val, d := data.GetRawConfigAt(cty.GetAttrPath(FieldAutoscalerSettings).IndexInt(0).GetAttr(FieldUnschedulablePods).IndexInt(0).GetAttr(FieldCustomInstancesEnabled))
+	if policy == nil {
+		return
+	}
+
+	// Handle deprecated spot_instances field
+	val, d := data.GetRawConfigAt(cty.GetAttrPath(FieldAutoscalerSettings).IndexInt(0).GetAttr(FieldSpotInstances))
+	if !d.HasError() && val.IsNull() {
+		policy.SpotInstances = nil
+	}
+
+	if policy.UnschedulablePods != nil {
+		unschedulablePodsPath := cty.GetAttrPath(FieldAutoscalerSettings).IndexInt(0).GetAttr(FieldUnschedulablePods).IndexInt(0)
+
+		// Handle custom_instances_enabled (deprecated)
+		val, d := data.GetRawConfigAt(unschedulablePodsPath.GetAttr(FieldCustomInstancesEnabled))
 		if !d.HasError() && val.IsNull() {
 			policy.UnschedulablePods.CustomInstances = nil
+		}
+
+		// Handle headroom (deprecated)
+		val, d = data.GetRawConfigAt(unschedulablePodsPath.GetAttr(FieldHeadroom))
+		if !d.HasError() && val.IsNull() {
+			policy.UnschedulablePods.Headroom = nil
+		}
+
+		// Handle headroom_spot (deprecated)
+		val, d = data.GetRawConfigAt(unschedulablePodsPath.GetAttr(FieldHeadroomSpot))
+		if !d.HasError() && val.IsNull() {
+			policy.UnschedulablePods.HeadroomSpot = nil
+		}
+
+		// Handle node_constraints (deprecated)
+		val, d = data.GetRawConfigAt(unschedulablePodsPath.GetAttr(FieldNodeConstraints))
+		if !d.HasError() && val.IsNull() {
+			policy.UnschedulablePods.NodeConstraints = nil
 		}
 	}
 }

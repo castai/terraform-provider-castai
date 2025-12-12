@@ -150,7 +150,7 @@ func testAccGKENodeConfigurationConfigWithMaxPodsFormula(rName, clusterName, pro
 }
 
 func testAccGKENodeConfigurationConfigWithGKEConfig(rName, clusterName, projectID, gkeParams string) string {
-	return concatenateConfigs(testAccGKEClusterConfig(rName, clusterName, projectID), fmt.Sprintf(`
+	return ConfigCompose(testAccGKEClusterConfig(rName, clusterName, projectID), fmt.Sprintf(`
 resource "castai_node_configuration" "test" {
   name   		    = %[1]q
   cluster_id        = castai_gke_cluster.test.id
@@ -174,7 +174,7 @@ resource "castai_node_configuration_default" "test" {
 }
 
 func testAccGKENodeConfigurationUpdated(rName, clusterName, projectID string) string {
-	return concatenateConfigs(testAccGKEClusterConfig(rName, clusterName, projectID), fmt.Sprintf(`
+	return ConfigCompose(testAccGKEClusterConfig(rName, clusterName, projectID), fmt.Sprintf(`
 resource "castai_node_configuration" "test" {
   name   		    = %[1]q
   cluster_id        = castai_gke_cluster.test.id
@@ -213,7 +213,7 @@ resource "castai_node_configuration" "test" {
 `, rName))
 }
 func testAccGKEClusterConfig(rName string, clusterName string, projectID string) string {
-	return concatenateConfigs(testAccGCPConfig(rName, clusterName, projectID), fmt.Sprintf(`
+	return ConfigCompose(testAccGCPConfig(rName, clusterName, projectID), fmt.Sprintf(`
 resource "castai_gke_cluster" "test" {
   project_id                 = %[1]q
   location                   = "us-central1-c" 

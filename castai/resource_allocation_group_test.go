@@ -93,7 +93,7 @@ func allocationGroupWithAllClusterIds() string {
 		cluster_ids = []
 	}
 	`
-	return concatenateConfigs(cfg)
+	return ConfigCompose(cfg)
 }
 
 func allocationGroupConfig() string {
@@ -116,7 +116,7 @@ func allocationGroupConfig() string {
 	}
 	`
 
-	return concatenateConfigs(cfg)
+	return ConfigCompose(cfg)
 }
 
 func allocationGroupUpdatedConfig() string {
@@ -140,5 +140,5 @@ func allocationGroupUpdatedConfig() string {
 	}
 	`
 
-	return concatenateConfigs(cfg)
+	return ConfigCompose(cfg)
 }

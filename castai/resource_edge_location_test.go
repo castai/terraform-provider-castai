@@ -203,7 +203,7 @@ func testAccEdgeLocationAWSConfigWithParams(rName, clusterName, description stri
 	}
 	zonesConfig += "]"
 
-	return concatenateConfigs(testOmniClusterConfig(clusterName), fmt.Sprintf(`
+	return ConfigCompose(testOmniClusterConfig(clusterName), fmt.Sprintf(`
 resource "castai_edge_location" "test" {
   organization_id = %[5]q
   cluster_id      = castai_omni_cluster.test.id
@@ -292,7 +292,7 @@ func testAccEdgeLocationGCPConfigWithParams(rName, clusterName, description stri
 		networkTagsConfig += fmt.Sprintf("%q", tag)
 	}
 
-	return concatenateConfigs(testOmniClusterConfig(clusterName), fmt.Sprintf(`
+	return ConfigCompose(testOmniClusterConfig(clusterName), fmt.Sprintf(`
 resource "castai_edge_location" "test" {
   organization_id = %[6]q
   cluster_id      = castai_omni_cluster.test.id
@@ -337,7 +337,7 @@ func testAccEdgeLocationOCIConfigWithParams(rName, description, ociCredentials s
 	organizationID := testAccGetOrganizationID()
 	clusterName := "test-oci-cluster"
 
-	return concatenateConfigs(testOmniClusterConfig(clusterName), fmt.Sprintf(`
+	return ConfigCompose(testOmniClusterConfig(clusterName), fmt.Sprintf(`
 resource "castai_edge_location" "test" {
   organization_id = %[3]q
   cluster_id      = castai_omni_cluster.test.id
