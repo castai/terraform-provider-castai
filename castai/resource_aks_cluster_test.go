@@ -441,6 +441,15 @@ func TestAccAKS_ResourceAKSCluster(t *testing.T) {
 				),
 			},
 			{
+				Config: testAccAKSWithFederationIDConfig(clusterName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(clusterResourceName, "name", clusterName),
+					resource.TestCheckResourceAttrSet(clusterResourceName, "credentials_id"),
+					resource.TestCheckResourceAttr(clusterResourceName, "region", "westeurope"),
+					resource.TestCheckResourceAttrSet(clusterResourceName, "cluster_token"),
+				),
+			},
+			{
 				Config: testAccAKSNodeConfigurationConfig(rName, clusterName, resourceGroupName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(nodeConfResourceName, "name", rName),
@@ -509,4 +518,24 @@ resource "castai_aks_cluster" "test" {
 }
 
 `, clusterName, subscriptionID, tenantID, clientID, clientSecret)
+}
+
+func testAccAKSWithFederationIDConfig(clusterName string) string {
+	subscriptionID := os.Getenv("ARM_SUBSCRIPTION_ID")
+	federationID := os.Getenv("AZURE_TF_ACCEPTANCE_TEST_FEDERATION_ID")
+	tenantID := os.Getenv("AZURE_TF_ACCEPTANCE_TEST_FEDERATION_TENANT_ID")
+	clientID := os.Getenv("AZURE_TF_ACCEPTANCE_TEST_FEDERATION_CLIENT_ID")
+
+	return fmt.Sprintf(`
+resource "castai_aks_cluster" "test" {
+  name = %[3]q
+
+  region              = "westeurope"
+  subscription_id     = %[1]q
+  tenant_id           = %[4]q
+  client_id           = %[5]q
+  federation_id       = %[2]q
+  node_resource_group = "%[3]s-ng"
+}
+`, subscriptionID, federationID, clusterName, tenantID, clientID)
 }

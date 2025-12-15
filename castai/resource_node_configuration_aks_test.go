@@ -5,7 +5,7 @@ import (
 )
 
 func testAccAKSNodeConfigurationConfig(rName, clusterName, resourceGroupName string) string {
-	return ConfigCompose(testAccAKSWithClientSecretConfig(clusterName), fmt.Sprintf(`
+	return ConfigCompose(testAccAKSWithFederationIDConfig(clusterName), fmt.Sprintf(`
 provider "azurerm" {
 	features {}		
 }
@@ -38,7 +38,7 @@ resource "castai_node_configuration_default" "test" {
 }
 
 func testAccAKSNodeConfigurationUpdated(rName, clusterName, resourceGroupName string) string {
-	return ConfigCompose(testAccAKSWithClientSecretConfig(clusterName), fmt.Sprintf(`
+	return ConfigCompose(testAccAKSWithFederationIDConfig(clusterName), fmt.Sprintf(`
 provider "azurerm" {
 	features {}		
 }

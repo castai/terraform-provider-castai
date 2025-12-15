@@ -7,15 +7,17 @@ import (
 
 type AzureCredentials struct {
 	ClientID       string `json:"clientId"`
-	ClientSecret   string `json:"clientSecret"`
-	TenantID       string `json:"tenantId"`
+	ClientSecret   string `json:"clientSecret,omitempty"`
+	FederationID   string `json:"federationId,omitempty"`
 	SubscriptionID string `json:"subscriptionId"`
+	TenantID       string `json:"tenantId"`
 }
 
-func ToCloudCredentialsAzure(clientID, clientSecret, tenantID, subscriptionID string) (string, error) {
+func ToCloudCredentialsAzure(clientID, clientSecret, federationID, tenantID, subscriptionID string) (string, error) {
 	credentialsJson, err := json.Marshal(AzureCredentials{
 		ClientID:       clientID,
 		ClientSecret:   clientSecret,
+		FederationID:   federationID,
 		TenantID:       tenantID,
 		SubscriptionID: subscriptionID,
 	})

@@ -495,6 +495,11 @@ type ClientInterface interface {
 	// ExternalClusterAPITriggerHibernateCluster request
 	ExternalClusterAPITriggerHibernateCluster(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// ExternalClusterAPIIngestInstanceLogsWithBody request with any body
+	ExternalClusterAPIIngestInstanceLogsWithBody(ctx context.Context, clusterId string, instanceId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	ExternalClusterAPIIngestInstanceLogs(ctx context.Context, clusterId string, instanceId string, body ExternalClusterAPIIngestInstanceLogsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// ExternalClusterAPIListNodes request
 	ExternalClusterAPIListNodes(ctx context.Context, clusterId string, params *ExternalClusterAPIListNodesParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -979,6 +984,9 @@ type ClientInterface interface {
 
 	// WorkloadOptimizationAPIGetWorkloadFilters request
 	WorkloadOptimizationAPIGetWorkloadFilters(ctx context.Context, clusterId string, params *WorkloadOptimizationAPIGetWorkloadFiltersParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// WorkloadOptimizationAPIMigrateClusterToHPAV2 request
+	WorkloadOptimizationAPIMigrateClusterToHPAV2(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// WorkloadOptimizationAPIGetWorkload request
 	WorkloadOptimizationAPIGetWorkload(ctx context.Context, clusterId string, workloadId string, params *WorkloadOptimizationAPIGetWorkloadParams, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -2768,6 +2776,30 @@ func (c *Client) ExternalClusterAPIDisableGKESA(ctx context.Context, clusterId s
 
 func (c *Client) ExternalClusterAPITriggerHibernateCluster(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewExternalClusterAPITriggerHibernateClusterRequest(c.Server, clusterId)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) ExternalClusterAPIIngestInstanceLogsWithBody(ctx context.Context, clusterId string, instanceId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewExternalClusterAPIIngestInstanceLogsRequestWithBody(c.Server, clusterId, instanceId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) ExternalClusterAPIIngestInstanceLogs(ctx context.Context, clusterId string, instanceId string, body ExternalClusterAPIIngestInstanceLogsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewExternalClusterAPIIngestInstanceLogsRequest(c.Server, clusterId, instanceId, body)
 	if err != nil {
 		return nil, err
 	}
@@ -4892,6 +4924,18 @@ func (c *Client) WorkloadOptimizationAPIGetWorkloadsSummaryMetrics(ctx context.C
 
 func (c *Client) WorkloadOptimizationAPIGetWorkloadFilters(ctx context.Context, clusterId string, params *WorkloadOptimizationAPIGetWorkloadFiltersParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewWorkloadOptimizationAPIGetWorkloadFiltersRequest(c.Server, clusterId, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) WorkloadOptimizationAPIMigrateClusterToHPAV2(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewWorkloadOptimizationAPIMigrateClusterToHPAV2Request(c.Server, clusterId)
 	if err != nil {
 		return nil, err
 	}
@@ -11605,6 +11649,60 @@ func NewExternalClusterAPITriggerHibernateClusterRequest(server string, clusterI
 	if err != nil {
 		return nil, err
 	}
+
+	return req, nil
+}
+
+// NewExternalClusterAPIIngestInstanceLogsRequest calls the generic ExternalClusterAPIIngestInstanceLogs builder with application/json body
+func NewExternalClusterAPIIngestInstanceLogsRequest(server string, clusterId string, instanceId string, body ExternalClusterAPIIngestInstanceLogsJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewExternalClusterAPIIngestInstanceLogsRequestWithBody(server, clusterId, instanceId, "application/json", bodyReader)
+}
+
+// NewExternalClusterAPIIngestInstanceLogsRequestWithBody generates requests for ExternalClusterAPIIngestInstanceLogs with any type of body
+func NewExternalClusterAPIIngestInstanceLogsRequestWithBody(server string, clusterId string, instanceId string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "clusterId", runtime.ParamLocationPath, clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "instanceId", runtime.ParamLocationPath, instanceId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/kubernetes/external-clusters/%s/instances/%s/logs", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
 
 	return req, nil
 }
@@ -19635,6 +19733,40 @@ func NewWorkloadOptimizationAPIGetWorkloadFiltersRequest(server string, clusterI
 	return req, nil
 }
 
+// NewWorkloadOptimizationAPIMigrateClusterToHPAV2Request generates requests for WorkloadOptimizationAPIMigrateClusterToHPAV2
+func NewWorkloadOptimizationAPIMigrateClusterToHPAV2Request(server string, clusterId string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "clusterId", runtime.ParamLocationPath, clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/workload-autoscaling/clusters/%s/workloads/migrate-to-hpa-v2", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
 // NewWorkloadOptimizationAPIGetWorkloadRequest generates requests for WorkloadOptimizationAPIGetWorkload
 func NewWorkloadOptimizationAPIGetWorkloadRequest(server string, clusterId string, workloadId string, params *WorkloadOptimizationAPIGetWorkloadParams) (*http.Request, error) {
 	var err error
@@ -20639,6 +20771,11 @@ type ClientWithResponsesInterface interface {
 	// ExternalClusterAPITriggerHibernateCluster request
 	ExternalClusterAPITriggerHibernateClusterWithResponse(ctx context.Context, clusterId string) (*ExternalClusterAPITriggerHibernateClusterResponse, error)
 
+	// ExternalClusterAPIIngestInstanceLogs request  with any body
+	ExternalClusterAPIIngestInstanceLogsWithBodyWithResponse(ctx context.Context, clusterId string, instanceId string, contentType string, body io.Reader) (*ExternalClusterAPIIngestInstanceLogsResponse, error)
+
+	ExternalClusterAPIIngestInstanceLogsWithResponse(ctx context.Context, clusterId string, instanceId string, body ExternalClusterAPIIngestInstanceLogsJSONRequestBody) (*ExternalClusterAPIIngestInstanceLogsResponse, error)
+
 	// ExternalClusterAPIListNodes request
 	ExternalClusterAPIListNodesWithResponse(ctx context.Context, clusterId string, params *ExternalClusterAPIListNodesParams) (*ExternalClusterAPIListNodesResponse, error)
 
@@ -21123,6 +21260,9 @@ type ClientWithResponsesInterface interface {
 
 	// WorkloadOptimizationAPIGetWorkloadFilters request
 	WorkloadOptimizationAPIGetWorkloadFiltersWithResponse(ctx context.Context, clusterId string, params *WorkloadOptimizationAPIGetWorkloadFiltersParams) (*WorkloadOptimizationAPIGetWorkloadFiltersResponse, error)
+
+	// WorkloadOptimizationAPIMigrateClusterToHPAV2 request
+	WorkloadOptimizationAPIMigrateClusterToHPAV2WithResponse(ctx context.Context, clusterId string) (*WorkloadOptimizationAPIMigrateClusterToHPAV2Response, error)
 
 	// WorkloadOptimizationAPIGetWorkload request
 	WorkloadOptimizationAPIGetWorkloadWithResponse(ctx context.Context, clusterId string, workloadId string, params *WorkloadOptimizationAPIGetWorkloadParams) (*WorkloadOptimizationAPIGetWorkloadResponse, error)
@@ -24490,6 +24630,36 @@ func (r ExternalClusterAPITriggerHibernateClusterResponse) StatusCode() int {
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
 func (r ExternalClusterAPITriggerHibernateClusterResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type ExternalClusterAPIIngestInstanceLogsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *ExternalclusterV1IngestInstanceLogsResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r ExternalClusterAPIIngestInstanceLogsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r ExternalClusterAPIIngestInstanceLogsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r ExternalClusterAPIIngestInstanceLogsResponse) GetBody() []byte {
 	return r.Body
 }
 
@@ -28425,6 +28595,36 @@ func (r WorkloadOptimizationAPIGetWorkloadFiltersResponse) GetBody() []byte {
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
+type WorkloadOptimizationAPIMigrateClusterToHPAV2Response struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *WorkloadoptimizationV1MigrateClusterToHPAV2Response
+}
+
+// Status returns HTTPResponse.Status
+func (r WorkloadOptimizationAPIMigrateClusterToHPAV2Response) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r WorkloadOptimizationAPIMigrateClusterToHPAV2Response) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r WorkloadOptimizationAPIMigrateClusterToHPAV2Response) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
 type WorkloadOptimizationAPIGetWorkloadResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -29981,6 +30181,23 @@ func (c *ClientWithResponses) ExternalClusterAPITriggerHibernateClusterWithRespo
 	return ParseExternalClusterAPITriggerHibernateClusterResponse(rsp)
 }
 
+// ExternalClusterAPIIngestInstanceLogsWithBodyWithResponse request with arbitrary body returning *ExternalClusterAPIIngestInstanceLogsResponse
+func (c *ClientWithResponses) ExternalClusterAPIIngestInstanceLogsWithBodyWithResponse(ctx context.Context, clusterId string, instanceId string, contentType string, body io.Reader) (*ExternalClusterAPIIngestInstanceLogsResponse, error) {
+	rsp, err := c.ExternalClusterAPIIngestInstanceLogsWithBody(ctx, clusterId, instanceId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseExternalClusterAPIIngestInstanceLogsResponse(rsp)
+}
+
+func (c *ClientWithResponses) ExternalClusterAPIIngestInstanceLogsWithResponse(ctx context.Context, clusterId string, instanceId string, body ExternalClusterAPIIngestInstanceLogsJSONRequestBody) (*ExternalClusterAPIIngestInstanceLogsResponse, error) {
+	rsp, err := c.ExternalClusterAPIIngestInstanceLogs(ctx, clusterId, instanceId, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseExternalClusterAPIIngestInstanceLogsResponse(rsp)
+}
+
 // ExternalClusterAPIListNodesWithResponse request returning *ExternalClusterAPIListNodesResponse
 func (c *ClientWithResponses) ExternalClusterAPIListNodesWithResponse(ctx context.Context, clusterId string, params *ExternalClusterAPIListNodesParams) (*ExternalClusterAPIListNodesResponse, error) {
 	rsp, err := c.ExternalClusterAPIListNodes(ctx, clusterId, params)
@@ -31526,6 +31743,15 @@ func (c *ClientWithResponses) WorkloadOptimizationAPIGetWorkloadFiltersWithRespo
 		return nil, err
 	}
 	return ParseWorkloadOptimizationAPIGetWorkloadFiltersResponse(rsp)
+}
+
+// WorkloadOptimizationAPIMigrateClusterToHPAV2WithResponse request returning *WorkloadOptimizationAPIMigrateClusterToHPAV2Response
+func (c *ClientWithResponses) WorkloadOptimizationAPIMigrateClusterToHPAV2WithResponse(ctx context.Context, clusterId string) (*WorkloadOptimizationAPIMigrateClusterToHPAV2Response, error) {
+	rsp, err := c.WorkloadOptimizationAPIMigrateClusterToHPAV2(ctx, clusterId)
+	if err != nil {
+		return nil, err
+	}
+	return ParseWorkloadOptimizationAPIMigrateClusterToHPAV2Response(rsp)
 }
 
 // WorkloadOptimizationAPIGetWorkloadWithResponse request returning *WorkloadOptimizationAPIGetWorkloadResponse
@@ -34489,6 +34715,32 @@ func ParseExternalClusterAPITriggerHibernateClusterResponse(rsp *http.Response) 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest ExternalclusterV1TriggerHibernateClusterResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseExternalClusterAPIIngestInstanceLogsResponse parses an HTTP response from a ExternalClusterAPIIngestInstanceLogsWithResponse call
+func ParseExternalClusterAPIIngestInstanceLogsResponse(rsp *http.Response) (*ExternalClusterAPIIngestInstanceLogsResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &ExternalClusterAPIIngestInstanceLogsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest ExternalclusterV1IngestInstanceLogsResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -37886,6 +38138,32 @@ func ParseWorkloadOptimizationAPIGetWorkloadFiltersResponse(rsp *http.Response) 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest WorkloadoptimizationV1GetWorkloadFiltersResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseWorkloadOptimizationAPIMigrateClusterToHPAV2Response parses an HTTP response from a WorkloadOptimizationAPIMigrateClusterToHPAV2WithResponse call
+func ParseWorkloadOptimizationAPIMigrateClusterToHPAV2Response(rsp *http.Response) (*WorkloadOptimizationAPIMigrateClusterToHPAV2Response, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &WorkloadOptimizationAPIMigrateClusterToHPAV2Response{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest WorkloadoptimizationV1MigrateClusterToHPAV2Response
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
