@@ -1,14 +1,15 @@
 # 2. Create EKS cluster.
 module "eks" {
-  source       = "terraform-aws-modules/eks/aws"
-  version      = "19.4.2"
+  source  = "terraform-aws-modules/eks/aws"
+  version = "~> 21.0"
   putin_khuylo = true
 
-  cluster_name                   = var.cluster_name
-  cluster_version                = var.cluster_version
-  cluster_endpoint_public_access = true
+  name                         = var.cluster_name
+  kubernetes_version           = var.cluster_version
+  endpoint_public_access       = true
+  enable_cluster_creator_admin_permissions = true
 
-  cluster_addons = {
+  addons = {
     coredns = {
       most_recent = true
     }
@@ -29,19 +30,13 @@ module "eks" {
   vpc_id     = module.vpc.vpc_id
   subnet_ids = module.vpc.private_subnets
 
-  manage_aws_auth_configmap = true
-
-  aws_auth_roles = [
-    # Add the CAST AI IAM role which required for CAST AI nodes to join the cluster.
-    {
-      rolearn  = module.castai-eks-role-iam[0].instance_profile_role_arn
-      username = "system:node:{{EC2PrivateDNSName}}"
-      groups = [
-        "system:bootstrappers",
-        "system:nodes",
-      ]
-    },
-  ]
+  # Access entry for CAST AI nodes to join the cluster
+  access_entries = {
+    castai_node = {
+      principal_arn = module.castai-eks-role-iam[0].instance_profile_role_arn
+      type          = "EC2_LINUX"
+    }
+  }
 
   self_managed_node_groups = {
     node_group_1 = {
@@ -50,21 +45,12 @@ module "eks" {
       max_size      = 5
       min_size      = 2
       desired_size  = 2
-    }
-  }
 
-  eks_managed_node_groups = {
-    node_group_spot = {
-      name         = "${var.cluster_name}-spot"
-      min_size     = 1
-      max_size     = 10
-      desired_size = 1
-
-      instance_types = ["t3.large"]
-      capacity_type  = "SPOT"
-
-      update_config = {
-        max_unavailable_percentage = 50 # or set `max_unavailable`
+      # Allow pods to access IMDS (required for castai-agent)
+      metadata_options = {
+        http_endpoint               = "enabled"
+        http_tokens                 = "required"
+        http_put_response_hop_limit = 2
       }
     }
   }
@@ -73,7 +59,7 @@ module "eks" {
 
 module "ebs_csi_irsa_role" {
   source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
-  version = "~> 4.21.1"
+  version = "~> 5.52"
 
   role_name             = "ebs-csi-${var.cluster_name}"
   attach_ebs_csi_policy = true
