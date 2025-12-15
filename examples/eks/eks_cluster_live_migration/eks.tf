@@ -6,6 +6,7 @@ module "eks" {
   name                   = var.cluster_name
   kubernetes_version     = var.cluster_version
   endpoint_public_access = true
+  enable_cluster_creator_admin_permissions = true
 
   addons = {
     coredns = {
@@ -21,6 +22,7 @@ module "eks" {
     aws-ebs-csi-driver = {
       service_account_role_arn = module.ebs_csi_irsa_role.iam_role_arn
       most_recent              = true
+      resolve_conflicts        = "OVERWRITE"
     }
   }
 
@@ -29,7 +31,13 @@ module "eks" {
   vpc_id     = module.vpc.vpc_id
   subnet_ids = module.vpc.private_subnets
 
-  enable_cluster_creator_admin_permissions = true
+  # Access entry for CAST AI nodes to join the cluster
+  access_entries = {
+    castai_node = {
+      principal_arn = module.castai-eks-role-iam[0].instance_profile_role_arn
+      type          = "EC2_LINUX"
+    }
+  }
 
   self_managed_node_groups = {
     node_group_1 = {
@@ -39,6 +47,7 @@ module "eks" {
       min_size      = 2
       desired_size  = 2
 
+      # Allow pods to access IMDS (required for castai-agent)
       metadata_options = {
         http_endpoint               = "enabled"
         http_tokens                 = "required"
