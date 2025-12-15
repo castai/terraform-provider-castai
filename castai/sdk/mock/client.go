@@ -2675,6 +2675,46 @@ func (mr *MockClientInterfaceMockRecorder) ExternalClusterAPIImpersonationServic
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIImpersonationServiceAccountWithBody", reflect.TypeOf((*MockClientInterface)(nil).ExternalClusterAPIImpersonationServiceAccountWithBody), varargs...)
 }
 
+// ExternalClusterAPIIngestInstanceLogs mocks base method.
+func (m *MockClientInterface) ExternalClusterAPIIngestInstanceLogs(ctx context.Context, clusterId, instanceId string, body sdk.ExternalClusterAPIIngestInstanceLogsJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, instanceId, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ExternalClusterAPIIngestInstanceLogs", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ExternalClusterAPIIngestInstanceLogs indicates an expected call of ExternalClusterAPIIngestInstanceLogs.
+func (mr *MockClientInterfaceMockRecorder) ExternalClusterAPIIngestInstanceLogs(ctx, clusterId, instanceId, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, instanceId, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIIngestInstanceLogs", reflect.TypeOf((*MockClientInterface)(nil).ExternalClusterAPIIngestInstanceLogs), varargs...)
+}
+
+// ExternalClusterAPIIngestInstanceLogsWithBody mocks base method.
+func (m *MockClientInterface) ExternalClusterAPIIngestInstanceLogsWithBody(ctx context.Context, clusterId, instanceId, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, instanceId, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ExternalClusterAPIIngestInstanceLogsWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ExternalClusterAPIIngestInstanceLogsWithBody indicates an expected call of ExternalClusterAPIIngestInstanceLogsWithBody.
+func (mr *MockClientInterfaceMockRecorder) ExternalClusterAPIIngestInstanceLogsWithBody(ctx, clusterId, instanceId, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, instanceId, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIIngestInstanceLogsWithBody", reflect.TypeOf((*MockClientInterface)(nil).ExternalClusterAPIIngestInstanceLogsWithBody), varargs...)
+}
+
 // ExternalClusterAPIListClusters mocks base method.
 func (m *MockClientInterface) ExternalClusterAPIListClusters(ctx context.Context, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
@@ -6553,6 +6593,26 @@ func (mr *MockClientInterfaceMockRecorder) WorkloadOptimizationAPIListWorkloads(
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{ctx, clusterId, params}, reqEditors...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIListWorkloads", reflect.TypeOf((*MockClientInterface)(nil).WorkloadOptimizationAPIListWorkloads), varargs...)
+}
+
+// WorkloadOptimizationAPIMigrateClusterToHPAV2 mocks base method.
+func (m *MockClientInterface) WorkloadOptimizationAPIMigrateClusterToHPAV2(ctx context.Context, clusterId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "WorkloadOptimizationAPIMigrateClusterToHPAV2", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// WorkloadOptimizationAPIMigrateClusterToHPAV2 indicates an expected call of WorkloadOptimizationAPIMigrateClusterToHPAV2.
+func (mr *MockClientInterfaceMockRecorder) WorkloadOptimizationAPIMigrateClusterToHPAV2(ctx, clusterId interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIMigrateClusterToHPAV2", reflect.TypeOf((*MockClientInterface)(nil).WorkloadOptimizationAPIMigrateClusterToHPAV2), varargs...)
 }
 
 // WorkloadOptimizationAPIPatchWorkloadV2 mocks base method.
@@ -11366,6 +11426,76 @@ func (m *MockClientWithResponsesInterface) ExternalClusterAPIImpersonationServic
 func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIImpersonationServiceAccountWithResponse(ctx, body interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIImpersonationServiceAccountWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIImpersonationServiceAccountWithResponse), ctx, body)
+}
+
+// ExternalClusterAPIIngestInstanceLogs mocks base method.
+func (m *MockClientWithResponsesInterface) ExternalClusterAPIIngestInstanceLogs(ctx context.Context, clusterId, instanceId string, body sdk.ExternalClusterAPIIngestInstanceLogsJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, instanceId, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ExternalClusterAPIIngestInstanceLogs", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ExternalClusterAPIIngestInstanceLogs indicates an expected call of ExternalClusterAPIIngestInstanceLogs.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIIngestInstanceLogs(ctx, clusterId, instanceId, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, instanceId, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIIngestInstanceLogs", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIIngestInstanceLogs), varargs...)
+}
+
+// ExternalClusterAPIIngestInstanceLogsWithBody mocks base method.
+func (m *MockClientWithResponsesInterface) ExternalClusterAPIIngestInstanceLogsWithBody(ctx context.Context, clusterId, instanceId, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, instanceId, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ExternalClusterAPIIngestInstanceLogsWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ExternalClusterAPIIngestInstanceLogsWithBody indicates an expected call of ExternalClusterAPIIngestInstanceLogsWithBody.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIIngestInstanceLogsWithBody(ctx, clusterId, instanceId, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, instanceId, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIIngestInstanceLogsWithBody", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIIngestInstanceLogsWithBody), varargs...)
+}
+
+// ExternalClusterAPIIngestInstanceLogsWithBodyWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) ExternalClusterAPIIngestInstanceLogsWithBodyWithResponse(ctx context.Context, clusterId, instanceId, contentType string, body io.Reader) (*sdk.ExternalClusterAPIIngestInstanceLogsResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ExternalClusterAPIIngestInstanceLogsWithBodyWithResponse", ctx, clusterId, instanceId, contentType, body)
+	ret0, _ := ret[0].(*sdk.ExternalClusterAPIIngestInstanceLogsResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ExternalClusterAPIIngestInstanceLogsWithBodyWithResponse indicates an expected call of ExternalClusterAPIIngestInstanceLogsWithBodyWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIIngestInstanceLogsWithBodyWithResponse(ctx, clusterId, instanceId, contentType, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIIngestInstanceLogsWithBodyWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIIngestInstanceLogsWithBodyWithResponse), ctx, clusterId, instanceId, contentType, body)
+}
+
+// ExternalClusterAPIIngestInstanceLogsWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) ExternalClusterAPIIngestInstanceLogsWithResponse(ctx context.Context, clusterId, instanceId string, body sdk.ExternalClusterAPIIngestInstanceLogsJSONRequestBody) (*sdk.ExternalClusterAPIIngestInstanceLogsResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ExternalClusterAPIIngestInstanceLogsWithResponse", ctx, clusterId, instanceId, body)
+	ret0, _ := ret[0].(*sdk.ExternalClusterAPIIngestInstanceLogsResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ExternalClusterAPIIngestInstanceLogsWithResponse indicates an expected call of ExternalClusterAPIIngestInstanceLogsWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIIngestInstanceLogsWithResponse(ctx, clusterId, instanceId, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIIngestInstanceLogsWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIIngestInstanceLogsWithResponse), ctx, clusterId, instanceId, body)
 }
 
 // ExternalClusterAPIListClusters mocks base method.
@@ -18156,6 +18286,41 @@ func (m *MockClientWithResponsesInterface) WorkloadOptimizationAPIListWorkloadsW
 func (mr *MockClientWithResponsesInterfaceMockRecorder) WorkloadOptimizationAPIListWorkloadsWithResponse(ctx, clusterId, params interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIListWorkloadsWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).WorkloadOptimizationAPIListWorkloadsWithResponse), ctx, clusterId, params)
+}
+
+// WorkloadOptimizationAPIMigrateClusterToHPAV2 mocks base method.
+func (m *MockClientWithResponsesInterface) WorkloadOptimizationAPIMigrateClusterToHPAV2(ctx context.Context, clusterId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "WorkloadOptimizationAPIMigrateClusterToHPAV2", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// WorkloadOptimizationAPIMigrateClusterToHPAV2 indicates an expected call of WorkloadOptimizationAPIMigrateClusterToHPAV2.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) WorkloadOptimizationAPIMigrateClusterToHPAV2(ctx, clusterId interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIMigrateClusterToHPAV2", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).WorkloadOptimizationAPIMigrateClusterToHPAV2), varargs...)
+}
+
+// WorkloadOptimizationAPIMigrateClusterToHPAV2WithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) WorkloadOptimizationAPIMigrateClusterToHPAV2WithResponse(ctx context.Context, clusterId string) (*sdk.WorkloadOptimizationAPIMigrateClusterToHPAV2Response, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "WorkloadOptimizationAPIMigrateClusterToHPAV2WithResponse", ctx, clusterId)
+	ret0, _ := ret[0].(*sdk.WorkloadOptimizationAPIMigrateClusterToHPAV2Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// WorkloadOptimizationAPIMigrateClusterToHPAV2WithResponse indicates an expected call of WorkloadOptimizationAPIMigrateClusterToHPAV2WithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) WorkloadOptimizationAPIMigrateClusterToHPAV2WithResponse(ctx, clusterId interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIMigrateClusterToHPAV2WithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).WorkloadOptimizationAPIMigrateClusterToHPAV2WithResponse), ctx, clusterId)
 }
 
 // WorkloadOptimizationAPIPatchWorkloadV2 mocks base method.

@@ -638,6 +638,13 @@ const (
 	PODSSCALINGPOLICY               WorkloadoptimizationV1HPAScalingPolicyType = "PODS_SCALING_POLICY"
 )
 
+// Defines values for WorkloadoptimizationV1HPAUnsupportedReasonType.
+const (
+	HPAUNSUPPORTEDREASONTAKEOWNERSHIP WorkloadoptimizationV1HPAUnsupportedReasonType = "HPA_UNSUPPORTED_REASON_TAKE_OWNERSHIP"
+	HPAUNSUPPORTEDREASONUNKNOWN       WorkloadoptimizationV1HPAUnsupportedReasonType = "HPA_UNSUPPORTED_REASON_UNKNOWN"
+	HPAUNSUPPORTEDREASONWORKLOADTYPE  WorkloadoptimizationV1HPAUnsupportedReasonType = "HPA_UNSUPPORTED_REASON_WORKLOAD_TYPE"
+)
+
 // Defines values for WorkloadoptimizationV1InPlaceResizeStatus.
 const (
 	ERROR                      WorkloadoptimizationV1InPlaceResizeStatus = "ERROR"
@@ -5210,6 +5217,9 @@ type ExternalclusterV1ImpersonationServiceAccountResponse struct {
 	Id    *string `json:"id,omitempty"`
 }
 
+// ExternalclusterV1IngestInstanceLogsResponse IngestInstanceLogsResponse returns ingest instance logs response.
+type ExternalclusterV1IngestInstanceLogsResponse = map[string]interface{}
+
 // ExternalclusterV1KOPSClusterParams KOPSClusterParams defines KOPS-specific arguments.
 type ExternalclusterV1KOPSClusterParams struct {
 	// Cloud Cloud provider of the cluster.
@@ -5248,6 +5258,14 @@ type ExternalclusterV1ListNodesResponse struct {
 	NextCursor *string                  `json:"nextCursor,omitempty"`
 }
 
+// ExternalclusterV1LogEvent defines model for externalcluster.v1.LogEvent.
+type ExternalclusterV1LogEvent struct {
+	Fields  *map[string]string `json:"fields,omitempty"`
+	Level   *string            `json:"level,omitempty"`
+	Message *string            `json:"message,omitempty"`
+	Time    *time.Time         `json:"time,omitempty"`
+}
+
 // ExternalclusterV1MIGConfig MIGConfig configures MIG slicing on NVIDIA GPUs.
 type ExternalclusterV1MIGConfig struct {
 	GpuMemoryGb    *int32    `json:"gpuMemoryGb"`
@@ -5273,7 +5291,9 @@ type ExternalclusterV1Node struct {
 	InstanceLabels *map[string]string `json:"instanceLabels,omitempty"`
 
 	// InstanceName Output only. Cloud provider instance name.
-	InstanceName  *string `json:"instanceName"`
+	InstanceName *string `json:"instanceName"`
+
+	// InstancePrice Deprecated. Pricing is now handled by price service.
 	InstancePrice *string `json:"instancePrice"`
 	InstanceType  *string `json:"instanceType,omitempty"`
 
@@ -5376,6 +5396,11 @@ type ExternalclusterV1NodeListFilter struct {
 	Name   *string   `json:"name,omitempty"`
 	Type   *string   `json:"type,omitempty"`
 	Values *[]string `json:"values,omitempty"`
+}
+
+// ExternalclusterV1NodeLogs defines model for externalcluster.v1.NodeLogs.
+type ExternalclusterV1NodeLogs struct {
+	LogEvents *[]ExternalclusterV1LogEvent `json:"logEvents,omitempty"`
 }
 
 // ExternalclusterV1NodeNetwork NodeNetwork represents node network.
@@ -8132,6 +8157,24 @@ type WorkloadoptimizationV1HPASpec struct {
 	TargetCpuUtilizationPercentage *int32 `json:"targetCpuUtilizationPercentage"`
 }
 
+// WorkloadoptimizationV1HPAUnsupportedReason HPAUnsupportedReason contains categorized type and description for why native HPA is unsupported.
+type WorkloadoptimizationV1HPAUnsupportedReason struct {
+	// Description Description of why native HPA is unsupported.
+	Description string `json:"description"`
+
+	// Type HPAUnsupportedReasonType explains why native HPA is unsupported for the workload.
+	//
+	//  - HPA_UNSUPPORTED_REASON_WORKLOAD_TYPE: Workload type/kind is not supported for HPA.
+	//  - HPA_UNSUPPORTED_REASON_TAKE_OWNERSHIP: Cannot take ownership of existing HPA (e.g. owned by third party or has unsupported metrics).
+	Type WorkloadoptimizationV1HPAUnsupportedReasonType `json:"type"`
+}
+
+// WorkloadoptimizationV1HPAUnsupportedReasonType HPAUnsupportedReasonType explains why native HPA is unsupported for the workload.
+//
+//   - HPA_UNSUPPORTED_REASON_WORKLOAD_TYPE: Workload type/kind is not supported for HPA.
+//   - HPA_UNSUPPORTED_REASON_TAKE_OWNERSHIP: Cannot take ownership of existing HPA (e.g. owned by third party or has unsupported metrics).
+type WorkloadoptimizationV1HPAUnsupportedReasonType string
+
 // WorkloadoptimizationV1HorizontalOverrides defines model for workloadoptimization.v1.HorizontalOverrides.
 type WorkloadoptimizationV1HorizontalOverrides struct {
 	// Behavior HorizontalPodAutoscalerBehavior configures the scaling behavior of the target
@@ -8385,6 +8428,9 @@ type WorkloadoptimizationV1MetricTarget struct {
 // AVERAGE_VALUE - A metric value averaged across all pods (e.g., 200Mi).
 // UTILIZATION - A percentage of the requested resource utilization (e.g., 80).
 type WorkloadoptimizationV1MetricTargetType string
+
+// WorkloadoptimizationV1MigrateClusterToHPAV2Response defines model for workloadoptimization.v1.MigrateClusterToHPAV2Response.
+type WorkloadoptimizationV1MigrateClusterToHPAV2Response = map[string]interface{}
 
 // WorkloadoptimizationV1NewCustomMetricsConfig defines model for workloadoptimization.v1.NewCustomMetricsConfig.
 type WorkloadoptimizationV1NewCustomMetricsConfig struct {
@@ -9173,9 +9219,14 @@ type WorkloadoptimizationV1Workload struct {
 	Name             string `json:"name"`
 	Namespace        string `json:"namespace"`
 
-	// NativeHpaUnsupportedReason Reason for unsupported HPA V2.
+	// NativeHpaUnsupportedReason Deprecated: Use native_hpa_unsupported_reason_details instead.
+	// Reason description of why native HPA V2 is unsupported (kept for backward compatibility).
+	// Deprecated:
 	NativeHpaUnsupportedReason *string `json:"nativeHpaUnsupportedReason"`
-	OrganizationId             string  `json:"organizationId"`
+
+	// NativeHpaUnsupportedReasonDetails HPAUnsupportedReason contains categorized type and description for why native HPA is unsupported.
+	NativeHpaUnsupportedReasonDetails *WorkloadoptimizationV1HPAUnsupportedReason `json:"nativeHpaUnsupportedReasonDetails,omitempty"`
+	OrganizationId                    string                                      `json:"organizationId"`
 
 	// PodCount Pod count stores the *running* count of pods of the workload.
 	PodCount             int32                                         `json:"podCount"`
@@ -10694,6 +10745,9 @@ type ExternalClusterAPIGCPCreateSAJSONRequestBody = ExternalClusterAPIGCPCreateS
 
 // ExternalClusterAPIGKECreateSAJSONRequestBody defines body for ExternalClusterAPIGKECreateSA for application/json ContentType.
 type ExternalClusterAPIGKECreateSAJSONRequestBody = ExternalClusterAPIGKECreateSARequest
+
+// ExternalClusterAPIIngestInstanceLogsJSONRequestBody defines body for ExternalClusterAPIIngestInstanceLogs for application/json ContentType.
+type ExternalClusterAPIIngestInstanceLogsJSONRequestBody = ExternalclusterV1NodeLogs
 
 // ExternalClusterAPIAddNodeJSONRequestBody defines body for ExternalClusterAPIAddNode for application/json ContentType.
 type ExternalClusterAPIAddNodeJSONRequestBody = ExternalclusterV1NodeConfig
