@@ -27,6 +27,7 @@ const (
 	fieldCommitmentsAzureReservations = "azure_reservations"
 	fieldCommitmentsGCPCUDs           = "gcp_cuds"
 	fieldCommitmentsConfigs           = "commitment_configs"
+	fieldCommitmentsOrganizationId    = "organization_id"
 )
 
 var (
@@ -149,6 +150,11 @@ func resourceCommitments() *schema.Resource {
 				Optional:     true,
 				Description:  "JSON file containing CUDs exported from GCP.",
 				ExactlyOneOf: []string{fieldCommitmentsAzureReservationsCSV, fieldCommitmentsGCPCUDsJSON},
+			},
+			fieldCommitmentsOrganizationId: {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Organization ID. If not provided, will be fetched from the API using the authentication token.",
 			},
 			// Input configurations
 			fieldCommitmentsConfigs: {
@@ -776,11 +782,20 @@ func getOrganizationCommitmentAssignments(
 }
 
 func getCommitmentsImportID(ctx context.Context, data *schema.ResourceData, meta any) (string, error) {
-	// The commitments API doesn't take organization ID as a parameter, so we always use the default one associated
-	// with the used auth token
-	defOrgID, err := getDefaultOrganizationId(ctx, meta)
-	if err != nil {
-		return "", err
+	var orgID string
+
+	// Check if organization_id is provided
+	if orgIDValue, found := data.GetOk(fieldCommitmentsOrganizationId); found {
+		orgID = orgIDValue.(string)
+	} else {
+		// Fall back to fetching from /v1/organizations endpoint
+		// The commitments API doesn't take organization ID as a parameter, so we use the default one associated
+		// with the used auth token
+		defOrgID, err := getDefaultOrganizationId(ctx, meta)
+		if err != nil {
+			return "", err
+		}
+		orgID = defOrgID
 	}
 
 	var cloud string
@@ -790,7 +805,7 @@ func getCommitmentsImportID(ctx context.Context, data *schema.ResourceData, meta
 	if _, ok := data.GetOk(fieldCommitmentsGCPCUDsJSON); ok {
 		cloud = "gcp"
 	}
-	return defOrgID + ":" + cloud, nil
+	return orgID + ":" + cloud, nil
 }
 
 func getCspFromImportID(id string) string {

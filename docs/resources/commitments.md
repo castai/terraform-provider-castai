@@ -66,6 +66,7 @@ resource "castai_commitments" "azure_test" {
 - `azure_reservations_csv` (String) CSV file containing reservations exported from Azure.
 - `commitment_configs` (Block List) List of commitment configurations. (see [below for nested schema](#nestedblock--commitment_configs))
 - `gcp_cuds_json` (String) JSON file containing CUDs exported from GCP.
+- `organization_id` (String) Organization ID. If not provided, will be fetched from the API using the authentication token.
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
 ### Read-Only
