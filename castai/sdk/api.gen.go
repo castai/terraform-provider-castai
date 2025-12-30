@@ -631,6 +631,15 @@ const (
 	AGENTSTATUSUNKNOWN WorkloadoptimizationV1GetAgentStatusResponseAgentStatus = "AGENT_STATUS_UNKNOWN"
 )
 
+// Defines values for WorkloadoptimizationV1GetHPAV2MigrationEligibilityResponseMigrationStatus.
+const (
+	WorkloadoptimizationV1GetHPAV2MigrationEligibilityResponseMigrationStatusBLOCKED     WorkloadoptimizationV1GetHPAV2MigrationEligibilityResponseMigrationStatus = "BLOCKED"
+	WorkloadoptimizationV1GetHPAV2MigrationEligibilityResponseMigrationStatusFULL        WorkloadoptimizationV1GetHPAV2MigrationEligibilityResponseMigrationStatus = "FULL"
+	WorkloadoptimizationV1GetHPAV2MigrationEligibilityResponseMigrationStatusNONE        WorkloadoptimizationV1GetHPAV2MigrationEligibilityResponseMigrationStatus = "NONE"
+	WorkloadoptimizationV1GetHPAV2MigrationEligibilityResponseMigrationStatusPARTIAL     WorkloadoptimizationV1GetHPAV2MigrationEligibilityResponseMigrationStatus = "PARTIAL"
+	WorkloadoptimizationV1GetHPAV2MigrationEligibilityResponseMigrationStatusUNSPECIFIED WorkloadoptimizationV1GetHPAV2MigrationEligibilityResponseMigrationStatus = "UNSPECIFIED"
+)
+
 // Defines values for WorkloadoptimizationV1HPAScalingPolicyType.
 const (
 	HPASCALINGPOLICYTYPEUNSPECIFIED WorkloadoptimizationV1HPAScalingPolicyType = "HPA_SCALING_POLICY_TYPE_UNSPECIFIED"
@@ -1106,9 +1115,9 @@ const (
 
 // Defines values for WorkloadOptimizationAPIGetWorkloadFiltersParamsManagementOptions.
 const (
-	WorkloadOptimizationAPIGetWorkloadFiltersParamsManagementOptionsMANAGED   WorkloadOptimizationAPIGetWorkloadFiltersParamsManagementOptions = "MANAGED"
-	WorkloadOptimizationAPIGetWorkloadFiltersParamsManagementOptionsREADONLY  WorkloadOptimizationAPIGetWorkloadFiltersParamsManagementOptions = "READ_ONLY"
-	WorkloadOptimizationAPIGetWorkloadFiltersParamsManagementOptionsUNDEFINED WorkloadOptimizationAPIGetWorkloadFiltersParamsManagementOptions = "UNDEFINED"
+	MANAGED   WorkloadOptimizationAPIGetWorkloadFiltersParamsManagementOptions = "MANAGED"
+	READONLY  WorkloadOptimizationAPIGetWorkloadFiltersParamsManagementOptions = "READ_ONLY"
+	UNDEFINED WorkloadOptimizationAPIGetWorkloadFiltersParamsManagementOptions = "UNDEFINED"
 )
 
 // Defines values for WorkloadOptimizationAPIGetInstallCmdParamsCmePresets.
@@ -1755,6 +1764,7 @@ type CastaiInventoryV1beta1Commitment struct {
 	AwsSavingsPlanContext       *CastaiInventoryV1beta1AWSSavingsPlan              `json:"awsSavingsPlanContext,omitempty"`
 	AzureReservationContext     *CastaiInventoryV1beta1AzureReservation            `json:"azureReservationContext,omitempty"`
 	EndDate                     *time.Time                                         `json:"endDate"`
+	GcpFlexCudContext           *CastaiInventoryV1beta1GCPFlexCUD                  `json:"gcpFlexCudContext,omitempty"`
 	GcpResourceCudContext       *CastaiInventoryV1beta1GCPResourceCUD              `json:"gcpResourceCudContext,omitempty"`
 	Id                          *string                                            `json:"id,omitempty"`
 	Name                        *string                                            `json:"name,omitempty"`
@@ -1857,6 +1867,17 @@ type CastaiInventoryV1beta1GCPCommitmentImport struct {
 	Status            *string                              `json:"status,omitempty"`
 	StatusMessage     *string                              `json:"statusMessage,omitempty"`
 	Type              *string                              `json:"type,omitempty"`
+}
+
+// CastaiInventoryV1beta1GCPFlexCUD defines model for castai.inventory.v1beta1.GCPFlexCUD.
+type CastaiInventoryV1beta1GCPFlexCUD struct {
+	CommitmentAmount *float64 `json:"commitmentAmount,omitempty"`
+	DisplayName      *string  `json:"displayName,omitempty"`
+	LineItemId       *string  `json:"lineItemId,omitempty"`
+	Offer            *string  `json:"offer,omitempty"`
+	OrderName        *string  `json:"orderName,omitempty"`
+	Region           *string  `json:"region,omitempty"`
+	State            *string  `json:"state,omitempty"`
 }
 
 // CastaiInventoryV1beta1GCPResource defines model for castai.inventory.v1beta1.GCPResource.
@@ -2073,6 +2094,7 @@ type CastaiInventoryV1beta1InstanceType struct {
 
 	// NetworkInfo Describes the network settings for the instance type.
 	NetworkInfo *CastaiInventoryV1beta1NetworkInfo `json:"networkInfo,omitempty"`
+	NeuronInfo  *CastaiInventoryV1beta1NeuronInfo  `json:"neuronInfo,omitempty"`
 	Obsolete    *bool                              `json:"obsolete,omitempty"`
 	Os          *string                            `json:"os,omitempty"`
 
@@ -2236,6 +2258,15 @@ type CastaiInventoryV1beta1NetworkInfo struct {
 	MaximumNetworkInterfaces *int32 `json:"maximumNetworkInterfaces,omitempty"`
 }
 
+// CastaiInventoryV1beta1NeuronInfo defines model for castai.inventory.v1beta1.NeuronInfo.
+type CastaiInventoryV1beta1NeuronInfo struct {
+	// DeviceCount Total number of AWS Neuron devices (accelerator chips) available on the instance type.
+	DeviceCount *int64 `json:"deviceCount,omitempty"`
+
+	// TotalCores Total number of AWS Neuron cores (AI accelerator cores) available on the instance type.
+	TotalCores *int64 `json:"totalCores,omitempty"`
+}
+
 // CastaiInventoryV1beta1NodeUsage defines model for castai.inventory.v1beta1.NodeUsage.
 type CastaiInventoryV1beta1NodeUsage struct {
 	NodeId            *string                                  `json:"nodeId,omitempty"`
@@ -2366,10 +2397,15 @@ type CastaiInventoryV1beta1StorageInfoDeviceType string
 
 // CastaiInventoryV1beta1StorageInfoEphemeralOSDisksInfo EphemeralOSDisksInfo holds information about ephemeral OS disks. Currently only supported for Azure.
 type CastaiInventoryV1beta1StorageInfoEphemeralOSDisksInfo struct {
-	// MaxSizeGib Max size GiB specifies the maximum size of the disk.
+	// MaxSizeGib Deprecated: Use placement_options instead. This field contains the minimum max_size_gib across all placements.
+	// Deprecated:
 	MaxSizeGib *int32 `json:"maxSizeGib,omitempty"`
 
-	// Placements Placements describe where an ephemeral OS disk can be stored.
+	// PlacementOptions Placement options describe available ephemeral OS disk placements with their respective max sizes.
+	PlacementOptions *[]CastaiInventoryV1beta1StorageInfoEphemeralOSDisksInfoPlacementInfo `json:"placementOptions,omitempty"`
+
+	// Placements Deprecated: Use placement_options instead.
+	// Deprecated:
 	Placements *[]CastaiInventoryV1beta1StorageInfoEphemeralOSDisksInfoPlacement `json:"placements,omitempty"`
 }
 
@@ -2380,6 +2416,20 @@ type CastaiInventoryV1beta1StorageInfoEphemeralOSDisksInfo struct {
 //   - CACHE_DISK: Cache disk placement.
 //   - NVME_DISK: NVMe disk placement.
 type CastaiInventoryV1beta1StorageInfoEphemeralOSDisksInfoPlacement string
+
+// CastaiInventoryV1beta1StorageInfoEphemeralOSDisksInfoPlacementInfo PlacementInfo holds information about a specific ephemeral OS disk placement option.
+type CastaiInventoryV1beta1StorageInfoEphemeralOSDisksInfoPlacementInfo struct {
+	// MaxSizeGib Max size GiB specifies the maximum size of the disk for this placement.
+	MaxSizeGib *int32 `json:"maxSizeGib,omitempty"`
+
+	// Placement Placement specifies where the ephemeral OS disk is stored.
+	//
+	//  - PLACEMENT_UNSPECIFIED: Unspecified placement.
+	//  - RESOURCE_DISK: Resource (temp) disk placement.
+	//  - CACHE_DISK: Cache disk placement.
+	//  - NVME_DISK: NVMe disk placement.
+	Placement *CastaiInventoryV1beta1StorageInfoEphemeralOSDisksInfoPlacement `json:"placement,omitempty"`
+}
 
 // CastaiInventoryV1beta1UpdateCommitmentInput defines model for castai.inventory.v1beta1.UpdateCommitmentInput.
 type CastaiInventoryV1beta1UpdateCommitmentInput struct {
@@ -7921,6 +7971,21 @@ type WorkloadoptimizationV1GetAgentStatusResponse struct {
 // WorkloadoptimizationV1GetAgentStatusResponseAgentStatus AgentStatus defines the status of workload-autoscaler.
 type WorkloadoptimizationV1GetAgentStatusResponseAgentStatus string
 
+// WorkloadoptimizationV1GetHPAV2MigrationEligibilityResponse defines model for workloadoptimization.v1.GetHPAV2MigrationEligibilityResponse.
+type WorkloadoptimizationV1GetHPAV2MigrationEligibilityResponse struct {
+	// Status - FULL: All workloads are UI legacy HPAs and can be fully migrated
+	//  - PARTIAL: Mix of UI and annotation-based workloads - partial migration supported
+	//  - BLOCKED: All workloads are annotation-based - migration not supported
+	//  - NONE: No workloads eligible for migration - banner should not be shown
+	Status WorkloadoptimizationV1GetHPAV2MigrationEligibilityResponseMigrationStatus `json:"status"`
+}
+
+// WorkloadoptimizationV1GetHPAV2MigrationEligibilityResponseMigrationStatus - FULL: All workloads are UI legacy HPAs and can be fully migrated
+//   - PARTIAL: Mix of UI and annotation-based workloads - partial migration supported
+//   - BLOCKED: All workloads are annotation-based - migration not supported
+//   - NONE: No workloads eligible for migration - banner should not be shown
+type WorkloadoptimizationV1GetHPAV2MigrationEligibilityResponseMigrationStatus string
+
 // WorkloadoptimizationV1GetInstallCmdResponse defines model for workloadoptimization.v1.GetInstallCmdResponse.
 type WorkloadoptimizationV1GetInstallCmdResponse struct {
 	Script string `json:"script"`
@@ -9218,11 +9283,6 @@ type WorkloadoptimizationV1Workload struct {
 	MatchingPodCount int32  `json:"matchingPodCount"`
 	Name             string `json:"name"`
 	Namespace        string `json:"namespace"`
-
-	// NativeHpaUnsupportedReason Deprecated: Use native_hpa_unsupported_reason_details instead.
-	// Reason description of why native HPA V2 is unsupported (kept for backward compatibility).
-	// Deprecated:
-	NativeHpaUnsupportedReason *string `json:"nativeHpaUnsupportedReason"`
 
 	// NativeHpaUnsupportedReasonDetails HPAUnsupportedReason contains categorized type and description for why native HPA is unsupported.
 	NativeHpaUnsupportedReasonDetails *WorkloadoptimizationV1HPAUnsupportedReason `json:"nativeHpaUnsupportedReasonDetails,omitempty"`
