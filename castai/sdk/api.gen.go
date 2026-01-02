@@ -5324,14 +5324,14 @@ type ExternalclusterV1MIGConfig struct {
 
 // ExternalclusterV1Node Node represents a single VM that run as Kubernetes master or worker.
 type ExternalclusterV1Node struct {
-	AddedBy     *string            `json:"addedBy,omitempty"`
-	Annotations *map[string]string `json:"annotations,omitempty"`
-	Cloud       *string            `json:"cloud,omitempty"`
+	AddedBy     *string           `json:"addedBy,omitempty"`
+	Annotations map[string]string `json:"annotations"`
+	Cloud       string            `json:"cloud"`
 
 	// CreatedAt created_at represents timestamp of when node was created in cloud infrastructure.
-	CreatedAt *time.Time                `json:"createdAt,omitempty"`
+	CreatedAt time.Time                 `json:"createdAt"`
 	GpuInfo   *ExternalclusterV1GPUInfo `json:"gpuInfo,omitempty"`
-	Id        *string                   `json:"id,omitempty"`
+	Id        string                    `json:"id"`
 
 	// InstanceArchitecture Deprecated. Use node_info architecture field.
 	InstanceArchitecture *string `json:"instanceArchitecture"`
@@ -5345,32 +5345,32 @@ type ExternalclusterV1Node struct {
 
 	// InstancePrice Deprecated. Pricing is now handled by price service.
 	InstancePrice *string `json:"instancePrice"`
-	InstanceType  *string `json:"instanceType,omitempty"`
+	InstanceType  string  `json:"instanceType"`
 
 	// JoinedAt joined_at represents timestamp of when node has joined kubernetes cluster.
-	JoinedAt *time.Time         `json:"joinedAt,omitempty"`
-	Labels   *map[string]string `json:"labels,omitempty"`
-	Name     *string            `json:"name,omitempty"`
+	JoinedAt *time.Time        `json:"joinedAt,omitempty"`
+	Labels   map[string]string `json:"labels"`
+	Name     string            `json:"name"`
 
 	// Network NodeNetwork represents node network.
 	Network             *ExternalclusterV1NodeNetwork `json:"network,omitempty"`
 	NodeConfigurationId *string                       `json:"nodeConfigurationId"`
 	NodeInfo            *ExternalclusterV1NodeInfo    `json:"nodeInfo,omitempty"`
 	ProviderId          *string                       `json:"providerId"`
-	Resources           *ExternalclusterV1Resources   `json:"resources,omitempty"`
+	Resources           ExternalclusterV1Resources    `json:"resources"`
 
 	// Role NodeType defines the role of the VM when joining the Kubernetes cluster. Default value is not allowed.
-	Role *ExternalclusterV1NodeType `json:"role,omitempty"`
+	Role ExternalclusterV1NodeType `json:"role"`
 
 	// SpotConfig NodeSpotConfig defines if node should be created as spot instance, and params for creation.
-	SpotConfig *ExternalclusterV1NodeSpotConfig `json:"spotConfig,omitempty"`
+	SpotConfig ExternalclusterV1NodeSpotConfig `json:"spotConfig"`
 
 	// State NodeState contains feedback information about progress on the node provisioning.
-	State         *ExternalclusterV1NodeState `json:"state,omitempty"`
-	SubnetId      *string                     `json:"subnetId"`
-	Taints        *[]ExternalclusterV1Taint   `json:"taints,omitempty"`
-	Unschedulable *bool                       `json:"unschedulable,omitempty"`
-	Zone          *string                     `json:"zone,omitempty"`
+	State         ExternalclusterV1NodeState `json:"state"`
+	SubnetId      *string                    `json:"subnetId"`
+	Taints        []ExternalclusterV1Taint   `json:"taints"`
+	Unschedulable bool                       `json:"unschedulable"`
+	Zone          *string                    `json:"zone,omitempty"`
 }
 
 // ExternalclusterV1NodeAffinity NodeAffinity provides control over the assignment of individual nodes to dedicated host instances.
@@ -6231,10 +6231,10 @@ type NodeconfigV1NodeConfiguration struct {
 	CreatedAt *time.Time `json:"createdAt,omitempty"`
 
 	// Default Whether node configuration is the default one.
-	Default *bool `json:"default,omitempty"`
+	Default bool `json:"default"`
 
 	// DiskCpuRatio Disk to CPU ratio.
-	DiskCpuRatio *int32 `json:"diskCpuRatio,omitempty"`
+	DiskCpuRatio int32 `json:"diskCpuRatio"`
 
 	// DockerConfig Optional docker daemon configuration properties. Applicable for EKS only.
 	DockerConfig *map[string]interface{} `json:"dockerConfig"`
@@ -6245,7 +6245,7 @@ type NodeconfigV1NodeConfiguration struct {
 	Gke             *NodeconfigV1GKEConfig `json:"gke,omitempty"`
 
 	// Id The node configuration ID.
-	Id *string `json:"id,omitempty"`
+	Id string `json:"id"`
 
 	// Image Image to be used while provisioning the node.
 	// Image setting takes precedence over image family.
@@ -6260,26 +6260,26 @@ type NodeconfigV1NodeConfiguration struct {
 	KubeletConfig *map[string]interface{} `json:"kubeletConfig"`
 
 	// MinDiskSize Minimal disk size in GiB.
-	MinDiskSize *int32 `json:"minDiskSize,omitempty"`
+	MinDiskSize int32 `json:"minDiskSize"`
 
 	// Name The name of the node configuration.
-	Name                   *string                                   `json:"name,omitempty"`
+	Name                   string                                    `json:"name"`
 	SelfHostedWithEc2Nodes *NodeconfigV1SelfHostedWithEC2NodesConfig `json:"selfHostedWithEc2Nodes,omitempty"`
 
 	// SshPublicKey Base64 encoded ssh public key to be used for provisioned nodes.
 	SshPublicKey *string `json:"sshPublicKey"`
 
 	// Subnets Subnet ids to be used for provisioned nodes.
-	Subnets *[]string `json:"subnets,omitempty"`
+	Subnets []string `json:"subnets"`
 
 	// Tags Tags to be added on cloud instances for provisioned nodes.
-	Tags *map[string]string `json:"tags,omitempty"`
+	Tags map[string]string `json:"tags"`
 
 	// UpdatedAt The date when node configuration was updated.
 	UpdatedAt *time.Time `json:"updatedAt,omitempty"`
 
 	// Version The version of the node configuration.
-	Version *int32 `json:"version,omitempty"`
+	Version int32 `json:"version"`
 }
 
 // NodeconfigV1NodeConfigurationUpdate defines model for nodeconfig.v1.NodeConfigurationUpdate.
@@ -6552,15 +6552,15 @@ type NodetemplatesV1NodeTemplate struct {
 
 // NodetemplatesV1NodeTemplateListItem defines model for nodetemplates.v1.NodeTemplateListItem.
 type NodetemplatesV1NodeTemplateListItem struct {
-	Stats    *NodetemplatesV1NodeTemplateListItemStats `json:"stats,omitempty"`
-	Template *NodetemplatesV1NodeTemplate              `json:"template,omitempty"`
+	Stats    NodetemplatesV1NodeTemplateListItemStats `json:"stats"`
+	Template NodetemplatesV1NodeTemplate              `json:"template"`
 }
 
 // NodetemplatesV1NodeTemplateListItemStats defines model for nodetemplates.v1.NodeTemplateListItem.Stats.
 type NodetemplatesV1NodeTemplateListItemStats struct {
-	CountFallback *int32 `json:"countFallback,omitempty"`
-	CountOnDemand *int32 `json:"countOnDemand,omitempty"`
-	CountSpot     *int32 `json:"countSpot,omitempty"`
+	CountFallback int32 `json:"countFallback"`
+	CountOnDemand int32 `json:"countOnDemand"`
+	CountSpot     int32 `json:"countSpot"`
 }
 
 // NodetemplatesV1PriceAdjustmentConfiguration PriceAdjustmentConfiguration represents price adjustment multipliers.
@@ -7531,12 +7531,12 @@ type ScheduledrebalancingV1ListAvailableRebalancingTZResponse struct {
 
 // ScheduledrebalancingV1ListRebalancingJobsResponse defines model for scheduledrebalancing.v1.ListRebalancingJobsResponse.
 type ScheduledrebalancingV1ListRebalancingJobsResponse struct {
-	Jobs *[]ScheduledrebalancingV1RebalancingJob `json:"jobs,omitempty"`
+	Jobs []ScheduledrebalancingV1RebalancingJob `json:"jobs"`
 }
 
 // ScheduledrebalancingV1ListRebalancingSchedulesResponse defines model for scheduledrebalancing.v1.ListRebalancingSchedulesResponse.
 type ScheduledrebalancingV1ListRebalancingSchedulesResponse struct {
-	Schedules *[]ScheduledrebalancingV1RebalancingSchedule `json:"schedules,omitempty"`
+	Schedules []ScheduledrebalancingV1RebalancingSchedule `json:"schedules"`
 }
 
 // ScheduledrebalancingV1Node defines model for scheduledrebalancing.v1.Node.
@@ -7584,7 +7584,7 @@ type ScheduledrebalancingV1RebalancingJob struct {
 	LastTriggerAt         *time.Time `json:"lastTriggerAt"`
 	NextTriggerAt         *time.Time `json:"nextTriggerAt"`
 	RebalancingPlanId     *string    `json:"rebalancingPlanId,omitempty"`
-	RebalancingScheduleId *string    `json:"rebalancingScheduleId,omitempty"`
+	RebalancingScheduleId string     `json:"rebalancingScheduleId"`
 
 	// Status JobStatus defines rebalancing job's last execution status.
 	Status *ScheduledrebalancingV1JobStatus `json:"status,omitempty"`

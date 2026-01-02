@@ -121,7 +121,8 @@ const (
 
 type nodeSelectorOperatorsSlice []string
 
-var nodeSelectorOperators = nodeSelectorOperatorsSlice{NodeSelectorOperationIn,
+var nodeSelectorOperators = nodeSelectorOperatorsSlice{
+	NodeSelectorOperationIn,
 	NodeSelectorOperationNotIn,
 	NodeSelectorOperationExists,
 	NodeSelectorOperationDoesNot,
@@ -1102,7 +1103,6 @@ func flattenNodeAffinity(affinities []sdk.NodetemplatesV1TemplateConstraintsDedi
 		result[FieldNodeTemplateAzName] = lo.FromPtr(item.AzName)
 
 		if item.Affinity != nil && len(*item.Affinity) > 0 {
-
 			result[FieldNodeTemplateAffinityName] = lo.Map(*item.Affinity, func(affinity sdk.K8sSelectorV1KubernetesNodeAffinity, index int) map[string]any {
 				affinityOperator, ok := nodeSelectorOperators.Get(affinity.Operator)
 				if !ok {
@@ -1404,7 +1404,7 @@ func getNodeTemplateByName(ctx context.Context, data *schema.ResourceData, meta 
 		return nil, fmt.Errorf("%w: %v", ErrFailedToFindTemplateWithName, nodeTemplateName)
 	}
 
-	return t.Template, nil
+	return &t.Template, nil
 }
 
 func nodeTemplateStateImporter(ctx context.Context, d *schema.ResourceData, meta any) ([]*schema.ResourceData, error) {
