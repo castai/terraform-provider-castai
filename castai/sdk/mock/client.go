@@ -6255,6 +6255,26 @@ func (mr *MockClientInterfaceMockRecorder) WorkloadOptimizationAPIGetAgentStatus
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIGetAgentStatus", reflect.TypeOf((*MockClientInterface)(nil).WorkloadOptimizationAPIGetAgentStatus), varargs...)
 }
 
+// WorkloadOptimizationAPIGetHPAV2MigrationEligibility mocks base method.
+func (m *MockClientInterface) WorkloadOptimizationAPIGetHPAV2MigrationEligibility(ctx context.Context, clusterId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "WorkloadOptimizationAPIGetHPAV2MigrationEligibility", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// WorkloadOptimizationAPIGetHPAV2MigrationEligibility indicates an expected call of WorkloadOptimizationAPIGetHPAV2MigrationEligibility.
+func (mr *MockClientInterfaceMockRecorder) WorkloadOptimizationAPIGetHPAV2MigrationEligibility(ctx, clusterId interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIGetHPAV2MigrationEligibility", reflect.TypeOf((*MockClientInterface)(nil).WorkloadOptimizationAPIGetHPAV2MigrationEligibility), varargs...)
+}
+
 // WorkloadOptimizationAPIGetInstallCmd mocks base method.
 func (m *MockClientInterface) WorkloadOptimizationAPIGetInstallCmd(ctx context.Context, params *sdk.WorkloadOptimizationAPIGetInstallCmdParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
@@ -17691,6 +17711,41 @@ func (m *MockClientWithResponsesInterface) WorkloadOptimizationAPIGetAgentStatus
 func (mr *MockClientWithResponsesInterfaceMockRecorder) WorkloadOptimizationAPIGetAgentStatusWithResponse(ctx, clusterId interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIGetAgentStatusWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).WorkloadOptimizationAPIGetAgentStatusWithResponse), ctx, clusterId)
+}
+
+// WorkloadOptimizationAPIGetHPAV2MigrationEligibility mocks base method.
+func (m *MockClientWithResponsesInterface) WorkloadOptimizationAPIGetHPAV2MigrationEligibility(ctx context.Context, clusterId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "WorkloadOptimizationAPIGetHPAV2MigrationEligibility", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// WorkloadOptimizationAPIGetHPAV2MigrationEligibility indicates an expected call of WorkloadOptimizationAPIGetHPAV2MigrationEligibility.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) WorkloadOptimizationAPIGetHPAV2MigrationEligibility(ctx, clusterId interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIGetHPAV2MigrationEligibility", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).WorkloadOptimizationAPIGetHPAV2MigrationEligibility), varargs...)
+}
+
+// WorkloadOptimizationAPIGetHPAV2MigrationEligibilityWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) WorkloadOptimizationAPIGetHPAV2MigrationEligibilityWithResponse(ctx context.Context, clusterId string) (*sdk.WorkloadOptimizationAPIGetHPAV2MigrationEligibilityResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "WorkloadOptimizationAPIGetHPAV2MigrationEligibilityWithResponse", ctx, clusterId)
+	ret0, _ := ret[0].(*sdk.WorkloadOptimizationAPIGetHPAV2MigrationEligibilityResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// WorkloadOptimizationAPIGetHPAV2MigrationEligibilityWithResponse indicates an expected call of WorkloadOptimizationAPIGetHPAV2MigrationEligibilityWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) WorkloadOptimizationAPIGetHPAV2MigrationEligibilityWithResponse(ctx, clusterId interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIGetHPAV2MigrationEligibilityWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).WorkloadOptimizationAPIGetHPAV2MigrationEligibilityWithResponse), ctx, clusterId)
 }
 
 // WorkloadOptimizationAPIGetInstallCmd mocks base method.

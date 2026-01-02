@@ -479,6 +479,79 @@ func TestCommitmentsResourceDelete(t *testing.T) {
 	}
 }
 
+func TestGetCommitmentsImportID(t *testing.T) {
+	ctx := context.Background()
+	orgID := uuid.New()
+
+	tests := map[string]struct {
+		resourceData                 map[string]any
+		expectOrganizationsAPICalled bool
+		expectedCloud                string
+	}{
+		"should use provided organization_id for Azure": {
+			resourceData: map[string]any{
+				fieldCommitmentsOrganizationId:       orgID.String(),
+				fieldCommitmentsAzureReservationsCSV: "dummy-csv",
+			},
+			expectOrganizationsAPICalled: false,
+			expectedCloud:                "azure",
+		},
+		"should use provided organization_id for GCP": {
+			resourceData: map[string]any{
+				fieldCommitmentsOrganizationId: orgID.String(),
+				fieldCommitmentsGCPCUDsJSON:    "dummy-json",
+			},
+			expectOrganizationsAPICalled: false,
+			expectedCloud:                "gcp",
+		},
+		"should fetch organization_id when not provided": {
+			resourceData: map[string]any{
+				fieldCommitmentsAzureReservationsCSV: "dummy-csv",
+			},
+			expectOrganizationsAPICalled: true,
+			expectedCloud:                "azure",
+		},
+	}
+
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			r := require.New(t)
+
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+
+			resource := resourceCommitments()
+			mockClient := mock_sdk.NewMockClientWithResponsesInterface(ctrl)
+			provider := &ProviderConfig{api: mockClient}
+
+			data := schema.TestResourceDataRaw(t, resource.Schema, tt.resourceData)
+
+			// Set expectation for /v1/organizations call
+			if tt.expectOrganizationsAPICalled {
+				mockClient.EXPECT().UsersAPIListOrganizationsWithResponse(gomock.Any()).Return(&sdk.UsersAPIListOrganizationsResponse{
+					JSON200: &sdk.CastaiUsersV1beta1ListOrganizationsResponse{
+						Organizations: []sdk.CastaiUsersV1beta1UserOrganization{
+							{Id: lo.ToPtr(orgID.String())},
+						},
+					},
+					HTTPResponse: &http.Response{StatusCode: http.StatusOK},
+				}, nil).Times(1)
+			} else {
+				// Verify it's NOT called
+				mockClient.EXPECT().UsersAPIListOrganizationsWithResponse(gomock.Any()).Times(0)
+			}
+
+			// Call the function under test
+			importID, err := getCommitmentsImportID(ctx, data, provider)
+
+			// Verify results
+			r.NoError(err)
+			expectedID := orgID.String() + ":" + tt.expectedCloud
+			r.Equal(expectedID, importID)
+		})
+	}
+}
+
 func noErrInDiagnostics(r *require.Assertions, diags diag.Diagnostics) {
 	for _, d := range diags {
 		if d.Severity == diag.Error {
