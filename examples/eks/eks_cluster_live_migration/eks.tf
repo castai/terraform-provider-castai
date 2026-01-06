@@ -54,6 +54,12 @@ module "eks" {
       max_size     = 10
       desired_size = 1
 
+      metadata_options = {
+        http_endpoint               = "enabled"
+        http_tokens                 = "required"
+        http_put_response_hop_limit = 2
+      }
+
       instance_types = ["t3.large"]
       capacity_type  = "SPOT"
 
