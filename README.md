@@ -1,5 +1,9 @@
 <a href="https://cast.ai">
-    <img src="https://cast.ai/wp-content/themes/cast/img/cast-logo-dark-blue.svg" align="right" height="100" />
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset=".github/full-logo-white.svg">
+    <source media="(prefers-color-scheme: light)" srcset=".github/full-logo-black.svg">
+    <img src=".github/full-logo-black.svg" alt="Cast AI logo" title="Cast AI" align="right" height="50">
+  </picture>
 </a>
 
 Terraform Provider for CAST AI
