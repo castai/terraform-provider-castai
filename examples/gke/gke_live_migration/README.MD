@@ -11,19 +11,19 @@ This example contains a full creation of a GKE cluster and onboarding on Cast AI
 Currently not supported in GKE yet, be aware of the type of workloads you try to migrate for customers, it will fail eventually if they use persistent TCP connections.
 
 # How to create your env
-1. Rename `tf.vars.example` to `tf.vars`
-2. Update `tf.vars` file with your project name, cluster name, cluster region and Cast AI API token.
+1. Copy `terraform.tfvars.example` to `terraform.tfvars`
+2. Update `terraform.tfvars` file with your project name, cluster name, cluster region and Cast AI API token.
 3. Initialize tofu. Under example root folder run:
 ```bash
 tofu init
 ```
 4. Run tofu apply:
 ```
-tofu apply -var-file=tf.vars
+tofu apply
 ```
 5. To destroy resources created by this example:
 ```
-tofu destroy -var-file=tf.vars
+tofu destroy
 ```
 
 Please refer to this guide if you run into any issues https://docs.cast.ai/docs/terraform-troubleshooting
