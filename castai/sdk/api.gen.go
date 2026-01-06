@@ -1515,8 +1515,16 @@ type CastaiInventoryV1beta1AWSReservedInstancesContext struct {
 	AvailabilityZoneId   *string `json:"availabilityZoneId"`
 	AvailabilityZoneName *string `json:"availabilityZoneName"`
 
-	// EffectiveCount Effective instance count is the adjusted original commitment count based only the portion remaining after out-of-cluster usage.
-	EffectiveCount        *string                                       `json:"effectiveCount,omitempty"`
+	// EffectiveCount Deprecated: use effective_cpu and effective_memory_mib instead.
+	// Effective instance count is the adjusted original commitment count based only the portion remaining after out-of-cluster usage.
+	// Deprecated:
+	EffectiveCount *string `json:"effectiveCount,omitempty"`
+
+	// EffectiveCpu Effective CPU is the remaining CPU capacity after out-of-cluster usage (committed CPU - external usage CPU).
+	EffectiveCpu *string `json:"effectiveCpu,omitempty"`
+
+	// EffectiveMemoryMib Effective memory in MiB is the remaining memory capacity after out-of-cluster usage (committed memory - external usage memory).
+	EffectiveMemoryMib    *string                                       `json:"effectiveMemoryMib,omitempty"`
 	Id                    *string                                       `json:"id,omitempty"`
 	InstanceCount         *string                                       `json:"instanceCount,omitempty"`
 	InstanceType          *string                                       `json:"instanceType,omitempty"`
