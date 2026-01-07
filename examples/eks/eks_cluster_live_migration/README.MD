@@ -20,8 +20,8 @@ All are in the `modules/castai/main.tf` file.
 All other EKS/CAST AI resources mostly manage the EKS cluster and its connection to CAST AI, not specifically the CLM feature.
 
 # Usage
-1. Rename `tf.vars.example` to `tf.vars`
-2. Update `tf.vars` file with your cluster name, cluster region and CAST AI API token.
+1. Copy `terraform.tfvars.example` to `terraform.tfvars`
+2. Update `terraform.tfvars` file with your cluster name, cluster region and CAST AI API token.
 
 | Variable | Description |
 | --- | --- |
@@ -35,11 +35,11 @@ terraform init
 ```
 4. Run Terraform apply:
 ```
-terraform apply -var-file=tf.vars
+terraform apply
 ```
 5. To destroy resources created by this example:
 ```
-terraform destroy -var-file=tf.vars
+terraform destroy
 ```
 
 > **Note**

@@ -9,8 +9,8 @@ Example configuration should be analysed in the following order:
 3. Create CAST AI related resources to connect EKS cluster to CAST AI with Kvisor enabled - `castai.tf`
 
 # Usage
-1. Rename `tf.vars.example` to `tf.vars`
-2. Update `tf.vars` file with your cluster name, cluster region and CAST AI API token
+1. Copy `terraform.tfvars.example` to `terraform.tfvars`
+2. Update `terraform.tfvars` file with your cluster name, cluster region and CAST AI API token
 
 | Variable | Description |
 | --- | --- |

@@ -11,23 +11,23 @@ Prerequisites:
 - CAST AI account
 - Obtained CAST AI [API Access key](https://docs.cast.ai/docs/authentication#obtaining-api-access-key) with Full Access
 
-1. Rename `tf_scoped.vars.example` to `tf.vars`
+1. Copy `tf_scoped.vars.example` to `terraform.tfvars`
 2. To get `service_accounts_unique_ids` run :
 ```
 PROJECT_ID=<PLACEHOLDER> LOCATION=<PLACEHOLDER> CLUSTER_NAME=<PLACEHOLDER> ./script.sh
 ```
-3. Update `tf.vars` file with your project name, cluster name, cluster region, service accounts unique ids and CAST AI API token.
+3. Update `terraform.tfvars` file with your project name, cluster name, cluster region, service accounts unique ids and CAST AI API token.
 4. Initialize Terraform. Under example root folder run:
 ```
 terraform init
 ```
 5. Run Terraform apply:
 ```
-terraform apply -var-file=tf.vars
+terraform apply
 ```
 6. To destroy resources created by this example:
 ```
-terraform destroy -var-file=tf.vars
+terraform destroy
 ```
 
 ### Steps to take to successfully create GCP IAM resources with default `iam.serviceAccountUser` without custom condition.
@@ -36,19 +36,19 @@ Prerequisites:
 - CAST AI account
 - Obtained CAST AI [API Access key](https://docs.cast.ai/docs/authentication#obtaining-api-access-key) with Full Access
 
-1. Rename `tf_default.vars.example` to `tf.vars`
-2. Update `tf.vars` file with your project name, cluster name, cluster region and CAST AI API token.
+1. Copy `tf_default.vars.example` to `terraform.tfvars`
+2. Update `terraform.tfvars` file with your project name, cluster name, cluster region and CAST AI API token.
 3. Initialize Terraform. Under example root folder run:
 ```
 terraform init
 ```
 4. Run Terraform apply:
 ```
-terraform apply -var-file=tf.vars
+terraform apply
 ```
 5. To destroy resources created by this example:
 ```
-terraform destroy -var-file=tf.vars
+terraform destroy
 ```
 
 Please refer to this guide if you run into any issues https://docs.cast.ai/docs/terraform-troubleshooting
