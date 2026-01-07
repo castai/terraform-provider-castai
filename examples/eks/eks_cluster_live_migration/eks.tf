@@ -3,9 +3,9 @@ module "eks" {
   source  = "terraform-aws-modules/eks/aws"
   version = "~> 21.0"
 
-  name                   = var.cluster_name
-  kubernetes_version     = var.cluster_version
-  endpoint_public_access = true
+  name                                     = var.cluster_name
+  kubernetes_version                       = var.cluster_version
+  endpoint_public_access                   = true
   enable_cluster_creator_admin_permissions = true
 
   addons = {
@@ -108,12 +108,4 @@ resource "aws_security_group" "additional" {
       "10.0.0.0/8",
     ]
   }
-}
-
-# CAST AI access entry for nodes to join the cluster.
-resource "aws_eks_access_entry" "castai" {
-  count         = length(module.castai-eks-role-iam) > 0 ? 1 : 0
-  cluster_name  = module.eks.cluster_name
-  principal_arn = module.castai-eks-role-iam[0].instance_profile_role_arn
-  type          = "EC2_LINUX"
 }
