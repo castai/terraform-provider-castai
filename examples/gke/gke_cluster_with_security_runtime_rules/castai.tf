@@ -66,7 +66,6 @@ module "castai-gke-cluster" {
   # Everything else ...
 
   install_workload_autoscaler = false
-  install_cloud_proxy         = false
   install_pod_mutator         = false
   delete_nodes_on_disconnect  = false
 
