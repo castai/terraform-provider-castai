@@ -29,6 +29,12 @@ variable "cluster_name" {
   description = "EKS cluster name in AWS account."
 }
 
+variable "cluster_version" {
+  type        = string
+  description = "EKS cluster version."
+  default     = "1.33"
+}
+
 variable "tags" {
   type        = map(any)
   description = "Optional tags for new cluster nodes. This parameter applies only to new nodes - tags for old nodes are not reconciled."
