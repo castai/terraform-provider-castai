@@ -21,7 +21,7 @@ module "castai_gke_iam" {
 
 module "castai_gke_cluster" {
   source  = "castai/gke-cluster/castai"
-  version = "~> 9.4"
+  version = "~> 10.1"
 
   api_url                = var.castai_api_url
   castai_api_token       = var.castai_api_token
