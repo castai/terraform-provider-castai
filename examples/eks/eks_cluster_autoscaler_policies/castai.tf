@@ -215,7 +215,7 @@ module "castai-eks-cluster" {
 
   # depends_on helps Terraform with creating proper dependencies graph in case of resource creation and in this case destroy.
   # module "castai-eks-cluster" has to be destroyed before module "castai-eks-role-iam".
-  depends_on = [module.castai-eks-role-iam]
+  depends_on = [module.castai-eks-role-iam, module.vpc, module.eks]
 }
 
 resource "castai_rebalancing_schedule" "spots" {

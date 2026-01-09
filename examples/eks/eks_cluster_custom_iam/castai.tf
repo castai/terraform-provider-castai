@@ -64,4 +64,6 @@ module "castai-eks-cluster" {
   }
 
   delete_nodes_on_disconnect = var.delete_nodes_on_disconnect
+
+  depends_on = [module.vpc, module.eks]
 }
