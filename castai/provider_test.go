@@ -71,7 +71,10 @@ func testAccPreCheck(t *testing.T) {
 	testAccProviderConfigure.Do(func() {
 		if os.Getenv("CASTAI_API_URL") == "" {
 			// Run acceptance on dev by default if not set.
-			os.Setenv("CASTAI_API_URL", "https://api.dev-master.cast.ai")
+			err := os.Setenv("CASTAI_API_URL", "https://api.dev-master.cast.ai")
+			if err != nil {
+				t.Fatal("failed to set CASTAI_API_URL")
+			}
 		}
 
 		if v := os.Getenv("CASTAI_API_TOKEN"); v == "" {

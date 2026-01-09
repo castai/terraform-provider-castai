@@ -788,7 +788,7 @@ func getCurrentPolicies(ctx context.Context, client sdk.ClientWithResponsesInter
 	}
 
 	responseBytes, err := io.ReadAll(resp.Body)
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 	if err != nil {
 		return nil, fmt.Errorf("reading response body: %w", err)
 	}

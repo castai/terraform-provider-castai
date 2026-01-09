@@ -54,7 +54,7 @@ func resourceNodeConfigurationDefaultCreate(ctx context.Context, d *schema.Resou
 		return diag.FromErr(checkErr)
 	}
 
-	d.SetId(*resp.JSON200.Id)
+	d.SetId(resp.JSON200.Id)
 
 	return resourceNodeConfigurationDefaultRead(ctx, d, meta)
 }
@@ -79,8 +79,8 @@ func resourceNodeConfigurationDefaultRead(ctx context.Context, d *schema.Resourc
 		return diag.FromErr(err)
 	}
 
-	configID := resp.JSON200.Id
-	if !*resp.JSON200.Default {
+	configID := &resp.JSON200.Id
+	if !resp.JSON200.Default {
 		// If configuration is no longer default, we should trigger state change.
 		configID = nil
 	}
