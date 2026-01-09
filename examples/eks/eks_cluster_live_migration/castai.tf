@@ -53,5 +53,5 @@ module "cluster" {
 
   delete_nodes_on_disconnect = var.delete_nodes_on_disconnect
 
-  depends_on = [module.eks, module.castai-eks-role-iam]
+  depends_on = [module.castai-eks-role-iam, module.vpc, module.eks]
 }

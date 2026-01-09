@@ -28,7 +28,7 @@ module "castai-gke-iam" {
 
 module "castai-gke-cluster" {
   source  = "castai/gke-cluster/castai"
-  version = "~> 9.1"
+  version = "~> 10.1"
 
   api_url                = var.castai_public_api_url
   castware_api_url       = "https://api.psc.${var.castai_api_private_domain}"

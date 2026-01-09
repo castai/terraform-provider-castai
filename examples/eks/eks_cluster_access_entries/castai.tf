@@ -49,7 +49,7 @@ resource "castai_eks_clusterid" "cluster_id" {
 
 module "castai_eks_cluster" {
   source                 = "castai/eks-cluster/castai"
-  version                = "~> 14.0"
+  version                = "~> 14.1"
   api_url                = var.castai_api_url
   castai_api_token       = var.castai_api_token
   grpc_url               = var.castai_grpc_url
@@ -79,5 +79,5 @@ module "castai_eks_cluster" {
 
   // depends_on helps Terraform with creating proper dependencies graph in case of resource creation and in this case destroy.
   // module "castai-eks-cluster" has to be destroyed before module "castai_eks_role_iam".
-  depends_on = [module.castai_eks_role_iam]
+  depends_on = [module.castai_eks_role_iam, module.vpc, module.eks]
 }
