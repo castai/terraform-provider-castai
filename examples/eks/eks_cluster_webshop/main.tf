@@ -65,7 +65,7 @@ module "castai-eks-role-iam" {
 
 module "castai-eks-cluster" {
   source  = "castai/eks-cluster/castai"
-  version = "~> 12.0"
+  version = "~> 14.1"
 
   api_url = var.castai_api_url
 
