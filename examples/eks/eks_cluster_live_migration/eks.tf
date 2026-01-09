@@ -3,9 +3,10 @@ module "eks" {
   source  = "terraform-aws-modules/eks/aws"
   version = "~> 21.0"
 
-  name                   = var.cluster_name
-  kubernetes_version     = var.cluster_version
-  endpoint_public_access = true
+  name                                     = var.cluster_name
+  kubernetes_version                       = var.cluster_version
+  endpoint_public_access                   = true
+  enable_cluster_creator_admin_permissions = true
 
   addons = {
     coredns = {
@@ -21,6 +22,7 @@ module "eks" {
     aws-ebs-csi-driver = {
       service_account_role_arn = module.ebs_csi_irsa_role.iam_role_arn
       most_recent              = true
+      resolve_conflicts        = "OVERWRITE"
     }
   }
 
@@ -29,7 +31,13 @@ module "eks" {
   vpc_id     = module.vpc.vpc_id
   subnet_ids = module.vpc.private_subnets
 
-  enable_cluster_creator_admin_permissions = true
+  # Access entry for CAST AI nodes to join the cluster
+  access_entries = {
+    castai_node = {
+      principal_arn = module.castai-eks-role-iam[0].instance_profile_role_arn
+      type          = "EC2_LINUX"
+    }
+  }
 
   self_managed_node_groups = {
     node_group_1 = {
@@ -39,6 +47,7 @@ module "eks" {
       min_size      = 2
       desired_size  = 2
 
+      # Allow pods to access IMDS (required for castai-agent)
       metadata_options = {
         http_endpoint               = "enabled"
         http_tokens                 = "required"
@@ -53,6 +62,12 @@ module "eks" {
       min_size     = 1
       max_size     = 10
       desired_size = 1
+
+      metadata_options = {
+        http_endpoint               = "enabled"
+        http_tokens                 = "required"
+        http_put_response_hop_limit = 2
+      }
 
       instance_types = ["t3.large"]
       capacity_type  = "SPOT"
@@ -93,12 +108,4 @@ resource "aws_security_group" "additional" {
       "10.0.0.0/8",
     ]
   }
-}
-
-# CAST AI access entry for nodes to join the cluster.
-resource "aws_eks_access_entry" "castai" {
-  count         = length(module.castai-eks-role-iam) > 0 ? 1 : 0
-  cluster_name  = module.eks.cluster_name
-  principal_arn = module.castai-eks-role-iam[0].instance_profile_role_arn
-  type          = "EC2_LINUX"
 }

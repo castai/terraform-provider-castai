@@ -6,7 +6,7 @@ data "azurerm_subscription" "current" {}
 # Configure AKS cluster connection to CAST AI using CAST AI aks-cluster module with enabled Kvisor security agent.
 module "castai-aks-cluster" {
   source  = "castai/aks/castai"
-  version = "~> 9.0"
+  version = "~> 10.3"
 
   kvisor_grpc_addr = var.kvisor_grpc_addr
 

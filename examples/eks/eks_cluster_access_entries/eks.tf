@@ -57,6 +57,8 @@ module "eks" {
         max_unavailable_percentage = 50 # or set `max_unavailable`
       }
       metadata_options = {
+        http_endpoint               = "enabled"
+        http_tokens                 = "required"
         http_put_response_hop_limit = 2
       }
     }

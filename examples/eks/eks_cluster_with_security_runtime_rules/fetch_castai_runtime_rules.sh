@@ -127,8 +127,8 @@ echo "$rules_list" | while read -r name; do
   current=$((current + 1))
   safe_name=$(echo "$name" | iconv -c -t ascii | tr '[:upper:]' '[:lower:]' | tr -c 'a-z0-9_' '_' | sed 's/^_*//')
   if [ "$current" -lt "$count" ]; then
-    echo "terraform import -var-file=tf.vars castai_security_runtime_rule.$safe_name \"$name\" &&"
+    echo "terraform import castai_security_runtime_rule.$safe_name \"$name\" &&"
   else
-    echo "terraform import -var-file=tf.vars castai_security_runtime_rule.$safe_name \"$name\""
+    echo "terraform import castai_security_runtime_rule.$safe_name \"$name\""
   fi
 done

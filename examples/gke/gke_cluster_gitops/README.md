@@ -102,7 +102,7 @@ helm upgrade -i castai-kvisor castai-helm/castai-kvisor -n castai-agent \
 
 ## Steps Overview
 
-1. Configure `tf.vars.example` file with required values. If AKS cluster is already managed by Terraform you could instead directly reference those resources.
+1. Configure `terraform.tfvars.example` file with required values. If AKS cluster is already managed by Terraform you could instead directly reference those resources.
 2. Run `terraform init`
 3. Run `terraform apply` and make a note of `cluster_id`  output values. At this stage you would see that your cluster is in `Connecting` state in CAST AI console
 4. Install CAST AI components using Helm. Use `cluster_id` and `api_key` values to configure Helm releases:

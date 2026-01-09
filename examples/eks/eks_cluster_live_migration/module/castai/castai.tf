@@ -58,7 +58,7 @@ data "aws_caller_identity" "current" {}
 
 module "castai-eks-cluster" {
   source  = "castai/eks-cluster/castai"
-  version = "~> 13.1"
+  version = "~> 14.1"
 
   api_url                = var.castai_api_url
   castai_api_token       = var.castai_api_token
