@@ -27,6 +27,12 @@ variable "castware_operator_version" {
   default     = "0.0.25" # >= version that supports TF 
 }
 
+variable "extended_permissions" {
+  type        = bool
+  description = "Enable extended permissions to install phase2 components"
+  default     = false # Set it to true to install cluster controller
+}
+
 variable "castware_operator_image_tag" {
   type        = string
   description = "Image tag for castware operator"
@@ -38,3 +44,5 @@ variable "castware_default_components_enabled" {
   description = "Enable default components"
   default     = false # should ALWAYS be false for terraform
 }
+
+
