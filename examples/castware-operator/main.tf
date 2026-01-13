@@ -17,6 +17,11 @@ resource "helm_release" "castware_operator" {
   }
 
   set {
+    name  = "extendedPermissions"
+    value = var.extended_permissions
+  }
+
+  set {
     name  = "defaultCluster.provider"
     value = var.cluster_provider
   }

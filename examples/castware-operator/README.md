@@ -75,6 +75,7 @@ components:
 **Available components:**
 - `castai-agent` - Main Cast AI agent ([full configuration options](https://github.com/castai/helm-charts/tree/main/charts/castai-agent))
 - `spot-handler` - Cast AI spot handler daemon ([full configuration options](https://github.com/castai/helm-charts/tree/main/charts/castai-spot-handler)) *support added with Operator version v0.1.0
+- `cluster-controller` - Cast AI cluster controller ([full configuration options](https://github.com/castai/helm-charts/tree/main/charts/castai-cluster-controller)) *support added with Operator version v0.3.0
 
 ### 3. Deploy
 
@@ -257,6 +258,57 @@ components:
     overrides:
       # ... your overrides
 ```
+
+## Extended Permissions
+
+Extended permissions grant the Operator additional capabilities beyond read-only functionality, allowing it to actively manage cluster resources and components.
+
+### What Are Extended Permissions?
+
+Extended permissions enable the Operator to:
+- Install and manage `cluster-controller` for cluster operations
+- Create, update, and delete cluster-scoped resources required by Phase 2 components
+- Execute cluster operations beyond monitoring
+
+### When Are They Needed?
+
+Extended permissions are required when:
+- Enabling Phase 2 automation capabilities
+- Installing or upgrading the `cluster-controller` component
+- Transitioning from monitoring-only mode to active cluster management
+
+### Components Requiring Extended Permissions
+
+The following component requires extended permissions:
+- **`cluster-controller`** - Manages cluster operations
+
+### Security Model
+
+The Operator follows Kubernetes privilege escalation prevention principles. It can only create roles and bindings with permissions it already has, preventing unauthorized privilege escalation.
+
+### Enabling Extended Permissions
+
+In Terraform, extended permissions are enabled by setting the `extended_permissions` variable to `true`. Without this setting, the `cluster-controller` component will not be installed.
+
+Add to your `terraform.tfvars`:
+
+```hcl
+extended_permissions = true
+```
+
+Or set it directly in your module/configuration:
+
+```hcl
+variable "extended_permissions" {
+  type        = bool
+  description = "Enable extended permissions to install phase2 components"
+  default     = true  # Set to true to install cluster-controller
+}
+```
+
+This variable controls the `extendedPermissions` flag in the Helm chart, which grants the necessary permissions for Phase 2 components.
+
+For more details, see the [Cast AI Operator documentation](https://docs.cast.ai/docs/castai-operator).
 
 ## Cleanup
 
