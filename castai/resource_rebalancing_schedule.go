@@ -467,7 +467,7 @@ func getRebalancingScheduleByName(ctx context.Context, client sdk.ClientWithResp
 		return nil, checkErr
 	}
 
-	for _, schedule := range *resp.JSON200.Schedules {
+	for _, schedule := range resp.JSON200.Schedules {
 		if schedule.Name == name {
 			return &schedule, nil
 		}

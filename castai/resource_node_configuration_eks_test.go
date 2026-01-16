@@ -319,7 +319,7 @@ func testAccCheckNodeConfigurationDestroy(s *terraform.State) error {
 		if response.StatusCode() == http.StatusNotFound {
 			return nil
 		}
-		if *response.JSON200.Default {
+		if response.JSON200.Default {
 			// Default node config can't be deleted.
 			return nil
 		}
