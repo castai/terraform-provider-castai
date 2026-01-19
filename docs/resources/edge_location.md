@@ -95,6 +95,10 @@ Required:
 - `project_id` (String) GCP project ID where edges run
 - `subnet_name` (String) The name of the subnetwork to be used in the selected region
 
+Optional:
+
+- `instance_service_account` (String) GCP service account email to be attached to edge instances. It can be used to grant permissions to access other GCP resources.
+
 
 <a id="nestedatt--oci"></a>
 ### Nested Schema for `oci`

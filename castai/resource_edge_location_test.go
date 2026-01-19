@@ -101,6 +101,7 @@ func TestAccCloudAgnostic_ResourceEdgeLocationGCP(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "zones.1.id", "us-central1-b"),
 					resource.TestCheckResourceAttr(resourceName, "zones.1.name", "us-central1-b"),
 					resource.TestCheckResourceAttrSet(resourceName, "gcp.project_id"),
+					resource.TestCheckResourceAttr(resourceName, "gcp.instance_service_account", "custom-sa@test-project-123456.iam.gserviceaccount.com"),
 					resource.TestCheckResourceAttrSet(resourceName, "id"),
 					resource.TestCheckResourceAttr(resourceName, "credentials_revision", "1"),
 				),
@@ -302,11 +303,12 @@ resource "castai_edge_location" "test" {
 %[3]s
 
   gcp = {
-    project_id     = "test-project-123456"
+    project_id               = "test-project-123456"
+	instance_service_account = "custom-sa@test-project-123456.iam.gserviceaccount.com"
     %[5]s
-    network_name   = "test-network"
-    subnet_name    = "test-subnet"
-    network_tags   = [%[4]s]
+    network_name             = "test-network"
+    subnet_name              = "test-subnet"
+    network_tags             = [%[4]s]
   }
 }
 `, rName, description, zonesConfig, networkTagsConfig, gcpCredentials, organizationID))
