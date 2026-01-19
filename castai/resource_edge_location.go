@@ -66,6 +66,7 @@ type awsModel struct {
 
 type gcpModel struct {
 	ProjectID                        types.String `tfsdk:"project_id"`
+	InstanceServiceAccount           types.String `tfsdk:"instance_service_account"`
 	ClientServiceAccountJSONBase64WO types.String `tfsdk:"client_service_account_json_base64_wo"`
 	NetworkName                      types.String `tfsdk:"network_name"`
 	SubnetName                       types.String `tfsdk:"subnet_name"`
@@ -108,7 +109,8 @@ func (m gcpModel) Equal(other *gcpModel) bool {
 	return m.ProjectID.Equal(other.ProjectID) &&
 		m.NetworkName.Equal(other.NetworkName) &&
 		m.SubnetName.Equal(other.SubnetName) &&
-		m.NetworkTags.Equal(other.NetworkTags)
+		m.NetworkTags.Equal(other.NetworkTags) &&
+		m.InstanceServiceAccount.Equal(other.InstanceServiceAccount)
 }
 
 func (m ociModel) credentials() types.String {
@@ -259,6 +261,10 @@ func (r *edgeLocationResource) Schema(_ context.Context, _ resource.SchemaReques
 					"project_id": schema.StringAttribute{
 						Required:    true,
 						Description: "GCP project ID where edges run",
+					},
+					"instance_service_account": schema.StringAttribute{
+						Optional:    true,
+						Description: "GCP service account email to be attached to edge instances. It can be used to grant permissions to access other GCP resources.",
 					},
 					"client_service_account_json_base64_wo": schema.StringAttribute{
 						Required:    true,
@@ -736,8 +742,14 @@ func (r *edgeLocationResource) toGCP(ctx context.Context, plan, config *gcpModel
 		return nil, diags
 	}
 
+	var instanceServiceAccount *string
+	if !plan.InstanceServiceAccount.IsNull() && plan.InstanceServiceAccount.ValueString() != "" {
+		instanceServiceAccount = lo.ToPtr(plan.InstanceServiceAccount.ValueString())
+	}
+
 	out := &omni.GCPParam{
-		ProjectId: plan.ProjectID.ValueString(),
+		ProjectId:              plan.ProjectID.ValueString(),
+		InstanceServiceAccount: instanceServiceAccount,
 		Credentials: &omni.GCPParamCredentials{
 			ClientServiceAccountJsonBase64: config.ClientServiceAccountJSONBase64WO.ValueString(),
 		},
@@ -759,10 +771,15 @@ func (r *edgeLocationResource) toGCPModel(ctx context.Context, config *omni.GCPP
 
 	gcp := &gcpModel{
 		ProjectID:                        types.StringValue(config.ProjectId),
+		InstanceServiceAccount:           types.StringNull(),
 		ClientServiceAccountJSONBase64WO: types.StringNull(),
 		NetworkName:                      types.StringNull(),
 		SubnetName:                       types.StringNull(),
 		NetworkTags:                      types.SetNull(types.StringType),
+	}
+
+	if config.InstanceServiceAccount != nil {
+		gcp.InstanceServiceAccount = types.StringValue(*config.InstanceServiceAccount)
 	}
 
 	if config.Networking != nil {
