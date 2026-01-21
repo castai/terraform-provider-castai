@@ -838,11 +838,10 @@ func updateScalingPolicy(ctx context.Context, d *schema.ResourceData, meta any) 
 }
 
 func toExcludedContainers(d *schema.ResourceData) *[]string {
-	containers, ok := d.Get(FieldExcludedContainers).([]string)
-	if !ok {
-		return nil
+	if v, ok := d.Get(FieldExcludedContainers).([]any); ok && len(v) > 0 {
+		return lo.ToPtr(toStringList(v))
 	}
-	return &containers
+	return nil
 }
 
 func resourceWorkloadScalingPolicyDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
