@@ -606,11 +606,11 @@ const (
 	WorkloadoptimizationV1ApplyTypeUNKNOWN   WorkloadoptimizationV1ApplyType = "UNKNOWN"
 )
 
-// Defines values for WorkloadoptimizationV1CustomMetricsConfigType.
+// Defines values for WorkloadoptimizationV1CustomMetricsDataSourceType.
 const (
-	NODEWORKLOAD    WorkloadoptimizationV1CustomMetricsConfigType = "NODE_WORKLOAD"
-	PROMETHEUS      WorkloadoptimizationV1CustomMetricsConfigType = "PROMETHEUS"
-	TYPEUNSPECIFIED WorkloadoptimizationV1CustomMetricsConfigType = "TYPE_UNSPECIFIED"
+	NODEWORKLOAD    WorkloadoptimizationV1CustomMetricsDataSourceType = "NODE_WORKLOAD"
+	PROMETHEUS      WorkloadoptimizationV1CustomMetricsDataSourceType = "PROMETHEUS"
+	TYPEUNSPECIFIED WorkloadoptimizationV1CustomMetricsDataSourceType = "TYPE_UNSPECIFIED"
 )
 
 // Defines values for WorkloadoptimizationV1EventType.
@@ -1262,10 +1262,10 @@ type WorkloadOptimizationAPISetScalingPoliciesOrderRequest struct {
 	PolicyIds *[]string `json:"policyIds,omitempty"`
 }
 
-// WorkloadOptimizationAPIUpdateCustomMetricsConfigRequest defines model for WorkloadOptimizationAPI_UpdateCustomMetricsConfig_request.
-type WorkloadOptimizationAPIUpdateCustomMetricsConfigRequest struct {
-	Config     *WorkloadoptimizationV1UpdateCustomMetricsConfig `json:"config,omitempty"`
-	UpdateMask string                                           `json:"updateMask"`
+// WorkloadOptimizationAPIUpdateCustomMetricsDataSourceRequest defines model for WorkloadOptimizationAPI_UpdateCustomMetricsDataSource_request.
+type WorkloadOptimizationAPIUpdateCustomMetricsDataSourceRequest struct {
+	DataSource *WorkloadoptimizationV1UpdateCustomMetricsDataSource `json:"dataSource,omitempty"`
+	UpdateMask string                                               `json:"updateMask"`
 }
 
 // CastaiAuthtokenV1beta1AuthToken Auth token used to authenticate via api.
@@ -7908,15 +7908,15 @@ type WorkloadoptimizationV1CrossVersionObjectReference struct {
 	Name       *string `json:"name,omitempty"`
 }
 
-// WorkloadoptimizationV1CustomMetricsConfig defines model for workloadoptimization.v1.CustomMetricsConfig.
-type WorkloadoptimizationV1CustomMetricsConfig struct {
-	ClusterId string                                        `json:"clusterId"`
-	CreatedAt time.Time                                     `json:"createdAt"`
-	Data      WorkloadoptimizationV1CustomMetricsConfigData `json:"data"`
-	Id        string                                        `json:"id"`
+// WorkloadoptimizationV1CustomMetricsDataSource defines model for workloadoptimization.v1.CustomMetricsDataSource.
+type WorkloadoptimizationV1CustomMetricsDataSource struct {
+	ClusterId string                                            `json:"clusterId"`
+	CreatedAt time.Time                                         `json:"createdAt"`
+	Data      WorkloadoptimizationV1CustomMetricsDataSourceData `json:"data"`
+	Id        string                                            `json:"id"`
 
 	// KubeResourceName KubeResourceName is the name of the resource in Kubernetes. Cannot be updated, as it would break the sync.
-	// It is NOT unique per cluster as multiple config entries in the DB may form a single resource in the cluster.
+	// It is NOT unique per cluster as multiple data source entries in the DB may form a single resource in the cluster.
 	// When not provided, it is generated based on name field.
 	KubeResourceName string `json:"kubeResourceName"`
 
@@ -7928,55 +7928,55 @@ type WorkloadoptimizationV1CustomMetricsConfig struct {
 	OrganizationId string     `json:"organizationId"`
 	SyncedAt       *time.Time `json:"syncedAt"`
 
-	// Type Type defines the type of custom metrics config. Respective Data field will be populated based on the type.
+	// Type Type defines the type of custom metrics data source. Respective Data field will be populated based on the type.
 	// For each type, exactly one of the data fields should be populated.
-	Type      WorkloadoptimizationV1CustomMetricsConfigType `json:"type"`
-	UpdatedAt time.Time                                     `json:"updatedAt"`
+	Type      WorkloadoptimizationV1CustomMetricsDataSourceType `json:"type"`
+	UpdatedAt time.Time                                         `json:"updatedAt"`
 }
 
-// WorkloadoptimizationV1CustomMetricsConfigData defines model for workloadoptimization.v1.CustomMetricsConfig.Data.
-type WorkloadoptimizationV1CustomMetricsConfigData struct {
-	NodeWorkload *WorkloadoptimizationV1CustomMetricsConfigDataNodeWorkload `json:"nodeWorkload,omitempty"`
-	Prometheus   *WorkloadoptimizationV1CustomMetricsConfigDataPrometheus   `json:"prometheus,omitempty"`
+// WorkloadoptimizationV1CustomMetricsDataSourceData defines model for workloadoptimization.v1.CustomMetricsDataSource.Data.
+type WorkloadoptimizationV1CustomMetricsDataSourceData struct {
+	NodeWorkload *WorkloadoptimizationV1CustomMetricsDataSourceDataNodeWorkload `json:"nodeWorkload,omitempty"`
+	Prometheus   *WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheus   `json:"prometheus,omitempty"`
 }
 
-// WorkloadoptimizationV1CustomMetricsConfigDataNodeWorkload defines model for workloadoptimization.v1.CustomMetricsConfig.Data.NodeWorkload.
-type WorkloadoptimizationV1CustomMetricsConfigDataNodeWorkload struct {
-	DataSource WorkloadoptimizationV1CustomMetricsConfigDataNodeWorkloadDataSource `json:"dataSource"`
-	Metrics    *WorkloadoptimizationV1CustomMetricsConfigDataNodeWorkloadMetrics   `json:"metrics,omitempty"`
+// WorkloadoptimizationV1CustomMetricsDataSourceDataNodeWorkload defines model for workloadoptimization.v1.CustomMetricsDataSource.Data.NodeWorkload.
+type WorkloadoptimizationV1CustomMetricsDataSourceDataNodeWorkload struct {
+	DataSource WorkloadoptimizationV1CustomMetricsDataSourceDataNodeWorkloadDataSource `json:"dataSource"`
+	Metrics    *WorkloadoptimizationV1CustomMetricsDataSourceDataNodeWorkloadMetrics   `json:"metrics,omitempty"`
 }
 
-// WorkloadoptimizationV1CustomMetricsConfigDataNodeWorkloadDataSource defines model for workloadoptimization.v1.CustomMetricsConfig.Data.NodeWorkload.DataSource.
-type WorkloadoptimizationV1CustomMetricsConfigDataNodeWorkloadDataSource struct {
+// WorkloadoptimizationV1CustomMetricsDataSourceDataNodeWorkloadDataSource defines model for workloadoptimization.v1.CustomMetricsDataSource.Data.NodeWorkload.DataSource.
+type WorkloadoptimizationV1CustomMetricsDataSourceDataNodeWorkloadDataSource struct {
 	KubeletPort int32  `json:"kubeletPort"`
 	MetricsPath string `json:"metricsPath"`
 }
 
-// WorkloadoptimizationV1CustomMetricsConfigDataNodeWorkloadMetrics defines model for workloadoptimization.v1.CustomMetricsConfig.Data.NodeWorkload.Metrics.
-type WorkloadoptimizationV1CustomMetricsConfigDataNodeWorkloadMetrics struct {
+// WorkloadoptimizationV1CustomMetricsDataSourceDataNodeWorkloadMetrics defines model for workloadoptimization.v1.CustomMetricsDataSource.Data.NodeWorkload.Metrics.
+type WorkloadoptimizationV1CustomMetricsDataSourceDataNodeWorkloadMetrics struct {
 	Presets *[]string `json:"presets,omitempty"`
 }
 
-// WorkloadoptimizationV1CustomMetricsConfigDataPrometheus defines model for workloadoptimization.v1.CustomMetricsConfig.Data.Prometheus.
-type WorkloadoptimizationV1CustomMetricsConfigDataPrometheus struct {
-	DataSource WorkloadoptimizationV1CustomMetricsConfigDataPrometheusDataSource `json:"dataSource"`
-	Metrics    *WorkloadoptimizationV1CustomMetricsConfigDataPrometheusMetrics   `json:"metrics,omitempty"`
+// WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheus defines model for workloadoptimization.v1.CustomMetricsDataSource.Data.Prometheus.
+type WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheus struct {
+	DataSource WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusDataSource `json:"dataSource"`
+	Metrics    *WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetrics   `json:"metrics,omitempty"`
 }
 
-// WorkloadoptimizationV1CustomMetricsConfigDataPrometheusDataSource defines model for workloadoptimization.v1.CustomMetricsConfig.Data.Prometheus.DataSource.
-type WorkloadoptimizationV1CustomMetricsConfigDataPrometheusDataSource struct {
+// WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusDataSource defines model for workloadoptimization.v1.CustomMetricsDataSource.Data.Prometheus.DataSource.
+type WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusDataSource struct {
 	Timeout *string `json:"timeout,omitempty"`
 	Url     string  `json:"url"`
 }
 
-// WorkloadoptimizationV1CustomMetricsConfigDataPrometheusMetrics defines model for workloadoptimization.v1.CustomMetricsConfig.Data.Prometheus.Metrics.
-type WorkloadoptimizationV1CustomMetricsConfigDataPrometheusMetrics struct {
+// WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetrics defines model for workloadoptimization.v1.CustomMetricsDataSource.Data.Prometheus.Metrics.
+type WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetrics struct {
 	Presets *[]string `json:"presets,omitempty"`
 }
 
-// WorkloadoptimizationV1CustomMetricsConfigType Type defines the type of custom metrics config. Respective Data field will be populated based on the type.
+// WorkloadoptimizationV1CustomMetricsDataSourceType Type defines the type of custom metrics data source. Respective Data field will be populated based on the type.
 // For each type, exactly one of the data fields should be populated.
-type WorkloadoptimizationV1CustomMetricsConfigType string
+type WorkloadoptimizationV1CustomMetricsDataSourceType string
 
 // WorkloadoptimizationV1DeleteWorkloadScalingPolicyResponse defines model for workloadoptimization.v1.DeleteWorkloadScalingPolicyResponse.
 type WorkloadoptimizationV1DeleteWorkloadScalingPolicyResponse = map[string]interface{}
@@ -8479,9 +8479,9 @@ type WorkloadoptimizationV1LimitRangeResource struct {
 	Min *float64 `json:"min"`
 }
 
-// WorkloadoptimizationV1ListCustomMetricsConfigsResponse defines model for workloadoptimization.v1.ListCustomMetricsConfigsResponse.
-type WorkloadoptimizationV1ListCustomMetricsConfigsResponse struct {
-	Items []WorkloadoptimizationV1CustomMetricsConfig `json:"items"`
+// WorkloadoptimizationV1ListCustomMetricsDataSourcesResponse defines model for workloadoptimization.v1.ListCustomMetricsDataSourcesResponse.
+type WorkloadoptimizationV1ListCustomMetricsDataSourcesResponse struct {
+	Items []WorkloadoptimizationV1CustomMetricsDataSource `json:"items"`
 }
 
 // WorkloadoptimizationV1ListLimitRangesResponse defines model for workloadoptimization.v1.ListLimitRangesResponse.
@@ -8592,14 +8592,14 @@ type WorkloadoptimizationV1MetricTargetType string
 // WorkloadoptimizationV1MigrateClusterToHPAV2Response defines model for workloadoptimization.v1.MigrateClusterToHPAV2Response.
 type WorkloadoptimizationV1MigrateClusterToHPAV2Response = map[string]interface{}
 
-// WorkloadoptimizationV1NewCustomMetricsConfig defines model for workloadoptimization.v1.NewCustomMetricsConfig.
-type WorkloadoptimizationV1NewCustomMetricsConfig struct {
-	Data WorkloadoptimizationV1CustomMetricsConfigData `json:"data"`
-	Name string                                        `json:"name"`
+// WorkloadoptimizationV1NewCustomMetricsDataSource defines model for workloadoptimization.v1.NewCustomMetricsDataSource.
+type WorkloadoptimizationV1NewCustomMetricsDataSource struct {
+	Data WorkloadoptimizationV1CustomMetricsDataSourceData `json:"data"`
+	Name string                                            `json:"name"`
 
-	// Type Type defines the type of custom metrics config. Respective Data field will be populated based on the type.
+	// Type Type defines the type of custom metrics data source. Respective Data field will be populated based on the type.
 	// For each type, exactly one of the data fields should be populated.
-	Type WorkloadoptimizationV1CustomMetricsConfigType `json:"type"`
+	Type WorkloadoptimizationV1CustomMetricsDataSourceType `json:"type"`
 }
 
 // WorkloadoptimizationV1NewWorkloadScalingPolicy defines model for workloadoptimization.v1.NewWorkloadScalingPolicy.
@@ -9244,10 +9244,10 @@ type WorkloadoptimizationV1TimeSeriesMetric struct {
 	Value     float64   `json:"value"`
 }
 
-// WorkloadoptimizationV1UpdateCustomMetricsConfig defines model for workloadoptimization.v1.UpdateCustomMetricsConfig.
-type WorkloadoptimizationV1UpdateCustomMetricsConfig struct {
-	Data *WorkloadoptimizationV1CustomMetricsConfigData `json:"data,omitempty"`
-	Name *string                                        `json:"name,omitempty"`
+// WorkloadoptimizationV1UpdateCustomMetricsDataSource defines model for workloadoptimization.v1.UpdateCustomMetricsDataSource.
+type WorkloadoptimizationV1UpdateCustomMetricsDataSource struct {
+	Data *WorkloadoptimizationV1CustomMetricsDataSourceData `json:"data,omitempty"`
+	Name *string                                            `json:"name,omitempty"`
 }
 
 // WorkloadoptimizationV1UpdateWorkloadResponseV2 defines model for workloadoptimization.v1.UpdateWorkloadResponseV2.
@@ -11031,11 +11031,11 @@ type SSOAPIUpdateSSOConnectionJSONRequestBody = CastaiSsoV1beta1UpdateSSOConnect
 // SSOAPISetSyncForSSOConnectionJSONRequestBody defines body for SSOAPISetSyncForSSOConnection for application/json ContentType.
 type SSOAPISetSyncForSSOConnectionJSONRequestBody = SSOAPISetSyncForSSOConnectionRequest
 
-// WorkloadOptimizationAPICreateCustomMetricsConfigJSONRequestBody defines body for WorkloadOptimizationAPICreateCustomMetricsConfig for application/json ContentType.
-type WorkloadOptimizationAPICreateCustomMetricsConfigJSONRequestBody = WorkloadoptimizationV1NewCustomMetricsConfig
+// WorkloadOptimizationAPICreateCustomMetricsDataSourceJSONRequestBody defines body for WorkloadOptimizationAPICreateCustomMetricsDataSource for application/json ContentType.
+type WorkloadOptimizationAPICreateCustomMetricsDataSourceJSONRequestBody = WorkloadoptimizationV1NewCustomMetricsDataSource
 
-// WorkloadOptimizationAPIUpdateCustomMetricsConfigJSONRequestBody defines body for WorkloadOptimizationAPIUpdateCustomMetricsConfig for application/json ContentType.
-type WorkloadOptimizationAPIUpdateCustomMetricsConfigJSONRequestBody = WorkloadOptimizationAPIUpdateCustomMetricsConfigRequest
+// WorkloadOptimizationAPIUpdateCustomMetricsDataSourceJSONRequestBody defines body for WorkloadOptimizationAPIUpdateCustomMetricsDataSource for application/json ContentType.
+type WorkloadOptimizationAPIUpdateCustomMetricsDataSourceJSONRequestBody = WorkloadOptimizationAPIUpdateCustomMetricsDataSourceRequest
 
 // WorkloadOptimizationAPICreateWorkloadScalingPolicyJSONRequestBody defines body for WorkloadOptimizationAPICreateWorkloadScalingPolicy for application/json ContentType.
 type WorkloadOptimizationAPICreateWorkloadScalingPolicyJSONRequestBody = WorkloadoptimizationV1NewWorkloadScalingPolicy

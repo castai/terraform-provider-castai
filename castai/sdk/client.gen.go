@@ -916,21 +916,21 @@ type ClientInterface interface {
 	// WorkloadOptimizationAPIGetAgentStatus request
 	WorkloadOptimizationAPIGetAgentStatus(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// WorkloadOptimizationAPIListCustomMetricsConfigs request
-	WorkloadOptimizationAPIListCustomMetricsConfigs(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// WorkloadOptimizationAPIListCustomMetricsDataSources request
+	WorkloadOptimizationAPIListCustomMetricsDataSources(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// WorkloadOptimizationAPICreateCustomMetricsConfigWithBody request with any body
-	WorkloadOptimizationAPICreateCustomMetricsConfigWithBody(ctx context.Context, clusterId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// WorkloadOptimizationAPICreateCustomMetricsDataSourceWithBody request with any body
+	WorkloadOptimizationAPICreateCustomMetricsDataSourceWithBody(ctx context.Context, clusterId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	WorkloadOptimizationAPICreateCustomMetricsConfig(ctx context.Context, clusterId string, body WorkloadOptimizationAPICreateCustomMetricsConfigJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+	WorkloadOptimizationAPICreateCustomMetricsDataSource(ctx context.Context, clusterId string, body WorkloadOptimizationAPICreateCustomMetricsDataSourceJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// WorkloadOptimizationAPIDeleteCustomMetricsConfig request
-	WorkloadOptimizationAPIDeleteCustomMetricsConfig(ctx context.Context, clusterId string, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// WorkloadOptimizationAPIDeleteCustomMetricsDataSource request
+	WorkloadOptimizationAPIDeleteCustomMetricsDataSource(ctx context.Context, clusterId string, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// WorkloadOptimizationAPIUpdateCustomMetricsConfigWithBody request with any body
-	WorkloadOptimizationAPIUpdateCustomMetricsConfigWithBody(ctx context.Context, clusterId string, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// WorkloadOptimizationAPIUpdateCustomMetricsDataSourceWithBody request with any body
+	WorkloadOptimizationAPIUpdateCustomMetricsDataSourceWithBody(ctx context.Context, clusterId string, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	WorkloadOptimizationAPIUpdateCustomMetricsConfig(ctx context.Context, clusterId string, id string, body WorkloadOptimizationAPIUpdateCustomMetricsConfigJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+	WorkloadOptimizationAPIUpdateCustomMetricsDataSource(ctx context.Context, clusterId string, id string, body WorkloadOptimizationAPIUpdateCustomMetricsDataSourceJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// WorkloadOptimizationAPIListLimitRanges request
 	WorkloadOptimizationAPIListLimitRanges(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -4640,8 +4640,8 @@ func (c *Client) WorkloadOptimizationAPIGetAgentStatus(ctx context.Context, clus
 	return c.Client.Do(req)
 }
 
-func (c *Client) WorkloadOptimizationAPIListCustomMetricsConfigs(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewWorkloadOptimizationAPIListCustomMetricsConfigsRequest(c.Server, clusterId)
+func (c *Client) WorkloadOptimizationAPIListCustomMetricsDataSources(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewWorkloadOptimizationAPIListCustomMetricsDataSourcesRequest(c.Server, clusterId)
 	if err != nil {
 		return nil, err
 	}
@@ -4652,8 +4652,8 @@ func (c *Client) WorkloadOptimizationAPIListCustomMetricsConfigs(ctx context.Con
 	return c.Client.Do(req)
 }
 
-func (c *Client) WorkloadOptimizationAPICreateCustomMetricsConfigWithBody(ctx context.Context, clusterId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewWorkloadOptimizationAPICreateCustomMetricsConfigRequestWithBody(c.Server, clusterId, contentType, body)
+func (c *Client) WorkloadOptimizationAPICreateCustomMetricsDataSourceWithBody(ctx context.Context, clusterId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewWorkloadOptimizationAPICreateCustomMetricsDataSourceRequestWithBody(c.Server, clusterId, contentType, body)
 	if err != nil {
 		return nil, err
 	}
@@ -4664,8 +4664,8 @@ func (c *Client) WorkloadOptimizationAPICreateCustomMetricsConfigWithBody(ctx co
 	return c.Client.Do(req)
 }
 
-func (c *Client) WorkloadOptimizationAPICreateCustomMetricsConfig(ctx context.Context, clusterId string, body WorkloadOptimizationAPICreateCustomMetricsConfigJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewWorkloadOptimizationAPICreateCustomMetricsConfigRequest(c.Server, clusterId, body)
+func (c *Client) WorkloadOptimizationAPICreateCustomMetricsDataSource(ctx context.Context, clusterId string, body WorkloadOptimizationAPICreateCustomMetricsDataSourceJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewWorkloadOptimizationAPICreateCustomMetricsDataSourceRequest(c.Server, clusterId, body)
 	if err != nil {
 		return nil, err
 	}
@@ -4676,8 +4676,8 @@ func (c *Client) WorkloadOptimizationAPICreateCustomMetricsConfig(ctx context.Co
 	return c.Client.Do(req)
 }
 
-func (c *Client) WorkloadOptimizationAPIDeleteCustomMetricsConfig(ctx context.Context, clusterId string, id string, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewWorkloadOptimizationAPIDeleteCustomMetricsConfigRequest(c.Server, clusterId, id)
+func (c *Client) WorkloadOptimizationAPIDeleteCustomMetricsDataSource(ctx context.Context, clusterId string, id string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewWorkloadOptimizationAPIDeleteCustomMetricsDataSourceRequest(c.Server, clusterId, id)
 	if err != nil {
 		return nil, err
 	}
@@ -4688,8 +4688,8 @@ func (c *Client) WorkloadOptimizationAPIDeleteCustomMetricsConfig(ctx context.Co
 	return c.Client.Do(req)
 }
 
-func (c *Client) WorkloadOptimizationAPIUpdateCustomMetricsConfigWithBody(ctx context.Context, clusterId string, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewWorkloadOptimizationAPIUpdateCustomMetricsConfigRequestWithBody(c.Server, clusterId, id, contentType, body)
+func (c *Client) WorkloadOptimizationAPIUpdateCustomMetricsDataSourceWithBody(ctx context.Context, clusterId string, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewWorkloadOptimizationAPIUpdateCustomMetricsDataSourceRequestWithBody(c.Server, clusterId, id, contentType, body)
 	if err != nil {
 		return nil, err
 	}
@@ -4700,8 +4700,8 @@ func (c *Client) WorkloadOptimizationAPIUpdateCustomMetricsConfigWithBody(ctx co
 	return c.Client.Do(req)
 }
 
-func (c *Client) WorkloadOptimizationAPIUpdateCustomMetricsConfig(ctx context.Context, clusterId string, id string, body WorkloadOptimizationAPIUpdateCustomMetricsConfigJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewWorkloadOptimizationAPIUpdateCustomMetricsConfigRequest(c.Server, clusterId, id, body)
+func (c *Client) WorkloadOptimizationAPIUpdateCustomMetricsDataSource(ctx context.Context, clusterId string, id string, body WorkloadOptimizationAPIUpdateCustomMetricsDataSourceJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewWorkloadOptimizationAPIUpdateCustomMetricsDataSourceRequest(c.Server, clusterId, id, body)
 	if err != nil {
 		return nil, err
 	}
@@ -18383,8 +18383,8 @@ func NewWorkloadOptimizationAPIGetAgentStatusRequest(server string, clusterId st
 	return req, nil
 }
 
-// NewWorkloadOptimizationAPIListCustomMetricsConfigsRequest generates requests for WorkloadOptimizationAPIListCustomMetricsConfigs
-func NewWorkloadOptimizationAPIListCustomMetricsConfigsRequest(server string, clusterId string) (*http.Request, error) {
+// NewWorkloadOptimizationAPIListCustomMetricsDataSourcesRequest generates requests for WorkloadOptimizationAPIListCustomMetricsDataSources
+func NewWorkloadOptimizationAPIListCustomMetricsDataSourcesRequest(server string, clusterId string) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -18399,7 +18399,7 @@ func NewWorkloadOptimizationAPIListCustomMetricsConfigsRequest(server string, cl
 		return nil, err
 	}
 
-	operationPath := fmt.Sprintf("/v1/workload-autoscaling/clusters/%s/custom-metrics/configs", pathParam0)
+	operationPath := fmt.Sprintf("/v1/workload-autoscaling/clusters/%s/custom-metrics/configs/data-sources", pathParam0)
 	if operationPath[0] == '/' {
 		operationPath = "." + operationPath
 	}
@@ -18417,19 +18417,19 @@ func NewWorkloadOptimizationAPIListCustomMetricsConfigsRequest(server string, cl
 	return req, nil
 }
 
-// NewWorkloadOptimizationAPICreateCustomMetricsConfigRequest calls the generic WorkloadOptimizationAPICreateCustomMetricsConfig builder with application/json body
-func NewWorkloadOptimizationAPICreateCustomMetricsConfigRequest(server string, clusterId string, body WorkloadOptimizationAPICreateCustomMetricsConfigJSONRequestBody) (*http.Request, error) {
+// NewWorkloadOptimizationAPICreateCustomMetricsDataSourceRequest calls the generic WorkloadOptimizationAPICreateCustomMetricsDataSource builder with application/json body
+func NewWorkloadOptimizationAPICreateCustomMetricsDataSourceRequest(server string, clusterId string, body WorkloadOptimizationAPICreateCustomMetricsDataSourceJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
 	buf, err := json.Marshal(body)
 	if err != nil {
 		return nil, err
 	}
 	bodyReader = bytes.NewReader(buf)
-	return NewWorkloadOptimizationAPICreateCustomMetricsConfigRequestWithBody(server, clusterId, "application/json", bodyReader)
+	return NewWorkloadOptimizationAPICreateCustomMetricsDataSourceRequestWithBody(server, clusterId, "application/json", bodyReader)
 }
 
-// NewWorkloadOptimizationAPICreateCustomMetricsConfigRequestWithBody generates requests for WorkloadOptimizationAPICreateCustomMetricsConfig with any type of body
-func NewWorkloadOptimizationAPICreateCustomMetricsConfigRequestWithBody(server string, clusterId string, contentType string, body io.Reader) (*http.Request, error) {
+// NewWorkloadOptimizationAPICreateCustomMetricsDataSourceRequestWithBody generates requests for WorkloadOptimizationAPICreateCustomMetricsDataSource with any type of body
+func NewWorkloadOptimizationAPICreateCustomMetricsDataSourceRequestWithBody(server string, clusterId string, contentType string, body io.Reader) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -18444,7 +18444,7 @@ func NewWorkloadOptimizationAPICreateCustomMetricsConfigRequestWithBody(server s
 		return nil, err
 	}
 
-	operationPath := fmt.Sprintf("/v1/workload-autoscaling/clusters/%s/custom-metrics/configs", pathParam0)
+	operationPath := fmt.Sprintf("/v1/workload-autoscaling/clusters/%s/custom-metrics/configs/data-sources", pathParam0)
 	if operationPath[0] == '/' {
 		operationPath = "." + operationPath
 	}
@@ -18464,8 +18464,8 @@ func NewWorkloadOptimizationAPICreateCustomMetricsConfigRequestWithBody(server s
 	return req, nil
 }
 
-// NewWorkloadOptimizationAPIDeleteCustomMetricsConfigRequest generates requests for WorkloadOptimizationAPIDeleteCustomMetricsConfig
-func NewWorkloadOptimizationAPIDeleteCustomMetricsConfigRequest(server string, clusterId string, id string) (*http.Request, error) {
+// NewWorkloadOptimizationAPIDeleteCustomMetricsDataSourceRequest generates requests for WorkloadOptimizationAPIDeleteCustomMetricsDataSource
+func NewWorkloadOptimizationAPIDeleteCustomMetricsDataSourceRequest(server string, clusterId string, id string) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -18487,7 +18487,7 @@ func NewWorkloadOptimizationAPIDeleteCustomMetricsConfigRequest(server string, c
 		return nil, err
 	}
 
-	operationPath := fmt.Sprintf("/v1/workload-autoscaling/clusters/%s/custom-metrics/configs/%s", pathParam0, pathParam1)
+	operationPath := fmt.Sprintf("/v1/workload-autoscaling/clusters/%s/custom-metrics/configs/data-sources/%s", pathParam0, pathParam1)
 	if operationPath[0] == '/' {
 		operationPath = "." + operationPath
 	}
@@ -18505,19 +18505,19 @@ func NewWorkloadOptimizationAPIDeleteCustomMetricsConfigRequest(server string, c
 	return req, nil
 }
 
-// NewWorkloadOptimizationAPIUpdateCustomMetricsConfigRequest calls the generic WorkloadOptimizationAPIUpdateCustomMetricsConfig builder with application/json body
-func NewWorkloadOptimizationAPIUpdateCustomMetricsConfigRequest(server string, clusterId string, id string, body WorkloadOptimizationAPIUpdateCustomMetricsConfigJSONRequestBody) (*http.Request, error) {
+// NewWorkloadOptimizationAPIUpdateCustomMetricsDataSourceRequest calls the generic WorkloadOptimizationAPIUpdateCustomMetricsDataSource builder with application/json body
+func NewWorkloadOptimizationAPIUpdateCustomMetricsDataSourceRequest(server string, clusterId string, id string, body WorkloadOptimizationAPIUpdateCustomMetricsDataSourceJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
 	buf, err := json.Marshal(body)
 	if err != nil {
 		return nil, err
 	}
 	bodyReader = bytes.NewReader(buf)
-	return NewWorkloadOptimizationAPIUpdateCustomMetricsConfigRequestWithBody(server, clusterId, id, "application/json", bodyReader)
+	return NewWorkloadOptimizationAPIUpdateCustomMetricsDataSourceRequestWithBody(server, clusterId, id, "application/json", bodyReader)
 }
 
-// NewWorkloadOptimizationAPIUpdateCustomMetricsConfigRequestWithBody generates requests for WorkloadOptimizationAPIUpdateCustomMetricsConfig with any type of body
-func NewWorkloadOptimizationAPIUpdateCustomMetricsConfigRequestWithBody(server string, clusterId string, id string, contentType string, body io.Reader) (*http.Request, error) {
+// NewWorkloadOptimizationAPIUpdateCustomMetricsDataSourceRequestWithBody generates requests for WorkloadOptimizationAPIUpdateCustomMetricsDataSource with any type of body
+func NewWorkloadOptimizationAPIUpdateCustomMetricsDataSourceRequestWithBody(server string, clusterId string, id string, contentType string, body io.Reader) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -18539,7 +18539,7 @@ func NewWorkloadOptimizationAPIUpdateCustomMetricsConfigRequestWithBody(server s
 		return nil, err
 	}
 
-	operationPath := fmt.Sprintf("/v1/workload-autoscaling/clusters/%s/custom-metrics/configs/%s", pathParam0, pathParam1)
+	operationPath := fmt.Sprintf("/v1/workload-autoscaling/clusters/%s/custom-metrics/configs/data-sources/%s", pathParam0, pathParam1)
 	if operationPath[0] == '/' {
 		operationPath = "." + operationPath
 	}
@@ -21313,21 +21313,21 @@ type ClientWithResponsesInterface interface {
 	// WorkloadOptimizationAPIGetAgentStatus request
 	WorkloadOptimizationAPIGetAgentStatusWithResponse(ctx context.Context, clusterId string) (*WorkloadOptimizationAPIGetAgentStatusResponse, error)
 
-	// WorkloadOptimizationAPIListCustomMetricsConfigs request
-	WorkloadOptimizationAPIListCustomMetricsConfigsWithResponse(ctx context.Context, clusterId string) (*WorkloadOptimizationAPIListCustomMetricsConfigsResponse, error)
+	// WorkloadOptimizationAPIListCustomMetricsDataSources request
+	WorkloadOptimizationAPIListCustomMetricsDataSourcesWithResponse(ctx context.Context, clusterId string) (*WorkloadOptimizationAPIListCustomMetricsDataSourcesResponse, error)
 
-	// WorkloadOptimizationAPICreateCustomMetricsConfig request  with any body
-	WorkloadOptimizationAPICreateCustomMetricsConfigWithBodyWithResponse(ctx context.Context, clusterId string, contentType string, body io.Reader) (*WorkloadOptimizationAPICreateCustomMetricsConfigResponse, error)
+	// WorkloadOptimizationAPICreateCustomMetricsDataSource request  with any body
+	WorkloadOptimizationAPICreateCustomMetricsDataSourceWithBodyWithResponse(ctx context.Context, clusterId string, contentType string, body io.Reader) (*WorkloadOptimizationAPICreateCustomMetricsDataSourceResponse, error)
 
-	WorkloadOptimizationAPICreateCustomMetricsConfigWithResponse(ctx context.Context, clusterId string, body WorkloadOptimizationAPICreateCustomMetricsConfigJSONRequestBody) (*WorkloadOptimizationAPICreateCustomMetricsConfigResponse, error)
+	WorkloadOptimizationAPICreateCustomMetricsDataSourceWithResponse(ctx context.Context, clusterId string, body WorkloadOptimizationAPICreateCustomMetricsDataSourceJSONRequestBody) (*WorkloadOptimizationAPICreateCustomMetricsDataSourceResponse, error)
 
-	// WorkloadOptimizationAPIDeleteCustomMetricsConfig request
-	WorkloadOptimizationAPIDeleteCustomMetricsConfigWithResponse(ctx context.Context, clusterId string, id string) (*WorkloadOptimizationAPIDeleteCustomMetricsConfigResponse, error)
+	// WorkloadOptimizationAPIDeleteCustomMetricsDataSource request
+	WorkloadOptimizationAPIDeleteCustomMetricsDataSourceWithResponse(ctx context.Context, clusterId string, id string) (*WorkloadOptimizationAPIDeleteCustomMetricsDataSourceResponse, error)
 
-	// WorkloadOptimizationAPIUpdateCustomMetricsConfig request  with any body
-	WorkloadOptimizationAPIUpdateCustomMetricsConfigWithBodyWithResponse(ctx context.Context, clusterId string, id string, contentType string, body io.Reader) (*WorkloadOptimizationAPIUpdateCustomMetricsConfigResponse, error)
+	// WorkloadOptimizationAPIUpdateCustomMetricsDataSource request  with any body
+	WorkloadOptimizationAPIUpdateCustomMetricsDataSourceWithBodyWithResponse(ctx context.Context, clusterId string, id string, contentType string, body io.Reader) (*WorkloadOptimizationAPIUpdateCustomMetricsDataSourceResponse, error)
 
-	WorkloadOptimizationAPIUpdateCustomMetricsConfigWithResponse(ctx context.Context, clusterId string, id string, body WorkloadOptimizationAPIUpdateCustomMetricsConfigJSONRequestBody) (*WorkloadOptimizationAPIUpdateCustomMetricsConfigResponse, error)
+	WorkloadOptimizationAPIUpdateCustomMetricsDataSourceWithResponse(ctx context.Context, clusterId string, id string, body WorkloadOptimizationAPIUpdateCustomMetricsDataSourceJSONRequestBody) (*WorkloadOptimizationAPIUpdateCustomMetricsDataSourceResponse, error)
 
 	// WorkloadOptimizationAPIListLimitRanges request
 	WorkloadOptimizationAPIListLimitRangesWithResponse(ctx context.Context, clusterId string) (*WorkloadOptimizationAPIListLimitRangesResponse, error)
@@ -28152,14 +28152,14 @@ func (r WorkloadOptimizationAPIGetAgentStatusResponse) GetBody() []byte {
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
-type WorkloadOptimizationAPIListCustomMetricsConfigsResponse struct {
+type WorkloadOptimizationAPIListCustomMetricsDataSourcesResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON200      *WorkloadoptimizationV1ListCustomMetricsConfigsResponse
+	JSON200      *WorkloadoptimizationV1ListCustomMetricsDataSourcesResponse
 }
 
 // Status returns HTTPResponse.Status
-func (r WorkloadOptimizationAPIListCustomMetricsConfigsResponse) Status() string {
+func (r WorkloadOptimizationAPIListCustomMetricsDataSourcesResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -28167,7 +28167,7 @@ func (r WorkloadOptimizationAPIListCustomMetricsConfigsResponse) Status() string
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r WorkloadOptimizationAPIListCustomMetricsConfigsResponse) StatusCode() int {
+func (r WorkloadOptimizationAPIListCustomMetricsDataSourcesResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -28176,20 +28176,20 @@ func (r WorkloadOptimizationAPIListCustomMetricsConfigsResponse) StatusCode() in
 
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
-func (r WorkloadOptimizationAPIListCustomMetricsConfigsResponse) GetBody() []byte {
+func (r WorkloadOptimizationAPIListCustomMetricsDataSourcesResponse) GetBody() []byte {
 	return r.Body
 }
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
-type WorkloadOptimizationAPICreateCustomMetricsConfigResponse struct {
+type WorkloadOptimizationAPICreateCustomMetricsDataSourceResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON200      *WorkloadoptimizationV1CustomMetricsConfig
+	JSON200      *WorkloadoptimizationV1CustomMetricsDataSource
 }
 
 // Status returns HTTPResponse.Status
-func (r WorkloadOptimizationAPICreateCustomMetricsConfigResponse) Status() string {
+func (r WorkloadOptimizationAPICreateCustomMetricsDataSourceResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -28197,7 +28197,7 @@ func (r WorkloadOptimizationAPICreateCustomMetricsConfigResponse) Status() strin
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r WorkloadOptimizationAPICreateCustomMetricsConfigResponse) StatusCode() int {
+func (r WorkloadOptimizationAPICreateCustomMetricsDataSourceResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -28206,20 +28206,20 @@ func (r WorkloadOptimizationAPICreateCustomMetricsConfigResponse) StatusCode() i
 
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
-func (r WorkloadOptimizationAPICreateCustomMetricsConfigResponse) GetBody() []byte {
+func (r WorkloadOptimizationAPICreateCustomMetricsDataSourceResponse) GetBody() []byte {
 	return r.Body
 }
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
-type WorkloadOptimizationAPIDeleteCustomMetricsConfigResponse struct {
+type WorkloadOptimizationAPIDeleteCustomMetricsDataSourceResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *map[string]interface{}
 }
 
 // Status returns HTTPResponse.Status
-func (r WorkloadOptimizationAPIDeleteCustomMetricsConfigResponse) Status() string {
+func (r WorkloadOptimizationAPIDeleteCustomMetricsDataSourceResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -28227,7 +28227,7 @@ func (r WorkloadOptimizationAPIDeleteCustomMetricsConfigResponse) Status() strin
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r WorkloadOptimizationAPIDeleteCustomMetricsConfigResponse) StatusCode() int {
+func (r WorkloadOptimizationAPIDeleteCustomMetricsDataSourceResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -28236,20 +28236,20 @@ func (r WorkloadOptimizationAPIDeleteCustomMetricsConfigResponse) StatusCode() i
 
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
-func (r WorkloadOptimizationAPIDeleteCustomMetricsConfigResponse) GetBody() []byte {
+func (r WorkloadOptimizationAPIDeleteCustomMetricsDataSourceResponse) GetBody() []byte {
 	return r.Body
 }
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
-type WorkloadOptimizationAPIUpdateCustomMetricsConfigResponse struct {
+type WorkloadOptimizationAPIUpdateCustomMetricsDataSourceResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON200      *WorkloadoptimizationV1CustomMetricsConfig
+	JSON200      *WorkloadoptimizationV1CustomMetricsDataSource
 }
 
 // Status returns HTTPResponse.Status
-func (r WorkloadOptimizationAPIUpdateCustomMetricsConfigResponse) Status() string {
+func (r WorkloadOptimizationAPIUpdateCustomMetricsDataSourceResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -28257,7 +28257,7 @@ func (r WorkloadOptimizationAPIUpdateCustomMetricsConfigResponse) Status() strin
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r WorkloadOptimizationAPIUpdateCustomMetricsConfigResponse) StatusCode() int {
+func (r WorkloadOptimizationAPIUpdateCustomMetricsDataSourceResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -28266,7 +28266,7 @@ func (r WorkloadOptimizationAPIUpdateCustomMetricsConfigResponse) StatusCode() i
 
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
-func (r WorkloadOptimizationAPIUpdateCustomMetricsConfigResponse) GetBody() []byte {
+func (r WorkloadOptimizationAPIUpdateCustomMetricsDataSourceResponse) GetBody() []byte {
 	return r.Body
 }
 
@@ -31713,56 +31713,56 @@ func (c *ClientWithResponses) WorkloadOptimizationAPIGetAgentStatusWithResponse(
 	return ParseWorkloadOptimizationAPIGetAgentStatusResponse(rsp)
 }
 
-// WorkloadOptimizationAPIListCustomMetricsConfigsWithResponse request returning *WorkloadOptimizationAPIListCustomMetricsConfigsResponse
-func (c *ClientWithResponses) WorkloadOptimizationAPIListCustomMetricsConfigsWithResponse(ctx context.Context, clusterId string) (*WorkloadOptimizationAPIListCustomMetricsConfigsResponse, error) {
-	rsp, err := c.WorkloadOptimizationAPIListCustomMetricsConfigs(ctx, clusterId)
+// WorkloadOptimizationAPIListCustomMetricsDataSourcesWithResponse request returning *WorkloadOptimizationAPIListCustomMetricsDataSourcesResponse
+func (c *ClientWithResponses) WorkloadOptimizationAPIListCustomMetricsDataSourcesWithResponse(ctx context.Context, clusterId string) (*WorkloadOptimizationAPIListCustomMetricsDataSourcesResponse, error) {
+	rsp, err := c.WorkloadOptimizationAPIListCustomMetricsDataSources(ctx, clusterId)
 	if err != nil {
 		return nil, err
 	}
-	return ParseWorkloadOptimizationAPIListCustomMetricsConfigsResponse(rsp)
+	return ParseWorkloadOptimizationAPIListCustomMetricsDataSourcesResponse(rsp)
 }
 
-// WorkloadOptimizationAPICreateCustomMetricsConfigWithBodyWithResponse request with arbitrary body returning *WorkloadOptimizationAPICreateCustomMetricsConfigResponse
-func (c *ClientWithResponses) WorkloadOptimizationAPICreateCustomMetricsConfigWithBodyWithResponse(ctx context.Context, clusterId string, contentType string, body io.Reader) (*WorkloadOptimizationAPICreateCustomMetricsConfigResponse, error) {
-	rsp, err := c.WorkloadOptimizationAPICreateCustomMetricsConfigWithBody(ctx, clusterId, contentType, body)
+// WorkloadOptimizationAPICreateCustomMetricsDataSourceWithBodyWithResponse request with arbitrary body returning *WorkloadOptimizationAPICreateCustomMetricsDataSourceResponse
+func (c *ClientWithResponses) WorkloadOptimizationAPICreateCustomMetricsDataSourceWithBodyWithResponse(ctx context.Context, clusterId string, contentType string, body io.Reader) (*WorkloadOptimizationAPICreateCustomMetricsDataSourceResponse, error) {
+	rsp, err := c.WorkloadOptimizationAPICreateCustomMetricsDataSourceWithBody(ctx, clusterId, contentType, body)
 	if err != nil {
 		return nil, err
 	}
-	return ParseWorkloadOptimizationAPICreateCustomMetricsConfigResponse(rsp)
+	return ParseWorkloadOptimizationAPICreateCustomMetricsDataSourceResponse(rsp)
 }
 
-func (c *ClientWithResponses) WorkloadOptimizationAPICreateCustomMetricsConfigWithResponse(ctx context.Context, clusterId string, body WorkloadOptimizationAPICreateCustomMetricsConfigJSONRequestBody) (*WorkloadOptimizationAPICreateCustomMetricsConfigResponse, error) {
-	rsp, err := c.WorkloadOptimizationAPICreateCustomMetricsConfig(ctx, clusterId, body)
+func (c *ClientWithResponses) WorkloadOptimizationAPICreateCustomMetricsDataSourceWithResponse(ctx context.Context, clusterId string, body WorkloadOptimizationAPICreateCustomMetricsDataSourceJSONRequestBody) (*WorkloadOptimizationAPICreateCustomMetricsDataSourceResponse, error) {
+	rsp, err := c.WorkloadOptimizationAPICreateCustomMetricsDataSource(ctx, clusterId, body)
 	if err != nil {
 		return nil, err
 	}
-	return ParseWorkloadOptimizationAPICreateCustomMetricsConfigResponse(rsp)
+	return ParseWorkloadOptimizationAPICreateCustomMetricsDataSourceResponse(rsp)
 }
 
-// WorkloadOptimizationAPIDeleteCustomMetricsConfigWithResponse request returning *WorkloadOptimizationAPIDeleteCustomMetricsConfigResponse
-func (c *ClientWithResponses) WorkloadOptimizationAPIDeleteCustomMetricsConfigWithResponse(ctx context.Context, clusterId string, id string) (*WorkloadOptimizationAPIDeleteCustomMetricsConfigResponse, error) {
-	rsp, err := c.WorkloadOptimizationAPIDeleteCustomMetricsConfig(ctx, clusterId, id)
+// WorkloadOptimizationAPIDeleteCustomMetricsDataSourceWithResponse request returning *WorkloadOptimizationAPIDeleteCustomMetricsDataSourceResponse
+func (c *ClientWithResponses) WorkloadOptimizationAPIDeleteCustomMetricsDataSourceWithResponse(ctx context.Context, clusterId string, id string) (*WorkloadOptimizationAPIDeleteCustomMetricsDataSourceResponse, error) {
+	rsp, err := c.WorkloadOptimizationAPIDeleteCustomMetricsDataSource(ctx, clusterId, id)
 	if err != nil {
 		return nil, err
 	}
-	return ParseWorkloadOptimizationAPIDeleteCustomMetricsConfigResponse(rsp)
+	return ParseWorkloadOptimizationAPIDeleteCustomMetricsDataSourceResponse(rsp)
 }
 
-// WorkloadOptimizationAPIUpdateCustomMetricsConfigWithBodyWithResponse request with arbitrary body returning *WorkloadOptimizationAPIUpdateCustomMetricsConfigResponse
-func (c *ClientWithResponses) WorkloadOptimizationAPIUpdateCustomMetricsConfigWithBodyWithResponse(ctx context.Context, clusterId string, id string, contentType string, body io.Reader) (*WorkloadOptimizationAPIUpdateCustomMetricsConfigResponse, error) {
-	rsp, err := c.WorkloadOptimizationAPIUpdateCustomMetricsConfigWithBody(ctx, clusterId, id, contentType, body)
+// WorkloadOptimizationAPIUpdateCustomMetricsDataSourceWithBodyWithResponse request with arbitrary body returning *WorkloadOptimizationAPIUpdateCustomMetricsDataSourceResponse
+func (c *ClientWithResponses) WorkloadOptimizationAPIUpdateCustomMetricsDataSourceWithBodyWithResponse(ctx context.Context, clusterId string, id string, contentType string, body io.Reader) (*WorkloadOptimizationAPIUpdateCustomMetricsDataSourceResponse, error) {
+	rsp, err := c.WorkloadOptimizationAPIUpdateCustomMetricsDataSourceWithBody(ctx, clusterId, id, contentType, body)
 	if err != nil {
 		return nil, err
 	}
-	return ParseWorkloadOptimizationAPIUpdateCustomMetricsConfigResponse(rsp)
+	return ParseWorkloadOptimizationAPIUpdateCustomMetricsDataSourceResponse(rsp)
 }
 
-func (c *ClientWithResponses) WorkloadOptimizationAPIUpdateCustomMetricsConfigWithResponse(ctx context.Context, clusterId string, id string, body WorkloadOptimizationAPIUpdateCustomMetricsConfigJSONRequestBody) (*WorkloadOptimizationAPIUpdateCustomMetricsConfigResponse, error) {
-	rsp, err := c.WorkloadOptimizationAPIUpdateCustomMetricsConfig(ctx, clusterId, id, body)
+func (c *ClientWithResponses) WorkloadOptimizationAPIUpdateCustomMetricsDataSourceWithResponse(ctx context.Context, clusterId string, id string, body WorkloadOptimizationAPIUpdateCustomMetricsDataSourceJSONRequestBody) (*WorkloadOptimizationAPIUpdateCustomMetricsDataSourceResponse, error) {
+	rsp, err := c.WorkloadOptimizationAPIUpdateCustomMetricsDataSource(ctx, clusterId, id, body)
 	if err != nil {
 		return nil, err
 	}
-	return ParseWorkloadOptimizationAPIUpdateCustomMetricsConfigResponse(rsp)
+	return ParseWorkloadOptimizationAPIUpdateCustomMetricsDataSourceResponse(rsp)
 }
 
 // WorkloadOptimizationAPIListLimitRangesWithResponse request returning *WorkloadOptimizationAPIListLimitRangesResponse
@@ -37859,22 +37859,22 @@ func ParseWorkloadOptimizationAPIGetAgentStatusResponse(rsp *http.Response) (*Wo
 	return response, nil
 }
 
-// ParseWorkloadOptimizationAPIListCustomMetricsConfigsResponse parses an HTTP response from a WorkloadOptimizationAPIListCustomMetricsConfigsWithResponse call
-func ParseWorkloadOptimizationAPIListCustomMetricsConfigsResponse(rsp *http.Response) (*WorkloadOptimizationAPIListCustomMetricsConfigsResponse, error) {
+// ParseWorkloadOptimizationAPIListCustomMetricsDataSourcesResponse parses an HTTP response from a WorkloadOptimizationAPIListCustomMetricsDataSourcesWithResponse call
+func ParseWorkloadOptimizationAPIListCustomMetricsDataSourcesResponse(rsp *http.Response) (*WorkloadOptimizationAPIListCustomMetricsDataSourcesResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
 	defer rsp.Body.Close()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &WorkloadOptimizationAPIListCustomMetricsConfigsResponse{
+	response := &WorkloadOptimizationAPIListCustomMetricsDataSourcesResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest WorkloadoptimizationV1ListCustomMetricsConfigsResponse
+		var dest WorkloadoptimizationV1ListCustomMetricsDataSourcesResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -37885,22 +37885,22 @@ func ParseWorkloadOptimizationAPIListCustomMetricsConfigsResponse(rsp *http.Resp
 	return response, nil
 }
 
-// ParseWorkloadOptimizationAPICreateCustomMetricsConfigResponse parses an HTTP response from a WorkloadOptimizationAPICreateCustomMetricsConfigWithResponse call
-func ParseWorkloadOptimizationAPICreateCustomMetricsConfigResponse(rsp *http.Response) (*WorkloadOptimizationAPICreateCustomMetricsConfigResponse, error) {
+// ParseWorkloadOptimizationAPICreateCustomMetricsDataSourceResponse parses an HTTP response from a WorkloadOptimizationAPICreateCustomMetricsDataSourceWithResponse call
+func ParseWorkloadOptimizationAPICreateCustomMetricsDataSourceResponse(rsp *http.Response) (*WorkloadOptimizationAPICreateCustomMetricsDataSourceResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
 	defer rsp.Body.Close()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &WorkloadOptimizationAPICreateCustomMetricsConfigResponse{
+	response := &WorkloadOptimizationAPICreateCustomMetricsDataSourceResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest WorkloadoptimizationV1CustomMetricsConfig
+		var dest WorkloadoptimizationV1CustomMetricsDataSource
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -37911,15 +37911,15 @@ func ParseWorkloadOptimizationAPICreateCustomMetricsConfigResponse(rsp *http.Res
 	return response, nil
 }
 
-// ParseWorkloadOptimizationAPIDeleteCustomMetricsConfigResponse parses an HTTP response from a WorkloadOptimizationAPIDeleteCustomMetricsConfigWithResponse call
-func ParseWorkloadOptimizationAPIDeleteCustomMetricsConfigResponse(rsp *http.Response) (*WorkloadOptimizationAPIDeleteCustomMetricsConfigResponse, error) {
+// ParseWorkloadOptimizationAPIDeleteCustomMetricsDataSourceResponse parses an HTTP response from a WorkloadOptimizationAPIDeleteCustomMetricsDataSourceWithResponse call
+func ParseWorkloadOptimizationAPIDeleteCustomMetricsDataSourceResponse(rsp *http.Response) (*WorkloadOptimizationAPIDeleteCustomMetricsDataSourceResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
 	defer rsp.Body.Close()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &WorkloadOptimizationAPIDeleteCustomMetricsConfigResponse{
+	response := &WorkloadOptimizationAPIDeleteCustomMetricsDataSourceResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -37937,22 +37937,22 @@ func ParseWorkloadOptimizationAPIDeleteCustomMetricsConfigResponse(rsp *http.Res
 	return response, nil
 }
 
-// ParseWorkloadOptimizationAPIUpdateCustomMetricsConfigResponse parses an HTTP response from a WorkloadOptimizationAPIUpdateCustomMetricsConfigWithResponse call
-func ParseWorkloadOptimizationAPIUpdateCustomMetricsConfigResponse(rsp *http.Response) (*WorkloadOptimizationAPIUpdateCustomMetricsConfigResponse, error) {
+// ParseWorkloadOptimizationAPIUpdateCustomMetricsDataSourceResponse parses an HTTP response from a WorkloadOptimizationAPIUpdateCustomMetricsDataSourceWithResponse call
+func ParseWorkloadOptimizationAPIUpdateCustomMetricsDataSourceResponse(rsp *http.Response) (*WorkloadOptimizationAPIUpdateCustomMetricsDataSourceResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
 	defer rsp.Body.Close()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &WorkloadOptimizationAPIUpdateCustomMetricsConfigResponse{
+	response := &WorkloadOptimizationAPIUpdateCustomMetricsDataSourceResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest WorkloadoptimizationV1CustomMetricsConfig
+		var dest WorkloadoptimizationV1CustomMetricsDataSource
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
