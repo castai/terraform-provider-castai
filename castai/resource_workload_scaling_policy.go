@@ -601,8 +601,6 @@ func resourceWorkloadScalingPolicyCreate(ctx context.Context, d *schema.Resource
 
 	req.RecommendationPolicies.Downscaling = toDownscaling(toSection(d, "downscaling"))
 
-	req.RecommendationPolicies.ExcludedContainers = toExcludedContainers(d)
-
 	req.RecommendationPolicies.MemoryEvent = toMemoryEvent(toSection(d, "memory_event"))
 
 	req.RecommendationPolicies.AntiAffinity = toAntiAffinity(toSection(d, "anti_affinity"))
@@ -610,6 +608,8 @@ func resourceWorkloadScalingPolicyCreate(ctx context.Context, d *schema.Resource
 	req.RecommendationPolicies.PredictiveScaling = toPredictiveScaling(toSection(d, FieldPredictiveScaling))
 
 	req.RecommendationPolicies.RolloutBehavior = toRolloutBehavior(toSection(d, FieldRolloutBehavior))
+
+	req.RecommendationPolicies.ExcludedContainers = toExcludedContainers(d)
 
 	ar, err := toAssignmentRules(toSection(d, FieldAssignmentRules))
 	if err != nil {
@@ -817,13 +817,13 @@ func updateScalingPolicy(ctx context.Context, d *schema.ResourceData, meta any) 
 			Cpu:                cpu,
 			Memory:             memory,
 			Startup:            toStartup(toSection(d, "startup")),
-			ExcludedContainers: toExcludedContainers(d),
 			Downscaling:        toDownscaling(toSection(d, "downscaling")),
 			MemoryEvent:        toMemoryEvent(toSection(d, "memory_event")),
 			AntiAffinity:       toAntiAffinity(toSection(d, "anti_affinity")),
 			Confidence:         toConfidence(toSection(d, FieldConfidence)),
 			PredictiveScaling:  toPredictiveScaling(toSection(d, FieldPredictiveScaling)),
 			RolloutBehavior:    toRolloutBehavior(toSection(d, FieldRolloutBehavior)),
+			ExcludedContainers: toExcludedContainers(d),
 		},
 	}
 
