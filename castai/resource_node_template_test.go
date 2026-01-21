@@ -165,7 +165,7 @@ func TestNodeTemplateResourceReadContext(t *testing.T) {
 	state.ID = "gpu"
 
 	data := resource.Data(state)
-	//spew.Dump(data)
+	// spew.Dump(data)
 	result := resource.ReadContext(ctx, data, provider)
 	r.Nil(result)
 	r.False(result.HasError())

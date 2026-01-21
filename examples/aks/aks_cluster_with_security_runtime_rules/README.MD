@@ -31,19 +31,19 @@ Example configuration should be analysed in the following order:
    Terraform import commands are printed to console, you need to import newly added resources to terraform state before running any other commands.
 
 # Terraform Usage
-1. Rename `tf.vars.example` to `tf.vars`
-2. Update `tf.vars` file with your cluster name, cluster region and CAST AI API token.
+1. Copy `terraform.tfvars.example` to `terraform.tfvars`
+2. Update `terraform.tfvars` file with your cluster name, cluster region and CAST AI API token.
 3. Initialize Terraform. Under example root folder run:
 ```
 terraform init
 ```
 4. Run Terraform apply:
 ```
-terraform apply -var-file=tf.vars
+terraform apply
 ```
 5. To destroy resources created by this example:
 ```
-terraform destroy -var-file=tf.vars
+terraform destroy
 ```
 
 Please refer to this guide if you run into any issues https://docs.cast.ai/docs/terraform-troubleshooting

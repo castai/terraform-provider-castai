@@ -12,7 +12,7 @@ variable "cluster_region" {
 variable "cluster_version" {
   type        = string
   description = "EKS cluster version."
-  default     = "1.32"
+  default     = "1.33"
 }
 
 variable "castai_api_url" {
@@ -57,5 +57,5 @@ variable "install_helm_live" {
 
 variable "live_helm_version" {
   type    = string
-  default = "0.39.0"
+  default = "0.63.0"
 }

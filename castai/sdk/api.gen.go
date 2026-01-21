@@ -8065,6 +8065,8 @@ type WorkloadoptimizationV1GetAgentStatusResponseAgentStatus string
 
 // WorkloadoptimizationV1GetHPAV2MigrationEligibilityResponse defines model for workloadoptimization.v1.GetHPAV2MigrationEligibilityResponse.
 type WorkloadoptimizationV1GetHPAV2MigrationEligibilityResponse struct {
+	EligibleCount int32 `json:"eligibleCount"`
+
 	// Status - FULL: All workloads are UI legacy HPAs and can be fully migrated
 	//  - PARTIAL: Mix of UI and annotation-based workloads - partial migration supported
 	//  - BLOCKED: All workloads are annotation-based - migration not supported
@@ -8106,6 +8108,7 @@ type WorkloadoptimizationV1GetWorkloadFiltersCounts struct {
 	RecommendationApplied         int32 `json:"recommendationApplied"`
 	RecommendationIsLowConfidence int32 `json:"recommendationIsLowConfidence"`
 	Total                         int32 `json:"total"`
+	WorkloadHasCustomMetrics      int32 `json:"workloadHasCustomMetrics"`
 	WorkloadHasError              int32 `json:"workloadHasError"`
 	WorkloadIsStopped             int32 `json:"workloadIsStopped"`
 }
@@ -10733,6 +10736,7 @@ type WorkloadOptimizationAPIListWorkloadsParams struct {
 	RecommendationStatusType      *WorkloadOptimizationAPIListWorkloadsParamsRecommendationStatusType `form:"recommendationStatusType,omitempty" json:"recommendationStatusType,omitempty"`
 	RecommendationIsLowConfidence *bool                                                               `form:"recommendationIsLowConfidence,omitempty" json:"recommendationIsLowConfidence,omitempty"`
 	WorkloadHasError              *bool                                                               `form:"workloadHasError,omitempty" json:"workloadHasError,omitempty"`
+	WorkloadHasCustomMetrics      *bool                                                               `form:"workloadHasCustomMetrics,omitempty" json:"workloadHasCustomMetrics,omitempty"`
 }
 
 // WorkloadOptimizationAPIListWorkloadsParamsManagementOptions defines parameters for WorkloadOptimizationAPIListWorkloads.

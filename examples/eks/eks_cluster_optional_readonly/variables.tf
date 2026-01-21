@@ -12,7 +12,7 @@ variable "cluster_region" {
 variable "cluster_version" {
   type        = string
   description = "EKS cluster version."
-  default     = "1.32"
+  default     = "1.33"
 }
 
 # Variables required for connecting EKS cluster to CAST AI

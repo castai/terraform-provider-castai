@@ -15,19 +15,19 @@ Example configuration should be analysed in the following order:
 This example connects the GKE cluster to Cast AI through GCP Private Service Connect.
 
 ## Usage
-1. Rename `tf.vars.example` to `tf.vars`
-2. Update `tf.vars` file necessary variables.
+1. Copy `terraform.tfvars.example` to `terraform.tfvars`
+2. Update `terraform.tfvars` file necessary variables.
 3. Initialize Terraform. Under example root folder run:
 ```
 terraform init
 ```
 4. Run Terraform apply:
 ```
-terraform apply -var-file=tf.vars
+terraform apply
 ```
 5. To destroy resources created by this example:
 ```
-terraform destroy -var-file=tf.vars
+terraform destroy
 ```
 
 Please refer to this guide if you run into any issues https://docs.cast.ai/docs/terraform-troubleshooting

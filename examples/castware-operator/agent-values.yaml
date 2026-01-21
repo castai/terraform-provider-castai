@@ -12,3 +12,7 @@ components:
     component: spot-handler
     cluster: castai
     enabled: true
+  cluster-controller:
+    component: cluster-controller
+    cluster: castai
+    enabled: ${extended_permissions}
