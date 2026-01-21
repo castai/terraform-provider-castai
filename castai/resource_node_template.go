@@ -1404,7 +1404,7 @@ func getNodeTemplateByName(ctx context.Context, data *schema.ResourceData, meta 
 		return nil, fmt.Errorf("%w: %v", ErrFailedToFindTemplateWithName, nodeTemplateName)
 	}
 
-	return t.Template, nil
+	return &t.Template, nil
 }
 
 func nodeTemplateStateImporter(ctx context.Context, d *schema.ResourceData, meta any) ([]*schema.ResourceData, error) {

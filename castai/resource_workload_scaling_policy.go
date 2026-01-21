@@ -45,6 +45,7 @@ const (
 	FieldLimitStrategyOnlyIfOriginalExist          = "only_if_original_exist"
 	FieldLimitStrategyOnlyIfOriginalLower          = "only_if_original_lower"
 	FieldConfidence                                = "confidence"
+	FieldExcludedContainers                        = "excluded_containers"
 	FieldRolloutBehavior                           = "rollout_behavior"
 	FieldRolloutBehaviorType                       = "type"
 	FieldRolloutBehaviorNoDisruptionType           = "NO_DISRUPTION"
@@ -188,6 +189,12 @@ It can be either:
 				Required: true,
 				MaxItems: 1,
 				Elem:     workloadScalingPolicyResourceSchema("memory", "MAX", 0.1, 10),
+			},
+			FieldExcludedContainers: {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Description: "Defines containers to be excluded from receiving recommendations. The containers are matched by exact name.",
+				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
 			"startup": {
 				Type:     schema.TypeList,
@@ -594,6 +601,8 @@ func resourceWorkloadScalingPolicyCreate(ctx context.Context, d *schema.Resource
 
 	req.RecommendationPolicies.Downscaling = toDownscaling(toSection(d, "downscaling"))
 
+	req.RecommendationPolicies.ExcludedContainers = toExcludedContainers(d)
+
 	req.RecommendationPolicies.MemoryEvent = toMemoryEvent(toSection(d, "memory_event"))
 
 	req.RecommendationPolicies.AntiAffinity = toAntiAffinity(toSection(d, "anti_affinity"))
@@ -719,6 +728,9 @@ func fetchScalingPolicy(ctx context.Context, d *schema.ResourceData, meta any) (
 	if err := d.Set("startup", toStartupMap(sp.RecommendationPolicies.Startup)); err != nil {
 		return nil, fmt.Errorf("setting startup: %w", err)
 	}
+	if err := d.Set(FieldExcludedContainers, sp.RecommendationPolicies.ExcludedContainers); err != nil {
+		return nil, fmt.Errorf("setting excluded containers: %w", err)
+	}
 	if err := d.Set(FieldConfidence, toConfidenceMap(sp.RecommendationPolicies.Confidence)); err != nil {
 		return nil, fmt.Errorf("setting confidence: %w", err)
 	}
@@ -775,6 +787,7 @@ func updateScalingPolicy(ctx context.Context, d *schema.ResourceData, meta any) 
 		FieldAssignmentRules,
 		FieldPredictiveScaling,
 		FieldRolloutBehavior,
+		FieldExcludedContainers,
 	) {
 		tflog.Info(ctx, "scaling policy up to date")
 		return nil, nil
@@ -800,16 +813,17 @@ func updateScalingPolicy(ctx context.Context, d *schema.ResourceData, meta any) 
 		ApplyType:       sdk.WorkloadoptimizationV1ApplyType(d.Get(FieldApplyType).(string)),
 		AssignmentRules: ar,
 		RecommendationPolicies: sdk.WorkloadoptimizationV1RecommendationPolicies{
-			ManagementOption:  sdk.WorkloadoptimizationV1ManagementOption(d.Get("management_option").(string)),
-			Cpu:               cpu,
-			Memory:            memory,
-			Startup:           toStartup(toSection(d, "startup")),
-			Downscaling:       toDownscaling(toSection(d, "downscaling")),
-			MemoryEvent:       toMemoryEvent(toSection(d, "memory_event")),
-			AntiAffinity:      toAntiAffinity(toSection(d, "anti_affinity")),
-			Confidence:        toConfidence(toSection(d, FieldConfidence)),
-			PredictiveScaling: toPredictiveScaling(toSection(d, FieldPredictiveScaling)),
-			RolloutBehavior:   toRolloutBehavior(toSection(d, FieldRolloutBehavior)),
+			ManagementOption:   sdk.WorkloadoptimizationV1ManagementOption(d.Get("management_option").(string)),
+			Cpu:                cpu,
+			Memory:             memory,
+			Startup:            toStartup(toSection(d, "startup")),
+			ExcludedContainers: toExcludedContainers(d),
+			Downscaling:        toDownscaling(toSection(d, "downscaling")),
+			MemoryEvent:        toMemoryEvent(toSection(d, "memory_event")),
+			AntiAffinity:       toAntiAffinity(toSection(d, "anti_affinity")),
+			Confidence:         toConfidence(toSection(d, FieldConfidence)),
+			PredictiveScaling:  toPredictiveScaling(toSection(d, FieldPredictiveScaling)),
+			RolloutBehavior:    toRolloutBehavior(toSection(d, FieldRolloutBehavior)),
 		},
 	}
 
@@ -821,6 +835,14 @@ func updateScalingPolicy(ctx context.Context, d *schema.ResourceData, meta any) 
 		return resp, err
 	}
 	return fetchScalingPolicy(ctx, d, meta)
+}
+
+func toExcludedContainers(d *schema.ResourceData) *[]string {
+	containers, ok := d.Get(FieldExcludedContainers).([]string)
+	if !ok {
+		return nil
+	}
+	return &containers
 }
 
 func resourceWorkloadScalingPolicyDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {

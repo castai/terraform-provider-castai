@@ -3,10 +3,11 @@ package castai
 import (
 	"context"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"net/http"
 	"strings"
 	"time"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/castai/terraform-provider-castai/castai/sdk"
 	"github.com/google/uuid"
@@ -65,7 +66,7 @@ func resourceRebalancingJobCreate(ctx context.Context, d *schema.ResourceData, m
 		return diag.FromErr(err)
 	}
 
-	jobByScheduleId, found, err := getRebalancingJobByScheduleId(ctx, client, *job.ClusterId, *job.RebalancingScheduleId)
+	jobByScheduleId, found, err := getRebalancingJobByScheduleId(ctx, client, *job.ClusterId, job.RebalancingScheduleId)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -184,7 +185,7 @@ func stateToRebalancingJob(d *schema.ResourceData) (*sdk.ScheduledrebalancingV1R
 		Id:                    lo.ToPtr(d.Id()),
 		Enabled:               lo.ToPtr(d.Get("enabled").(bool)),
 		ClusterId:             lo.ToPtr(d.Get("cluster_id").(string)),
-		RebalancingScheduleId: lo.ToPtr(d.Get("rebalancing_schedule_id").(string)),
+		RebalancingScheduleId: d.Get("rebalancing_schedule_id").(string),
 	}
 
 	return &result, nil
@@ -220,8 +221,8 @@ func getRebalancingJobByScheduleName(ctx context.Context, client sdk.ClientWithR
 	}
 
 	scheduleID := *schedule.Id
-	for _, job := range *resp.JSON200.Jobs {
-		if *job.RebalancingScheduleId == scheduleID {
+	for _, job := range resp.JSON200.Jobs {
+		if job.RebalancingScheduleId == scheduleID {
 			tflog.Debug(ctx, "job found", map[string]interface{}{
 				"cluster_id":  clusterID,
 				"schedule_id": scheduleID,
@@ -257,8 +258,8 @@ func getRebalancingJobByScheduleId(ctx context.Context, client sdk.ClientWithRes
 	if checkErr := sdk.CheckOKResponse(listResp, err); checkErr != nil {
 		return nil, false, checkErr
 	}
-	for _, j := range *listResp.JSON200.Jobs {
-		if *j.RebalancingScheduleId == scheduleID {
+	for _, j := range listResp.JSON200.Jobs {
+		if j.RebalancingScheduleId == scheduleID {
 			return &j, true, nil
 		}
 	}

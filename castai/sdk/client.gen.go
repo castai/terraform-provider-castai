@@ -227,6 +227,9 @@ type ClientInterface interface {
 	// DboAPIGetCacheSummary request
 	DboAPIGetCacheSummary(ctx context.Context, groupId string, cacheId string, params *DboAPIGetCacheSummaryParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// DboAPIGetCacheConfiguration request
+	DboAPIGetCacheConfiguration(ctx context.Context, groupId string, databaseName string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// DboAPIDeleteCacheConfiguration request
 	DboAPIDeleteCacheConfiguration(ctx context.Context, groupId string, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -1603,6 +1606,18 @@ func (c *Client) DboAPIUpdateCacheTTL(ctx context.Context, groupId string, cache
 
 func (c *Client) DboAPIGetCacheSummary(ctx context.Context, groupId string, cacheId string, params *DboAPIGetCacheSummaryParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewDboAPIGetCacheSummaryRequest(c.Server, groupId, cacheId, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) DboAPIGetCacheConfiguration(ctx context.Context, groupId string, databaseName string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDboAPIGetCacheConfigurationRequest(c.Server, groupId, databaseName)
 	if err != nil {
 		return nil, err
 	}
@@ -7902,6 +7917,47 @@ func NewDboAPIGetCacheSummaryRequest(server string, groupId string, cacheId stri
 		}
 
 		queryURL.RawQuery = queryValues.Encode()
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewDboAPIGetCacheConfigurationRequest generates requests for DboAPIGetCacheConfiguration
+func NewDboAPIGetCacheConfigurationRequest(server string, groupId string, databaseName string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "groupId", runtime.ParamLocationPath, groupId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "databaseName", runtime.ParamLocationPath, databaseName)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/dbo/cache-groups/%s/cache-configurations/%s", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
 	}
 
 	req, err := http.NewRequest("GET", queryURL.String(), nil)
@@ -20552,6 +20608,9 @@ type ClientWithResponsesInterface interface {
 	// DboAPIGetCacheSummary request
 	DboAPIGetCacheSummaryWithResponse(ctx context.Context, groupId string, cacheId string, params *DboAPIGetCacheSummaryParams) (*DboAPIGetCacheSummaryResponse, error)
 
+	// DboAPIGetCacheConfiguration request
+	DboAPIGetCacheConfigurationWithResponse(ctx context.Context, groupId string, databaseName string) (*DboAPIGetCacheConfigurationResponse, error)
+
 	// DboAPIDeleteCacheConfiguration request
 	DboAPIDeleteCacheConfigurationWithResponse(ctx context.Context, groupId string, id string) (*DboAPIDeleteCacheConfigurationResponse, error)
 
@@ -22523,6 +22582,36 @@ func (r DboAPIGetCacheSummaryResponse) StatusCode() int {
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
 func (r DboAPIGetCacheSummaryResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type DboAPIGetCacheConfigurationResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *DboV1GetCacheConfigurationResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r DboAPIGetCacheConfigurationResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r DboAPIGetCacheConfigurationResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r DboAPIGetCacheConfigurationResponse) GetBody() []byte {
 	return r.Body
 }
 
@@ -29407,6 +29496,15 @@ func (c *ClientWithResponses) DboAPIGetCacheSummaryWithResponse(ctx context.Cont
 	return ParseDboAPIGetCacheSummaryResponse(rsp)
 }
 
+// DboAPIGetCacheConfigurationWithResponse request returning *DboAPIGetCacheConfigurationResponse
+func (c *ClientWithResponses) DboAPIGetCacheConfigurationWithResponse(ctx context.Context, groupId string, databaseName string) (*DboAPIGetCacheConfigurationResponse, error) {
+	rsp, err := c.DboAPIGetCacheConfiguration(ctx, groupId, databaseName)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDboAPIGetCacheConfigurationResponse(rsp)
+}
+
 // DboAPIDeleteCacheConfigurationWithResponse request returning *DboAPIDeleteCacheConfigurationResponse
 func (c *ClientWithResponses) DboAPIDeleteCacheConfigurationWithResponse(ctx context.Context, groupId string, id string) (*DboAPIDeleteCacheConfigurationResponse, error) {
 	rsp, err := c.DboAPIDeleteCacheConfiguration(ctx, groupId, id)
@@ -32944,6 +33042,32 @@ func ParseDboAPIGetCacheSummaryResponse(rsp *http.Response) (*DboAPIGetCacheSumm
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest DboV1GetCacheSummaryResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseDboAPIGetCacheConfigurationResponse parses an HTTP response from a DboAPIGetCacheConfigurationWithResponse call
+func ParseDboAPIGetCacheConfigurationResponse(rsp *http.Response) (*DboAPIGetCacheConfigurationResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &DboAPIGetCacheConfigurationResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest DboV1GetCacheConfigurationResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}

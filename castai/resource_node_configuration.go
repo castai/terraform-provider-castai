@@ -731,7 +731,7 @@ func resourceNodeConfigurationCreate(ctx context.Context, d *schema.ResourceData
 		return diag.FromErr(checkErr)
 	}
 
-	d.SetId(*resp.JSON200.Id)
+	d.SetId(resp.JSON200.Id)
 
 	return resourceNodeConfigurationRead(ctx, d, meta)
 }
@@ -924,7 +924,7 @@ func resourceNodeConfigurationDelete(ctx context.Context, d *schema.ResourceData
 		return diag.FromErr(err)
 	}
 
-	if *resp.JSON200.Default {
+	if resp.JSON200.Default {
 		log.Printf("[WARN] Default node configuration (%s) can't be deleted, removing from state", d.Id())
 		return nil
 	}
@@ -1738,8 +1738,8 @@ func nodeConfigStateImporter(ctx context.Context, d *schema.ResourceData, meta i
 	}
 
 	for _, cfg := range *resp.JSON200.Items {
-		if lo.FromPtr(cfg.Name) == id {
-			d.SetId(toString(cfg.Id))
+		if cfg.Name == id {
+			d.SetId(cfg.Id)
 			return []*schema.ResourceData{d}, nil
 		}
 	}

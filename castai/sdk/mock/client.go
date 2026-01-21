@@ -1455,6 +1455,26 @@ func (mr *MockClientInterfaceMockRecorder) DboAPIExchangeCacheStateWithBody(ctx,
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIExchangeCacheStateWithBody", reflect.TypeOf((*MockClientInterface)(nil).DboAPIExchangeCacheStateWithBody), varargs...)
 }
 
+// DboAPIGetCacheConfiguration mocks base method.
+func (m *MockClientInterface) DboAPIGetCacheConfiguration(ctx context.Context, groupId, databaseName string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, groupId, databaseName}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DboAPIGetCacheConfiguration", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPIGetCacheConfiguration indicates an expected call of DboAPIGetCacheConfiguration.
+func (mr *MockClientInterfaceMockRecorder) DboAPIGetCacheConfiguration(ctx, groupId, databaseName interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, groupId, databaseName}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIGetCacheConfiguration", reflect.TypeOf((*MockClientInterface)(nil).DboAPIGetCacheConfiguration), varargs...)
+}
+
 // DboAPIGetCacheEfficiency mocks base method.
 func (m *MockClientInterface) DboAPIGetCacheEfficiency(ctx context.Context, groupId, cacheId string, params *sdk.DboAPIGetCacheEfficiencyParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
@@ -9311,6 +9331,41 @@ func (m *MockClientWithResponsesInterface) DboAPIExchangeCacheStateWithResponse(
 func (mr *MockClientWithResponsesInterfaceMockRecorder) DboAPIExchangeCacheStateWithResponse(ctx, cacheGroupId, body interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIExchangeCacheStateWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DboAPIExchangeCacheStateWithResponse), ctx, cacheGroupId, body)
+}
+
+// DboAPIGetCacheConfiguration mocks base method.
+func (m *MockClientWithResponsesInterface) DboAPIGetCacheConfiguration(ctx context.Context, groupId, databaseName string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, groupId, databaseName}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DboAPIGetCacheConfiguration", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPIGetCacheConfiguration indicates an expected call of DboAPIGetCacheConfiguration.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) DboAPIGetCacheConfiguration(ctx, groupId, databaseName interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, groupId, databaseName}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIGetCacheConfiguration", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DboAPIGetCacheConfiguration), varargs...)
+}
+
+// DboAPIGetCacheConfigurationWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) DboAPIGetCacheConfigurationWithResponse(ctx context.Context, groupId, databaseName string) (*sdk.DboAPIGetCacheConfigurationResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DboAPIGetCacheConfigurationWithResponse", ctx, groupId, databaseName)
+	ret0, _ := ret[0].(*sdk.DboAPIGetCacheConfigurationResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPIGetCacheConfigurationWithResponse indicates an expected call of DboAPIGetCacheConfigurationWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) DboAPIGetCacheConfigurationWithResponse(ctx, groupId, databaseName interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIGetCacheConfigurationWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DboAPIGetCacheConfigurationWithResponse), ctx, groupId, databaseName)
 }
 
 // DboAPIGetCacheEfficiency mocks base method.

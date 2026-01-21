@@ -88,6 +88,7 @@ resource "castai_workload_scaling_policy" "services" {
   rollout_behavior {
     type = "NO_DISRUPTION"
   }
+  excluded_containers = ["container-1", "container-2"]
 }
 ```
 
@@ -113,6 +114,7 @@ resource "castai_workload_scaling_policy" "services" {
 - `assignment_rules` (Block List) Allows defining conditions for automatically assigning workloads to this scaling policy. (see [below for nested schema](#nestedblock--assignment_rules))
 - `confidence` (Block List, Max: 1) Defines the confidence settings for applying recommendations. (see [below for nested schema](#nestedblock--confidence))
 - `downscaling` (Block List, Max: 1) (see [below for nested schema](#nestedblock--downscaling))
+- `excluded_containers` (List of String) List of container names to exclude from scaling policy. Containers matching these names will not have their resource requests and limits managed by the scaling policy.
 - `memory_event` (Block List, Max: 1) (see [below for nested schema](#nestedblock--memory_event))
 - `predictive_scaling` (Block List, Max: 1) (see [below for nested schema](#nestedblock--predictive_scaling))
 - `rollout_behavior` (Block List, Max: 1) Defines the rollout behavior used when applying recommendations. Prerequisites:
