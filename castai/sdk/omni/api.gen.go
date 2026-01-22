@@ -224,6 +224,11 @@ type GCPParam struct {
 	// Credentials Credentials used to authenticate GCP API.
 	Credentials *GCPParamCredentials `json:"credentials,omitempty"`
 
+	// InstanceServiceAccount The GCP service account email to be mounted by default in the edge nodes created in this location.
+	//  To transparently pull images from the GCP artifact registry, the service account must have
+	//  at least the roles/artifactregistry.reader role assigned.
+	InstanceServiceAccount *string `json:"instanceServiceAccount,omitempty"`
+
 	// Networking The networking parameters. Created during location onboarding.
 	Networking *GCPParamGCPNetworking `json:"networking,omitempty"`
 

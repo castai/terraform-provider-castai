@@ -1739,7 +1739,7 @@ func nodeConfigStateImporter(ctx context.Context, d *schema.ResourceData, meta i
 
 	for _, cfg := range *resp.JSON200.Items {
 		if cfg.Name == id {
-			d.SetId(toString(&cfg.Id))
+			d.SetId(cfg.Id)
 			return []*schema.ResourceData{d}, nil
 		}
 	}

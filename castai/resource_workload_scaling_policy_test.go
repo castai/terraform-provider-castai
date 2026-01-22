@@ -42,6 +42,8 @@ func TestAccGKE_ResourceWorkloadScalingPolicy(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "name", rName),
 					resource.TestCheckResourceAttr(resourceName, "apply_type", "IMMEDIATE"),
 					resource.TestCheckResourceAttr(resourceName, "management_option", "READ_ONLY"),
+					resource.TestCheckResourceAttr(resourceName, "excluded_containers.0", "a"),
+					resource.TestCheckResourceAttr(resourceName, "excluded_containers.1", "b"),
 					resource.TestCheckResourceAttr(resourceName, "cpu.0.function", "QUANTILE"),
 					resource.TestCheckResourceAttr(resourceName, "cpu.0.overhead", "0.05"),
 					resource.TestCheckResourceAttr(resourceName, "cpu.0.apply_threshold_strategy.0.type", "PERCENTAGE"),
@@ -91,6 +93,8 @@ func TestAccGKE_ResourceWorkloadScalingPolicy(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "name", rName+"-updated"),
 					resource.TestCheckResourceAttr(resourceName, "apply_type", "IMMEDIATE"),
 					resource.TestCheckResourceAttr(resourceName, "management_option", "MANAGED"),
+					resource.TestCheckResourceAttr(resourceName, "excluded_containers.0", "a"),
+					resource.TestCheckResourceAttr(resourceName, "excluded_containers.1", "b"),
 					resource.TestCheckResourceAttr(resourceName, "cpu.0.function", "QUANTILE"),
 					resource.TestCheckResourceAttr(resourceName, "cpu.0.overhead", "0.15"),
 					resource.TestCheckResourceAttr(resourceName, "cpu.0.apply_threshold", "0.1"),
@@ -250,6 +254,7 @@ func scalingPolicyConfig(clusterName, projectID, name string) string {
 		cluster_id			= castai_gke_cluster.test.id
 		apply_type			= "IMMEDIATE"
 		management_option	= "READ_ONLY"
+		excluded_containers = ["a", "b"]
 		confidence {
 			threshold = 0.4
 		}
@@ -321,6 +326,7 @@ func scalingPolicyConfigUpdated(clusterName, projectID, name string) string {
 		cluster_id			= castai_gke_cluster.test.id
 		apply_type			= "IMMEDIATE"
 		management_option	= "MANAGED"
+		excluded_containers = ["a", "b"]
 		assignment_rules {
 			rules {
 				namespace {

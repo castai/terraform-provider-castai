@@ -79,10 +79,10 @@ func resourceNodeConfigurationDefaultRead(ctx context.Context, d *schema.Resourc
 		return diag.FromErr(err)
 	}
 
-	configID := &resp.JSON200.Id
+	configID := resp.JSON200.Id
 	if !resp.JSON200.Default {
 		// If configuration is no longer default, we should trigger state change.
-		configID = nil
+		configID = ""
 	}
 	if err := d.Set("configuration_id", configID); err != nil {
 		return diag.FromErr(fmt.Errorf("setting configuration id: %w", err))
