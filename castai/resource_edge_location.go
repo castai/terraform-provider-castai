@@ -61,7 +61,6 @@ type awsModel struct {
 	VpcID             types.String `tfsdk:"vpc_id"`
 	SecurityGroupID   types.String `tfsdk:"security_group_id"`
 	SubnetIDs         types.Map    `tfsdk:"subnet_ids"`
-	NameTag           types.String `tfsdk:"name_tag"`
 }
 
 type gcpModel struct {
@@ -94,8 +93,7 @@ func (m awsModel) Equal(other *awsModel) bool {
 	return m.AccountID.Equal(other.AccountID) &&
 		m.VpcID.Equal(other.VpcID) &&
 		m.SecurityGroupID.Equal(other.SecurityGroupID) &&
-		m.SubnetIDs.Equal(other.SubnetIDs) &&
-		m.NameTag.Equal(other.NameTag)
+		m.SubnetIDs.Equal(other.SubnetIDs)
 }
 
 func (m gcpModel) credentials() types.String {
@@ -249,8 +247,9 @@ func (r *edgeLocationResource) Schema(_ context.Context, _ resource.SchemaReques
 						Description: "Map of zone names to subnet IDs to be used in the selected region",
 					},
 					"name_tag": schema.StringAttribute{
-						Required:    true,
-						Description: "The value of a 'Name' tag applied to VPC resources",
+						Optional:           true,
+						Description:        "The value of a 'Name' tag applied to VPC resources",
+						DeprecationMessage: "Deprecated. Can be omitted",
 					},
 				},
 			},
@@ -691,7 +690,6 @@ func (r *edgeLocationResource) toAWS(ctx context.Context, plan, config *awsModel
 			VpcId:           plan.VpcID.ValueString(),
 			SecurityGroupId: plan.SecurityGroupID.ValueString(),
 			SubnetIds:       subnetMap,
-			NameTag:         plan.NameTag.ValueString(),
 		},
 	}
 
@@ -709,7 +707,6 @@ func (r *edgeLocationResource) toAWSModel(ctx context.Context, config *omni.AWSP
 		VpcID:             types.StringNull(),
 		SecurityGroupID:   types.StringNull(),
 		SubnetIDs:         types.MapNull(types.StringType),
-		NameTag:           types.StringNull(),
 		AccessKeyIDWO:     types.StringNull(),
 		SecretAccessKeyWO: types.StringNull(),
 	}
@@ -717,7 +714,6 @@ func (r *edgeLocationResource) toAWSModel(ctx context.Context, config *omni.AWSP
 	if config.Networking != nil {
 		aws.VpcID = types.StringValue(config.Networking.VpcId)
 		aws.SecurityGroupID = types.StringValue(config.Networking.SecurityGroupId)
-		aws.NameTag = types.StringValue(config.Networking.NameTag)
 
 		if config.Networking.SubnetIds != nil {
 			subnetMap, d := types.MapValueFrom(ctx, types.StringType, config.Networking.SubnetIds)
