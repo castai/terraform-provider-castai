@@ -7,6 +7,7 @@ resource "helm_release" "castware_operator" {
   version    = var.castware_operator_version
 
   wait             = true
+  wait_for_jobs    = true
   atomic           = true
   cleanup_on_fail  = true
   create_namespace = false # true if you plan to deploy in a cluster without any cast components
@@ -60,6 +61,7 @@ resource "helm_release" "castware_components" {
   chart      = "castware-components"
 
   wait             = true
+  wait_for_jobs    = true
   atomic           = true
   cleanup_on_fail  = true
   create_namespace = false
