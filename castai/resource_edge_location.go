@@ -694,6 +694,9 @@ func (r *edgeLocationResource) toAWS(ctx context.Context, plan, config *awsModel
 			SubnetIds:       subnetMap,
 		},
 	}
+	if !plan.NameTag.IsNull() {
+		out.Networking.NameTag = lo.ToPtr(plan.NameTag.ValueString())
+	}
 
 	return out, diags
 }
@@ -709,6 +712,7 @@ func (r *edgeLocationResource) toAWSModel(ctx context.Context, config *omni.AWSP
 		VpcID:             types.StringNull(),
 		SecurityGroupID:   types.StringNull(),
 		SubnetIDs:         types.MapNull(types.StringType),
+		NameTag:           types.StringNull(),
 		AccessKeyIDWO:     types.StringNull(),
 		SecretAccessKeyWO: types.StringNull(),
 	}
@@ -716,6 +720,9 @@ func (r *edgeLocationResource) toAWSModel(ctx context.Context, config *omni.AWSP
 	if config.Networking != nil {
 		aws.VpcID = types.StringValue(config.Networking.VpcId)
 		aws.SecurityGroupID = types.StringValue(config.Networking.SecurityGroupId)
+		if config.Networking.NameTag != nil {
+			aws.NameTag = types.StringValue(*config.Networking.NameTag)
+		}
 
 		if config.Networking.SubnetIds != nil {
 			subnetMap, d := types.MapValueFrom(ctx, types.StringType, config.Networking.SubnetIds)
