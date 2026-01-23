@@ -220,7 +220,6 @@ resource "castai_edge_location" "test" {
     security_group_id    = "sg-12345678"
     subnet_ids = {%[4]s
     }
-    name_tag             = "test-edge-location"
   }
 }
 `, rName, description, zonesConfig, subnetConfig, organizationID, awsCredentials))
