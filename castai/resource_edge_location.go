@@ -61,6 +61,8 @@ type awsModel struct {
 	VpcID             types.String `tfsdk:"vpc_id"`
 	SecurityGroupID   types.String `tfsdk:"security_group_id"`
 	SubnetIDs         types.Map    `tfsdk:"subnet_ids"`
+	// Deprecated. Should be removed with name_tag attribute removal.
+	NameTag types.String `tfsdk:"name_tag"`
 }
 
 type gcpModel struct {
