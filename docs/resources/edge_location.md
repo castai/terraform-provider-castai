@@ -77,11 +77,14 @@ Required:
 
 - `access_key_id_wo` (String, Sensitive) AWS access key ID
 - `account_id` (String) AWS account ID
-- `name_tag` (String) The value of a 'Name' tag applied to VPC resources
 - `secret_access_key_wo` (String, Sensitive) AWS secret access key
 - `security_group_id` (String) Security group ID to be used in the selected region
 - `subnet_ids` (Map of String) Map of zone names to subnet IDs to be used in the selected region
 - `vpc_id` (String) VPC ID to be used in the selected region
+
+Optional:
+
+- `name_tag` (String, Deprecated) The value of a 'Name' tag applied to VPC resources
 
 
 <a id="nestedatt--gcp"></a>
