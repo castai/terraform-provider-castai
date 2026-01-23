@@ -20,7 +20,7 @@ const (
 	EKSSettingsFieldIamPolicyJson         = "iam_policy_json"
 	EKSSettingsFieldIamUserPolicyJson     = "iam_user_policy_json"
 	EKSSettingsFieldIamManagedPolicies    = "iam_managed_policies"
-	EKSSettingsFieldAWSSharedVPCAccountId = "aws_shared_vpc_account_id"
+	EKSSettingsFieldAWSSharedVPCAccountId = "shared_vpc_account_id"
 
 	GovCloudPrefix = "us-gov"
 )
@@ -71,7 +71,7 @@ func dataSourceEKSSettings() *schema.Resource {
 				Type:             schema.TypeString,
 				Optional:         true,
 				ForceNew:         true,
-				Description:      "AWS account ID where the VPC and subnets are located, for shared VPC setups. If not provided, defaults to the account_id.",
+				Description:      "AWS account ID where the VPC and subnets are located, for shared VPC setups. If not applicable, defaults to the account_id.",
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
 		},

@@ -33,7 +33,7 @@ data "castai_eks_settings" "current" {
 
 ### Optional
 
-- `aws_shared_vpc_account_id` (String) AWS account ID where the VPC and subnets are located, for shared VPC setups. If not provided, defaults to the account_id.
+- `shared_vpc_account_id` (String) AWS account ID where the VPC and subnets are located, for shared VPC setups. If not applicable, defaults to the account_id.
 
 ### Read-Only
 
