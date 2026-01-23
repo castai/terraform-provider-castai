@@ -69,8 +69,8 @@ type AWSParam struct {
 //
 //	Used by all the edges in the edge location.
 type AWSParamAWSNetworking struct {
-	// NameTag The value of a 'Name' tag applied to VPC resources.
-	NameTag string `json:"nameTag"`
+	// NameTag Deprecated. The value of a 'Name' tag applied to VPC resources.
+	NameTag *string `json:"nameTag,omitempty"`
 
 	// SecurityGroupId The id of the security group to be used in the selected region.
 	SecurityGroupId string `json:"securityGroupId"`
