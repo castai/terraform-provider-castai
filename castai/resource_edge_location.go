@@ -720,7 +720,7 @@ func (r *edgeLocationResource) toAWSModel(ctx context.Context, config *omni.AWSP
 	if config.Networking != nil {
 		aws.VpcID = types.StringValue(config.Networking.VpcId)
 		aws.SecurityGroupID = types.StringValue(config.Networking.SecurityGroupId)
-		if config.Networking.NameTag != nil {
+		if config.Networking.NameTag != nil && *config.Networking.NameTag != "" {
 			aws.NameTag = types.StringValue(*config.Networking.NameTag)
 		}
 
