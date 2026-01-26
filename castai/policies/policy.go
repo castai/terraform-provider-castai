@@ -46,6 +46,8 @@ func GetUserInlinePolicy(clusterName, arn, vpc, partition, sharedVPCArn string) 
 	// If sharedVPCArn is not provided, use the main ARN for VPC/subnet resources
 	if sharedVPCArn == "" {
 		vpcArn = arn
+	} else {
+		vpcArn = sharedVPCArn
 	}
 
 	type tmplValues struct {
