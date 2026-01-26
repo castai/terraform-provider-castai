@@ -42,10 +42,10 @@ func GetUserInlinePolicy(clusterName, arn, vpc, partition, sharedVPCArn string) 
 	if err != nil {
 		return "", fmt.Errorf("parsing template: %w", err)
 	}
-
+	var vpcArn string
 	// If sharedVPCArn is not provided, use the main ARN for VPC/subnet resources
 	if sharedVPCArn == "" {
-		sharedVPCArn = arn
+		vpcArn = arn
 	}
 
 	type tmplValues struct {
@@ -53,7 +53,7 @@ func GetUserInlinePolicy(clusterName, arn, vpc, partition, sharedVPCArn string) 
 		ARN          string
 		VPC          string
 		Partition    string
-		SharedVPCArn string
+		VPCArn string
 	}
 
 	var buf bytes.Buffer
@@ -63,7 +63,7 @@ func GetUserInlinePolicy(clusterName, arn, vpc, partition, sharedVPCArn string) 
 		ARN:          arn,
 		VPC:          vpc,
 		Partition:    partition,
-		SharedVPCArn: sharedVPCArn,
+		VPCArn: vpcArn,
 	}); err != nil {
 		return "", fmt.Errorf("interpolating template: %w", err)
 	}

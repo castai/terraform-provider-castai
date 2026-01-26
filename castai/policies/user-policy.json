@@ -16,10 +16,10 @@
       "Sid": "RunInstancesVpcRestriction",
       "Effect": "Allow",
       "Action": "ec2:RunInstances",
-      "Resource": "arn:{{ .Partition }}:ec2:{{ .SharedVPCArn }}:subnet/*",
+      "Resource": "arn:{{ .Partition }}:ec2:{{ .VPCArn }}:subnet/*",
       "Condition": {
         "StringEquals": {
-          "ec2:Vpc": "arn:{{ .Partition }}:ec2:{{ .SharedVPCArn }}:vpc/{{ .VPC }}"
+          "ec2:Vpc": "arn:{{ .Partition }}:ec2:{{ .VPCArn }}:vpc/{{ .VPC }}"
         }
       }
     },
