@@ -24,7 +24,7 @@ func TestPolicies(t *testing.T) {
 	})
 
 	t.Run("User policy", func(t *testing.T) {
-		userpolicy, err := GetUserInlinePolicy("clustername", "testarn", "testvpc", "testpartition")
+		userpolicy, err := GetUserInlinePolicy("clustername", "testarn", "testvpc", "testpartition", "")
 		if err != nil || userpolicy == "" {
 			t.Fatalf("couldn't generate user policy")
 		}
@@ -37,6 +37,29 @@ func TestPolicies(t *testing.T) {
 
 		if strings.Contains(userpolicy, ".ARN") || strings.Contains(userpolicy, ".Partition") {
 			t.Fatalf("Incorrectly formatted template")
+		}
+	})
+
+	t.Run("User policy with shared VPC account", func(t *testing.T) {
+		userpolicy, err := GetUserInlinePolicy("clustername", "testarn", "testvpc", "testpartition", "sharedvpcarn")
+		if err != nil || userpolicy == "" {
+			t.Fatalf("couldn't generate user policy")
+		}
+
+		vpcResource := "arn:testpartition:ec2:sharedvpcarn:vpc/testvpc"
+		subnetResource := "arn:testpartition:ec2:sharedvpcarn:subnet/*"
+		instanceResource := "arn:testpartition:ec2:testarn:instance/*"
+
+		if !strings.Contains(userpolicy, vpcResource) {
+			t.Fatalf("generated User policy does not contain shared VPC resource")
+		}
+
+		if !strings.Contains(userpolicy, subnetResource) {
+			t.Fatalf("generated User policy does not contain shared subnet resource")
+		}
+
+		if !strings.Contains(userpolicy, instanceResource) {
+			t.Fatalf("generated User policy should still use main ARN for instance resources")
 		}
 	})
 

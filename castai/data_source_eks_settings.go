@@ -13,13 +13,14 @@ import (
 )
 
 const (
-	EKSSettingsFieldAccountId          = "account_id"
-	EKSSettingsFieldRegion             = "region"
-	EKSSettingsFieldVpc                = "vpc"
-	EKSSettingsFieldCluster            = "cluster"
-	EKSSettingsFieldIamPolicyJson      = "iam_policy_json"
-	EKSSettingsFieldIamUserPolicyJson  = "iam_user_policy_json"
-	EKSSettingsFieldIamManagedPolicies = "iam_managed_policies"
+	EKSSettingsFieldAccountId             = "account_id"
+	EKSSettingsFieldRegion                = "region"
+	EKSSettingsFieldVpc                   = "vpc"
+	EKSSettingsFieldCluster               = "cluster"
+	EKSSettingsFieldIamPolicyJson         = "iam_policy_json"
+	EKSSettingsFieldIamUserPolicyJson     = "iam_user_policy_json"
+	EKSSettingsFieldIamManagedPolicies    = "iam_managed_policies"
+	EKSSettingsFieldAWSSharedVPCAccountId = "shared_vpc_account_id"
 
 	GovCloudPrefix = "us-gov"
 )
@@ -66,6 +67,13 @@ func dataSourceEKSSettings() *schema.Resource {
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				Computed: true,
 			},
+			EKSSettingsFieldAWSSharedVPCAccountId: {
+				Type:             schema.TypeString,
+				Optional:         true,
+				ForceNew:         true,
+				Description:      "AWS account ID where the VPC and subnets are located, for shared VPC setups. If not applicable, defaults to the account_id.",
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
+			},
 		},
 	}
 }
@@ -75,11 +83,17 @@ func dataSourceCastaiEKSSettingsRead(ctx context.Context, data *schema.ResourceD
 	vpc := data.Get(EKSSettingsFieldVpc).(string)
 	region := data.Get(EKSSettingsFieldRegion).(string)
 	cluster := data.Get(EKSSettingsFieldCluster).(string)
+	sharedVPCAccountID := data.Get(EKSSettingsFieldAWSSharedVPCAccountId).(string)
 
 	arn := fmt.Sprintf("%s:%s", region, accountID)
 	partition := getPartition(region)
 
-	userPolicy, _ := policies.GetUserInlinePolicy(cluster, arn, vpc, partition)
+	var sharedVPCArn string
+	if sharedVPCAccountID != "" {
+		sharedVPCArn = fmt.Sprintf("%s:%s", region, sharedVPCAccountID)
+	}
+
+	userPolicy, _ := policies.GetUserInlinePolicy(cluster, arn, vpc, partition, sharedVPCArn)
 	iamPolicy, _ := policies.GetIAMPolicy(accountID, partition)
 	managedPolicies := policies.GetManagedPolicies(partition)
 
