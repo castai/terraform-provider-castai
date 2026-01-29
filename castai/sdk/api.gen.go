@@ -1937,7 +1937,6 @@ type CastaiInventoryV1beta1GCPFlexCUD struct {
 	LineItemId         *string                                       `json:"lineItemId,omitempty"`
 	Offer              *string                                       `json:"offer,omitempty"`
 	OrderName          *string                                       `json:"orderName,omitempty"`
-
 	// Plan - TWELVE_MONTH: 1 year commitment plan
 	//  - THIRTY_SIX_MONTH: 3 year commitment plan
 	Plan   *CastaiInventoryV1beta1GCPFlexCUDCUDPlan `json:"plan,omitempty"`
