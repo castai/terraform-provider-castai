@@ -1911,13 +1911,14 @@ type CastaiInventoryV1beta1GCPCommitmentImport struct {
 
 // CastaiInventoryV1beta1GCPFlexCUD defines model for castai.inventory.v1beta1.GCPFlexCUD.
 type CastaiInventoryV1beta1GCPFlexCUD struct {
-	CommitmentAmount *float64 `json:"commitmentAmount,omitempty"`
-	DisplayName      *string  `json:"displayName,omitempty"`
-	LineItemId       *string  `json:"lineItemId,omitempty"`
-	Offer            *string  `json:"offer,omitempty"`
-	OrderName        *string  `json:"orderName,omitempty"`
-	Region           *string  `json:"region,omitempty"`
-	State            *string  `json:"state,omitempty"`
+	CommitmentAmount   *float64                                      `json:"commitmentAmount,omitempty"`
+	DisplayName        *string                                       `json:"displayName,omitempty"`
+	InstanceTypesUsage *CastaiInventoryV1beta1InstanceTypeBasedUsage `json:"instanceTypesUsage,omitempty"`
+	LineItemId         *string                                       `json:"lineItemId,omitempty"`
+	Offer              *string                                       `json:"offer,omitempty"`
+	OrderName          *string                                       `json:"orderName,omitempty"`
+	Region             *string                                       `json:"region,omitempty"`
+	State              *string                                       `json:"state,omitempty"`
 }
 
 // CastaiInventoryV1beta1GCPResource defines model for castai.inventory.v1beta1.GCPResource.
@@ -6516,6 +6517,7 @@ type NodetemplatesV1GPU struct {
 	DefaultSharedClientsPerGpu *int32                               `json:"defaultSharedClientsPerGpu"`
 	EnableTimeSharing          *bool                                `json:"enableTimeSharing,omitempty"`
 	SharingConfiguration       *map[string]NodetemplatesV1SharedGPU `json:"sharingConfiguration,omitempty"`
+	UserManagedGpuDrivers      *bool                                `json:"userManagedGpuDrivers"`
 }
 
 // NodetemplatesV1GenerateNodeTemplatesResponse defines model for nodetemplates.v1.GenerateNodeTemplatesResponse.
@@ -9346,6 +9348,9 @@ type WorkloadoptimizationV1VerticalOverrides struct {
 	Cpu         *WorkloadoptimizationV1ResourceConfigOverrides `json:"cpu,omitempty"`
 	Downscaling *WorkloadoptimizationV1DownscalingSettings     `json:"downscaling,omitempty"`
 
+	// ExcludedContainers Containers to exclude from optimization.
+	ExcludedContainers *[]string `json:"excludedContainers,omitempty"`
+
 	// Jvm JVMRuntimeConfiguration defines set of settings that enables and configures for JVM optimization.
 	Jvm *WorkloadoptimizationV1JVMRuntimeConfiguration `json:"jvm,omitempty"`
 
@@ -10086,6 +10091,9 @@ type ExternalClusterAPIGetConnectAndEnableCASTAICmdParams struct {
 
 	// InstallOmni Whether cluster should be onboarded with CAST AI Omni.
 	InstallOmni *bool `form:"installOmni,omitempty" json:"installOmni,omitempty"`
+
+	// InstallOperator Whether cluster should be onboarded with Castware Operator.
+	InstallOperator *bool `form:"installOperator,omitempty" json:"installOperator,omitempty"`
 }
 
 // ExternalClusterAPIGetCredentialsScriptParams defines parameters for ExternalClusterAPIGetCredentialsScript.

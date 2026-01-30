@@ -85,6 +85,7 @@ Required:
 Optional:
 
 - `name_tag` (String, Deprecated) The value of a 'Name' tag applied to VPC resources
+- `vpc_peered` (String) Whether existing VPC is peered with main cluster's VPC. Field is ignored if vpc_id is not provided or main cluster is not EKS
 
 
 <a id="nestedatt--gcp"></a>
