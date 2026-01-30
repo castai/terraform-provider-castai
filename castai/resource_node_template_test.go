@@ -1319,7 +1319,7 @@ func Test_toTemplateGpu(t *testing.T) {
 				DefaultSharedClientsPerGpu: lo.ToPtr(int32(6)), // Set when > 0
 				EnableTimeSharing:          lo.ToPtr(true),
 				SharingConfiguration:       &map[string]sdk.NodetemplatesV1SharedGPU{},
-				UserManagedGpuDrivers:      lo.ToPtr(false),
+				// UserManagedGpuDrivers not set (nil) - only sent when explicitly true (GKE-only)
 			},
 		},
 		{
@@ -1331,7 +1331,7 @@ func Test_toTemplateGpu(t *testing.T) {
 				DefaultSharedClientsPerGpu: nil, // Not set when 0
 				EnableTimeSharing:          lo.ToPtr(true),
 				SharingConfiguration:       &map[string]sdk.NodetemplatesV1SharedGPU{},
-				UserManagedGpuDrivers:      lo.ToPtr(false),
+				// UserManagedGpuDrivers not set (nil) - only sent when explicitly true (GKE-only)
 			},
 		},
 	}

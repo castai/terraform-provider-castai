@@ -1733,9 +1733,8 @@ func toTemplateGpu(obj map[string]any) *sdk.NodetemplatesV1GPU {
 	}
 
 	result := &sdk.NodetemplatesV1GPU{
-		EnableTimeSharing:     &enableTimeSharing,
-		SharingConfiguration:  &sharingConfig,
-		UserManagedGpuDrivers: &userManagedGPUDrivers,
+		EnableTimeSharing:    &enableTimeSharing,
+		SharingConfiguration: &sharingConfig,
 	}
 
 	// Only set DefaultSharedClientsPerGpu if it's non-zero to avoid API validation errors
@@ -1743,6 +1742,12 @@ func toTemplateGpu(obj map[string]any) *sdk.NodetemplatesV1GPU {
 	// API requires it to be in range (0, 48] if present
 	if defaultSharedClientsPerGpu > 0 {
 		result.DefaultSharedClientsPerGpu = &defaultSharedClientsPerGpu
+	}
+
+	// Only set UserManagedGpuDrivers if explicitly true
+	//as this is optional and as terraform treats nil values as zero values
+	if userManagedGPUDrivers {
+		result.UserManagedGpuDrivers = &userManagedGPUDrivers
 	}
 
 	return result
