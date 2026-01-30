@@ -1490,9 +1490,12 @@ type CastaiInventoryV1beta1AWSODCRContext struct {
 	InstanceTypeCpu       *string                                       `json:"instanceTypeCpu,omitempty"`
 	InstanceTypeMemoryMib *string                                       `json:"instanceTypeMemoryMib,omitempty"`
 	InstanceTypesUsage    *CastaiInventoryV1beta1InstanceTypeBasedUsage `json:"instanceTypesUsage,omitempty"`
-	State                 *string                                       `json:"state,omitempty"`
-	Tenancy               *string                                       `json:"tenancy,omitempty"`
-	TotalInstanceCount    *string                                       `json:"totalInstanceCount,omitempty"`
+
+	// Interruptible Indicates whether this Capacity Reservation is interruptible, meaning instances may be terminated when the owner reclaims capacity.
+	Interruptible      *bool   `json:"interruptible,omitempty"`
+	State              *string `json:"state,omitempty"`
+	Tenancy            *string `json:"tenancy,omitempty"`
+	TotalInstanceCount *string `json:"totalInstanceCount,omitempty"`
 }
 
 // CastaiInventoryV1beta1AWSRecurringCharges defines model for castai.inventory.v1beta1.AWSRecurringCharges.
@@ -6054,7 +6057,10 @@ type NodeconfigV1EC2VolumesConfig struct {
 	Encrypted *bool `json:"encrypted,omitempty"`
 
 	// Iops EBS volume IOPS value to be used for provisioned nodes.
-	Iops      *int32  `json:"iops"`
+	Iops *int32 `json:"iops"`
+
+	// KmsKeyArn KMS key for encrypting EBS volumes.
+	// Accepts any AWS-supported format (ARN, Key ID, Alias, or Alias ARN).
 	KmsKeyArn *string `json:"kmsKeyArn"`
 
 	// Size EBS volume size in GiB to be used for provisioned nodes.

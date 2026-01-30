@@ -241,7 +241,7 @@ func (r *edgeLocationResource) Schema(_ context.Context, _ resource.SchemaReques
 						Required:    true,
 						Description: "VPC ID to be used in the selected region",
 					},
-					"vpc_peered": schema.StringAttribute{
+					"vpc_peered": schema.BoolAttribute{
 						Optional:    true,
 						Description: "Whether existing VPC is peered with main cluster's VPC. Field is ignored if vpc_id is not provided or main cluster is not EKS",
 					},
