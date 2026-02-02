@@ -29,8 +29,9 @@
       "Action": [
         "iam:CreateServiceLinkedRole",
         "ec2:CreateKeyPair",
-        "ec2:DeleteKeyPair",
         "ec2:CreateTags",
+        "ec2:DeleteKeyPair",
+        "ec2:DescribeCapacityReservations",
         "ec2:ImportKeyPair"
       ],
       "Resource": "*"
@@ -40,10 +41,11 @@
       "Effect": "Allow",
       "Action": "ec2:RunInstances",
       "Resource": [
+        "arn:{{ .Partition }}:ec2:*:{{ .AccountNumber }}:capacity-reservation/*",
+        "arn:{{ .Partition }}:ec2:*:{{ .AccountNumber }}:key-pair/*",
         "arn:{{ .Partition }}:ec2:*:{{ .AccountNumber }}:network-interface/*",
         "arn:{{ .Partition }}:ec2:*:{{ .AccountNumber }}:security-group/*",
         "arn:{{ .Partition }}:ec2:*:{{ .AccountNumber }}:volume/*",
-        "arn:{{ .Partition }}:ec2:*:{{ .AccountNumber }}:key-pair/*",
         "arn:{{ .Partition }}:ec2:*::image/*"
       ]
     }
