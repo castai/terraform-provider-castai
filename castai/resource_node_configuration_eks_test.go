@@ -46,7 +46,7 @@ func TestAccEKS_ResourceNodeConfiguration(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "eks.0.volume_throughput", "131"),
 					resource.TestCheckResourceAttr(resourceName, "eks.0.imds_v1", "true"),
 					resource.TestCheckResourceAttr(resourceName, "eks.0.imds_hop_limit", "3"),
-					resource.TestCheckResourceAttr(resourceName, "eks.0.volume_kms_key_arn", "arn:aws:kms:eu-central-1:012345:key/1d989ee1-59cd-4238-8018-79bae29d1109"),
+					resource.TestCheckResourceAttr(resourceName, "eks.0.volume_kms_key_arn", "arn:aws:kms:us-east-1:123456789012:key/1234abcd-12ab-34cd-56ef-1234567890ab"),
 					resource.TestCheckResourceAttr(resourceName, "eks.0.target_group.#", "1"),
 					resource.TestCheckResourceAttr(resourceName, "eks.0.max_pods_per_node_formula", "NUM_IP_PER_PREFIX-NUM_MAX_NET_INTERFACES"),
 					resource.TestCheckResourceAttr(resourceName, "eks.0.ips_per_prefix", "4"),
@@ -138,7 +138,7 @@ resource "castai_node_configuration" "test" {
 	  volume_type 		 = "gp3"
     volume_iops		     = 3100
 	  volume_throughput 	 = 131
-    volume_kms_key_arn   = "arn:aws:kms:eu-central-1:012345:key/1d989ee1-59cd-4238-8018-79bae29d1109"
+    volume_kms_key_arn   = "arn:aws:kms:us-east-1:123456789012:key/1234abcd-12ab-34cd-56ef-1234567890ab"
 	  imds_v1				 = true
 	  imds_hop_limit       = 3
     max_pods_per_node_formula = "NUM_IP_PER_PREFIX-NUM_MAX_NET_INTERFACES"
