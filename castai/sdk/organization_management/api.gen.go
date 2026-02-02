@@ -188,6 +188,9 @@ type BatchCreateEnterpriseGroupsRequestMemberKind string
 
 // BatchCreateEnterpriseGroupsRequestRoleBinding RoleBinding definition
 type BatchCreateEnterpriseGroupsRequestRoleBinding struct {
+	// ChildOrganizationId Reference the child org the role binding is for. If the RoleBinding is for Parent, leave nil.
+	ChildOrganizationId *string `json:"childOrganizationId,omitempty"`
+
 	// Name Name is a name of the role binding.
 	Name string `json:"name"`
 
@@ -335,6 +338,9 @@ type BatchUpdateEnterpriseGroupsRequestMemberKind string
 
 // BatchUpdateEnterpriseGroupsRequestRoleBinding RoleBinding definition
 type BatchUpdateEnterpriseGroupsRequestRoleBinding struct {
+	// ChildOrganizationId Reference the child org the role binding is for. If the RoleBinding is for Parent, leave nil.
+	ChildOrganizationId *string `json:"childOrganizationId,omitempty"`
+
 	// Id ID is the unique identifier of the role binding (required for updates).
 	Id string `json:"id"`
 
@@ -1001,6 +1007,9 @@ type RoleBinding struct {
 
 // RoleBindingDefinition RoleBindingDefinition represents the definition of a role binding
 type RoleBindingDefinition struct {
+	// ChildOrganizationId Reference the child org the role binding is for. If the RoleBinding is for Parent, this will be empty.
+	ChildOrganizationId *string `json:"childOrganizationId,omitempty"`
+
 	// RoleId RoleID is the unique identifier of the role.
 	RoleId *string `json:"roleId,omitempty"`
 
@@ -1019,6 +1028,9 @@ type RoleBindingStatusPolicyID struct {
 
 // RoleBindingRoleBindingDefinition Definition represents the role binding definition.
 type RoleBindingRoleBindingDefinition struct {
+	// ChildOrganizationId Reference the child org the role binding is for. If the RoleBinding is for Parent, this will be empty.
+	ChildOrganizationId *string `json:"childOrganizationId,omitempty"`
+
 	// RoleId RoleID is the unique identifier of the role.
 	RoleId string `json:"roleId"`
 
