@@ -828,20 +828,6 @@ func updateAutoscalerPolicies(ctx context.Context, data *schema.ResourceData, me
 		return upsertPolicies(ctx, meta, clusterId, changedPoliciesJSON)
 	}
 
-	// Try to update policies immediately without any delay.
-	err := updatePolicies()
-	if err == nil {
-		return nil
-	}
-
-	// Check if error is retryable (node template version conflict)
-	if !isNodeTemplateVersionConflict(err) {
-		return err // Non-retryable error
-	}
-
-	// Fall back to exponential backoff retry only if version conflict occurred.
-	log.Printf("[INFO] Node template version conflict detected, will retry with exponential backoff: %v", err)
-
 	// Exponential backoff configuration
 	backoff := wait.Backoff{
 		Duration: 100 * time.Millisecond,
@@ -868,7 +854,7 @@ func updateAutoscalerPolicies(ctx context.Context, data *schema.ResourceData, me
 
 	if retryErr != nil {
 		if wait.Interrupted(retryErr) {
-			return fmt.Errorf("timeout waiting for autoscaler policy update after version conflicts: %w", err)
+			return fmt.Errorf("timeout waiting for autoscaler policy update after version conflicts: %w", retryErr)
 		}
 		return retryErr
 	}
