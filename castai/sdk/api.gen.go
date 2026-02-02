@@ -124,10 +124,16 @@ const (
 	CastaiInventoryV1beta1DiscountPricingTypeTYPEUNKNOWN    CastaiInventoryV1beta1DiscountPricingType = "TYPE_UNKNOWN"
 )
 
+// Defines values for CastaiInventoryV1beta1GCPFlexCUDCUDPlan.
+const (
+	CastaiInventoryV1beta1GCPFlexCUDCUDPlanTHIRTYSIXMONTH CastaiInventoryV1beta1GCPFlexCUDCUDPlan = "THIRTY_SIX_MONTH"
+	CastaiInventoryV1beta1GCPFlexCUDCUDPlanTWELVEMONTH    CastaiInventoryV1beta1GCPFlexCUDCUDPlan = "TWELVE_MONTH"
+)
+
 // Defines values for CastaiInventoryV1beta1GCPResourceCUDCUDPlan.
 const (
-	THIRTYSIXMONTH CastaiInventoryV1beta1GCPResourceCUDCUDPlan = "THIRTY_SIX_MONTH"
-	TWELVEMONTH    CastaiInventoryV1beta1GCPResourceCUDCUDPlan = "TWELVE_MONTH"
+	CastaiInventoryV1beta1GCPResourceCUDCUDPlanTHIRTYSIXMONTH CastaiInventoryV1beta1GCPResourceCUDCUDPlan = "THIRTY_SIX_MONTH"
+	CastaiInventoryV1beta1GCPResourceCUDCUDPlanTWELVEMONTH    CastaiInventoryV1beta1GCPResourceCUDCUDPlan = "TWELVE_MONTH"
 )
 
 // Defines values for CastaiInventoryV1beta1GPUCountUnit.
@@ -1920,9 +1926,17 @@ type CastaiInventoryV1beta1GCPFlexCUD struct {
 	LineItemId         *string                                       `json:"lineItemId,omitempty"`
 	Offer              *string                                       `json:"offer,omitempty"`
 	OrderName          *string                                       `json:"orderName,omitempty"`
-	Region             *string                                       `json:"region,omitempty"`
-	State              *string                                       `json:"state,omitempty"`
+
+	// Plan - TWELVE_MONTH: 1 year commitment plan
+	//  - THIRTY_SIX_MONTH: 3 year commitment plan
+	Plan   *CastaiInventoryV1beta1GCPFlexCUDCUDPlan `json:"plan,omitempty"`
+	Region *string                                  `json:"region,omitempty"`
+	State  *string                                  `json:"state,omitempty"`
 }
+
+// CastaiInventoryV1beta1GCPFlexCUDCUDPlan - TWELVE_MONTH: 1 year commitment plan
+//   - THIRTY_SIX_MONTH: 3 year commitment plan
+type CastaiInventoryV1beta1GCPFlexCUDCUDPlan string
 
 // CastaiInventoryV1beta1GCPResource defines model for castai.inventory.v1beta1.GCPResource.
 type CastaiInventoryV1beta1GCPResource struct {
