@@ -1016,6 +1016,7 @@ resource "castai_edge_location" "test_1" {
     secret_access_key_wo = "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
     vpc_id               = "vpc-12345678"
     security_group_id    = "sg-12345678"
+	vpc_peered           = false
     subnet_ids = {
       "us-east-1a" = "subnet-12345678"
       "us-east-1b" = "subnet-12345679"
@@ -1044,6 +1045,7 @@ resource "castai_edge_location" "test_2" {
     secret_access_key_wo = "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
     vpc_id               = "vpc-87654321"
     security_group_id    = "sg-87654321"
+	vpc_peered           = false
     subnet_ids = {
       "us-west-2a" = "subnet-87654321"
     }
