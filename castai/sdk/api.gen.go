@@ -350,6 +350,14 @@ const (
 	Manual    DboV1TTLMode = "Manual"
 )
 
+// Defines values for ExternalclusterV1AWSNodeConfigCapacityReservationType.
+const (
+	ExternalclusterV1AWSNodeConfigCapacityReservationTypeCAPACITYBLOCK                      ExternalclusterV1AWSNodeConfigCapacityReservationType = "CAPACITY_BLOCK"
+	ExternalclusterV1AWSNodeConfigCapacityReservationTypeCAPACITYRESERVATIONTYPEUNSPECIFIED ExternalclusterV1AWSNodeConfigCapacityReservationType = "CAPACITY_RESERVATION_TYPE_UNSPECIFIED"
+	ExternalclusterV1AWSNodeConfigCapacityReservationTypeINTERRUPTIBLEODCR                  ExternalclusterV1AWSNodeConfigCapacityReservationType = "INTERRUPTIBLE_ODCR"
+	ExternalclusterV1AWSNodeConfigCapacityReservationTypeODCR                               ExternalclusterV1AWSNodeConfigCapacityReservationType = "ODCR"
+)
+
 // Defines values for ExternalclusterV1ClusterCastwareInstallMethod.
 const (
 	CASTWAREINSTALLMETHODUNSPECIFIED ExternalclusterV1ClusterCastwareInstallMethod = "CASTWARE_INSTALL_METHOD_UNSPECIFIED"
@@ -626,6 +634,7 @@ const (
 	WorkloadoptimizationV1EventTypeEVENTTYPEFAILEDHELMTESTHOOK         WorkloadoptimizationV1EventType = "EVENT_TYPE_FAILED_HELM_TEST_HOOK"
 	WorkloadoptimizationV1EventTypeEVENTTYPEHPAALMOSTMAXEDOUT          WorkloadoptimizationV1EventType = "EVENT_TYPE_HPA_ALMOST_MAXED_OUT"
 	WorkloadoptimizationV1EventTypeEVENTTYPEHPAMAXEDOUT                WorkloadoptimizationV1EventType = "EVENT_TYPE_HPA_MAXED_OUT"
+	WorkloadoptimizationV1EventTypeEVENTTYPEINFINITESCALING            WorkloadoptimizationV1EventType = "EVENT_TYPE_INFINITE_SCALING"
 	WorkloadoptimizationV1EventTypeEVENTTYPEINVALID                    WorkloadoptimizationV1EventType = "EVENT_TYPE_INVALID"
 	WorkloadoptimizationV1EventTypeEVENTTYPEMEMORYPRESSUREEVICTION     WorkloadoptimizationV1EventType = "EVENT_TYPE_MEMORY_PRESSURE_EVICTION"
 	WorkloadoptimizationV1EventTypeEVENTTYPEOOMKILL                    WorkloadoptimizationV1EventType = "EVENT_TYPE_OOM_KILL"
@@ -882,12 +891,12 @@ const (
 
 // Defines values for CommitmentsAPIGetCommitmentUsageHistoryParamsCommitmentType.
 const (
-	CAPACITYBLOCK               CommitmentsAPIGetCommitmentUsageHistoryParamsCommitmentType = "CAPACITY_BLOCK"
-	COMMITMENTTYPEUNSPECIFIED   CommitmentsAPIGetCommitmentUsageHistoryParamsCommitmentType = "COMMITMENT_TYPE_UNSPECIFIED"
-	ONDEMANDCAPACITYRESERVATION CommitmentsAPIGetCommitmentUsageHistoryParamsCommitmentType = "ON_DEMAND_CAPACITY_RESERVATION"
-	RESERVEDINSTANCE            CommitmentsAPIGetCommitmentUsageHistoryParamsCommitmentType = "RESERVED_INSTANCE"
-	RESOURCECUD                 CommitmentsAPIGetCommitmentUsageHistoryParamsCommitmentType = "RESOURCE_CUD"
-	SAVINGSPLAN                 CommitmentsAPIGetCommitmentUsageHistoryParamsCommitmentType = "SAVINGS_PLAN"
+	CommitmentsAPIGetCommitmentUsageHistoryParamsCommitmentTypeCAPACITYBLOCK               CommitmentsAPIGetCommitmentUsageHistoryParamsCommitmentType = "CAPACITY_BLOCK"
+	CommitmentsAPIGetCommitmentUsageHistoryParamsCommitmentTypeCOMMITMENTTYPEUNSPECIFIED   CommitmentsAPIGetCommitmentUsageHistoryParamsCommitmentType = "COMMITMENT_TYPE_UNSPECIFIED"
+	CommitmentsAPIGetCommitmentUsageHistoryParamsCommitmentTypeONDEMANDCAPACITYRESERVATION CommitmentsAPIGetCommitmentUsageHistoryParamsCommitmentType = "ON_DEMAND_CAPACITY_RESERVATION"
+	CommitmentsAPIGetCommitmentUsageHistoryParamsCommitmentTypeRESERVEDINSTANCE            CommitmentsAPIGetCommitmentUsageHistoryParamsCommitmentType = "RESERVED_INSTANCE"
+	CommitmentsAPIGetCommitmentUsageHistoryParamsCommitmentTypeRESOURCECUD                 CommitmentsAPIGetCommitmentUsageHistoryParamsCommitmentType = "RESOURCE_CUD"
+	CommitmentsAPIGetCommitmentUsageHistoryParamsCommitmentTypeSAVINGSPLAN                 CommitmentsAPIGetCommitmentUsageHistoryParamsCommitmentType = "SAVINGS_PLAN"
 )
 
 // Defines values for CommitmentsAPIImportAWSReservedInstancesParamsBehaviour.
@@ -1075,6 +1084,7 @@ const (
 	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPEFAILEDHELMTESTHOOK         WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_FAILED_HELM_TEST_HOOK"
 	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPEHPAALMOSTMAXEDOUT          WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_HPA_ALMOST_MAXED_OUT"
 	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPEHPAMAXEDOUT                WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_HPA_MAXED_OUT"
+	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPEINFINITESCALING            WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_INFINITE_SCALING"
 	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPEINVALID                    WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_INVALID"
 	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPEMEMORYPRESSUREEVICTION     WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_MEMORY_PRESSURE_EVICTION"
 	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPEOOMKILL                    WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_OOM_KILL"
@@ -1098,6 +1108,7 @@ const (
 	EVENTTYPEFAILEDHELMTESTHOOK         WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_FAILED_HELM_TEST_HOOK"
 	EVENTTYPEHPAALMOSTMAXEDOUT          WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_HPA_ALMOST_MAXED_OUT"
 	EVENTTYPEHPAMAXEDOUT                WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_HPA_MAXED_OUT"
+	EVENTTYPEINFINITESCALING            WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_INFINITE_SCALING"
 	EVENTTYPEINVALID                    WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_INVALID"
 	EVENTTYPEMEMORYPRESSUREEVICTION     WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_MEMORY_PRESSURE_EVICTION"
 	EVENTTYPEOOMKILL                    WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_OOM_KILL"
@@ -4929,6 +4940,34 @@ type ExternalclusterV1AKSClusterParams struct {
 	ZoneNamePattern *string `json:"zoneNamePattern,omitempty"`
 }
 
+// ExternalclusterV1AWSNodeConfig AWSNodeConfig holds AWS-specific configuration for node provisioning.
+type ExternalclusterV1AWSNodeConfig struct {
+	CapacityReservation *ExternalclusterV1AWSNodeConfigCapacityReservation `json:"capacityReservation,omitempty"`
+}
+
+// ExternalclusterV1AWSNodeConfigCapacityReservation defines model for externalcluster.v1.AWSNodeConfig.CapacityReservation.
+type ExternalclusterV1AWSNodeConfigCapacityReservation struct {
+	Id               *string `json:"id,omitempty"`
+	ResourceGroupArn *string `json:"resourceGroupArn"`
+
+	// Type CapacityReservationType indicates the type of capacity reservation.
+	//
+	//  - ODCR: On-Demand Capacity Reservation (ODCR)
+	//  - CAPACITY_BLOCK: Capacity Block for ML
+	//  - INTERRUPTIBLE_ODCR: Interruptible On-Demand Capacity Reservation
+	// Represents spare capacity lent from existing ODCRs with 2-minute interruption notice.
+	Type *ExternalclusterV1AWSNodeConfigCapacityReservationType `json:"type,omitempty"`
+}
+
+// ExternalclusterV1AWSNodeConfigCapacityReservationType CapacityReservationType indicates the type of capacity reservation.
+//
+//   - ODCR: On-Demand Capacity Reservation (ODCR)
+//   - CAPACITY_BLOCK: Capacity Block for ML
+//   - INTERRUPTIBLE_ODCR: Interruptible On-Demand Capacity Reservation
+//
+// Represents spare capacity lent from existing ODCRs with 2-minute interruption notice.
+type ExternalclusterV1AWSNodeConfigCapacityReservationType string
+
 // ExternalclusterV1AddNodeResponse AddNodeResponse is the result of AddNodeRequest.
 type ExternalclusterV1AddNodeResponse struct {
 	// NodeId The ID of the node.
@@ -5459,6 +5498,9 @@ type ExternalclusterV1NodeAffinity struct {
 
 // ExternalclusterV1NodeConfig defines model for externalcluster.v1.NodeConfig.
 type ExternalclusterV1NodeConfig struct {
+	// Aws AWSNodeConfig holds AWS-specific configuration for node provisioning.
+	Aws *ExternalclusterV1AWSNodeConfig `json:"aws,omitempty"`
+
 	// ConfigurationId ID reference of Node configuration (template) to be used for node creation. Supersedes Configuration Name.
 	ConfigurationId *string `json:"configurationId"`
 
@@ -8026,6 +8068,7 @@ type WorkloadoptimizationV1Event struct {
 	FailedHook                 *WorkloadoptimizationV1FailedHookEvent                 `json:"failedHook,omitempty"`
 	HpaAlmostMaxedOut          *WorkloadoptimizationV1HPAMaxedOutEvent                `json:"hpaAlmostMaxedOut,omitempty"`
 	HpaMaxedOut                *WorkloadoptimizationV1HPAMaxedOutEvent                `json:"hpaMaxedOut,omitempty"`
+	InfiniteMemoryScaling      *WorkloadoptimizationV1InfiniteMemoryScalingEvent      `json:"infiniteMemoryScaling,omitempty"`
 	MemoryPressureEviction     *WorkloadoptimizationV1MemoryPressureEvictionEvent     `json:"memoryPressureEviction,omitempty"`
 	OomKill                    *WorkloadoptimizationV1OOMKillEvent                    `json:"oomKill,omitempty"`
 	RecommendedPodCountChanged *WorkloadoptimizationV1RecommendedPodCountChangedEvent `json:"recommendedPodCountChanged,omitempty"`
@@ -8414,6 +8457,9 @@ type WorkloadoptimizationV1HorizontalPodAutoscalerBehavior struct {
 
 // WorkloadoptimizationV1InPlaceResizeStatus InPlaceResizeStatus explains the in-place resize status.
 type WorkloadoptimizationV1InPlaceResizeStatus string
+
+// WorkloadoptimizationV1InfiniteMemoryScalingEvent defines model for workloadoptimization.v1.InfiniteMemoryScalingEvent.
+type WorkloadoptimizationV1InfiniteMemoryScalingEvent = map[string]interface{}
 
 // WorkloadoptimizationV1InitiatedBy defines model for workloadoptimization.v1.InitiatedBy.
 type WorkloadoptimizationV1InitiatedBy struct {
