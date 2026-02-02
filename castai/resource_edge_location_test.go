@@ -35,6 +35,7 @@ func TestAccCloudAgnostic_ResourceEdgeLocationAWS(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "zones.1.name", "us-east-1b"),
 					resource.TestCheckResourceAttrSet(resourceName, "aws.account_id"),
 					resource.TestCheckResourceAttrSet(resourceName, "aws.vpc_id"),
+					resource.TestCheckResourceAttrSet(resourceName, "aws.vpc_peered"),
 					resource.TestCheckResourceAttrSet(resourceName, "aws.security_group_id"),
 					resource.TestCheckResourceAttr(resourceName, "aws.subnet_ids.%", "2"),
 					resource.TestCheckResourceAttrSet(resourceName, "id"),
@@ -217,6 +218,7 @@ resource "castai_edge_location" "test" {
     account_id           = "123456789012"
     %[6]s
     vpc_id               = "vpc-12345678"
+	vpc_peered           = true
     security_group_id    = "sg-12345678"
     subnet_ids = {%[4]s
     }

@@ -59,6 +59,7 @@ type awsModel struct {
 	AccessKeyIDWO     types.String `tfsdk:"access_key_id_wo"`
 	SecretAccessKeyWO types.String `tfsdk:"secret_access_key_wo"`
 	VpcID             types.String `tfsdk:"vpc_id"`
+	VpcPeered         types.Bool   `tfsdk:"vpc_peered"`
 	SecurityGroupID   types.String `tfsdk:"security_group_id"`
 	SubnetIDs         types.Map    `tfsdk:"subnet_ids"`
 	// Deprecated. Should be removed with name_tag attribute removal.
@@ -94,6 +95,7 @@ func (m awsModel) Equal(other *awsModel) bool {
 	}
 	return m.AccountID.Equal(other.AccountID) &&
 		m.VpcID.Equal(other.VpcID) &&
+		m.VpcPeered.Equal(other.VpcPeered) &&
 		m.SecurityGroupID.Equal(other.SecurityGroupID) &&
 		m.SubnetIDs.Equal(other.SubnetIDs)
 }
@@ -238,6 +240,10 @@ func (r *edgeLocationResource) Schema(_ context.Context, _ resource.SchemaReques
 					"vpc_id": schema.StringAttribute{
 						Required:    true,
 						Description: "VPC ID to be used in the selected region",
+					},
+					"vpc_peered": schema.BoolAttribute{
+						Optional:    true,
+						Description: "Whether existing VPC is peered with main cluster's VPC. Field is ignored if vpc_id is not provided or main cluster is not EKS",
 					},
 					"security_group_id": schema.StringAttribute{
 						Required:    true,
@@ -690,6 +696,7 @@ func (r *edgeLocationResource) toAWS(ctx context.Context, plan, config *awsModel
 		},
 		Networking: &omni.AWSParamAWSNetworking{
 			VpcId:           plan.VpcID.ValueString(),
+			VpcPeered:       plan.VpcPeered.ValueBoolPointer(),
 			SecurityGroupId: plan.SecurityGroupID.ValueString(),
 			SubnetIds:       subnetMap,
 		},
@@ -711,6 +718,7 @@ func (r *edgeLocationResource) toAWSModel(ctx context.Context, config *omni.AWSP
 		AccountID:         types.StringValue(lo.FromPtr(config.AccountId)),
 		VpcID:             types.StringNull(),
 		SecurityGroupID:   types.StringNull(),
+		VpcPeered:         types.BoolNull(),
 		SubnetIDs:         types.MapNull(types.StringType),
 		NameTag:           types.StringNull(),
 		AccessKeyIDWO:     types.StringNull(),
@@ -719,6 +727,7 @@ func (r *edgeLocationResource) toAWSModel(ctx context.Context, config *omni.AWSP
 
 	if config.Networking != nil {
 		aws.VpcID = types.StringValue(config.Networking.VpcId)
+		aws.VpcPeered = types.BoolPointerValue(config.Networking.VpcPeered)
 		aws.SecurityGroupID = types.StringValue(config.Networking.SecurityGroupId)
 		if config.Networking.NameTag != nil && *config.Networking.NameTag != "" {
 			aws.NameTag = types.StringValue(*config.Networking.NameTag)

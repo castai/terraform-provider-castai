@@ -80,6 +80,9 @@ type AWSParamAWSNetworking struct {
 
 	// VpcId The id of the VPC to be used in the selected region.
 	VpcId string `json:"vpcId"`
+
+	// VpcPeered Whether existing VPC is peered with main cluster's VPC. Field is ignored if vpc_id is not provided or main cluster is not EKS.
+	VpcPeered *bool `json:"vpcPeered,omitempty"`
 }
 
 // AWSParamCredentials AWS credentials.

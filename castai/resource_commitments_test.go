@@ -100,7 +100,7 @@ func TestCommitmentsResourceCreateAndUpdate(t *testing.T) {
 						Cpu:      lo.ToPtr("10"),
 						CudId:    lo.ToPtr("123456789"),
 						MemoryMb: lo.ToPtr("20480"),
-						Plan:     lo.ToPtr(sdk.TWELVEMONTH),
+						Plan:     lo.ToPtr(sdk.CastaiInventoryV1beta1GCPResourceCUDCUDPlanTWELVEMONTH),
 						Status:   lo.ToPtr("Active"),
 						Type:     lo.ToPtr("COMPUTE_OPTIMIZED_C2D"),
 					},

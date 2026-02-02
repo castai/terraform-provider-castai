@@ -124,10 +124,16 @@ const (
 	CastaiInventoryV1beta1DiscountPricingTypeTYPEUNKNOWN    CastaiInventoryV1beta1DiscountPricingType = "TYPE_UNKNOWN"
 )
 
+// Defines values for CastaiInventoryV1beta1GCPFlexCUDCUDPlan.
+const (
+	CastaiInventoryV1beta1GCPFlexCUDCUDPlanTHIRTYSIXMONTH CastaiInventoryV1beta1GCPFlexCUDCUDPlan = "THIRTY_SIX_MONTH"
+	CastaiInventoryV1beta1GCPFlexCUDCUDPlanTWELVEMONTH    CastaiInventoryV1beta1GCPFlexCUDCUDPlan = "TWELVE_MONTH"
+)
+
 // Defines values for CastaiInventoryV1beta1GCPResourceCUDCUDPlan.
 const (
-	THIRTYSIXMONTH CastaiInventoryV1beta1GCPResourceCUDCUDPlan = "THIRTY_SIX_MONTH"
-	TWELVEMONTH    CastaiInventoryV1beta1GCPResourceCUDCUDPlan = "TWELVE_MONTH"
+	CastaiInventoryV1beta1GCPResourceCUDCUDPlanTHIRTYSIXMONTH CastaiInventoryV1beta1GCPResourceCUDCUDPlan = "THIRTY_SIX_MONTH"
+	CastaiInventoryV1beta1GCPResourceCUDCUDPlanTWELVEMONTH    CastaiInventoryV1beta1GCPResourceCUDCUDPlan = "TWELVE_MONTH"
 )
 
 // Defines values for CastaiInventoryV1beta1GPUCountUnit.
@@ -1490,9 +1496,12 @@ type CastaiInventoryV1beta1AWSODCRContext struct {
 	InstanceTypeCpu       *string                                       `json:"instanceTypeCpu,omitempty"`
 	InstanceTypeMemoryMib *string                                       `json:"instanceTypeMemoryMib,omitempty"`
 	InstanceTypesUsage    *CastaiInventoryV1beta1InstanceTypeBasedUsage `json:"instanceTypesUsage,omitempty"`
-	State                 *string                                       `json:"state,omitempty"`
-	Tenancy               *string                                       `json:"tenancy,omitempty"`
-	TotalInstanceCount    *string                                       `json:"totalInstanceCount,omitempty"`
+
+	// Interruptible Indicates whether this Capacity Reservation is interruptible, meaning instances may be terminated when the owner reclaims capacity.
+	Interruptible      *bool   `json:"interruptible,omitempty"`
+	State              *string `json:"state,omitempty"`
+	Tenancy            *string `json:"tenancy,omitempty"`
+	TotalInstanceCount *string `json:"totalInstanceCount,omitempty"`
 }
 
 // CastaiInventoryV1beta1AWSRecurringCharges defines model for castai.inventory.v1beta1.AWSRecurringCharges.
@@ -1911,14 +1920,23 @@ type CastaiInventoryV1beta1GCPCommitmentImport struct {
 
 // CastaiInventoryV1beta1GCPFlexCUD defines model for castai.inventory.v1beta1.GCPFlexCUD.
 type CastaiInventoryV1beta1GCPFlexCUD struct {
-	CommitmentAmount *float64 `json:"commitmentAmount,omitempty"`
-	DisplayName      *string  `json:"displayName,omitempty"`
-	LineItemId       *string  `json:"lineItemId,omitempty"`
-	Offer            *string  `json:"offer,omitempty"`
-	OrderName        *string  `json:"orderName,omitempty"`
-	Region           *string  `json:"region,omitempty"`
-	State            *string  `json:"state,omitempty"`
+	CommitmentAmount   *float64                                      `json:"commitmentAmount,omitempty"`
+	DisplayName        *string                                       `json:"displayName,omitempty"`
+	InstanceTypesUsage *CastaiInventoryV1beta1InstanceTypeBasedUsage `json:"instanceTypesUsage,omitempty"`
+	LineItemId         *string                                       `json:"lineItemId,omitempty"`
+	Offer              *string                                       `json:"offer,omitempty"`
+	OrderName          *string                                       `json:"orderName,omitempty"`
+
+	// Plan - TWELVE_MONTH: 1 year commitment plan
+	//  - THIRTY_SIX_MONTH: 3 year commitment plan
+	Plan   *CastaiInventoryV1beta1GCPFlexCUDCUDPlan `json:"plan,omitempty"`
+	Region *string                                  `json:"region,omitempty"`
+	State  *string                                  `json:"state,omitempty"`
 }
+
+// CastaiInventoryV1beta1GCPFlexCUDCUDPlan - TWELVE_MONTH: 1 year commitment plan
+//   - THIRTY_SIX_MONTH: 3 year commitment plan
+type CastaiInventoryV1beta1GCPFlexCUDCUDPlan string
 
 // CastaiInventoryV1beta1GCPResource defines model for castai.inventory.v1beta1.GCPResource.
 type CastaiInventoryV1beta1GCPResource struct {
@@ -6053,7 +6071,10 @@ type NodeconfigV1EC2VolumesConfig struct {
 	Encrypted *bool `json:"encrypted,omitempty"`
 
 	// Iops EBS volume IOPS value to be used for provisioned nodes.
-	Iops      *int32  `json:"iops"`
+	Iops *int32 `json:"iops"`
+
+	// KmsKeyArn KMS key for encrypting EBS volumes.
+	// Accepts any AWS-supported format (ARN, Key ID, Alias, or Alias ARN).
 	KmsKeyArn *string `json:"kmsKeyArn"`
 
 	// Size EBS volume size in GiB to be used for provisioned nodes.
@@ -6516,6 +6537,7 @@ type NodetemplatesV1GPU struct {
 	DefaultSharedClientsPerGpu *int32                               `json:"defaultSharedClientsPerGpu"`
 	EnableTimeSharing          *bool                                `json:"enableTimeSharing,omitempty"`
 	SharingConfiguration       *map[string]NodetemplatesV1SharedGPU `json:"sharingConfiguration,omitempty"`
+	UserManagedGpuDrivers      *bool                                `json:"userManagedGpuDrivers"`
 }
 
 // NodetemplatesV1GenerateNodeTemplatesResponse defines model for nodetemplates.v1.GenerateNodeTemplatesResponse.
@@ -9346,6 +9368,9 @@ type WorkloadoptimizationV1VerticalOverrides struct {
 	Cpu         *WorkloadoptimizationV1ResourceConfigOverrides `json:"cpu,omitempty"`
 	Downscaling *WorkloadoptimizationV1DownscalingSettings     `json:"downscaling,omitempty"`
 
+	// ExcludedContainers Containers to exclude from optimization.
+	ExcludedContainers *[]string `json:"excludedContainers,omitempty"`
+
 	// Jvm JVMRuntimeConfiguration defines set of settings that enables and configures for JVM optimization.
 	Jvm *WorkloadoptimizationV1JVMRuntimeConfiguration `json:"jvm,omitempty"`
 
@@ -10086,6 +10111,9 @@ type ExternalClusterAPIGetConnectAndEnableCASTAICmdParams struct {
 
 	// InstallOmni Whether cluster should be onboarded with CAST AI Omni.
 	InstallOmni *bool `form:"installOmni,omitempty" json:"installOmni,omitempty"`
+
+	// InstallOperator Whether cluster should be onboarded with Castware Operator.
+	InstallOperator *bool `form:"installOperator,omitempty" json:"installOperator,omitempty"`
 }
 
 // ExternalClusterAPIGetCredentialsScriptParams defines parameters for ExternalClusterAPIGetCredentialsScript.
