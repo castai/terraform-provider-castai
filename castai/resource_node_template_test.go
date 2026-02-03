@@ -50,6 +50,7 @@ func TestNodeTemplateResourceReadContext(t *testing.T) {
 			   "gpu": {
 				 "enableTimeSharing": true,
 				 "defaultSharedClientsPerGpu": 10,
+				 "userManagedGpuDrivers": true,
 				 "sharingConfiguration": {
 					"A100": {
 					  "sharedClientsPerGpu": 5
@@ -272,6 +273,7 @@ edge_location_ids.1 = b2c3d4e5-f6a7-8901-bcde-f12345678901
 gpu.# = 1
 gpu.0.default_shared_clients_per_gpu = 10
 gpu.0.enable_time_sharing = true
+gpu.0.user_managed_gpu_drivers = true
 gpu.0.sharing_configuration.# = 1
 gpu.0.sharing_configuration.0.gpu_name = A100
 gpu.0.sharing_configuration.0.shared_clients_per_gpu = 5
@@ -1201,4 +1203,302 @@ resource "castai_node_configuration_default" "default" {
 }
 
 `, rName))
+}
+
+func Test_toTemplateGpu(t *testing.T) {
+	tests := []struct {
+		name  string
+		input map[string]any
+		want  *sdk.NodetemplatesV1GPU
+	}{
+		{
+			name:  "nil input returns nil",
+			input: nil,
+			want:  nil,
+		},
+		{
+			name:  "empty map returns nil",
+			input: map[string]any{},
+			want:  nil,
+		},
+		{
+			name: "user_managed_gpu_drivers true",
+			input: map[string]any{
+				FieldNodeTemplateUserManagedGPUDrivers: true,
+			},
+			want: &sdk.NodetemplatesV1GPU{
+				DefaultSharedClientsPerGpu: nil, // Not set when 0 to avoid API validation error
+				EnableTimeSharing:          lo.ToPtr(false),
+				SharingConfiguration:       &map[string]sdk.NodetemplatesV1SharedGPU{},
+				UserManagedGpuDrivers:      lo.ToPtr(true),
+			},
+		},
+		{
+			name: "user_managed_gpu_drivers false",
+			input: map[string]any{
+				FieldNodeTemplateUserManagedGPUDrivers: false,
+			},
+			want: nil, // All fields are zero/false, so returns nil
+		},
+		{
+			name: "user_managed_gpu_drivers with time sharing enabled",
+			input: map[string]any{
+				FieldNodeTemplateUserManagedGPUDrivers:      true,
+				FieldNodeTemplateEnableTimeSharing:          true,
+				FieldNodeTemplateDefaultSharedClientsPerGpu: 8,
+			},
+			want: &sdk.NodetemplatesV1GPU{
+				DefaultSharedClientsPerGpu: lo.ToPtr(int32(8)),
+				EnableTimeSharing:          lo.ToPtr(true),
+				SharingConfiguration:       &map[string]sdk.NodetemplatesV1SharedGPU{},
+				UserManagedGpuDrivers:      lo.ToPtr(true),
+			},
+		},
+		{
+			name: "user_managed_gpu_drivers with sharing configuration",
+			input: map[string]any{
+				FieldNodeTemplateUserManagedGPUDrivers:      true,
+				FieldNodeTemplateEnableTimeSharing:          true,
+				FieldNodeTemplateDefaultSharedClientsPerGpu: 10,
+				FieldNodeTemplateSharingConfiguration: []any{
+					map[string]any{
+						FieldNodeTemplateSharedGpuName:       "A100",
+						FieldNodeTemplateSharedClientsPerGpu: 5,
+					},
+				},
+			},
+			want: &sdk.NodetemplatesV1GPU{
+				DefaultSharedClientsPerGpu: lo.ToPtr(int32(10)),
+				EnableTimeSharing:          lo.ToPtr(true),
+				SharingConfiguration: &map[string]sdk.NodetemplatesV1SharedGPU{
+					"A100": {
+						SharedClientsPerGpu: lo.ToPtr(int32(5)),
+					},
+				},
+				UserManagedGpuDrivers: lo.ToPtr(true),
+			},
+		},
+		{
+			name: "all gpu settings enabled",
+			input: map[string]any{
+				FieldNodeTemplateUserManagedGPUDrivers:      true,
+				FieldNodeTemplateEnableTimeSharing:          true,
+				FieldNodeTemplateDefaultSharedClientsPerGpu: 12,
+				FieldNodeTemplateSharingConfiguration: []any{
+					map[string]any{
+						FieldNodeTemplateSharedGpuName:       "V100",
+						FieldNodeTemplateSharedClientsPerGpu: 4,
+					},
+					map[string]any{
+						FieldNodeTemplateSharedGpuName:       "T4",
+						FieldNodeTemplateSharedClientsPerGpu: 8,
+					},
+				},
+			},
+			want: &sdk.NodetemplatesV1GPU{
+				DefaultSharedClientsPerGpu: lo.ToPtr(int32(12)),
+				EnableTimeSharing:          lo.ToPtr(true),
+				SharingConfiguration: &map[string]sdk.NodetemplatesV1SharedGPU{
+					"V100": {
+						SharedClientsPerGpu: lo.ToPtr(int32(4)),
+					},
+					"T4": {
+						SharedClientsPerGpu: lo.ToPtr(int32(8)),
+					},
+				},
+				UserManagedGpuDrivers: lo.ToPtr(true),
+			},
+		},
+		{
+			name: "only time sharing without user managed drivers",
+			input: map[string]any{
+				FieldNodeTemplateEnableTimeSharing:          true,
+				FieldNodeTemplateDefaultSharedClientsPerGpu: 6,
+			},
+			want: &sdk.NodetemplatesV1GPU{
+				DefaultSharedClientsPerGpu: lo.ToPtr(int32(6)), // Set when > 0
+				EnableTimeSharing:          lo.ToPtr(true),
+				SharingConfiguration:       &map[string]sdk.NodetemplatesV1SharedGPU{},
+				// UserManagedGpuDrivers not set (nil) - only sent when explicitly true (GKE-only)
+			},
+		},
+		{
+			name: "only enable_time_sharing true without default clients",
+			input: map[string]any{
+				FieldNodeTemplateEnableTimeSharing: true,
+			},
+			want: &sdk.NodetemplatesV1GPU{
+				DefaultSharedClientsPerGpu: nil, // Not set when 0
+				EnableTimeSharing:          lo.ToPtr(true),
+				SharingConfiguration:       &map[string]sdk.NodetemplatesV1SharedGPU{},
+				// UserManagedGpuDrivers not set (nil) - only sent when explicitly true (GKE-only)
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := toTemplateGpu(tt.input)
+
+			if tt.want == nil {
+				require.Nil(t, got)
+				return
+			}
+
+			require.NotNil(t, got)
+
+			// Compare DefaultSharedClientsPerGpu (can be nil)
+			if tt.want.DefaultSharedClientsPerGpu == nil {
+				require.Nil(t, got.DefaultSharedClientsPerGpu, "DefaultSharedClientsPerGpu should be nil")
+			} else {
+				require.NotNil(t, got.DefaultSharedClientsPerGpu, "DefaultSharedClientsPerGpu should not be nil")
+				require.Equal(t, *tt.want.DefaultSharedClientsPerGpu, *got.DefaultSharedClientsPerGpu)
+			}
+
+			require.Equal(t, tt.want.EnableTimeSharing, got.EnableTimeSharing)
+			require.Equal(t, tt.want.UserManagedGpuDrivers, got.UserManagedGpuDrivers)
+
+			if tt.want.SharingConfiguration != nil && got.SharingConfiguration != nil {
+				wantMap := *tt.want.SharingConfiguration
+				gotMap := *got.SharingConfiguration
+
+				// Both nil maps and empty maps are acceptable as equivalent
+				if (wantMap == nil && gotMap == nil) || (len(wantMap) == 0 && len(gotMap) == 0) {
+					// Pass - both are empty/nil
+				} else {
+					require.Equal(t, wantMap, gotMap)
+				}
+			} else {
+				// Both should be nil
+				require.Equal(t, tt.want.SharingConfiguration, got.SharingConfiguration, "SharingConfiguration pointers should be equal")
+			}
+		})
+	}
+}
+
+func Test_flattenGpuSettings(t *testing.T) {
+	tests := []struct {
+		name    string
+		input   *sdk.NodetemplatesV1GPU
+		want    []map[string]any
+		wantErr bool
+	}{
+		{
+			name:    "nil input returns nil",
+			input:   nil,
+			want:    nil,
+			wantErr: false,
+		},
+		{
+			name:  "empty gpu settings",
+			input: &sdk.NodetemplatesV1GPU{},
+			want: []map[string]any{
+				{},
+			},
+			wantErr: false,
+		},
+		{
+			name: "user_managed_gpu_drivers true",
+			input: &sdk.NodetemplatesV1GPU{
+				UserManagedGpuDrivers: lo.ToPtr(true),
+			},
+			want: []map[string]any{
+				{
+					FieldNodeTemplateUserManagedGPUDrivers: lo.ToPtr(true),
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "user_managed_gpu_drivers false",
+			input: &sdk.NodetemplatesV1GPU{
+				UserManagedGpuDrivers: lo.ToPtr(false),
+			},
+			want: []map[string]any{
+				{
+					FieldNodeTemplateUserManagedGPUDrivers: lo.ToPtr(false),
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "user_managed_gpu_drivers with time sharing",
+			input: &sdk.NodetemplatesV1GPU{
+				UserManagedGpuDrivers:      lo.ToPtr(true),
+				EnableTimeSharing:          lo.ToPtr(true),
+				DefaultSharedClientsPerGpu: lo.ToPtr(int32(10)),
+			},
+			want: []map[string]any{
+				{
+					FieldNodeTemplateUserManagedGPUDrivers:      lo.ToPtr(true),
+					FieldNodeTemplateEnableTimeSharing:          lo.ToPtr(true),
+					FieldNodeTemplateDefaultSharedClientsPerGpu: lo.ToPtr(int32(10)),
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "all gpu settings",
+			input: &sdk.NodetemplatesV1GPU{
+				UserManagedGpuDrivers:      lo.ToPtr(true),
+				EnableTimeSharing:          lo.ToPtr(true),
+				DefaultSharedClientsPerGpu: lo.ToPtr(int32(12)),
+				SharingConfiguration: &map[string]sdk.NodetemplatesV1SharedGPU{
+					"A100": {
+						SharedClientsPerGpu: lo.ToPtr(int32(5)),
+					},
+					"V100": {
+						SharedClientsPerGpu: lo.ToPtr(int32(3)),
+					},
+				},
+			},
+			want: []map[string]any{
+				{
+					FieldNodeTemplateUserManagedGPUDrivers:      lo.ToPtr(true),
+					FieldNodeTemplateEnableTimeSharing:          lo.ToPtr(true),
+					FieldNodeTemplateDefaultSharedClientsPerGpu: lo.ToPtr(int32(12)),
+					FieldNodeTemplateSharingConfiguration: []map[string]any{
+						{
+							FieldNodeTemplateSharedGpuName:       "A100",
+							FieldNodeTemplateSharedClientsPerGpu: int32(5),
+						},
+						{
+							FieldNodeTemplateSharedGpuName:       "V100",
+							FieldNodeTemplateSharedClientsPerGpu: int32(3),
+						},
+					},
+				},
+			},
+			wantErr: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := flattenGpuSettings(tt.input)
+			if tt.wantErr {
+				require.Error(t, err)
+				return
+			}
+
+			require.NoError(t, err)
+			require.Len(t, got, len(tt.want))
+
+			if len(tt.want) == 0 {
+				return
+			}
+
+			// Compare all fields except sharing_configuration
+			require.Equal(t, tt.want[0][FieldNodeTemplateUserManagedGPUDrivers], got[0][FieldNodeTemplateUserManagedGPUDrivers])
+			require.Equal(t, tt.want[0][FieldNodeTemplateEnableTimeSharing], got[0][FieldNodeTemplateEnableTimeSharing])
+			require.Equal(t, tt.want[0][FieldNodeTemplateDefaultSharedClientsPerGpu], got[0][FieldNodeTemplateDefaultSharedClientsPerGpu])
+
+			// Compare sharing_configuration with ElementsMatch (order doesn't matter)
+			wantSharing := tt.want[0][FieldNodeTemplateSharingConfiguration]
+			gotSharing := got[0][FieldNodeTemplateSharingConfiguration]
+			if wantSharing != nil || gotSharing != nil {
+				require.ElementsMatch(t, wantSharing, gotSharing)
+			}
+		})
+	}
 }

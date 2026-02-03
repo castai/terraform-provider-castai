@@ -90,6 +90,7 @@ const (
 	FieldNodeTemplateEdgeLocationIDs                          = "edge_location_ids"
 	FieldNodeTemplatePriceAdjustmentConfiguration             = "price_adjustment_configuration"
 	FieldNodeTemplateInstanceTypeAdjustments                  = "instance_type_adjustments"
+	FieldNodeTemplateUserManagedGPUDrivers                    = "user_managed_gpu_drivers"
 )
 
 const (
@@ -710,6 +711,12 @@ func resourceNodeTemplate() *schema.Resource {
 								},
 							},
 						},
+						FieldNodeTemplateUserManagedGPUDrivers: {
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Default:     nil,
+							Description: "Enable/disable user-managed GPU drivers (for GKE clusters only).",
+						},
 					},
 				},
 			},
@@ -870,6 +877,10 @@ func flattenGpuSettings(g *sdk.NodetemplatesV1GPU) ([]map[string]any, error) {
 	}
 
 	out := make(map[string]any)
+
+	if g.UserManagedGpuDrivers != nil {
+		out[FieldNodeTemplateUserManagedGPUDrivers] = g.UserManagedGpuDrivers
+	}
 
 	if g.EnableTimeSharing != nil {
 		out[FieldNodeTemplateEnableTimeSharing] = g.EnableTimeSharing
@@ -1170,6 +1181,7 @@ func updateNodeTemplate(ctx context.Context, d *schema.ResourceData, meta any, s
 		FieldNodeTemplateClmEnabled,
 		FieldNodeTemplateEdgeLocationIDs,
 		FieldNodeTemplatePriceAdjustmentConfiguration,
+		FieldNodeTemplateUserManagedGPUDrivers,
 	) {
 		log.Printf("[INFO] Nothing to update in node template")
 		return nil
@@ -1680,6 +1692,11 @@ func toTemplateGpu(obj map[string]any) *sdk.NodetemplatesV1GPU {
 		return nil
 	}
 
+	var userManagedGPUDrivers bool
+	if v, ok := obj[FieldNodeTemplateUserManagedGPUDrivers].(bool); ok {
+		userManagedGPUDrivers = v
+	}
+
 	var defaultSharedClientsPerGpu int32
 	if v, ok := obj[FieldNodeTemplateDefaultSharedClientsPerGpu].(int); ok {
 		defaultSharedClientsPerGpu = int32(v)
@@ -1711,16 +1728,29 @@ func toTemplateGpu(obj map[string]any) *sdk.NodetemplatesV1GPU {
 	// terraform treats nil values as zero values
 	// this condition checks whether the whole gpu configuration is deleted
 	// and gpu configuration should be set to nil
-	if defaultSharedClientsPerGpu == 0 &&
-		!enableTimeSharing &&
-		len(sharingConfig) == 0 {
+	if defaultSharedClientsPerGpu == 0 && !enableTimeSharing && len(sharingConfig) == 0 && !userManagedGPUDrivers {
 		return nil
 	}
-	return &sdk.NodetemplatesV1GPU{
-		DefaultSharedClientsPerGpu: &defaultSharedClientsPerGpu,
-		EnableTimeSharing:          &enableTimeSharing,
-		SharingConfiguration:       &sharingConfig,
+
+	result := &sdk.NodetemplatesV1GPU{
+		EnableTimeSharing:    &enableTimeSharing,
+		SharingConfiguration: &sharingConfig,
 	}
+
+	// Only set DefaultSharedClientsPerGpu if it's non-zero to avoid API validation errors
+	// as terraform treats nil values as zero values
+	// API requires it to be in range (0, 48] if present
+	if defaultSharedClientsPerGpu > 0 {
+		result.DefaultSharedClientsPerGpu = &defaultSharedClientsPerGpu
+	}
+
+	// Only set UserManagedGpuDrivers if explicitly true
+	//as this is optional and as terraform treats nil values as zero values
+	if userManagedGPUDrivers {
+		result.UserManagedGpuDrivers = &userManagedGPUDrivers
+	}
+
+	return result
 }
 
 func toTemplateConstraintsInstanceFamilies(o map[string]any) *sdk.NodetemplatesV1TemplateConstraintsInstanceFamilyConstraints {

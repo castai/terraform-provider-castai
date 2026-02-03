@@ -8,6 +8,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"strings"
 	"time"
 
 	jsonpatch "github.com/evanphx/json-patch"
@@ -17,6 +18,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/mitchellh/mapstructure"
+	"k8s.io/apimachinery/pkg/util/wait"
 
 	"github.com/castai/terraform-provider-castai/castai/sdk"
 	"github.com/castai/terraform-provider-castai/castai/types"
@@ -805,23 +807,59 @@ func updateAutoscalerPolicies(ctx context.Context, data *schema.ResourceData, me
 		return nil
 	}
 
-	policies, err := getChangedPolicies(ctx, data, meta, clusterId)
-	if err != nil {
-		return err
+	// Define the update operation that will be executed with retry logic
+	updatePolicies := func() error {
+		policies, err := getChangedPolicies(ctx, data, meta, clusterId)
+		if err != nil {
+			return err
+		}
+
+		if policies == nil {
+			log.Printf("[DEBUG] changed policies json not calculated. Skipping autoscaler policies changes")
+			return nil
+		}
+
+		changedPoliciesJSON := string(policies)
+		if changedPoliciesJSON == "" {
+			log.Printf("[DEBUG] changed policies json not found. Skipping autoscaler policies changes")
+			return nil
+		}
+
+		return upsertPolicies(ctx, meta, clusterId, changedPoliciesJSON)
 	}
 
-	if policies == nil {
-		log.Printf("[DEBUG] changed policies json not calculated. Skipping autoscaler policies changes")
-		return nil
+	// Exponential backoff configuration
+	backoff := wait.Backoff{
+		Duration: 100 * time.Millisecond,
+		Factor:   2.0,
+		Jitter:   0.1,
+		Steps:    5,
+		Cap:      2 * time.Second,
 	}
 
-	changedPoliciesJSON := string(policies)
-	if changedPoliciesJSON == "" {
-		log.Printf("[DEBUG] changed policies json not found. Skipping autoscaler policies changes")
-		return nil
+	retryErr := wait.ExponentialBackoffWithContext(ctx, backoff, func(ctx context.Context) (done bool, err error) {
+		err = updatePolicies()
+		if err == nil {
+			return true, nil // Success - stop retrying
+		}
+
+		// Check if error is retryable
+		if !isNodeTemplateVersionConflict(err) {
+			return false, err // Non-retryable error - stop with error
+		}
+
+		log.Printf("[DEBUG] Retry failed with version conflict: %v", err)
+		return false, nil // Retryable error - continue retrying
+	})
+
+	if retryErr != nil {
+		if wait.Interrupted(retryErr) {
+			return fmt.Errorf("timeout waiting for autoscaler policy update after version conflicts: %w", retryErr)
+		}
+		return retryErr
 	}
 
-	return upsertPolicies(ctx, meta, clusterId, changedPoliciesJSON)
+	return nil
 }
 
 func upsertPolicies(ctx context.Context, meta interface{}, clusterId string, changedPoliciesJSON string) error {
@@ -833,6 +871,15 @@ func upsertPolicies(ctx context.Context, meta interface{}, clusterId string, cha
 	}
 
 	return nil
+}
+
+// isNodeTemplateVersionConflict checks if the error is due to version mismatch
+func isNodeTemplateVersionConflict(err error) bool {
+	if err == nil {
+		return false
+	}
+	errMsg := err.Error()
+	return strings.Contains(errMsg, "template has changed") || strings.Contains(errMsg, "refetch the policies")
 }
 
 func readAutoscalerPolicies(ctx context.Context, data *schema.ResourceData, meta interface{}) error {

@@ -227,6 +227,7 @@ Optional:
 - `default_shared_clients_per_gpu` (Number) Defines default number of shared clients per GPU.
 - `enable_time_sharing` (Boolean) Enable/disable GPU time-sharing.
 - `sharing_configuration` (Block List) Defines GPU sharing configurations for GPU devices. (see [below for nested schema](#nestedblock--gpu--sharing_configuration))
+- `user_managed_gpu_drivers` (Boolean) Enable/disable user-managed GPU drivers (for GKE clusters only).
 
 <a id="nestedblock--gpu--sharing_configuration"></a>
 ### Nested Schema for `gpu.sharing_configuration`
