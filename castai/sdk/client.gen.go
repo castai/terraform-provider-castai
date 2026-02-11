@@ -260,6 +260,9 @@ type ClientInterface interface {
 	// DboAPIGetCacheGroupPerformance request
 	DboAPIGetCacheGroupPerformance(ctx context.Context, id string, params *DboAPIGetCacheGroupPerformanceParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// DboAPIGetCacheGroupOperationalMetrics request
+	DboAPIGetCacheGroupOperationalMetrics(ctx context.Context, id string, params *DboAPIGetCacheGroupOperationalMetricsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// DboAPIExchangeCacheStateWithBody request with any body
 	DboAPIExchangeCacheStateWithBody(ctx context.Context, cacheGroupId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -1750,6 +1753,18 @@ func (c *Client) DboAPIUpdateCacheGroup(ctx context.Context, id string, body Dbo
 
 func (c *Client) DboAPIGetCacheGroupPerformance(ctx context.Context, id string, params *DboAPIGetCacheGroupPerformanceParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewDboAPIGetCacheGroupPerformanceRequest(c.Server, id, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) DboAPIGetCacheGroupOperationalMetrics(ctx context.Context, id string, params *DboAPIGetCacheGroupOperationalMetricsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDboAPIGetCacheGroupOperationalMetricsRequest(c.Server, id, params)
 	if err != nil {
 		return nil, err
 	}
@@ -5318,6 +5333,22 @@ func NewCommitmentsAPIGetCommitmentUsageHistoryRequest(server string, organizati
 
 		}
 
+		if params.CommitmentTypes != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "commitmentTypes", runtime.ParamLocationQuery, *params.CommitmentTypes); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
 		queryURL.RawQuery = queryValues.Encode()
 	}
 
@@ -8367,6 +8398,106 @@ func NewDboAPIGetCacheGroupPerformanceRequest(server string, id string, params *
 					queryValues.Add(k, v2)
 				}
 			}
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewDboAPIGetCacheGroupOperationalMetricsRequest generates requests for DboAPIGetCacheGroupOperationalMetrics
+func NewDboAPIGetCacheGroupOperationalMetricsRequest(server string, id string, params *DboAPIGetCacheGroupOperationalMetricsParams) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/dbo/cache-groups/%s/operational-metrics", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if params.MetricsRangeStart != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "metricsRange.start", runtime.ParamLocationQuery, *params.MetricsRangeStart); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.MetricsRangeEnd != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "metricsRange.end", runtime.ParamLocationQuery, *params.MetricsRangeEnd); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "stepSeconds", runtime.ParamLocationQuery, params.StepSeconds); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+		if params.ConfigurationId != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "configurationId", runtime.ParamLocationQuery, *params.ConfigurationId); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
 		}
 
 		queryURL.RawQuery = queryValues.Encode()
@@ -19641,6 +19772,22 @@ func NewWorkloadOptimizationAPIListWorkloadsRequest(server string, clusterId str
 
 		}
 
+		if params.AnyContainerWithRuntime != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "anyContainerWithRuntime", runtime.ParamLocationQuery, *params.AnyContainerWithRuntime); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
 		queryURL.RawQuery = queryValues.Encode()
 	}
 
@@ -20672,6 +20819,9 @@ type ClientWithResponsesInterface interface {
 
 	// DboAPIGetCacheGroupPerformance request
 	DboAPIGetCacheGroupPerformanceWithResponse(ctx context.Context, id string, params *DboAPIGetCacheGroupPerformanceParams) (*DboAPIGetCacheGroupPerformanceResponse, error)
+
+	// DboAPIGetCacheGroupOperationalMetrics request
+	DboAPIGetCacheGroupOperationalMetricsWithResponse(ctx context.Context, id string, params *DboAPIGetCacheGroupOperationalMetricsParams) (*DboAPIGetCacheGroupOperationalMetricsResponse, error)
 
 	// DboAPIExchangeCacheState request  with any body
 	DboAPIExchangeCacheStateWithBodyWithResponse(ctx context.Context, cacheGroupId string, contentType string, body io.Reader) (*DboAPIExchangeCacheStateResponse, error)
@@ -22884,6 +23034,36 @@ func (r DboAPIGetCacheGroupPerformanceResponse) StatusCode() int {
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
 func (r DboAPIGetCacheGroupPerformanceResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type DboAPIGetCacheGroupOperationalMetricsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *DboV1GetCacheGroupOperationalMetricsResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r DboAPIGetCacheGroupOperationalMetricsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r DboAPIGetCacheGroupOperationalMetricsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r DboAPIGetCacheGroupOperationalMetricsResponse) GetBody() []byte {
 	return r.Body
 }
 
@@ -29633,6 +29813,15 @@ func (c *ClientWithResponses) DboAPIGetCacheGroupPerformanceWithResponse(ctx con
 	return ParseDboAPIGetCacheGroupPerformanceResponse(rsp)
 }
 
+// DboAPIGetCacheGroupOperationalMetricsWithResponse request returning *DboAPIGetCacheGroupOperationalMetricsResponse
+func (c *ClientWithResponses) DboAPIGetCacheGroupOperationalMetricsWithResponse(ctx context.Context, id string, params *DboAPIGetCacheGroupOperationalMetricsParams) (*DboAPIGetCacheGroupOperationalMetricsResponse, error) {
+	rsp, err := c.DboAPIGetCacheGroupOperationalMetrics(ctx, id, params)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDboAPIGetCacheGroupOperationalMetricsResponse(rsp)
+}
+
 // DboAPIExchangeCacheStateWithBodyWithResponse request with arbitrary body returning *DboAPIExchangeCacheStateResponse
 func (c *ClientWithResponses) DboAPIExchangeCacheStateWithBodyWithResponse(ctx context.Context, cacheGroupId string, contentType string, body io.Reader) (*DboAPIExchangeCacheStateResponse, error) {
 	rsp, err := c.DboAPIExchangeCacheStateWithBody(ctx, cacheGroupId, contentType, body)
@@ -33308,6 +33497,32 @@ func ParseDboAPIGetCacheGroupPerformanceResponse(rsp *http.Response) (*DboAPIGet
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest DboV1GetCacheGroupPerformanceResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseDboAPIGetCacheGroupOperationalMetricsResponse parses an HTTP response from a DboAPIGetCacheGroupOperationalMetricsWithResponse call
+func ParseDboAPIGetCacheGroupOperationalMetricsResponse(rsp *http.Response) (*DboAPIGetCacheGroupOperationalMetricsResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &DboAPIGetCacheGroupOperationalMetricsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest DboV1GetCacheGroupOperationalMetricsResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
