@@ -68,6 +68,6 @@ jobs:
           TF_VAR_castai_api_token: ${{ secrets.CASTAI_TOKEN }}
           TF_VAR_castai_api_url:  ${{ secrets.CASTAI_URL }}
           TF_VAR_cluster_region: "germanywestcentral"
-          TF_VAR_subscription_id: ${{ secrets.AZURE_TF_ACCEPTANCE_TEST_ARM_SUBSCRIPTION_ID }}
+          TF_VAR_subscription_id: ${{ secrets.AZURE_TF_ACCEPTANCE_TEST_ARM_SUBSCRIPTION_ID_V2 }}
         id: aks_plan_examples
         run: make plan-terraform-example EXAMPLE_DIR=examples/aks/aks_cluster
