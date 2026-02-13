@@ -1515,6 +1515,26 @@ func (mr *MockClientInterfaceMockRecorder) DboAPIGetCacheGroup(ctx, id, params i
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIGetCacheGroup", reflect.TypeOf((*MockClientInterface)(nil).DboAPIGetCacheGroup), varargs...)
 }
 
+// DboAPIGetCacheGroupOperationalMetrics mocks base method.
+func (m *MockClientInterface) DboAPIGetCacheGroupOperationalMetrics(ctx context.Context, id string, params *sdk.DboAPIGetCacheGroupOperationalMetricsParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, id, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DboAPIGetCacheGroupOperationalMetrics", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPIGetCacheGroupOperationalMetrics indicates an expected call of DboAPIGetCacheGroupOperationalMetrics.
+func (mr *MockClientInterfaceMockRecorder) DboAPIGetCacheGroupOperationalMetrics(ctx, id, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, id, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIGetCacheGroupOperationalMetrics", reflect.TypeOf((*MockClientInterface)(nil).DboAPIGetCacheGroupOperationalMetrics), varargs...)
+}
+
 // DboAPIGetCacheGroupPerformance mocks base method.
 func (m *MockClientInterface) DboAPIGetCacheGroupPerformance(ctx context.Context, id string, params *sdk.DboAPIGetCacheGroupPerformanceParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
@@ -9421,6 +9441,41 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) DboAPIGetCacheGroup(ctx,
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{ctx, id, params}, reqEditors...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIGetCacheGroup", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DboAPIGetCacheGroup), varargs...)
+}
+
+// DboAPIGetCacheGroupOperationalMetrics mocks base method.
+func (m *MockClientWithResponsesInterface) DboAPIGetCacheGroupOperationalMetrics(ctx context.Context, id string, params *sdk.DboAPIGetCacheGroupOperationalMetricsParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, id, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DboAPIGetCacheGroupOperationalMetrics", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPIGetCacheGroupOperationalMetrics indicates an expected call of DboAPIGetCacheGroupOperationalMetrics.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) DboAPIGetCacheGroupOperationalMetrics(ctx, id, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, id, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIGetCacheGroupOperationalMetrics", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DboAPIGetCacheGroupOperationalMetrics), varargs...)
+}
+
+// DboAPIGetCacheGroupOperationalMetricsWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) DboAPIGetCacheGroupOperationalMetricsWithResponse(ctx context.Context, id string, params *sdk.DboAPIGetCacheGroupOperationalMetricsParams) (*sdk.DboAPIGetCacheGroupOperationalMetricsResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DboAPIGetCacheGroupOperationalMetricsWithResponse", ctx, id, params)
+	ret0, _ := ret[0].(*sdk.DboAPIGetCacheGroupOperationalMetricsResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPIGetCacheGroupOperationalMetricsWithResponse indicates an expected call of DboAPIGetCacheGroupOperationalMetricsWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) DboAPIGetCacheGroupOperationalMetricsWithResponse(ctx, id, params interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIGetCacheGroupOperationalMetricsWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DboAPIGetCacheGroupOperationalMetricsWithResponse), ctx, id, params)
 }
 
 // DboAPIGetCacheGroupPerformance mocks base method.

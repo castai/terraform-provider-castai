@@ -370,6 +370,9 @@ type ReportStatusRequest struct {
 	// Edge The status of the edge.
 	Edge *ReportStatusRequestEdge `json:"edge,omitempty"`
 
+	// EdgeLocation The status of the edge location.
+	EdgeLocation *ReportStatusRequestEdgeLocation `json:"edgeLocation,omitempty"`
+
 	// Id The ID of the cluster.
 	Id string `json:"id"`
 
@@ -395,6 +398,15 @@ type ReportStatusRequestEdge struct {
 	Id string `json:"id"`
 
 	// Status The status of the edge.
+	Status *ObjectStatus `json:"status,omitempty"`
+}
+
+// ReportStatusRequestEdgeLocation EdgeLocation object.
+type ReportStatusRequestEdgeLocation struct {
+	// Id The ID of the edge location.
+	Id string `json:"id"`
+
+	// Status The status of the edge location.
 	Status *ObjectStatus `json:"status,omitempty"`
 }
 

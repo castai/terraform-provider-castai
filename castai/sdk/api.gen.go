@@ -168,6 +168,13 @@ const (
 	CastaiInventoryV1beta1InstanceTypeAvailabilityTypeUNKNOWN CastaiInventoryV1beta1InstanceTypeAvailabilityType = "UNKNOWN"
 )
 
+// Defines values for CastaiInventoryV1beta1NodeUsageAWSCapacityReservationType.
+const (
+	CastaiInventoryV1beta1NodeUsageAWSCapacityReservationTypeCAPACITYBLOCK                      CastaiInventoryV1beta1NodeUsageAWSCapacityReservationType = "CAPACITY_BLOCK"
+	CastaiInventoryV1beta1NodeUsageAWSCapacityReservationTypeCAPACITYRESERVATIONTYPEUNSPECIFIED CastaiInventoryV1beta1NodeUsageAWSCapacityReservationType = "CAPACITY_RESERVATION_TYPE_UNSPECIFIED"
+	CastaiInventoryV1beta1NodeUsageAWSCapacityReservationTypeONDEMANDCAPACITYRESERVATION        CastaiInventoryV1beta1NodeUsageAWSCapacityReservationType = "ON_DEMAND_CAPACITY_RESERVATION"
+)
+
 // Defines values for CastaiInventoryV1beta1StorageDriver.
 const (
 	CastaiInventoryV1beta1StorageDriverInvalid CastaiInventoryV1beta1StorageDriver = "invalid"
@@ -508,6 +515,13 @@ const (
 	NoSchedule NodetemplatesV1TaintEffect = "NoSchedule"
 )
 
+// Defines values for NodetemplatesV1TemplateConstraintsAWSConstraintsCapacityReservationType.
+const (
+	NodetemplatesV1TemplateConstraintsAWSConstraintsCapacityReservationTypeCAPACITYBLOCK                      NodetemplatesV1TemplateConstraintsAWSConstraintsCapacityReservationType = "CAPACITY_BLOCK"
+	NodetemplatesV1TemplateConstraintsAWSConstraintsCapacityReservationTypeCAPACITYRESERVATIONTYPEUNSPECIFIED NodetemplatesV1TemplateConstraintsAWSConstraintsCapacityReservationType = "CAPACITY_RESERVATION_TYPE_UNSPECIFIED"
+	NodetemplatesV1TemplateConstraintsAWSConstraintsCapacityReservationTypeONDEMANDCAPACITYRESERVATION        NodetemplatesV1TemplateConstraintsAWSConstraintsCapacityReservationType = "ON_DEMAND_CAPACITY_RESERVATION"
+)
+
 // Defines values for NodetemplatesV1TemplateConstraintsCPUManufacturer.
 const (
 	NodetemplatesV1TemplateConstraintsCPUManufacturerAMD    NodetemplatesV1TemplateConstraintsCPUManufacturer = "AMD"
@@ -631,6 +645,7 @@ const (
 const (
 	WorkloadoptimizationV1EventTypeEVENTTYPECONFIGURATIONCHANGEDV2     WorkloadoptimizationV1EventType = "EVENT_TYPE_CONFIGURATION_CHANGEDV2"
 	WorkloadoptimizationV1EventTypeEVENTTYPECPUPRESSURE                WorkloadoptimizationV1EventType = "EVENT_TYPE_CPU_PRESSURE"
+	WorkloadoptimizationV1EventTypeEVENTTYPECPUPRESSURERESOLVED        WorkloadoptimizationV1EventType = "EVENT_TYPE_CPU_PRESSURE_RESOLVED"
 	WorkloadoptimizationV1EventTypeEVENTTYPEFAILEDHELMTESTHOOK         WorkloadoptimizationV1EventType = "EVENT_TYPE_FAILED_HELM_TEST_HOOK"
 	WorkloadoptimizationV1EventTypeEVENTTYPEHPAALMOSTMAXEDOUT          WorkloadoptimizationV1EventType = "EVENT_TYPE_HPA_ALMOST_MAXED_OUT"
 	WorkloadoptimizationV1EventTypeEVENTTYPEHPAMAXEDOUT                WorkloadoptimizationV1EventType = "EVENT_TYPE_HPA_MAXED_OUT"
@@ -757,9 +772,12 @@ const (
 // Defines values for WorkloadoptimizationV1RecommendationOrigin.
 const (
 	ORIGINCONFIGCHANGED             WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_CONFIG_CHANGED"
+	ORIGINHPAALMOSTMAXEDOUT         WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_HPA_ALMOST_MAXED_OUT"
+	ORIGINHPAMAXEDOUT               WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_HPA_MAXED_OUT"
 	ORIGINMEMORYEVENT               WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_MEMORY_EVENT"
 	ORIGINREADONLYRESOURCECHANGED   WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_READONLY_RESOURCE_CHANGED"
 	ORIGINSNAPSHOT                  WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_SNAPSHOT"
+	ORIGINSTARTUPFAILUREEVENT       WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_STARTUP_FAILURE_EVENT"
 	ORIGINSURGEEVENT                WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_SURGE_EVENT"
 	ORIGINUNKNOWN                   WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_UNKNOWN"
 	ORIGINVERTICALMANAGEMENTENABLED WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_VERTICAL_MANAGEMENT_ENABLED"
@@ -812,10 +830,11 @@ const (
 
 // Defines values for WorkloadoptimizationV1ResourceLimitStrategyType.
 const (
-	KEEPLIMITS WorkloadoptimizationV1ResourceLimitStrategyType = "KEEP_LIMITS"
-	MULTIPLIER WorkloadoptimizationV1ResourceLimitStrategyType = "MULTIPLIER"
-	NOLIMIT    WorkloadoptimizationV1ResourceLimitStrategyType = "NO_LIMIT"
-	UNKNOWN    WorkloadoptimizationV1ResourceLimitStrategyType = "UNKNOWN"
+	KEEPLIMITS    WorkloadoptimizationV1ResourceLimitStrategyType = "KEEP_LIMITS"
+	MAINTAINRATIO WorkloadoptimizationV1ResourceLimitStrategyType = "MAINTAIN_RATIO"
+	MULTIPLIER    WorkloadoptimizationV1ResourceLimitStrategyType = "MULTIPLIER"
+	NOLIMIT       WorkloadoptimizationV1ResourceLimitStrategyType = "NO_LIMIT"
+	UNKNOWN       WorkloadoptimizationV1ResourceLimitStrategyType = "UNKNOWN"
 )
 
 // Defines values for WorkloadoptimizationV1ResourcePoliciesFunction.
@@ -828,6 +847,12 @@ const (
 const (
 	NODISRUPTION WorkloadoptimizationV1RolloutBehaviorType = "NO_DISRUPTION"
 	UNSPECIFIED  WorkloadoptimizationV1RolloutBehaviorType = "UNSPECIFIED"
+)
+
+// Defines values for WorkloadoptimizationV1Runtime.
+const (
+	WorkloadoptimizationV1RuntimeJVM                WorkloadoptimizationV1Runtime = "JVM"
+	WorkloadoptimizationV1RuntimeRUNTIMEUNSPECIFIED WorkloadoptimizationV1Runtime = "RUNTIME_UNSPECIFIED"
 )
 
 // Defines values for WorkloadoptimizationV1ScalingPolicyOrigin.
@@ -893,10 +918,22 @@ const (
 const (
 	CommitmentsAPIGetCommitmentUsageHistoryParamsCommitmentTypeCAPACITYBLOCK               CommitmentsAPIGetCommitmentUsageHistoryParamsCommitmentType = "CAPACITY_BLOCK"
 	CommitmentsAPIGetCommitmentUsageHistoryParamsCommitmentTypeCOMMITMENTTYPEUNSPECIFIED   CommitmentsAPIGetCommitmentUsageHistoryParamsCommitmentType = "COMMITMENT_TYPE_UNSPECIFIED"
+	CommitmentsAPIGetCommitmentUsageHistoryParamsCommitmentTypeFLEXCUD                     CommitmentsAPIGetCommitmentUsageHistoryParamsCommitmentType = "FLEX_CUD"
 	CommitmentsAPIGetCommitmentUsageHistoryParamsCommitmentTypeONDEMANDCAPACITYRESERVATION CommitmentsAPIGetCommitmentUsageHistoryParamsCommitmentType = "ON_DEMAND_CAPACITY_RESERVATION"
 	CommitmentsAPIGetCommitmentUsageHistoryParamsCommitmentTypeRESERVEDINSTANCE            CommitmentsAPIGetCommitmentUsageHistoryParamsCommitmentType = "RESERVED_INSTANCE"
 	CommitmentsAPIGetCommitmentUsageHistoryParamsCommitmentTypeRESOURCECUD                 CommitmentsAPIGetCommitmentUsageHistoryParamsCommitmentType = "RESOURCE_CUD"
 	CommitmentsAPIGetCommitmentUsageHistoryParamsCommitmentTypeSAVINGSPLAN                 CommitmentsAPIGetCommitmentUsageHistoryParamsCommitmentType = "SAVINGS_PLAN"
+)
+
+// Defines values for CommitmentsAPIGetCommitmentUsageHistoryParamsCommitmentTypes.
+const (
+	CAPACITYBLOCK               CommitmentsAPIGetCommitmentUsageHistoryParamsCommitmentTypes = "CAPACITY_BLOCK"
+	COMMITMENTTYPEUNSPECIFIED   CommitmentsAPIGetCommitmentUsageHistoryParamsCommitmentTypes = "COMMITMENT_TYPE_UNSPECIFIED"
+	FLEXCUD                     CommitmentsAPIGetCommitmentUsageHistoryParamsCommitmentTypes = "FLEX_CUD"
+	ONDEMANDCAPACITYRESERVATION CommitmentsAPIGetCommitmentUsageHistoryParamsCommitmentTypes = "ON_DEMAND_CAPACITY_RESERVATION"
+	RESERVEDINSTANCE            CommitmentsAPIGetCommitmentUsageHistoryParamsCommitmentTypes = "RESERVED_INSTANCE"
+	RESOURCECUD                 CommitmentsAPIGetCommitmentUsageHistoryParamsCommitmentTypes = "RESOURCE_CUD"
+	SAVINGSPLAN                 CommitmentsAPIGetCommitmentUsageHistoryParamsCommitmentTypes = "SAVINGS_PLAN"
 )
 
 // Defines values for CommitmentsAPIImportAWSReservedInstancesParamsBehaviour.
@@ -1081,6 +1118,7 @@ const (
 const (
 	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPECONFIGURATIONCHANGEDV2     WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_CONFIGURATION_CHANGEDV2"
 	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPECPUPRESSURE                WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_CPU_PRESSURE"
+	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPECPUPRESSURERESOLVED        WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_CPU_PRESSURE_RESOLVED"
 	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPEFAILEDHELMTESTHOOK         WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_FAILED_HELM_TEST_HOOK"
 	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPEHPAALMOSTMAXEDOUT          WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_HPA_ALMOST_MAXED_OUT"
 	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPEHPAMAXEDOUT                WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_HPA_MAXED_OUT"
@@ -1105,6 +1143,7 @@ const (
 const (
 	EVENTTYPECONFIGURATIONCHANGEDV2     WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_CONFIGURATION_CHANGEDV2"
 	EVENTTYPECPUPRESSURE                WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_CPU_PRESSURE"
+	EVENTTYPECPUPRESSURERESOLVED        WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_CPU_PRESSURE_RESOLVED"
 	EVENTTYPEFAILEDHELMTESTHOOK         WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_FAILED_HELM_TEST_HOOK"
 	EVENTTYPEHPAALMOSTMAXEDOUT          WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_HPA_ALMOST_MAXED_OUT"
 	EVENTTYPEHPAMAXEDOUT                WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_HPA_MAXED_OUT"
@@ -1146,6 +1185,12 @@ const (
 	STATUSSTOPPED WorkloadOptimizationAPIListWorkloadsParamsRecommendationStatusType = "STATUS_STOPPED"
 	STATUSUNKNOWN WorkloadOptimizationAPIListWorkloadsParamsRecommendationStatusType = "STATUS_UNKNOWN"
 	STATUSWAITING WorkloadOptimizationAPIListWorkloadsParamsRecommendationStatusType = "STATUS_WAITING"
+)
+
+// Defines values for WorkloadOptimizationAPIListWorkloadsParamsAnyContainerWithRuntime.
+const (
+	WorkloadOptimizationAPIListWorkloadsParamsAnyContainerWithRuntimeJVM                WorkloadOptimizationAPIListWorkloadsParamsAnyContainerWithRuntime = "JVM"
+	WorkloadOptimizationAPIListWorkloadsParamsAnyContainerWithRuntimeRUNTIMEUNSPECIFIED WorkloadOptimizationAPIListWorkloadsParamsAnyContainerWithRuntime = "RUNTIME_UNSPECIFIED"
 )
 
 // Defines values for WorkloadOptimizationAPIGetWorkloadFiltersParamsManagementOptions.
@@ -1489,6 +1534,7 @@ type CastaiInventoryV1beta1AWSCapacityBlockContext struct {
 	InstanceTypesUsage    *CastaiInventoryV1beta1InstanceTypeBasedUsage `json:"instanceTypesUsage,omitempty"`
 	State                 *string                                       `json:"state,omitempty"`
 	TotalInstanceCount    *string                                       `json:"totalInstanceCount,omitempty"`
+	TotalPrice            *string                                       `json:"totalPrice,omitempty"`
 }
 
 // CastaiInventoryV1beta1AWSODCRContext defines model for castai.inventory.v1beta1.AWSODCRContext.
@@ -1500,6 +1546,7 @@ type CastaiInventoryV1beta1AWSODCRContext struct {
 	// EffectiveCount Effective instance count is the adjusted original commitment count based on the portion remaining after out-of-cluster usage.
 	EffectiveCount        *string                                       `json:"effectiveCount,omitempty"`
 	EndDateType           *string                                       `json:"endDateType,omitempty"`
+	HourlyPrice           *string                                       `json:"hourlyPrice,omitempty"`
 	Id                    *string                                       `json:"id,omitempty"`
 	InstanceMatchCriteria *string                                       `json:"instanceMatchCriteria,omitempty"`
 	InstancePlatform      *string                                       `json:"instancePlatform,omitempty"`
@@ -2185,6 +2232,7 @@ type CastaiInventoryV1beta1InstanceType struct {
 
 	// StorageInfo StorageInfo describes the available local volumes for an instance type.
 	StorageInfo *CastaiInventoryV1beta1StorageInfo `json:"storageInfo,omitempty"`
+	TpuInfo     *CastaiInventoryV1beta1TPUInfo     `json:"tpuInfo,omitempty"`
 
 	// UpdatedAt UpdatedAt is the timestamp of the last update operation on this instance type object.
 	UpdatedAt *time.Time `json:"updatedAt,omitempty"`
@@ -2338,9 +2386,25 @@ type CastaiInventoryV1beta1NeuronInfo struct {
 
 // CastaiInventoryV1beta1NodeUsage defines model for castai.inventory.v1beta1.NodeUsage.
 type CastaiInventoryV1beta1NodeUsage struct {
+	Aws               *CastaiInventoryV1beta1NodeUsageAWS      `json:"aws,omitempty"`
 	NodeId            *string                                  `json:"nodeId,omitempty"`
 	UsageDistribution *CastaiInventoryV1beta1UsageDistribution `json:"usageDistribution,omitempty"`
 }
+
+// CastaiInventoryV1beta1NodeUsageAWS defines model for castai.inventory.v1beta1.NodeUsage.AWS.
+type CastaiInventoryV1beta1NodeUsageAWS struct {
+	CapacityReservationId *string `json:"capacityReservationId,omitempty"`
+
+	// CapacityReservationType - CAPACITY_RESERVATION_TYPE_UNSPECIFIED: Capacity reservation type not specified
+	//  - ON_DEMAND_CAPACITY_RESERVATION: On-demand capacity reservation
+	//  - CAPACITY_BLOCK: Capacity block
+	CapacityReservationType *CastaiInventoryV1beta1NodeUsageAWSCapacityReservationType `json:"capacityReservationType,omitempty"`
+}
+
+// CastaiInventoryV1beta1NodeUsageAWSCapacityReservationType - CAPACITY_RESERVATION_TYPE_UNSPECIFIED: Capacity reservation type not specified
+//   - ON_DEMAND_CAPACITY_RESERVATION: On-demand capacity reservation
+//   - CAPACITY_BLOCK: Capacity block
+type CastaiInventoryV1beta1NodeUsageAWSCapacityReservationType string
 
 // CastaiInventoryV1beta1OverwriteReservationsResponse defines model for castai.inventory.v1beta1.OverwriteReservationsResponse.
 type CastaiInventoryV1beta1OverwriteReservationsResponse struct {
@@ -2498,6 +2562,22 @@ type CastaiInventoryV1beta1StorageInfoEphemeralOSDisksInfoPlacementInfo struct {
 	//  - CACHE_DISK: Cache disk placement.
 	//  - NVME_DISK: NVMe disk placement.
 	Placement *CastaiInventoryV1beta1StorageInfoEphemeralOSDisksInfoPlacement `json:"placement,omitempty"`
+}
+
+// CastaiInventoryV1beta1TPUDevice defines model for castai.inventory.v1beta1.TPUDevice.
+type CastaiInventoryV1beta1TPUDevice struct {
+	ChipCount   *int32  `json:"chipCount,omitempty"`
+	CoreCount   *int32  `json:"coreCount,omitempty"`
+	Generation  *string `json:"generation,omitempty"`
+	Id          *string `json:"id,omitempty"`
+	MemoryMib   *int32  `json:"memoryMib,omitempty"`
+	Name        *string `json:"name,omitempty"`
+	PriceHourly *string `json:"priceHourly,omitempty"`
+}
+
+// CastaiInventoryV1beta1TPUInfo defines model for castai.inventory.v1beta1.TPUInfo.
+type CastaiInventoryV1beta1TPUInfo struct {
+	TpuDevices *[]CastaiInventoryV1beta1TPUDevice `json:"tpuDevices,omitempty"`
 }
 
 // CastaiInventoryV1beta1UpdateCommitmentInput defines model for castai.inventory.v1beta1.UpdateCommitmentInput.
@@ -4196,6 +4276,9 @@ type DboV1CacheGroupStatusConditions struct {
 	// Descriptions Human-readable descriptions of any issues detected.
 	Descriptions *[]string `json:"descriptions,omitempty"`
 
+	// PoolingEnabled Indicates if connection pooling is enabled in the DBO deployment.
+	PoolingEnabled *bool `json:"poolingEnabled,omitempty"`
+
 	// PullTimeout Indicates that DBO hasn't fetched configuration within expected time limit.
 	PullTimeout *bool `json:"pullTimeout,omitempty"`
 
@@ -4632,6 +4715,12 @@ type DboV1GetCacheEfficiencyResponse struct {
 	Items *[]DboV1CacheEfficiency `json:"items,omitempty"`
 }
 
+// DboV1GetCacheGroupOperationalMetricsResponse defines model for dbo.v1.GetCacheGroupOperationalMetricsResponse.
+type DboV1GetCacheGroupOperationalMetricsResponse struct {
+	Items   []DboV1OperationalMetricsTimeseries `json:"items"`
+	Summary DboV1OperationalMetricsSummary      `json:"summary"`
+}
+
 // DboV1GetCacheGroupPerformanceResponse defines model for dbo.v1.GetCacheGroupPerformanceResponse.
 type DboV1GetCacheGroupPerformanceResponse struct {
 	Items *[]DboV1CachePerformanceTimeseries `json:"items,omitempty"`
@@ -4720,6 +4809,48 @@ type DboV1LogicalDatabase struct {
 	Name string `json:"name"`
 }
 
+// DboV1OperationalMetricsSummary defines model for dbo.v1.OperationalMetricsSummary.
+type DboV1OperationalMetricsSummary struct {
+	Databases []DboV1OperationalMetricsSummaryCacheConfigurationMetrics `json:"databases"`
+}
+
+// DboV1OperationalMetricsSummaryCacheConfigurationMetrics defines model for dbo.v1.OperationalMetricsSummary.CacheConfigurationMetrics.
+type DboV1OperationalMetricsSummaryCacheConfigurationMetrics struct {
+	// DatabaseIdleConnections Number of idle connections from DBO to database.
+	DatabaseIdleConnections float64 `json:"databaseIdleConnections"`
+
+	// DatabaseName Database name.
+	DatabaseName string `json:"databaseName"`
+
+	// DatabaseTotalConnections Total number of connections from DBO to database.
+	DatabaseTotalConnections float64 `json:"databaseTotalConnections"`
+
+	// DboIdleConnections Number of idle connections to DBO.
+	DboIdleConnections float64 `json:"dboIdleConnections"`
+
+	// DboTotalConnections Total number of connections to DBO.
+	DboTotalConnections float64 `json:"dboTotalConnections"`
+
+	// Id ID of the cache configuration.
+	Id string `json:"id"`
+}
+
+// DboV1OperationalMetricsTimeseries OperationalMetricsTimeseries represents operational metrics timeseries for a cache group.
+type DboV1OperationalMetricsTimeseries struct {
+	// DatabaseIdleConnections Number of idle connections from DBO to database.
+	DatabaseIdleConnections float64 `json:"databaseIdleConnections"`
+
+	// DatabaseTotalConnections Total number of connections from DBO to database.
+	DatabaseTotalConnections float64 `json:"databaseTotalConnections"`
+
+	// DboIdleConnections Number of idle connections to DBO.
+	DboIdleConnections float64 `json:"dboIdleConnections"`
+
+	// DboTotalConnections Total number of connections to DBO.
+	DboTotalConnections float64   `json:"dboTotalConnections"`
+	Timestamp           time.Time `json:"timestamp"`
+}
+
 // DboV1OrganizationSummary defines model for dbo.v1.OrganizationSummary.
 type DboV1OrganizationSummary struct {
 	// CacheHits Deprecated: use cache metrics. Amount of cached queries by cache.
@@ -4789,6 +4920,7 @@ type DboV1ProxyStateCacheDeployment struct {
 	ChartVersion        string           `json:"chartVersion"`
 	Endpoints           *[]DboV1Endpoint `json:"endpoints,omitempty"`
 	Namespace           string           `json:"namespace"`
+	PoolingEnabled      *bool            `json:"poolingEnabled,omitempty"`
 	ProxyImage          string           `json:"proxyImage"`
 	QueryProcessorImage string           `json:"queryProcessorImage"`
 	ServiceName         string           `json:"serviceName"`
@@ -5006,7 +5138,18 @@ type ExternalclusterV1Cluster struct {
 	// AgentSnapshotReceivedAt The date agent snapshot was last received.
 	AgentSnapshotReceivedAt *time.Time `json:"agentSnapshotReceivedAt,omitempty"`
 
-	// AgentStatus Agent status.
+	// AgentStatus Current connectivity status of the CAST AI agent running in the cluster.
+	//
+	// Possible values:
+	// * `waiting-connection` - No snapshot has been received yet from the agent. Initial state after cluster registration.
+	// * `online` - Agent is actively sending snapshots to the CAST AI API. This is the normal healthy state.
+	// * `non-responding` - Agent snapshot has not been received within the expected timeout window. May indicate networking issues or agent pod problems.
+	// * `disconnected` - Agent is fully disconnected. Occurs when cluster has no credentials and no snapshots have been received for an extended period.
+	// * `disconnecting` - Cluster is being deleted (cluster status is `deleting`).
+	//
+	// The agent_status is computed dynamically based on the timestamp of the last received snapshot
+	// and the cluster's lifecycle status. Use this field to monitor agent health and connectivity.
+	// For cluster lifecycle state, use `status` instead.
 	AgentStatus *string `json:"agentStatus,omitempty"`
 
 	// Aks AKSClusterParams defines AKS-specific arguments.
@@ -5093,7 +5236,23 @@ type ExternalclusterV1Cluster struct {
 	// SshPublicKey Deprecated. Node configuration equivalent should be used.
 	SshPublicKey *string `json:"sshPublicKey"`
 
-	// Status Current status of the cluster.
+	// Status Current lifecycle status of the cluster.
+	//
+	// Possible values:
+	// * `connecting` - Cluster credentials are being updated and the first reconcile after the update is still pending. Cluster enters this state after Phase 2 onboarding and before a successful
+	// reconcile.
+	// * `ready` - Cluster is healthy and ready for use. May be in this state even without credentials for node autoscaling.
+	// * `warning` - An issue was detected that prevents normal operation. Autoscaling does NOT work in this state; the autoscaler will not issue commands. (Phase 2 only)
+	// * `failed` - Cluster failed multiple times with persistent errors and could not recover. Reconciles will not run automatically; manual fix by triggering reconciliation is required. (Phase 2 only)
+	// * `deleting` - Cluster disconnect has been requested, but cleanup operations are still pending. Cleanup operations execute on reconcile and all dependencies must finish before cluster deletion.
+	// * `deleted` - Successfully disconnected the cluster, and its dependencies have been cleaned up. The cluster remains visible to users (penultimate state). The next step is to remove the cluster
+	// from the Cast console.
+	// * `hibernating` - Cluster hibernation was requested and is still in progress. (Phase 2 only)
+	// * `hibernated` - Cluster has been hibernated and is not expected to run any nodes. Resume is needed to bring the cluster back to life. (Phase 2 only)
+	// * `resuming` - Cluster was hibernated, resume was requested, and is still in progress. (Phase 2 only)
+	//
+	// Use `status` to understand the cluster's lifecycle state and operational readiness.
+	// For agent connectivity, use `agent_status` instead.
 	Status *string `json:"status,omitempty"`
 
 	// Subnets Cluster subnets.
@@ -6117,6 +6276,7 @@ type NodeconfigV1EC2VolumesConfig struct {
 
 	// KmsKeyArn KMS key for encrypting EBS volumes.
 	// Accepts any AWS-supported format (ARN, Key ID, Alias, or Alias ARN).
+	// Supports both single-region and multi-region keys (mrk- prefix).
 	KmsKeyArn *string `json:"kmsKeyArn"`
 
 	// Size EBS volume size in GiB to be used for provisioned nodes.
@@ -6217,6 +6377,9 @@ type NodeconfigV1GKEConfig struct {
 	// For example: if max pods per node is 11, you need 22 IPs. The next power of 2 is 32, so the Pod CIDR will be /27.
 	// More info: https://cloud.google.com/kubernetes-engine/docs/how-to/flexible-pod-cidr#cidr_ranges_for_clusters .
 	MaxPodsPerNodeFormula *string `json:"maxPodsPerNodeFormula,omitempty"`
+
+	// MinCpuPlatform Minimum CPU platform for the node (e.g., "Intel Ice Lake", "AMD Milan").
+	MinCpuPlatform *string `json:"minCpuPlatform"`
 
 	// NetworkTags Network tags to be added on a VM. Each tag must be 1-63 characters long, start with a lowercase letter and end with either a number or a lowercase letter.
 	NetworkTags *[]string `json:"networkTags,omitempty"`
@@ -6723,8 +6886,9 @@ type NodetemplatesV1TaintWithOptionalEffect struct {
 
 // NodetemplatesV1TemplateConstraints defines model for nodetemplates.v1.TemplateConstraints.
 type NodetemplatesV1TemplateConstraints struct {
-	ArchitecturePriority *[]string `json:"architecturePriority,omitempty"`
-	Architectures        *[]string `json:"architectures,omitempty"`
+	ArchitecturePriority *[]string                                         `json:"architecturePriority,omitempty"`
+	Architectures        *[]string                                         `json:"architectures,omitempty"`
+	Aws                  *NodetemplatesV1TemplateConstraintsAWSConstraints `json:"aws,omitempty"`
 
 	// Azs AZS - The list of AZ names to consider for the node template, if empty or not set all AZs are considered.
 	//
@@ -6823,6 +6987,28 @@ type NodetemplatesV1TemplateConstraints struct {
 	// UseSpotFallbacks Spot instance fallback constraint - when true, on-demand instances will be created, when spots are unavailable.
 	UseSpotFallbacks *bool `json:"useSpotFallbacks"`
 }
+
+// NodetemplatesV1TemplateConstraintsAWSConstraints defines model for nodetemplates.v1.TemplateConstraints.AWSConstraints.
+type NodetemplatesV1TemplateConstraintsAWSConstraints struct {
+	// CapacityReservations Capacity reservations that this template can use for provisioning.
+	CapacityReservations *[]NodetemplatesV1TemplateConstraintsAWSConstraintsCapacityReservation `json:"capacityReservations,omitempty"`
+}
+
+// NodetemplatesV1TemplateConstraintsAWSConstraintsCapacityReservation defines model for nodetemplates.v1.TemplateConstraints.AWSConstraints.CapacityReservation.
+type NodetemplatesV1TemplateConstraintsAWSConstraintsCapacityReservation struct {
+	CapacityResourceGroupArn *string `json:"capacityResourceGroupArn,omitempty"`
+	Id                       *string `json:"id,omitempty"`
+
+	// Type - CAPACITY_RESERVATION_TYPE_UNSPECIFIED: Unspecified capacity reservation type
+	//  - ON_DEMAND_CAPACITY_RESERVATION: On-demand capacity reservation
+	//  - CAPACITY_BLOCK: Capacity block for ML
+	Type *NodetemplatesV1TemplateConstraintsAWSConstraintsCapacityReservationType `json:"type,omitempty"`
+}
+
+// NodetemplatesV1TemplateConstraintsAWSConstraintsCapacityReservationType - CAPACITY_RESERVATION_TYPE_UNSPECIFIED: Unspecified capacity reservation type
+//   - ON_DEMAND_CAPACITY_RESERVATION: On-demand capacity reservation
+//   - CAPACITY_BLOCK: Capacity block for ML
+type NodetemplatesV1TemplateConstraintsAWSConstraintsCapacityReservationType string
 
 // NodetemplatesV1TemplateConstraintsCPUManufacturer defines model for nodetemplates.v1.TemplateConstraints.CPUManufacturer.
 type NodetemplatesV1TemplateConstraintsCPUManufacturer string
@@ -6940,6 +7126,10 @@ type PoliciesV1Evictor struct {
 	//
 	// Deprecated; use "status" instead.
 	Allowed *bool `json:"allowed"`
+
+	// CleanupKarpenterNodes If enabled, Evictor will delete Karpenter NodeClaims after draining Karpenter-managed nodes,
+	// triggering Karpenter's termination controller for fast instance cleanup.
+	CleanupKarpenterNodes *bool `json:"cleanupKarpenterNodes"`
 
 	// CycleInterval Configure the interval duration between Evictor operations. This property can be used to lower or raise the
 	// frequency of the Evictor's find-and-drain operations.
@@ -7772,6 +7962,11 @@ type ScheduledrebalancingV1TriggerConditions struct {
 	SavingsPercentage *float32 `json:"savingsPercentage,omitempty"`
 }
 
+// WorkloadoptimizationV1AggregatedCPUStallMetrics defines model for workloadoptimization.v1.AggregatedCPUStallMetrics.
+type WorkloadoptimizationV1AggregatedCPUStallMetrics struct {
+	Avg float64 `json:"avg"`
+}
+
 // WorkloadoptimizationV1AggregatedMetrics defines model for workloadoptimization.v1.AggregatedMetrics.
 type WorkloadoptimizationV1AggregatedMetrics struct {
 	Avg float64 `json:"avg"`
@@ -7843,14 +8038,25 @@ type WorkloadoptimizationV1AssignScalingPolicyWorkloadsResponse = map[string]int
 
 // WorkloadoptimizationV1CPUPressureContainer defines model for workloadoptimization.v1.CPUPressureContainer.
 type WorkloadoptimizationV1CPUPressureContainer struct {
-	// EligiblePodCountPercentage Percentage of pods where container was experiencing CPU pressure above threshold.
-	EligiblePodCountPercentage float64 `json:"eligiblePodCountPercentage"`
-	Name                       string  `json:"name"`
+	// EligiblePodCount Pod count where container was experiencing CPU pressure above threshold.
+	EligiblePodCount int32  `json:"eligiblePodCount"`
+	Name             string `json:"name"`
+
+	// PodCountTotal Examined pod count.
+	PodCountTotal int32 `json:"podCountTotal"`
+
+	// PressurePercentage Pressure percentage container was experiencing across pods during the observation period.
+	PressurePercentage float64 `json:"pressurePercentage"`
 }
 
 // WorkloadoptimizationV1CPUPressureEvent defines model for workloadoptimization.v1.CPUPressureEvent.
 type WorkloadoptimizationV1CPUPressureEvent struct {
 	Containers []WorkloadoptimizationV1CPUPressureContainer `json:"containers"`
+}
+
+// WorkloadoptimizationV1CPUPressureResolvedEvent defines model for workloadoptimization.v1.CPUPressureResolvedEvent.
+type WorkloadoptimizationV1CPUPressureResolvedEvent struct {
+	Containers []WorkloadoptimizationV1PSIPressureResolvedContainer `json:"containers"`
 }
 
 // WorkloadoptimizationV1CPUPressureSettings CPUPressureSettings configures CPU pressure anomaly detection thresholds.
@@ -7895,6 +8101,9 @@ type WorkloadoptimizationV1Container struct {
 	OriginalResources *WorkloadoptimizationV1Resources `json:"originalResources,omitempty"`
 	Recommendation    *WorkloadoptimizationV1Resources `json:"recommendation,omitempty"`
 	Resources         *WorkloadoptimizationV1Resources `json:"resources,omitempty"`
+
+	// Runtime Defines the application runtime.
+	Runtime *WorkloadoptimizationV1Runtime `json:"runtime,omitempty"`
 }
 
 // WorkloadoptimizationV1ContainerConfig ContainerConfig defines configuration settings for a specific container within a workload.
@@ -8065,6 +8274,7 @@ type WorkloadoptimizationV1DownscalingSettings struct {
 type WorkloadoptimizationV1Event struct {
 	ConfigurationChangedV2     *WorkloadoptimizationV1ConfigurationChangedEventV2     `json:"configurationChangedV2,omitempty"`
 	CpuPressure                *WorkloadoptimizationV1CPUPressureEvent                `json:"cpuPressure,omitempty"`
+	CpuPressureResolved        *WorkloadoptimizationV1CPUPressureResolvedEvent        `json:"cpuPressureResolved,omitempty"`
 	FailedHook                 *WorkloadoptimizationV1FailedHookEvent                 `json:"failedHook,omitempty"`
 	HpaAlmostMaxedOut          *WorkloadoptimizationV1HPAMaxedOutEvent                `json:"hpaAlmostMaxedOut,omitempty"`
 	HpaMaxedOut                *WorkloadoptimizationV1HPAMaxedOutEvent                `json:"hpaMaxedOut,omitempty"`
@@ -8128,6 +8338,11 @@ type WorkloadoptimizationV1GetAgentStatusResponse struct {
 	InstalledAt                      *time.Time `json:"installedAt"`
 	LatestVersion                    *string    `json:"latestVersion"`
 	NativeHpaSupportedFromVersion    *string    `json:"nativeHpaSupportedFromVersion"`
+
+	// ResourceQuotasAffectingOptimization True if we detected at least one ResourceQuota with a hard CPU or memory limit,
+	// regardless of whether VPA is enabled or the quota is currently affecting workload optimization.
+	// This only informs that it MAY prevent workloads from not getting enough resources during spikes.
+	ResourceQuotasAffectingOptimization *bool `json:"resourceQuotasAffectingOptimization"`
 
 	// Status AgentStatus defines the status of workload-autoscaler.
 	Status WorkloadoptimizationV1GetAgentStatusResponseAgentStatus `json:"status"`
@@ -8468,6 +8683,12 @@ type WorkloadoptimizationV1InitiatedBy struct {
 	Name  *string `json:"name"`
 }
 
+// WorkloadoptimizationV1JVMMemorySettings defines model for workloadoptimization.v1.JVMMemorySettings.
+type WorkloadoptimizationV1JVMMemorySettings struct {
+	// Optimization Defines whether JVM memory optimization is enabled.
+	Optimization bool `json:"optimization"`
+}
+
 // WorkloadoptimizationV1JVMRuntimeConfiguration JVMRuntimeConfiguration defines set of settings that enables and configures for JVM optimization.
 type WorkloadoptimizationV1JVMRuntimeConfiguration struct {
 	// Enabled Flag to enable JVM optimization.
@@ -8484,6 +8705,11 @@ type WorkloadoptimizationV1JVMRuntimeConfigurationUpdate struct {
 
 	// OptionsEnvVar Name of environment variable with JVM parameters that will be injected to container (defaults to JAVA_OPTS if not set).
 	OptionsEnvVar *string `json:"optionsEnvVar"`
+}
+
+// WorkloadoptimizationV1JVMSettings defines model for workloadoptimization.v1.JVMSettings.
+type WorkloadoptimizationV1JVMSettings struct {
+	Memory *WorkloadoptimizationV1JVMMemorySettings `json:"memory,omitempty"`
 }
 
 // WorkloadoptimizationV1KeyValuePair defines model for workloadoptimization.v1.KeyValuePair.
@@ -8709,6 +8935,17 @@ type WorkloadoptimizationV1ObjectMetricSource struct {
 	Target          WorkloadoptimizationV1MetricTarget                `json:"target"`
 }
 
+// WorkloadoptimizationV1PSIPressureResolvedContainer defines model for workloadoptimization.v1.PSIPressureResolvedContainer.
+type WorkloadoptimizationV1PSIPressureResolvedContainer struct {
+	Name string `json:"name"`
+
+	// StartedAt Time pressure was detected.
+	StartedAt time.Time `json:"startedAt"`
+
+	// StoppedAt Time pressure correction was stopped.
+	StoppedAt time.Time `json:"stoppedAt"`
+}
+
 // WorkloadoptimizationV1PatchWorkloadV2 defines model for workloadoptimization.v1.PatchWorkloadV2.
 type WorkloadoptimizationV1PatchWorkloadV2 struct {
 	// ScalingPolicyId Defines the scaling policy ID assigned to the workload.
@@ -8834,6 +9071,7 @@ type WorkloadoptimizationV1RecommendationPolicies struct {
 	Cpu                WorkloadoptimizationV1ResourcePolicies          `json:"cpu"`
 	Downscaling        *WorkloadoptimizationV1DownscalingSettings      `json:"downscaling,omitempty"`
 	ExcludedContainers *[]string                                       `json:"excludedContainers,omitempty"`
+	Jvm                *WorkloadoptimizationV1JVMSettings              `json:"jvm,omitempty"`
 
 	// ManagementOption Defines possible options for workload management.
 	// READ_ONLY - workload watched (metrics collected), but no actions may be performed by CAST AI.
@@ -8893,6 +9131,7 @@ type WorkloadoptimizationV1RecommendedRequestsChangedEvent struct {
 	ApplyType WorkloadoptimizationV1ApplyType                             `json:"applyType"`
 	Current   WorkloadoptimizationV1RecommendedRequestsChangedEventChange `json:"current"`
 	DebugData *map[string]interface{}                                     `json:"debugData,omitempty"`
+	Origins   *[]WorkloadoptimizationV1RecommendationOrigin               `json:"origins,omitempty"`
 	Previous  WorkloadoptimizationV1RecommendedRequestsChangedEventChange `json:"previous"`
 }
 
@@ -9027,6 +9266,7 @@ type WorkloadoptimizationV1ResourceLimitStrategy struct {
 	//  - NO_LIMIT: No limit removes the resource limit even if it was specified in the workload spec.
 	//  - MULTIPLIER: Multiplier used to calculate the resource limit. The final value is determined by multiplying the resource request by the specified factor.
 	//  - KEEP_LIMITS: Keep limits respects limits if they are present in the workload spec.
+	//  - MAINTAIN_RATIO: Maintain original ratio of requests/limits.
 	Type WorkloadoptimizationV1ResourceLimitStrategyType `json:"type"`
 }
 
@@ -9035,6 +9275,7 @@ type WorkloadoptimizationV1ResourceLimitStrategy struct {
 //   - NO_LIMIT: No limit removes the resource limit even if it was specified in the workload spec.
 //   - MULTIPLIER: Multiplier used to calculate the resource limit. The final value is determined by multiplying the resource request by the specified factor.
 //   - KEEP_LIMITS: Keep limits respects limits if they are present in the workload spec.
+//   - MAINTAIN_RATIO: Maintain original ratio of requests/limits.
 type WorkloadoptimizationV1ResourceLimitStrategyType string
 
 // WorkloadoptimizationV1ResourceMetricSource defines model for workloadoptimization.v1.ResourceMetricSource.
@@ -9147,6 +9388,9 @@ type WorkloadoptimizationV1RolloutBehaviorSettings struct {
 // WorkloadoptimizationV1RolloutBehaviorType Defines workload recommendation rollout types.
 // NO_DISRUPTION - rollout shouldn't cause service disruption.
 type WorkloadoptimizationV1RolloutBehaviorType string
+
+// WorkloadoptimizationV1Runtime Defines the application runtime.
+type WorkloadoptimizationV1Runtime string
 
 // WorkloadoptimizationV1ScalingBehaviour defines model for workloadoptimization.v1.ScalingBehaviour.
 type WorkloadoptimizationV1ScalingBehaviour struct {
@@ -9542,6 +9786,8 @@ type WorkloadoptimizationV1WorkloadMetricContainer struct {
 	CpuCores                      []WorkloadoptimizationV1ResourceMetrics            `json:"cpuCores"`
 	CpuCoresAggregated            WorkloadoptimizationV1AggregatedMetrics            `json:"cpuCoresAggregated"`
 	CpuCoresPredictionsAggregated *WorkloadoptimizationV1AggregatedPredictionMetrics `json:"cpuCoresPredictionsAggregated,omitempty"`
+	CpuStallPct                   *[]WorkloadoptimizationV1ResourceMetrics           `json:"cpuStallPct,omitempty"`
+	CpuStallPctAggregated         *WorkloadoptimizationV1AggregatedCPUStallMetrics   `json:"cpuStallPctAggregated,omitempty"`
 	MemoryGib                     []WorkloadoptimizationV1ResourceMetrics            `json:"memoryGib"`
 	MemoryGibAggregated           WorkloadoptimizationV1AggregatedMetrics            `json:"memoryGibAggregated"`
 	Name                          string                                             `json:"name"`
@@ -9666,8 +9912,11 @@ type CommitmentsAPIGetCommitmentUsageHistoryParams struct {
 	//  - unknown: Unknown.
 	Cloud *CommitmentsAPIGetCommitmentUsageHistoryParamsCloud `form:"cloud,omitempty" json:"cloud,omitempty"`
 
-	// CommitmentType Filter by commitment type. If not specified, data for all commitment types will be returned.
+	// CommitmentType Deprecated: Use commitment_types instead.
 	CommitmentType *CommitmentsAPIGetCommitmentUsageHistoryParamsCommitmentType `form:"commitmentType,omitempty" json:"commitmentType,omitempty"`
+
+	// CommitmentTypes Filter by commitment types. If not specified, data for all commitment types will be returned.
+	CommitmentTypes *[]CommitmentsAPIGetCommitmentUsageHistoryParamsCommitmentTypes `form:"commitmentTypes,omitempty" json:"commitmentTypes,omitempty"`
 }
 
 // CommitmentsAPIGetCommitmentUsageHistoryParamsAggregationInterval defines parameters for CommitmentsAPIGetCommitmentUsageHistory.
@@ -9678,6 +9927,9 @@ type CommitmentsAPIGetCommitmentUsageHistoryParamsCloud string
 
 // CommitmentsAPIGetCommitmentUsageHistoryParamsCommitmentType defines parameters for CommitmentsAPIGetCommitmentUsageHistory.
 type CommitmentsAPIGetCommitmentUsageHistoryParamsCommitmentType string
+
+// CommitmentsAPIGetCommitmentUsageHistoryParamsCommitmentTypes defines parameters for CommitmentsAPIGetCommitmentUsageHistory.
+type CommitmentsAPIGetCommitmentUsageHistoryParamsCommitmentTypes string
 
 // CommitmentsAPIGetAWSReservedInstancesImportCMDParams defines parameters for CommitmentsAPIGetAWSReservedInstancesImportCMD.
 type CommitmentsAPIGetAWSReservedInstancesImportCMDParams struct {
@@ -10010,6 +10262,21 @@ type DboAPIGetCacheGroupPerformanceParams struct {
 
 	// StepSeconds Aggregate items in specified interval steps.
 	StepSeconds int64 `form:"stepSeconds" json:"stepSeconds"`
+}
+
+// DboAPIGetCacheGroupOperationalMetricsParams defines parameters for DboAPIGetCacheGroupOperationalMetrics.
+type DboAPIGetCacheGroupOperationalMetricsParams struct {
+	// MetricsRangeStart Start of period.
+	MetricsRangeStart *time.Time `form:"metricsRange.start,omitempty" json:"metricsRange.start,omitempty"`
+
+	// MetricsRangeEnd End of period.
+	MetricsRangeEnd *time.Time `form:"metricsRange.end,omitempty" json:"metricsRange.end,omitempty"`
+
+	// StepSeconds Aggregate items in specified interval steps.
+	StepSeconds int64 `form:"stepSeconds" json:"stepSeconds"`
+
+	// ConfigurationId Cache configuration id: if provided, will filter by it.
+	ConfigurationId *string `form:"configurationId,omitempty" json:"configurationId,omitempty"`
 }
 
 // DboAPIGetDatabaseClusterParams defines parameters for DboAPIGetDatabaseCluster.
@@ -10825,6 +11092,7 @@ type WorkloadOptimizationAPIListWorkloadsParams struct {
 	RecommendationIsLowConfidence *bool                                                               `form:"recommendationIsLowConfidence,omitempty" json:"recommendationIsLowConfidence,omitempty"`
 	WorkloadHasError              *bool                                                               `form:"workloadHasError,omitempty" json:"workloadHasError,omitempty"`
 	WorkloadHasCustomMetrics      *bool                                                               `form:"workloadHasCustomMetrics,omitempty" json:"workloadHasCustomMetrics,omitempty"`
+	AnyContainerWithRuntime       *WorkloadOptimizationAPIListWorkloadsParamsAnyContainerWithRuntime  `form:"anyContainerWithRuntime,omitempty" json:"anyContainerWithRuntime,omitempty"`
 }
 
 // WorkloadOptimizationAPIListWorkloadsParamsManagementOptions defines parameters for WorkloadOptimizationAPIListWorkloads.
@@ -10835,6 +11103,9 @@ type WorkloadOptimizationAPIListWorkloadsParamsSortOrder string
 
 // WorkloadOptimizationAPIListWorkloadsParamsRecommendationStatusType defines parameters for WorkloadOptimizationAPIListWorkloads.
 type WorkloadOptimizationAPIListWorkloadsParamsRecommendationStatusType string
+
+// WorkloadOptimizationAPIListWorkloadsParamsAnyContainerWithRuntime defines parameters for WorkloadOptimizationAPIListWorkloads.
+type WorkloadOptimizationAPIListWorkloadsParamsAnyContainerWithRuntime string
 
 // WorkloadOptimizationAPIGetWorkloadsSummaryParams defines parameters for WorkloadOptimizationAPIGetWorkloadsSummary.
 type WorkloadOptimizationAPIGetWorkloadsSummaryParams struct {

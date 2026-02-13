@@ -605,6 +605,59 @@ func Test_validateResourcePolicy(t *testing.T) {
 	}
 }
 
+func Test_toWorkloadScalingPolicies_limit(t *testing.T) {
+	tests := map[string]struct {
+		args map[string]any
+		exp  sdk.WorkloadoptimizationV1ResourceLimitStrategy
+	}{
+		"maintain ratio": {
+			args: map[string]any{
+				"type": "MAINTAIN_RATIO",
+			},
+			exp: sdk.WorkloadoptimizationV1ResourceLimitStrategy{
+				Type: sdk.MAINTAINRATIO,
+			},
+		},
+		"no limit": {
+			args: map[string]any{
+				"type": "NO_LIMIT",
+			},
+			exp: sdk.WorkloadoptimizationV1ResourceLimitStrategy{
+				Type: sdk.NOLIMIT,
+			},
+		},
+		"keep limits": {
+			args: map[string]any{
+				"type": "KEEP_LIMITS",
+			},
+			exp: sdk.WorkloadoptimizationV1ResourceLimitStrategy{
+				Type: sdk.KEEPLIMITS,
+			},
+		},
+		"multiplier": {
+			args: map[string]any{
+				"type":       "MULTIPLIER",
+				"multiplier": 2.5,
+			},
+			exp: sdk.WorkloadoptimizationV1ResourceLimitStrategy{
+				Type:       sdk.MULTIPLIER,
+				Multiplier: lo.ToPtr(2.5),
+			},
+		},
+	}
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			args := map[string]any{
+				"limit": []any{tc.args},
+			}
+			got, err := toWorkloadScalingPolicies("cpu", args)
+			require.NoError(t, err)
+			require.NotNil(t, got.Limit)
+			require.Equal(t, tc.exp, *got.Limit)
+		})
+	}
+}
+
 func Test_toPredictiveScaling(t *testing.T) {
 	tests := map[string]struct {
 		args map[string]any

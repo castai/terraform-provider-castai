@@ -473,7 +473,8 @@ func workloadScalingPolicyResourceLimitSchema() *schema.Resource {
 				Description: fmt.Sprintf(`Defines limit strategy type.
 	- %s - removes the resource limit even if it was specified in the workload spec.
 	- %s - keep existing resource limits. While limits provide stability predictability, they may restrict workloads that need to temporarily burst beyond their allocation.
-	- %s - used to calculate the resource limit. The final value is determined by multiplying the resource request by the specified factor.`, sdk.NOLIMIT, sdk.KEEPLIMITS, sdk.MULTIPLIER),
+	- %s - used to calculate the resource limit. The final value is determined by multiplying the resource request by the specified factor.
+	- %s - maintains the original ratio between requests and limits.`, sdk.NOLIMIT, sdk.KEEPLIMITS, sdk.MULTIPLIER, sdk.MAINTAINRATIO),
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{string(sdk.MULTIPLIER), string(sdk.KEEPLIMITS), string(sdk.NOLIMIT)}, false)),
 			},
 			FieldLimitStrategyMultiplier: {
@@ -1106,7 +1107,7 @@ func toWorkloadResourceLimit(obj map[string]any) (*sdk.WorkloadoptimizationV1Res
 		out.OnlyIfOriginalExist = onlyIfOriginalExist
 	}
 	switch out.Type {
-	case sdk.NOLIMIT, sdk.KEEPLIMITS:
+	case sdk.NOLIMIT, sdk.KEEPLIMITS, sdk.MAINTAINRATIO:
 		out.Multiplier, err = mustGetValue[float64](obj, FieldLimitStrategyMultiplier)
 		if err == nil {
 			return nil, fmt.Errorf(`%q limit type doesn't accept multiplier value`, out.Type)
