@@ -44,6 +44,7 @@ spec:
             memory: "2Gi"
             ephemeral-storage: "8Mi"
       nodeSelector:
+        workload: monarch-prep
         spark-nodeselect-instance-type: amd64-64-16
         spark-nodeselect-nodepool-group: hyper
         spark-nodeselect-preemptible: "true"
