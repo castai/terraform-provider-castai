@@ -161,7 +161,7 @@ Optional:
 - `eks_image_family` (String) Image OS Family to use when provisioning node in EKS. If both image and family are provided, the system will use provided image and provisioning logic for given family. If only image family is provided, the system will attempt to resolve the latest image from that family based on kubernetes version and node architecture. If image family is omitted, a default family (based on cloud provider) will be used. See Cast.ai documentation for details. Possible values: (al2,al2023,bottlerocket)
 - `imds_hop_limit` (Number) Allow configure the IMDSv2 hop limit, the default is 2
 - `imds_v1` (Boolean) When the value is true both IMDSv1 and IMDSv2 are enabled. Setting the value to false disables permanently IMDSv1 and might affect legacy workloads running on the node created with this configuration. The default is true if the flag isn't provided
-- `ips_per_prefix` (Number) Number of IPs per prefix to be used for calculating max pods.
+- `ips_per_prefix` (Number) Number of IPs per prefix to be used for calculating max pods. For IPv4 it should be 16. More info: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-prefix-eni.html#ec2-prefix-basics
 - `key_pair_id` (String) AWS key pair ID to be used for CAST provisioned nodes. Has priority over ssh_public_key
 - `max_pods_per_node_formula` (String) Formula to calculate the maximum number of pods that can be run on a node. The following list of variables will be bound to a number before evaluating and can be used in the formula: NUM_MAX_NET_INTERFACES, NUM_IP_PER_INTERFACE, NUM_IP_PER_PREFIX, NUM_CPU, NUM_RAM_GB .
 - `node_group_arn` (String) Cluster's node group ARN used for CAST provisioned node pools. Required for hibernate/resume functionality
