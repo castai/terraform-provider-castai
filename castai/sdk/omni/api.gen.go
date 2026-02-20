@@ -78,6 +78,9 @@ type AWSParamAWSNetworking struct {
 	// SubnetIds A map of zone names to subnet IDs to be used in the selected region.
 	SubnetIds map[string]string `json:"subnetIds"`
 
+	// VpcCidr VPC IPv4 CIDR block.
+	VpcCidr *string `json:"vpcCidr,omitempty"`
+
 	// VpcId The id of the VPC to be used in the selected region.
 	VpcId string `json:"vpcId"`
 

@@ -263,6 +263,9 @@ type ClientInterface interface {
 	// DboAPIGetCacheGroupOperationalMetrics request
 	DboAPIGetCacheGroupOperationalMetrics(ctx context.Context, id string, params *DboAPIGetCacheGroupOperationalMetricsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// DboAPIGetCacheGroupPoolingEligibility request
+	DboAPIGetCacheGroupPoolingEligibility(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// DboAPIExchangeCacheStateWithBody request with any body
 	DboAPIExchangeCacheStateWithBody(ctx context.Context, cacheGroupId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -725,9 +728,6 @@ type ClientInterface interface {
 
 	// CommitmentsAPIGetCommitments request
 	CommitmentsAPIGetCommitments(ctx context.Context, params *CommitmentsAPIGetCommitmentsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
-
-	// CommitmentsAPIGetCommitmentsDiscountedPrices request
-	CommitmentsAPIGetCommitmentsDiscountedPrices(ctx context.Context, params *CommitmentsAPIGetCommitmentsDiscountedPricesParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// CommitmentsAPIImportAzureReservationsWithBody request with any body
 	CommitmentsAPIImportAzureReservationsWithBody(ctx context.Context, params *CommitmentsAPIImportAzureReservationsParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -1765,6 +1765,18 @@ func (c *Client) DboAPIGetCacheGroupPerformance(ctx context.Context, id string, 
 
 func (c *Client) DboAPIGetCacheGroupOperationalMetrics(ctx context.Context, id string, params *DboAPIGetCacheGroupOperationalMetricsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewDboAPIGetCacheGroupOperationalMetricsRequest(c.Server, id, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) DboAPIGetCacheGroupPoolingEligibility(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDboAPIGetCacheGroupPoolingEligibilityRequest(c.Server, id)
 	if err != nil {
 		return nil, err
 	}
@@ -3793,18 +3805,6 @@ func (c *Client) CommitmentsAPIDeleteCommitmentAssignment(ctx context.Context, a
 
 func (c *Client) CommitmentsAPIGetCommitments(ctx context.Context, params *CommitmentsAPIGetCommitmentsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewCommitmentsAPIGetCommitmentsRequest(c.Server, params)
-	if err != nil {
-		return nil, err
-	}
-	req = req.WithContext(ctx)
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
-}
-
-func (c *Client) CommitmentsAPIGetCommitmentsDiscountedPrices(ctx context.Context, params *CommitmentsAPIGetCommitmentsDiscountedPricesParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewCommitmentsAPIGetCommitmentsDiscountedPricesRequest(c.Server, params)
 	if err != nil {
 		return nil, err
 	}
@@ -8501,6 +8501,40 @@ func NewDboAPIGetCacheGroupOperationalMetricsRequest(server string, id string, p
 		}
 
 		queryURL.RawQuery = queryValues.Encode()
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewDboAPIGetCacheGroupPoolingEligibilityRequest generates requests for DboAPIGetCacheGroupPoolingEligibility
+func NewDboAPIGetCacheGroupPoolingEligibilityRequest(server string, id string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/dbo/cache-groups/%s/pooling-eligibility", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
 	}
 
 	req, err := http.NewRequest("GET", queryURL.String(), nil)
@@ -15070,71 +15104,6 @@ func NewCommitmentsAPIGetCommitmentsRequest(server string, params *CommitmentsAP
 	return req, nil
 }
 
-// NewCommitmentsAPIGetCommitmentsDiscountedPricesRequest generates requests for CommitmentsAPIGetCommitmentsDiscountedPrices
-func NewCommitmentsAPIGetCommitmentsDiscountedPricesRequest(server string, params *CommitmentsAPIGetCommitmentsDiscountedPricesParams) (*http.Request, error) {
-	var err error
-
-	serverURL, err := url.Parse(server)
-	if err != nil {
-		return nil, err
-	}
-
-	operationPath := fmt.Sprintf("/v1/savings/commitments/discounted-prices")
-	if operationPath[0] == '/' {
-		operationPath = "." + operationPath
-	}
-
-	queryURL, err := serverURL.Parse(operationPath)
-	if err != nil {
-		return nil, err
-	}
-
-	if params != nil {
-		queryValues := queryURL.Query()
-
-		if params.PageLimit != nil {
-
-			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "page.limit", runtime.ParamLocationQuery, *params.PageLimit); err != nil {
-				return nil, err
-			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
-				return nil, err
-			} else {
-				for k, v := range parsed {
-					for _, v2 := range v {
-						queryValues.Add(k, v2)
-					}
-				}
-			}
-
-		}
-
-		if params.PageCursor != nil {
-
-			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "page.cursor", runtime.ParamLocationQuery, *params.PageCursor); err != nil {
-				return nil, err
-			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
-				return nil, err
-			} else {
-				for k, v := range parsed {
-					for _, v2 := range v {
-						queryValues.Add(k, v2)
-					}
-				}
-			}
-
-		}
-
-		queryURL.RawQuery = queryValues.Encode()
-	}
-
-	req, err := http.NewRequest("GET", queryURL.String(), nil)
-	if err != nil {
-		return nil, err
-	}
-
-	return req, nil
-}
-
 // NewCommitmentsAPIImportAzureReservationsRequest calls the generic CommitmentsAPIImportAzureReservations builder with application/json body
 func NewCommitmentsAPIImportAzureReservationsRequest(server string, params *CommitmentsAPIImportAzureReservationsParams, body CommitmentsAPIImportAzureReservationsJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
@@ -20823,6 +20792,9 @@ type ClientWithResponsesInterface interface {
 	// DboAPIGetCacheGroupOperationalMetrics request
 	DboAPIGetCacheGroupOperationalMetricsWithResponse(ctx context.Context, id string, params *DboAPIGetCacheGroupOperationalMetricsParams) (*DboAPIGetCacheGroupOperationalMetricsResponse, error)
 
+	// DboAPIGetCacheGroupPoolingEligibility request
+	DboAPIGetCacheGroupPoolingEligibilityWithResponse(ctx context.Context, id string) (*DboAPIGetCacheGroupPoolingEligibilityResponse, error)
+
 	// DboAPIExchangeCacheState request  with any body
 	DboAPIExchangeCacheStateWithBodyWithResponse(ctx context.Context, cacheGroupId string, contentType string, body io.Reader) (*DboAPIExchangeCacheStateResponse, error)
 
@@ -21285,9 +21257,6 @@ type ClientWithResponsesInterface interface {
 
 	// CommitmentsAPIGetCommitments request
 	CommitmentsAPIGetCommitmentsWithResponse(ctx context.Context, params *CommitmentsAPIGetCommitmentsParams) (*CommitmentsAPIGetCommitmentsResponse, error)
-
-	// CommitmentsAPIGetCommitmentsDiscountedPrices request
-	CommitmentsAPIGetCommitmentsDiscountedPricesWithResponse(ctx context.Context, params *CommitmentsAPIGetCommitmentsDiscountedPricesParams) (*CommitmentsAPIGetCommitmentsDiscountedPricesResponse, error)
 
 	// CommitmentsAPIImportAzureReservations request  with any body
 	CommitmentsAPIImportAzureReservationsWithBodyWithResponse(ctx context.Context, params *CommitmentsAPIImportAzureReservationsParams, contentType string, body io.Reader) (*CommitmentsAPIImportAzureReservationsResponse, error)
@@ -23064,6 +23033,36 @@ func (r DboAPIGetCacheGroupOperationalMetricsResponse) StatusCode() int {
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
 func (r DboAPIGetCacheGroupOperationalMetricsResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type DboAPIGetCacheGroupPoolingEligibilityResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *DboV1GetCacheGroupPoolingEligibilityResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r DboAPIGetCacheGroupPoolingEligibilityResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r DboAPIGetCacheGroupPoolingEligibilityResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r DboAPIGetCacheGroupPoolingEligibilityResponse) GetBody() []byte {
 	return r.Body
 }
 
@@ -26821,36 +26820,6 @@ func (r CommitmentsAPIGetCommitmentsResponse) GetBody() []byte {
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
-type CommitmentsAPIGetCommitmentsDiscountedPricesResponse struct {
-	Body         []byte
-	HTTPResponse *http.Response
-	JSON200      *CastaiInventoryV1beta1GetCommitmentsDiscountedPricesResponse
-}
-
-// Status returns HTTPResponse.Status
-func (r CommitmentsAPIGetCommitmentsDiscountedPricesResponse) Status() string {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.Status
-	}
-	return http.StatusText(0)
-}
-
-// StatusCode returns HTTPResponse.StatusCode
-func (r CommitmentsAPIGetCommitmentsDiscountedPricesResponse) StatusCode() int {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.StatusCode
-	}
-	return 0
-}
-
-// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-// Body returns body of byte array
-func (r CommitmentsAPIGetCommitmentsDiscountedPricesResponse) GetBody() []byte {
-	return r.Body
-}
-
-// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-
 type CommitmentsAPIImportAzureReservationsResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -29822,6 +29791,15 @@ func (c *ClientWithResponses) DboAPIGetCacheGroupOperationalMetricsWithResponse(
 	return ParseDboAPIGetCacheGroupOperationalMetricsResponse(rsp)
 }
 
+// DboAPIGetCacheGroupPoolingEligibilityWithResponse request returning *DboAPIGetCacheGroupPoolingEligibilityResponse
+func (c *ClientWithResponses) DboAPIGetCacheGroupPoolingEligibilityWithResponse(ctx context.Context, id string) (*DboAPIGetCacheGroupPoolingEligibilityResponse, error) {
+	rsp, err := c.DboAPIGetCacheGroupPoolingEligibility(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDboAPIGetCacheGroupPoolingEligibilityResponse(rsp)
+}
+
 // DboAPIExchangeCacheStateWithBodyWithResponse request with arbitrary body returning *DboAPIExchangeCacheStateResponse
 func (c *ClientWithResponses) DboAPIExchangeCacheStateWithBodyWithResponse(ctx context.Context, cacheGroupId string, contentType string, body io.Reader) (*DboAPIExchangeCacheStateResponse, error) {
 	rsp, err := c.DboAPIExchangeCacheStateWithBody(ctx, cacheGroupId, contentType, body)
@@ -31297,15 +31275,6 @@ func (c *ClientWithResponses) CommitmentsAPIGetCommitmentsWithResponse(ctx conte
 		return nil, err
 	}
 	return ParseCommitmentsAPIGetCommitmentsResponse(rsp)
-}
-
-// CommitmentsAPIGetCommitmentsDiscountedPricesWithResponse request returning *CommitmentsAPIGetCommitmentsDiscountedPricesResponse
-func (c *ClientWithResponses) CommitmentsAPIGetCommitmentsDiscountedPricesWithResponse(ctx context.Context, params *CommitmentsAPIGetCommitmentsDiscountedPricesParams) (*CommitmentsAPIGetCommitmentsDiscountedPricesResponse, error) {
-	rsp, err := c.CommitmentsAPIGetCommitmentsDiscountedPrices(ctx, params)
-	if err != nil {
-		return nil, err
-	}
-	return ParseCommitmentsAPIGetCommitmentsDiscountedPricesResponse(rsp)
 }
 
 // CommitmentsAPIImportAzureReservationsWithBodyWithResponse request with arbitrary body returning *CommitmentsAPIImportAzureReservationsResponse
@@ -33523,6 +33492,32 @@ func ParseDboAPIGetCacheGroupOperationalMetricsResponse(rsp *http.Response) (*Db
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest DboV1GetCacheGroupOperationalMetricsResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseDboAPIGetCacheGroupPoolingEligibilityResponse parses an HTTP response from a DboAPIGetCacheGroupPoolingEligibilityWithResponse call
+func ParseDboAPIGetCacheGroupPoolingEligibilityResponse(rsp *http.Response) (*DboAPIGetCacheGroupPoolingEligibilityResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &DboAPIGetCacheGroupPoolingEligibilityResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest DboV1GetCacheGroupPoolingEligibilityResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -36784,32 +36779,6 @@ func ParseCommitmentsAPIGetCommitmentsResponse(rsp *http.Response) (*Commitments
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest CastaiInventoryV1beta1GetCommitmentsResponse
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON200 = &dest
-
-	}
-
-	return response, nil
-}
-
-// ParseCommitmentsAPIGetCommitmentsDiscountedPricesResponse parses an HTTP response from a CommitmentsAPIGetCommitmentsDiscountedPricesWithResponse call
-func ParseCommitmentsAPIGetCommitmentsDiscountedPricesResponse(rsp *http.Response) (*CommitmentsAPIGetCommitmentsDiscountedPricesResponse, error) {
-	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
-	if err != nil {
-		return nil, err
-	}
-
-	response := &CommitmentsAPIGetCommitmentsDiscountedPricesResponse{
-		Body:         bodyBytes,
-		HTTPResponse: rsp,
-	}
-
-	switch {
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest CastaiInventoryV1beta1GetCommitmentsDiscountedPricesResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}

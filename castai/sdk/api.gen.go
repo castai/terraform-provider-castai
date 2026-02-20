@@ -357,6 +357,15 @@ const (
 	Manual    DboV1TTLMode = "Manual"
 )
 
+// Defines values for DboV1TrafficInsightsType.
+const (
+	ListenNotify                 DboV1TrafficInsightsType = "ListenNotify"
+	PoolingIncompatibleFunctions DboV1TrafficInsightsType = "PoolingIncompatibleFunctions"
+	SessionLocks                 DboV1TrafficInsightsType = "SessionLocks"
+	SimpleProtocolPrepares       DboV1TrafficInsightsType = "SimpleProtocolPrepares"
+	Undefined                    DboV1TrafficInsightsType = "Undefined"
+)
+
 // Defines values for ExternalclusterV1AWSNodeConfigCapacityReservationType.
 const (
 	ExternalclusterV1AWSNodeConfigCapacityReservationTypeCAPACITYBLOCK                      ExternalclusterV1AWSNodeConfigCapacityReservationType = "CAPACITY_BLOCK"
@@ -441,6 +450,7 @@ const (
 // Defines values for NodeconfigV1AKSConfigOsDiskEphemeralPlacement.
 const (
 	NodeconfigV1AKSConfigOsDiskEphemeralPlacementPLACEMENTCACHEDISK    NodeconfigV1AKSConfigOsDiskEphemeralPlacement = "PLACEMENT_CACHE_DISK"
+	NodeconfigV1AKSConfigOsDiskEphemeralPlacementPLACEMENTNVMEDISK     NodeconfigV1AKSConfigOsDiskEphemeralPlacement = "PLACEMENT_NVME_DISK"
 	NodeconfigV1AKSConfigOsDiskEphemeralPlacementPLACEMENTRESOURCEDISK NodeconfigV1AKSConfigOsDiskEphemeralPlacement = "PLACEMENT_RESOURCE_DISK"
 	NodeconfigV1AKSConfigOsDiskEphemeralPlacementPLACEMENTUNSPECIFIED  NodeconfigV1AKSConfigOsDiskEphemeralPlacement = "PLACEMENT_UNSPECIFIED"
 )
@@ -680,6 +690,25 @@ const (
 	WorkloadoptimizationV1GetHPAV2MigrationEligibilityResponseMigrationStatusNONE        WorkloadoptimizationV1GetHPAV2MigrationEligibilityResponseMigrationStatus = "NONE"
 	WorkloadoptimizationV1GetHPAV2MigrationEligibilityResponseMigrationStatusPARTIAL     WorkloadoptimizationV1GetHPAV2MigrationEligibilityResponseMigrationStatus = "PARTIAL"
 	WorkloadoptimizationV1GetHPAV2MigrationEligibilityResponseMigrationStatusUNSPECIFIED WorkloadoptimizationV1GetHPAV2MigrationEligibilityResponseMigrationStatus = "UNSPECIFIED"
+)
+
+// Defines values for WorkloadoptimizationV1HPALegacyUnsupportedReasonType.
+const (
+	HPALEGACYUNSUPPORTEDREASONHASNATIVEHPA        WorkloadoptimizationV1HPALegacyUnsupportedReasonType = "HPA_LEGACY_UNSUPPORTED_REASON_HAS_NATIVE_HPA"
+	HPALEGACYUNSUPPORTEDREASONNOELIGIBLECONTAINER WorkloadoptimizationV1HPALegacyUnsupportedReasonType = "HPA_LEGACY_UNSUPPORTED_REASON_NO_ELIGIBLE_CONTAINER"
+	HPALEGACYUNSUPPORTEDREASONROLLOUTWORKLOADREF  WorkloadoptimizationV1HPALegacyUnsupportedReasonType = "HPA_LEGACY_UNSUPPORTED_REASON_ROLLOUT_WORKLOAD_REF"
+	HPALEGACYUNSUPPORTEDREASONUNKNOWN             WorkloadoptimizationV1HPALegacyUnsupportedReasonType = "HPA_LEGACY_UNSUPPORTED_REASON_UNKNOWN"
+	HPALEGACYUNSUPPORTEDREASONWORKLOADTYPE        WorkloadoptimizationV1HPALegacyUnsupportedReasonType = "HPA_LEGACY_UNSUPPORTED_REASON_WORKLOAD_TYPE"
+)
+
+// Defines values for WorkloadoptimizationV1HPAMode.
+const (
+	HPAMODELEGACY      WorkloadoptimizationV1HPAMode = "HPA_MODE_LEGACY"
+	HPAMODENATIVE      WorkloadoptimizationV1HPAMode = "HPA_MODE_NATIVE"
+	HPAMODENOTSET      WorkloadoptimizationV1HPAMode = "HPA_MODE_NOT_SET"
+	HPAMODETAKEOVER    WorkloadoptimizationV1HPAMode = "HPA_MODE_TAKEOVER"
+	HPAMODEUNSPECIFIED WorkloadoptimizationV1HPAMode = "HPA_MODE_UNSPECIFIED"
+	HPAMODEV2          WorkloadoptimizationV1HPAMode = "HPA_MODE_V2"
 )
 
 // Defines values for WorkloadoptimizationV1HPAScalingPolicyType.
@@ -1645,11 +1674,6 @@ type CastaiInventoryV1beta1AWSSavingsPlanCommitmentTermUnit string
 // CastaiInventoryV1beta1AWSSavingsPlanPaymentOption defines model for castai.inventory.v1beta1.AWSSavingsPlan.PaymentOption.
 type CastaiInventoryV1beta1AWSSavingsPlanPaymentOption string
 
-// CastaiInventoryV1beta1AWSSavingsPlanDiscountedPrices defines model for castai.inventory.v1beta1.AWSSavingsPlanDiscountedPrices.
-type CastaiInventoryV1beta1AWSSavingsPlanDiscountedPrices struct {
-	OfferingsPrices *map[string]CastaiInventoryV1beta1PricesPerRegions `json:"offeringsPrices,omitempty"`
-}
-
 // CastaiInventoryV1beta1AddReservationResponse defines model for castai.inventory.v1beta1.AddReservationResponse.
 type CastaiInventoryV1beta1AddReservationResponse struct {
 	Reservation *CastaiInventoryV1beta1ReservationDetails `json:"reservation,omitempty"`
@@ -1914,11 +1938,6 @@ type CastaiInventoryV1beta1CommitmentAssignment struct {
 	Priority     *int32  `json:"priority,omitempty"`
 }
 
-// CastaiInventoryV1beta1CommitmentDiscountedPrice defines model for castai.inventory.v1beta1.CommitmentDiscountedPrice.
-type CastaiInventoryV1beta1CommitmentDiscountedPrice struct {
-	AwsSavingsPlanDiscountedPrices *CastaiInventoryV1beta1AWSSavingsPlanDiscountedPrices `json:"awsSavingsPlanDiscountedPrices,omitempty"`
-}
-
 // CastaiInventoryV1beta1CountableInstanceType defines model for castai.inventory.v1beta1.CountableInstanceType.
 type CastaiInventoryV1beta1CountableInstanceType struct {
 	ClusterId *string `json:"clusterId,omitempty"`
@@ -1978,12 +1997,13 @@ type CastaiInventoryV1beta1GCPCommitmentImport struct {
 
 // CastaiInventoryV1beta1GCPFlexCUD defines model for castai.inventory.v1beta1.GCPFlexCUD.
 type CastaiInventoryV1beta1GCPFlexCUD struct {
-	CommitmentAmount   *float64                                      `json:"commitmentAmount,omitempty"`
-	DisplayName        *string                                       `json:"displayName,omitempty"`
-	InstanceTypesUsage *CastaiInventoryV1beta1InstanceTypeBasedUsage `json:"instanceTypesUsage,omitempty"`
-	LineItemId         *string                                       `json:"lineItemId,omitempty"`
-	Offer              *string                                       `json:"offer,omitempty"`
-	OrderName          *string                                       `json:"orderName,omitempty"`
+	CommitmentAmount          *float64                                      `json:"commitmentAmount,omitempty"`
+	DisplayName               *string                                       `json:"displayName,omitempty"`
+	EffectiveCommitmentAmount *float64                                      `json:"effectiveCommitmentAmount,omitempty"`
+	InstanceTypesUsage        *CastaiInventoryV1beta1InstanceTypeBasedUsage `json:"instanceTypesUsage,omitempty"`
+	LineItemId                *string                                       `json:"lineItemId,omitempty"`
+	Offer                     *string                                       `json:"offer,omitempty"`
+	OrderName                 *string                                       `json:"orderName,omitempty"`
 
 	// Plan - TWELVE_MONTH: 1 year commitment plan
 	//  - THIRTY_SIX_MONTH: 3 year commitment plan
@@ -2004,8 +2024,14 @@ type CastaiInventoryV1beta1GCPResource struct {
 
 // CastaiInventoryV1beta1GCPResourceCUD defines model for castai.inventory.v1beta1.GCPResourceCUD.
 type CastaiInventoryV1beta1GCPResourceCUD struct {
-	Cpu                *string                                       `json:"cpu,omitempty"`
-	CudId              *string                                       `json:"cudId,omitempty"`
+	Cpu   *string `json:"cpu,omitempty"`
+	CudId *string `json:"cudId,omitempty"`
+
+	// EffectiveCpu Effective CPU is the remaining CPU capacity after out-of-cluster usage (committed CPU - external usage CPU).
+	EffectiveCpu *string `json:"effectiveCpu,omitempty"`
+
+	// EffectiveMemoryMib Effective memory in MiB is the remaining memory capacity after out-of-cluster usage (committed memory - external usage memory).
+	EffectiveMemoryMib *string                                       `json:"effectiveMemoryMib,omitempty"`
 	InstanceTypesUsage *CastaiInventoryV1beta1InstanceTypeBasedUsage `json:"instanceTypesUsage,omitempty"`
 	MemoryMb           *string                                       `json:"memoryMb,omitempty"`
 
@@ -2119,12 +2145,6 @@ type CastaiInventoryV1beta1GetCommitmentUsageHistoryResponse struct {
 // CastaiInventoryV1beta1GetCommitmentsAssignmentsResponse defines model for castai.inventory.v1beta1.GetCommitmentsAssignmentsResponse.
 type CastaiInventoryV1beta1GetCommitmentsAssignmentsResponse struct {
 	CommitmentsAssignments *[]CastaiInventoryV1beta1CommitmentAssignment `json:"commitmentsAssignments,omitempty"`
-}
-
-// CastaiInventoryV1beta1GetCommitmentsDiscountedPricesResponse defines model for castai.inventory.v1beta1.GetCommitmentsDiscountedPricesResponse.
-type CastaiInventoryV1beta1GetCommitmentsDiscountedPricesResponse struct {
-	DiscountedPrices *[]CastaiInventoryV1beta1CommitmentDiscountedPrice `json:"discountedPrices,omitempty"`
-	NextPageToken    *string                                            `json:"nextPageToken,omitempty"`
 }
 
 // CastaiInventoryV1beta1GetCommitmentsResponse defines model for castai.inventory.v1beta1.GetCommitmentsResponse.
@@ -2409,16 +2429,6 @@ type CastaiInventoryV1beta1NodeUsageAWSCapacityReservationType string
 // CastaiInventoryV1beta1OverwriteReservationsResponse defines model for castai.inventory.v1beta1.OverwriteReservationsResponse.
 type CastaiInventoryV1beta1OverwriteReservationsResponse struct {
 	Reservations *[]CastaiInventoryV1beta1ReservationDetails `json:"reservations,omitempty"`
-}
-
-// CastaiInventoryV1beta1PricesByInstanceTypes defines model for castai.inventory.v1beta1.PricesByInstanceTypes.
-type CastaiInventoryV1beta1PricesByInstanceTypes struct {
-	Prices *map[string]string `json:"prices,omitempty"`
-}
-
-// CastaiInventoryV1beta1PricesPerRegions defines model for castai.inventory.v1beta1.PricesPerRegions.
-type CastaiInventoryV1beta1PricesPerRegions struct {
-	RegionsInstanceTypePrices *map[string]CastaiInventoryV1beta1PricesByInstanceTypes `json:"regionsInstanceTypePrices,omitempty"`
 }
 
 // CastaiInventoryV1beta1Region defines model for castai.inventory.v1beta1.Region.
@@ -2924,6 +2934,9 @@ type CastaiRbacV1beta1RoleBinding struct {
 
 // CastaiRbacV1beta1RoleBindingDefinition Definition represents the role binding definition.
 type CastaiRbacV1beta1RoleBindingDefinition struct {
+	// ChildOrganizationId Reference the child org the role binding is for. If the RoleBinding is not for a child org, this will be empty.
+	ChildOrganizationId *string `json:"childOrganizationId,omitempty"`
+
 	// RoleId RoleID is the unique identifier of the role.
 	RoleId string `json:"roleId"`
 
@@ -4665,6 +4678,7 @@ type DboV1DeployCacheParams struct {
 	CacheGroupId         string  `json:"cacheGroupId"`
 	HelmChartValues      *string `json:"helmChartValues,omitempty"`
 	ManualExecuteCommand *string `json:"manualExecuteCommand,omitempty"`
+	PoolingEnabled       *bool   `json:"poolingEnabled"`
 }
 
 // DboV1DeployDBAgentParams defines model for dbo.v1.DeployDBAgentParams.
@@ -4724,6 +4738,12 @@ type DboV1GetCacheGroupOperationalMetricsResponse struct {
 // DboV1GetCacheGroupPerformanceResponse defines model for dbo.v1.GetCacheGroupPerformanceResponse.
 type DboV1GetCacheGroupPerformanceResponse struct {
 	Items *[]DboV1CachePerformanceTimeseries `json:"items,omitempty"`
+}
+
+// DboV1GetCacheGroupPoolingEligibilityResponse defines model for dbo.v1.GetCacheGroupPoolingEligibilityResponse.
+type DboV1GetCacheGroupPoolingEligibilityResponse struct {
+	Insights          []DboV1PoolingEligibilityInsight `json:"insights"`
+	PoolingCompatible bool                             `json:"poolingCompatible"`
 }
 
 // DboV1GetCacheQueriesResponse defines model for dbo.v1.GetCacheQueriesResponse.
@@ -4900,10 +4920,20 @@ type DboV1PhaseOneParams struct {
 	Csp CastaiV1Cloud `json:"csp"`
 }
 
+// DboV1PoolingEligibilityInsight defines model for dbo.v1.PoolingEligibilityInsight.
+type DboV1PoolingEligibilityInsight struct {
+	Description       string                   `json:"description"`
+	DocumentationLink string                   `json:"documentationLink"`
+	LastSeen          time.Time                `json:"lastSeen"`
+	Summary           string                   `json:"summary"`
+	Type              DboV1TrafficInsightsType `json:"type"`
+}
+
 // DboV1ProxyState defines model for dbo.v1.ProxyState.
 type DboV1ProxyState struct {
-	ConfigStates []DboV1ProxyStateCacheConfigState `json:"configStates"`
-	Deployment   DboV1ProxyStateCacheDeployment    `json:"deployment"`
+	ConfigStates    []DboV1ProxyStateCacheConfigState `json:"configStates"`
+	Deployment      DboV1ProxyStateCacheDeployment    `json:"deployment"`
+	TrafficInsights []DboV1ProxyStateTrafficInsights  `json:"trafficInsights"`
 }
 
 // DboV1ProxyStateCacheConfigState defines model for dbo.v1.ProxyState.CacheConfigState.
@@ -4928,6 +4958,12 @@ type DboV1ProxyStateCacheDeployment struct {
 
 // DboV1ProxyStateDatabaseConnectionStatus This one is equivalent to DB status that is reported from proxy.
 type DboV1ProxyStateDatabaseConnectionStatus string
+
+// DboV1ProxyStateTrafficInsights defines model for dbo.v1.ProxyState.TrafficInsights.
+type DboV1ProxyStateTrafficInsights struct {
+	Timestamp time.Time                `json:"timestamp"`
+	Type      DboV1TrafficInsightsType `json:"type"`
+}
 
 // DboV1RDS defines model for dbo.v1.RDS.
 type DboV1RDS struct {
@@ -5030,6 +5066,9 @@ type DboV1TTLConfiguration struct {
 
 // DboV1TTLMode TTLMode defines a caching behaviour for TTL setting.
 type DboV1TTLMode string
+
+// DboV1TrafficInsightsType defines model for dbo.v1.TrafficInsightsType.
+type DboV1TrafficInsightsType string
 
 // DboV1UninstallCacheParams defines model for dbo.v1.UninstallCacheParams.
 type DboV1UninstallCacheParams struct {
@@ -5464,6 +5503,9 @@ type ExternalclusterV1GPUConfig struct {
 	// MigConfig MIGConfig configures MIG slicing on NVIDIA GPUs.
 	MigConfig *ExternalclusterV1MIGConfig `json:"migConfig,omitempty"`
 
+	// Mps MPS configures Multi-Process Service sharing strategy on NVIDIA GPUs.
+	Mps *ExternalclusterV1MPS `json:"mps,omitempty"`
+
 	// TimeSharing GPUTimeSharing configures sharing strategy by splitting time of single GPU to several processes.
 	TimeSharing *ExternalclusterV1GPUTimeSharing `json:"timeSharing,omitempty"`
 
@@ -5593,6 +5635,11 @@ type ExternalclusterV1LogEvent struct {
 type ExternalclusterV1MIGConfig struct {
 	GpuMemoryGb    *int32    `json:"gpuMemoryGb"`
 	PartitionSizes *[]string `json:"partitionSizes,omitempty"`
+}
+
+// ExternalclusterV1MPS MPS configures Multi-Process Service sharing strategy on NVIDIA GPUs.
+type ExternalclusterV1MPS struct {
+	Replicas *int32 `json:"replicas,omitempty"`
 }
 
 // ExternalclusterV1Node Node represents a single VM that run as Kubernetes master or worker.
@@ -6217,14 +6264,16 @@ type NodeconfigV1AKSConfigOsDiskEphemeral struct {
 	// CacheType Type of cache to use for the ephemeral OS disk. Default is READ_ONLY.
 	CacheType *NodeconfigV1AKSConfigOsDiskEphemeralCacheType `json:"cacheType,omitempty"`
 
-	// Placement Placement of the ephemeral OS disk. Default is PLACEMENT_CACHE_DISk.
+	// Placement Placement of the ephemeral OS disk. If unspecified, the default value is picked based on VM SKU.
+	// See https://learn.microsoft.com/en-us/azure/virtual-machines/ephemeral-os-disks#placement-options-for-ephemeral-os-disks for details.
 	Placement *NodeconfigV1AKSConfigOsDiskEphemeralPlacement `json:"placement,omitempty"`
 }
 
 // NodeconfigV1AKSConfigOsDiskEphemeralCacheType Type of cache to use for the ephemeral OS disk. Default is READ_ONLY.
 type NodeconfigV1AKSConfigOsDiskEphemeralCacheType string
 
-// NodeconfigV1AKSConfigOsDiskEphemeralPlacement Placement of the ephemeral OS disk. Default is PLACEMENT_CACHE_DISk.
+// NodeconfigV1AKSConfigOsDiskEphemeralPlacement Placement of the ephemeral OS disk. If unspecified, the default value is picked based on VM SKU.
+// See https://learn.microsoft.com/en-us/azure/virtual-machines/ephemeral-os-disks#placement-options-for-ephemeral-os-disks for details.
 type NodeconfigV1AKSConfigOsDiskEphemeralPlacement string
 
 // NodeconfigV1AKSConfigOsDiskType OsDiskType represent possible values for AKS node os disk type(this is subset of all available Azure disk types).
@@ -7155,8 +7204,11 @@ type PoliciesV1Evictor struct {
 
 	// ScopedMode Enable/disable scoped mode. By default, Evictor targets all nodes in the cluster. This mode will constrain in to
 	// just the nodes which were created by CAST AI.
-	ScopedMode *bool                    `json:"scopedMode"`
-	Status     *PoliciesV1EvictorStatus `json:"status,omitempty"`
+	ScopedMode *bool `json:"scopedMode"`
+
+	// SoftTainting If enabled, Evictor will use soft tainting (PreferNoSchedule) instead of hard cordoning after eviction.
+	SoftTainting *bool                    `json:"softTainting"`
+	Status       *PoliciesV1EvictorStatus `json:"status,omitempty"`
 }
 
 // PoliciesV1EvictorStatus defines model for policies.v1.EvictorStatus.
@@ -8337,6 +8389,7 @@ type WorkloadoptimizationV1GetAgentStatusResponse struct {
 	InPlaceResizeEnabled             bool       `json:"inPlaceResizeEnabled"`
 	InstalledAt                      *time.Time `json:"installedAt"`
 	LatestVersion                    *string    `json:"latestVersion"`
+	MetricsExporterVersion           *string    `json:"metricsExporterVersion"`
 	NativeHpaSupportedFromVersion    *string    `json:"nativeHpaSupportedFromVersion"`
 
 	// ResourceQuotasAffectingOptimization True if we detected at least one ResourceQuota with a hard CPU or memory limit,
@@ -8540,11 +8593,56 @@ type WorkloadoptimizationV1HPAConfigUpdate struct {
 	UseNative *bool `json:"useNative"`
 }
 
+// WorkloadoptimizationV1HPALegacyConfig HPALegacyConfig holds the resolved configuration for legacy CAST AI HPA.
+type WorkloadoptimizationV1HPALegacyConfig struct {
+	// ManagementOption Defines possible options for workload management.
+	// READ_ONLY - workload watched (metrics collected), but no actions may be performed by CAST AI.
+	// MANAGED - workload watched (metrics collected), CAST AI may perform actions on the workload.
+	ManagementOption WorkloadoptimizationV1ManagementOption `json:"managementOption"`
+
+	// MaxReplicas Maximum number of replicas.
+	MaxReplicas int32 `json:"maxReplicas"`
+
+	// MinReplicas Minimum number of replicas.
+	MinReplicas int32 `json:"minReplicas"`
+}
+
+// WorkloadoptimizationV1HPALegacyUnsupportedReason HPALegacyUnsupportedReason contains categorized type and description for why legacy CAST AI HPA is unsupported.
+type WorkloadoptimizationV1HPALegacyUnsupportedReason struct {
+	// Description Description of why legacy CAST AI HPA is unsupported.
+	Description string `json:"description"`
+
+	// Type HPALegacyUnsupportedReasonType explains why legacy CAST AI HPA is unsupported for the workload.
+	//
+	//  - HPA_LEGACY_UNSUPPORTED_REASON_WORKLOAD_TYPE: Workload type/kind is not supported for legacy HPA.
+	//  - HPA_LEGACY_UNSUPPORTED_REASON_HAS_NATIVE_HPA: Workload already has a native HPA configured.
+	//  - HPA_LEGACY_UNSUPPORTED_REASON_NO_ELIGIBLE_CONTAINER: Workload has no HPA eligible container.
+	//  - HPA_LEGACY_UNSUPPORTED_REASON_ROLLOUT_WORKLOAD_REF: Rollout workload is configured using workloadRef.
+	Type WorkloadoptimizationV1HPALegacyUnsupportedReasonType `json:"type"`
+}
+
+// WorkloadoptimizationV1HPALegacyUnsupportedReasonType HPALegacyUnsupportedReasonType explains why legacy CAST AI HPA is unsupported for the workload.
+//
+//   - HPA_LEGACY_UNSUPPORTED_REASON_WORKLOAD_TYPE: Workload type/kind is not supported for legacy HPA.
+//   - HPA_LEGACY_UNSUPPORTED_REASON_HAS_NATIVE_HPA: Workload already has a native HPA configured.
+//   - HPA_LEGACY_UNSUPPORTED_REASON_NO_ELIGIBLE_CONTAINER: Workload has no HPA eligible container.
+//   - HPA_LEGACY_UNSUPPORTED_REASON_ROLLOUT_WORKLOAD_REF: Rollout workload is configured using workloadRef.
+type WorkloadoptimizationV1HPALegacyUnsupportedReasonType string
+
 // WorkloadoptimizationV1HPAMaxedOutEvent defines model for workloadoptimization.v1.HPAMaxedOutEvent.
 type WorkloadoptimizationV1HPAMaxedOutEvent struct {
 	DesiredReplicas int32 `json:"desiredReplicas"`
 	MaxReplicas     int32 `json:"maxReplicas"`
 }
+
+// WorkloadoptimizationV1HPAMode HPAMode describes the computed horizontal‑scaling state for a workload.
+//
+//   - HPA_MODE_NOT_SET: No HPA configuration on the workload (no native/legacy/v2).
+//   - HPA_MODE_LEGACY: Legacy CAST AI HPA is configured.
+//   - HPA_MODE_V2: HPA v2 is configured.
+//   - HPA_MODE_TAKEOVER: HPA v2 is configured with ownership takeover.
+//   - HPA_MODE_NATIVE: Workload has an existing native HPA that is not managed by CAST AI.
+type WorkloadoptimizationV1HPAMode string
 
 // WorkloadoptimizationV1HPAScalingPolicy HPAScalingPolicy is a single policy which must hold true for a specified past interval.
 type WorkloadoptimizationV1HPAScalingPolicy struct {
@@ -8611,23 +8709,72 @@ type WorkloadoptimizationV1HPASpec struct {
 	TargetCpuUtilizationPercentage *int32 `json:"targetCpuUtilizationPercentage"`
 }
 
-// WorkloadoptimizationV1HPAUnsupportedReason HPAUnsupportedReason contains categorized type and description for why native HPA is unsupported.
+// WorkloadoptimizationV1HPAState defines model for workloadoptimization.v1.HPAState.
+type WorkloadoptimizationV1HPAState struct {
+	// LegacyConfig HPALegacyConfig holds the resolved configuration for legacy CAST AI HPA.
+	LegacyConfig *WorkloadoptimizationV1HPALegacyConfig `json:"legacyConfig,omitempty"`
+
+	// LegacyUnsupportedReason HPALegacyUnsupportedReason contains categorized type and description for why legacy CAST AI HPA is unsupported.
+	LegacyUnsupportedReason *WorkloadoptimizationV1HPALegacyUnsupportedReason `json:"legacyUnsupportedReason,omitempty"`
+
+	// Mode HPAMode describes the computed horizontal‑scaling state for a workload.
+	//
+	//  - HPA_MODE_NOT_SET: No HPA configuration on the workload (no native/legacy/v2).
+	//  - HPA_MODE_LEGACY: Legacy CAST AI HPA is configured.
+	//  - HPA_MODE_V2: HPA v2 is configured.
+	//  - HPA_MODE_TAKEOVER: HPA v2 is configured with ownership takeover.
+	//  - HPA_MODE_NATIVE: Workload has an existing native HPA that is not managed by CAST AI.
+	Mode      WorkloadoptimizationV1HPAMode  `json:"mode"`
+	NativeHpa *WorkloadoptimizationV1HPASpec `json:"nativeHpa,omitempty"`
+
+	// V2Config HPAV2Config holds the resolved configuration for native Kubernetes HPA v2.
+	V2Config *WorkloadoptimizationV1HPAV2Config `json:"v2Config,omitempty"`
+
+	// V2UnsupportedReason HPAUnsupportedReason contains categorized type and description for why HPA V2 is unsupported.
+	V2UnsupportedReason *WorkloadoptimizationV1HPAUnsupportedReason `json:"v2UnsupportedReason,omitempty"`
+}
+
+// WorkloadoptimizationV1HPAUnsupportedReason HPAUnsupportedReason contains categorized type and description for why HPA V2 is unsupported.
 type WorkloadoptimizationV1HPAUnsupportedReason struct {
-	// Description Description of why native HPA is unsupported.
+	// Description Description of why HPA V2 is unsupported.
 	Description string `json:"description"`
 
-	// Type HPAUnsupportedReasonType explains why native HPA is unsupported for the workload.
+	// Type HPAUnsupportedReasonType explains why HPA V2 is unsupported for the workload.
 	//
 	//  - HPA_UNSUPPORTED_REASON_WORKLOAD_TYPE: Workload type/kind is not supported for HPA.
 	//  - HPA_UNSUPPORTED_REASON_TAKE_OWNERSHIP: Cannot take ownership of existing HPA (e.g. owned by third party or has unsupported metrics).
 	Type WorkloadoptimizationV1HPAUnsupportedReasonType `json:"type"`
 }
 
-// WorkloadoptimizationV1HPAUnsupportedReasonType HPAUnsupportedReasonType explains why native HPA is unsupported for the workload.
+// WorkloadoptimizationV1HPAUnsupportedReasonType HPAUnsupportedReasonType explains why HPA V2 is unsupported for the workload.
 //
 //   - HPA_UNSUPPORTED_REASON_WORKLOAD_TYPE: Workload type/kind is not supported for HPA.
 //   - HPA_UNSUPPORTED_REASON_TAKE_OWNERSHIP: Cannot take ownership of existing HPA (e.g. owned by third party or has unsupported metrics).
 type WorkloadoptimizationV1HPAUnsupportedReasonType string
+
+// WorkloadoptimizationV1HPAV2Config HPAV2Config holds the resolved configuration for native Kubernetes HPA v2.
+type WorkloadoptimizationV1HPAV2Config struct {
+	// Behavior HorizontalPodAutoscalerBehavior configures the scaling behavior of the target
+	// in both Up and Down directions (scaleUp and scaleDown fields respectively).
+	Behavior *WorkloadoptimizationV1HorizontalPodAutoscalerBehavior `json:"behavior,omitempty"`
+
+	// ManagementOption Defines possible options for workload management.
+	// READ_ONLY - workload watched (metrics collected), but no actions may be performed by CAST AI.
+	// MANAGED - workload watched (metrics collected), CAST AI may perform actions on the workload.
+	ManagementOption WorkloadoptimizationV1ManagementOption `json:"managementOption"`
+
+	// MaxReplicas Maximum number of replicas.
+	MaxReplicas int32 `json:"maxReplicas"`
+
+	// Metrics Metrics the HPA scales on.
+	Metrics *[]WorkloadoptimizationV1MetricSpec `json:"metrics,omitempty"`
+
+	// MinReplicas Minimum number of replicas.
+	MinReplicas int32 `json:"minReplicas"`
+
+	// TakeOwnership Whether CAST AI takes ownership of the existing native HPA.
+	TakeOwnership bool `json:"takeOwnership"`
+}
 
 // WorkloadoptimizationV1HorizontalOverrides defines model for workloadoptimization.v1.HorizontalOverrides.
 type WorkloadoptimizationV1HorizontalOverrides struct {
@@ -9602,9 +9749,12 @@ type WorkloadoptimizationV1UpdateWorkloadV2 struct {
 
 // WorkloadoptimizationV1VPAConfig defines model for workloadoptimization.v1.VPAConfig.
 type WorkloadoptimizationV1VPAConfig struct {
-	AntiAffinity         WorkloadoptimizationV1AntiAffinitySettings   `json:"antiAffinity"`
-	ApplyType            WorkloadoptimizationV1ApplyType              `json:"applyType"`
-	ContainerConstraints []WorkloadoptimizationV1ContainerConstraints `json:"containerConstraints"`
+	// AnomalyDetection AnomalyDetectionSettings configures how workload anomalies are detected and handled.
+	// Different anomaly types can have different detection thresholds based on the scaling policy.
+	AnomalyDetection     *WorkloadoptimizationV1AnomalyDetectionSettings `json:"anomalyDetection,omitempty"`
+	AntiAffinity         WorkloadoptimizationV1AntiAffinitySettings      `json:"antiAffinity"`
+	ApplyType            WorkloadoptimizationV1ApplyType                 `json:"applyType"`
+	ContainerConstraints []WorkloadoptimizationV1ContainerConstraints    `json:"containerConstraints"`
 
 	// Containers The containers configuration for the workload.
 	Containers         []WorkloadoptimizationV1ContainerConfig    `json:"containers"`
@@ -9646,9 +9796,12 @@ type WorkloadoptimizationV1VPAConfigUpdate struct {
 
 // WorkloadoptimizationV1VerticalOverrides defines model for workloadoptimization.v1.VerticalOverrides.
 type WorkloadoptimizationV1VerticalOverrides struct {
-	AntiAffinity *WorkloadoptimizationV1AntiAffinitySettings `json:"antiAffinity,omitempty"`
-	ApplyType    *WorkloadoptimizationV1ApplyType            `json:"applyType,omitempty"`
-	Confidence   *WorkloadoptimizationV1ConfidenceSettings   `json:"confidence,omitempty"`
+	// AnomalyDetection AnomalyDetectionSettings configures how workload anomalies are detected and handled.
+	// Different anomaly types can have different detection thresholds based on the scaling policy.
+	AnomalyDetection *WorkloadoptimizationV1AnomalyDetectionSettings `json:"anomalyDetection,omitempty"`
+	AntiAffinity     *WorkloadoptimizationV1AntiAffinitySettings     `json:"antiAffinity,omitempty"`
+	ApplyType        *WorkloadoptimizationV1ApplyType                `json:"applyType,omitempty"`
+	Confidence       *WorkloadoptimizationV1ConfidenceSettings       `json:"confidence,omitempty"`
 
 	// ContainerConstraints Deprecated (use ContainerConfig containers instead), defines container specific overrides.
 	ContainerConstraints *[]WorkloadoptimizationV1ContainerConstraintsV2 `json:"containerConstraints,omitempty"`
@@ -9695,11 +9848,12 @@ type WorkloadoptimizationV1Workload struct {
 	Group      string  `json:"group"`
 
 	// HasNativeHpa Whether workload has native HPA configured.
-	HasNativeHpa *bool                          `json:"hasNativeHpa"`
-	HpaSpec      *WorkloadoptimizationV1HPASpec `json:"hpaSpec,omitempty"`
-	Id           string                         `json:"id"`
-	IsCustom     bool                           `json:"isCustom"`
-	Kind         string                         `json:"kind"`
+	HasNativeHpa *bool                           `json:"hasNativeHpa"`
+	HpaSpec      *WorkloadoptimizationV1HPASpec  `json:"hpaSpec,omitempty"`
+	HpaState     *WorkloadoptimizationV1HPAState `json:"hpaState,omitempty"`
+	Id           string                          `json:"id"`
+	IsCustom     bool                            `json:"isCustom"`
+	Kind         string                          `json:"kind"`
 
 	// Labels Labels as defined on the workload manifest. These are labels from the controller meta, not the pod meta.
 	Labels []WorkloadoptimizationV1KeyValuePair `json:"labels"`
@@ -9714,7 +9868,7 @@ type WorkloadoptimizationV1Workload struct {
 	Name             string `json:"name"`
 	Namespace        string `json:"namespace"`
 
-	// NativeHpaUnsupportedReasonDetails HPAUnsupportedReason contains categorized type and description for why native HPA is unsupported.
+	// NativeHpaUnsupportedReasonDetails HPAUnsupportedReason contains categorized type and description for why HPA V2 is unsupported.
 	NativeHpaUnsupportedReasonDetails *WorkloadoptimizationV1HPAUnsupportedReason `json:"nativeHpaUnsupportedReasonDetails,omitempty"`
 	OrganizationId                    string                                      `json:"organizationId"`
 
@@ -10654,15 +10808,6 @@ type CommitmentsAPIGetCommitmentsParams struct {
 
 	// IncludeUsagePerInstanceTypes indicates if usage per instance types should be included
 	IncludeUsagePerInstanceTypes *bool `form:"includeUsagePerInstanceTypes,omitempty" json:"includeUsagePerInstanceTypes,omitempty"`
-}
-
-// CommitmentsAPIGetCommitmentsDiscountedPricesParams defines parameters for CommitmentsAPIGetCommitmentsDiscountedPrices.
-type CommitmentsAPIGetCommitmentsDiscountedPricesParams struct {
-	PageLimit *string `form:"page.limit,omitempty" json:"page.limit,omitempty"`
-
-	// PageCursor Cursor that defines token indicating where to start the next page.
-	// Empty value indicates to start from beginning of the dataset.
-	PageCursor *string `form:"page.cursor,omitempty" json:"page.cursor,omitempty"`
 }
 
 // CommitmentsAPIImportAzureReservationsJSONBody defines parameters for CommitmentsAPIImportAzureReservations.
