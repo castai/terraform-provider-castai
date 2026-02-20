@@ -265,11 +265,11 @@ func resourceNodeConfiguration() *schema.Resource {
 							Type:             schema.TypeInt,
 							Optional:         true,
 							Default:          nil,
-							Description:      "Number of IPs per prefix to be used for calculating max pods.",
+							Description:      "Number of IPs per prefix to be used for calculating max pods. For IPv4 it should be 16. More info: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-prefix-eni.html#ec2-prefix-basics",
 							ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(0, 256)),
 							DiffSuppressFunc: func(k, oldValue, newValue string, d *schema.ResourceData) bool {
 								log.Printf("[DEBUG] changing 'ips_per_prefix' attribute for eks: old=%s, new=%s", oldValue, newValue)
-								if oldValue == "1" && newValue == "0" {
+								if (oldValue == "1" || oldValue == "16") && newValue == "0" {
 									return true
 								}
 								return oldValue == newValue
