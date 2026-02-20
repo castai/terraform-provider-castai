@@ -62,7 +62,6 @@ resource "castai_node_configuration" "test" {
     aks_image_family = "azure-linux"
 	ephemeral_os_disk {
     	placement = "CacheDisk"
-    	cache = "ReadOnly"
 	}
 	loadbalancers {
 		name = "test-lb"
