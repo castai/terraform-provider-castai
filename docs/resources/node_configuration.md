@@ -106,7 +106,7 @@ Required:
 
 Optional:
 
-- `cache` (String) Cache type for the ephemeral OS disk. One of: ReadOnly, ReadWrite
+- `cache` (String, Deprecated) Deprecated: this field has no effect. Ephemeral OS disks always use ReadOnly cache strategy
 
 
 <a id="nestedblock--aks--loadbalancers"></a>

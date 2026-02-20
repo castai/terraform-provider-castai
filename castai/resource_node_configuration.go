@@ -63,8 +63,6 @@ const (
 	aksImageFamilyWindows2022             = "windows2022"
 	aksEphemeralDiskPlacementCacheDisk    = "cacheDisk"
 	aksEphemeralDiskPlacementResourceDisk = "resourceDisk"
-	aksDiskCacheReadOnly                  = "ReadOnly"
-	aksDiskCacheReadWrite                 = "ReadWrite"
 )
 
 const (
@@ -371,13 +369,13 @@ func resourceNodeConfiguration() *schema.Resource {
 										},
 									},
 									"cache": {
-										Type:                  schema.TypeString,
-										Optional:              true,
-										Description:           "Cache type for the ephemeral OS disk. One of: ReadOnly, ReadWrite",
-										ValidateDiagFunc:      validation.ToDiagFunc(validation.StringInSlice([]string{aksDiskCacheReadOnly, aksDiskCacheReadWrite}, true)),
-										DiffSuppressOnRefresh: true,
+										Type:        schema.TypeString,
+										Optional:    true,
+										Deprecated:  "This field has no effect and will be removed in a future major version of the provider. Remove it from your configuration.",
+										Description: "Deprecated: this field has no effect. Ephemeral OS disks always use ReadOnly cache strategy",
+										// Prevent state drift for customers that put the value in their confguration. Since it has no effect, no point in raising diffs.
 										DiffSuppressFunc: func(k, oldValue, newValue string, d *schema.ResourceData) bool {
-											return strings.EqualFold(oldValue, newValue)
+											return true
 										},
 									},
 								},
@@ -1239,15 +1237,6 @@ func toAKSEphemeralOSDisk(obj any) *sdk.NodeconfigV1AKSConfigOsDiskEphemeral {
 		}
 	}
 
-	if v, ok := obj.(map[string]any)["cache"].(string); ok && v != "" {
-		switch strings.ToLower(v) {
-		case strings.ToLower(aksDiskCacheReadWrite):
-			osDisk.CacheType = lo.ToPtr(sdk.NodeconfigV1AKSConfigOsDiskEphemeralCacheTypeREADWRITE)
-		case strings.ToLower(aksDiskCacheReadOnly):
-			osDisk.CacheType = lo.ToPtr(sdk.NodeconfigV1AKSConfigOsDiskEphemeralCacheTypeREADONLY)
-		}
-	}
-
 	return osDisk
 }
 
@@ -1431,15 +1420,6 @@ func fromAKSEphemeralOSDisk(sdkEph *sdk.NodeconfigV1AKSConfigOsDiskEphemeral) []
 			m["placement"] = aksEphemeralDiskPlacementResourceDisk
 		case sdk.NodeconfigV1AKSConfigOsDiskEphemeralPlacementPLACEMENTCACHEDISK:
 			m["placement"] = aksEphemeralDiskPlacementCacheDisk
-		}
-	}
-
-	if sdkEph.CacheType != nil {
-		switch *sdkEph.CacheType {
-		case sdk.NodeconfigV1AKSConfigOsDiskEphemeralCacheTypeREADWRITE:
-			m["cache"] = aksDiskCacheReadWrite
-		case sdk.NodeconfigV1AKSConfigOsDiskEphemeralCacheTypeREADONLY:
-			m["cache"] = aksDiskCacheReadOnly
 		}
 	}
 

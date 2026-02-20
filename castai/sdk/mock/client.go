@@ -795,26 +795,6 @@ func (mr *MockClientInterfaceMockRecorder) CommitmentsAPIGetCommitmentsAssignmen
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIGetCommitmentsAssignments", reflect.TypeOf((*MockClientInterface)(nil).CommitmentsAPIGetCommitmentsAssignments), varargs...)
 }
 
-// CommitmentsAPIGetCommitmentsDiscountedPrices mocks base method.
-func (m *MockClientInterface) CommitmentsAPIGetCommitmentsDiscountedPrices(ctx context.Context, params *sdk.CommitmentsAPIGetCommitmentsDiscountedPricesParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
-	m.ctrl.T.Helper()
-	varargs := []interface{}{ctx, params}
-	for _, a := range reqEditors {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "CommitmentsAPIGetCommitmentsDiscountedPrices", varargs...)
-	ret0, _ := ret[0].(*http.Response)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// CommitmentsAPIGetCommitmentsDiscountedPrices indicates an expected call of CommitmentsAPIGetCommitmentsDiscountedPrices.
-func (mr *MockClientInterfaceMockRecorder) CommitmentsAPIGetCommitmentsDiscountedPrices(ctx, params interface{}, reqEditors ...interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, params}, reqEditors...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIGetCommitmentsDiscountedPrices", reflect.TypeOf((*MockClientInterface)(nil).CommitmentsAPIGetCommitmentsDiscountedPrices), varargs...)
-}
-
 // CommitmentsAPIGetGCPCommitmentsImportScript mocks base method.
 func (m *MockClientInterface) CommitmentsAPIGetGCPCommitmentsImportScript(ctx context.Context, params *sdk.CommitmentsAPIGetGCPCommitmentsImportScriptParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
@@ -1553,6 +1533,26 @@ func (mr *MockClientInterfaceMockRecorder) DboAPIGetCacheGroupPerformance(ctx, i
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{ctx, id, params}, reqEditors...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIGetCacheGroupPerformance", reflect.TypeOf((*MockClientInterface)(nil).DboAPIGetCacheGroupPerformance), varargs...)
+}
+
+// DboAPIGetCacheGroupPoolingEligibility mocks base method.
+func (m *MockClientInterface) DboAPIGetCacheGroupPoolingEligibility(ctx context.Context, id string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, id}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DboAPIGetCacheGroupPoolingEligibility", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPIGetCacheGroupPoolingEligibility indicates an expected call of DboAPIGetCacheGroupPoolingEligibility.
+func (mr *MockClientInterfaceMockRecorder) DboAPIGetCacheGroupPoolingEligibility(ctx, id interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, id}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIGetCacheGroupPoolingEligibility", reflect.TypeOf((*MockClientInterface)(nil).DboAPIGetCacheGroupPoolingEligibility), varargs...)
 }
 
 // DboAPIGetCacheQueries mocks base method.
@@ -8183,41 +8183,6 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) CommitmentsAPIGetCommitm
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIGetCommitmentsAssignmentsWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).CommitmentsAPIGetCommitmentsAssignmentsWithResponse), ctx)
 }
 
-// CommitmentsAPIGetCommitmentsDiscountedPrices mocks base method.
-func (m *MockClientWithResponsesInterface) CommitmentsAPIGetCommitmentsDiscountedPrices(ctx context.Context, params *sdk.CommitmentsAPIGetCommitmentsDiscountedPricesParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
-	m.ctrl.T.Helper()
-	varargs := []interface{}{ctx, params}
-	for _, a := range reqEditors {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "CommitmentsAPIGetCommitmentsDiscountedPrices", varargs...)
-	ret0, _ := ret[0].(*http.Response)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// CommitmentsAPIGetCommitmentsDiscountedPrices indicates an expected call of CommitmentsAPIGetCommitmentsDiscountedPrices.
-func (mr *MockClientWithResponsesInterfaceMockRecorder) CommitmentsAPIGetCommitmentsDiscountedPrices(ctx, params interface{}, reqEditors ...interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, params}, reqEditors...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIGetCommitmentsDiscountedPrices", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).CommitmentsAPIGetCommitmentsDiscountedPrices), varargs...)
-}
-
-// CommitmentsAPIGetCommitmentsDiscountedPricesWithResponse mocks base method.
-func (m *MockClientWithResponsesInterface) CommitmentsAPIGetCommitmentsDiscountedPricesWithResponse(ctx context.Context, params *sdk.CommitmentsAPIGetCommitmentsDiscountedPricesParams) (*sdk.CommitmentsAPIGetCommitmentsDiscountedPricesResponse, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CommitmentsAPIGetCommitmentsDiscountedPricesWithResponse", ctx, params)
-	ret0, _ := ret[0].(*sdk.CommitmentsAPIGetCommitmentsDiscountedPricesResponse)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// CommitmentsAPIGetCommitmentsDiscountedPricesWithResponse indicates an expected call of CommitmentsAPIGetCommitmentsDiscountedPricesWithResponse.
-func (mr *MockClientWithResponsesInterfaceMockRecorder) CommitmentsAPIGetCommitmentsDiscountedPricesWithResponse(ctx, params interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIGetCommitmentsDiscountedPricesWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).CommitmentsAPIGetCommitmentsDiscountedPricesWithResponse), ctx, params)
-}
-
 // CommitmentsAPIGetCommitmentsWithResponse mocks base method.
 func (m *MockClientWithResponsesInterface) CommitmentsAPIGetCommitmentsWithResponse(ctx context.Context, params *sdk.CommitmentsAPIGetCommitmentsParams) (*sdk.CommitmentsAPIGetCommitmentsResponse, error) {
 	m.ctrl.T.Helper()
@@ -9511,6 +9476,41 @@ func (m *MockClientWithResponsesInterface) DboAPIGetCacheGroupPerformanceWithRes
 func (mr *MockClientWithResponsesInterfaceMockRecorder) DboAPIGetCacheGroupPerformanceWithResponse(ctx, id, params interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIGetCacheGroupPerformanceWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DboAPIGetCacheGroupPerformanceWithResponse), ctx, id, params)
+}
+
+// DboAPIGetCacheGroupPoolingEligibility mocks base method.
+func (m *MockClientWithResponsesInterface) DboAPIGetCacheGroupPoolingEligibility(ctx context.Context, id string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, id}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DboAPIGetCacheGroupPoolingEligibility", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPIGetCacheGroupPoolingEligibility indicates an expected call of DboAPIGetCacheGroupPoolingEligibility.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) DboAPIGetCacheGroupPoolingEligibility(ctx, id interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, id}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIGetCacheGroupPoolingEligibility", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DboAPIGetCacheGroupPoolingEligibility), varargs...)
+}
+
+// DboAPIGetCacheGroupPoolingEligibilityWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) DboAPIGetCacheGroupPoolingEligibilityWithResponse(ctx context.Context, id string) (*sdk.DboAPIGetCacheGroupPoolingEligibilityResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DboAPIGetCacheGroupPoolingEligibilityWithResponse", ctx, id)
+	ret0, _ := ret[0].(*sdk.DboAPIGetCacheGroupPoolingEligibilityResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPIGetCacheGroupPoolingEligibilityWithResponse indicates an expected call of DboAPIGetCacheGroupPoolingEligibilityWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) DboAPIGetCacheGroupPoolingEligibilityWithResponse(ctx, id interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIGetCacheGroupPoolingEligibilityWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DboAPIGetCacheGroupPoolingEligibilityWithResponse), ctx, id)
 }
 
 // DboAPIGetCacheGroupWithResponse mocks base method.

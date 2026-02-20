@@ -471,7 +471,6 @@ func TestAccAKS_ResourceAKSCluster(t *testing.T) {
 					resource.TestCheckResourceAttr(nodeConfResourceName, "aks.0.max_pods_per_node", "32"),
 					resource.TestCheckResourceAttr(nodeConfResourceName, "aks.0.aks_image_family", "azure-linux"),
 					resource.TestCheckResourceAttr(nodeConfResourceName, "aks.0.ephemeral_os_disk.0.placement", "cacheDisk"),
-					resource.TestCheckResourceAttr(nodeConfResourceName, "aks.0.ephemeral_os_disk.0.cache", "ReadOnly"),
 					resource.TestCheckResourceAttr(nodeConfResourceName, "aks.0.loadbalancers.0.name", "test-lb"),
 					resource.TestCheckResourceAttr(nodeConfResourceName, "aks.0.loadbalancers.0.ip_based_backend_pools.0.name", "test"),
 					resource.TestCheckResourceAttr(nodeConfResourceName, "aks.0.network_security_group", "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg/providers/Microsoft.Network/networkSecurityGroups/test-nsg"),
