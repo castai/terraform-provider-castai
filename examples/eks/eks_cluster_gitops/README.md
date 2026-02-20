@@ -104,7 +104,7 @@ Note generated 'CASTAI_CLUSTER_ID' from outputs
 terraform output cluster_id  
 terraform output cluster_token
 
-Obtained values are needed for next step
+Obtained values are needed for next step. Note that cluster_token must be used within few hours after creation or it gets expired. It is recommended to install at least castai-agent to keep cluster_token active.
 
 ### Step 6: Deploy Helm chart of CAST Components
 Coponents: `castai-cluster-controller`,`castai-evictor`, `castai-spot-handler`, `castai-kvisor`, `castai-workload-autoscaler`, `castai-pod-pinner` \
