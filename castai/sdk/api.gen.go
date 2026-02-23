@@ -519,6 +519,13 @@ const (
 	NodetemplatesV1AvailableInstanceTypeStorageOptimizedOptionOnDemand NodetemplatesV1AvailableInstanceTypeStorageOptimizedOption = "OnDemand"
 )
 
+// Defines values for NodetemplatesV1GPUSharingStrategy.
+const (
+	GPUSHARINGSTRATEGYMPS         NodetemplatesV1GPUSharingStrategy = "GPU_SHARING_STRATEGY_MPS"
+	GPUSHARINGSTRATEGYTIMESLICING NodetemplatesV1GPUSharingStrategy = "GPU_SHARING_STRATEGY_TIME_SLICING"
+	GPUSHARINGSTRATEGYUNSPECIFIED NodetemplatesV1GPUSharingStrategy = "GPU_SHARING_STRATEGY_UNSPECIFIED"
+)
+
 // Defines values for NodetemplatesV1TaintEffect.
 const (
 	NoExecute  NodetemplatesV1TaintEffect = "NoExecute"
@@ -635,6 +642,14 @@ const (
 	TargetNodeSelectionAlgorithmNormalizedPrice ScheduledrebalancingV1TargetNodeSelectionAlgorithm = "TargetNodeSelectionAlgorithmNormalizedPrice"
 	TargetNodeSelectionAlgorithmUtilization     ScheduledrebalancingV1TargetNodeSelectionAlgorithm = "TargetNodeSelectionAlgorithmUtilization"
 	TargetNodeSelectionAlgorithmUtilizedPrice   ScheduledrebalancingV1TargetNodeSelectionAlgorithm = "TargetNodeSelectionAlgorithmUtilizedPrice"
+)
+
+// Defines values for WorkloadoptimizationV1ActionType.
+const (
+	ACTIONTYPEUNSPECIFIED WorkloadoptimizationV1ActionType = "ACTION_TYPE_UNSPECIFIED"
+	APPLY                 WorkloadoptimizationV1ActionType = "APPLY"
+	IGNORE                WorkloadoptimizationV1ActionType = "IGNORE"
+	PERSIST               WorkloadoptimizationV1ActionType = "PERSIST"
 )
 
 // Defines values for WorkloadoptimizationV1ApplyType.
@@ -789,6 +804,7 @@ const (
 	ERRORCUSTOMWORKLOADCONTAINERSMISMATCH WorkloadoptimizationV1RecommendationErrorType = "ERROR_CUSTOM_WORKLOAD_CONTAINERS_MISMATCH"
 	ERRORCUSTOMWORKLOADINVALIDNAME        WorkloadoptimizationV1RecommendationErrorType = "ERROR_CUSTOM_WORKLOAD_INVALID_NAME"
 	ERRORDEPLOYFAILED                     WorkloadoptimizationV1RecommendationErrorType = "ERROR_DEPLOY_FAILED"
+	ERRORRECOMMENDATIONGENERATION         WorkloadoptimizationV1RecommendationErrorType = "ERROR_RECOMMENDATION_GENERATION"
 	ERRORUNKNOWN                          WorkloadoptimizationV1RecommendationErrorType = "ERROR_UNKNOWN"
 )
 
@@ -6354,9 +6370,7 @@ type NodeconfigV1EKSConfig struct {
 
 	// InstanceProfileArn Cluster's instance profile ARN used for CAST provisioned nodes.
 	InstanceProfileArn string `json:"instanceProfileArn"`
-
-	// IpsPerPrefix Number of IPs per prefix to be used for calculating max pods. Defaults to 1.
-	IpsPerPrefix *int32 `json:"ipsPerPrefix"`
+	IpsPerPrefix       *int32 `json:"ipsPerPrefix"`
 
 	// KeyPairId AWS key pair ID to be used for provisioned nodes. Has priority over sshPublicKey.
 	KeyPairId             *string `json:"keyPairId"`
@@ -6788,11 +6802,18 @@ type NodetemplatesV1FilterInstanceTypesResponse struct {
 
 // NodetemplatesV1GPU defines model for nodetemplates.v1.GPU.
 type NodetemplatesV1GPU struct {
-	DefaultSharedClientsPerGpu *int32                               `json:"defaultSharedClientsPerGpu"`
-	EnableTimeSharing          *bool                                `json:"enableTimeSharing,omitempty"`
-	SharingConfiguration       *map[string]NodetemplatesV1SharedGPU `json:"sharingConfiguration,omitempty"`
-	UserManagedGpuDrivers      *bool                                `json:"userManagedGpuDrivers"`
+	DefaultSharedClientsPerGpu *int32 `json:"defaultSharedClientsPerGpu"`
+
+	// EnableTimeSharing Deprecated: Use sharing_strategy instead. This field is kept for backward compatibility.
+	// Deprecated:
+	EnableTimeSharing     *bool                                `json:"enableTimeSharing,omitempty"`
+	SharingConfiguration  *map[string]NodetemplatesV1SharedGPU `json:"sharingConfiguration,omitempty"`
+	SharingStrategy       *NodetemplatesV1GPUSharingStrategy   `json:"sharingStrategy,omitempty"`
+	UserManagedGpuDrivers *bool                                `json:"userManagedGpuDrivers"`
 }
+
+// NodetemplatesV1GPUSharingStrategy defines model for nodetemplates.v1.GPUSharingStrategy.
+type NodetemplatesV1GPUSharingStrategy string
 
 // NodetemplatesV1GenerateNodeTemplatesResponse defines model for nodetemplates.v1.GenerateNodeTemplatesResponse.
 type NodetemplatesV1GenerateNodeTemplatesResponse struct {
@@ -8014,6 +8035,9 @@ type ScheduledrebalancingV1TriggerConditions struct {
 	SavingsPercentage *float32 `json:"savingsPercentage,omitempty"`
 }
 
+// WorkloadoptimizationV1ActionType defines model for workloadoptimization.v1.ActionType.
+type WorkloadoptimizationV1ActionType string
+
 // WorkloadoptimizationV1AggregatedCPUStallMetrics defines model for workloadoptimization.v1.AggregatedCPUStallMetrics.
 type WorkloadoptimizationV1AggregatedCPUStallMetrics struct {
 	Avg float64 `json:"avg"`
@@ -8206,11 +8230,24 @@ type WorkloadoptimizationV1ContainerConstraintsV3 struct {
 	Min *float64 `json:"min"`
 }
 
+// WorkloadoptimizationV1ContainerRecommendationSummary defines model for workloadoptimization.v1.ContainerRecommendationSummary.
+type WorkloadoptimizationV1ContainerRecommendationSummary struct {
+	Resources  *WorkloadoptimizationV1Resources            `json:"resources,omitempty"`
+	Steps      *[]WorkloadoptimizationV1RecommendationStep `json:"steps,omitempty"`
+	Thresholds *WorkloadoptimizationV1ContainerThresholds  `json:"thresholds,omitempty"`
+}
+
 // WorkloadoptimizationV1ContainerResourceMetricSource defines model for workloadoptimization.v1.ContainerResourceMetricSource.
 type WorkloadoptimizationV1ContainerResourceMetricSource struct {
 	Container string                             `json:"container"`
 	Name      string                             `json:"name"`
 	Target    WorkloadoptimizationV1MetricTarget `json:"target"`
+}
+
+// WorkloadoptimizationV1ContainerThresholds defines model for workloadoptimization.v1.ContainerThresholds.
+type WorkloadoptimizationV1ContainerThresholds struct {
+	Cpu    *WorkloadoptimizationV1ResourceThreshold `json:"cpu,omitempty"`
+	Memory *WorkloadoptimizationV1ResourceThreshold `json:"memory,omitempty"`
 }
 
 // WorkloadoptimizationV1Costs defines model for workloadoptimization.v1.Costs.
@@ -9254,6 +9291,21 @@ type WorkloadoptimizationV1RecommendationStatus struct {
 // WorkloadoptimizationV1RecommendationStatusType RecommendationStatusType explains what is the current state of recommendations.
 type WorkloadoptimizationV1RecommendationStatusType string
 
+// WorkloadoptimizationV1RecommendationStep RecommendationStep captures a single transformation stage in the recommendation
+// pipeline. The args field contains unstructured step-specific parameters.
+type WorkloadoptimizationV1RecommendationStep struct {
+	Args      *map[string]interface{}                          `json:"args,omitempty"`
+	Labels    *[]WorkloadoptimizationV1RecommendationStepLabel `json:"labels,omitempty"`
+	Message   *string                                          `json:"message,omitempty"`
+	Resources *WorkloadoptimizationV1Resources                 `json:"resources,omitempty"`
+}
+
+// WorkloadoptimizationV1RecommendationStepLabel defines model for workloadoptimization.v1.RecommendationStepLabel.
+type WorkloadoptimizationV1RecommendationStepLabel struct {
+	Key   *string `json:"key,omitempty"`
+	Value *string `json:"value,omitempty"`
+}
+
 // WorkloadoptimizationV1RecommendationStopReason defines model for workloadoptimization.v1.RecommendationStopReason.
 type WorkloadoptimizationV1RecommendationStopReason struct {
 	// Message Human-readable reason.
@@ -9266,11 +9318,26 @@ type WorkloadoptimizationV1RecommendationStopReason struct {
 // WorkloadoptimizationV1RecommendationStopReasonType RecommendationStopReasonType explains why the recommendation has been stopped for the workload.
 type WorkloadoptimizationV1RecommendationStopReasonType string
 
+// WorkloadoptimizationV1RecommendationSummary RecommendationSummary describes the overall outcome and per-container calculation steps
+// for a workload recommendation event.
+type WorkloadoptimizationV1RecommendationSummary struct {
+	ActionType               *WorkloadoptimizationV1ActionType                                `json:"actionType,omitempty"`
+	ApplyType                *WorkloadoptimizationV1ApplyType                                 `json:"applyType,omitempty"`
+	Confidence               *WorkloadoptimizationV1SummaryConfidence                         `json:"confidence,omitempty"`
+	ContainerRecommendations *map[string]WorkloadoptimizationV1ContainerRecommendationSummary `json:"containerRecommendations,omitempty"`
+	Origins                  *[]WorkloadoptimizationV1RecommendationOrigin                    `json:"origins,omitempty"`
+	Thresholds               *WorkloadoptimizationV1WorkloadThresholds                        `json:"thresholds,omitempty"`
+}
+
 // WorkloadoptimizationV1RecommendedPodCountChangedEvent defines model for workloadoptimization.v1.RecommendedPodCountChangedEvent.
 type WorkloadoptimizationV1RecommendedPodCountChangedEvent struct {
 	Current   int32                   `json:"current"`
 	DebugData *map[string]interface{} `json:"debugData,omitempty"`
 	Previous  int32                   `json:"previous"`
+
+	// Summary RecommendationSummary describes the overall outcome and per-container calculation steps
+	// for a workload recommendation event.
+	Summary *WorkloadoptimizationV1RecommendationSummary `json:"summary,omitempty"`
 }
 
 // WorkloadoptimizationV1RecommendedRequestsChangedEvent defines model for workloadoptimization.v1.RecommendedRequestsChangedEvent.
@@ -9280,6 +9347,10 @@ type WorkloadoptimizationV1RecommendedRequestsChangedEvent struct {
 	DebugData *map[string]interface{}                                     `json:"debugData,omitempty"`
 	Origins   *[]WorkloadoptimizationV1RecommendationOrigin               `json:"origins,omitempty"`
 	Previous  WorkloadoptimizationV1RecommendedRequestsChangedEventChange `json:"previous"`
+
+	// Summary RecommendationSummary describes the overall outcome and per-container calculation steps
+	// for a workload recommendation event.
+	Summary *WorkloadoptimizationV1RecommendationSummary `json:"summary,omitempty"`
 }
 
 // WorkloadoptimizationV1RecommendedRequestsChangedEventChange defines model for workloadoptimization.v1.RecommendedRequestsChangedEvent.Change.
@@ -9516,6 +9587,12 @@ type WorkloadoptimizationV1ResourceQuotaResource struct {
 	Used *float64 `json:"used"`
 }
 
+// WorkloadoptimizationV1ResourceThreshold defines model for workloadoptimization.v1.ResourceThreshold.
+type WorkloadoptimizationV1ResourceThreshold struct {
+	Reference *float64 `json:"reference"`
+	Threshold *float64 `json:"threshold,omitempty"`
+}
+
 // WorkloadoptimizationV1Resources defines model for workloadoptimization.v1.Resources.
 type WorkloadoptimizationV1Resources struct {
 	Limits   *WorkloadoptimizationV1ResourceQuantity `json:"limits,omitempty"`
@@ -9649,6 +9726,12 @@ type WorkloadoptimizationV1StartupSettings struct {
 	// When set, recommendations will be adjusted to disregard resource spikes within this period.
 	// If not specified, the workload will receive standard recommendations without startup considerations.
 	PeriodSeconds *int32 `json:"periodSeconds"`
+}
+
+// WorkloadoptimizationV1SummaryConfidence defines model for workloadoptimization.v1.SummaryConfidence.
+type WorkloadoptimizationV1SummaryConfidence struct {
+	Threshold *float64 `json:"threshold,omitempty"`
+	Total     *float64 `json:"total,omitempty"`
 }
 
 // WorkloadoptimizationV1SurgeContainer defines model for workloadoptimization.v1.SurgeContainer.
@@ -10036,6 +10119,12 @@ type WorkloadoptimizationV1WorkloadSystemOverrides struct {
 type WorkloadoptimizationV1WorkloadSystemOverridesVerticalOptimization struct {
 	// Active Indicates whether system overrides are enabled, for example, due to frequent OOM events.
 	Active bool `json:"active"`
+}
+
+// WorkloadoptimizationV1WorkloadThresholds defines model for workloadoptimization.v1.WorkloadThresholds.
+type WorkloadoptimizationV1WorkloadThresholds struct {
+	Cpu    *WorkloadoptimizationV1ApplyThresholdStrategy `json:"cpu,omitempty"`
+	Memory *WorkloadoptimizationV1ApplyThresholdStrategy `json:"memory,omitempty"`
 }
 
 // WorkloadoptimizationV1WorkloadsSummaryMetrics defines model for workloadoptimization.v1.WorkloadsSummaryMetrics.
