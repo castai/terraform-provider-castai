@@ -685,6 +685,32 @@ func resourceNodeTemplate() *schema.Resource {
 							Optional:         true,
 							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"time-slicing", "mps"}, false)),
 							Description:      "GPU sharing strategy. Supported values: `time-slicing`, `mps`.",
+							DiffSuppressFunc: func(k, oldVal, newVal string, d *schema.ResourceData) bool {
+								// Suppress diff when sharing_strategy is not configured but enable_time_sharing=true
+								// implies time-slicing, so the API returning "time-slicing" is not a real change.
+								//
+								//	The DiffSuppressFunc receives k — the full key path of the field that's diffing, which looks like:
+								//	gpu.0.sharing_strategy
+								//	We need to check the sibling field enable_time_sharing at the same path:
+								//	gpu.0.enable_time_sharing
+								//	So the code:
+								//	prefix := k[:len(k)-len(FieldNodeTemplateSharingStrategy)]
+								//	// k                    = "gpu.0.sharing_strategy"
+								//	// len("sharing_strategy") chars stripped from end
+								//	// prefix               = "gpu.0."
+								//
+								//Then:
+								//	d.GetOk(prefix + FieldNodeTemplateEnableTimeSharing)
+								//	// = d.GetOk("gpu.0." + "enable_time_sharing")
+								//	// = d.GetOk("gpu.0.enable_time_sharing")
+								if newVal == "" && oldVal == "time-slicing" {
+									prefix := k[:len(k)-len(FieldNodeTemplateSharingStrategy)]
+									if v, ok := d.GetOk(prefix + FieldNodeTemplateEnableTimeSharing); ok && v.(bool) {
+										return true
+									}
+								}
+								return false
+							},
 						},
 						FieldNodeTemplateEnableTimeSharing: {
 							Type:        schema.TypeBool,

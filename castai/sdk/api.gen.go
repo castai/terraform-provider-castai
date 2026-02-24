@@ -659,6 +659,15 @@ const (
 	WorkloadoptimizationV1ApplyTypeUNKNOWN   WorkloadoptimizationV1ApplyType = "UNKNOWN"
 )
 
+// Defines values for WorkloadoptimizationV1CustomMetricsDataSourceStatus.
+const (
+	WorkloadoptimizationV1CustomMetricsDataSourceStatusCONNECTED     WorkloadoptimizationV1CustomMetricsDataSourceStatus = "CONNECTED"
+	WorkloadoptimizationV1CustomMetricsDataSourceStatusCONNECTING    WorkloadoptimizationV1CustomMetricsDataSourceStatus = "CONNECTING"
+	WorkloadoptimizationV1CustomMetricsDataSourceStatusFAILED        WorkloadoptimizationV1CustomMetricsDataSourceStatus = "FAILED"
+	WorkloadoptimizationV1CustomMetricsDataSourceStatusSTATUSUNKNOWN WorkloadoptimizationV1CustomMetricsDataSourceStatus = "STATUS_UNKNOWN"
+	WorkloadoptimizationV1CustomMetricsDataSourceStatusSYNCING       WorkloadoptimizationV1CustomMetricsDataSourceStatus = "SYNCING"
+)
+
 // Defines values for WorkloadoptimizationV1CustomMetricsDataSourceType.
 const (
 	NODEWORKLOAD    WorkloadoptimizationV1CustomMetricsDataSourceType = "NODE_WORKLOAD"
@@ -1226,10 +1235,10 @@ const (
 
 // Defines values for WorkloadOptimizationAPIListWorkloadsParamsRecommendationStatusType.
 const (
-	STATUSAPPLIED WorkloadOptimizationAPIListWorkloadsParamsRecommendationStatusType = "STATUS_APPLIED"
-	STATUSSTOPPED WorkloadOptimizationAPIListWorkloadsParamsRecommendationStatusType = "STATUS_STOPPED"
-	STATUSUNKNOWN WorkloadOptimizationAPIListWorkloadsParamsRecommendationStatusType = "STATUS_UNKNOWN"
-	STATUSWAITING WorkloadOptimizationAPIListWorkloadsParamsRecommendationStatusType = "STATUS_WAITING"
+	WorkloadOptimizationAPIListWorkloadsParamsRecommendationStatusTypeSTATUSAPPLIED WorkloadOptimizationAPIListWorkloadsParamsRecommendationStatusType = "STATUS_APPLIED"
+	WorkloadOptimizationAPIListWorkloadsParamsRecommendationStatusTypeSTATUSSTOPPED WorkloadOptimizationAPIListWorkloadsParamsRecommendationStatusType = "STATUS_STOPPED"
+	WorkloadOptimizationAPIListWorkloadsParamsRecommendationStatusTypeSTATUSUNKNOWN WorkloadOptimizationAPIListWorkloadsParamsRecommendationStatusType = "STATUS_UNKNOWN"
+	WorkloadOptimizationAPIListWorkloadsParamsRecommendationStatusTypeSTATUSWAITING WorkloadOptimizationAPIListWorkloadsParamsRecommendationStatusType = "STATUS_WAITING"
 )
 
 // Defines values for WorkloadOptimizationAPIListWorkloadsParamsAnyContainerWithRuntime.
@@ -6277,7 +6286,8 @@ type NodeconfigV1AKSConfigLoadBalancersNICBasedBackendPool struct {
 
 // NodeconfigV1AKSConfigOsDiskEphemeral defines model for nodeconfig.v1.AKSConfig.OsDiskEphemeral.
 type NodeconfigV1AKSConfigOsDiskEphemeral struct {
-	// CacheType Type of cache to use for the ephemeral OS disk. Default is READ_ONLY.
+	// CacheType Deprecated: This message exists for compatibility reasons only.
+	// Deprecated:
 	CacheType *NodeconfigV1AKSConfigOsDiskEphemeralCacheType `json:"cacheType,omitempty"`
 
 	// Placement Placement of the ephemeral OS disk. If unspecified, the default value is picked based on VM SKU.
@@ -6285,7 +6295,7 @@ type NodeconfigV1AKSConfigOsDiskEphemeral struct {
 	Placement *NodeconfigV1AKSConfigOsDiskEphemeralPlacement `json:"placement,omitempty"`
 }
 
-// NodeconfigV1AKSConfigOsDiskEphemeralCacheType Type of cache to use for the ephemeral OS disk. Default is READ_ONLY.
+// NodeconfigV1AKSConfigOsDiskEphemeralCacheType Deprecated: This message exists for compatibility reasons only.
 type NodeconfigV1AKSConfigOsDiskEphemeralCacheType string
 
 // NodeconfigV1AKSConfigOsDiskEphemeralPlacement Placement of the ephemeral OS disk. If unspecified, the default value is picked based on VM SKU.
@@ -8278,10 +8288,11 @@ type WorkloadoptimizationV1CrossVersionObjectReference struct {
 
 // WorkloadoptimizationV1CustomMetricsDataSource defines model for workloadoptimization.v1.CustomMetricsDataSource.
 type WorkloadoptimizationV1CustomMetricsDataSource struct {
-	ClusterId string                                            `json:"clusterId"`
-	CreatedAt time.Time                                         `json:"createdAt"`
-	Data      WorkloadoptimizationV1CustomMetricsDataSourceData `json:"data"`
-	Id        string                                            `json:"id"`
+	ClusterId string                                                `json:"clusterId"`
+	CreatedAt time.Time                                             `json:"createdAt"`
+	Data      WorkloadoptimizationV1CustomMetricsDataSourceData     `json:"data"`
+	Errors    *[]WorkloadoptimizationV1CustomMetricsDataSourceError `json:"errors,omitempty"`
+	Id        string                                                `json:"id"`
 
 	// KubeResourceName KubeResourceName is the name of the resource in Kubernetes. Cannot be updated, as it would break the sync.
 	// It is NOT unique per cluster as multiple data source entries in the DB may form a single resource in the cluster.
@@ -8291,15 +8302,21 @@ type WorkloadoptimizationV1CustomMetricsDataSource struct {
 	// ManagedByCast ManagedByCast indicates whether the source of truth is a CAST database. If true, the resource
 	// is automatically synchronized from the database to the cluster. If false, the resource is
 	// synchronized in the opposite direction (from the cluster to the database).
-	ManagedByCast  bool       `json:"managedByCast"`
-	Name           string     `json:"name"`
-	OrganizationId string     `json:"organizationId"`
-	SyncedAt       *time.Time `json:"syncedAt"`
+	ManagedByCast  bool   `json:"managedByCast"`
+	Name           string `json:"name"`
+	OrganizationId string `json:"organizationId"`
+
+	// Status Status represents the synchronization status of the custom metrics data source. It indicates whether the data
+	// source is currently being synchronized, has been successfully synchronized, is in the process of syncing, or has
+	// failed to sync.
+	Status   WorkloadoptimizationV1CustomMetricsDataSourceStatus `json:"status"`
+	SyncedAt *time.Time                                          `json:"syncedAt"`
 
 	// Type Type defines the type of custom metrics data source. Respective Data field will be populated based on the type.
 	// For each type, exactly one of the data fields should be populated.
-	Type      WorkloadoptimizationV1CustomMetricsDataSourceType `json:"type"`
-	UpdatedAt time.Time                                         `json:"updatedAt"`
+	Type      WorkloadoptimizationV1CustomMetricsDataSourceType       `json:"type"`
+	UpdatedAt time.Time                                               `json:"updatedAt"`
+	Warnings  *[]WorkloadoptimizationV1CustomMetricsDataSourceWarning `json:"warnings,omitempty"`
 }
 
 // WorkloadoptimizationV1CustomMetricsDataSourceData defines model for workloadoptimization.v1.CustomMetricsDataSource.Data.
@@ -8342,9 +8359,42 @@ type WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetrics struct {
 	Presets *[]string `json:"presets,omitempty"`
 }
 
+// WorkloadoptimizationV1CustomMetricsDataSourceError defines model for workloadoptimization.v1.CustomMetricsDataSource.Error.
+type WorkloadoptimizationV1CustomMetricsDataSourceError struct {
+	Generic *WorkloadoptimizationV1CustomMetricsDataSourceErrorGenericError `json:"generic,omitempty"`
+	Metric  *WorkloadoptimizationV1CustomMetricsDataSourceErrorMetricError  `json:"metric,omitempty"`
+}
+
+// WorkloadoptimizationV1CustomMetricsDataSourceErrorGenericError defines model for workloadoptimization.v1.CustomMetricsDataSource.Error.GenericError.
+type WorkloadoptimizationV1CustomMetricsDataSourceErrorGenericError struct {
+	Message string `json:"message"`
+}
+
+// WorkloadoptimizationV1CustomMetricsDataSourceErrorMetricError defines model for workloadoptimization.v1.CustomMetricsDataSource.Error.MetricError.
+type WorkloadoptimizationV1CustomMetricsDataSourceErrorMetricError struct {
+	Message string `json:"message"`
+	Metric  string `json:"metric"`
+}
+
+// WorkloadoptimizationV1CustomMetricsDataSourceStatus Status represents the synchronization status of the custom metrics data source. It indicates whether the data
+// source is currently being synchronized, has been successfully synchronized, is in the process of syncing, or has
+// failed to sync.
+type WorkloadoptimizationV1CustomMetricsDataSourceStatus string
+
 // WorkloadoptimizationV1CustomMetricsDataSourceType Type defines the type of custom metrics data source. Respective Data field will be populated based on the type.
 // For each type, exactly one of the data fields should be populated.
 type WorkloadoptimizationV1CustomMetricsDataSourceType string
+
+// WorkloadoptimizationV1CustomMetricsDataSourceWarning defines model for workloadoptimization.v1.CustomMetricsDataSource.Warning.
+type WorkloadoptimizationV1CustomMetricsDataSourceWarning struct {
+	Metric *WorkloadoptimizationV1CustomMetricsDataSourceWarningMetricWarning `json:"metric,omitempty"`
+}
+
+// WorkloadoptimizationV1CustomMetricsDataSourceWarningMetricWarning defines model for workloadoptimization.v1.CustomMetricsDataSource.Warning.MetricWarning.
+type WorkloadoptimizationV1CustomMetricsDataSourceWarningMetricWarning struct {
+	Message string `json:"message"`
+	Metric  string `json:"metric"`
+}
 
 // WorkloadoptimizationV1DeleteWorkloadScalingPolicyResponse defines model for workloadoptimization.v1.DeleteWorkloadScalingPolicyResponse.
 type WorkloadoptimizationV1DeleteWorkloadScalingPolicyResponse = map[string]interface{}
