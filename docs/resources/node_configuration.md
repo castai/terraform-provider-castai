@@ -102,7 +102,7 @@ Optional:
 
 Required:
 
-- `placement` (String) Placement of the ephemeral OS disk. One of: cacheDisk, resourceDisk
+- `placement` (String) Placement of the ephemeral OS disk. One of: cacheDisk, resourceDisk, nvmeDisk
 
 Optional:
 
