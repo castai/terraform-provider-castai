@@ -75,8 +75,24 @@ const (
 
 // Defines values for CastaiInventoryV1beta1AzureReservationReservationPlan.
 const (
-	ONEYEAR   CastaiInventoryV1beta1AzureReservationReservationPlan = "ONE_YEAR"
-	THREEYEAR CastaiInventoryV1beta1AzureReservationReservationPlan = "THREE_YEAR"
+	CastaiInventoryV1beta1AzureReservationReservationPlanONEYEAR   CastaiInventoryV1beta1AzureReservationReservationPlan = "ONE_YEAR"
+	CastaiInventoryV1beta1AzureReservationReservationPlanTHREEYEAR CastaiInventoryV1beta1AzureReservationReservationPlan = "THREE_YEAR"
+)
+
+// Defines values for CastaiInventoryV1beta1AzureSavingsPlanContextAzureSavingsPlanScope.
+const (
+	AZURESAVINGSPLANSCOPEUNSPECIFIED CastaiInventoryV1beta1AzureSavingsPlanContextAzureSavingsPlanScope = "AZURE_SAVINGS_PLAN_SCOPE_UNSPECIFIED"
+	MANAGEMENTGROUP                  CastaiInventoryV1beta1AzureSavingsPlanContextAzureSavingsPlanScope = "MANAGEMENT_GROUP"
+	SHARED                           CastaiInventoryV1beta1AzureSavingsPlanContextAzureSavingsPlanScope = "SHARED"
+	SINGLE                           CastaiInventoryV1beta1AzureSavingsPlanContextAzureSavingsPlanScope = "SINGLE"
+)
+
+// Defines values for CastaiInventoryV1beta1AzureSavingsPlanContextAzureSavingsPlanTerm.
+const (
+	CastaiInventoryV1beta1AzureSavingsPlanContextAzureSavingsPlanTermAZURESAVINGSPLANTERMUNSPECIFIED CastaiInventoryV1beta1AzureSavingsPlanContextAzureSavingsPlanTerm = "AZURE_SAVINGS_PLAN_TERM_UNSPECIFIED"
+	CastaiInventoryV1beta1AzureSavingsPlanContextAzureSavingsPlanTermFIVEYEARS                       CastaiInventoryV1beta1AzureSavingsPlanContextAzureSavingsPlanTerm = "FIVE_YEARS"
+	CastaiInventoryV1beta1AzureSavingsPlanContextAzureSavingsPlanTermONEYEAR                         CastaiInventoryV1beta1AzureSavingsPlanContextAzureSavingsPlanTerm = "ONE_YEAR"
+	CastaiInventoryV1beta1AzureSavingsPlanContextAzureSavingsPlanTermTHREEYEARS                      CastaiInventoryV1beta1AzureSavingsPlanContextAzureSavingsPlanTerm = "THREE_YEARS"
 )
 
 // Defines values for CastaiInventoryV1beta1BlockStorageInfoAttachmentLimitType.
@@ -394,6 +410,24 @@ const (
 	ExternalclusterV1ClusterReconcileInfoReconcileStatusOk      ExternalclusterV1ClusterReconcileInfoReconcileStatus = "ok"
 	ExternalclusterV1ClusterReconcileInfoReconcileStatusUnknown ExternalclusterV1ClusterReconcileInfoReconcileStatus = "unknown"
 	ExternalclusterV1ClusterReconcileInfoReconcileStatusWarning ExternalclusterV1ClusterReconcileInfoReconcileStatus = "warning"
+)
+
+// Defines values for ExternalclusterV1GetNodeGroupResponseBatchOperationStatus.
+const (
+	ExternalclusterV1GetNodeGroupResponseBatchOperationStatusBATCHOPERATIONSTATUSUNSPECIFIED ExternalclusterV1GetNodeGroupResponseBatchOperationStatus = "BATCH_OPERATION_STATUS_UNSPECIFIED"
+	ExternalclusterV1GetNodeGroupResponseBatchOperationStatusFAILED                          ExternalclusterV1GetNodeGroupResponseBatchOperationStatus = "FAILED"
+	ExternalclusterV1GetNodeGroupResponseBatchOperationStatusINPROGRESS                      ExternalclusterV1GetNodeGroupResponseBatchOperationStatus = "IN_PROGRESS"
+	ExternalclusterV1GetNodeGroupResponseBatchOperationStatusPARTIAL                         ExternalclusterV1GetNodeGroupResponseBatchOperationStatus = "PARTIAL"
+	ExternalclusterV1GetNodeGroupResponseBatchOperationStatusPENDING                         ExternalclusterV1GetNodeGroupResponseBatchOperationStatus = "PENDING"
+	ExternalclusterV1GetNodeGroupResponseBatchOperationStatusSUCCESS                         ExternalclusterV1GetNodeGroupResponseBatchOperationStatus = "SUCCESS"
+)
+
+// Defines values for ExternalclusterV1GetNodeGroupResponseNodeStatus.
+const (
+	CREATED               ExternalclusterV1GetNodeGroupResponseNodeStatus = "CREATED"
+	JOINED                ExternalclusterV1GetNodeGroupResponseNodeStatus = "JOINED"
+	JOINFAILED            ExternalclusterV1GetNodeGroupResponseNodeStatus = "JOIN_FAILED"
+	NODESTATUSUNSPECIFIED ExternalclusterV1GetNodeGroupResponseNodeStatus = "NODE_STATUS_UNSPECIFIED"
 )
 
 // Defines values for ExternalclusterV1KentEligibility.
@@ -884,11 +918,11 @@ const (
 
 // Defines values for WorkloadoptimizationV1ResourceLimitStrategyType.
 const (
-	KEEPLIMITS    WorkloadoptimizationV1ResourceLimitStrategyType = "KEEP_LIMITS"
-	MAINTAINRATIO WorkloadoptimizationV1ResourceLimitStrategyType = "MAINTAIN_RATIO"
-	MULTIPLIER    WorkloadoptimizationV1ResourceLimitStrategyType = "MULTIPLIER"
-	NOLIMIT       WorkloadoptimizationV1ResourceLimitStrategyType = "NO_LIMIT"
-	UNKNOWN       WorkloadoptimizationV1ResourceLimitStrategyType = "UNKNOWN"
+	WorkloadoptimizationV1ResourceLimitStrategyTypeKEEPLIMITS    WorkloadoptimizationV1ResourceLimitStrategyType = "KEEP_LIMITS"
+	WorkloadoptimizationV1ResourceLimitStrategyTypeMAINTAINRATIO WorkloadoptimizationV1ResourceLimitStrategyType = "MAINTAIN_RATIO"
+	WorkloadoptimizationV1ResourceLimitStrategyTypeMULTIPLIER    WorkloadoptimizationV1ResourceLimitStrategyType = "MULTIPLIER"
+	WorkloadoptimizationV1ResourceLimitStrategyTypeNOLIMIT       WorkloadoptimizationV1ResourceLimitStrategyType = "NO_LIMIT"
+	WorkloadoptimizationV1ResourceLimitStrategyTypeUNKNOWN       WorkloadoptimizationV1ResourceLimitStrategyType = "UNKNOWN"
 )
 
 // Defines values for WorkloadoptimizationV1ResourcePoliciesFunction.
@@ -1792,6 +1826,25 @@ type CastaiInventoryV1beta1AzureReservationImport struct {
 	Type                *string `json:"type,omitempty"`
 }
 
+// CastaiInventoryV1beta1AzureSavingsPlanContext defines model for castai.inventory.v1beta1.AzureSavingsPlanContext.
+type CastaiInventoryV1beta1AzureSavingsPlanContext struct {
+	CommitmentAmount     *float64                                                            `json:"commitmentAmount,omitempty"`
+	Id                   *string                                                             `json:"id,omitempty"`
+	ProvisioningState    *string                                                             `json:"provisioningState,omitempty"`
+	Scope                *CastaiInventoryV1beta1AzureSavingsPlanContextAzureSavingsPlanScope `json:"scope,omitempty"`
+	ScopeManagementGroup *string                                                             `json:"scopeManagementGroup,omitempty"`
+	ScopeResourceGroup   *string                                                             `json:"scopeResourceGroup,omitempty"`
+	ScopeSubscription    *string                                                             `json:"scopeSubscription,omitempty"`
+	ScopeTenant          *string                                                             `json:"scopeTenant,omitempty"`
+	Term                 *CastaiInventoryV1beta1AzureSavingsPlanContextAzureSavingsPlanTerm  `json:"term,omitempty"`
+}
+
+// CastaiInventoryV1beta1AzureSavingsPlanContextAzureSavingsPlanScope defines model for castai.inventory.v1beta1.AzureSavingsPlanContext.AzureSavingsPlanScope.
+type CastaiInventoryV1beta1AzureSavingsPlanContextAzureSavingsPlanScope string
+
+// CastaiInventoryV1beta1AzureSavingsPlanContextAzureSavingsPlanTerm defines model for castai.inventory.v1beta1.AzureSavingsPlanContext.AzureSavingsPlanTerm.
+type CastaiInventoryV1beta1AzureSavingsPlanContextAzureSavingsPlanTerm string
+
 // CastaiInventoryV1beta1BatchUpdateCommitmentsResponse defines model for castai.inventory.v1beta1.BatchUpdateCommitmentsResponse.
 type CastaiInventoryV1beta1BatchUpdateCommitmentsResponse struct {
 	Commitments *[]CastaiInventoryV1beta1Commitment `json:"commitments,omitempty"`
@@ -1905,6 +1958,7 @@ type CastaiInventoryV1beta1Commitment struct {
 	AwsReservedInstancesContext *CastaiInventoryV1beta1AWSReservedInstancesContext `json:"awsReservedInstancesContext,omitempty"`
 	AwsSavingsPlanContext       *CastaiInventoryV1beta1AWSSavingsPlan              `json:"awsSavingsPlanContext,omitempty"`
 	AzureReservationContext     *CastaiInventoryV1beta1AzureReservation            `json:"azureReservationContext,omitempty"`
+	AzureSavingsPlanContext     *CastaiInventoryV1beta1AzureSavingsPlanContext     `json:"azureSavingsPlanContext,omitempty"`
 	EndDate                     *time.Time                                         `json:"endDate"`
 	GcpFlexCudContext           *CastaiInventoryV1beta1GCPFlexCUD                  `json:"gcpFlexCudContext,omitempty"`
 	GcpResourceCudContext       *CastaiInventoryV1beta1GCPResourceCUD              `json:"gcpResourceCudContext,omitempty"`
@@ -5164,6 +5218,15 @@ type ExternalclusterV1AWSNodeConfigCapacityReservation struct {
 // Represents spare capacity lent from existing ODCRs with 2-minute interruption notice.
 type ExternalclusterV1AWSNodeConfigCapacityReservationType string
 
+// ExternalclusterV1AddNodeGroupResponse AddNodeGroupResponse is the response to AddNodeGroup RPC.
+type ExternalclusterV1AddNodeGroupResponse struct {
+	// NodeGroupId The ID of the created node group. Will be used to track the progress of node group creation.
+	NodeGroupId *string `json:"nodeGroupId,omitempty"`
+
+	// OperationId The ID of the operation.
+	OperationId *string `json:"operationId,omitempty"`
+}
+
 // ExternalclusterV1AddNodeResponse AddNodeResponse is the result of AddNodeRequest.
 type ExternalclusterV1AddNodeResponse struct {
 	// NodeId The ID of the node.
@@ -5463,6 +5526,12 @@ type ExternalclusterV1EKSClusterParams struct {
 	Tags *map[string]string `json:"tags,omitempty"`
 }
 
+// ExternalclusterV1EKSNodeGroupConfig defines model for externalcluster.v1.EKSNodeGroupConfig.
+type ExternalclusterV1EKSNodeGroupConfig struct {
+	// FleetContextId Context ID passed to the CreateFleet API.
+	FleetContextId *string `json:"fleetContextId"`
+}
+
 // ExternalclusterV1EdgeConfig EdgeConfig holds Edge specific configuration.
 type ExternalclusterV1EdgeConfig struct {
 	// ConfigurationId ID of the Edge configuration.
@@ -5584,6 +5653,41 @@ type ExternalclusterV1GetCredentialsScriptResponse struct {
 // ExternalclusterV1GetListNodesFiltersResponse defines model for externalcluster.v1.GetListNodesFiltersResponse.
 type ExternalclusterV1GetListNodesFiltersResponse struct {
 	Filters *[]ExternalclusterV1NodeListFilter `json:"filters,omitempty"`
+}
+
+// ExternalclusterV1GetNodeGroupResponse GetNodeGroupResponse is the response to GetNodeGroup RPC, containing the status of node group creation and details about created nodes.
+type ExternalclusterV1GetNodeGroupResponse struct {
+	CompletedAt  *time.Time                                             `json:"completedAt,omitempty"`
+	CreatedCount *int32                                                 `json:"createdCount,omitempty"`
+	CreatedNodes *[]ExternalclusterV1GetNodeGroupResponseCreatedNode    `json:"createdNodes,omitempty"`
+	Done         *bool                                                  `json:"done,omitempty"`
+	Errors       *[]ExternalclusterV1GetNodeGroupResponseOperationError `json:"errors,omitempty"`
+	FailedCount  *int32                                                 `json:"failedCount,omitempty"`
+	StartedAt    *time.Time                                             `json:"startedAt,omitempty"`
+
+	// Status BatchOperationStatus represents the current status of the batch operation.
+	Status *ExternalclusterV1GetNodeGroupResponseBatchOperationStatus `json:"status,omitempty"`
+}
+
+// ExternalclusterV1GetNodeGroupResponseBatchOperationStatus BatchOperationStatus represents the current status of the batch operation.
+type ExternalclusterV1GetNodeGroupResponseBatchOperationStatus string
+
+// ExternalclusterV1GetNodeGroupResponseCreatedNode defines model for externalcluster.v1.GetNodeGroupResponse.CreatedNode.
+type ExternalclusterV1GetNodeGroupResponseCreatedNode struct {
+	InstanceType *string `json:"instanceType,omitempty"`
+	NodeId       *string `json:"nodeId,omitempty"`
+
+	// Status NodeStatus represents the status of a provisioned node.
+	Status *ExternalclusterV1GetNodeGroupResponseNodeStatus `json:"status,omitempty"`
+}
+
+// ExternalclusterV1GetNodeGroupResponseNodeStatus NodeStatus represents the status of a provisioned node.
+type ExternalclusterV1GetNodeGroupResponseNodeStatus string
+
+// ExternalclusterV1GetNodeGroupResponseOperationError defines model for externalcluster.v1.GetNodeGroupResponse.OperationError.
+type ExternalclusterV1GetNodeGroupResponseOperationError struct {
+	Code    *string `json:"code,omitempty"`
+	Message *string `json:"message,omitempty"`
 }
 
 // ExternalclusterV1HandleCloudEventResponse HandleCloudEventResponse is the result of HandleCloudEventRequest.
@@ -5727,6 +5831,12 @@ type ExternalclusterV1NodeAffinity struct {
 	DedicatedGroup *string `json:"dedicatedGroup"`
 }
 
+// ExternalclusterV1NodeCapacity defines model for externalcluster.v1.NodeCapacity.
+type ExternalclusterV1NodeCapacity struct {
+	// Instances Number of nodes to be created.
+	Instances *int32 `json:"instances,omitempty"`
+}
+
 // ExternalclusterV1NodeConfig defines model for externalcluster.v1.NodeConfig.
 type ExternalclusterV1NodeConfig struct {
 	// Aws AWSNodeConfig holds AWS-specific configuration for node provisioning.
@@ -5776,6 +5886,68 @@ type ExternalclusterV1NodeConfig struct {
 
 	// Zone Zone of the node.
 	Zone *string `json:"zone"`
+}
+
+// ExternalclusterV1NodeGroupConfig defines model for externalcluster.v1.NodeGroupConfig.
+type ExternalclusterV1NodeGroupConfig struct {
+	// Aws AWSNodeConfig holds AWS-specific configuration for node provisioning.
+	Aws *ExternalclusterV1AWSNodeConfig `json:"aws,omitempty"`
+
+	// ConfigurationId ID reference of Node configuration (template) to be used for node creation.
+	ConfigurationId *string `json:"configurationId"`
+
+	// EdgeConfig EdgeConfig holds Edge specific configuration.
+	EdgeConfig *ExternalclusterV1EdgeConfig `json:"edgeConfig,omitempty"`
+
+	// GpuConfig GPUConfig describes instance GPU configuration.
+	//
+	// Use for:
+	// * Creating GCP N1 with customer quantity and type of GPUs attached.
+	// * Setting required labels for AKS GPU nodes.
+	// * Configuring gpu sharing.
+	// Required while provisioning GCP N1 instance types with GPU.
+	// Eg.: n1-standard-2 with 8 x NVIDIA Tesla K80
+	GpuConfig *ExternalclusterV1GPUConfig `json:"gpuConfig,omitempty"`
+
+	// KubernetesLabels Node Kubernetes labels.
+	KubernetesLabels *map[string]string `json:"kubernetesLabels,omitempty"`
+
+	// KubernetesTaints Node Kubernetes taints.
+	KubernetesTaints *[]ExternalclusterV1Taint `json:"kubernetesTaints,omitempty"`
+
+	// NodeAffinity NodeAffinity provides control over the assignment of individual nodes to dedicated host instances.
+	NodeAffinity *ExternalclusterV1NodeAffinity `json:"nodeAffinity,omitempty"`
+
+	// SpotConfig NodeSpotConfig defines if node should be created as spot instance, and params for creation.
+	SpotConfig *ExternalclusterV1NodeSpotConfig `json:"spotConfig,omitempty"`
+
+	// Volume NodeVolume defines node's local root volume configuration.
+	Volume *ExternalclusterV1NodeVolume `json:"volume,omitempty"`
+}
+
+// ExternalclusterV1NodeGroupOption defines model for externalcluster.v1.NodeGroupOption.
+type ExternalclusterV1NodeGroupOption struct {
+	CapacityPerNode *ExternalclusterV1NodeCapacity `json:"capacityPerNode,omitempty"`
+
+	// InstanceType Instance type of the node.
+	InstanceType *string `json:"instanceType,omitempty"`
+
+	// SubnetId Node subnet ID.
+	SubnetId *string `json:"subnetId"`
+
+	// Zone Zone of the node.
+	Zone *string `json:"zone"`
+}
+
+// ExternalclusterV1NodeGroupSpec defines model for externalcluster.v1.NodeGroupSpec.
+type ExternalclusterV1NodeGroupSpec struct {
+	BaseConfig *ExternalclusterV1NodeGroupConfig    `json:"baseConfig,omitempty"`
+	Eks        *ExternalclusterV1EKSNodeGroupConfig `json:"eks,omitempty"`
+
+	// Options List of different options for nodes in the group.
+	// Ordered by preference. Each option is merged with the baseConfiguration.
+	Options       *[]ExternalclusterV1NodeGroupOption `json:"options,omitempty"`
+	TotalCapacity *ExternalclusterV1NodeCapacity      `json:"totalCapacity,omitempty"`
 }
 
 // ExternalclusterV1NodeInfo defines model for externalcluster.v1.NodeInfo.
@@ -10555,6 +10727,15 @@ type DboAPIGetCacheGroupPerformanceParams struct {
 
 	// StepSeconds Aggregate items in specified interval steps.
 	StepSeconds int64 `form:"stepSeconds" json:"stepSeconds"`
+
+	// DatabaseId Filter by specific database (cache configuration) ID.
+	DatabaseId *string `form:"databaseId,omitempty" json:"databaseId,omitempty"`
+
+	// EndpointName Filter by endpoint name. Cannot be combined with username.
+	EndpointName *string `form:"endpointName,omitempty" json:"endpointName,omitempty"`
+
+	// Username Filter by username. Cannot be combined with endpoint_name.
+	Username *string `form:"username,omitempty" json:"username,omitempty"`
 }
 
 // DboAPIGetCacheGroupOperationalMetricsParams defines parameters for DboAPIGetCacheGroupOperationalMetrics.
@@ -11553,6 +11734,9 @@ type ExternalClusterAPIGKECreateSAJSONRequestBody = ExternalClusterAPIGKECreateS
 
 // ExternalClusterAPIIngestInstanceLogsJSONRequestBody defines body for ExternalClusterAPIIngestInstanceLogs for application/json ContentType.
 type ExternalClusterAPIIngestInstanceLogsJSONRequestBody = ExternalclusterV1NodeLogs
+
+// ExternalClusterAPIAddNodeGroupJSONRequestBody defines body for ExternalClusterAPIAddNodeGroup for application/json ContentType.
+type ExternalClusterAPIAddNodeGroupJSONRequestBody = ExternalclusterV1NodeGroupSpec
 
 // ExternalClusterAPIAddNodeJSONRequestBody defines body for ExternalClusterAPIAddNode for application/json ContentType.
 type ExternalClusterAPIAddNodeJSONRequestBody = ExternalclusterV1NodeConfig

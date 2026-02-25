@@ -172,7 +172,7 @@ test,3b3de39c-bc44-4d69-be2d-69527dfe9958,630226bb-5170-4b95-90b0-f222757130c1,S
 						InstanceType:          lo.ToPtr("Standard_D32as_v4"),
 						InstanceTypeCpu:       lo.ToPtr("32"),
 						InstanceTypeMemoryMib: lo.ToPtr("131072"),
-						Plan:                  lo.ToPtr(sdk.THREEYEAR),
+						Plan:                  lo.ToPtr(sdk.CastaiInventoryV1beta1AzureReservationReservationPlanTHREEYEAR),
 						Scope:                 lo.ToPtr("Single subscription"),
 						ScopeResourceGroup:    lo.ToPtr("All resource groups"),
 						ScopeSubscription:     lo.ToPtr("8faa0959-093b-4612-8686-a996ac19db00"),

@@ -509,6 +509,14 @@ type ClientInterface interface {
 
 	ExternalClusterAPIIngestInstanceLogs(ctx context.Context, clusterId string, instanceId string, body ExternalClusterAPIIngestInstanceLogsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// ExternalClusterAPIAddNodeGroupWithBody request with any body
+	ExternalClusterAPIAddNodeGroupWithBody(ctx context.Context, clusterId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	ExternalClusterAPIAddNodeGroup(ctx context.Context, clusterId string, body ExternalClusterAPIAddNodeGroupJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// ExternalClusterAPIGetNodeGroup request
+	ExternalClusterAPIGetNodeGroup(ctx context.Context, clusterId string, nodeGroupId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// ExternalClusterAPIListNodes request
 	ExternalClusterAPIListNodes(ctx context.Context, clusterId string, params *ExternalClusterAPIListNodesParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -2845,6 +2853,42 @@ func (c *Client) ExternalClusterAPIIngestInstanceLogsWithBody(ctx context.Contex
 
 func (c *Client) ExternalClusterAPIIngestInstanceLogs(ctx context.Context, clusterId string, instanceId string, body ExternalClusterAPIIngestInstanceLogsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewExternalClusterAPIIngestInstanceLogsRequest(c.Server, clusterId, instanceId, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) ExternalClusterAPIAddNodeGroupWithBody(ctx context.Context, clusterId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewExternalClusterAPIAddNodeGroupRequestWithBody(c.Server, clusterId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) ExternalClusterAPIAddNodeGroup(ctx context.Context, clusterId string, body ExternalClusterAPIAddNodeGroupJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewExternalClusterAPIAddNodeGroupRequest(c.Server, clusterId, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) ExternalClusterAPIGetNodeGroup(ctx context.Context, clusterId string, nodeGroupId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewExternalClusterAPIGetNodeGroupRequest(c.Server, clusterId, nodeGroupId)
 	if err != nil {
 		return nil, err
 	}
@@ -8400,6 +8444,54 @@ func NewDboAPIGetCacheGroupPerformanceRequest(server string, id string, params *
 			}
 		}
 
+		if params.DatabaseId != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "databaseId", runtime.ParamLocationQuery, *params.DatabaseId); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.EndpointName != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "endpointName", runtime.ParamLocationQuery, *params.EndpointName); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.Username != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "username", runtime.ParamLocationQuery, *params.Username); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
 		queryURL.RawQuery = queryValues.Encode()
 	}
 
@@ -11955,6 +12047,94 @@ func NewExternalClusterAPIIngestInstanceLogsRequestWithBody(server string, clust
 	}
 
 	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewExternalClusterAPIAddNodeGroupRequest calls the generic ExternalClusterAPIAddNodeGroup builder with application/json body
+func NewExternalClusterAPIAddNodeGroupRequest(server string, clusterId string, body ExternalClusterAPIAddNodeGroupJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewExternalClusterAPIAddNodeGroupRequestWithBody(server, clusterId, "application/json", bodyReader)
+}
+
+// NewExternalClusterAPIAddNodeGroupRequestWithBody generates requests for ExternalClusterAPIAddNodeGroup with any type of body
+func NewExternalClusterAPIAddNodeGroupRequestWithBody(server string, clusterId string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "clusterId", runtime.ParamLocationPath, clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/kubernetes/external-clusters/%s/node-groups", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewExternalClusterAPIGetNodeGroupRequest generates requests for ExternalClusterAPIGetNodeGroup
+func NewExternalClusterAPIGetNodeGroupRequest(server string, clusterId string, nodeGroupId string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "clusterId", runtime.ParamLocationPath, clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "nodeGroupId", runtime.ParamLocationPath, nodeGroupId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/kubernetes/external-clusters/%s/node-groups/%s", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
 
 	return req, nil
 }
@@ -21038,6 +21218,14 @@ type ClientWithResponsesInterface interface {
 
 	ExternalClusterAPIIngestInstanceLogsWithResponse(ctx context.Context, clusterId string, instanceId string, body ExternalClusterAPIIngestInstanceLogsJSONRequestBody) (*ExternalClusterAPIIngestInstanceLogsResponse, error)
 
+	// ExternalClusterAPIAddNodeGroup request  with any body
+	ExternalClusterAPIAddNodeGroupWithBodyWithResponse(ctx context.Context, clusterId string, contentType string, body io.Reader) (*ExternalClusterAPIAddNodeGroupResponse, error)
+
+	ExternalClusterAPIAddNodeGroupWithResponse(ctx context.Context, clusterId string, body ExternalClusterAPIAddNodeGroupJSONRequestBody) (*ExternalClusterAPIAddNodeGroupResponse, error)
+
+	// ExternalClusterAPIGetNodeGroup request
+	ExternalClusterAPIGetNodeGroupWithResponse(ctx context.Context, clusterId string, nodeGroupId string) (*ExternalClusterAPIGetNodeGroupResponse, error)
+
 	// ExternalClusterAPIListNodes request
 	ExternalClusterAPIListNodesWithResponse(ctx context.Context, clusterId string, params *ExternalClusterAPIListNodesParams) (*ExternalClusterAPIListNodesResponse, error)
 
@@ -25012,6 +25200,66 @@ func (r ExternalClusterAPIIngestInstanceLogsResponse) StatusCode() int {
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
 func (r ExternalClusterAPIIngestInstanceLogsResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type ExternalClusterAPIAddNodeGroupResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *ExternalclusterV1AddNodeGroupResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r ExternalClusterAPIAddNodeGroupResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r ExternalClusterAPIAddNodeGroupResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r ExternalClusterAPIAddNodeGroupResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type ExternalClusterAPIGetNodeGroupResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *ExternalclusterV1GetNodeGroupResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r ExternalClusterAPIGetNodeGroupResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r ExternalClusterAPIGetNodeGroupResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r ExternalClusterAPIGetNodeGroupResponse) GetBody() []byte {
 	return r.Body
 }
 
@@ -30577,6 +30825,32 @@ func (c *ClientWithResponses) ExternalClusterAPIIngestInstanceLogsWithResponse(c
 	return ParseExternalClusterAPIIngestInstanceLogsResponse(rsp)
 }
 
+// ExternalClusterAPIAddNodeGroupWithBodyWithResponse request with arbitrary body returning *ExternalClusterAPIAddNodeGroupResponse
+func (c *ClientWithResponses) ExternalClusterAPIAddNodeGroupWithBodyWithResponse(ctx context.Context, clusterId string, contentType string, body io.Reader) (*ExternalClusterAPIAddNodeGroupResponse, error) {
+	rsp, err := c.ExternalClusterAPIAddNodeGroupWithBody(ctx, clusterId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseExternalClusterAPIAddNodeGroupResponse(rsp)
+}
+
+func (c *ClientWithResponses) ExternalClusterAPIAddNodeGroupWithResponse(ctx context.Context, clusterId string, body ExternalClusterAPIAddNodeGroupJSONRequestBody) (*ExternalClusterAPIAddNodeGroupResponse, error) {
+	rsp, err := c.ExternalClusterAPIAddNodeGroup(ctx, clusterId, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseExternalClusterAPIAddNodeGroupResponse(rsp)
+}
+
+// ExternalClusterAPIGetNodeGroupWithResponse request returning *ExternalClusterAPIGetNodeGroupResponse
+func (c *ClientWithResponses) ExternalClusterAPIGetNodeGroupWithResponse(ctx context.Context, clusterId string, nodeGroupId string) (*ExternalClusterAPIGetNodeGroupResponse, error) {
+	rsp, err := c.ExternalClusterAPIGetNodeGroup(ctx, clusterId, nodeGroupId)
+	if err != nil {
+		return nil, err
+	}
+	return ParseExternalClusterAPIGetNodeGroupResponse(rsp)
+}
+
 // ExternalClusterAPIListNodesWithResponse request returning *ExternalClusterAPIListNodesResponse
 func (c *ClientWithResponses) ExternalClusterAPIListNodesWithResponse(ctx context.Context, clusterId string, params *ExternalClusterAPIListNodesParams) (*ExternalClusterAPIListNodesResponse, error) {
 	rsp, err := c.ExternalClusterAPIListNodes(ctx, clusterId, params)
@@ -35198,6 +35472,58 @@ func ParseExternalClusterAPIIngestInstanceLogsResponse(rsp *http.Response) (*Ext
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest ExternalclusterV1IngestInstanceLogsResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseExternalClusterAPIAddNodeGroupResponse parses an HTTP response from a ExternalClusterAPIAddNodeGroupWithResponse call
+func ParseExternalClusterAPIAddNodeGroupResponse(rsp *http.Response) (*ExternalClusterAPIAddNodeGroupResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &ExternalClusterAPIAddNodeGroupResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest ExternalclusterV1AddNodeGroupResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseExternalClusterAPIGetNodeGroupResponse parses an HTTP response from a ExternalClusterAPIGetNodeGroupWithResponse call
+func ParseExternalClusterAPIGetNodeGroupResponse(rsp *http.Response) (*ExternalClusterAPIGetNodeGroupResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &ExternalClusterAPIGetNodeGroupResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest ExternalclusterV1GetNodeGroupResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
