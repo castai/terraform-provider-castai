@@ -86,6 +86,7 @@ const (
 	FieldNodeTemplateSharingConfiguration                     = "sharing_configuration"
 	FieldNodeTemplateSharedClientsPerGpu                      = "shared_clients_per_gpu"
 	FieldNodeTemplateSharedGpuName                            = "gpu_name"
+	FieldNodeTemplateSharingStrategy                          = "sharing_strategy"
 	FieldNodeTemplateClmEnabled                               = "clm_enabled"
 	FieldNodeTemplateEdgeLocationIDs                          = "edge_location_ids"
 	FieldNodeTemplatePriceAdjustmentConfiguration             = "price_adjustment_configuration"
@@ -679,11 +680,44 @@ func resourceNodeTemplate() *schema.Resource {
 				DiffSuppressFunc: compareLists,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
+						FieldNodeTemplateSharingStrategy: {
+							Type:             schema.TypeString,
+							Optional:         true,
+							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"time-slicing", "mps"}, false)),
+							Description:      "GPU sharing strategy. Supported values: `time-slicing`, `mps`.",
+							DiffSuppressFunc: func(k, oldVal, newVal string, d *schema.ResourceData) bool {
+								// Suppress diff when sharing_strategy is not configured but enable_time_sharing=true
+								// implies time-slicing, so the API returning "time-slicing" is not a real change.
+								//
+								//	The DiffSuppressFunc receives k — the full key path of the field that's diffing, which looks like:
+								//	gpu.0.sharing_strategy
+								//	We need to check the sibling field enable_time_sharing at the same path:
+								//	gpu.0.enable_time_sharing
+								//	So the code:
+								//	prefix := k[:len(k)-len(FieldNodeTemplateSharingStrategy)]
+								//	// k                    = "gpu.0.sharing_strategy"
+								//	// len("sharing_strategy") chars stripped from end
+								//	// prefix               = "gpu.0."
+								//
+								//Then:
+								//	d.GetOk(prefix + FieldNodeTemplateEnableTimeSharing)
+								//	// = d.GetOk("gpu.0." + "enable_time_sharing")
+								//	// = d.GetOk("gpu.0.enable_time_sharing")
+								if newVal == "" && oldVal == "time-slicing" {
+									prefix := k[:len(k)-len(FieldNodeTemplateSharingStrategy)]
+									if v, ok := d.GetOk(prefix + FieldNodeTemplateEnableTimeSharing); ok && v.(bool) {
+										return true
+									}
+								}
+								return false
+							},
+						},
 						FieldNodeTemplateEnableTimeSharing: {
 							Type:        schema.TypeBool,
 							Optional:    true,
 							Default:     nil,
-							Description: "Enable/disable GPU time-sharing.",
+							Deprecated:  "Use sharing_strategy instead.",
+							Description: "Enable/disable GPU time-sharing. Deprecated: use sharing_strategy = \"time-slicing\" instead.",
 						},
 						FieldNodeTemplateDefaultSharedClientsPerGpu: {
 							Type:        schema.TypeInt,
@@ -880,6 +914,10 @@ func flattenGpuSettings(g *sdk.NodetemplatesV1GPU) ([]map[string]any, error) {
 
 	if g.UserManagedGpuDrivers != nil {
 		out[FieldNodeTemplateUserManagedGPUDrivers] = g.UserManagedGpuDrivers
+	}
+
+	if g.SharingStrategy != nil {
+		out[FieldNodeTemplateSharingStrategy] = gpuSharingStrategyToTerraform(*g.SharingStrategy)
 	}
 
 	if g.EnableTimeSharing != nil {
@@ -1175,6 +1213,7 @@ func updateNodeTemplate(ctx context.Context, d *schema.ResourceData, meta any, s
 		FieldNodeTemplateGpu,
 		FieldNodeTemplateDefaultSharedClientsPerGpu,
 		FieldNodeTemplateEnableTimeSharing,
+		FieldNodeTemplateSharingStrategy,
 		FieldNodeTemplateSharingConfiguration,
 		FieldNodeTemplateSharedGpuName,
 		FieldNodeTemplateSharedClientsPerGpu,
@@ -1702,6 +1741,12 @@ func toTemplateGpu(obj map[string]any) *sdk.NodetemplatesV1GPU {
 		defaultSharedClientsPerGpu = int32(v)
 	}
 
+	var sharingStrategy *sdk.NodetemplatesV1GPUSharingStrategy
+	if v, ok := obj[FieldNodeTemplateSharingStrategy].(string); ok && v != "" {
+		s := gpuSharingStrategyToAPI(v)
+		sharingStrategy = &s
+	}
+
 	var enableTimeSharing bool
 	if v, ok := obj[FieldNodeTemplateEnableTimeSharing].(bool); ok {
 		enableTimeSharing = v
@@ -1728,13 +1773,14 @@ func toTemplateGpu(obj map[string]any) *sdk.NodetemplatesV1GPU {
 	// terraform treats nil values as zero values
 	// this condition checks whether the whole gpu configuration is deleted
 	// and gpu configuration should be set to nil
-	if defaultSharedClientsPerGpu == 0 && !enableTimeSharing && len(sharingConfig) == 0 && !userManagedGPUDrivers {
+	if defaultSharedClientsPerGpu == 0 && !enableTimeSharing && sharingStrategy == nil && len(sharingConfig) == 0 && !userManagedGPUDrivers {
 		return nil
 	}
 
 	result := &sdk.NodetemplatesV1GPU{
 		EnableTimeSharing:    &enableTimeSharing,
 		SharingConfiguration: &sharingConfig,
+		SharingStrategy:      sharingStrategy,
 	}
 
 	// Only set DefaultSharedClientsPerGpu if it's non-zero to avoid API validation errors
@@ -1924,4 +1970,28 @@ func compareLists(key, oldValue, newValue string, d *schema.ResourceData) bool {
 		return reflect.DeepEqual(oldItems, newItems)
 	}
 	return false
+}
+
+// gpuSharingStrategyToAPI converts a terraform-friendly strategy string to the API enum value.
+func gpuSharingStrategyToAPI(s string) sdk.NodetemplatesV1GPUSharingStrategy {
+	switch s {
+	case "mps":
+		return sdk.GPUSHARINGSTRATEGYMPS
+	case "time-slicing":
+		return sdk.GPUSHARINGSTRATEGYTIMESLICING
+	default:
+		return sdk.GPUSHARINGSTRATEGYUNSPECIFIED
+	}
+}
+
+// gpuSharingStrategyToTerraform converts the API enum value to a terraform-friendly string.
+func gpuSharingStrategyToTerraform(s sdk.NodetemplatesV1GPUSharingStrategy) string {
+	switch s {
+	case sdk.GPUSHARINGSTRATEGYMPS:
+		return "mps"
+	case sdk.GPUSHARINGSTRATEGYTIMESLICING:
+		return "time-slicing"
+	default:
+		return ""
+	}
 }

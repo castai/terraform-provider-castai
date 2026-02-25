@@ -519,6 +519,13 @@ const (
 	NodetemplatesV1AvailableInstanceTypeStorageOptimizedOptionOnDemand NodetemplatesV1AvailableInstanceTypeStorageOptimizedOption = "OnDemand"
 )
 
+// Defines values for NodetemplatesV1GPUSharingStrategy.
+const (
+	GPUSHARINGSTRATEGYMPS         NodetemplatesV1GPUSharingStrategy = "GPU_SHARING_STRATEGY_MPS"
+	GPUSHARINGSTRATEGYTIMESLICING NodetemplatesV1GPUSharingStrategy = "GPU_SHARING_STRATEGY_TIME_SLICING"
+	GPUSHARINGSTRATEGYUNSPECIFIED NodetemplatesV1GPUSharingStrategy = "GPU_SHARING_STRATEGY_UNSPECIFIED"
+)
+
 // Defines values for NodetemplatesV1TaintEffect.
 const (
 	NoExecute  NodetemplatesV1TaintEffect = "NoExecute"
@@ -637,11 +644,28 @@ const (
 	TargetNodeSelectionAlgorithmUtilizedPrice   ScheduledrebalancingV1TargetNodeSelectionAlgorithm = "TargetNodeSelectionAlgorithmUtilizedPrice"
 )
 
+// Defines values for WorkloadoptimizationV1ActionType.
+const (
+	ACTIONTYPEUNSPECIFIED WorkloadoptimizationV1ActionType = "ACTION_TYPE_UNSPECIFIED"
+	APPLY                 WorkloadoptimizationV1ActionType = "APPLY"
+	IGNORE                WorkloadoptimizationV1ActionType = "IGNORE"
+	PERSIST               WorkloadoptimizationV1ActionType = "PERSIST"
+)
+
 // Defines values for WorkloadoptimizationV1ApplyType.
 const (
 	WorkloadoptimizationV1ApplyTypeDEFERRED  WorkloadoptimizationV1ApplyType = "DEFERRED"
 	WorkloadoptimizationV1ApplyTypeIMMEDIATE WorkloadoptimizationV1ApplyType = "IMMEDIATE"
 	WorkloadoptimizationV1ApplyTypeUNKNOWN   WorkloadoptimizationV1ApplyType = "UNKNOWN"
+)
+
+// Defines values for WorkloadoptimizationV1CustomMetricsDataSourceStatus.
+const (
+	WorkloadoptimizationV1CustomMetricsDataSourceStatusCONNECTED     WorkloadoptimizationV1CustomMetricsDataSourceStatus = "CONNECTED"
+	WorkloadoptimizationV1CustomMetricsDataSourceStatusCONNECTING    WorkloadoptimizationV1CustomMetricsDataSourceStatus = "CONNECTING"
+	WorkloadoptimizationV1CustomMetricsDataSourceStatusFAILED        WorkloadoptimizationV1CustomMetricsDataSourceStatus = "FAILED"
+	WorkloadoptimizationV1CustomMetricsDataSourceStatusSTATUSUNKNOWN WorkloadoptimizationV1CustomMetricsDataSourceStatus = "STATUS_UNKNOWN"
+	WorkloadoptimizationV1CustomMetricsDataSourceStatusSYNCING       WorkloadoptimizationV1CustomMetricsDataSourceStatus = "SYNCING"
 )
 
 // Defines values for WorkloadoptimizationV1CustomMetricsDataSourceType.
@@ -789,6 +813,7 @@ const (
 	ERRORCUSTOMWORKLOADCONTAINERSMISMATCH WorkloadoptimizationV1RecommendationErrorType = "ERROR_CUSTOM_WORKLOAD_CONTAINERS_MISMATCH"
 	ERRORCUSTOMWORKLOADINVALIDNAME        WorkloadoptimizationV1RecommendationErrorType = "ERROR_CUSTOM_WORKLOAD_INVALID_NAME"
 	ERRORDEPLOYFAILED                     WorkloadoptimizationV1RecommendationErrorType = "ERROR_DEPLOY_FAILED"
+	ERRORRECOMMENDATIONGENERATION         WorkloadoptimizationV1RecommendationErrorType = "ERROR_RECOMMENDATION_GENERATION"
 	ERRORUNKNOWN                          WorkloadoptimizationV1RecommendationErrorType = "ERROR_UNKNOWN"
 )
 
@@ -1210,10 +1235,10 @@ const (
 
 // Defines values for WorkloadOptimizationAPIListWorkloadsParamsRecommendationStatusType.
 const (
-	STATUSAPPLIED WorkloadOptimizationAPIListWorkloadsParamsRecommendationStatusType = "STATUS_APPLIED"
-	STATUSSTOPPED WorkloadOptimizationAPIListWorkloadsParamsRecommendationStatusType = "STATUS_STOPPED"
-	STATUSUNKNOWN WorkloadOptimizationAPIListWorkloadsParamsRecommendationStatusType = "STATUS_UNKNOWN"
-	STATUSWAITING WorkloadOptimizationAPIListWorkloadsParamsRecommendationStatusType = "STATUS_WAITING"
+	WorkloadOptimizationAPIListWorkloadsParamsRecommendationStatusTypeSTATUSAPPLIED WorkloadOptimizationAPIListWorkloadsParamsRecommendationStatusType = "STATUS_APPLIED"
+	WorkloadOptimizationAPIListWorkloadsParamsRecommendationStatusTypeSTATUSSTOPPED WorkloadOptimizationAPIListWorkloadsParamsRecommendationStatusType = "STATUS_STOPPED"
+	WorkloadOptimizationAPIListWorkloadsParamsRecommendationStatusTypeSTATUSUNKNOWN WorkloadOptimizationAPIListWorkloadsParamsRecommendationStatusType = "STATUS_UNKNOWN"
+	WorkloadOptimizationAPIListWorkloadsParamsRecommendationStatusTypeSTATUSWAITING WorkloadOptimizationAPIListWorkloadsParamsRecommendationStatusType = "STATUS_WAITING"
 )
 
 // Defines values for WorkloadOptimizationAPIListWorkloadsParamsAnyContainerWithRuntime.
@@ -6261,7 +6286,8 @@ type NodeconfigV1AKSConfigLoadBalancersNICBasedBackendPool struct {
 
 // NodeconfigV1AKSConfigOsDiskEphemeral defines model for nodeconfig.v1.AKSConfig.OsDiskEphemeral.
 type NodeconfigV1AKSConfigOsDiskEphemeral struct {
-	// CacheType Type of cache to use for the ephemeral OS disk. Default is READ_ONLY.
+	// CacheType Deprecated: This message exists for compatibility reasons only.
+	// Deprecated:
 	CacheType *NodeconfigV1AKSConfigOsDiskEphemeralCacheType `json:"cacheType,omitempty"`
 
 	// Placement Placement of the ephemeral OS disk. If unspecified, the default value is picked based on VM SKU.
@@ -6269,7 +6295,7 @@ type NodeconfigV1AKSConfigOsDiskEphemeral struct {
 	Placement *NodeconfigV1AKSConfigOsDiskEphemeralPlacement `json:"placement,omitempty"`
 }
 
-// NodeconfigV1AKSConfigOsDiskEphemeralCacheType Type of cache to use for the ephemeral OS disk. Default is READ_ONLY.
+// NodeconfigV1AKSConfigOsDiskEphemeralCacheType Deprecated: This message exists for compatibility reasons only.
 type NodeconfigV1AKSConfigOsDiskEphemeralCacheType string
 
 // NodeconfigV1AKSConfigOsDiskEphemeralPlacement Placement of the ephemeral OS disk. If unspecified, the default value is picked based on VM SKU.
@@ -6354,9 +6380,7 @@ type NodeconfigV1EKSConfig struct {
 
 	// InstanceProfileArn Cluster's instance profile ARN used for CAST provisioned nodes.
 	InstanceProfileArn string `json:"instanceProfileArn"`
-
-	// IpsPerPrefix Number of IPs per prefix to be used for calculating max pods. Defaults to 1.
-	IpsPerPrefix *int32 `json:"ipsPerPrefix"`
+	IpsPerPrefix       *int32 `json:"ipsPerPrefix"`
 
 	// KeyPairId AWS key pair ID to be used for provisioned nodes. Has priority over sshPublicKey.
 	KeyPairId             *string `json:"keyPairId"`
@@ -6788,11 +6812,18 @@ type NodetemplatesV1FilterInstanceTypesResponse struct {
 
 // NodetemplatesV1GPU defines model for nodetemplates.v1.GPU.
 type NodetemplatesV1GPU struct {
-	DefaultSharedClientsPerGpu *int32                               `json:"defaultSharedClientsPerGpu"`
-	EnableTimeSharing          *bool                                `json:"enableTimeSharing,omitempty"`
-	SharingConfiguration       *map[string]NodetemplatesV1SharedGPU `json:"sharingConfiguration,omitempty"`
-	UserManagedGpuDrivers      *bool                                `json:"userManagedGpuDrivers"`
+	DefaultSharedClientsPerGpu *int32 `json:"defaultSharedClientsPerGpu"`
+
+	// EnableTimeSharing Deprecated: Use sharing_strategy instead. This field is kept for backward compatibility.
+	// Deprecated:
+	EnableTimeSharing     *bool                                `json:"enableTimeSharing,omitempty"`
+	SharingConfiguration  *map[string]NodetemplatesV1SharedGPU `json:"sharingConfiguration,omitempty"`
+	SharingStrategy       *NodetemplatesV1GPUSharingStrategy   `json:"sharingStrategy,omitempty"`
+	UserManagedGpuDrivers *bool                                `json:"userManagedGpuDrivers"`
 }
+
+// NodetemplatesV1GPUSharingStrategy defines model for nodetemplates.v1.GPUSharingStrategy.
+type NodetemplatesV1GPUSharingStrategy string
 
 // NodetemplatesV1GenerateNodeTemplatesResponse defines model for nodetemplates.v1.GenerateNodeTemplatesResponse.
 type NodetemplatesV1GenerateNodeTemplatesResponse struct {
@@ -8014,6 +8045,9 @@ type ScheduledrebalancingV1TriggerConditions struct {
 	SavingsPercentage *float32 `json:"savingsPercentage,omitempty"`
 }
 
+// WorkloadoptimizationV1ActionType defines model for workloadoptimization.v1.ActionType.
+type WorkloadoptimizationV1ActionType string
+
 // WorkloadoptimizationV1AggregatedCPUStallMetrics defines model for workloadoptimization.v1.AggregatedCPUStallMetrics.
 type WorkloadoptimizationV1AggregatedCPUStallMetrics struct {
 	Avg float64 `json:"avg"`
@@ -8206,11 +8240,24 @@ type WorkloadoptimizationV1ContainerConstraintsV3 struct {
 	Min *float64 `json:"min"`
 }
 
+// WorkloadoptimizationV1ContainerRecommendationSummary defines model for workloadoptimization.v1.ContainerRecommendationSummary.
+type WorkloadoptimizationV1ContainerRecommendationSummary struct {
+	Resources  *WorkloadoptimizationV1Resources            `json:"resources,omitempty"`
+	Steps      *[]WorkloadoptimizationV1RecommendationStep `json:"steps,omitempty"`
+	Thresholds *WorkloadoptimizationV1ContainerThresholds  `json:"thresholds,omitempty"`
+}
+
 // WorkloadoptimizationV1ContainerResourceMetricSource defines model for workloadoptimization.v1.ContainerResourceMetricSource.
 type WorkloadoptimizationV1ContainerResourceMetricSource struct {
 	Container string                             `json:"container"`
 	Name      string                             `json:"name"`
 	Target    WorkloadoptimizationV1MetricTarget `json:"target"`
+}
+
+// WorkloadoptimizationV1ContainerThresholds defines model for workloadoptimization.v1.ContainerThresholds.
+type WorkloadoptimizationV1ContainerThresholds struct {
+	Cpu    *WorkloadoptimizationV1ResourceThreshold `json:"cpu,omitempty"`
+	Memory *WorkloadoptimizationV1ResourceThreshold `json:"memory,omitempty"`
 }
 
 // WorkloadoptimizationV1Costs defines model for workloadoptimization.v1.Costs.
@@ -8241,10 +8288,11 @@ type WorkloadoptimizationV1CrossVersionObjectReference struct {
 
 // WorkloadoptimizationV1CustomMetricsDataSource defines model for workloadoptimization.v1.CustomMetricsDataSource.
 type WorkloadoptimizationV1CustomMetricsDataSource struct {
-	ClusterId string                                            `json:"clusterId"`
-	CreatedAt time.Time                                         `json:"createdAt"`
-	Data      WorkloadoptimizationV1CustomMetricsDataSourceData `json:"data"`
-	Id        string                                            `json:"id"`
+	ClusterId string                                                `json:"clusterId"`
+	CreatedAt time.Time                                             `json:"createdAt"`
+	Data      WorkloadoptimizationV1CustomMetricsDataSourceData     `json:"data"`
+	Errors    *[]WorkloadoptimizationV1CustomMetricsDataSourceError `json:"errors,omitempty"`
+	Id        string                                                `json:"id"`
 
 	// KubeResourceName KubeResourceName is the name of the resource in Kubernetes. Cannot be updated, as it would break the sync.
 	// It is NOT unique per cluster as multiple data source entries in the DB may form a single resource in the cluster.
@@ -8254,15 +8302,21 @@ type WorkloadoptimizationV1CustomMetricsDataSource struct {
 	// ManagedByCast ManagedByCast indicates whether the source of truth is a CAST database. If true, the resource
 	// is automatically synchronized from the database to the cluster. If false, the resource is
 	// synchronized in the opposite direction (from the cluster to the database).
-	ManagedByCast  bool       `json:"managedByCast"`
-	Name           string     `json:"name"`
-	OrganizationId string     `json:"organizationId"`
-	SyncedAt       *time.Time `json:"syncedAt"`
+	ManagedByCast  bool   `json:"managedByCast"`
+	Name           string `json:"name"`
+	OrganizationId string `json:"organizationId"`
+
+	// Status Status represents the synchronization status of the custom metrics data source. It indicates whether the data
+	// source is currently being synchronized, has been successfully synchronized, is in the process of syncing, or has
+	// failed to sync.
+	Status   WorkloadoptimizationV1CustomMetricsDataSourceStatus `json:"status"`
+	SyncedAt *time.Time                                          `json:"syncedAt"`
 
 	// Type Type defines the type of custom metrics data source. Respective Data field will be populated based on the type.
 	// For each type, exactly one of the data fields should be populated.
-	Type      WorkloadoptimizationV1CustomMetricsDataSourceType `json:"type"`
-	UpdatedAt time.Time                                         `json:"updatedAt"`
+	Type      WorkloadoptimizationV1CustomMetricsDataSourceType       `json:"type"`
+	UpdatedAt time.Time                                               `json:"updatedAt"`
+	Warnings  *[]WorkloadoptimizationV1CustomMetricsDataSourceWarning `json:"warnings,omitempty"`
 }
 
 // WorkloadoptimizationV1CustomMetricsDataSourceData defines model for workloadoptimization.v1.CustomMetricsDataSource.Data.
@@ -8305,9 +8359,42 @@ type WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetrics struct {
 	Presets *[]string `json:"presets,omitempty"`
 }
 
+// WorkloadoptimizationV1CustomMetricsDataSourceError defines model for workloadoptimization.v1.CustomMetricsDataSource.Error.
+type WorkloadoptimizationV1CustomMetricsDataSourceError struct {
+	Generic *WorkloadoptimizationV1CustomMetricsDataSourceErrorGenericError `json:"generic,omitempty"`
+	Metric  *WorkloadoptimizationV1CustomMetricsDataSourceErrorMetricError  `json:"metric,omitempty"`
+}
+
+// WorkloadoptimizationV1CustomMetricsDataSourceErrorGenericError defines model for workloadoptimization.v1.CustomMetricsDataSource.Error.GenericError.
+type WorkloadoptimizationV1CustomMetricsDataSourceErrorGenericError struct {
+	Message string `json:"message"`
+}
+
+// WorkloadoptimizationV1CustomMetricsDataSourceErrorMetricError defines model for workloadoptimization.v1.CustomMetricsDataSource.Error.MetricError.
+type WorkloadoptimizationV1CustomMetricsDataSourceErrorMetricError struct {
+	Message string `json:"message"`
+	Metric  string `json:"metric"`
+}
+
+// WorkloadoptimizationV1CustomMetricsDataSourceStatus Status represents the synchronization status of the custom metrics data source. It indicates whether the data
+// source is currently being synchronized, has been successfully synchronized, is in the process of syncing, or has
+// failed to sync.
+type WorkloadoptimizationV1CustomMetricsDataSourceStatus string
+
 // WorkloadoptimizationV1CustomMetricsDataSourceType Type defines the type of custom metrics data source. Respective Data field will be populated based on the type.
 // For each type, exactly one of the data fields should be populated.
 type WorkloadoptimizationV1CustomMetricsDataSourceType string
+
+// WorkloadoptimizationV1CustomMetricsDataSourceWarning defines model for workloadoptimization.v1.CustomMetricsDataSource.Warning.
+type WorkloadoptimizationV1CustomMetricsDataSourceWarning struct {
+	Metric *WorkloadoptimizationV1CustomMetricsDataSourceWarningMetricWarning `json:"metric,omitempty"`
+}
+
+// WorkloadoptimizationV1CustomMetricsDataSourceWarningMetricWarning defines model for workloadoptimization.v1.CustomMetricsDataSource.Warning.MetricWarning.
+type WorkloadoptimizationV1CustomMetricsDataSourceWarningMetricWarning struct {
+	Message string `json:"message"`
+	Metric  string `json:"metric"`
+}
 
 // WorkloadoptimizationV1DeleteWorkloadScalingPolicyResponse defines model for workloadoptimization.v1.DeleteWorkloadScalingPolicyResponse.
 type WorkloadoptimizationV1DeleteWorkloadScalingPolicyResponse = map[string]interface{}
@@ -9254,6 +9341,21 @@ type WorkloadoptimizationV1RecommendationStatus struct {
 // WorkloadoptimizationV1RecommendationStatusType RecommendationStatusType explains what is the current state of recommendations.
 type WorkloadoptimizationV1RecommendationStatusType string
 
+// WorkloadoptimizationV1RecommendationStep RecommendationStep captures a single transformation stage in the recommendation
+// pipeline. The args field contains unstructured step-specific parameters.
+type WorkloadoptimizationV1RecommendationStep struct {
+	Args      *map[string]interface{}                          `json:"args,omitempty"`
+	Labels    *[]WorkloadoptimizationV1RecommendationStepLabel `json:"labels,omitempty"`
+	Message   *string                                          `json:"message,omitempty"`
+	Resources *WorkloadoptimizationV1Resources                 `json:"resources,omitempty"`
+}
+
+// WorkloadoptimizationV1RecommendationStepLabel defines model for workloadoptimization.v1.RecommendationStepLabel.
+type WorkloadoptimizationV1RecommendationStepLabel struct {
+	Key   *string `json:"key,omitempty"`
+	Value *string `json:"value,omitempty"`
+}
+
 // WorkloadoptimizationV1RecommendationStopReason defines model for workloadoptimization.v1.RecommendationStopReason.
 type WorkloadoptimizationV1RecommendationStopReason struct {
 	// Message Human-readable reason.
@@ -9266,11 +9368,26 @@ type WorkloadoptimizationV1RecommendationStopReason struct {
 // WorkloadoptimizationV1RecommendationStopReasonType RecommendationStopReasonType explains why the recommendation has been stopped for the workload.
 type WorkloadoptimizationV1RecommendationStopReasonType string
 
+// WorkloadoptimizationV1RecommendationSummary RecommendationSummary describes the overall outcome and per-container calculation steps
+// for a workload recommendation event.
+type WorkloadoptimizationV1RecommendationSummary struct {
+	ActionType               *WorkloadoptimizationV1ActionType                                `json:"actionType,omitempty"`
+	ApplyType                *WorkloadoptimizationV1ApplyType                                 `json:"applyType,omitempty"`
+	Confidence               *WorkloadoptimizationV1SummaryConfidence                         `json:"confidence,omitempty"`
+	ContainerRecommendations *map[string]WorkloadoptimizationV1ContainerRecommendationSummary `json:"containerRecommendations,omitempty"`
+	Origins                  *[]WorkloadoptimizationV1RecommendationOrigin                    `json:"origins,omitempty"`
+	Thresholds               *WorkloadoptimizationV1WorkloadThresholds                        `json:"thresholds,omitempty"`
+}
+
 // WorkloadoptimizationV1RecommendedPodCountChangedEvent defines model for workloadoptimization.v1.RecommendedPodCountChangedEvent.
 type WorkloadoptimizationV1RecommendedPodCountChangedEvent struct {
 	Current   int32                   `json:"current"`
 	DebugData *map[string]interface{} `json:"debugData,omitempty"`
 	Previous  int32                   `json:"previous"`
+
+	// Summary RecommendationSummary describes the overall outcome and per-container calculation steps
+	// for a workload recommendation event.
+	Summary *WorkloadoptimizationV1RecommendationSummary `json:"summary,omitempty"`
 }
 
 // WorkloadoptimizationV1RecommendedRequestsChangedEvent defines model for workloadoptimization.v1.RecommendedRequestsChangedEvent.
@@ -9280,6 +9397,10 @@ type WorkloadoptimizationV1RecommendedRequestsChangedEvent struct {
 	DebugData *map[string]interface{}                                     `json:"debugData,omitempty"`
 	Origins   *[]WorkloadoptimizationV1RecommendationOrigin               `json:"origins,omitempty"`
 	Previous  WorkloadoptimizationV1RecommendedRequestsChangedEventChange `json:"previous"`
+
+	// Summary RecommendationSummary describes the overall outcome and per-container calculation steps
+	// for a workload recommendation event.
+	Summary *WorkloadoptimizationV1RecommendationSummary `json:"summary,omitempty"`
 }
 
 // WorkloadoptimizationV1RecommendedRequestsChangedEventChange defines model for workloadoptimization.v1.RecommendedRequestsChangedEvent.Change.
@@ -9516,6 +9637,12 @@ type WorkloadoptimizationV1ResourceQuotaResource struct {
 	Used *float64 `json:"used"`
 }
 
+// WorkloadoptimizationV1ResourceThreshold defines model for workloadoptimization.v1.ResourceThreshold.
+type WorkloadoptimizationV1ResourceThreshold struct {
+	Reference *float64 `json:"reference"`
+	Threshold *float64 `json:"threshold,omitempty"`
+}
+
 // WorkloadoptimizationV1Resources defines model for workloadoptimization.v1.Resources.
 type WorkloadoptimizationV1Resources struct {
 	Limits   *WorkloadoptimizationV1ResourceQuantity `json:"limits,omitempty"`
@@ -9649,6 +9776,12 @@ type WorkloadoptimizationV1StartupSettings struct {
 	// When set, recommendations will be adjusted to disregard resource spikes within this period.
 	// If not specified, the workload will receive standard recommendations without startup considerations.
 	PeriodSeconds *int32 `json:"periodSeconds"`
+}
+
+// WorkloadoptimizationV1SummaryConfidence defines model for workloadoptimization.v1.SummaryConfidence.
+type WorkloadoptimizationV1SummaryConfidence struct {
+	Threshold *float64 `json:"threshold,omitempty"`
+	Total     *float64 `json:"total,omitempty"`
 }
 
 // WorkloadoptimizationV1SurgeContainer defines model for workloadoptimization.v1.SurgeContainer.
@@ -10036,6 +10169,12 @@ type WorkloadoptimizationV1WorkloadSystemOverrides struct {
 type WorkloadoptimizationV1WorkloadSystemOverridesVerticalOptimization struct {
 	// Active Indicates whether system overrides are enabled, for example, due to frequent OOM events.
 	Active bool `json:"active"`
+}
+
+// WorkloadoptimizationV1WorkloadThresholds defines model for workloadoptimization.v1.WorkloadThresholds.
+type WorkloadoptimizationV1WorkloadThresholds struct {
+	Cpu    *WorkloadoptimizationV1ApplyThresholdStrategy `json:"cpu,omitempty"`
+	Memory *WorkloadoptimizationV1ApplyThresholdStrategy `json:"memory,omitempty"`
 }
 
 // WorkloadoptimizationV1WorkloadsSummaryMetrics defines model for workloadoptimization.v1.WorkloadsSummaryMetrics.

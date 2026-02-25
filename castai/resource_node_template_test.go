@@ -273,6 +273,7 @@ edge_location_ids.1 = b2c3d4e5-f6a7-8901-bcde-f12345678901
 gpu.# = 1
 gpu.0.default_shared_clients_per_gpu = 10
 gpu.0.enable_time_sharing = true
+gpu.0.sharing_strategy = 
 gpu.0.user_managed_gpu_drivers = true
 gpu.0.sharing_configuration.# = 1
 gpu.0.sharing_configuration.0.gpu_name = A100
@@ -1334,6 +1335,45 @@ func Test_toTemplateGpu(t *testing.T) {
 				// UserManagedGpuDrivers not set (nil) - only sent when explicitly true (GKE-only)
 			},
 		},
+		{
+			name: "sharing_strategy mps",
+			input: map[string]any{
+				FieldNodeTemplateSharingStrategy:            "mps",
+				FieldNodeTemplateDefaultSharedClientsPerGpu: 4,
+			},
+			want: &sdk.NodetemplatesV1GPU{
+				DefaultSharedClientsPerGpu: lo.ToPtr(int32(4)),
+				EnableTimeSharing:          lo.ToPtr(false),
+				SharingConfiguration:       &map[string]sdk.NodetemplatesV1SharedGPU{},
+				SharingStrategy:            lo.ToPtr(sdk.GPUSHARINGSTRATEGYMPS),
+			},
+		},
+		{
+			name: "sharing_strategy time-slicing",
+			input: map[string]any{
+				FieldNodeTemplateSharingStrategy:            "time-slicing",
+				FieldNodeTemplateDefaultSharedClientsPerGpu: 8,
+			},
+			want: &sdk.NodetemplatesV1GPU{
+				DefaultSharedClientsPerGpu: lo.ToPtr(int32(8)),
+				EnableTimeSharing:          lo.ToPtr(false),
+				SharingConfiguration:       &map[string]sdk.NodetemplatesV1SharedGPU{},
+				SharingStrategy:            lo.ToPtr(sdk.GPUSHARINGSTRATEGYTIMESLICING),
+			},
+		},
+		{
+			name: "sharing_strategy mps with user_managed_gpu_drivers",
+			input: map[string]any{
+				FieldNodeTemplateSharingStrategy:       "mps",
+				FieldNodeTemplateUserManagedGPUDrivers: true,
+			},
+			want: &sdk.NodetemplatesV1GPU{
+				EnableTimeSharing:    lo.ToPtr(false),
+				SharingConfiguration: &map[string]sdk.NodetemplatesV1SharedGPU{},
+				SharingStrategy:      lo.ToPtr(sdk.GPUSHARINGSTRATEGYMPS),
+				UserManagedGpuDrivers: lo.ToPtr(true),
+			},
+		},
 	}
 
 	for _, tt := range tests {
@@ -1356,6 +1396,7 @@ func Test_toTemplateGpu(t *testing.T) {
 			}
 
 			require.Equal(t, tt.want.EnableTimeSharing, got.EnableTimeSharing)
+			require.Equal(t, tt.want.SharingStrategy, got.SharingStrategy)
 			require.Equal(t, tt.want.UserManagedGpuDrivers, got.UserManagedGpuDrivers)
 
 			if tt.want.SharingConfiguration != nil && got.SharingConfiguration != nil {
@@ -1471,6 +1512,34 @@ func Test_flattenGpuSettings(t *testing.T) {
 			},
 			wantErr: false,
 		},
+		{
+			name: "sharing_strategy mps",
+			input: &sdk.NodetemplatesV1GPU{
+				SharingStrategy:            lo.ToPtr(sdk.GPUSHARINGSTRATEGYMPS),
+				DefaultSharedClientsPerGpu: lo.ToPtr(int32(4)),
+			},
+			want: []map[string]any{
+				{
+					FieldNodeTemplateSharingStrategy:            "mps",
+					FieldNodeTemplateDefaultSharedClientsPerGpu: lo.ToPtr(int32(4)),
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "sharing_strategy time-slicing",
+			input: &sdk.NodetemplatesV1GPU{
+				SharingStrategy:            lo.ToPtr(sdk.GPUSHARINGSTRATEGYTIMESLICING),
+				DefaultSharedClientsPerGpu: lo.ToPtr(int32(8)),
+			},
+			want: []map[string]any{
+				{
+					FieldNodeTemplateSharingStrategy:            "time-slicing",
+					FieldNodeTemplateDefaultSharedClientsPerGpu: lo.ToPtr(int32(8)),
+				},
+			},
+			wantErr: false,
+		},
 	}
 
 	for _, tt := range tests {
@@ -1491,6 +1560,7 @@ func Test_flattenGpuSettings(t *testing.T) {
 			// Compare all fields except sharing_configuration
 			require.Equal(t, tt.want[0][FieldNodeTemplateUserManagedGPUDrivers], got[0][FieldNodeTemplateUserManagedGPUDrivers])
 			require.Equal(t, tt.want[0][FieldNodeTemplateEnableTimeSharing], got[0][FieldNodeTemplateEnableTimeSharing])
+			require.Equal(t, tt.want[0][FieldNodeTemplateSharingStrategy], got[0][FieldNodeTemplateSharingStrategy])
 			require.Equal(t, tt.want[0][FieldNodeTemplateDefaultSharedClientsPerGpu], got[0][FieldNodeTemplateDefaultSharedClientsPerGpu])
 
 			// Compare sharing_configuration with ElementsMatch (order doesn't matter)
