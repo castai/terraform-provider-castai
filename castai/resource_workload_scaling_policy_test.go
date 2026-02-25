@@ -615,7 +615,7 @@ func Test_toWorkloadScalingPolicies_limit(t *testing.T) {
 				"type": "MAINTAIN_RATIO",
 			},
 			exp: sdk.WorkloadoptimizationV1ResourceLimitStrategy{
-				Type: sdk.MAINTAINRATIO,
+				Type: sdk.WorkloadoptimizationV1ResourceLimitStrategyTypeMAINTAINRATIO,
 			},
 		},
 		"no limit": {
@@ -623,7 +623,7 @@ func Test_toWorkloadScalingPolicies_limit(t *testing.T) {
 				"type": "NO_LIMIT",
 			},
 			exp: sdk.WorkloadoptimizationV1ResourceLimitStrategy{
-				Type: sdk.NOLIMIT,
+				Type: sdk.WorkloadoptimizationV1ResourceLimitStrategyTypeNOLIMIT,
 			},
 		},
 		"keep limits": {
@@ -631,7 +631,7 @@ func Test_toWorkloadScalingPolicies_limit(t *testing.T) {
 				"type": "KEEP_LIMITS",
 			},
 			exp: sdk.WorkloadoptimizationV1ResourceLimitStrategy{
-				Type: sdk.KEEPLIMITS,
+				Type: sdk.WorkloadoptimizationV1ResourceLimitStrategyTypeKEEPLIMITS,
 			},
 		},
 		"multiplier": {
@@ -640,7 +640,7 @@ func Test_toWorkloadScalingPolicies_limit(t *testing.T) {
 				"multiplier": 2.5,
 			},
 			exp: sdk.WorkloadoptimizationV1ResourceLimitStrategy{
-				Type:       sdk.MULTIPLIER,
+				Type:       sdk.WorkloadoptimizationV1ResourceLimitStrategyTypeMULTIPLIER,
 				Multiplier: lo.ToPtr(2.5),
 			},
 		},
@@ -991,7 +991,7 @@ func Test_toWorkloadScalingPoliciesMap(t *testing.T) {
 				Args:     []string{"0.9"},
 				Overhead: 0.1,
 				Limit: &sdk.WorkloadoptimizationV1ResourceLimitStrategy{
-					Type:                sdk.MULTIPLIER,
+					Type:                sdk.WorkloadoptimizationV1ResourceLimitStrategyTypeMULTIPLIER,
 					Multiplier:          lo.ToPtr(2.0),
 					OnlyIfOriginalExist: lo.ToPtr(true),
 				},
@@ -1005,7 +1005,7 @@ func Test_toWorkloadScalingPoliciesMap(t *testing.T) {
 					"max":      (*float64)(nil),
 					"limit": []map[string]any{
 						{
-							FieldLimitStrategyType:                sdk.MULTIPLIER,
+							FieldLimitStrategyType:                sdk.WorkloadoptimizationV1ResourceLimitStrategyTypeMULTIPLIER,
 							FieldLimitStrategyMultiplier:          2.0,
 							FieldLimitStrategyOnlyIfOriginalExist: true,
 						},
@@ -1019,7 +1019,7 @@ func Test_toWorkloadScalingPoliciesMap(t *testing.T) {
 				Function: sdk.MAX,
 				Overhead: 0.15,
 				Limit: &sdk.WorkloadoptimizationV1ResourceLimitStrategy{
-					Type:                sdk.NOLIMIT,
+					Type:                sdk.WorkloadoptimizationV1ResourceLimitStrategyTypeNOLIMIT,
 					OnlyIfOriginalExist: lo.ToPtr(false),
 				},
 			},
@@ -1032,7 +1032,7 @@ func Test_toWorkloadScalingPoliciesMap(t *testing.T) {
 					"max":      (*float64)(nil),
 					"limit": []map[string]any{
 						{
-							FieldLimitStrategyType:                sdk.NOLIMIT,
+							FieldLimitStrategyType:                sdk.WorkloadoptimizationV1ResourceLimitStrategyTypeNOLIMIT,
 							FieldLimitStrategyOnlyIfOriginalExist: false,
 						},
 					},
@@ -1046,7 +1046,7 @@ func Test_toWorkloadScalingPoliciesMap(t *testing.T) {
 				Args:     []string{"0.95"},
 				Overhead: 0.2,
 				Limit: &sdk.WorkloadoptimizationV1ResourceLimitStrategy{
-					Type:                sdk.KEEPLIMITS,
+					Type:                sdk.WorkloadoptimizationV1ResourceLimitStrategyTypeKEEPLIMITS,
 					OnlyIfOriginalLower: lo.ToPtr(true),
 				},
 			},
@@ -1059,7 +1059,7 @@ func Test_toWorkloadScalingPoliciesMap(t *testing.T) {
 					"max":      (*float64)(nil),
 					"limit": []map[string]any{
 						{
-							FieldLimitStrategyType:                sdk.KEEPLIMITS,
+							FieldLimitStrategyType:                sdk.WorkloadoptimizationV1ResourceLimitStrategyTypeKEEPLIMITS,
 							FieldLimitStrategyOnlyIfOriginalLower: true,
 						},
 					},
@@ -1073,7 +1073,7 @@ func Test_toWorkloadScalingPoliciesMap(t *testing.T) {
 				Args:     []string{"0.5"},
 				Overhead: 0.05,
 				Limit: &sdk.WorkloadoptimizationV1ResourceLimitStrategy{
-					Type:                sdk.MULTIPLIER,
+					Type:                sdk.WorkloadoptimizationV1ResourceLimitStrategyTypeMULTIPLIER,
 					Multiplier:          lo.ToPtr(1.5),
 					OnlyIfOriginalLower: lo.ToPtr(false),
 				},
@@ -1087,7 +1087,7 @@ func Test_toWorkloadScalingPoliciesMap(t *testing.T) {
 					"max":      (*float64)(nil),
 					"limit": []map[string]any{
 						{
-							FieldLimitStrategyType:                sdk.MULTIPLIER,
+							FieldLimitStrategyType:                sdk.WorkloadoptimizationV1ResourceLimitStrategyTypeMULTIPLIER,
 							FieldLimitStrategyMultiplier:          1.5,
 							FieldLimitStrategyOnlyIfOriginalLower: false,
 						},
@@ -1101,7 +1101,7 @@ func Test_toWorkloadScalingPoliciesMap(t *testing.T) {
 				Function: sdk.MAX,
 				Overhead: 0.3,
 				Limit: &sdk.WorkloadoptimizationV1ResourceLimitStrategy{
-					Type:                sdk.MULTIPLIER,
+					Type:                sdk.WorkloadoptimizationV1ResourceLimitStrategyTypeMULTIPLIER,
 					Multiplier:          lo.ToPtr(2.5),
 					OnlyIfOriginalExist: lo.ToPtr(true),
 					OnlyIfOriginalLower: lo.ToPtr(true),
@@ -1116,7 +1116,7 @@ func Test_toWorkloadScalingPoliciesMap(t *testing.T) {
 					"max":      (*float64)(nil),
 					"limit": []map[string]any{
 						{
-							FieldLimitStrategyType:                sdk.MULTIPLIER,
+							FieldLimitStrategyType:                sdk.WorkloadoptimizationV1ResourceLimitStrategyTypeMULTIPLIER,
 							FieldLimitStrategyMultiplier:          2.5,
 							FieldLimitStrategyOnlyIfOriginalExist: true,
 							FieldLimitStrategyOnlyIfOriginalLower: true,
@@ -1132,7 +1132,7 @@ func Test_toWorkloadScalingPoliciesMap(t *testing.T) {
 				Args:     []string{"0.8"},
 				Overhead: 0.12,
 				Limit: &sdk.WorkloadoptimizationV1ResourceLimitStrategy{
-					Type:       sdk.MULTIPLIER,
+					Type:       sdk.WorkloadoptimizationV1ResourceLimitStrategyTypeMULTIPLIER,
 					Multiplier: lo.ToPtr(1.8),
 				},
 			},
@@ -1145,7 +1145,7 @@ func Test_toWorkloadScalingPoliciesMap(t *testing.T) {
 					"max":      (*float64)(nil),
 					"limit": []map[string]any{
 						{
-							FieldLimitStrategyType:       sdk.MULTIPLIER,
+							FieldLimitStrategyType:       sdk.WorkloadoptimizationV1ResourceLimitStrategyTypeMULTIPLIER,
 							FieldLimitStrategyMultiplier: 1.8,
 						},
 					},

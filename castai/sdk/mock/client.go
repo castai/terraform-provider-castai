@@ -2095,6 +2095,46 @@ func (mr *MockClientInterfaceMockRecorder) ExternalClusterAPIAddNode(ctx, cluste
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIAddNode", reflect.TypeOf((*MockClientInterface)(nil).ExternalClusterAPIAddNode), varargs...)
 }
 
+// ExternalClusterAPIAddNodeGroup mocks base method.
+func (m *MockClientInterface) ExternalClusterAPIAddNodeGroup(ctx context.Context, clusterId string, body sdk.ExternalClusterAPIAddNodeGroupJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ExternalClusterAPIAddNodeGroup", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ExternalClusterAPIAddNodeGroup indicates an expected call of ExternalClusterAPIAddNodeGroup.
+func (mr *MockClientInterfaceMockRecorder) ExternalClusterAPIAddNodeGroup(ctx, clusterId, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIAddNodeGroup", reflect.TypeOf((*MockClientInterface)(nil).ExternalClusterAPIAddNodeGroup), varargs...)
+}
+
+// ExternalClusterAPIAddNodeGroupWithBody mocks base method.
+func (m *MockClientInterface) ExternalClusterAPIAddNodeGroupWithBody(ctx context.Context, clusterId, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ExternalClusterAPIAddNodeGroupWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ExternalClusterAPIAddNodeGroupWithBody indicates an expected call of ExternalClusterAPIAddNodeGroupWithBody.
+func (mr *MockClientInterfaceMockRecorder) ExternalClusterAPIAddNodeGroupWithBody(ctx, clusterId, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIAddNodeGroupWithBody", reflect.TypeOf((*MockClientInterface)(nil).ExternalClusterAPIAddNodeGroupWithBody), varargs...)
+}
+
 // ExternalClusterAPIAddNodeWithBody mocks base method.
 func (m *MockClientInterface) ExternalClusterAPIAddNodeWithBody(ctx context.Context, clusterId, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
@@ -2633,6 +2673,26 @@ func (mr *MockClientInterfaceMockRecorder) ExternalClusterAPIGetNode(ctx, cluste
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{ctx, clusterId, nodeId}, reqEditors...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIGetNode", reflect.TypeOf((*MockClientInterface)(nil).ExternalClusterAPIGetNode), varargs...)
+}
+
+// ExternalClusterAPIGetNodeGroup mocks base method.
+func (m *MockClientInterface) ExternalClusterAPIGetNodeGroup(ctx context.Context, clusterId, nodeGroupId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, nodeGroupId}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ExternalClusterAPIGetNodeGroup", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ExternalClusterAPIGetNodeGroup indicates an expected call of ExternalClusterAPIGetNodeGroup.
+func (mr *MockClientInterfaceMockRecorder) ExternalClusterAPIGetNodeGroup(ctx, clusterId, nodeGroupId interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, nodeGroupId}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIGetNodeGroup", reflect.TypeOf((*MockClientInterface)(nil).ExternalClusterAPIGetNodeGroup), varargs...)
 }
 
 // ExternalClusterAPIHandleCloudEvent mocks base method.
@@ -10458,6 +10518,76 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIAddNod
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIAddNode", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIAddNode), varargs...)
 }
 
+// ExternalClusterAPIAddNodeGroup mocks base method.
+func (m *MockClientWithResponsesInterface) ExternalClusterAPIAddNodeGroup(ctx context.Context, clusterId string, body sdk.ExternalClusterAPIAddNodeGroupJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ExternalClusterAPIAddNodeGroup", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ExternalClusterAPIAddNodeGroup indicates an expected call of ExternalClusterAPIAddNodeGroup.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIAddNodeGroup(ctx, clusterId, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIAddNodeGroup", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIAddNodeGroup), varargs...)
+}
+
+// ExternalClusterAPIAddNodeGroupWithBody mocks base method.
+func (m *MockClientWithResponsesInterface) ExternalClusterAPIAddNodeGroupWithBody(ctx context.Context, clusterId, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ExternalClusterAPIAddNodeGroupWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ExternalClusterAPIAddNodeGroupWithBody indicates an expected call of ExternalClusterAPIAddNodeGroupWithBody.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIAddNodeGroupWithBody(ctx, clusterId, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIAddNodeGroupWithBody", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIAddNodeGroupWithBody), varargs...)
+}
+
+// ExternalClusterAPIAddNodeGroupWithBodyWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) ExternalClusterAPIAddNodeGroupWithBodyWithResponse(ctx context.Context, clusterId, contentType string, body io.Reader) (*sdk.ExternalClusterAPIAddNodeGroupResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ExternalClusterAPIAddNodeGroupWithBodyWithResponse", ctx, clusterId, contentType, body)
+	ret0, _ := ret[0].(*sdk.ExternalClusterAPIAddNodeGroupResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ExternalClusterAPIAddNodeGroupWithBodyWithResponse indicates an expected call of ExternalClusterAPIAddNodeGroupWithBodyWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIAddNodeGroupWithBodyWithResponse(ctx, clusterId, contentType, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIAddNodeGroupWithBodyWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIAddNodeGroupWithBodyWithResponse), ctx, clusterId, contentType, body)
+}
+
+// ExternalClusterAPIAddNodeGroupWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) ExternalClusterAPIAddNodeGroupWithResponse(ctx context.Context, clusterId string, body sdk.ExternalClusterAPIAddNodeGroupJSONRequestBody) (*sdk.ExternalClusterAPIAddNodeGroupResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ExternalClusterAPIAddNodeGroupWithResponse", ctx, clusterId, body)
+	ret0, _ := ret[0].(*sdk.ExternalClusterAPIAddNodeGroupResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ExternalClusterAPIAddNodeGroupWithResponse indicates an expected call of ExternalClusterAPIAddNodeGroupWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIAddNodeGroupWithResponse(ctx, clusterId, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIAddNodeGroupWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIAddNodeGroupWithResponse), ctx, clusterId, body)
+}
+
 // ExternalClusterAPIAddNodeWithBody mocks base method.
 func (m *MockClientWithResponsesInterface) ExternalClusterAPIAddNodeWithBody(ctx context.Context, clusterId, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
@@ -11401,6 +11531,41 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIGetNod
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{ctx, clusterId, nodeId}, reqEditors...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIGetNode", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIGetNode), varargs...)
+}
+
+// ExternalClusterAPIGetNodeGroup mocks base method.
+func (m *MockClientWithResponsesInterface) ExternalClusterAPIGetNodeGroup(ctx context.Context, clusterId, nodeGroupId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, nodeGroupId}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ExternalClusterAPIGetNodeGroup", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ExternalClusterAPIGetNodeGroup indicates an expected call of ExternalClusterAPIGetNodeGroup.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIGetNodeGroup(ctx, clusterId, nodeGroupId interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, nodeGroupId}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIGetNodeGroup", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIGetNodeGroup), varargs...)
+}
+
+// ExternalClusterAPIGetNodeGroupWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) ExternalClusterAPIGetNodeGroupWithResponse(ctx context.Context, clusterId, nodeGroupId string) (*sdk.ExternalClusterAPIGetNodeGroupResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ExternalClusterAPIGetNodeGroupWithResponse", ctx, clusterId, nodeGroupId)
+	ret0, _ := ret[0].(*sdk.ExternalClusterAPIGetNodeGroupResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ExternalClusterAPIGetNodeGroupWithResponse indicates an expected call of ExternalClusterAPIGetNodeGroupWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIGetNodeGroupWithResponse(ctx, clusterId, nodeGroupId interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIGetNodeGroupWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIGetNodeGroupWithResponse), ctx, clusterId, nodeGroupId)
 }
 
 // ExternalClusterAPIGetNodeWithResponse mocks base method.
