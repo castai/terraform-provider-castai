@@ -63,6 +63,7 @@ const (
 	aksImageFamilyWindows2022             = "windows2022"
 	aksEphemeralDiskPlacementCacheDisk    = "cacheDisk"
 	aksEphemeralDiskPlacementResourceDisk = "resourceDisk"
+	aksEphemeralDiskPlacementNVME         = "nvmeDisk"
 )
 
 const (
@@ -361,8 +362,8 @@ func resourceNodeConfiguration() *schema.Resource {
 									"placement": {
 										Type:                  schema.TypeString,
 										Required:              true,
-										Description:           "Placement of the ephemeral OS disk. One of: cacheDisk, resourceDisk",
-										ValidateDiagFunc:      validation.ToDiagFunc(validation.StringInSlice([]string{aksEphemeralDiskPlacementCacheDisk, aksEphemeralDiskPlacementResourceDisk}, true)),
+										Description:           "Placement of the ephemeral OS disk. One of: cacheDisk, resourceDisk, nvmeDisk",
+										ValidateDiagFunc:      validation.ToDiagFunc(validation.StringInSlice([]string{aksEphemeralDiskPlacementCacheDisk, aksEphemeralDiskPlacementResourceDisk, aksEphemeralDiskPlacementNVME}, true)),
 										DiffSuppressOnRefresh: true,
 										DiffSuppressFunc: func(k, oldValue, newValue string, d *schema.ResourceData) bool {
 											return strings.EqualFold(oldValue, newValue)
@@ -1234,6 +1235,8 @@ func toAKSEphemeralOSDisk(obj any) *sdk.NodeconfigV1AKSConfigOsDiskEphemeral {
 			osDisk.Placement = lo.ToPtr(sdk.NodeconfigV1AKSConfigOsDiskEphemeralPlacementPLACEMENTRESOURCEDISK)
 		case strings.ToLower(aksEphemeralDiskPlacementCacheDisk):
 			osDisk.Placement = lo.ToPtr(sdk.NodeconfigV1AKSConfigOsDiskEphemeralPlacementPLACEMENTCACHEDISK)
+		case strings.ToLower(aksEphemeralDiskPlacementNVME):
+			osDisk.Placement = lo.ToPtr(sdk.NodeconfigV1AKSConfigOsDiskEphemeralPlacementPLACEMENTNVMEDISK)
 		}
 	}
 
@@ -1420,6 +1423,8 @@ func fromAKSEphemeralOSDisk(sdkEph *sdk.NodeconfigV1AKSConfigOsDiskEphemeral) []
 			m["placement"] = aksEphemeralDiskPlacementResourceDisk
 		case sdk.NodeconfigV1AKSConfigOsDiskEphemeralPlacementPLACEMENTCACHEDISK:
 			m["placement"] = aksEphemeralDiskPlacementCacheDisk
+		case sdk.NodeconfigV1AKSConfigOsDiskEphemeralPlacementPLACEMENTNVMEDISK:
+			m["placement"] = aksEphemeralDiskPlacementNVME
 		}
 	}
 
