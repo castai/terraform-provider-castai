@@ -92,6 +92,11 @@ const (
 	FieldNodeTemplatePriceAdjustmentConfiguration             = "price_adjustment_configuration"
 	FieldNodeTemplateInstanceTypeAdjustments                  = "instance_type_adjustments"
 	FieldNodeTemplateUserManagedGPUDrivers                    = "user_managed_gpu_drivers"
+	FieldNodeTemplateAWSConstraints                           = "aws"
+	FieldNodeTemplateCapacityReservations                     = "capacity_reservations"
+	FieldNodeTemplateCapacityReservationId                    = "id"
+	FieldNodeTemplateCapacityResourceGroupArn                 = "capacity_resource_group_arn"
+	FieldNodeTemplateCapacityReservationType                  = "type"
 )
 
 const (
@@ -119,6 +124,11 @@ const (
 	True        = "true"
 	False       = "false"
 	Unspecified = "unspecified"
+)
+
+const (
+	CapacityReservationTypeOnDemand      = "ON_DEMAND_CAPACITY_RESERVATION"
+	CapacityReservationTypeCapacityBlock = "CAPACITY_BLOCK"
 )
 
 type nodeSelectorOperatorsSlice []string
@@ -609,6 +619,41 @@ func resourceNodeTemplate() *schema.Resource {
 								},
 							},
 						},
+						FieldNodeTemplateAWSConstraints: {
+							Type:     schema.TypeList,
+							MaxItems: 1,
+							Optional: true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									FieldNodeTemplateCapacityReservations: {
+										Type:     schema.TypeList,
+										Optional: true,
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												FieldNodeTemplateCapacityReservationId: {
+													Type:        schema.TypeString,
+													Optional:    true,
+													Description: "AWS capacity reservation ID.",
+												},
+												FieldNodeTemplateCapacityResourceGroupArn: {
+													Type:        schema.TypeString,
+													Optional:    true,
+													Description: "Capacity resource group ARN for UltraServer capacity blocks.",
+												},
+												FieldNodeTemplateCapacityReservationType: {
+													Type:             schema.TypeString,
+													Optional:         true,
+													ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{CapacityReservationTypeOnDemand, CapacityReservationTypeCapacityBlock}, false)),
+													Description:      fmt.Sprintf("Type of capacity reservation. Allowed values: %s, %s.", CapacityReservationTypeOnDemand, CapacityReservationTypeCapacityBlock),
+												},
+											},
+										},
+										Description: "Capacity reservations that this template can use for provisioning.",
+									},
+								},
+							},
+							Description: "AWS-specific constraints for the node template.",
+						},
 					},
 				},
 			},
@@ -1043,6 +1088,9 @@ func flattenConstraints(c *sdk.NodetemplatesV1TemplateConstraints) ([]map[string
 		out[FieldNodeTemplateArchitecturePriority] = lo.FromPtr(c.ArchitecturePriority)
 	}
 	out[FieldNodeTemplateResourceLimits] = flattenResourceLimits(c.ResourceLimits)
+	if c.Aws != nil {
+		out[FieldNodeTemplateAWSConstraints] = flattenAWSConstraints(c.Aws)
+	}
 	if c.BareMetal != nil {
 		if lo.FromPtr(c.BareMetal) {
 			out[FieldNodeTemplateBareMetal] = True
@@ -1099,6 +1147,33 @@ func flattenResourceLimits(resourceLimits *sdk.NodetemplatesV1TemplateConstraint
 	if resourceLimits.CpuLimitMaxCores != nil {
 		out[FieldNodeTemplateCPULimitMaxCores] = resourceLimits.CpuLimitMaxCores
 	}
+	return []map[string]any{out}
+}
+
+func flattenAWSConstraints(aws *sdk.NodetemplatesV1TemplateConstraintsAWSConstraints) []map[string]any {
+	if aws == nil {
+		return nil
+	}
+	out := map[string]any{}
+	if aws.CapacityReservations == nil {
+		return []map[string]any{out}
+	}
+
+	reservations := make([]map[string]any, 0, len(*aws.CapacityReservations))
+	for _, r := range *aws.CapacityReservations {
+		m := map[string]any{}
+		if r.Id != nil {
+			m[FieldNodeTemplateCapacityReservationId] = *r.Id
+		}
+		if r.CapacityResourceGroupArn != nil {
+			m[FieldNodeTemplateCapacityResourceGroupArn] = *r.CapacityResourceGroupArn
+		}
+		if r.Type != nil {
+			m[FieldNodeTemplateCapacityReservationType] = string(*r.Type)
+		}
+		reservations = append(reservations, m)
+	}
+	out[FieldNodeTemplateCapacityReservations] = reservations
 	return []map[string]any{out}
 }
 
@@ -1711,6 +1786,11 @@ func toTemplateConstraints(obj map[string]any) *sdk.NodetemplatesV1TemplateConst
 			out.ResourceLimits = toTemplateConstraintsResourceLimits(val)
 		}
 	}
+	if v, ok := obj[FieldNodeTemplateAWSConstraints].([]any); ok && len(v) > 0 {
+		if val, ok := v[0].(map[string]any); ok {
+			out.Aws = toTemplateConstraintsAWSConstraints(val)
+		}
+	}
 
 	if v, ok := obj[FieldNodeTemplateBareMetal].(string); ok {
 		switch v {
@@ -1826,6 +1906,37 @@ func toTemplateConstraintsResourceLimits(o map[string]any) *sdk.NodetemplatesV1T
 	if v, ok := o[FieldNodeTemplateCPULimitMaxCores].(int); ok {
 		out.CpuLimitMaxCores = toPtr(int32(v))
 	}
+	return out
+}
+
+func toTemplateConstraintsAWSConstraints(o map[string]any) *sdk.NodetemplatesV1TemplateConstraintsAWSConstraints {
+	if o == nil {
+		return nil
+	}
+	out := &sdk.NodetemplatesV1TemplateConstraintsAWSConstraints{}
+	v, ok := o[FieldNodeTemplateCapacityReservations].([]any)
+	if !ok || len(v) == 0 {
+		return out
+	}
+
+	reservations := lo.FilterMap(v, func(item any, _ int) (sdk.NodetemplatesV1TemplateConstraintsAWSConstraintsCapacityReservation, bool) {
+		m, ok := item.(map[string]any)
+		if !ok {
+			return sdk.NodetemplatesV1TemplateConstraintsAWSConstraintsCapacityReservation{}, false
+		}
+		r := sdk.NodetemplatesV1TemplateConstraintsAWSConstraintsCapacityReservation{}
+		if id, ok := m[FieldNodeTemplateCapacityReservationId].(string); ok && id != "" {
+			r.Id = toPtr(id)
+		}
+		if arn, ok := m[FieldNodeTemplateCapacityResourceGroupArn].(string); ok && arn != "" {
+			r.CapacityResourceGroupArn = toPtr(arn)
+		}
+		if t, ok := m[FieldNodeTemplateCapacityReservationType].(string); ok && t != "" {
+			r.Type = toPtr(sdk.NodetemplatesV1TemplateConstraintsAWSConstraintsCapacityReservationType(t))
+		}
+		return r, true
+	})
+	out.CapacityReservations = &reservations
 	return out
 }
 
