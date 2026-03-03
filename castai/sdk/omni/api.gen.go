@@ -97,8 +97,20 @@ type AWSParamCredentials struct {
 	SecretAccessKey string `json:"secretAccessKey"`
 }
 
+// CastaiOIDCConfig Message to get CastAI OIDC config.
+type CastaiOIDCConfig struct {
+	// GcpServiceAccountEmail OMNI GCP service account for impersonation.
+	GcpServiceAccountEmail *string `json:"gcpServiceAccountEmail,omitempty"`
+
+	// GcpServiceAccountUniqueId OMNI GCP service account unique ID for impersonation.
+	GcpServiceAccountUniqueId *string `json:"gcpServiceAccountUniqueId,omitempty"`
+}
+
 // Cluster Message to represent a cluster.
 type Cluster struct {
+	// CastaiOidcConfig OMNI GCP service account for impersonation.
+	CastaiOidcConfig *CastaiOIDCConfig `json:"castaiOidcConfig,omitempty"`
+
 	// CreateTime The creation timestamp.
 	CreateTime *time.Time `json:"createTime,omitempty"`
 
@@ -245,7 +257,10 @@ type GCPParam struct {
 // GCPParamCredentials GCP credentials.
 type GCPParamCredentials struct {
 	// ClientServiceAccountJsonBase64 Client service account json to be used to provision edge resources.
-	ClientServiceAccountJsonBase64 string `json:"clientServiceAccountJsonBase64"`
+	ClientServiceAccountJsonBase64 *string `json:"clientServiceAccountJsonBase64,omitempty"`
+
+	// TargetServiceAccountEmail Target service account email to be used for impersonation.
+	TargetServiceAccountEmail *string `json:"targetServiceAccountEmail,omitempty"`
 }
 
 // GCPParamGCPNetworking The names of networking resources created during location onboarding.
