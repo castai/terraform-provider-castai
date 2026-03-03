@@ -1132,11 +1132,13 @@ const (
 // Defines values for CommitmentsAPIImportAzureReservationsParamsBehaviour.
 const (
 	CommitmentsAPIImportAzureReservationsParamsBehaviourOVERWRITE CommitmentsAPIImportAzureReservationsParamsBehaviour = "OVERWRITE"
+	CommitmentsAPIImportAzureReservationsParamsBehaviourAPPEND    CommitmentsAPIImportAzureReservationsParamsBehaviour = "APPEND"
 )
 
 // Defines values for CommitmentsAPIImportGCPCommitmentsParamsBehaviour.
 const (
 	OVERWRITE CommitmentsAPIImportGCPCommitmentsParamsBehaviour = "OVERWRITE"
+	APPEND    CommitmentsAPIImportGCPCommitmentsParamsBehaviour = "APPEND"
 )
 
 // Defines values for RuntimeSecurityAPIGetAnomaliesParamsStatus.
