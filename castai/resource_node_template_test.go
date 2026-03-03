@@ -796,7 +796,7 @@ func TestAccEKS_ResourceNodeTemplate_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.resource_limits.0.cpu_limit_enabled", "false"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.resource_limits.0.cpu_limit_max_cores", "0"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.aws.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "constraints.0.aws.0.capacity_reservations.#", "2"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.aws.0.capacity_reservations.#", "1"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.aws.0.capacity_reservations.0.id", "cr-12345678901234567"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.aws.0.capacity_reservations.0.type", "ON_DEMAND_CAPACITY_RESERVATION"),
 					resource.TestCheckResourceAttr(resourceName, "edge_location_ids.#", "2"),
