@@ -247,6 +247,7 @@ constraints.0.spot_interruption_predictions_type = aws-rebalance-recommendations
 constraints.0.storage_optimized = false
 constraints.0.storage_optimized_state = enabled
 constraints.0.use_spot_fallbacks = false
+constraints.0.aws.# = 0
 constraints.0.bare_metal = unspecified
 custom_instances_enabled = true
 custom_instances_with_extended_memory_enabled = true
@@ -794,6 +795,10 @@ func TestAccEKS_ResourceNodeTemplate_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.resource_limits.#", "1"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.resource_limits.0.cpu_limit_enabled", "false"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.resource_limits.0.cpu_limit_max_cores", "0"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.aws.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.aws.0.capacity_reservations.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.aws.0.capacity_reservations.0.id", "cr-12345678901234567"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.aws.0.capacity_reservations.0.type", "ON_DEMAND_CAPACITY_RESERVATION"),
 					resource.TestCheckResourceAttr(resourceName, "edge_location_ids.#", "2"),
 					resource.TestCheckResourceAttrSet(resourceName, "edge_location_ids.0"),
 					resource.TestCheckResourceAttrSet(resourceName, "edge_location_ids.1"),
@@ -880,6 +885,10 @@ func TestAccEKS_ResourceNodeTemplate_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.resource_limits.#", "1"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.resource_limits.0.cpu_limit_enabled", "true"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.resource_limits.0.cpu_limit_max_cores", "50"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.aws.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.aws.0.capacity_reservations.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.aws.0.capacity_reservations.0.id", "cr-98765432109876543"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.aws.0.capacity_reservations.0.type", "ON_DEMAND_CAPACITY_RESERVATION"),
 					resource.TestCheckResourceAttr(resourceName, "gpu.0.default_shared_clients_per_gpu", "1"),
 					resource.TestCheckResourceAttr(resourceName, "gpu.0.enable_time_sharing", "false"),
 					resource.TestCheckResourceAttr(resourceName, "edge_location_ids.#", "1"),
@@ -982,6 +991,13 @@ func testAccNodeTemplateConfig(rName, clusterName string) string {
 
 				cpu_manufacturers = ["INTEL", "AMD"]
 				architecture_priority = ["amd64"]
+
+				aws {
+					capacity_reservations {
+						id   = "cr-12345678901234567"
+						type = "ON_DEMAND_CAPACITY_RESERVATION"
+					}
+				}
 			}
 		}
 	`, rName))
@@ -1136,6 +1152,13 @@ func testNodeTemplateUpdated(rName, clusterName string) string {
 				resource_limits {
 					cpu_limit_enabled   = true
 					cpu_limit_max_cores = 50
+				}
+
+				aws {
+					capacity_reservations {
+						id   = "cr-98765432109876543"
+						type = "ON_DEMAND_CAPACITY_RESERVATION"
+					}
 				}
 			}
 		}
@@ -1368,9 +1391,9 @@ func Test_toTemplateGpu(t *testing.T) {
 				FieldNodeTemplateUserManagedGPUDrivers: true,
 			},
 			want: &sdk.NodetemplatesV1GPU{
-				EnableTimeSharing:    lo.ToPtr(false),
-				SharingConfiguration: &map[string]sdk.NodetemplatesV1SharedGPU{},
-				SharingStrategy:      lo.ToPtr(sdk.GPUSHARINGSTRATEGYMPS),
+				EnableTimeSharing:     lo.ToPtr(false),
+				SharingConfiguration:  &map[string]sdk.NodetemplatesV1SharedGPU{},
+				SharingStrategy:       lo.ToPtr(sdk.GPUSHARINGSTRATEGYMPS),
 				UserManagedGpuDrivers: lo.ToPtr(true),
 			},
 		},
@@ -1569,6 +1592,143 @@ func Test_flattenGpuSettings(t *testing.T) {
 			if wantSharing != nil || gotSharing != nil {
 				require.ElementsMatch(t, wantSharing, gotSharing)
 			}
+		})
+	}
+}
+
+func Test_flattenAWSConstraints(t *testing.T) {
+	tests := []struct {
+		name  string
+		input *sdk.NodetemplatesV1TemplateConstraintsAWSConstraints
+		want  []map[string]any
+	}{
+		{
+			name:  "nil input returns nil",
+			input: nil,
+			want:  nil,
+		},
+		{
+			name:  "empty reservations",
+			input: &sdk.NodetemplatesV1TemplateConstraintsAWSConstraints{},
+			want:  []map[string]any{{}},
+		},
+		{
+			name: "reservation with id",
+			input: &sdk.NodetemplatesV1TemplateConstraintsAWSConstraints{
+				CapacityReservations: &[]sdk.NodetemplatesV1TemplateConstraintsAWSConstraintsCapacityReservation{
+					{
+						Id:   lo.ToPtr("cr-123"),
+						Type: lo.ToPtr(sdk.NodetemplatesV1TemplateConstraintsAWSConstraintsCapacityReservationTypeONDEMANDCAPACITYRESERVATION),
+					},
+				},
+			},
+			want: []map[string]any{{
+				FieldNodeTemplateCapacityReservations: []map[string]any{
+					{
+						FieldNodeTemplateCapacityReservationId:   "cr-123",
+						FieldNodeTemplateCapacityReservationType: CapacityReservationTypeOnDemand,
+					},
+				},
+			}},
+		},
+		{
+			name: "reservation with ARN",
+			input: &sdk.NodetemplatesV1TemplateConstraintsAWSConstraints{
+				CapacityReservations: &[]sdk.NodetemplatesV1TemplateConstraintsAWSConstraintsCapacityReservation{
+					{
+						CapacityResourceGroupArn: lo.ToPtr("arn:aws:ec2:us-east-1:123456789012:capacity-reservation-group/my-group"),
+						Type:                     lo.ToPtr(sdk.NodetemplatesV1TemplateConstraintsAWSConstraintsCapacityReservationTypeCAPACITYBLOCK),
+					},
+				},
+			},
+			want: []map[string]any{{
+				FieldNodeTemplateCapacityReservations: []map[string]any{
+					{
+						FieldNodeTemplateCapacityResourceGroupArn: "arn:aws:ec2:us-east-1:123456789012:capacity-reservation-group/my-group",
+						FieldNodeTemplateCapacityReservationType:  CapacityReservationTypeCapacityBlock,
+					},
+				},
+			}},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := flattenAWSConstraints(tt.input)
+			require.Equal(t, tt.want, got)
+		})
+	}
+}
+
+func Test_toTemplateConstraintsAWSConstraints(t *testing.T) {
+	tests := map[string]struct {
+		input map[string]any
+		want  *sdk.NodetemplatesV1TemplateConstraintsAWSConstraints
+	}{
+		"nil input": {
+			input: nil,
+			want:  nil,
+		},
+		"reservation with id": {
+			input: map[string]any{
+				FieldNodeTemplateCapacityReservations: []any{
+					map[string]any{
+						FieldNodeTemplateCapacityReservationId:   "cr-123",
+						FieldNodeTemplateCapacityReservationType: CapacityReservationTypeOnDemand,
+					},
+				},
+			},
+			want: &sdk.NodetemplatesV1TemplateConstraintsAWSConstraints{
+				CapacityReservations: &[]sdk.NodetemplatesV1TemplateConstraintsAWSConstraintsCapacityReservation{
+					{
+						Id:   lo.ToPtr("cr-123"),
+						Type: lo.ToPtr(sdk.NodetemplatesV1TemplateConstraintsAWSConstraintsCapacityReservationTypeONDEMANDCAPACITYRESERVATION),
+					},
+				},
+			},
+		},
+		"reservation with ARN": {
+			input: map[string]any{
+				FieldNodeTemplateCapacityReservations: []any{
+					map[string]any{
+						FieldNodeTemplateCapacityResourceGroupArn: "arn:aws:ec2:us-east-1:123456789012:capacity-reservation-group/my-group",
+						FieldNodeTemplateCapacityReservationType:  CapacityReservationTypeCapacityBlock,
+					},
+				},
+			},
+			want: &sdk.NodetemplatesV1TemplateConstraintsAWSConstraints{
+				CapacityReservations: &[]sdk.NodetemplatesV1TemplateConstraintsAWSConstraintsCapacityReservation{
+					{
+						CapacityResourceGroupArn: lo.ToPtr("arn:aws:ec2:us-east-1:123456789012:capacity-reservation-group/my-group"),
+						Type:                     lo.ToPtr(sdk.NodetemplatesV1TemplateConstraintsAWSConstraintsCapacityReservationTypeCAPACITYBLOCK),
+					},
+				},
+			},
+		},
+		"reservation with both id and ARN": {
+			input: map[string]any{
+				FieldNodeTemplateCapacityReservations: []any{
+					map[string]any{
+						FieldNodeTemplateCapacityReservationId:    "cr-456",
+						FieldNodeTemplateCapacityResourceGroupArn: "arn:aws:ec2:us-east-1:123456789012:capacity-reservation-group/my-group",
+						FieldNodeTemplateCapacityReservationType:  CapacityReservationTypeCapacityBlock,
+					},
+				},
+			},
+			want: &sdk.NodetemplatesV1TemplateConstraintsAWSConstraints{
+				CapacityReservations: &[]sdk.NodetemplatesV1TemplateConstraintsAWSConstraintsCapacityReservation{
+					{
+						Id:                       lo.ToPtr("cr-456"),
+						CapacityResourceGroupArn: lo.ToPtr("arn:aws:ec2:us-east-1:123456789012:capacity-reservation-group/my-group"),
+						Type:                     lo.ToPtr(sdk.NodetemplatesV1TemplateConstraintsAWSConstraintsCapacityReservationTypeCAPACITYBLOCK),
+					},
+				},
+			},
+		},
+	}
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			got := toTemplateConstraintsAWSConstraints(tt.input)
+			require.Equal(t, tt.want, got)
 		})
 	}
 }

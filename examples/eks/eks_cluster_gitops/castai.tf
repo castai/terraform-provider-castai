@@ -91,6 +91,27 @@ resource "castai_node_template" "default_by_castai" {
 
 }
 
+resource "castai_node_template" "example_capacity_reservation" {
+  cluster_id = castai_eks_cluster.my_castai_cluster.id
+
+  name             = "example_capacity_reservation"
+  is_default       = false
+  is_enabled       = true
+  configuration_id = castai_node_configuration.default.id
+  should_taint     = false
+
+  constraints {
+    on_demand = true
+
+    aws {
+      capacity_reservations {
+        id   = "cr-12345678901234567"
+        type = "ON_DEMAND_CAPACITY_RESERVATION"
+      }
+    }
+  }
+}
+
 resource "castai_node_template" "example_spot_template" {
   cluster_id = castai_eks_cluster.my_castai_cluster.id
 
