@@ -104,6 +104,7 @@ Optional:
 
 - `architecture_priority` (List of String) Priority ordering of architectures, specifying no priority will pick cheapest. Allowed values: amd64, arm64.
 - `architectures` (List of String) List of acceptable instance CPU architectures, the default is amd64. Allowed values: amd64, arm64.
+- `aws` (Block List, Max: 1) AWS-specific constraints for the node template. (see [below for nested schema](#nestedblock--constraints--aws))
 - `azs` (List of String) The list of AZ names to consider for the node template, if empty or not set all AZs are considered.
 - `bare_metal` (String) Bare metal constraint, will only pick bare metal nodes if set to true. Will only pick non-bare metal nodes if false. Defaults to unspecified. Allowed values: true, false, unspecified.
 - `burstable_instances` (String) Will include burstable instances when enabled otherwise they will be excluded. Supported values: `enabled`, `disabled` or ``.
@@ -139,6 +140,24 @@ Optional:
 - `storage_optimized` (Boolean) Storage optimized instance constraint (deprecated).
 - `storage_optimized_state` (String) Storage optimized instance constraint - will only pick storage optimized nodes if enabled and won't pick if disabled. Empty value will have no effect. Supported values: `enabled`, `disabled` or empty string.
 - `use_spot_fallbacks` (Boolean) Spot instance fallback constraint - when true, on-demand instances will be created, when spots are unavailable.
+
+<a id="nestedblock--constraints--aws"></a>
+### Nested Schema for `constraints.aws`
+
+Optional:
+
+- `capacity_reservations` (Block List) Capacity reservations that this template can use for provisioning. (see [below for nested schema](#nestedblock--constraints--aws--capacity_reservations))
+
+<a id="nestedblock--constraints--aws--capacity_reservations"></a>
+### Nested Schema for `constraints.aws.capacity_reservations`
+
+Optional:
+
+- `capacity_resource_group_arn` (String) Capacity resource group ARN for UltraServer capacity blocks.
+- `id` (String) AWS capacity reservation ID.
+- `type` (String) Type of capacity reservation. Allowed values: ON_DEMAND_CAPACITY_RESERVATION, CAPACITY_BLOCK.
+
+
 
 <a id="nestedblock--constraints--custom_priority"></a>
 ### Nested Schema for `constraints.custom_priority`
