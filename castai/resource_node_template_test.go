@@ -247,6 +247,7 @@ constraints.0.spot_interruption_predictions_type = aws-rebalance-recommendations
 constraints.0.storage_optimized = false
 constraints.0.storage_optimized_state = enabled
 constraints.0.use_spot_fallbacks = false
+constraints.0.aws.# = 0
 constraints.0.bare_metal = unspecified
 custom_instances_enabled = true
 custom_instances_with_extended_memory_enabled = true
