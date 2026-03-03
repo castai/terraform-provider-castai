@@ -765,7 +765,7 @@ func (r *edgeLocationResource) toGCP(ctx context.Context, plan, config *gcpModel
 		ProjectId:              plan.ProjectID.ValueString(),
 		InstanceServiceAccount: instanceServiceAccount,
 		Credentials: &omni.GCPParamCredentials{
-			ClientServiceAccountJsonBase64: config.ClientServiceAccountJSONBase64WO.ValueString(),
+			ClientServiceAccountJsonBase64: config.ClientServiceAccountJSONBase64WO.ValueStringPointer(),
 		},
 		Networking: &omni.GCPParamGCPNetworking{
 			NetworkName: plan.NetworkName.ValueString(),
