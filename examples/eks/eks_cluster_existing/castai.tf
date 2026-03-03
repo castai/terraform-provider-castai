@@ -190,6 +190,22 @@ module "castai_eks_cluster" {
   # Installs network monitor
   install_egressd = true
 
+  # Optional: pass additional Helm values to castai-agent and cluster-controller.
+  # This is useful for setting environment variables (additionalEnv), resource limits,
+  # pod annotations, proxy settings, etc.
+  #
+  # Example terraform.tfvars entry:
+  #
+  #   agent_values = [<<-EOF
+  #     additionalEnv:
+  #       MY_ENV_VAR: "my-value"
+  #       HTTP_PROXY: "http://proxy.example.com:8080"
+  #   EOF
+  #   ]
+  #
+  agent_values              = var.agent_values
+  cluster_controller_values = var.cluster_controller_values
+
   # depends_on helps Terraform with creating proper dependencies graph in case of resource creation and in this case destroy.
   # module "castai-eks-cluster" has to be destroyed before module "castai-eks-role-iam".
   depends_on = [module.castai_eks_role_iam]
