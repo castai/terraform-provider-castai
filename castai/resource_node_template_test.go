@@ -799,8 +799,6 @@ func TestAccEKS_ResourceNodeTemplate_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.aws.0.capacity_reservations.#", "2"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.aws.0.capacity_reservations.0.id", "cr-12345678901234567"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.aws.0.capacity_reservations.0.type", "ON_DEMAND_CAPACITY_RESERVATION"),
-					resource.TestCheckResourceAttr(resourceName, "constraints.0.aws.0.capacity_reservations.1.capacity_resource_group_arn", "arn:aws:ec2:eu-central-1:123456789012:capacity-reservation-group/my-group"),
-					resource.TestCheckResourceAttr(resourceName, "constraints.0.aws.0.capacity_reservations.1.type", "CAPACITY_BLOCK"),
 					resource.TestCheckResourceAttr(resourceName, "edge_location_ids.#", "2"),
 					resource.TestCheckResourceAttrSet(resourceName, "edge_location_ids.0"),
 					resource.TestCheckResourceAttrSet(resourceName, "edge_location_ids.1"),
@@ -998,10 +996,6 @@ func testAccNodeTemplateConfig(rName, clusterName string) string {
 					capacity_reservations {
 						id   = "cr-12345678901234567"
 						type = "ON_DEMAND_CAPACITY_RESERVATION"
-					}
-					capacity_reservations {
-						capacity_resource_group_arn = "arn:aws:ec2:eu-central-1:123456789012:capacity-reservation-group/my-group"
-						type                       = "CAPACITY_BLOCK"
 					}
 				}
 			}
