@@ -260,6 +260,9 @@ type ClientInterface interface {
 	// DboAPIGetCacheGroupPerformance request
 	DboAPIGetCacheGroupPerformance(ctx context.Context, id string, params *DboAPIGetCacheGroupPerformanceParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// DboAPIGetCacheGroupPerformanceSummary request
+	DboAPIGetCacheGroupPerformanceSummary(ctx context.Context, id string, params *DboAPIGetCacheGroupPerformanceSummaryParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// DboAPIGetCacheGroupOperationalMetrics request
 	DboAPIGetCacheGroupOperationalMetrics(ctx context.Context, id string, params *DboAPIGetCacheGroupOperationalMetricsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -509,13 +512,13 @@ type ClientInterface interface {
 
 	ExternalClusterAPIIngestInstanceLogs(ctx context.Context, clusterId string, instanceId string, body ExternalClusterAPIIngestInstanceLogsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// ExternalClusterAPIAddNodeGroupWithBody request with any body
-	ExternalClusterAPIAddNodeGroupWithBody(ctx context.Context, clusterId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// ExternalClusterAPIAddNodeBatchWithBody request with any body
+	ExternalClusterAPIAddNodeBatchWithBody(ctx context.Context, clusterId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	ExternalClusterAPIAddNodeGroup(ctx context.Context, clusterId string, body ExternalClusterAPIAddNodeGroupJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+	ExternalClusterAPIAddNodeBatch(ctx context.Context, clusterId string, body ExternalClusterAPIAddNodeBatchJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// ExternalClusterAPIGetNodeGroup request
-	ExternalClusterAPIGetNodeGroup(ctx context.Context, clusterId string, nodeGroupId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// ExternalClusterAPIGetNodeBatch request
+	ExternalClusterAPIGetNodeBatch(ctx context.Context, clusterId string, nodeBatchId string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// ExternalClusterAPIListNodes request
 	ExternalClusterAPIListNodes(ctx context.Context, clusterId string, params *ExternalClusterAPIListNodesParams, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -1774,6 +1777,18 @@ func (c *Client) DboAPIGetCacheGroupPerformance(ctx context.Context, id string, 
 	return c.Client.Do(req)
 }
 
+func (c *Client) DboAPIGetCacheGroupPerformanceSummary(ctx context.Context, id string, params *DboAPIGetCacheGroupPerformanceSummaryParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDboAPIGetCacheGroupPerformanceSummaryRequest(c.Server, id, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
 func (c *Client) DboAPIGetCacheGroupOperationalMetrics(ctx context.Context, id string, params *DboAPIGetCacheGroupOperationalMetricsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewDboAPIGetCacheGroupOperationalMetricsRequest(c.Server, id, params)
 	if err != nil {
@@ -2866,8 +2881,8 @@ func (c *Client) ExternalClusterAPIIngestInstanceLogs(ctx context.Context, clust
 	return c.Client.Do(req)
 }
 
-func (c *Client) ExternalClusterAPIAddNodeGroupWithBody(ctx context.Context, clusterId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewExternalClusterAPIAddNodeGroupRequestWithBody(c.Server, clusterId, contentType, body)
+func (c *Client) ExternalClusterAPIAddNodeBatchWithBody(ctx context.Context, clusterId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewExternalClusterAPIAddNodeBatchRequestWithBody(c.Server, clusterId, contentType, body)
 	if err != nil {
 		return nil, err
 	}
@@ -2878,8 +2893,8 @@ func (c *Client) ExternalClusterAPIAddNodeGroupWithBody(ctx context.Context, clu
 	return c.Client.Do(req)
 }
 
-func (c *Client) ExternalClusterAPIAddNodeGroup(ctx context.Context, clusterId string, body ExternalClusterAPIAddNodeGroupJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewExternalClusterAPIAddNodeGroupRequest(c.Server, clusterId, body)
+func (c *Client) ExternalClusterAPIAddNodeBatch(ctx context.Context, clusterId string, body ExternalClusterAPIAddNodeBatchJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewExternalClusterAPIAddNodeBatchRequest(c.Server, clusterId, body)
 	if err != nil {
 		return nil, err
 	}
@@ -2890,8 +2905,8 @@ func (c *Client) ExternalClusterAPIAddNodeGroup(ctx context.Context, clusterId s
 	return c.Client.Do(req)
 }
 
-func (c *Client) ExternalClusterAPIGetNodeGroup(ctx context.Context, clusterId string, nodeGroupId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewExternalClusterAPIGetNodeGroupRequest(c.Server, clusterId, nodeGroupId)
+func (c *Client) ExternalClusterAPIGetNodeBatch(ctx context.Context, clusterId string, nodeBatchId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewExternalClusterAPIGetNodeBatchRequest(c.Server, clusterId, nodeBatchId)
 	if err != nil {
 		return nil, err
 	}
@@ -8518,6 +8533,126 @@ func NewDboAPIGetCacheGroupPerformanceRequest(server string, id string, params *
 	return req, nil
 }
 
+// NewDboAPIGetCacheGroupPerformanceSummaryRequest generates requests for DboAPIGetCacheGroupPerformanceSummary
+func NewDboAPIGetCacheGroupPerformanceSummaryRequest(server string, id string, params *DboAPIGetCacheGroupPerformanceSummaryParams) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/dbo/cache-groups/%s/cache-performance/summary", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if params.MetricsRangeStart != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "metricsRange.start", runtime.ParamLocationQuery, *params.MetricsRangeStart); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.MetricsRangeEnd != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "metricsRange.end", runtime.ParamLocationQuery, *params.MetricsRangeEnd); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.DatabaseId != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "databaseId", runtime.ParamLocationQuery, *params.DatabaseId); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.EndpointName != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "endpointName", runtime.ParamLocationQuery, *params.EndpointName); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.Username != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "username", runtime.ParamLocationQuery, *params.Username); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
 // NewDboAPIGetCacheGroupOperationalMetricsRequest generates requests for DboAPIGetCacheGroupOperationalMetrics
 func NewDboAPIGetCacheGroupOperationalMetricsRequest(server string, id string, params *DboAPIGetCacheGroupOperationalMetricsParams) (*http.Request, error) {
 	var err error
@@ -8594,6 +8729,38 @@ func NewDboAPIGetCacheGroupOperationalMetricsRequest(server string, id string, p
 		if params.ConfigurationId != nil {
 
 			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "configurationId", runtime.ParamLocationQuery, *params.ConfigurationId); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.EndpointName != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "endpointName", runtime.ParamLocationQuery, *params.EndpointName); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.Username != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "username", runtime.ParamLocationQuery, *params.Username); err != nil {
 				return nil, err
 			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
 				return nil, err
@@ -12066,19 +12233,19 @@ func NewExternalClusterAPIIngestInstanceLogsRequestWithBody(server string, clust
 	return req, nil
 }
 
-// NewExternalClusterAPIAddNodeGroupRequest calls the generic ExternalClusterAPIAddNodeGroup builder with application/json body
-func NewExternalClusterAPIAddNodeGroupRequest(server string, clusterId string, body ExternalClusterAPIAddNodeGroupJSONRequestBody) (*http.Request, error) {
+// NewExternalClusterAPIAddNodeBatchRequest calls the generic ExternalClusterAPIAddNodeBatch builder with application/json body
+func NewExternalClusterAPIAddNodeBatchRequest(server string, clusterId string, body ExternalClusterAPIAddNodeBatchJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
 	buf, err := json.Marshal(body)
 	if err != nil {
 		return nil, err
 	}
 	bodyReader = bytes.NewReader(buf)
-	return NewExternalClusterAPIAddNodeGroupRequestWithBody(server, clusterId, "application/json", bodyReader)
+	return NewExternalClusterAPIAddNodeBatchRequestWithBody(server, clusterId, "application/json", bodyReader)
 }
 
-// NewExternalClusterAPIAddNodeGroupRequestWithBody generates requests for ExternalClusterAPIAddNodeGroup with any type of body
-func NewExternalClusterAPIAddNodeGroupRequestWithBody(server string, clusterId string, contentType string, body io.Reader) (*http.Request, error) {
+// NewExternalClusterAPIAddNodeBatchRequestWithBody generates requests for ExternalClusterAPIAddNodeBatch with any type of body
+func NewExternalClusterAPIAddNodeBatchRequestWithBody(server string, clusterId string, contentType string, body io.Reader) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -12093,7 +12260,7 @@ func NewExternalClusterAPIAddNodeGroupRequestWithBody(server string, clusterId s
 		return nil, err
 	}
 
-	operationPath := fmt.Sprintf("/v1/kubernetes/external-clusters/%s/node-groups", pathParam0)
+	operationPath := fmt.Sprintf("/v1/kubernetes/external-clusters/%s/node-batches", pathParam0)
 	if operationPath[0] == '/' {
 		operationPath = "." + operationPath
 	}
@@ -12113,8 +12280,8 @@ func NewExternalClusterAPIAddNodeGroupRequestWithBody(server string, clusterId s
 	return req, nil
 }
 
-// NewExternalClusterAPIGetNodeGroupRequest generates requests for ExternalClusterAPIGetNodeGroup
-func NewExternalClusterAPIGetNodeGroupRequest(server string, clusterId string, nodeGroupId string) (*http.Request, error) {
+// NewExternalClusterAPIGetNodeBatchRequest generates requests for ExternalClusterAPIGetNodeBatch
+func NewExternalClusterAPIGetNodeBatchRequest(server string, clusterId string, nodeBatchId string) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -12126,7 +12293,7 @@ func NewExternalClusterAPIGetNodeGroupRequest(server string, clusterId string, n
 
 	var pathParam1 string
 
-	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "nodeGroupId", runtime.ParamLocationPath, nodeGroupId)
+	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "nodeBatchId", runtime.ParamLocationPath, nodeBatchId)
 	if err != nil {
 		return nil, err
 	}
@@ -12136,7 +12303,7 @@ func NewExternalClusterAPIGetNodeGroupRequest(server string, clusterId string, n
 		return nil, err
 	}
 
-	operationPath := fmt.Sprintf("/v1/kubernetes/external-clusters/%s/node-groups/%s", pathParam0, pathParam1)
+	operationPath := fmt.Sprintf("/v1/kubernetes/external-clusters/%s/node-batches/%s", pathParam0, pathParam1)
 	if operationPath[0] == '/' {
 		operationPath = "." + operationPath
 	}
@@ -21083,6 +21250,9 @@ type ClientWithResponsesInterface interface {
 	// DboAPIGetCacheGroupPerformance request
 	DboAPIGetCacheGroupPerformanceWithResponse(ctx context.Context, id string, params *DboAPIGetCacheGroupPerformanceParams) (*DboAPIGetCacheGroupPerformanceResponse, error)
 
+	// DboAPIGetCacheGroupPerformanceSummary request
+	DboAPIGetCacheGroupPerformanceSummaryWithResponse(ctx context.Context, id string, params *DboAPIGetCacheGroupPerformanceSummaryParams) (*DboAPIGetCacheGroupPerformanceSummaryResponse, error)
+
 	// DboAPIGetCacheGroupOperationalMetrics request
 	DboAPIGetCacheGroupOperationalMetricsWithResponse(ctx context.Context, id string, params *DboAPIGetCacheGroupOperationalMetricsParams) (*DboAPIGetCacheGroupOperationalMetricsResponse, error)
 
@@ -21332,13 +21502,13 @@ type ClientWithResponsesInterface interface {
 
 	ExternalClusterAPIIngestInstanceLogsWithResponse(ctx context.Context, clusterId string, instanceId string, body ExternalClusterAPIIngestInstanceLogsJSONRequestBody) (*ExternalClusterAPIIngestInstanceLogsResponse, error)
 
-	// ExternalClusterAPIAddNodeGroup request  with any body
-	ExternalClusterAPIAddNodeGroupWithBodyWithResponse(ctx context.Context, clusterId string, contentType string, body io.Reader) (*ExternalClusterAPIAddNodeGroupResponse, error)
+	// ExternalClusterAPIAddNodeBatch request  with any body
+	ExternalClusterAPIAddNodeBatchWithBodyWithResponse(ctx context.Context, clusterId string, contentType string, body io.Reader) (*ExternalClusterAPIAddNodeBatchResponse, error)
 
-	ExternalClusterAPIAddNodeGroupWithResponse(ctx context.Context, clusterId string, body ExternalClusterAPIAddNodeGroupJSONRequestBody) (*ExternalClusterAPIAddNodeGroupResponse, error)
+	ExternalClusterAPIAddNodeBatchWithResponse(ctx context.Context, clusterId string, body ExternalClusterAPIAddNodeBatchJSONRequestBody) (*ExternalClusterAPIAddNodeBatchResponse, error)
 
-	// ExternalClusterAPIGetNodeGroup request
-	ExternalClusterAPIGetNodeGroupWithResponse(ctx context.Context, clusterId string, nodeGroupId string) (*ExternalClusterAPIGetNodeGroupResponse, error)
+	// ExternalClusterAPIGetNodeBatch request
+	ExternalClusterAPIGetNodeBatchWithResponse(ctx context.Context, clusterId string, nodeBatchId string) (*ExternalClusterAPIGetNodeBatchResponse, error)
 
 	// ExternalClusterAPIListNodes request
 	ExternalClusterAPIListNodesWithResponse(ctx context.Context, clusterId string, params *ExternalClusterAPIListNodesParams) (*ExternalClusterAPIListNodesResponse, error)
@@ -23308,6 +23478,36 @@ func (r DboAPIGetCacheGroupPerformanceResponse) StatusCode() int {
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
 func (r DboAPIGetCacheGroupPerformanceResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type DboAPIGetCacheGroupPerformanceSummaryResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *DboV1GetCacheGroupPerformanceSummaryResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r DboAPIGetCacheGroupPerformanceSummaryResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r DboAPIGetCacheGroupPerformanceSummaryResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r DboAPIGetCacheGroupPerformanceSummaryResponse) GetBody() []byte {
 	return r.Body
 }
 
@@ -25322,14 +25522,14 @@ func (r ExternalClusterAPIIngestInstanceLogsResponse) GetBody() []byte {
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
-type ExternalClusterAPIAddNodeGroupResponse struct {
+type ExternalClusterAPIAddNodeBatchResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON200      *ExternalclusterV1AddNodeGroupResponse
+	JSON200      *ExternalclusterV1AddNodeBatchResponse
 }
 
 // Status returns HTTPResponse.Status
-func (r ExternalClusterAPIAddNodeGroupResponse) Status() string {
+func (r ExternalClusterAPIAddNodeBatchResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -25337,7 +25537,7 @@ func (r ExternalClusterAPIAddNodeGroupResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r ExternalClusterAPIAddNodeGroupResponse) StatusCode() int {
+func (r ExternalClusterAPIAddNodeBatchResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -25346,20 +25546,20 @@ func (r ExternalClusterAPIAddNodeGroupResponse) StatusCode() int {
 
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
-func (r ExternalClusterAPIAddNodeGroupResponse) GetBody() []byte {
+func (r ExternalClusterAPIAddNodeBatchResponse) GetBody() []byte {
 	return r.Body
 }
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
-type ExternalClusterAPIGetNodeGroupResponse struct {
+type ExternalClusterAPIGetNodeBatchResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON200      *ExternalclusterV1GetNodeGroupResponse
+	JSON200      *ExternalclusterV1GetNodeBatchResponse
 }
 
 // Status returns HTTPResponse.Status
-func (r ExternalClusterAPIGetNodeGroupResponse) Status() string {
+func (r ExternalClusterAPIGetNodeBatchResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -25367,7 +25567,7 @@ func (r ExternalClusterAPIGetNodeGroupResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r ExternalClusterAPIGetNodeGroupResponse) StatusCode() int {
+func (r ExternalClusterAPIGetNodeBatchResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -25376,7 +25576,7 @@ func (r ExternalClusterAPIGetNodeGroupResponse) StatusCode() int {
 
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
-func (r ExternalClusterAPIGetNodeGroupResponse) GetBody() []byte {
+func (r ExternalClusterAPIGetNodeBatchResponse) GetBody() []byte {
 	return r.Body
 }
 
@@ -30177,6 +30377,15 @@ func (c *ClientWithResponses) DboAPIGetCacheGroupPerformanceWithResponse(ctx con
 	return ParseDboAPIGetCacheGroupPerformanceResponse(rsp)
 }
 
+// DboAPIGetCacheGroupPerformanceSummaryWithResponse request returning *DboAPIGetCacheGroupPerformanceSummaryResponse
+func (c *ClientWithResponses) DboAPIGetCacheGroupPerformanceSummaryWithResponse(ctx context.Context, id string, params *DboAPIGetCacheGroupPerformanceSummaryParams) (*DboAPIGetCacheGroupPerformanceSummaryResponse, error) {
+	rsp, err := c.DboAPIGetCacheGroupPerformanceSummary(ctx, id, params)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDboAPIGetCacheGroupPerformanceSummaryResponse(rsp)
+}
+
 // DboAPIGetCacheGroupOperationalMetricsWithResponse request returning *DboAPIGetCacheGroupOperationalMetricsResponse
 func (c *ClientWithResponses) DboAPIGetCacheGroupOperationalMetricsWithResponse(ctx context.Context, id string, params *DboAPIGetCacheGroupOperationalMetricsParams) (*DboAPIGetCacheGroupOperationalMetricsResponse, error) {
 	rsp, err := c.DboAPIGetCacheGroupOperationalMetrics(ctx, id, params)
@@ -30972,30 +31181,30 @@ func (c *ClientWithResponses) ExternalClusterAPIIngestInstanceLogsWithResponse(c
 	return ParseExternalClusterAPIIngestInstanceLogsResponse(rsp)
 }
 
-// ExternalClusterAPIAddNodeGroupWithBodyWithResponse request with arbitrary body returning *ExternalClusterAPIAddNodeGroupResponse
-func (c *ClientWithResponses) ExternalClusterAPIAddNodeGroupWithBodyWithResponse(ctx context.Context, clusterId string, contentType string, body io.Reader) (*ExternalClusterAPIAddNodeGroupResponse, error) {
-	rsp, err := c.ExternalClusterAPIAddNodeGroupWithBody(ctx, clusterId, contentType, body)
+// ExternalClusterAPIAddNodeBatchWithBodyWithResponse request with arbitrary body returning *ExternalClusterAPIAddNodeBatchResponse
+func (c *ClientWithResponses) ExternalClusterAPIAddNodeBatchWithBodyWithResponse(ctx context.Context, clusterId string, contentType string, body io.Reader) (*ExternalClusterAPIAddNodeBatchResponse, error) {
+	rsp, err := c.ExternalClusterAPIAddNodeBatchWithBody(ctx, clusterId, contentType, body)
 	if err != nil {
 		return nil, err
 	}
-	return ParseExternalClusterAPIAddNodeGroupResponse(rsp)
+	return ParseExternalClusterAPIAddNodeBatchResponse(rsp)
 }
 
-func (c *ClientWithResponses) ExternalClusterAPIAddNodeGroupWithResponse(ctx context.Context, clusterId string, body ExternalClusterAPIAddNodeGroupJSONRequestBody) (*ExternalClusterAPIAddNodeGroupResponse, error) {
-	rsp, err := c.ExternalClusterAPIAddNodeGroup(ctx, clusterId, body)
+func (c *ClientWithResponses) ExternalClusterAPIAddNodeBatchWithResponse(ctx context.Context, clusterId string, body ExternalClusterAPIAddNodeBatchJSONRequestBody) (*ExternalClusterAPIAddNodeBatchResponse, error) {
+	rsp, err := c.ExternalClusterAPIAddNodeBatch(ctx, clusterId, body)
 	if err != nil {
 		return nil, err
 	}
-	return ParseExternalClusterAPIAddNodeGroupResponse(rsp)
+	return ParseExternalClusterAPIAddNodeBatchResponse(rsp)
 }
 
-// ExternalClusterAPIGetNodeGroupWithResponse request returning *ExternalClusterAPIGetNodeGroupResponse
-func (c *ClientWithResponses) ExternalClusterAPIGetNodeGroupWithResponse(ctx context.Context, clusterId string, nodeGroupId string) (*ExternalClusterAPIGetNodeGroupResponse, error) {
-	rsp, err := c.ExternalClusterAPIGetNodeGroup(ctx, clusterId, nodeGroupId)
+// ExternalClusterAPIGetNodeBatchWithResponse request returning *ExternalClusterAPIGetNodeBatchResponse
+func (c *ClientWithResponses) ExternalClusterAPIGetNodeBatchWithResponse(ctx context.Context, clusterId string, nodeBatchId string) (*ExternalClusterAPIGetNodeBatchResponse, error) {
+	rsp, err := c.ExternalClusterAPIGetNodeBatch(ctx, clusterId, nodeBatchId)
 	if err != nil {
 		return nil, err
 	}
-	return ParseExternalClusterAPIGetNodeGroupResponse(rsp)
+	return ParseExternalClusterAPIGetNodeBatchResponse(rsp)
 }
 
 // ExternalClusterAPIListNodesWithResponse request returning *ExternalClusterAPIListNodesResponse
@@ -33906,6 +34115,32 @@ func ParseDboAPIGetCacheGroupPerformanceResponse(rsp *http.Response) (*DboAPIGet
 	return response, nil
 }
 
+// ParseDboAPIGetCacheGroupPerformanceSummaryResponse parses an HTTP response from a DboAPIGetCacheGroupPerformanceSummaryWithResponse call
+func ParseDboAPIGetCacheGroupPerformanceSummaryResponse(rsp *http.Response) (*DboAPIGetCacheGroupPerformanceSummaryResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &DboAPIGetCacheGroupPerformanceSummaryResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest DboV1GetCacheGroupPerformanceSummaryResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
 // ParseDboAPIGetCacheGroupOperationalMetricsResponse parses an HTTP response from a DboAPIGetCacheGroupOperationalMetricsWithResponse call
 func ParseDboAPIGetCacheGroupOperationalMetricsResponse(rsp *http.Response) (*DboAPIGetCacheGroupOperationalMetricsResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
@@ -35638,22 +35873,22 @@ func ParseExternalClusterAPIIngestInstanceLogsResponse(rsp *http.Response) (*Ext
 	return response, nil
 }
 
-// ParseExternalClusterAPIAddNodeGroupResponse parses an HTTP response from a ExternalClusterAPIAddNodeGroupWithResponse call
-func ParseExternalClusterAPIAddNodeGroupResponse(rsp *http.Response) (*ExternalClusterAPIAddNodeGroupResponse, error) {
+// ParseExternalClusterAPIAddNodeBatchResponse parses an HTTP response from a ExternalClusterAPIAddNodeBatchWithResponse call
+func ParseExternalClusterAPIAddNodeBatchResponse(rsp *http.Response) (*ExternalClusterAPIAddNodeBatchResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
 	defer rsp.Body.Close()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &ExternalClusterAPIAddNodeGroupResponse{
+	response := &ExternalClusterAPIAddNodeBatchResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest ExternalclusterV1AddNodeGroupResponse
+		var dest ExternalclusterV1AddNodeBatchResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -35664,22 +35899,22 @@ func ParseExternalClusterAPIAddNodeGroupResponse(rsp *http.Response) (*ExternalC
 	return response, nil
 }
 
-// ParseExternalClusterAPIGetNodeGroupResponse parses an HTTP response from a ExternalClusterAPIGetNodeGroupWithResponse call
-func ParseExternalClusterAPIGetNodeGroupResponse(rsp *http.Response) (*ExternalClusterAPIGetNodeGroupResponse, error) {
+// ParseExternalClusterAPIGetNodeBatchResponse parses an HTTP response from a ExternalClusterAPIGetNodeBatchWithResponse call
+func ParseExternalClusterAPIGetNodeBatchResponse(rsp *http.Response) (*ExternalClusterAPIGetNodeBatchResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
 	defer rsp.Body.Close()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &ExternalClusterAPIGetNodeGroupResponse{
+	response := &ExternalClusterAPIGetNodeBatchResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest ExternalclusterV1GetNodeGroupResponse
+		var dest ExternalclusterV1GetNodeBatchResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}

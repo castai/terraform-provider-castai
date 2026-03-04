@@ -61,6 +61,11 @@ type AWSParam struct {
 	// Credentials Credentials used to authenticate AWS API.
 	Credentials *AWSParamCredentials `json:"credentials,omitempty"`
 
+	// InstanceProfile The AWS IAM instance profile ARN to be attached to edge nodes created in this location.
+	//  To transparently pull images from ECR, the instance profile role must have
+	//  at least the ecr:GetAuthorizationToken, ecr:BatchGetImage, and ecr:GetDownloadUrlForLayer permissions.
+	InstanceProfile *string `json:"instanceProfile,omitempty"`
+
 	// Networking The networking parameters.
 	Networking *AWSParamAWSNetworking `json:"networking,omitempty"`
 }
@@ -269,6 +274,9 @@ type GCPParamCredentials struct {
 type GCPParamGCPNetworking struct {
 	// NetworkName The name of the network to be used in the selected region.
 	NetworkName string `json:"networkName"`
+
+	// SubnetCidr VPC Subnet IPv4 CIDR block.
+	SubnetCidr *string `json:"subnetCidr,omitempty"`
 
 	// SubnetName The name of the subnetwork to be used in the selected region.
 	SubnetName string `json:"subnetName"`
