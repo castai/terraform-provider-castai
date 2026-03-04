@@ -84,6 +84,7 @@ Required:
 
 Optional:
 
+- `instance_profile` (String) AWS IAM instance profile ARN to be attached to edge instances. It can be used to grant permissions to access other AWS resources such as ECR.
 - `name_tag` (String, Deprecated) The value of a 'Name' tag applied to VPC resources
 - `vpc_peered` (Boolean) Whether existing VPC is peered with main cluster's VPC. Field is ignored if vpc_id is not provided or main cluster is not EKS
 
