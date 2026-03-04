@@ -1535,6 +1535,26 @@ func (mr *MockClientInterfaceMockRecorder) DboAPIGetCacheGroupPerformance(ctx, i
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIGetCacheGroupPerformance", reflect.TypeOf((*MockClientInterface)(nil).DboAPIGetCacheGroupPerformance), varargs...)
 }
 
+// DboAPIGetCacheGroupPerformanceSummary mocks base method.
+func (m *MockClientInterface) DboAPIGetCacheGroupPerformanceSummary(ctx context.Context, id string, params *sdk.DboAPIGetCacheGroupPerformanceSummaryParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, id, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DboAPIGetCacheGroupPerformanceSummary", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPIGetCacheGroupPerformanceSummary indicates an expected call of DboAPIGetCacheGroupPerformanceSummary.
+func (mr *MockClientInterfaceMockRecorder) DboAPIGetCacheGroupPerformanceSummary(ctx, id, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, id, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIGetCacheGroupPerformanceSummary", reflect.TypeOf((*MockClientInterface)(nil).DboAPIGetCacheGroupPerformanceSummary), varargs...)
+}
+
 // DboAPIGetCacheGroupPoolingEligibility mocks base method.
 func (m *MockClientInterface) DboAPIGetCacheGroupPoolingEligibility(ctx context.Context, id string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
@@ -2095,44 +2115,44 @@ func (mr *MockClientInterfaceMockRecorder) ExternalClusterAPIAddNode(ctx, cluste
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIAddNode", reflect.TypeOf((*MockClientInterface)(nil).ExternalClusterAPIAddNode), varargs...)
 }
 
-// ExternalClusterAPIAddNodeGroup mocks base method.
-func (m *MockClientInterface) ExternalClusterAPIAddNodeGroup(ctx context.Context, clusterId string, body sdk.ExternalClusterAPIAddNodeGroupJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+// ExternalClusterAPIAddNodeBatch mocks base method.
+func (m *MockClientInterface) ExternalClusterAPIAddNodeBatch(ctx context.Context, clusterId string, body sdk.ExternalClusterAPIAddNodeBatchJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{ctx, clusterId, body}
 	for _, a := range reqEditors {
 		varargs = append(varargs, a)
 	}
-	ret := m.ctrl.Call(m, "ExternalClusterAPIAddNodeGroup", varargs...)
+	ret := m.ctrl.Call(m, "ExternalClusterAPIAddNodeBatch", varargs...)
 	ret0, _ := ret[0].(*http.Response)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// ExternalClusterAPIAddNodeGroup indicates an expected call of ExternalClusterAPIAddNodeGroup.
-func (mr *MockClientInterfaceMockRecorder) ExternalClusterAPIAddNodeGroup(ctx, clusterId, body interface{}, reqEditors ...interface{}) *gomock.Call {
+// ExternalClusterAPIAddNodeBatch indicates an expected call of ExternalClusterAPIAddNodeBatch.
+func (mr *MockClientInterfaceMockRecorder) ExternalClusterAPIAddNodeBatch(ctx, clusterId, body interface{}, reqEditors ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{ctx, clusterId, body}, reqEditors...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIAddNodeGroup", reflect.TypeOf((*MockClientInterface)(nil).ExternalClusterAPIAddNodeGroup), varargs...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIAddNodeBatch", reflect.TypeOf((*MockClientInterface)(nil).ExternalClusterAPIAddNodeBatch), varargs...)
 }
 
-// ExternalClusterAPIAddNodeGroupWithBody mocks base method.
-func (m *MockClientInterface) ExternalClusterAPIAddNodeGroupWithBody(ctx context.Context, clusterId, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+// ExternalClusterAPIAddNodeBatchWithBody mocks base method.
+func (m *MockClientInterface) ExternalClusterAPIAddNodeBatchWithBody(ctx context.Context, clusterId, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{ctx, clusterId, contentType, body}
 	for _, a := range reqEditors {
 		varargs = append(varargs, a)
 	}
-	ret := m.ctrl.Call(m, "ExternalClusterAPIAddNodeGroupWithBody", varargs...)
+	ret := m.ctrl.Call(m, "ExternalClusterAPIAddNodeBatchWithBody", varargs...)
 	ret0, _ := ret[0].(*http.Response)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// ExternalClusterAPIAddNodeGroupWithBody indicates an expected call of ExternalClusterAPIAddNodeGroupWithBody.
-func (mr *MockClientInterfaceMockRecorder) ExternalClusterAPIAddNodeGroupWithBody(ctx, clusterId, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+// ExternalClusterAPIAddNodeBatchWithBody indicates an expected call of ExternalClusterAPIAddNodeBatchWithBody.
+func (mr *MockClientInterfaceMockRecorder) ExternalClusterAPIAddNodeBatchWithBody(ctx, clusterId, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{ctx, clusterId, contentType, body}, reqEditors...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIAddNodeGroupWithBody", reflect.TypeOf((*MockClientInterface)(nil).ExternalClusterAPIAddNodeGroupWithBody), varargs...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIAddNodeBatchWithBody", reflect.TypeOf((*MockClientInterface)(nil).ExternalClusterAPIAddNodeBatchWithBody), varargs...)
 }
 
 // ExternalClusterAPIAddNodeWithBody mocks base method.
@@ -2675,24 +2695,24 @@ func (mr *MockClientInterfaceMockRecorder) ExternalClusterAPIGetNode(ctx, cluste
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIGetNode", reflect.TypeOf((*MockClientInterface)(nil).ExternalClusterAPIGetNode), varargs...)
 }
 
-// ExternalClusterAPIGetNodeGroup mocks base method.
-func (m *MockClientInterface) ExternalClusterAPIGetNodeGroup(ctx context.Context, clusterId, nodeGroupId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+// ExternalClusterAPIGetNodeBatch mocks base method.
+func (m *MockClientInterface) ExternalClusterAPIGetNodeBatch(ctx context.Context, clusterId, nodeBatchId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
-	varargs := []interface{}{ctx, clusterId, nodeGroupId}
+	varargs := []interface{}{ctx, clusterId, nodeBatchId}
 	for _, a := range reqEditors {
 		varargs = append(varargs, a)
 	}
-	ret := m.ctrl.Call(m, "ExternalClusterAPIGetNodeGroup", varargs...)
+	ret := m.ctrl.Call(m, "ExternalClusterAPIGetNodeBatch", varargs...)
 	ret0, _ := ret[0].(*http.Response)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// ExternalClusterAPIGetNodeGroup indicates an expected call of ExternalClusterAPIGetNodeGroup.
-func (mr *MockClientInterfaceMockRecorder) ExternalClusterAPIGetNodeGroup(ctx, clusterId, nodeGroupId interface{}, reqEditors ...interface{}) *gomock.Call {
+// ExternalClusterAPIGetNodeBatch indicates an expected call of ExternalClusterAPIGetNodeBatch.
+func (mr *MockClientInterfaceMockRecorder) ExternalClusterAPIGetNodeBatch(ctx, clusterId, nodeBatchId interface{}, reqEditors ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, clusterId, nodeGroupId}, reqEditors...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIGetNodeGroup", reflect.TypeOf((*MockClientInterface)(nil).ExternalClusterAPIGetNodeGroup), varargs...)
+	varargs := append([]interface{}{ctx, clusterId, nodeBatchId}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIGetNodeBatch", reflect.TypeOf((*MockClientInterface)(nil).ExternalClusterAPIGetNodeBatch), varargs...)
 }
 
 // ExternalClusterAPIHandleCloudEvent mocks base method.
@@ -9543,6 +9563,41 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) DboAPIGetCacheGroupPerfo
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIGetCacheGroupPerformance", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DboAPIGetCacheGroupPerformance), varargs...)
 }
 
+// DboAPIGetCacheGroupPerformanceSummary mocks base method.
+func (m *MockClientWithResponsesInterface) DboAPIGetCacheGroupPerformanceSummary(ctx context.Context, id string, params *sdk.DboAPIGetCacheGroupPerformanceSummaryParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, id, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DboAPIGetCacheGroupPerformanceSummary", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPIGetCacheGroupPerformanceSummary indicates an expected call of DboAPIGetCacheGroupPerformanceSummary.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) DboAPIGetCacheGroupPerformanceSummary(ctx, id, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, id, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIGetCacheGroupPerformanceSummary", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DboAPIGetCacheGroupPerformanceSummary), varargs...)
+}
+
+// DboAPIGetCacheGroupPerformanceSummaryWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) DboAPIGetCacheGroupPerformanceSummaryWithResponse(ctx context.Context, id string, params *sdk.DboAPIGetCacheGroupPerformanceSummaryParams) (*sdk.DboAPIGetCacheGroupPerformanceSummaryResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DboAPIGetCacheGroupPerformanceSummaryWithResponse", ctx, id, params)
+	ret0, _ := ret[0].(*sdk.DboAPIGetCacheGroupPerformanceSummaryResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPIGetCacheGroupPerformanceSummaryWithResponse indicates an expected call of DboAPIGetCacheGroupPerformanceSummaryWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) DboAPIGetCacheGroupPerformanceSummaryWithResponse(ctx, id, params interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIGetCacheGroupPerformanceSummaryWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DboAPIGetCacheGroupPerformanceSummaryWithResponse), ctx, id, params)
+}
+
 // DboAPIGetCacheGroupPerformanceWithResponse mocks base method.
 func (m *MockClientWithResponsesInterface) DboAPIGetCacheGroupPerformanceWithResponse(ctx context.Context, id string, params *sdk.DboAPIGetCacheGroupPerformanceParams) (*sdk.DboAPIGetCacheGroupPerformanceResponse, error) {
 	m.ctrl.T.Helper()
@@ -10538,74 +10593,74 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIAddNod
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIAddNode", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIAddNode), varargs...)
 }
 
-// ExternalClusterAPIAddNodeGroup mocks base method.
-func (m *MockClientWithResponsesInterface) ExternalClusterAPIAddNodeGroup(ctx context.Context, clusterId string, body sdk.ExternalClusterAPIAddNodeGroupJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+// ExternalClusterAPIAddNodeBatch mocks base method.
+func (m *MockClientWithResponsesInterface) ExternalClusterAPIAddNodeBatch(ctx context.Context, clusterId string, body sdk.ExternalClusterAPIAddNodeBatchJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{ctx, clusterId, body}
 	for _, a := range reqEditors {
 		varargs = append(varargs, a)
 	}
-	ret := m.ctrl.Call(m, "ExternalClusterAPIAddNodeGroup", varargs...)
+	ret := m.ctrl.Call(m, "ExternalClusterAPIAddNodeBatch", varargs...)
 	ret0, _ := ret[0].(*http.Response)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// ExternalClusterAPIAddNodeGroup indicates an expected call of ExternalClusterAPIAddNodeGroup.
-func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIAddNodeGroup(ctx, clusterId, body interface{}, reqEditors ...interface{}) *gomock.Call {
+// ExternalClusterAPIAddNodeBatch indicates an expected call of ExternalClusterAPIAddNodeBatch.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIAddNodeBatch(ctx, clusterId, body interface{}, reqEditors ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{ctx, clusterId, body}, reqEditors...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIAddNodeGroup", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIAddNodeGroup), varargs...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIAddNodeBatch", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIAddNodeBatch), varargs...)
 }
 
-// ExternalClusterAPIAddNodeGroupWithBody mocks base method.
-func (m *MockClientWithResponsesInterface) ExternalClusterAPIAddNodeGroupWithBody(ctx context.Context, clusterId, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+// ExternalClusterAPIAddNodeBatchWithBody mocks base method.
+func (m *MockClientWithResponsesInterface) ExternalClusterAPIAddNodeBatchWithBody(ctx context.Context, clusterId, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{ctx, clusterId, contentType, body}
 	for _, a := range reqEditors {
 		varargs = append(varargs, a)
 	}
-	ret := m.ctrl.Call(m, "ExternalClusterAPIAddNodeGroupWithBody", varargs...)
+	ret := m.ctrl.Call(m, "ExternalClusterAPIAddNodeBatchWithBody", varargs...)
 	ret0, _ := ret[0].(*http.Response)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// ExternalClusterAPIAddNodeGroupWithBody indicates an expected call of ExternalClusterAPIAddNodeGroupWithBody.
-func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIAddNodeGroupWithBody(ctx, clusterId, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+// ExternalClusterAPIAddNodeBatchWithBody indicates an expected call of ExternalClusterAPIAddNodeBatchWithBody.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIAddNodeBatchWithBody(ctx, clusterId, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{ctx, clusterId, contentType, body}, reqEditors...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIAddNodeGroupWithBody", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIAddNodeGroupWithBody), varargs...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIAddNodeBatchWithBody", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIAddNodeBatchWithBody), varargs...)
 }
 
-// ExternalClusterAPIAddNodeGroupWithBodyWithResponse mocks base method.
-func (m *MockClientWithResponsesInterface) ExternalClusterAPIAddNodeGroupWithBodyWithResponse(ctx context.Context, clusterId, contentType string, body io.Reader) (*sdk.ExternalClusterAPIAddNodeGroupResponse, error) {
+// ExternalClusterAPIAddNodeBatchWithBodyWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) ExternalClusterAPIAddNodeBatchWithBodyWithResponse(ctx context.Context, clusterId, contentType string, body io.Reader) (*sdk.ExternalClusterAPIAddNodeBatchResponse, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ExternalClusterAPIAddNodeGroupWithBodyWithResponse", ctx, clusterId, contentType, body)
-	ret0, _ := ret[0].(*sdk.ExternalClusterAPIAddNodeGroupResponse)
+	ret := m.ctrl.Call(m, "ExternalClusterAPIAddNodeBatchWithBodyWithResponse", ctx, clusterId, contentType, body)
+	ret0, _ := ret[0].(*sdk.ExternalClusterAPIAddNodeBatchResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// ExternalClusterAPIAddNodeGroupWithBodyWithResponse indicates an expected call of ExternalClusterAPIAddNodeGroupWithBodyWithResponse.
-func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIAddNodeGroupWithBodyWithResponse(ctx, clusterId, contentType, body interface{}) *gomock.Call {
+// ExternalClusterAPIAddNodeBatchWithBodyWithResponse indicates an expected call of ExternalClusterAPIAddNodeBatchWithBodyWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIAddNodeBatchWithBodyWithResponse(ctx, clusterId, contentType, body interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIAddNodeGroupWithBodyWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIAddNodeGroupWithBodyWithResponse), ctx, clusterId, contentType, body)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIAddNodeBatchWithBodyWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIAddNodeBatchWithBodyWithResponse), ctx, clusterId, contentType, body)
 }
 
-// ExternalClusterAPIAddNodeGroupWithResponse mocks base method.
-func (m *MockClientWithResponsesInterface) ExternalClusterAPIAddNodeGroupWithResponse(ctx context.Context, clusterId string, body sdk.ExternalClusterAPIAddNodeGroupJSONRequestBody) (*sdk.ExternalClusterAPIAddNodeGroupResponse, error) {
+// ExternalClusterAPIAddNodeBatchWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) ExternalClusterAPIAddNodeBatchWithResponse(ctx context.Context, clusterId string, body sdk.ExternalClusterAPIAddNodeBatchJSONRequestBody) (*sdk.ExternalClusterAPIAddNodeBatchResponse, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ExternalClusterAPIAddNodeGroupWithResponse", ctx, clusterId, body)
-	ret0, _ := ret[0].(*sdk.ExternalClusterAPIAddNodeGroupResponse)
+	ret := m.ctrl.Call(m, "ExternalClusterAPIAddNodeBatchWithResponse", ctx, clusterId, body)
+	ret0, _ := ret[0].(*sdk.ExternalClusterAPIAddNodeBatchResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// ExternalClusterAPIAddNodeGroupWithResponse indicates an expected call of ExternalClusterAPIAddNodeGroupWithResponse.
-func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIAddNodeGroupWithResponse(ctx, clusterId, body interface{}) *gomock.Call {
+// ExternalClusterAPIAddNodeBatchWithResponse indicates an expected call of ExternalClusterAPIAddNodeBatchWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIAddNodeBatchWithResponse(ctx, clusterId, body interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIAddNodeGroupWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIAddNodeGroupWithResponse), ctx, clusterId, body)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIAddNodeBatchWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIAddNodeBatchWithResponse), ctx, clusterId, body)
 }
 
 // ExternalClusterAPIAddNodeWithBody mocks base method.
@@ -11553,39 +11608,39 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIGetNod
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIGetNode", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIGetNode), varargs...)
 }
 
-// ExternalClusterAPIGetNodeGroup mocks base method.
-func (m *MockClientWithResponsesInterface) ExternalClusterAPIGetNodeGroup(ctx context.Context, clusterId, nodeGroupId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+// ExternalClusterAPIGetNodeBatch mocks base method.
+func (m *MockClientWithResponsesInterface) ExternalClusterAPIGetNodeBatch(ctx context.Context, clusterId, nodeBatchId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
-	varargs := []interface{}{ctx, clusterId, nodeGroupId}
+	varargs := []interface{}{ctx, clusterId, nodeBatchId}
 	for _, a := range reqEditors {
 		varargs = append(varargs, a)
 	}
-	ret := m.ctrl.Call(m, "ExternalClusterAPIGetNodeGroup", varargs...)
+	ret := m.ctrl.Call(m, "ExternalClusterAPIGetNodeBatch", varargs...)
 	ret0, _ := ret[0].(*http.Response)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// ExternalClusterAPIGetNodeGroup indicates an expected call of ExternalClusterAPIGetNodeGroup.
-func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIGetNodeGroup(ctx, clusterId, nodeGroupId interface{}, reqEditors ...interface{}) *gomock.Call {
+// ExternalClusterAPIGetNodeBatch indicates an expected call of ExternalClusterAPIGetNodeBatch.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIGetNodeBatch(ctx, clusterId, nodeBatchId interface{}, reqEditors ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, clusterId, nodeGroupId}, reqEditors...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIGetNodeGroup", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIGetNodeGroup), varargs...)
+	varargs := append([]interface{}{ctx, clusterId, nodeBatchId}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIGetNodeBatch", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIGetNodeBatch), varargs...)
 }
 
-// ExternalClusterAPIGetNodeGroupWithResponse mocks base method.
-func (m *MockClientWithResponsesInterface) ExternalClusterAPIGetNodeGroupWithResponse(ctx context.Context, clusterId, nodeGroupId string) (*sdk.ExternalClusterAPIGetNodeGroupResponse, error) {
+// ExternalClusterAPIGetNodeBatchWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) ExternalClusterAPIGetNodeBatchWithResponse(ctx context.Context, clusterId, nodeBatchId string) (*sdk.ExternalClusterAPIGetNodeBatchResponse, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ExternalClusterAPIGetNodeGroupWithResponse", ctx, clusterId, nodeGroupId)
-	ret0, _ := ret[0].(*sdk.ExternalClusterAPIGetNodeGroupResponse)
+	ret := m.ctrl.Call(m, "ExternalClusterAPIGetNodeBatchWithResponse", ctx, clusterId, nodeBatchId)
+	ret0, _ := ret[0].(*sdk.ExternalClusterAPIGetNodeBatchResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// ExternalClusterAPIGetNodeGroupWithResponse indicates an expected call of ExternalClusterAPIGetNodeGroupWithResponse.
-func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIGetNodeGroupWithResponse(ctx, clusterId, nodeGroupId interface{}) *gomock.Call {
+// ExternalClusterAPIGetNodeBatchWithResponse indicates an expected call of ExternalClusterAPIGetNodeBatchWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIGetNodeBatchWithResponse(ctx, clusterId, nodeBatchId interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIGetNodeGroupWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIGetNodeGroupWithResponse), ctx, clusterId, nodeGroupId)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIGetNodeBatchWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIGetNodeBatchWithResponse), ctx, clusterId, nodeBatchId)
 }
 
 // ExternalClusterAPIGetNodeWithResponse mocks base method.
