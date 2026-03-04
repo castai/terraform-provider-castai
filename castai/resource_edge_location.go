@@ -56,6 +56,7 @@ type zoneModel struct {
 
 type awsModel struct {
 	AccountID         types.String `tfsdk:"account_id"`
+	InstanceProfile   types.String `tfsdk:"instance_profile"`
 	AccessKeyIDWO     types.String `tfsdk:"access_key_id_wo"`
 	SecretAccessKeyWO types.String `tfsdk:"secret_access_key_wo"`
 	VpcID             types.String `tfsdk:"vpc_id"`
@@ -97,7 +98,8 @@ func (m awsModel) Equal(other *awsModel) bool {
 		m.VpcID.Equal(other.VpcID) &&
 		m.VpcPeered.Equal(other.VpcPeered) &&
 		m.SecurityGroupID.Equal(other.SecurityGroupID) &&
-		m.SubnetIDs.Equal(other.SubnetIDs)
+		m.SubnetIDs.Equal(other.SubnetIDs) &&
+		m.InstanceProfile.Equal(other.InstanceProfile)
 }
 
 func (m gcpModel) credentials() types.String {
@@ -224,6 +226,10 @@ func (r *edgeLocationResource) Schema(_ context.Context, _ resource.SchemaReques
 					"account_id": schema.StringAttribute{
 						Required:    true,
 						Description: "AWS account ID",
+					},
+					"instance_profile": schema.StringAttribute{
+						Optional:    true,
+						Description: "AWS IAM instance profile ARN to be attached to edge instances. It can be used to grant permissions to access other AWS resources such as ECR.",
 					},
 					"access_key_id_wo": schema.StringAttribute{
 						Required:    true,
@@ -688,8 +694,14 @@ func (r *edgeLocationResource) toAWS(ctx context.Context, plan, config *awsModel
 		return nil, diags
 	}
 
+	var instanceProfile *string
+	if !plan.InstanceProfile.IsNull() && plan.InstanceProfile.ValueString() != "" {
+		instanceProfile = lo.ToPtr(plan.InstanceProfile.ValueString())
+	}
+
 	out := &omni.AWSParam{
-		AccountId: toPtr(plan.AccountID.ValueString()),
+		AccountId:       toPtr(plan.AccountID.ValueString()),
+		InstanceProfile: instanceProfile,
 		Credentials: &omni.AWSParamCredentials{
 			AccessKeyId:     config.AccessKeyIDWO.ValueString(),
 			SecretAccessKey: config.SecretAccessKeyWO.ValueString(),
@@ -716,6 +728,7 @@ func (r *edgeLocationResource) toAWSModel(ctx context.Context, config *omni.AWSP
 
 	aws := &awsModel{
 		AccountID:         types.StringValue(lo.FromPtr(config.AccountId)),
+		InstanceProfile:   types.StringNull(),
 		VpcID:             types.StringNull(),
 		SecurityGroupID:   types.StringNull(),
 		VpcPeered:         types.BoolNull(),
@@ -723,6 +736,10 @@ func (r *edgeLocationResource) toAWSModel(ctx context.Context, config *omni.AWSP
 		NameTag:           types.StringNull(),
 		AccessKeyIDWO:     types.StringNull(),
 		SecretAccessKeyWO: types.StringNull(),
+	}
+
+	if config.InstanceProfile != nil && *config.InstanceProfile != "" {
+		aws.InstanceProfile = types.StringValue(*config.InstanceProfile)
 	}
 
 	if config.Networking != nil {
@@ -756,14 +773,9 @@ func (r *edgeLocationResource) toGCP(ctx context.Context, plan, config *gcpModel
 		return nil, diags
 	}
 
-	var instanceServiceAccount *string
-	if !plan.InstanceServiceAccount.IsNull() && plan.InstanceServiceAccount.ValueString() != "" {
-		instanceServiceAccount = lo.ToPtr(plan.InstanceServiceAccount.ValueString())
-	}
-
 	out := &omni.GCPParam{
 		ProjectId:              plan.ProjectID.ValueString(),
-		InstanceServiceAccount: instanceServiceAccount,
+		InstanceServiceAccount: plan.InstanceServiceAccount.ValueStringPointer(),
 		Credentials: &omni.GCPParamCredentials{
 			ClientServiceAccountJsonBase64: config.ClientServiceAccountJSONBase64WO.ValueStringPointer(),
 		},
