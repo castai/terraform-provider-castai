@@ -412,22 +412,22 @@ const (
 	ExternalclusterV1ClusterReconcileInfoReconcileStatusWarning ExternalclusterV1ClusterReconcileInfoReconcileStatus = "warning"
 )
 
-// Defines values for ExternalclusterV1GetNodeGroupResponseBatchOperationStatus.
+// Defines values for ExternalclusterV1GetNodeBatchResponseBatchOperationStatus.
 const (
-	ExternalclusterV1GetNodeGroupResponseBatchOperationStatusBATCHOPERATIONSTATUSUNSPECIFIED ExternalclusterV1GetNodeGroupResponseBatchOperationStatus = "BATCH_OPERATION_STATUS_UNSPECIFIED"
-	ExternalclusterV1GetNodeGroupResponseBatchOperationStatusFAILED                          ExternalclusterV1GetNodeGroupResponseBatchOperationStatus = "FAILED"
-	ExternalclusterV1GetNodeGroupResponseBatchOperationStatusINPROGRESS                      ExternalclusterV1GetNodeGroupResponseBatchOperationStatus = "IN_PROGRESS"
-	ExternalclusterV1GetNodeGroupResponseBatchOperationStatusPARTIAL                         ExternalclusterV1GetNodeGroupResponseBatchOperationStatus = "PARTIAL"
-	ExternalclusterV1GetNodeGroupResponseBatchOperationStatusPENDING                         ExternalclusterV1GetNodeGroupResponseBatchOperationStatus = "PENDING"
-	ExternalclusterV1GetNodeGroupResponseBatchOperationStatusSUCCESS                         ExternalclusterV1GetNodeGroupResponseBatchOperationStatus = "SUCCESS"
+	ExternalclusterV1GetNodeBatchResponseBatchOperationStatusBATCHOPERATIONSTATUSUNSPECIFIED ExternalclusterV1GetNodeBatchResponseBatchOperationStatus = "BATCH_OPERATION_STATUS_UNSPECIFIED"
+	ExternalclusterV1GetNodeBatchResponseBatchOperationStatusFAILED                          ExternalclusterV1GetNodeBatchResponseBatchOperationStatus = "FAILED"
+	ExternalclusterV1GetNodeBatchResponseBatchOperationStatusINPROGRESS                      ExternalclusterV1GetNodeBatchResponseBatchOperationStatus = "IN_PROGRESS"
+	ExternalclusterV1GetNodeBatchResponseBatchOperationStatusPARTIAL                         ExternalclusterV1GetNodeBatchResponseBatchOperationStatus = "PARTIAL"
+	ExternalclusterV1GetNodeBatchResponseBatchOperationStatusPENDING                         ExternalclusterV1GetNodeBatchResponseBatchOperationStatus = "PENDING"
+	ExternalclusterV1GetNodeBatchResponseBatchOperationStatusSUCCESS                         ExternalclusterV1GetNodeBatchResponseBatchOperationStatus = "SUCCESS"
 )
 
-// Defines values for ExternalclusterV1GetNodeGroupResponseNodeStatus.
+// Defines values for ExternalclusterV1GetNodeBatchResponseNodeStatus.
 const (
-	CREATED               ExternalclusterV1GetNodeGroupResponseNodeStatus = "CREATED"
-	JOINED                ExternalclusterV1GetNodeGroupResponseNodeStatus = "JOINED"
-	JOINFAILED            ExternalclusterV1GetNodeGroupResponseNodeStatus = "JOIN_FAILED"
-	NODESTATUSUNSPECIFIED ExternalclusterV1GetNodeGroupResponseNodeStatus = "NODE_STATUS_UNSPECIFIED"
+	CREATED               ExternalclusterV1GetNodeBatchResponseNodeStatus = "CREATED"
+	JOINED                ExternalclusterV1GetNodeBatchResponseNodeStatus = "JOINED"
+	JOINFAILED            ExternalclusterV1GetNodeBatchResponseNodeStatus = "JOIN_FAILED"
+	NODESTATUSUNSPECIFIED ExternalclusterV1GetNodeBatchResponseNodeStatus = "NODE_STATUS_UNSPECIFIED"
 )
 
 // Defines values for ExternalclusterV1KentEligibility.
@@ -739,6 +739,7 @@ const (
 	WorkloadoptimizationV1EventTypeEVENTTYPEINFINITESCALING            WorkloadoptimizationV1EventType = "EVENT_TYPE_INFINITE_SCALING"
 	WorkloadoptimizationV1EventTypeEVENTTYPEINVALID                    WorkloadoptimizationV1EventType = "EVENT_TYPE_INVALID"
 	WorkloadoptimizationV1EventTypeEVENTTYPEMEMORYPRESSUREEVICTION     WorkloadoptimizationV1EventType = "EVENT_TYPE_MEMORY_PRESSURE_EVICTION"
+	WorkloadoptimizationV1EventTypeEVENTTYPENATIVEVPASTATECHANGED      WorkloadoptimizationV1EventType = "EVENT_TYPE_NATIVE_VPA_STATE_CHANGED"
 	WorkloadoptimizationV1EventTypeEVENTTYPEOOMKILL                    WorkloadoptimizationV1EventType = "EVENT_TYPE_OOM_KILL"
 	WorkloadoptimizationV1EventTypeEVENTTYPERECOMMENDEDPODCOUNTCHANGED WorkloadoptimizationV1EventType = "EVENT_TYPE_RECOMMENDED_POD_COUNT_CHANGED"
 	WorkloadoptimizationV1EventTypeEVENTTYPERECOMMENDEDREQUESTSCHANGED WorkloadoptimizationV1EventType = "EVENT_TYPE_RECOMMENDED_REQUESTS_CHANGED"
@@ -1233,6 +1234,7 @@ const (
 	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPEINFINITESCALING            WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_INFINITE_SCALING"
 	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPEINVALID                    WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_INVALID"
 	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPEMEMORYPRESSUREEVICTION     WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_MEMORY_PRESSURE_EVICTION"
+	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPENATIVEVPASTATECHANGED      WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_NATIVE_VPA_STATE_CHANGED"
 	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPEOOMKILL                    WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_OOM_KILL"
 	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPERECOMMENDEDPODCOUNTCHANGED WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_RECOMMENDED_POD_COUNT_CHANGED"
 	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPERECOMMENDEDREQUESTSCHANGED WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_RECOMMENDED_REQUESTS_CHANGED"
@@ -1258,6 +1260,7 @@ const (
 	EVENTTYPEINFINITESCALING            WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_INFINITE_SCALING"
 	EVENTTYPEINVALID                    WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_INVALID"
 	EVENTTYPEMEMORYPRESSUREEVICTION     WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_MEMORY_PRESSURE_EVICTION"
+	EVENTTYPENATIVEVPASTATECHANGED      WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_NATIVE_VPA_STATE_CHANGED"
 	EVENTTYPEOOMKILL                    WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_OOM_KILL"
 	EVENTTYPERECOMMENDEDPODCOUNTCHANGED WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_RECOMMENDED_POD_COUNT_CHANGED"
 	EVENTTYPERECOMMENDEDREQUESTSCHANGED WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_RECOMMENDED_REQUESTS_CHANGED"
@@ -1850,6 +1853,7 @@ type CastaiInventoryV1beta1AzureReservationImport struct {
 type CastaiInventoryV1beta1AzureSavingsPlanContext struct {
 	CommitmentAmount     *float64                                                            `json:"commitmentAmount,omitempty"`
 	Id                   *string                                                             `json:"id,omitempty"`
+	InstanceTypesUsage   *CastaiInventoryV1beta1InstanceTypeBasedUsage                       `json:"instanceTypesUsage,omitempty"`
 	ProvisioningState    *string                                                             `json:"provisioningState,omitempty"`
 	Scope                *CastaiInventoryV1beta1AzureSavingsPlanContextAzureSavingsPlanScope `json:"scope,omitempty"`
 	ScopeManagementGroup *string                                                             `json:"scopeManagementGroup,omitempty"`
@@ -4831,6 +4835,12 @@ type DboV1GetCacheEfficiencyResponse struct {
 	Items *[]DboV1CacheEfficiency `json:"items,omitempty"`
 }
 
+// DboV1GetCacheGroupMetricsFilterOptionsResponse defines model for dbo.v1.GetCacheGroupMetricsFilterOptionsResponse.
+type DboV1GetCacheGroupMetricsFilterOptionsResponse struct {
+	// Users List of distinct users from metrics data.
+	Users *[]string `json:"users,omitempty"`
+}
+
 // DboV1GetCacheGroupOperationalMetricsResponse defines model for dbo.v1.GetCacheGroupOperationalMetricsResponse.
 type DboV1GetCacheGroupOperationalMetricsResponse struct {
 	Items   []DboV1OperationalMetricsTimeseries `json:"items"`
@@ -4840,6 +4850,11 @@ type DboV1GetCacheGroupOperationalMetricsResponse struct {
 // DboV1GetCacheGroupPerformanceResponse defines model for dbo.v1.GetCacheGroupPerformanceResponse.
 type DboV1GetCacheGroupPerformanceResponse struct {
 	Items *[]DboV1CachePerformanceTimeseries `json:"items,omitempty"`
+}
+
+// DboV1GetCacheGroupPerformanceSummaryResponse defines model for dbo.v1.GetCacheGroupPerformanceSummaryResponse.
+type DboV1GetCacheGroupPerformanceSummaryResponse struct {
+	Metrics *DboV1CacheMetrics `json:"metrics,omitempty"`
 }
 
 // DboV1GetCacheGroupPoolingEligibilityResponse defines model for dbo.v1.GetCacheGroupPoolingEligibilityResponse.
@@ -5241,10 +5256,10 @@ type ExternalclusterV1AWSNodeConfigCapacityReservation struct {
 // Represents spare capacity lent from existing ODCRs with 2-minute interruption notice.
 type ExternalclusterV1AWSNodeConfigCapacityReservationType string
 
-// ExternalclusterV1AddNodeGroupResponse AddNodeGroupResponse is the response to AddNodeGroup RPC.
-type ExternalclusterV1AddNodeGroupResponse struct {
-	// NodeGroupId The ID of the created node group. Will be used to track the progress of node group creation.
-	NodeGroupId *string `json:"nodeGroupId,omitempty"`
+// ExternalclusterV1AddNodeBatchResponse AddNodeBatchResponse is the response to AddNodeBatch RPC.
+type ExternalclusterV1AddNodeBatchResponse struct {
+	// NodeBatchId The ID of the created node batch . Will be used to track the progress of node batch creation.
+	NodeBatchId *string `json:"nodeBatchId,omitempty"`
 
 	// OperationId The ID of the operation.
 	OperationId *string `json:"operationId,omitempty"`
@@ -5474,6 +5489,12 @@ type ExternalclusterV1ClusterUpdate struct {
 	SelfHostedWithEc2Nodes *ExternalclusterV1UpdateSelfHostedWithEC2NodesParams `json:"selfHostedWithEc2Nodes,omitempty"`
 }
 
+// ExternalclusterV1ComputeCapacity defines model for externalcluster.v1.ComputeCapacity.
+type ExternalclusterV1ComputeCapacity struct {
+	// Instances Number of nodes to be created.
+	Instances *int32 `json:"instances,omitempty"`
+}
+
 // ExternalclusterV1CreateAssumeRolePrincipalResponse defines model for externalcluster.v1.CreateAssumeRolePrincipalResponse.
 type ExternalclusterV1CreateAssumeRolePrincipalResponse struct {
 	Arn *string `json:"arn,omitempty"`
@@ -5549,8 +5570,8 @@ type ExternalclusterV1EKSClusterParams struct {
 	Tags *map[string]string `json:"tags,omitempty"`
 }
 
-// ExternalclusterV1EKSNodeGroupConfig defines model for externalcluster.v1.EKSNodeGroupConfig.
-type ExternalclusterV1EKSNodeGroupConfig struct {
+// ExternalclusterV1EKSNodeBatchConfig defines model for externalcluster.v1.EKSNodeBatchConfig.
+type ExternalclusterV1EKSNodeBatchConfig struct {
 	// FleetContextId Context ID passed to the CreateFleet API.
 	FleetContextId *string `json:"fleetContextId"`
 }
@@ -5678,37 +5699,37 @@ type ExternalclusterV1GetListNodesFiltersResponse struct {
 	Filters *[]ExternalclusterV1NodeListFilter `json:"filters,omitempty"`
 }
 
-// ExternalclusterV1GetNodeGroupResponse GetNodeGroupResponse is the response to GetNodeGroup RPC, containing the status of node group creation and details about created nodes.
-type ExternalclusterV1GetNodeGroupResponse struct {
+// ExternalclusterV1GetNodeBatchResponse GetNodeBatchResponse is the response to GetNodeBatch RPC, containing the status of node batch creation and details about created nodes.
+type ExternalclusterV1GetNodeBatchResponse struct {
 	CompletedAt  *time.Time                                             `json:"completedAt,omitempty"`
 	CreatedCount *int32                                                 `json:"createdCount,omitempty"`
-	CreatedNodes *[]ExternalclusterV1GetNodeGroupResponseCreatedNode    `json:"createdNodes,omitempty"`
+	CreatedNodes *[]ExternalclusterV1GetNodeBatchResponseCreatedNode    `json:"createdNodes,omitempty"`
 	Done         *bool                                                  `json:"done,omitempty"`
-	Errors       *[]ExternalclusterV1GetNodeGroupResponseOperationError `json:"errors,omitempty"`
+	Errors       *[]ExternalclusterV1GetNodeBatchResponseOperationError `json:"errors,omitempty"`
 	FailedCount  *int32                                                 `json:"failedCount,omitempty"`
 	StartedAt    *time.Time                                             `json:"startedAt,omitempty"`
 
 	// Status BatchOperationStatus represents the current status of the batch operation.
-	Status *ExternalclusterV1GetNodeGroupResponseBatchOperationStatus `json:"status,omitempty"`
+	Status *ExternalclusterV1GetNodeBatchResponseBatchOperationStatus `json:"status,omitempty"`
 }
 
-// ExternalclusterV1GetNodeGroupResponseBatchOperationStatus BatchOperationStatus represents the current status of the batch operation.
-type ExternalclusterV1GetNodeGroupResponseBatchOperationStatus string
+// ExternalclusterV1GetNodeBatchResponseBatchOperationStatus BatchOperationStatus represents the current status of the batch operation.
+type ExternalclusterV1GetNodeBatchResponseBatchOperationStatus string
 
-// ExternalclusterV1GetNodeGroupResponseCreatedNode defines model for externalcluster.v1.GetNodeGroupResponse.CreatedNode.
-type ExternalclusterV1GetNodeGroupResponseCreatedNode struct {
+// ExternalclusterV1GetNodeBatchResponseCreatedNode defines model for externalcluster.v1.GetNodeBatchResponse.CreatedNode.
+type ExternalclusterV1GetNodeBatchResponseCreatedNode struct {
 	InstanceType *string `json:"instanceType,omitempty"`
 	NodeId       *string `json:"nodeId,omitempty"`
 
 	// Status NodeStatus represents the status of a provisioned node.
-	Status *ExternalclusterV1GetNodeGroupResponseNodeStatus `json:"status,omitempty"`
+	Status *ExternalclusterV1GetNodeBatchResponseNodeStatus `json:"status,omitempty"`
 }
 
-// ExternalclusterV1GetNodeGroupResponseNodeStatus NodeStatus represents the status of a provisioned node.
-type ExternalclusterV1GetNodeGroupResponseNodeStatus string
+// ExternalclusterV1GetNodeBatchResponseNodeStatus NodeStatus represents the status of a provisioned node.
+type ExternalclusterV1GetNodeBatchResponseNodeStatus string
 
-// ExternalclusterV1GetNodeGroupResponseOperationError defines model for externalcluster.v1.GetNodeGroupResponse.OperationError.
-type ExternalclusterV1GetNodeGroupResponseOperationError struct {
+// ExternalclusterV1GetNodeBatchResponseOperationError defines model for externalcluster.v1.GetNodeBatchResponse.OperationError.
+type ExternalclusterV1GetNodeBatchResponseOperationError struct {
 	Code    *string `json:"code,omitempty"`
 	Message *string `json:"message,omitempty"`
 }
@@ -5854,10 +5875,66 @@ type ExternalclusterV1NodeAffinity struct {
 	DedicatedGroup *string `json:"dedicatedGroup"`
 }
 
-// ExternalclusterV1NodeCapacity defines model for externalcluster.v1.NodeCapacity.
-type ExternalclusterV1NodeCapacity struct {
-	// Instances Number of nodes to be created.
-	Instances *int32 `json:"instances,omitempty"`
+// ExternalclusterV1NodeBatchConfig defines model for externalcluster.v1.NodeBatchConfig.
+type ExternalclusterV1NodeBatchConfig struct {
+	// Aws AWSNodeConfig holds AWS-specific configuration for node provisioning.
+	Aws *ExternalclusterV1AWSNodeConfig `json:"aws,omitempty"`
+
+	// ConfigurationId ID reference of Node configuration (template) to be used for node creation.
+	ConfigurationId *string `json:"configurationId"`
+
+	// EdgeConfig EdgeConfig holds Edge specific configuration.
+	EdgeConfig *ExternalclusterV1EdgeConfig `json:"edgeConfig,omitempty"`
+
+	// GpuConfig GPUConfig describes instance GPU configuration.
+	//
+	// Use for:
+	// * Creating GCP N1 with customer quantity and type of GPUs attached.
+	// * Setting required labels for AKS GPU nodes.
+	// * Configuring gpu sharing.
+	// Required while provisioning GCP N1 instance types with GPU.
+	// Eg.: n1-standard-2 with 8 x NVIDIA Tesla K80
+	GpuConfig *ExternalclusterV1GPUConfig `json:"gpuConfig,omitempty"`
+
+	// KubernetesLabels Node Kubernetes labels.
+	KubernetesLabels *map[string]string `json:"kubernetesLabels,omitempty"`
+
+	// KubernetesTaints Node Kubernetes taints.
+	KubernetesTaints *[]ExternalclusterV1Taint `json:"kubernetesTaints,omitempty"`
+
+	// NodeAffinity NodeAffinity provides control over the assignment of individual nodes to dedicated host instances.
+	NodeAffinity *ExternalclusterV1NodeAffinity `json:"nodeAffinity,omitempty"`
+
+	// SpotConfig NodeSpotConfig defines if node should be created as spot instance, and params for creation.
+	SpotConfig *ExternalclusterV1NodeSpotConfig `json:"spotConfig,omitempty"`
+
+	// Volume NodeVolume defines node's local root volume configuration.
+	Volume *ExternalclusterV1NodeVolume `json:"volume,omitempty"`
+}
+
+// ExternalclusterV1NodeBatchOption defines model for externalcluster.v1.NodeBatchOption.
+type ExternalclusterV1NodeBatchOption struct {
+	CapacityPerNode *ExternalclusterV1ComputeCapacity `json:"capacityPerNode,omitempty"`
+
+	// InstanceType Instance type of the node.
+	InstanceType *string `json:"instanceType,omitempty"`
+
+	// SubnetId Node subnet ID.
+	SubnetId *string `json:"subnetId"`
+
+	// Zone Zone of the node.
+	Zone *string `json:"zone"`
+}
+
+// ExternalclusterV1NodeBatchSpec defines model for externalcluster.v1.NodeBatchSpec.
+type ExternalclusterV1NodeBatchSpec struct {
+	BaseConfig *ExternalclusterV1NodeBatchConfig    `json:"baseConfig,omitempty"`
+	Eks        *ExternalclusterV1EKSNodeBatchConfig `json:"eks,omitempty"`
+
+	// Options List of different options for nodes in the batch.
+	// Each option is merged with the baseConfiguration.
+	Options       *[]ExternalclusterV1NodeBatchOption `json:"options,omitempty"`
+	TotalCapacity *ExternalclusterV1ComputeCapacity   `json:"totalCapacity,omitempty"`
 }
 
 // ExternalclusterV1NodeConfig defines model for externalcluster.v1.NodeConfig.
@@ -5909,68 +5986,6 @@ type ExternalclusterV1NodeConfig struct {
 
 	// Zone Zone of the node.
 	Zone *string `json:"zone"`
-}
-
-// ExternalclusterV1NodeGroupConfig defines model for externalcluster.v1.NodeGroupConfig.
-type ExternalclusterV1NodeGroupConfig struct {
-	// Aws AWSNodeConfig holds AWS-specific configuration for node provisioning.
-	Aws *ExternalclusterV1AWSNodeConfig `json:"aws,omitempty"`
-
-	// ConfigurationId ID reference of Node configuration (template) to be used for node creation.
-	ConfigurationId *string `json:"configurationId"`
-
-	// EdgeConfig EdgeConfig holds Edge specific configuration.
-	EdgeConfig *ExternalclusterV1EdgeConfig `json:"edgeConfig,omitempty"`
-
-	// GpuConfig GPUConfig describes instance GPU configuration.
-	//
-	// Use for:
-	// * Creating GCP N1 with customer quantity and type of GPUs attached.
-	// * Setting required labels for AKS GPU nodes.
-	// * Configuring gpu sharing.
-	// Required while provisioning GCP N1 instance types with GPU.
-	// Eg.: n1-standard-2 with 8 x NVIDIA Tesla K80
-	GpuConfig *ExternalclusterV1GPUConfig `json:"gpuConfig,omitempty"`
-
-	// KubernetesLabels Node Kubernetes labels.
-	KubernetesLabels *map[string]string `json:"kubernetesLabels,omitempty"`
-
-	// KubernetesTaints Node Kubernetes taints.
-	KubernetesTaints *[]ExternalclusterV1Taint `json:"kubernetesTaints,omitempty"`
-
-	// NodeAffinity NodeAffinity provides control over the assignment of individual nodes to dedicated host instances.
-	NodeAffinity *ExternalclusterV1NodeAffinity `json:"nodeAffinity,omitempty"`
-
-	// SpotConfig NodeSpotConfig defines if node should be created as spot instance, and params for creation.
-	SpotConfig *ExternalclusterV1NodeSpotConfig `json:"spotConfig,omitempty"`
-
-	// Volume NodeVolume defines node's local root volume configuration.
-	Volume *ExternalclusterV1NodeVolume `json:"volume,omitempty"`
-}
-
-// ExternalclusterV1NodeGroupOption defines model for externalcluster.v1.NodeGroupOption.
-type ExternalclusterV1NodeGroupOption struct {
-	CapacityPerNode *ExternalclusterV1NodeCapacity `json:"capacityPerNode,omitempty"`
-
-	// InstanceType Instance type of the node.
-	InstanceType *string `json:"instanceType,omitempty"`
-
-	// SubnetId Node subnet ID.
-	SubnetId *string `json:"subnetId"`
-
-	// Zone Zone of the node.
-	Zone *string `json:"zone"`
-}
-
-// ExternalclusterV1NodeGroupSpec defines model for externalcluster.v1.NodeGroupSpec.
-type ExternalclusterV1NodeGroupSpec struct {
-	BaseConfig *ExternalclusterV1NodeGroupConfig    `json:"baseConfig,omitempty"`
-	Eks        *ExternalclusterV1EKSNodeGroupConfig `json:"eks,omitempty"`
-
-	// Options List of different options for nodes in the group.
-	// Ordered by preference. Each option is merged with the baseConfiguration.
-	Options       *[]ExternalclusterV1NodeGroupOption `json:"options,omitempty"`
-	TotalCapacity *ExternalclusterV1NodeCapacity      `json:"totalCapacity,omitempty"`
 }
 
 // ExternalclusterV1NodeInfo defines model for externalcluster.v1.NodeInfo.
@@ -8628,6 +8643,7 @@ type WorkloadoptimizationV1Event struct {
 	HpaMaxedOut                *WorkloadoptimizationV1HPAMaxedOutEvent                `json:"hpaMaxedOut,omitempty"`
 	InfiniteMemoryScaling      *WorkloadoptimizationV1InfiniteMemoryScalingEvent      `json:"infiniteMemoryScaling,omitempty"`
 	MemoryPressureEviction     *WorkloadoptimizationV1MemoryPressureEvictionEvent     `json:"memoryPressureEviction,omitempty"`
+	NativeVpaStateChanged      *WorkloadoptimizationV1NativeVPAStateChangedEvent      `json:"nativeVpaStateChanged,omitempty"`
 	OomKill                    *WorkloadoptimizationV1OOMKillEvent                    `json:"oomKill,omitempty"`
 	RecommendedPodCountChanged *WorkloadoptimizationV1RecommendedPodCountChangedEvent `json:"recommendedPodCountChanged,omitempty"`
 	RecommendedRequestsChanged *WorkloadoptimizationV1RecommendedRequestsChangedEvent `json:"recommendedRequestsChanged,omitempty"`
@@ -8771,6 +8787,14 @@ type WorkloadoptimizationV1GetWorkloadFiltersResponse struct {
 	ScalingPolicyNames []string                                       `json:"scalingPolicyNames"`
 	WorkloadIds        []string                                       `json:"workloadIds"`
 	WorkloadNames      []string                                       `json:"workloadNames"`
+}
+
+// WorkloadoptimizationV1GetWorkloadNativeVpaSpecResponse defines model for workloadoptimization.v1.GetWorkloadNativeVpaSpecResponse.
+type WorkloadoptimizationV1GetWorkloadNativeVpaSpecResponse struct {
+	ClusterId      string                  `json:"clusterId"`
+	Id             string                  `json:"id"`
+	Object         *map[string]interface{} `json:"object"`
+	OrganizationId string                  `json:"organizationId"`
 }
 
 // WorkloadoptimizationV1GetWorkloadResponse defines model for workloadoptimization.v1.GetWorkloadResponse.
@@ -9355,6 +9379,11 @@ type WorkloadoptimizationV1MetricTargetType string
 
 // WorkloadoptimizationV1MigrateClusterToHPAV2Response defines model for workloadoptimization.v1.MigrateClusterToHPAV2Response.
 type WorkloadoptimizationV1MigrateClusterToHPAV2Response = map[string]interface{}
+
+// WorkloadoptimizationV1NativeVPAStateChangedEvent defines model for workloadoptimization.v1.NativeVPAStateChangedEvent.
+type WorkloadoptimizationV1NativeVPAStateChangedEvent struct {
+	VpaPresent bool `json:"vpaPresent"`
+}
 
 // WorkloadoptimizationV1NewCustomMetricsDataSource defines model for workloadoptimization.v1.NewCustomMetricsDataSource.
 type WorkloadoptimizationV1NewCustomMetricsDataSource struct {
@@ -10788,6 +10817,36 @@ type DboAPIGetCacheGroupPerformanceParams struct {
 	Username *string `form:"username,omitempty" json:"username,omitempty"`
 }
 
+// DboAPIGetCacheGroupPerformanceSummaryParams defines parameters for DboAPIGetCacheGroupPerformanceSummary.
+type DboAPIGetCacheGroupPerformanceSummaryParams struct {
+	// MetricsRangeStart Start of period.
+	MetricsRangeStart *time.Time `form:"metricsRange.start,omitempty" json:"metricsRange.start,omitempty"`
+
+	// MetricsRangeEnd End of period.
+	MetricsRangeEnd *time.Time `form:"metricsRange.end,omitempty" json:"metricsRange.end,omitempty"`
+
+	// DatabaseId Filter by specific database (cache configuration) ID.
+	DatabaseId *string `form:"databaseId,omitempty" json:"databaseId,omitempty"`
+
+	// EndpointName Filter by endpoint name. Cannot be combined with username.
+	EndpointName *string `form:"endpointName,omitempty" json:"endpointName,omitempty"`
+
+	// Username Filter by username. Cannot be combined with endpoint_name.
+	Username *string `form:"username,omitempty" json:"username,omitempty"`
+}
+
+// DboAPIGetCacheGroupMetricsFilterOptionsParams defines parameters for DboAPIGetCacheGroupMetricsFilterOptions.
+type DboAPIGetCacheGroupMetricsFilterOptionsParams struct {
+	// TimeRangeStart Start of period.
+	TimeRangeStart *time.Time `form:"timeRange.start,omitempty" json:"timeRange.start,omitempty"`
+
+	// TimeRangeEnd End of period.
+	TimeRangeEnd *time.Time `form:"timeRange.end,omitempty" json:"timeRange.end,omitempty"`
+
+	// DatabaseId Filter by specific database (cache configuration) ID.
+	DatabaseId *string `form:"databaseId,omitempty" json:"databaseId,omitempty"`
+}
+
 // DboAPIGetCacheGroupOperationalMetricsParams defines parameters for DboAPIGetCacheGroupOperationalMetrics.
 type DboAPIGetCacheGroupOperationalMetricsParams struct {
 	// MetricsRangeStart Start of period.
@@ -10801,6 +10860,12 @@ type DboAPIGetCacheGroupOperationalMetricsParams struct {
 
 	// ConfigurationId Cache configuration id: if provided, will filter by it.
 	ConfigurationId *string `form:"configurationId,omitempty" json:"configurationId,omitempty"`
+
+	// EndpointName Filter by endpoint name. Cannot be combined with username.
+	EndpointName *string `form:"endpointName,omitempty" json:"endpointName,omitempty"`
+
+	// Username Filter by username. Cannot be combined with endpoint_name.
+	Username *string `form:"username,omitempty" json:"username,omitempty"`
 }
 
 // DboAPIGetDatabaseClusterParams defines parameters for DboAPIGetDatabaseCluster.
@@ -11797,8 +11862,8 @@ type ExternalClusterAPIGKECreateSAJSONRequestBody = ExternalClusterAPIGKECreateS
 // ExternalClusterAPIIngestInstanceLogsJSONRequestBody defines body for ExternalClusterAPIIngestInstanceLogs for application/json ContentType.
 type ExternalClusterAPIIngestInstanceLogsJSONRequestBody = ExternalclusterV1NodeLogs
 
-// ExternalClusterAPIAddNodeGroupJSONRequestBody defines body for ExternalClusterAPIAddNodeGroup for application/json ContentType.
-type ExternalClusterAPIAddNodeGroupJSONRequestBody = ExternalclusterV1NodeGroupSpec
+// ExternalClusterAPIAddNodeBatchJSONRequestBody defines body for ExternalClusterAPIAddNodeBatch for application/json ContentType.
+type ExternalClusterAPIAddNodeBatchJSONRequestBody = ExternalclusterV1NodeBatchSpec
 
 // ExternalClusterAPIAddNodeJSONRequestBody defines body for ExternalClusterAPIAddNode for application/json ContentType.
 type ExternalClusterAPIAddNodeJSONRequestBody = ExternalclusterV1NodeConfig
