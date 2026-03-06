@@ -1131,6 +1131,7 @@ const (
 
 // Defines values for CommitmentsAPIImportAzureReservationsParamsBehaviour.
 const (
+	CommitmentsAPIImportAzureReservationsParamsBehaviourAPPEND    CommitmentsAPIImportAzureReservationsParamsBehaviour = "APPEND"
 	CommitmentsAPIImportAzureReservationsParamsBehaviourOVERWRITE CommitmentsAPIImportAzureReservationsParamsBehaviour = "OVERWRITE"
 )
 
@@ -11217,6 +11218,7 @@ type CommitmentsAPIImportAzureReservationsParams struct {
 	// Behaviour Behaviour
 	//
 	//  - OVERWRITE: Overwrite all existing commitments
+	//  - APPEND: Append commitments without deleting existing ones
 	Behaviour *CommitmentsAPIImportAzureReservationsParamsBehaviour `form:"behaviour,omitempty" json:"behaviour,omitempty"`
 }
 
