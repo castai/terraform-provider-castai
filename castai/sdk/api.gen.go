@@ -739,6 +739,7 @@ const (
 	WorkloadoptimizationV1EventTypeEVENTTYPEINFINITESCALING            WorkloadoptimizationV1EventType = "EVENT_TYPE_INFINITE_SCALING"
 	WorkloadoptimizationV1EventTypeEVENTTYPEINVALID                    WorkloadoptimizationV1EventType = "EVENT_TYPE_INVALID"
 	WorkloadoptimizationV1EventTypeEVENTTYPEMEMORYPRESSUREEVICTION     WorkloadoptimizationV1EventType = "EVENT_TYPE_MEMORY_PRESSURE_EVICTION"
+	WorkloadoptimizationV1EventTypeEVENTTYPENATIVEVPASTATECHANGED      WorkloadoptimizationV1EventType = "EVENT_TYPE_NATIVE_VPA_STATE_CHANGED"
 	WorkloadoptimizationV1EventTypeEVENTTYPEOOMKILL                    WorkloadoptimizationV1EventType = "EVENT_TYPE_OOM_KILL"
 	WorkloadoptimizationV1EventTypeEVENTTYPERECOMMENDEDPODCOUNTCHANGED WorkloadoptimizationV1EventType = "EVENT_TYPE_RECOMMENDED_POD_COUNT_CHANGED"
 	WorkloadoptimizationV1EventTypeEVENTTYPERECOMMENDEDREQUESTSCHANGED WorkloadoptimizationV1EventType = "EVENT_TYPE_RECOMMENDED_REQUESTS_CHANGED"
@@ -1233,6 +1234,7 @@ const (
 	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPEINFINITESCALING            WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_INFINITE_SCALING"
 	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPEINVALID                    WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_INVALID"
 	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPEMEMORYPRESSUREEVICTION     WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_MEMORY_PRESSURE_EVICTION"
+	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPENATIVEVPASTATECHANGED      WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_NATIVE_VPA_STATE_CHANGED"
 	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPEOOMKILL                    WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_OOM_KILL"
 	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPERECOMMENDEDPODCOUNTCHANGED WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_RECOMMENDED_POD_COUNT_CHANGED"
 	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPERECOMMENDEDREQUESTSCHANGED WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_RECOMMENDED_REQUESTS_CHANGED"
@@ -1258,6 +1260,7 @@ const (
 	EVENTTYPEINFINITESCALING            WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_INFINITE_SCALING"
 	EVENTTYPEINVALID                    WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_INVALID"
 	EVENTTYPEMEMORYPRESSUREEVICTION     WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_MEMORY_PRESSURE_EVICTION"
+	EVENTTYPENATIVEVPASTATECHANGED      WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_NATIVE_VPA_STATE_CHANGED"
 	EVENTTYPEOOMKILL                    WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_OOM_KILL"
 	EVENTTYPERECOMMENDEDPODCOUNTCHANGED WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_RECOMMENDED_POD_COUNT_CHANGED"
 	EVENTTYPERECOMMENDEDREQUESTSCHANGED WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_RECOMMENDED_REQUESTS_CHANGED"
@@ -2529,6 +2532,27 @@ type CastaiInventoryV1beta1NodeUsageAWS struct {
 //   - CAPACITY_BLOCK: Capacity block
 type CastaiInventoryV1beta1NodeUsageAWSCapacityReservationType string
 
+// CastaiInventoryV1beta1OrganizationUsageSummary Per-organization usage breakdown for enterprise commitments.
+type CastaiInventoryV1beta1OrganizationUsageSummary struct {
+	CpuUsed                          *float64 `json:"cpuUsed,omitempty"`
+	CpuUsedPercent                   *float64 `json:"cpuUsedPercent,omitempty"`
+	MemoryUsedMib                    *float64 `json:"memoryUsedMib,omitempty"`
+	MemoryUsedMibPercent             *float64 `json:"memoryUsedMibPercent,omitempty"`
+	MonetaryAmountUsedPerHour        *float64 `json:"monetaryAmountUsedPerHour,omitempty"`
+	MonetaryAmountUsedPerHourPercent *float64 `json:"monetaryAmountUsedPerHourPercent,omitempty"`
+	OrganizationId                   *string  `json:"organizationId,omitempty"`
+}
+
+// CastaiInventoryV1beta1OtherOrganizationsUsage Aggregated usage from other organizations within the enterprise.
+type CastaiInventoryV1beta1OtherOrganizationsUsage struct {
+	CpuUsed                          *float64 `json:"cpuUsed,omitempty"`
+	CpuUsedPercent                   *float64 `json:"cpuUsedPercent,omitempty"`
+	MemoryUsedMib                    *float64 `json:"memoryUsedMib,omitempty"`
+	MemoryUsedMibPercent             *float64 `json:"memoryUsedMibPercent,omitempty"`
+	MonetaryAmountUsedPerHour        *float64 `json:"monetaryAmountUsedPerHour,omitempty"`
+	MonetaryAmountUsedPerHourPercent *float64 `json:"monetaryAmountUsedPerHourPercent,omitempty"`
+}
+
 // CastaiInventoryV1beta1OverwriteReservationsResponse defines model for castai.inventory.v1beta1.OverwriteReservationsResponse.
 type CastaiInventoryV1beta1OverwriteReservationsResponse struct {
 	Reservations *[]CastaiInventoryV1beta1ReservationDetails `json:"reservations,omitempty"`
@@ -2749,6 +2773,12 @@ type CastaiInventoryV1beta1Usage struct {
 	MonetaryAmountUsedPerHourOthers        *float64 `json:"monetaryAmountUsedPerHourOthers,omitempty"`
 	MonetaryAmountUsedPerHourOthersPercent *float64 `json:"monetaryAmountUsedPerHourOthersPercent,omitempty"`
 	MonetaryAmountUsedPercent              *float64 `json:"monetaryAmountUsedPercent,omitempty"`
+
+	// OrganizationUsages Per-organization usage breakdown. Only populated for enterprise organizations.
+	OrganizationUsages *[]CastaiInventoryV1beta1OrganizationUsageSummary `json:"organizationUsages,omitempty"`
+
+	// OtherOrgsUsage Aggregated usage from other organizations within the enterprise.
+	OtherOrgsUsage *CastaiInventoryV1beta1OtherOrganizationsUsage `json:"otherOrgsUsage,omitempty"`
 }
 
 // CastaiInventoryV1beta1UsageAtTime defines model for castai.inventory.v1beta1.UsageAtTime.
@@ -4830,6 +4860,12 @@ type DboV1GetCacheConfigurationResponse struct {
 // DboV1GetCacheEfficiencyResponse defines model for dbo.v1.GetCacheEfficiencyResponse.
 type DboV1GetCacheEfficiencyResponse struct {
 	Items *[]DboV1CacheEfficiency `json:"items,omitempty"`
+}
+
+// DboV1GetCacheGroupMetricsFilterOptionsResponse defines model for dbo.v1.GetCacheGroupMetricsFilterOptionsResponse.
+type DboV1GetCacheGroupMetricsFilterOptionsResponse struct {
+	// Users List of distinct users from metrics data.
+	Users *[]string `json:"users,omitempty"`
 }
 
 // DboV1GetCacheGroupOperationalMetricsResponse defines model for dbo.v1.GetCacheGroupOperationalMetricsResponse.
@@ -8634,6 +8670,7 @@ type WorkloadoptimizationV1Event struct {
 	HpaMaxedOut                *WorkloadoptimizationV1HPAMaxedOutEvent                `json:"hpaMaxedOut,omitempty"`
 	InfiniteMemoryScaling      *WorkloadoptimizationV1InfiniteMemoryScalingEvent      `json:"infiniteMemoryScaling,omitempty"`
 	MemoryPressureEviction     *WorkloadoptimizationV1MemoryPressureEvictionEvent     `json:"memoryPressureEviction,omitempty"`
+	NativeVpaStateChanged      *WorkloadoptimizationV1NativeVPAStateChangedEvent      `json:"nativeVpaStateChanged,omitempty"`
 	OomKill                    *WorkloadoptimizationV1OOMKillEvent                    `json:"oomKill,omitempty"`
 	RecommendedPodCountChanged *WorkloadoptimizationV1RecommendedPodCountChangedEvent `json:"recommendedPodCountChanged,omitempty"`
 	RecommendedRequestsChanged *WorkloadoptimizationV1RecommendedRequestsChangedEvent `json:"recommendedRequestsChanged,omitempty"`
@@ -8777,6 +8814,14 @@ type WorkloadoptimizationV1GetWorkloadFiltersResponse struct {
 	ScalingPolicyNames []string                                       `json:"scalingPolicyNames"`
 	WorkloadIds        []string                                       `json:"workloadIds"`
 	WorkloadNames      []string                                       `json:"workloadNames"`
+}
+
+// WorkloadoptimizationV1GetWorkloadNativeVpaSpecResponse defines model for workloadoptimization.v1.GetWorkloadNativeVpaSpecResponse.
+type WorkloadoptimizationV1GetWorkloadNativeVpaSpecResponse struct {
+	ClusterId      string                  `json:"clusterId"`
+	Id             string                  `json:"id"`
+	Object         *map[string]interface{} `json:"object"`
+	OrganizationId string                  `json:"organizationId"`
 }
 
 // WorkloadoptimizationV1GetWorkloadResponse defines model for workloadoptimization.v1.GetWorkloadResponse.
@@ -9361,6 +9406,11 @@ type WorkloadoptimizationV1MetricTargetType string
 
 // WorkloadoptimizationV1MigrateClusterToHPAV2Response defines model for workloadoptimization.v1.MigrateClusterToHPAV2Response.
 type WorkloadoptimizationV1MigrateClusterToHPAV2Response = map[string]interface{}
+
+// WorkloadoptimizationV1NativeVPAStateChangedEvent defines model for workloadoptimization.v1.NativeVPAStateChangedEvent.
+type WorkloadoptimizationV1NativeVPAStateChangedEvent struct {
+	VpaPresent bool `json:"vpaPresent"`
+}
 
 // WorkloadoptimizationV1NewCustomMetricsDataSource defines model for workloadoptimization.v1.NewCustomMetricsDataSource.
 type WorkloadoptimizationV1NewCustomMetricsDataSource struct {
@@ -10810,6 +10860,18 @@ type DboAPIGetCacheGroupPerformanceSummaryParams struct {
 
 	// Username Filter by username. Cannot be combined with endpoint_name.
 	Username *string `form:"username,omitempty" json:"username,omitempty"`
+}
+
+// DboAPIGetCacheGroupMetricsFilterOptionsParams defines parameters for DboAPIGetCacheGroupMetricsFilterOptions.
+type DboAPIGetCacheGroupMetricsFilterOptionsParams struct {
+	// TimeRangeStart Start of period.
+	TimeRangeStart *time.Time `form:"timeRange.start,omitempty" json:"timeRange.start,omitempty"`
+
+	// TimeRangeEnd End of period.
+	TimeRangeEnd *time.Time `form:"timeRange.end,omitempty" json:"timeRange.end,omitempty"`
+
+	// DatabaseId Filter by specific database (cache configuration) ID.
+	DatabaseId *string `form:"databaseId,omitempty" json:"databaseId,omitempty"`
 }
 
 // DboAPIGetCacheGroupOperationalMetricsParams defines parameters for DboAPIGetCacheGroupOperationalMetrics.
