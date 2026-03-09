@@ -28,6 +28,10 @@ const (
 	fieldCommitmentsGCPCUDs           = "gcp_cuds"
 	fieldCommitmentsConfigs           = "commitment_configs"
 	fieldCommitmentsOrganizationId    = "organization_id"
+	fieldCommitmentsImportMode        = "import_mode"
+
+	importModeOverwrite = "OVERWRITE"
+	importModeAppend    = "APPEND"
 )
 
 var (
@@ -155,6 +159,13 @@ func resourceCommitments() *schema.Resource {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "Organization ID. If not provided, will be fetched from the API using the authentication token.",
+			},
+			fieldCommitmentsImportMode: {
+				Type:             schema.TypeString,
+				Optional:         true,
+				Default:          importModeOverwrite,
+				Description:      "Import mode. OVERWRITE replaces all commitments for the CSP. APPEND upserts without deleting existing ones.",
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{importModeOverwrite, importModeAppend}, false)),
 			},
 			// Input configurations
 			fieldCommitmentsConfigs: {
@@ -563,21 +574,42 @@ func resourceCastaiCommitmentsUpsert(ctx context.Context, data *schema.ResourceD
 		return diag.FromErr(err)
 	}
 
+	mode := data.Get(fieldCommitmentsImportMode).(string)
+
 	var imported []sdk.CastaiInventoryV1beta1Commitment
 	switch {
 	case reservationsOk:
-		if err := importReservations(ctx, meta, reservations); err != nil {
+		if err := importReservations(ctx, meta, reservations, mode); err != nil {
 			return diag.FromErr(err)
 		}
 		orgCommitments, err := getOrganizationCommitments(ctx, meta)
 		if err != nil {
 			return diag.FromErr(err)
 		}
-		imported = lo.Filter(orgCommitments, func(c sdk.CastaiInventoryV1beta1Commitment, _ int) bool {
-			return c.AzureReservationContext != nil
-		})
-		if len(imported) != len(reservations) {
-			return diag.Errorf("expected %d Azure commitments, got %d", len(reservations), len(imported))
+
+		if mode == importModeAppend {
+			// Build set of reservation IDs from the import input
+			importReservationIDs := make(map[string]struct{})
+			for _, r := range reservations {
+				if r.ReservationId != nil {
+					importReservationIDs[*r.ReservationId] = struct{}{}
+				}
+			}
+			// Filter org commitments to only those matching our import input
+			imported = lo.Filter(orgCommitments, func(c sdk.CastaiInventoryV1beta1Commitment, _ int) bool {
+				if c.AzureReservationContext == nil || c.AzureReservationContext.Id == nil {
+					return false
+				}
+				_, ok := importReservationIDs[*c.AzureReservationContext.Id]
+				return ok
+			})
+		} else {
+			imported = lo.Filter(orgCommitments, func(c sdk.CastaiInventoryV1beta1Commitment, _ int) bool {
+				return c.AzureReservationContext != nil
+			})
+			if len(imported) != len(reservations) {
+				return diag.Errorf("expected %d Azure commitments, got %d", len(reservations), len(imported))
+			}
 		}
 	case cudsOk:
 		if err := importCUDs(ctx, meta, cuds); err != nil {
@@ -649,7 +681,7 @@ func importCUDs(ctx context.Context, meta any, imports []sdk.CastaiInventoryV1be
 	res, err := meta.(*ProviderConfig).api.CommitmentsAPIImportGCPCommitmentsWithResponse(
 		ctx,
 		&sdk.CommitmentsAPIImportGCPCommitmentsParams{
-			Behaviour: lo.ToPtr[sdk.CommitmentsAPIImportGCPCommitmentsParamsBehaviour]("OVERWRITE"),
+			Behaviour: lo.ToPtr[sdk.CommitmentsAPIImportGCPCommitmentsParamsBehaviour](importModeOverwrite),
 		},
 		imports,
 	)
@@ -659,11 +691,26 @@ func importCUDs(ctx context.Context, meta any, imports []sdk.CastaiInventoryV1be
 	return nil
 }
 
-func importReservations(ctx context.Context, meta any, imports []sdk.CastaiInventoryV1beta1AzureReservationImport) error {
+func toAzureImportBehaviour(mode string) (sdk.CommitmentsAPIImportAzureReservationsParamsBehaviour, error) {
+	switch mode {
+	case importModeOverwrite:
+		return sdk.CommitmentsAPIImportAzureReservationsParamsBehaviourOVERWRITE, nil
+	case importModeAppend:
+		return sdk.CommitmentsAPIImportAzureReservationsParamsBehaviourAPPEND, nil
+	default:
+		return "", fmt.Errorf("unsupported azure import mode: %q", mode)
+	}
+}
+
+func importReservations(ctx context.Context, meta any, imports []sdk.CastaiInventoryV1beta1AzureReservationImport, mode string) error {
+	behaviour, err := toAzureImportBehaviour(mode)
+	if err != nil {
+		return err
+	}
 	res, err := meta.(*ProviderConfig).api.CommitmentsAPIImportAzureReservationsWithResponse(
 		ctx,
 		&sdk.CommitmentsAPIImportAzureReservationsParams{
-			Behaviour: lo.ToPtr[sdk.CommitmentsAPIImportAzureReservationsParamsBehaviour]("OVERWRITE"),
+			Behaviour: lo.ToPtr(behaviour),
 		},
 		imports,
 	)
@@ -733,6 +780,23 @@ func populateCommitmentsResourceData(ctx context.Context, d *schema.ResourceData
 		if err != nil {
 			return err
 		}
+
+		mode := ""
+		if v, ok := d.GetOk(fieldCommitmentsImportMode); ok {
+			mode = v.(string)
+		}
+		if mode == importModeAppend && reservationsOk {
+			// Filter azureResources to only those matching our import identifiers
+			importIDs := make(map[string]struct{})
+			for _, r := range reservations {
+				importIDs[r.ReservationID] = struct{}{}
+			}
+			azureResources = lo.Filter(azureResources, func(r *azureReservationResource, _ int) bool {
+				_, ok := importIDs[r.ReservationID]
+				return ok
+			})
+		}
+
 		if reservationsOk {
 			sortCommitmentResources(azureResources, reservations)
 		}

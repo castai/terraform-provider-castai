@@ -263,6 +263,9 @@ type ClientInterface interface {
 	// DboAPIGetCacheGroupPerformanceSummary request
 	DboAPIGetCacheGroupPerformanceSummary(ctx context.Context, id string, params *DboAPIGetCacheGroupPerformanceSummaryParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// DboAPIGetCacheGroupMetricsFilterOptions request
+	DboAPIGetCacheGroupMetricsFilterOptions(ctx context.Context, id string, params *DboAPIGetCacheGroupMetricsFilterOptionsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// DboAPIGetCacheGroupOperationalMetrics request
 	DboAPIGetCacheGroupOperationalMetrics(ctx context.Context, id string, params *DboAPIGetCacheGroupOperationalMetricsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -1010,6 +1013,9 @@ type ClientInterface interface {
 
 	// WorkloadOptimizationAPIGetWorkload request
 	WorkloadOptimizationAPIGetWorkload(ctx context.Context, clusterId string, workloadId string, params *WorkloadOptimizationAPIGetWorkloadParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// WorkloadOptimizationAPIGetWorkloadNativeVpaSpec request
+	WorkloadOptimizationAPIGetWorkloadNativeVpaSpec(ctx context.Context, clusterId string, workloadId string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// WorkloadOptimizationAPIGetWorkloadSpec request
 	WorkloadOptimizationAPIGetWorkloadSpec(ctx context.Context, clusterId string, workloadId string, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -1779,6 +1785,18 @@ func (c *Client) DboAPIGetCacheGroupPerformance(ctx context.Context, id string, 
 
 func (c *Client) DboAPIGetCacheGroupPerformanceSummary(ctx context.Context, id string, params *DboAPIGetCacheGroupPerformanceSummaryParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewDboAPIGetCacheGroupPerformanceSummaryRequest(c.Server, id, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) DboAPIGetCacheGroupMetricsFilterOptions(ctx context.Context, id string, params *DboAPIGetCacheGroupMetricsFilterOptionsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDboAPIGetCacheGroupMetricsFilterOptionsRequest(c.Server, id, params)
 	if err != nil {
 		return nil, err
 	}
@@ -5055,6 +5073,18 @@ func (c *Client) WorkloadOptimizationAPIMigrateClusterToHPAV2(ctx context.Contex
 
 func (c *Client) WorkloadOptimizationAPIGetWorkload(ctx context.Context, clusterId string, workloadId string, params *WorkloadOptimizationAPIGetWorkloadParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewWorkloadOptimizationAPIGetWorkloadRequest(c.Server, clusterId, workloadId, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) WorkloadOptimizationAPIGetWorkloadNativeVpaSpec(ctx context.Context, clusterId string, workloadId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewWorkloadOptimizationAPIGetWorkloadNativeVpaSpecRequest(c.Server, clusterId, workloadId)
 	if err != nil {
 		return nil, err
 	}
@@ -8629,6 +8659,94 @@ func NewDboAPIGetCacheGroupPerformanceSummaryRequest(server string, id string, p
 		if params.Username != nil {
 
 			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "username", runtime.ParamLocationQuery, *params.Username); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewDboAPIGetCacheGroupMetricsFilterOptionsRequest generates requests for DboAPIGetCacheGroupMetricsFilterOptions
+func NewDboAPIGetCacheGroupMetricsFilterOptionsRequest(server string, id string, params *DboAPIGetCacheGroupMetricsFilterOptionsParams) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/dbo/cache-groups/%s/metrics-filter-options", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if params.TimeRangeStart != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "timeRange.start", runtime.ParamLocationQuery, *params.TimeRangeStart); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.TimeRangeEnd != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "timeRange.end", runtime.ParamLocationQuery, *params.TimeRangeEnd); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.DatabaseId != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "databaseId", runtime.ParamLocationQuery, *params.DatabaseId); err != nil {
 				return nil, err
 			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
 				return nil, err
@@ -20493,6 +20611,47 @@ func NewWorkloadOptimizationAPIGetWorkloadRequest(server string, clusterId strin
 	return req, nil
 }
 
+// NewWorkloadOptimizationAPIGetWorkloadNativeVpaSpecRequest generates requests for WorkloadOptimizationAPIGetWorkloadNativeVpaSpec
+func NewWorkloadOptimizationAPIGetWorkloadNativeVpaSpecRequest(server string, clusterId string, workloadId string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "clusterId", runtime.ParamLocationPath, clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "workloadId", runtime.ParamLocationPath, workloadId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/workload-autoscaling/clusters/%s/workloads/%s/native-vpa-spec", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
 // NewWorkloadOptimizationAPIGetWorkloadSpecRequest generates requests for WorkloadOptimizationAPIGetWorkloadSpec
 func NewWorkloadOptimizationAPIGetWorkloadSpecRequest(server string, clusterId string, workloadId string) (*http.Request, error) {
 	var err error
@@ -21253,6 +21412,9 @@ type ClientWithResponsesInterface interface {
 	// DboAPIGetCacheGroupPerformanceSummary request
 	DboAPIGetCacheGroupPerformanceSummaryWithResponse(ctx context.Context, id string, params *DboAPIGetCacheGroupPerformanceSummaryParams) (*DboAPIGetCacheGroupPerformanceSummaryResponse, error)
 
+	// DboAPIGetCacheGroupMetricsFilterOptions request
+	DboAPIGetCacheGroupMetricsFilterOptionsWithResponse(ctx context.Context, id string, params *DboAPIGetCacheGroupMetricsFilterOptionsParams) (*DboAPIGetCacheGroupMetricsFilterOptionsResponse, error)
+
 	// DboAPIGetCacheGroupOperationalMetrics request
 	DboAPIGetCacheGroupOperationalMetricsWithResponse(ctx context.Context, id string, params *DboAPIGetCacheGroupOperationalMetricsParams) (*DboAPIGetCacheGroupOperationalMetricsResponse, error)
 
@@ -22000,6 +22162,9 @@ type ClientWithResponsesInterface interface {
 
 	// WorkloadOptimizationAPIGetWorkload request
 	WorkloadOptimizationAPIGetWorkloadWithResponse(ctx context.Context, clusterId string, workloadId string, params *WorkloadOptimizationAPIGetWorkloadParams) (*WorkloadOptimizationAPIGetWorkloadResponse, error)
+
+	// WorkloadOptimizationAPIGetWorkloadNativeVpaSpec request
+	WorkloadOptimizationAPIGetWorkloadNativeVpaSpecWithResponse(ctx context.Context, clusterId string, workloadId string) (*WorkloadOptimizationAPIGetWorkloadNativeVpaSpecResponse, error)
 
 	// WorkloadOptimizationAPIGetWorkloadSpec request
 	WorkloadOptimizationAPIGetWorkloadSpecWithResponse(ctx context.Context, clusterId string, workloadId string) (*WorkloadOptimizationAPIGetWorkloadSpecResponse, error)
@@ -23508,6 +23673,36 @@ func (r DboAPIGetCacheGroupPerformanceSummaryResponse) StatusCode() int {
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
 func (r DboAPIGetCacheGroupPerformanceSummaryResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type DboAPIGetCacheGroupMetricsFilterOptionsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *DboV1GetCacheGroupMetricsFilterOptionsResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r DboAPIGetCacheGroupMetricsFilterOptionsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r DboAPIGetCacheGroupMetricsFilterOptionsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r DboAPIGetCacheGroupMetricsFilterOptionsResponse) GetBody() []byte {
 	return r.Body
 }
 
@@ -29572,6 +29767,36 @@ func (r WorkloadOptimizationAPIGetWorkloadResponse) GetBody() []byte {
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
+type WorkloadOptimizationAPIGetWorkloadNativeVpaSpecResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *WorkloadoptimizationV1GetWorkloadNativeVpaSpecResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r WorkloadOptimizationAPIGetWorkloadNativeVpaSpecResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r WorkloadOptimizationAPIGetWorkloadNativeVpaSpecResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r WorkloadOptimizationAPIGetWorkloadNativeVpaSpecResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
 type WorkloadOptimizationAPIGetWorkloadSpecResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -30384,6 +30609,15 @@ func (c *ClientWithResponses) DboAPIGetCacheGroupPerformanceSummaryWithResponse(
 		return nil, err
 	}
 	return ParseDboAPIGetCacheGroupPerformanceSummaryResponse(rsp)
+}
+
+// DboAPIGetCacheGroupMetricsFilterOptionsWithResponse request returning *DboAPIGetCacheGroupMetricsFilterOptionsResponse
+func (c *ClientWithResponses) DboAPIGetCacheGroupMetricsFilterOptionsWithResponse(ctx context.Context, id string, params *DboAPIGetCacheGroupMetricsFilterOptionsParams) (*DboAPIGetCacheGroupMetricsFilterOptionsResponse, error) {
+	rsp, err := c.DboAPIGetCacheGroupMetricsFilterOptions(ctx, id, params)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDboAPIGetCacheGroupMetricsFilterOptionsResponse(rsp)
 }
 
 // DboAPIGetCacheGroupOperationalMetricsWithResponse request returning *DboAPIGetCacheGroupOperationalMetricsResponse
@@ -32772,6 +33006,15 @@ func (c *ClientWithResponses) WorkloadOptimizationAPIGetWorkloadWithResponse(ctx
 	return ParseWorkloadOptimizationAPIGetWorkloadResponse(rsp)
 }
 
+// WorkloadOptimizationAPIGetWorkloadNativeVpaSpecWithResponse request returning *WorkloadOptimizationAPIGetWorkloadNativeVpaSpecResponse
+func (c *ClientWithResponses) WorkloadOptimizationAPIGetWorkloadNativeVpaSpecWithResponse(ctx context.Context, clusterId string, workloadId string) (*WorkloadOptimizationAPIGetWorkloadNativeVpaSpecResponse, error) {
+	rsp, err := c.WorkloadOptimizationAPIGetWorkloadNativeVpaSpec(ctx, clusterId, workloadId)
+	if err != nil {
+		return nil, err
+	}
+	return ParseWorkloadOptimizationAPIGetWorkloadNativeVpaSpecResponse(rsp)
+}
+
 // WorkloadOptimizationAPIGetWorkloadSpecWithResponse request returning *WorkloadOptimizationAPIGetWorkloadSpecResponse
 func (c *ClientWithResponses) WorkloadOptimizationAPIGetWorkloadSpecWithResponse(ctx context.Context, clusterId string, workloadId string) (*WorkloadOptimizationAPIGetWorkloadSpecResponse, error) {
 	rsp, err := c.WorkloadOptimizationAPIGetWorkloadSpec(ctx, clusterId, workloadId)
@@ -34131,6 +34374,32 @@ func ParseDboAPIGetCacheGroupPerformanceSummaryResponse(rsp *http.Response) (*Db
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest DboV1GetCacheGroupPerformanceSummaryResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseDboAPIGetCacheGroupMetricsFilterOptionsResponse parses an HTTP response from a DboAPIGetCacheGroupMetricsFilterOptionsWithResponse call
+func ParseDboAPIGetCacheGroupMetricsFilterOptionsResponse(rsp *http.Response) (*DboAPIGetCacheGroupMetricsFilterOptionsResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &DboAPIGetCacheGroupMetricsFilterOptionsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest DboV1GetCacheGroupMetricsFilterOptionsResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -39364,6 +39633,32 @@ func ParseWorkloadOptimizationAPIGetWorkloadResponse(rsp *http.Response) (*Workl
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest WorkloadoptimizationV1GetWorkloadResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseWorkloadOptimizationAPIGetWorkloadNativeVpaSpecResponse parses an HTTP response from a WorkloadOptimizationAPIGetWorkloadNativeVpaSpecWithResponse call
+func ParseWorkloadOptimizationAPIGetWorkloadNativeVpaSpecResponse(rsp *http.Response) (*WorkloadOptimizationAPIGetWorkloadNativeVpaSpecResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &WorkloadOptimizationAPIGetWorkloadNativeVpaSpecResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest WorkloadoptimizationV1GetWorkloadNativeVpaSpecResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}

@@ -1495,6 +1495,26 @@ func (mr *MockClientInterfaceMockRecorder) DboAPIGetCacheGroup(ctx, id, params i
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIGetCacheGroup", reflect.TypeOf((*MockClientInterface)(nil).DboAPIGetCacheGroup), varargs...)
 }
 
+// DboAPIGetCacheGroupMetricsFilterOptions mocks base method.
+func (m *MockClientInterface) DboAPIGetCacheGroupMetricsFilterOptions(ctx context.Context, id string, params *sdk.DboAPIGetCacheGroupMetricsFilterOptionsParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, id, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DboAPIGetCacheGroupMetricsFilterOptions", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPIGetCacheGroupMetricsFilterOptions indicates an expected call of DboAPIGetCacheGroupMetricsFilterOptions.
+func (mr *MockClientInterfaceMockRecorder) DboAPIGetCacheGroupMetricsFilterOptions(ctx, id, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, id, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIGetCacheGroupMetricsFilterOptions", reflect.TypeOf((*MockClientInterface)(nil).DboAPIGetCacheGroupMetricsFilterOptions), varargs...)
+}
+
 // DboAPIGetCacheGroupOperationalMetrics mocks base method.
 func (m *MockClientInterface) DboAPIGetCacheGroupOperationalMetrics(ctx context.Context, id string, params *sdk.DboAPIGetCacheGroupOperationalMetricsParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
@@ -6555,6 +6575,26 @@ func (mr *MockClientInterfaceMockRecorder) WorkloadOptimizationAPIGetWorkloadFil
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIGetWorkloadFilters", reflect.TypeOf((*MockClientInterface)(nil).WorkloadOptimizationAPIGetWorkloadFilters), varargs...)
 }
 
+// WorkloadOptimizationAPIGetWorkloadNativeVpaSpec mocks base method.
+func (m *MockClientInterface) WorkloadOptimizationAPIGetWorkloadNativeVpaSpec(ctx context.Context, clusterId, workloadId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, workloadId}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "WorkloadOptimizationAPIGetWorkloadNativeVpaSpec", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// WorkloadOptimizationAPIGetWorkloadNativeVpaSpec indicates an expected call of WorkloadOptimizationAPIGetWorkloadNativeVpaSpec.
+func (mr *MockClientInterfaceMockRecorder) WorkloadOptimizationAPIGetWorkloadNativeVpaSpec(ctx, clusterId, workloadId interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, workloadId}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIGetWorkloadNativeVpaSpec", reflect.TypeOf((*MockClientInterface)(nil).WorkloadOptimizationAPIGetWorkloadNativeVpaSpec), varargs...)
+}
+
 // WorkloadOptimizationAPIGetWorkloadScalingPolicy mocks base method.
 func (m *MockClientInterface) WorkloadOptimizationAPIGetWorkloadScalingPolicy(ctx context.Context, clusterId, policyId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
@@ -9506,6 +9546,41 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) DboAPIGetCacheGroup(ctx,
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{ctx, id, params}, reqEditors...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIGetCacheGroup", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DboAPIGetCacheGroup), varargs...)
+}
+
+// DboAPIGetCacheGroupMetricsFilterOptions mocks base method.
+func (m *MockClientWithResponsesInterface) DboAPIGetCacheGroupMetricsFilterOptions(ctx context.Context, id string, params *sdk.DboAPIGetCacheGroupMetricsFilterOptionsParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, id, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DboAPIGetCacheGroupMetricsFilterOptions", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPIGetCacheGroupMetricsFilterOptions indicates an expected call of DboAPIGetCacheGroupMetricsFilterOptions.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) DboAPIGetCacheGroupMetricsFilterOptions(ctx, id, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, id, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIGetCacheGroupMetricsFilterOptions", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DboAPIGetCacheGroupMetricsFilterOptions), varargs...)
+}
+
+// DboAPIGetCacheGroupMetricsFilterOptionsWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) DboAPIGetCacheGroupMetricsFilterOptionsWithResponse(ctx context.Context, id string, params *sdk.DboAPIGetCacheGroupMetricsFilterOptionsParams) (*sdk.DboAPIGetCacheGroupMetricsFilterOptionsResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DboAPIGetCacheGroupMetricsFilterOptionsWithResponse", ctx, id, params)
+	ret0, _ := ret[0].(*sdk.DboAPIGetCacheGroupMetricsFilterOptionsResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPIGetCacheGroupMetricsFilterOptionsWithResponse indicates an expected call of DboAPIGetCacheGroupMetricsFilterOptionsWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) DboAPIGetCacheGroupMetricsFilterOptionsWithResponse(ctx, id, params interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIGetCacheGroupMetricsFilterOptionsWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DboAPIGetCacheGroupMetricsFilterOptionsWithResponse), ctx, id, params)
 }
 
 // DboAPIGetCacheGroupOperationalMetrics mocks base method.
@@ -18361,6 +18436,41 @@ func (m *MockClientWithResponsesInterface) WorkloadOptimizationAPIGetWorkloadFil
 func (mr *MockClientWithResponsesInterfaceMockRecorder) WorkloadOptimizationAPIGetWorkloadFiltersWithResponse(ctx, clusterId, params interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIGetWorkloadFiltersWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).WorkloadOptimizationAPIGetWorkloadFiltersWithResponse), ctx, clusterId, params)
+}
+
+// WorkloadOptimizationAPIGetWorkloadNativeVpaSpec mocks base method.
+func (m *MockClientWithResponsesInterface) WorkloadOptimizationAPIGetWorkloadNativeVpaSpec(ctx context.Context, clusterId, workloadId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, workloadId}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "WorkloadOptimizationAPIGetWorkloadNativeVpaSpec", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// WorkloadOptimizationAPIGetWorkloadNativeVpaSpec indicates an expected call of WorkloadOptimizationAPIGetWorkloadNativeVpaSpec.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) WorkloadOptimizationAPIGetWorkloadNativeVpaSpec(ctx, clusterId, workloadId interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, workloadId}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIGetWorkloadNativeVpaSpec", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).WorkloadOptimizationAPIGetWorkloadNativeVpaSpec), varargs...)
+}
+
+// WorkloadOptimizationAPIGetWorkloadNativeVpaSpecWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) WorkloadOptimizationAPIGetWorkloadNativeVpaSpecWithResponse(ctx context.Context, clusterId, workloadId string) (*sdk.WorkloadOptimizationAPIGetWorkloadNativeVpaSpecResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "WorkloadOptimizationAPIGetWorkloadNativeVpaSpecWithResponse", ctx, clusterId, workloadId)
+	ret0, _ := ret[0].(*sdk.WorkloadOptimizationAPIGetWorkloadNativeVpaSpecResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// WorkloadOptimizationAPIGetWorkloadNativeVpaSpecWithResponse indicates an expected call of WorkloadOptimizationAPIGetWorkloadNativeVpaSpecWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) WorkloadOptimizationAPIGetWorkloadNativeVpaSpecWithResponse(ctx, clusterId, workloadId interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIGetWorkloadNativeVpaSpecWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).WorkloadOptimizationAPIGetWorkloadNativeVpaSpecWithResponse), ctx, clusterId, workloadId)
 }
 
 // WorkloadOptimizationAPIGetWorkloadScalingPolicy mocks base method.

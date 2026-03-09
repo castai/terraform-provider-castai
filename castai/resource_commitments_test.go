@@ -294,6 +294,182 @@ test,3b3de39c-bc44-4d69-be2d-69527dfe9958,630226bb-5170-4b95-90b0-f222757130c1,S
 	}
 }
 
+// TestCommitmentsResourceCreateAndUpdateAppendMode tests that both create and update
+// in APPEND mode only touch our commitment, leaving other teams' commitments untouched.
+func TestCommitmentsResourceCreateAndUpdateAppendMode(t *testing.T) {
+	reservationID := "3b3de39c-bc44-4d69-be2d-69527dfe9958"
+	otherReservationID := "aaaaaaaa-0000-0000-0000-000000000000"
+
+	commitmentImport := sdk.CastaiInventoryV1beta1AzureReservationImport{
+		ExpirationDate:     lo.ToPtr("2050-01-01T00:00:00Z"),
+		Name:               lo.ToPtr("test"),
+		ProductName:        lo.ToPtr("Standard_D32as_v4"),
+		PurchaseDate:       lo.ToPtr("2023-01-11T00:00:00Z"),
+		Quantity:           lo.ToPtr[int32](3),
+		Region:             lo.ToPtr("eastus"),
+		ReservationId:      lo.ToPtr(reservationID),
+		Scope:              lo.ToPtr("Single subscription"),
+		ScopeResourceGroup: lo.ToPtr("All resource groups"),
+		ScopeSubscription:  lo.ToPtr("8faa0959-093b-4612-8686-a996ac19db00"),
+		Status:             lo.ToPtr("Succeeded"),
+		Term:               lo.ToPtr("P3Y"),
+		Type:               lo.ToPtr("VirtualMachines"),
+	}
+
+	type testedFn string
+	const (
+		testedFnCreate testedFn = "create"
+		testedFnUpdate testedFn = "update"
+	)
+	for _, fn := range []testedFn{testedFnCreate, testedFnUpdate} {
+		t.Run(string(fn), func(t *testing.T) {
+			ctx := context.Background()
+			r := require.New(t)
+
+			orgID, clusterID, commitmentID, otherCommitmentID := uuid.New(), uuid.New(), uuid.New(), uuid.New()
+
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+
+			res := resourceCommitments()
+			mockClient := mock_sdk.NewMockClientWithResponsesInterface(ctrl)
+			provider := &ProviderConfig{api: mockClient}
+
+			mockClient.EXPECT().UsersAPIListOrganizationsWithResponse(gomock.Any()).Return(&sdk.UsersAPIListOrganizationsResponse{
+				JSON200: &sdk.CastaiUsersV1beta1ListOrganizationsResponse{
+					Organizations: []sdk.CastaiUsersV1beta1UserOrganization{
+						{Id: lo.ToPtr(orgID.String())},
+					},
+				},
+				HTTPResponse: &http.Response{StatusCode: http.StatusOK},
+			}, nil).Times(1)
+
+			data := schema.TestResourceDataRaw(t, res.Schema, map[string]any{
+				fieldCommitmentsImportMode: "APPEND",
+				fieldCommitmentsAzureReservationsCSV: `Name,Reservation Id,Reservation order Id,Status,Expiration date,Purchase date,Term,Scope,Scope subscription,Scope resource group,Type,Product name,Region,Quantity,Utilization % 1 Day,Utilization % 7 Day,Utilization % 30 Day,Deep link to reservation
+test,3b3de39c-bc44-4d69-be2d-69527dfe9958,630226bb-5170-4b95-90b0-f222757130c1,Succeeded,2050-01-01T00:00:00Z,2023-01-11T00:00:00Z,P3Y,Single subscription,8faa0959-093b-4612-8686-a996ac19db00,All resource groups,VirtualMachines,Standard_D32as_v4,eastus,3,100,100,100,https://portal.azure.com`,
+				fieldCommitmentsConfigs: []any{
+					map[string]any{
+						"matcher": []any{
+							map[string]any{
+								"name":   "test",
+								"type":   "Standard_D32as_v4",
+								"region": "eastus",
+							},
+						},
+						"assignments": []any{
+							map[string]any{
+								"cluster_id": clusterID.String(),
+								"priority":   1,
+							},
+						},
+						"prioritization":   true,
+						"status":           "Active",
+						"allowed_usage":    0.7,
+						"scaling_strategy": "Default",
+					},
+				},
+			})
+
+			// Import call should pass APPEND as behaviour
+			mockClient.EXPECT().CommitmentsAPIImportAzureReservationsWithResponse(
+				gomock.Any(),
+				&sdk.CommitmentsAPIImportAzureReservationsParams{
+					Behaviour: lo.ToPtr[sdk.CommitmentsAPIImportAzureReservationsParamsBehaviour]("APPEND"),
+				},
+				[]sdk.CastaiInventoryV1beta1AzureReservationImport{commitmentImport},
+			).Return(&sdk.CommitmentsAPIImportAzureReservationsResponse{
+				HTTPResponse: &http.Response{StatusCode: http.StatusOK},
+			}, nil).Times(1)
+
+			// GetCommitments returns BOTH our commitment and another team's commitment.
+			// In APPEND mode, only our commitment (matching reservationId) should be used.
+			ourCommitment := sdk.CastaiInventoryV1beta1Commitment{
+				EndDate: lo.ToPtr(time.Date(2050, 1, 1, 0, 0, 0, 0, time.UTC)),
+				Id:      lo.ToPtr(commitmentID.String()),
+				Name:    lo.ToPtr("test"),
+				Region:  lo.ToPtr("eastus"),
+				AzureReservationContext: &sdk.CastaiInventoryV1beta1AzureReservation{
+					Count:                 lo.ToPtr[int32](3),
+					Id:                    lo.ToPtr(reservationID),
+					InstanceType:          lo.ToPtr("Standard_D32as_v4"),
+					InstanceTypeCpu:       lo.ToPtr("32"),
+					InstanceTypeMemoryMib: lo.ToPtr("131072"),
+					Plan:                  lo.ToPtr(sdk.CastaiInventoryV1beta1AzureReservationReservationPlanTHREEYEAR),
+					Scope:                 lo.ToPtr("Single subscription"),
+					ScopeResourceGroup:    lo.ToPtr("All resource groups"),
+					ScopeSubscription:     lo.ToPtr("8faa0959-093b-4612-8686-a996ac19db00"),
+					Status:                lo.ToPtr("Succeeded"),
+				},
+			}
+			otherTeamCommitment := sdk.CastaiInventoryV1beta1Commitment{
+				EndDate: lo.ToPtr(time.Date(2050, 1, 1, 0, 0, 0, 0, time.UTC)),
+				Id:      lo.ToPtr(otherCommitmentID.String()),
+				Name:    lo.ToPtr("other-team-commitment"),
+				Region:  lo.ToPtr("eastus"),
+				AzureReservationContext: &sdk.CastaiInventoryV1beta1AzureReservation{
+					Count:        lo.ToPtr[int32](5),
+					Id:           lo.ToPtr(otherReservationID),
+					InstanceType: lo.ToPtr("Standard_D8s_v5"),
+				},
+			}
+
+			mockClient.EXPECT().CommitmentsAPIGetCommitmentsWithResponse(
+				gomock.Any(), &sdk.CommitmentsAPIGetCommitmentsParams{},
+			).Return(&sdk.CommitmentsAPIGetCommitmentsResponse{
+				JSON200: &sdk.CastaiInventoryV1beta1GetCommitmentsResponse{
+					Commitments: &[]sdk.CastaiInventoryV1beta1Commitment{ourCommitment, otherTeamCommitment},
+				},
+				HTTPResponse: &http.Response{StatusCode: http.StatusOK},
+			}, nil).Times(2)
+
+			// Update only our commitment — gomock will fail if otherCommitmentID is touched
+			mockClient.EXPECT().CommitmentsAPIUpdateCommitmentWithResponse(
+				gomock.Any(), commitmentID.String(), sdk.CommitmentsAPIUpdateCommitmentJSONRequestBody{
+					AllowedUsage:    lo.ToPtr[float32](0.7),
+					Prioritization:  lo.ToPtr(true),
+					ScalingStrategy: lo.ToPtr(sdk.Default),
+					Status:          lo.ToPtr(sdk.CastaiInventoryV1beta1CommitmentStatusActive),
+				},
+			).Return(&sdk.CommitmentsAPIUpdateCommitmentResponse{
+				HTTPResponse: &http.Response{StatusCode: http.StatusOK},
+				JSON200:      &sdk.CastaiInventoryV1beta1UpdateCommitmentResponse{},
+			}, nil).Times(1)
+
+			// Assignments only for our commitment
+			mockClient.EXPECT().CommitmentsAPIReplaceCommitmentAssignmentsWithResponse(
+				gomock.Any(),
+				commitmentID.String(),
+				sdk.CommitmentsAPIReplaceCommitmentAssignmentsJSONRequestBody{clusterID.String()},
+			).Return(&sdk.CommitmentsAPIReplaceCommitmentAssignmentsResponse{
+				HTTPResponse: &http.Response{StatusCode: http.StatusOK},
+				JSON200:      &sdk.CastaiInventoryV1beta1ReplaceCommitmentAssignmentsResponse{},
+			}, nil).Times(1)
+
+			mockClient.EXPECT().CommitmentsAPIGetCommitmentsAssignmentsWithResponse(gomock.Any()).
+				Return(&sdk.CommitmentsAPIGetCommitmentsAssignmentsResponse{
+					JSON200: &sdk.CastaiInventoryV1beta1GetCommitmentsAssignmentsResponse{
+						CommitmentsAssignments: &[]sdk.CastaiInventoryV1beta1CommitmentAssignment{},
+					},
+					HTTPResponse: &http.Response{StatusCode: http.StatusOK},
+				}, nil).Times(1)
+
+			var handler func(context.Context, *schema.ResourceData, any) diag.Diagnostics
+			switch fn {
+			case testedFnCreate:
+				handler = res.CreateContext
+			case testedFnUpdate:
+				handler = res.UpdateContext
+			default:
+				r.Failf("unexpected tested function: %s", string(fn))
+			}
+
+			diags := handler(ctx, data, provider)
+			noErrInDiagnostics(r, diags)
+		})
+	}
+}
+
 func TestCommitmentsResourceRead(t *testing.T) {
 	ctx := context.Background()
 	orgID, clusterID, commitment1ID, commitment2ID := uuid.New(), uuid.New(), uuid.New(), uuid.New()
@@ -407,6 +583,93 @@ func TestCommitmentsResourceRead(t *testing.T) {
 	}
 }
 
+func TestCommitmentsResourceReadAppendMode(t *testing.T) {
+	ctx := context.Background()
+	r := require.New(t)
+
+	orgID := uuid.New()
+	clusterID := uuid.New()
+	ourCommitmentID := uuid.New()
+	otherCommitmentID := uuid.New()
+	ourReservationID := "3b3de39c-bc44-4d69-be2d-69527dfe9958"
+	otherReservationID := "aaaaaaaa-0000-0000-0000-000000000000"
+
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	resource := resourceCommitments()
+	mockClient := mock_sdk.NewMockClientWithResponsesInterface(ctrl)
+	provider := &ProviderConfig{api: mockClient}
+
+	// Set up resource data with APPEND mode and a CSV containing only our reservation
+	data := schema.TestResourceDataRaw(t, resource.Schema, map[string]any{
+		fieldCommitmentsImportMode: "APPEND",
+		fieldCommitmentsAzureReservationsCSV: `Name,Reservation Id,Reservation order Id,Status,Expiration date,Purchase date,Term,Scope,Scope subscription,Scope resource group,Type,Product name,Region,Quantity,Utilization % 1 Day,Utilization % 7 Day,Utilization % 30 Day,Deep link to reservation
+test,3b3de39c-bc44-4d69-be2d-69527dfe9958,630226bb-5170-4b95-90b0-f222757130c1,Succeeded,2050-01-01T00:00:00Z,2023-01-11T00:00:00Z,P3Y,Single subscription,sub-id,All resource groups,VirtualMachines,Standard_D32as_v4,eastus,3,100,100,100,https://portal.azure.com`,
+	})
+	data.SetId(orgID.String() + ":azure")
+
+	// API returns both our commitment and another team's commitment
+	mockClient.EXPECT().
+		CommitmentsAPIGetCommitmentsWithResponse(gomock.Any(), &sdk.CommitmentsAPIGetCommitmentsParams{}).
+		Return(&sdk.CommitmentsAPIGetCommitmentsResponse{
+			JSON200: &sdk.CastaiInventoryV1beta1GetCommitmentsResponse{
+				Commitments: &[]sdk.CastaiInventoryV1beta1Commitment{
+					{
+						Id:     lo.ToPtr(ourCommitmentID.String()),
+						Name:   lo.ToPtr("our-commitment"),
+						Region: lo.ToPtr("eastus"),
+						AzureReservationContext: &sdk.CastaiInventoryV1beta1AzureReservation{
+							Id:           lo.ToPtr(ourReservationID),
+							Count:        lo.ToPtr[int32](3),
+							InstanceType: lo.ToPtr("Standard_D32as_v4"),
+							Status:       lo.ToPtr("Succeeded"),
+						},
+					},
+					{
+						Id:     lo.ToPtr(otherCommitmentID.String()),
+						Name:   lo.ToPtr("other-team-commitment"),
+						Region: lo.ToPtr("eastus"),
+						AzureReservationContext: &sdk.CastaiInventoryV1beta1AzureReservation{
+							Id:           lo.ToPtr(otherReservationID),
+							Count:        lo.ToPtr[int32](5),
+							InstanceType: lo.ToPtr("Standard_D8s_v5"),
+							Status:       lo.ToPtr("Succeeded"),
+						},
+					},
+				},
+			},
+			HTTPResponse: &http.Response{StatusCode: http.StatusOK},
+		}, nil).
+		Times(1)
+
+	mockClient.EXPECT().
+		CommitmentsAPIGetCommitmentsAssignmentsWithResponse(gomock.Any()).
+		Return(&sdk.CommitmentsAPIGetCommitmentsAssignmentsResponse{
+			JSON200: &sdk.CastaiInventoryV1beta1GetCommitmentsAssignmentsResponse{
+				CommitmentsAssignments: &[]sdk.CastaiInventoryV1beta1CommitmentAssignment{
+					{
+						ClusterId:    lo.ToPtr(clusterID.String()),
+						CommitmentId: lo.ToPtr(ourCommitmentID.String()),
+					},
+				},
+			},
+			HTTPResponse: &http.Response{StatusCode: http.StatusOK},
+		}, nil).
+		Times(1)
+
+	diags := resource.ReadContext(ctx, data, provider)
+	noErrInDiagnostics(r, diags)
+
+	// Verify only our commitment ended up in state, other team's commitment was filtered out
+	v := data.Get(fieldCommitmentsAzureReservations)
+	var parsed []azureReservationResource
+	r.NoError(mapstructure.Decode(v, &parsed))
+	r.Len(parsed, 1, "APPEND mode should filter to only our commitment")
+	r.Equal(ourCommitmentID.String(), parsed[0].getCommitmentID())
+	r.Equal(ourReservationID, parsed[0].ReservationID)
+}
+
 func TestCommitmentsResourceDelete(t *testing.T) {
 	ctx := context.Background()
 	orgID, commitmentID := uuid.New(), uuid.New()
@@ -477,6 +740,53 @@ func TestCommitmentsResourceDelete(t *testing.T) {
 			noErrInDiagnostics(r, diag)
 		})
 	}
+}
+
+func TestCommitmentsResourceDeleteAppendMode(t *testing.T) {
+	ctx := context.Background()
+	r := require.New(t)
+
+	orgID := uuid.New()
+	ourCommitmentID := uuid.New()
+
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	resource := resourceCommitments()
+	mockClient := mock_sdk.NewMockClientWithResponsesInterface(ctrl)
+	provider := &ProviderConfig{api: mockClient}
+
+	// In APPEND mode, state only contains our commitment (Read filtered it).
+	// The other team's commitment exists in the org but is NOT in our state.
+	data := schema.TestResourceDataRaw(t, resource.Schema, map[string]any{
+		fieldCommitmentsImportMode: "APPEND",
+		fieldCommitmentsAzureReservations: []any{
+			map[string]any{
+				"id": ourCommitmentID.String(),
+			},
+		},
+	})
+
+	mockClient.EXPECT().UsersAPIListOrganizationsWithResponse(gomock.Any()).Return(&sdk.UsersAPIListOrganizationsResponse{
+		JSON200: &sdk.CastaiUsersV1beta1ListOrganizationsResponse{
+			Organizations: []sdk.CastaiUsersV1beta1UserOrganization{
+				{Id: lo.ToPtr(orgID.String())},
+			},
+		},
+		HTTPResponse: &http.Response{StatusCode: http.StatusOK},
+	}, nil).Times(1)
+
+	// Only our commitment should be deleted — gomock will fail if any other commitment ID is passed
+	mockClient.EXPECT().
+		CommitmentsAPIDeleteCommitmentWithResponse(gomock.Any(), ourCommitmentID.String()).
+		Return(&sdk.CommitmentsAPIDeleteCommitmentResponse{
+			JSON200:      &map[string]any{},
+			HTTPResponse: &http.Response{StatusCode: http.StatusOK},
+		}, nil).
+		Times(1)
+
+	diags := resource.DeleteContext(ctx, data, provider)
+	noErrInDiagnostics(r, diags)
 }
 
 func TestGetCommitmentsImportID(t *testing.T) {
