@@ -76,6 +76,7 @@ type (
 		AllowedUsage    *float64                           `mapstructure:"allowed_usage,omitempty"`
 		Assignments     []*commitmentAssignmentResource    `mapstructure:"assignments,omitempty"`
 		ScalingStrategy *string                            `mapstructure:"scaling_strategy,omitempty"`
+		AutoAssignment  *bool                              `mapstructure:"auto_assignment,omitempty"`
 	}
 	commitmentConfigMatcherResource struct {
 		Name   string  `mapstructure:"name"`
@@ -524,6 +525,9 @@ func mapCommitmentImportWithConfigToUpdateRequest(
 		}
 		if c.Config.ScalingStrategy != nil {
 			req.ScalingStrategy = (*sdk.CastaiInventoryV1beta1CommitmentScalingStrategy)(c.Config.ScalingStrategy)
+		}
+		if c.Config.AutoAssignment != nil {
+			req.AutoAssignment = c.Config.AutoAssignment
 		}
 	}
 	return req

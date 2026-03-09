@@ -225,6 +225,11 @@ func resourceCommitments() *schema.Resource {
 							Description:      "Scaling strategy of the commitment in CAST AI. One of: Default, CPUBased, RamBased",
 							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"Default", "CPUBased", "RamBased"}, false)),
 						},
+						"auto_assignment": {
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Description: "If enabled, the commitment is automatically assigned to all clusters in the matching region. When disabled, only explicitly listed cluster assignments are used. Defaults to true for new commitments if not specified.",
+						},
 					}),
 				},
 			},
