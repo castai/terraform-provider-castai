@@ -1801,7 +1801,13 @@ type CastaiInventoryV1beta1AttachableGPUDeviceManufacturer string
 
 // CastaiInventoryV1beta1AzureReservation defines model for castai.inventory.v1beta1.AzureReservation.
 type CastaiInventoryV1beta1AzureReservation struct {
-	Count                    *int32                                                     `json:"count,omitempty"`
+	Count *int32 `json:"count,omitempty"`
+
+	// EffectiveCpu Effective CPU is the remaining CPU capacity after out-of-cluster usage (committed CPU - external usage CPU).
+	EffectiveCpu *string `json:"effectiveCpu,omitempty"`
+
+	// EffectiveMemoryMib Effective memory in MiB is the remaining memory capacity after out-of-cluster usage (committed memory - external usage memory).
+	EffectiveMemoryMib       *string                                                    `json:"effectiveMemoryMib,omitempty"`
 	Id                       *string                                                    `json:"id,omitempty"`
 	InstanceFlexibility      *CastaiInventoryV1beta1AzureReservationInstanceFlexibility `json:"instanceFlexibility,omitempty"`
 	InstanceFlexibilityGroup *string                                                    `json:"instanceFlexibilityGroup"`

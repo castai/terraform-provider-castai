@@ -14,6 +14,7 @@
       "compute.instances.setServiceAccount",
       "compute.instances.setMetadata",
       "compute.instances.setTags",
+      "compute.instances.detachDisk",
       "compute.instanceGroupManagers.get",
       "compute.instanceGroupManagers.update",
       "compute.instanceGroups.get",

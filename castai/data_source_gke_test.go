@@ -25,7 +25,7 @@ func Test_dataSourceGKEPoliciesRead(t *testing.T) {
 				loadBalancersTargetBackendPoolsFeature:      true,
 				loadBalancersUnmanagedInstanceGroupsFeature: true,
 			},
-			expected: 43, // -1 for the duplicate policy
+			expected: 44, // -1 for the duplicate policy
 			hasError: false,
 		},
 		{
@@ -33,12 +33,12 @@ func Test_dataSourceGKEPoliciesRead(t *testing.T) {
 			features: map[string]bool{
 				loadBalancersTargetBackendPoolsFeature: true,
 			},
-			expected: 42, // -1 for the duplicate policy
+			expected: 43, // -1 for the duplicate policy
 			hasError: false,
 		},
 		{
 			name:     "empty features",
-			expected: 38,
+			expected: 39,
 			hasError: false,
 		},
 	}
@@ -85,14 +85,14 @@ func TestAccGKE_DataSourceGKEPolicies_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("data.castai_gke_user_policies.gke", "features.load_balancers_target_backend_pools", "true"),
 					resource.TestCheckResourceAttr("data.castai_gke_user_policies.gke", "features.load_balancers_unmanaged_instance_groups", "true"),
-					resource.TestCheckResourceAttr("data.castai_gke_user_policies.gke", "policy.#", "43"),
+					resource.TestCheckResourceAttr("data.castai_gke_user_policies.gke", "policy.#", "44"),
 				),
 			},
 			{
 				Config: testAccDataSourceGKEPoliciesConfigUpdated,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("data.castai_gke_user_policies.gke", "features.load_balancers_target_backend_pools", "true"),
-					resource.TestCheckResourceAttr("data.castai_gke_user_policies.gke", "policy.#", "42"),
+					resource.TestCheckResourceAttr("data.castai_gke_user_policies.gke", "policy.#", "43"),
 				),
 			},
 		},
