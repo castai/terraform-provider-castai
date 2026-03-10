@@ -9,8 +9,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/samber/lo"
 	"slices"
+
+	"github.com/samber/lo"
 
 	"github.com/castai/terraform-provider-castai/castai/reservations"
 	"github.com/castai/terraform-provider-castai/castai/sdk"
@@ -76,6 +77,7 @@ type (
 		AllowedUsage    *float64                           `mapstructure:"allowed_usage,omitempty"`
 		Assignments     []*commitmentAssignmentResource    `mapstructure:"assignments,omitempty"`
 		ScalingStrategy *string                            `mapstructure:"scaling_strategy,omitempty"`
+		AutoAssignment  *bool                              `mapstructure:"auto_assignment,omitempty"`
 	}
 	commitmentConfigMatcherResource struct {
 		Name   string  `mapstructure:"name"`
@@ -511,6 +513,7 @@ func mapCommitmentImportWithConfigToUpdateRequest(
 		Prioritization:  c.Commitment.Prioritization,
 		Status:          c.Commitment.Status,
 		ScalingStrategy: c.Commitment.ScalingStrategy,
+		AutoAssignment:  c.Commitment.AutoAssignment,
 	}
 	if c.Config != nil {
 		if c.Config.AllowedUsage != nil {
@@ -524,6 +527,9 @@ func mapCommitmentImportWithConfigToUpdateRequest(
 		}
 		if c.Config.ScalingStrategy != nil {
 			req.ScalingStrategy = (*sdk.CastaiInventoryV1beta1CommitmentScalingStrategy)(c.Config.ScalingStrategy)
+		}
+		if c.Config.AutoAssignment != nil {
+			req.AutoAssignment = c.Config.AutoAssignment
 		}
 	}
 	return req
