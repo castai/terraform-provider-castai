@@ -87,6 +87,7 @@ Optional:
 
 - `allowed_usage` (Number) Allowed usage of the commitment. The value is between 0 (0%) and 1 (100%).
 - `assignments` (Block List) List of assigned clusters for the commitment. If prioritization is enabled, the order of the assignments indicates the priority. The first assignment has the highest priority. (see [below for nested schema](#nestedblock--commitment_configs--assignments))
+- `auto_assignment` (Boolean) If enabled, the commitment is automatically assigned to all clusters in the matching region. When disabled, only explicitly listed cluster assignments are used.
 - `prioritization` (Boolean) If enabled, it's possible to assign priorities to the assigned clusters.
 - `scaling_strategy` (String) Scaling strategy of the commitment in CAST AI. One of: Default, CPUBased, RamBased
 - `status` (String) Status of the commitment in CAST AI.
