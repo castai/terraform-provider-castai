@@ -8737,7 +8737,6 @@ type WorkloadoptimizationV1GetAgentStatusResponse struct {
 	MetricsExporterVersion           *string    `json:"metricsExporterVersion"`
 	NativeHpaSupportedFromVersion    *string    `json:"nativeHpaSupportedFromVersion"`
 	PsiMetricsSupported              bool       `json:"psiMetricsSupported"`
-	RefreshedAt                      time.Time  `json:"refreshedAt"`
 
 	// ResourceQuotasAffectingOptimization True if we detected at least one ResourceQuota with a hard CPU or memory limit,
 	// regardless of whether VPA is enabled or the quota is currently affecting workload optimization.
@@ -8746,6 +8745,7 @@ type WorkloadoptimizationV1GetAgentStatusResponse struct {
 
 	// Status AgentStatus defines the status of workload-autoscaler.
 	Status                         WorkloadoptimizationV1GetAgentStatusResponseAgentStatus `json:"status"`
+	UpdatedAt                      time.Time                                               `json:"updatedAt"`
 	WorkloadAutoscalerReplicaCount int64                                                   `json:"workloadAutoscalerReplicaCount"`
 }
 

@@ -703,8 +703,8 @@ func (r *edgeLocationResource) toAWS(ctx context.Context, plan, config *awsModel
 		AccountId:       toPtr(plan.AccountID.ValueString()),
 		InstanceProfile: instanceProfile,
 		Credentials: &omni.AWSParamCredentials{
-			AccessKeyId:     config.AccessKeyIDWO.ValueString(),
-			SecretAccessKey: config.SecretAccessKeyWO.ValueString(),
+			AccessKeyId:     config.AccessKeyIDWO.ValueStringPointer(),
+			SecretAccessKey: config.SecretAccessKeyWO.ValueStringPointer(),
 		},
 		Networking: &omni.AWSParamAWSNetworking{
 			VpcId:           plan.VpcID.ValueString(),

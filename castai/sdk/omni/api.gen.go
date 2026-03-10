@@ -68,6 +68,9 @@ type AWSParam struct {
 
 	// Networking The networking parameters.
 	Networking *AWSParamAWSNetworking `json:"networking,omitempty"`
+
+	// RoleArn The AWS Role ARN used for impersonation.
+	RoleArn *string `json:"roleArn,omitempty"`
 }
 
 // AWSParamAWSNetworking The IDs of networking resources created during location onboarding.
@@ -96,10 +99,10 @@ type AWSParamAWSNetworking struct {
 // AWSParamCredentials AWS credentials.
 type AWSParamCredentials struct {
 	// AccessKeyId Access key for the AWS account.
-	AccessKeyId string `json:"accessKeyId"`
+	AccessKeyId *string `json:"accessKeyId,omitempty"`
 
 	// SecretAccessKey Secret key for the AWS account.
-	SecretAccessKey string `json:"secretAccessKey"`
+	SecretAccessKey *string `json:"secretAccessKey,omitempty"`
 }
 
 // CastaiOIDCConfig Message to get CastAI OIDC config.
@@ -257,15 +260,15 @@ type GCPParam struct {
 
 	// ProjectId GCP project ID where edges run.
 	ProjectId string `json:"projectId"`
+
+	// TargetServiceAccountEmail Target service account email to be used for impersonation.
+	TargetServiceAccountEmail *string `json:"targetServiceAccountEmail,omitempty"`
 }
 
 // GCPParamCredentials GCP credentials.
 type GCPParamCredentials struct {
 	// ClientServiceAccountJsonBase64 Client service account json to be used to provision edge resources.
 	ClientServiceAccountJsonBase64 *string `json:"clientServiceAccountJsonBase64,omitempty"`
-
-	// TargetServiceAccountEmail Target service account email to be used for impersonation.
-	TargetServiceAccountEmail *string `json:"targetServiceAccountEmail,omitempty"`
 }
 
 // GCPParamGCPNetworking The names of networking resources created during location onboarding.
