@@ -128,30 +128,3 @@ module "castai_aks_cluster" {
 
   install_omni = true
 }
-
-resource "castai_rebalancing_schedule" "default" {
-  name = "rebalance nodes at every 30th minute"
-  schedule {
-    cron = "CRON_TZ=America/Argentina/Buenos_Aires */30 * * * *"
-  }
-  trigger_conditions {
-    savings_percentage = 20
-  }
-  launch_configuration {
-    # only consider instances older than 5 minutes
-    node_ttl_seconds         = 300
-    num_targeted_nodes       = 3
-    rebalancing_min_nodes    = 2
-    keep_drain_timeout_nodes = false
-    execution_conditions {
-      enabled                     = true
-      achieved_savings_percentage = 10
-    }
-  }
-}
-
-resource "castai_rebalancing_job" "default" {
-  cluster_id              = module.castai_aks_cluster.cluster_id
-  rebalancing_schedule_id = castai_rebalancing_schedule.default.id
-  enabled                 = true
-}
