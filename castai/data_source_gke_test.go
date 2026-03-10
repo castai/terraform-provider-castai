@@ -25,7 +25,7 @@ func Test_dataSourceGKEPoliciesRead(t *testing.T) {
 				loadBalancersTargetBackendPoolsFeature:      true,
 				loadBalancersUnmanagedInstanceGroupsFeature: true,
 			},
-			expected: 43, // -1 for the duplicate policy
+			expected: 44, // -1 for the duplicate policy
 			hasError: false,
 		},
 		{
@@ -33,12 +33,12 @@ func Test_dataSourceGKEPoliciesRead(t *testing.T) {
 			features: map[string]bool{
 				loadBalancersTargetBackendPoolsFeature: true,
 			},
-			expected: 42, // -1 for the duplicate policy
+			expected: 43, // -1 for the duplicate policy
 			hasError: false,
 		},
 		{
 			name:     "empty features",
-			expected: 38,
+			expected: 39,
 			hasError: false,
 		},
 	}
