@@ -361,13 +361,14 @@ func resourceNodeConfiguration() *schema.Resource {
 								Schema: map[string]*schema.Schema{
 									"placement": {
 										Type:                  schema.TypeString,
-										Required:              true,
+										Optional:              true,
 										Description:           "Placement of the ephemeral OS disk. One of: cacheDisk, resourceDisk, nvmeDisk",
 										ValidateDiagFunc:      validation.ToDiagFunc(validation.StringInSlice([]string{aksEphemeralDiskPlacementCacheDisk, aksEphemeralDiskPlacementResourceDisk, aksEphemeralDiskPlacementNVME}, true)),
 										DiffSuppressOnRefresh: true,
 										DiffSuppressFunc: func(k, oldValue, newValue string, d *schema.ResourceData) bool {
 											return strings.EqualFold(oldValue, newValue)
 										},
+										Default: Unspecified,
 									},
 									"cache": {
 										Type:        schema.TypeString,

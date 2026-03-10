@@ -83,3 +83,38 @@ resource "castai_node_configuration" "test" {
 }
 `, rName, resourceGroupName))
 }
+
+func testAccAKSNodeConfigurationConfigWithEphemeral(rName, clusterName, resourceGroupName string) string {
+	return ConfigCompose(testAccAKSWithFederationIDConfig(clusterName), fmt.Sprintf(`
+provider "azurerm" {
+	features {}		
+}
+data "azurerm_subnet" "internal" {
+  name                 =  "internal"
+  virtual_network_name = "%[2]s-network"
+  resource_group_name  = %[2]q 
+}
+
+resource "castai_node_configuration" "test" {
+  name   		    = %[1]q
+  cluster_id        = castai_aks_cluster.test.id
+  disk_cpu_ratio    = 35
+  min_disk_size     = 122
+  subnets   	    = [data.azurerm_subnet.internal.id]
+  tags = {
+    env = "development"
+  }
+  aks {
+		max_pods_per_node = 31
+		aks_image_family = "ubuntu"
+		ephemeral_os_disk {
+		}
+  }
+}
+
+resource "castai_node_configuration_default" "test" {
+  cluster_id       = castai_aks_cluster.test.id
+  configuration_id = castai_node_configuration.test.id
+}
+`, rName, resourceGroupName))
+}
