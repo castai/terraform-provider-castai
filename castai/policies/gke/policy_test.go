@@ -1,8 +1,9 @@
 package gke
 
 import (
-	"github.com/stretchr/testify/require"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 func TestPolicies(t *testing.T) {
@@ -21,7 +22,7 @@ func TestPolicies(t *testing.T) {
 		if !contains(userpolicy, wantClustersGet) || !contains(userpolicy, wantZonesGet) {
 			t.Fatalf("generated User policy document does not contain required policies")
 		}
-		require.Equal(t, 38, len(userpolicy))
+		require.Equal(t, 39, len(userpolicy))
 	})
 	t.Run("LoadBalancersTargetBackendPools policy", func(t *testing.T) {
 		lbTbpPolicy, err := GetLoadBalancersTargetBackendPoolsPolicy()
