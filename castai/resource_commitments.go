@@ -228,7 +228,8 @@ func resourceCommitments() *schema.Resource {
 						"auto_assignment": {
 							Type:        schema.TypeBool,
 							Optional:    true,
-							Description: "If enabled, the commitment is automatically assigned to all clusters in the matching region. When disabled, only explicitly listed cluster assignments are used. Defaults to true for new commitments if not specified.",
+							Default:     true,
+							Description: "If enabled, the commitment is automatically assigned to all clusters in the matching region. When disabled, only explicitly listed cluster assignments are used.",
 						},
 					}),
 				},

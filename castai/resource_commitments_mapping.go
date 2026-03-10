@@ -9,8 +9,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/samber/lo"
 	"slices"
+
+	"github.com/samber/lo"
 
 	"github.com/castai/terraform-provider-castai/castai/reservations"
 	"github.com/castai/terraform-provider-castai/castai/sdk"
@@ -512,6 +513,7 @@ func mapCommitmentImportWithConfigToUpdateRequest(
 		Prioritization:  c.Commitment.Prioritization,
 		Status:          c.Commitment.Status,
 		ScalingStrategy: c.Commitment.ScalingStrategy,
+		AutoAssignment:  c.Commitment.AutoAssignment,
 	}
 	if c.Config != nil {
 		if c.Config.AllowedUsage != nil {
