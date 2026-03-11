@@ -1227,7 +1227,9 @@ func toAKSEphemeralOSDisk(obj any) *sdk.NodeconfigV1AKSConfigOsDiskEphemeral {
 		return nil
 	}
 
-	osDisk := &sdk.NodeconfigV1AKSConfigOsDiskEphemeral{}
+	osDisk := &sdk.NodeconfigV1AKSConfigOsDiskEphemeral{
+		Placement: lo.ToPtr(sdk.NodeconfigV1AKSConfigOsDiskEphemeralPlacementPLACEMENTUNSPECIFIED),
+	}
 
 	if v, ok := obj.(map[string]any)["placement"].(string); ok && v != "" {
 		switch strings.ToLower(v) {
