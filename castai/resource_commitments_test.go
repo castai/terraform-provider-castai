@@ -88,6 +88,7 @@ func TestCommitmentsResourceCreateAndUpdate(t *testing.T) {
 				commitmentImport: gcpImport,
 				expectCommitmentUpdate: sdk.CommitmentsAPIUpdateCommitmentJSONRequestBody{
 					AllowedUsage:    lo.ToPtr[float32](0.6),
+					AutoAssignment:  lo.ToPtr(true),
 					Prioritization:  lo.ToPtr(true),
 					ScalingStrategy: lo.ToPtr(sdk.CPUBased),
 					Status:          lo.ToPtr(sdk.CastaiInventoryV1beta1CommitmentStatusActive),
@@ -157,6 +158,7 @@ test,3b3de39c-bc44-4d69-be2d-69527dfe9958,630226bb-5170-4b95-90b0-f222757130c1,S
 				commitmentImport: commitmentImport,
 				expectCommitmentUpdate: sdk.CommitmentsAPIUpdateCommitmentJSONRequestBody{
 					AllowedUsage:    lo.ToPtr[float32](0.7),
+					AutoAssignment:  lo.ToPtr(true),
 					Prioritization:  lo.ToPtr(true),
 					ScalingStrategy: lo.ToPtr(sdk.Default),
 					Status:          lo.ToPtr(sdk.CastaiInventoryV1beta1CommitmentStatusActive),
@@ -363,10 +365,11 @@ test,3b3de39c-bc44-4d69-be2d-69527dfe9958,630226bb-5170-4b95-90b0-f222757130c1,S
 								"priority":   1,
 							},
 						},
-						"prioritization":   true,
-						"status":           "Active",
-						"allowed_usage":    0.7,
-						"scaling_strategy": "Default",
+						"prioritization":    true,
+						"status":            "Active",
+						"allowed_usage":     0.7,
+						"scaling_strategy":  "Default",
+						"auto_assignment":   false,
 					},
 				},
 			})
@@ -427,6 +430,7 @@ test,3b3de39c-bc44-4d69-be2d-69527dfe9958,630226bb-5170-4b95-90b0-f222757130c1,S
 			mockClient.EXPECT().CommitmentsAPIUpdateCommitmentWithResponse(
 				gomock.Any(), commitmentID.String(), sdk.CommitmentsAPIUpdateCommitmentJSONRequestBody{
 					AllowedUsage:    lo.ToPtr[float32](0.7),
+					AutoAssignment:  lo.ToPtr(false),
 					Prioritization:  lo.ToPtr(true),
 					ScalingStrategy: lo.ToPtr(sdk.Default),
 					Status:          lo.ToPtr(sdk.CastaiInventoryV1beta1CommitmentStatusActive),

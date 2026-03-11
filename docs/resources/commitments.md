@@ -13,6 +13,7 @@ Commitments represent cloud service provider reserved instances (Azure) and comm
 ## Example Usage
 
 ```terraform
+# GCP example with default OVERWRITE mode and auto_assignment enabled (default)
 resource "castai_commitments" "gcp_test" {
   gcp_cuds_json = file("./cuds.json")
   commitment_configs {
@@ -35,6 +36,7 @@ resource "castai_commitments" "gcp_test" {
   }
 }
 
+# Azure example with default OVERWRITE mode and auto_assignment enabled (default)
 resource "castai_commitments" "azure_test" {
   azure_reservations_csv = file("./reservations.csv")
   commitment_configs {
@@ -53,6 +55,29 @@ resource "castai_commitments" "azure_test" {
     }
     assignments {
       cluster_id = "cluster-id-4"
+    }
+  }
+}
+
+# Azure example with APPEND mode and auto_assignment disabled to prevent commitments from being auto-assigned to all matching clusters.
+resource "castai_commitments" "team_a" {
+  azure_reservations_csv = file("./team-a-reservations.csv")
+  import_mode            = "APPEND"
+
+  commitment_configs {
+    matcher {
+      region = "eastus"
+      type   = "Standard_DS2_v2"
+      name   = "team-a-reservation"
+    }
+    prioritization   = false
+    allowed_usage    = 1
+    status           = "Active"
+    scaling_strategy = "Default"
+    auto_assignment  = false
+
+    assignments {
+      cluster_id = "team-a-cluster-id"
     }
   }
 }
@@ -87,6 +112,7 @@ Optional:
 
 - `allowed_usage` (Number) Allowed usage of the commitment. The value is between 0 (0%) and 1 (100%).
 - `assignments` (Block List) List of assigned clusters for the commitment. If prioritization is enabled, the order of the assignments indicates the priority. The first assignment has the highest priority. (see [below for nested schema](#nestedblock--commitment_configs--assignments))
+- `auto_assignment` (Boolean) If enabled, the commitment is automatically assigned to all clusters in the matching region. When disabled, only explicitly listed cluster assignments are used.
 - `prioritization` (Boolean) If enabled, it's possible to assign priorities to the assigned clusters.
 - `scaling_strategy` (String) Scaling strategy of the commitment in CAST AI. One of: Default, CPUBased, RamBased
 - `status` (String) Status of the commitment in CAST AI.
