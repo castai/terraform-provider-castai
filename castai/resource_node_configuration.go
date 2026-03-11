@@ -1417,7 +1417,9 @@ func fromAKSEphemeralOSDisk(sdkEph *sdk.NodeconfigV1AKSConfigOsDiskEphemeral) []
 		return nil
 	}
 
-	m := map[string]interface{}{}
+	m := map[string]interface{}{
+		"placement": Unspecified,
+	}
 	if sdkEph.Placement != nil {
 		switch *sdkEph.Placement {
 		case sdk.NodeconfigV1AKSConfigOsDiskEphemeralPlacementPLACEMENTRESOURCEDISK:
