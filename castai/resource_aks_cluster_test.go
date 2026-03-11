@@ -474,7 +474,7 @@ func TestAccAKS_ResourceAKSCluster(t *testing.T) {
 					resource.TestCheckResourceAttr(nodeConfResourceName, "kops.#", "0"),
 					resource.TestCheckResourceAttr(nodeConfResourceName, "gke.#", "0"),
 					resource.TestCheckResourceAttr(nodeConfResourceName, "aks.0.ephemeral_os_disk.#", "1"),
-				resource.TestCheckResourceAttr(nodeConfResourceName, "aks.0.ephemeral_os_disk.0.placement", "cacheDisk"),
+					resource.TestCheckResourceAttr(nodeConfResourceName, "aks.0.ephemeral_os_disk.0.placement", "unspecified"),
 				),
 			},
 			{
