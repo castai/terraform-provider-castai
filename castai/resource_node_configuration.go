@@ -361,7 +361,7 @@ func resourceNodeConfiguration() *schema.Resource {
 								Schema: map[string]*schema.Schema{
 									"placement": {
 										Type:                  schema.TypeString,
-										Required:              true,
+										Optional:              true,
 										Description:           "Placement of the ephemeral OS disk. One of: cacheDisk, resourceDisk, nvmeDisk",
 										ValidateDiagFunc:      validation.ToDiagFunc(validation.StringInSlice([]string{aksEphemeralDiskPlacementCacheDisk, aksEphemeralDiskPlacementResourceDisk, aksEphemeralDiskPlacementNVME, "unspecified"}, true)),
 										DiffSuppressOnRefresh: true,
