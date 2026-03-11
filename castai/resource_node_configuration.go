@@ -361,13 +361,14 @@ func resourceNodeConfiguration() *schema.Resource {
 								Schema: map[string]*schema.Schema{
 									"placement": {
 										Type:                  schema.TypeString,
-										Optional:              true,
+										Required:              true,
 										Description:           "Placement of the ephemeral OS disk. One of: cacheDisk, resourceDisk, nvmeDisk",
-										ValidateDiagFunc:      validation.ToDiagFunc(validation.StringInSlice([]string{aksEphemeralDiskPlacementCacheDisk, aksEphemeralDiskPlacementResourceDisk, aksEphemeralDiskPlacementNVME}, true)),
+										ValidateDiagFunc:      validation.ToDiagFunc(validation.StringInSlice([]string{aksEphemeralDiskPlacementCacheDisk, aksEphemeralDiskPlacementResourceDisk, aksEphemeralDiskPlacementNVME, "unspecified"}, true)),
 										DiffSuppressOnRefresh: true,
 										DiffSuppressFunc: func(k, oldValue, newValue string, d *schema.ResourceData) bool {
 											return strings.EqualFold(oldValue, newValue)
 										},
+										Default: Unspecified,
 									},
 									"cache": {
 										Type:        schema.TypeString,
@@ -1227,9 +1228,7 @@ func toAKSEphemeralOSDisk(obj any) *sdk.NodeconfigV1AKSConfigOsDiskEphemeral {
 		return nil
 	}
 
-	osDisk := &sdk.NodeconfigV1AKSConfigOsDiskEphemeral{
-		Placement: lo.ToPtr(sdk.NodeconfigV1AKSConfigOsDiskEphemeralPlacementPLACEMENTUNSPECIFIED),
-	}
+	osDisk := &sdk.NodeconfigV1AKSConfigOsDiskEphemeral{}
 
 	if v, ok := obj.(map[string]any)["placement"].(string); ok && v != "" {
 		switch strings.ToLower(v) {
