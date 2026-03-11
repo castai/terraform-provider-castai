@@ -368,7 +368,6 @@ func resourceNodeConfiguration() *schema.Resource {
 										DiffSuppressFunc: func(k, oldValue, newValue string, d *schema.ResourceData) bool {
 											return strings.EqualFold(oldValue, newValue)
 										},
-										Default: Unspecified,
 									},
 									"cache": {
 										Type:        schema.TypeString,
@@ -1417,9 +1416,7 @@ func fromAKSEphemeralOSDisk(sdkEph *sdk.NodeconfigV1AKSConfigOsDiskEphemeral) []
 		return nil
 	}
 
-	m := map[string]interface{}{
-		"placement": Unspecified,
-	}
+	m := map[string]interface{}{}
 	if sdkEph.Placement != nil {
 		switch *sdkEph.Placement {
 		case sdk.NodeconfigV1AKSConfigOsDiskEphemeralPlacementPLACEMENTRESOURCEDISK:
