@@ -108,6 +108,7 @@ resource "castai_node_configuration" "test" {
 		max_pods_per_node = 31
 		aks_image_family = "ubuntu"
 		ephemeral_os_disk {
+			placement = "unspecified"
 		}
   }
 }
