@@ -100,10 +100,13 @@ Optional:
 <a id="nestedblock--aks--ephemeral_os_disk"></a>
 ### Nested Schema for `aks.ephemeral_os_disk`
 
+Required:
+
+- `placement` (String) Placement of the ephemeral OS disk. One of: cacheDisk, resourceDisk, nvmeDisk
+
 Optional:
 
 - `cache` (String, Deprecated) Deprecated: this field has no effect. Ephemeral OS disks always use ReadOnly cache strategy
-- `placement` (String) Placement of the ephemeral OS disk. One of: cacheDisk, resourceDisk, nvmeDisk
 
 
 <a id="nestedblock--aks--loadbalancers"></a>
