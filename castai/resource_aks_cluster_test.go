@@ -463,6 +463,35 @@ func TestAccAKS_ResourceAKSCluster(t *testing.T) {
 				),
 			},
 			{
+				Config: testAccAKSNodeConfigurationConfigWithEphemeral(rName, clusterName, resourceGroupName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(nodeConfResourceName, "name", rName),
+					resource.TestCheckResourceAttr(nodeConfResourceName, "disk_cpu_ratio", "35"),
+					resource.TestCheckResourceAttr(nodeConfResourceName, "min_disk_size", "122"),
+					resource.TestCheckResourceAttr(nodeConfResourceName, "aks.0.max_pods_per_node", "31"),
+					resource.TestCheckResourceAttr(nodeConfResourceName, "aks.0.aks_image_family", "ubuntu"),
+					resource.TestCheckResourceAttr(nodeConfResourceName, "eks.#", "0"),
+					resource.TestCheckResourceAttr(nodeConfResourceName, "kops.#", "0"),
+					resource.TestCheckResourceAttr(nodeConfResourceName, "gke.#", "0"),
+					resource.TestCheckResourceAttr(nodeConfResourceName, "aks.0.ephemeral_os_disk.#", "1"),
+				),
+			},
+			{
+				Config: testAccAKSNodeConfigurationConfigWithEphemeralNVME(rName, clusterName, resourceGroupName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(nodeConfResourceName, "name", rName),
+					resource.TestCheckResourceAttr(nodeConfResourceName, "disk_cpu_ratio", "35"),
+					resource.TestCheckResourceAttr(nodeConfResourceName, "min_disk_size", "122"),
+					resource.TestCheckResourceAttr(nodeConfResourceName, "aks.0.max_pods_per_node", "31"),
+					resource.TestCheckResourceAttr(nodeConfResourceName, "aks.0.aks_image_family", "ubuntu"),
+					resource.TestCheckResourceAttr(nodeConfResourceName, "eks.#", "0"),
+					resource.TestCheckResourceAttr(nodeConfResourceName, "kops.#", "0"),
+					resource.TestCheckResourceAttr(nodeConfResourceName, "gke.#", "0"),
+					resource.TestCheckResourceAttr(nodeConfResourceName, "aks.0.ephemeral_os_disk.#", "1"),
+					resource.TestCheckResourceAttr(nodeConfResourceName, "aks.0.ephemeral_os_disk.0.placement", "nvmeDisk"),
+				),
+			},
+			{
 				Config: testAccAKSNodeConfigurationUpdated(rName, clusterName, resourceGroupName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(nodeConfResourceName, "name", rName),

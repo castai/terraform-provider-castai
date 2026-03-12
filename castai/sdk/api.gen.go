@@ -6469,6 +6469,7 @@ type K8sSelectorV1Operator string
 type NodeconfigV1AKSConfig struct {
 	// ApplicationSecurityGroupIds Specifies an array of references to application security group.
 	ApplicationSecurityGroupIds *[]string `json:"applicationSecurityGroupIds,omitempty"`
+	EnableEncryptionAtHost      *bool     `json:"enableEncryptionAtHost"`
 
 	// ImageFamily List of supported image families (OSes) for AKS.
 	ImageFamily *NodeconfigV1AKSConfigImageFamily `json:"imageFamily,omitempty"`
