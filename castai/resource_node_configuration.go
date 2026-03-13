@@ -113,7 +113,7 @@ func resourceNodeConfiguration() *schema.Resource {
 				Type:             schema.TypeInt,
 				Optional:         true,
 				Default:          0,
-				ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(0, 3600)),
+				ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(0, 10800)),
 				Description:      "Timeout in seconds for draining the node. Defaults to 0",
 			},
 			FieldNodeConfigurationMinDiskSize: {
