@@ -125,6 +125,9 @@ type Cluster struct {
 	// DeleteTime The delete timestamp.
 	DeleteTime *time.Time `json:"deleteTime,omitempty"`
 
+	// EdgeLocations List of edge locations for this cluster.
+	EdgeLocations *[]EdgeLocation `json:"edgeLocations,omitempty"`
+
 	// Id The ID of the cluster.
 	Id *string `json:"id,omitempty"`
 
@@ -471,6 +474,9 @@ type ClustersAPIListClustersParams struct {
 	// PageCursor Cursor that defines token indicating where to start the next page.
 	//  Empty value indicates to start from beginning of the dataset.
 	PageCursor *string `form:"page.cursor,omitempty" json:"page.cursor,omitempty"`
+
+	// IncludeEdgeLocations Whether edge locations should be included in the response.
+	IncludeEdgeLocations *bool `form:"includeEdgeLocations,omitempty" json:"includeEdgeLocations,omitempty"`
 }
 
 // EdgeLocationsAPIListEdgeLocationsParams defines parameters for EdgeLocationsAPIListEdgeLocations.
@@ -487,6 +493,12 @@ type EdgeLocationsAPIListEdgeLocationsParams struct {
 type EdgeLocationsAPIUpdateEdgeLocationParams struct {
 	// UpdateMask The list of fields to be updated.
 	UpdateMask *string `form:"updateMask,omitempty" json:"updateMask,omitempty"`
+}
+
+// ClustersAPIGetClusterParams defines parameters for ClustersAPIGetCluster.
+type ClustersAPIGetClusterParams struct {
+	// IncludeEdgeLocations Whether edge locations should be included in the response.
+	IncludeEdgeLocations *bool `form:"includeEdgeLocations,omitempty" json:"includeEdgeLocations,omitempty"`
 }
 
 // EdgeLocationsAPICreateEdgeLocationJSONRequestBody defines body for EdgeLocationsAPICreateEdgeLocation for application/json ContentType.

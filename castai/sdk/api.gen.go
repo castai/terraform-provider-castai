@@ -1857,16 +1857,17 @@ type CastaiInventoryV1beta1AzureReservationImport struct {
 
 // CastaiInventoryV1beta1AzureSavingsPlanContext defines model for castai.inventory.v1beta1.AzureSavingsPlanContext.
 type CastaiInventoryV1beta1AzureSavingsPlanContext struct {
-	CommitmentAmount     *float64                                                            `json:"commitmentAmount,omitempty"`
-	Id                   *string                                                             `json:"id,omitempty"`
-	InstanceTypesUsage   *CastaiInventoryV1beta1InstanceTypeBasedUsage                       `json:"instanceTypesUsage,omitempty"`
-	ProvisioningState    *string                                                             `json:"provisioningState,omitempty"`
-	Scope                *CastaiInventoryV1beta1AzureSavingsPlanContextAzureSavingsPlanScope `json:"scope,omitempty"`
-	ScopeManagementGroup *string                                                             `json:"scopeManagementGroup,omitempty"`
-	ScopeResourceGroup   *string                                                             `json:"scopeResourceGroup,omitempty"`
-	ScopeSubscription    *string                                                             `json:"scopeSubscription,omitempty"`
-	ScopeTenant          *string                                                             `json:"scopeTenant,omitempty"`
-	Term                 *CastaiInventoryV1beta1AzureSavingsPlanContextAzureSavingsPlanTerm  `json:"term,omitempty"`
+	CommitmentAmount          *float64                                                            `json:"commitmentAmount,omitempty"`
+	EffectiveCommitmentAmount *float64                                                            `json:"effectiveCommitmentAmount,omitempty"`
+	Id                        *string                                                             `json:"id,omitempty"`
+	InstanceTypesUsage        *CastaiInventoryV1beta1InstanceTypeBasedUsage                       `json:"instanceTypesUsage,omitempty"`
+	ProvisioningState         *string                                                             `json:"provisioningState,omitempty"`
+	Scope                     *CastaiInventoryV1beta1AzureSavingsPlanContextAzureSavingsPlanScope `json:"scope,omitempty"`
+	ScopeManagementGroup      *string                                                             `json:"scopeManagementGroup,omitempty"`
+	ScopeResourceGroup        *string                                                             `json:"scopeResourceGroup,omitempty"`
+	ScopeSubscription         *string                                                             `json:"scopeSubscription,omitempty"`
+	ScopeTenant               *string                                                             `json:"scopeTenant,omitempty"`
+	Term                      *CastaiInventoryV1beta1AzureSavingsPlanContextAzureSavingsPlanTerm  `json:"term,omitempty"`
 }
 
 // CastaiInventoryV1beta1AzureSavingsPlanContextAzureSavingsPlanScope defines model for castai.inventory.v1beta1.AzureSavingsPlanContext.AzureSavingsPlanScope.
@@ -2488,6 +2489,9 @@ type CastaiInventoryV1beta1ListZonesResponse struct {
 
 // CastaiInventoryV1beta1NetworkInfo Describes the network settings for the instance type.
 type CastaiInventoryV1beta1NetworkInfo struct {
+	// AcceleratedNetworkingSupported Indicates whether the Azure instance type supports Accelerated Networking. Azure only.
+	AcceleratedNetworkingSupported *bool `json:"acceleratedNetworkingSupported"`
+
 	// BaseBandwidthMbps Base bandwidth in Mbps.
 	BaseBandwidthMbps *int32 `json:"baseBandwidthMbps,omitempty"`
 
@@ -3816,6 +3820,9 @@ type CastaiUsersV1beta1UserOrganization struct {
 
 	// Name name of the organization.
 	Name string `json:"name"`
+
+	// OrganizationMember Whether the user is member of the organization.
+	OrganizationMember *bool `json:"organizationMember,omitempty"`
 
 	// ParentId ID of the parent organization. This is beta feature not available for all organizations.
 	ParentId *string `json:"parentId"`
@@ -9197,6 +9204,13 @@ type WorkloadoptimizationV1InitiatedBy struct {
 	Name  *string `json:"name"`
 }
 
+// WorkloadoptimizationV1JVMContainerMetrics defines model for workloadoptimization.v1.JVMContainerMetrics.
+type WorkloadoptimizationV1JVMContainerMetrics struct {
+	HeapCommittedBytes   *[]WorkloadoptimizationV1TimeSeriesMetric `json:"heapCommittedBytes,omitempty"`
+	HeapUsedBytes        *[]WorkloadoptimizationV1TimeSeriesMetric `json:"heapUsedBytes,omitempty"`
+	RecommendedHeapBytes *[]WorkloadoptimizationV1TimeSeriesMetric `json:"recommendedHeapBytes,omitempty"`
+}
+
 // WorkloadoptimizationV1JVMMemorySettings defines model for workloadoptimization.v1.JVMMemorySettings.
 type WorkloadoptimizationV1JVMMemorySettings struct {
 	// Optimization Defines whether JVM memory optimization is enabled.
@@ -10360,6 +10374,7 @@ type WorkloadoptimizationV1WorkloadMetricContainer struct {
 	CpuCoresPredictionsAggregated *WorkloadoptimizationV1AggregatedPredictionMetrics `json:"cpuCoresPredictionsAggregated,omitempty"`
 	CpuStallPct                   *[]WorkloadoptimizationV1ResourceMetrics           `json:"cpuStallPct,omitempty"`
 	CpuStallPctAggregated         *WorkloadoptimizationV1AggregatedCPUStallMetrics   `json:"cpuStallPctAggregated,omitempty"`
+	Jvm                           *WorkloadoptimizationV1JVMContainerMetrics         `json:"jvm,omitempty"`
 	MemoryGib                     []WorkloadoptimizationV1ResourceMetrics            `json:"memoryGib"`
 	MemoryGibAggregated           WorkloadoptimizationV1AggregatedMetrics            `json:"memoryGibAggregated"`
 	Name                          string                                             `json:"name"`

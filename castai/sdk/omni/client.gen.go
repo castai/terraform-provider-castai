@@ -128,7 +128,7 @@ type ClientInterface interface {
 	ClustersAPIDeleteCluster(ctx context.Context, organizationId string, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// ClustersAPIGetCluster request
-	ClustersAPIGetCluster(ctx context.Context, organizationId string, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
+	ClustersAPIGetCluster(ctx context.Context, organizationId string, id string, params *ClustersAPIGetClusterParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// ClustersAPIOnboardCluster request
 	ClustersAPIOnboardCluster(ctx context.Context, organizationId string, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -301,8 +301,8 @@ func (c *Client) ClustersAPIDeleteCluster(ctx context.Context, organizationId st
 	return c.Client.Do(req)
 }
 
-func (c *Client) ClustersAPIGetCluster(ctx context.Context, organizationId string, id string, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewClustersAPIGetClusterRequest(c.Server, organizationId, id)
+func (c *Client) ClustersAPIGetCluster(ctx context.Context, organizationId string, id string, params *ClustersAPIGetClusterParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewClustersAPIGetClusterRequest(c.Server, organizationId, id, params)
 	if err != nil {
 		return nil, err
 	}
@@ -421,6 +421,22 @@ func NewClustersAPIListClustersRequest(server string, organizationId string, par
 		if params.PageCursor != nil {
 
 			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "page.cursor", runtime.ParamLocationQuery, *params.PageCursor); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.IncludeEdgeLocations != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "includeEdgeLocations", runtime.ParamLocationQuery, *params.IncludeEdgeLocations); err != nil {
 				return nil, err
 			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
 				return nil, err
@@ -991,7 +1007,7 @@ func NewClustersAPIDeleteClusterRequest(server string, organizationId string, id
 }
 
 // NewClustersAPIGetClusterRequest generates requests for ClustersAPIGetCluster
-func NewClustersAPIGetClusterRequest(server string, organizationId string, id string) (*http.Request, error) {
+func NewClustersAPIGetClusterRequest(server string, organizationId string, id string, params *ClustersAPIGetClusterParams) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -1021,6 +1037,28 @@ func NewClustersAPIGetClusterRequest(server string, organizationId string, id st
 	queryURL, err := serverURL.Parse(operationPath)
 	if err != nil {
 		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if params.IncludeEdgeLocations != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "includeEdgeLocations", runtime.ParamLocationQuery, *params.IncludeEdgeLocations); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
 	}
 
 	req, err := http.NewRequest("GET", queryURL.String(), nil)
@@ -1290,7 +1328,7 @@ type ClientWithResponsesInterface interface {
 	ClustersAPIDeleteClusterWithResponse(ctx context.Context, organizationId string, id string) (*ClustersAPIDeleteClusterResponse, error)
 
 	// ClustersAPIGetCluster request
-	ClustersAPIGetClusterWithResponse(ctx context.Context, organizationId string, id string) (*ClustersAPIGetClusterResponse, error)
+	ClustersAPIGetClusterWithResponse(ctx context.Context, organizationId string, id string, params *ClustersAPIGetClusterParams) (*ClustersAPIGetClusterResponse, error)
 
 	// ClustersAPIOnboardCluster request
 	ClustersAPIOnboardClusterWithResponse(ctx context.Context, organizationId string, id string) (*ClustersAPIOnboardClusterResponse, error)
@@ -1923,8 +1961,8 @@ func (c *ClientWithResponses) ClustersAPIDeleteClusterWithResponse(ctx context.C
 }
 
 // ClustersAPIGetClusterWithResponse request returning *ClustersAPIGetClusterResponse
-func (c *ClientWithResponses) ClustersAPIGetClusterWithResponse(ctx context.Context, organizationId string, id string) (*ClustersAPIGetClusterResponse, error) {
-	rsp, err := c.ClustersAPIGetCluster(ctx, organizationId, id)
+func (c *ClientWithResponses) ClustersAPIGetClusterWithResponse(ctx context.Context, organizationId string, id string, params *ClustersAPIGetClusterParams) (*ClustersAPIGetClusterResponse, error) {
+	rsp, err := c.ClustersAPIGetCluster(ctx, organizationId, id, params)
 	if err != nil {
 		return nil, err
 	}
