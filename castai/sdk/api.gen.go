@@ -1857,16 +1857,17 @@ type CastaiInventoryV1beta1AzureReservationImport struct {
 
 // CastaiInventoryV1beta1AzureSavingsPlanContext defines model for castai.inventory.v1beta1.AzureSavingsPlanContext.
 type CastaiInventoryV1beta1AzureSavingsPlanContext struct {
-	CommitmentAmount     *float64                                                            `json:"commitmentAmount,omitempty"`
-	Id                   *string                                                             `json:"id,omitempty"`
-	InstanceTypesUsage   *CastaiInventoryV1beta1InstanceTypeBasedUsage                       `json:"instanceTypesUsage,omitempty"`
-	ProvisioningState    *string                                                             `json:"provisioningState,omitempty"`
-	Scope                *CastaiInventoryV1beta1AzureSavingsPlanContextAzureSavingsPlanScope `json:"scope,omitempty"`
-	ScopeManagementGroup *string                                                             `json:"scopeManagementGroup,omitempty"`
-	ScopeResourceGroup   *string                                                             `json:"scopeResourceGroup,omitempty"`
-	ScopeSubscription    *string                                                             `json:"scopeSubscription,omitempty"`
-	ScopeTenant          *string                                                             `json:"scopeTenant,omitempty"`
-	Term                 *CastaiInventoryV1beta1AzureSavingsPlanContextAzureSavingsPlanTerm  `json:"term,omitempty"`
+	CommitmentAmount          *float64                                                            `json:"commitmentAmount,omitempty"`
+	EffectiveCommitmentAmount *float64                                                            `json:"effectiveCommitmentAmount,omitempty"`
+	Id                        *string                                                             `json:"id,omitempty"`
+	InstanceTypesUsage        *CastaiInventoryV1beta1InstanceTypeBasedUsage                       `json:"instanceTypesUsage,omitempty"`
+	ProvisioningState         *string                                                             `json:"provisioningState,omitempty"`
+	Scope                     *CastaiInventoryV1beta1AzureSavingsPlanContextAzureSavingsPlanScope `json:"scope,omitempty"`
+	ScopeManagementGroup      *string                                                             `json:"scopeManagementGroup,omitempty"`
+	ScopeResourceGroup        *string                                                             `json:"scopeResourceGroup,omitempty"`
+	ScopeSubscription         *string                                                             `json:"scopeSubscription,omitempty"`
+	ScopeTenant               *string                                                             `json:"scopeTenant,omitempty"`
+	Term                      *CastaiInventoryV1beta1AzureSavingsPlanContextAzureSavingsPlanTerm  `json:"term,omitempty"`
 }
 
 // CastaiInventoryV1beta1AzureSavingsPlanContextAzureSavingsPlanScope defines model for castai.inventory.v1beta1.AzureSavingsPlanContext.AzureSavingsPlanScope.
@@ -2488,6 +2489,9 @@ type CastaiInventoryV1beta1ListZonesResponse struct {
 
 // CastaiInventoryV1beta1NetworkInfo Describes the network settings for the instance type.
 type CastaiInventoryV1beta1NetworkInfo struct {
+	// AcceleratedNetworkingSupported Indicates whether the Azure instance type supports Accelerated Networking. Azure only.
+	AcceleratedNetworkingSupported *bool `json:"acceleratedNetworkingSupported"`
+
 	// BaseBandwidthMbps Base bandwidth in Mbps.
 	BaseBandwidthMbps *int32 `json:"baseBandwidthMbps,omitempty"`
 
@@ -3816,6 +3820,9 @@ type CastaiUsersV1beta1UserOrganization struct {
 
 	// Name name of the organization.
 	Name string `json:"name"`
+
+	// OrganizationMember Whether the user is member of the organization.
+	OrganizationMember *bool `json:"organizationMember,omitempty"`
 
 	// ParentId ID of the parent organization. This is beta feature not available for all organizations.
 	ParentId *string `json:"parentId"`
@@ -8128,6 +8135,9 @@ type ScheduledrebalancingV1AggressiveModeConfig struct {
 	// WARNING: When true, such pods might not restart, since they have no controller to do it.
 	IgnoreProblemPodsWithoutController *bool `json:"ignoreProblemPodsWithoutController,omitempty"`
 
+	// IgnoreProblemPreventedDrainPods Pods annotated with rebalancing.cast.ai/prevented-drain=true will not prevent the Rebalancer from deleting a node on which they run.
+	IgnoreProblemPreventedDrainPods *bool `json:"ignoreProblemPreventedDrainPods,omitempty"`
+
 	// IgnoreProblemRemovalDisabledPods Pods that are marked with "removal disabled" will not prevent the Rebalancer from deleting a node on which they run.
 	// WARNING: When true, such pods will be evicted and disrupted.
 	IgnoreProblemRemovalDisabledPods *bool `json:"ignoreProblemRemovalDisabledPods,omitempty"`
@@ -8138,6 +8148,16 @@ type ScheduledrebalancingV1DeleteRebalancingJobResponse = map[string]interface{}
 
 // ScheduledrebalancingV1DeleteRebalancingScheduleResponse defines model for scheduledrebalancing.v1.DeleteRebalancingScheduleResponse.
 type ScheduledrebalancingV1DeleteRebalancingScheduleResponse = map[string]interface{}
+
+// ScheduledrebalancingV1DrainFailureConfig Defines configuration for drain failure recovery behavior.
+type ScheduledrebalancingV1DrainFailureConfig struct {
+	// DisableUncordon When true, drain-failed nodes will NOT be automatically uncordoned.
+	DisableUncordon *bool `json:"disableUncordon"`
+
+	// UncordonAfterSeconds Time in seconds after which a drain-failed node should be automatically uncordoned.
+	// Clamped to [3600, 259200] (1h–72h). Defaults to 10800 (3h).
+	UncordonAfterSeconds *int32 `json:"uncordonAfterSeconds,omitempty"`
+}
 
 // ScheduledrebalancingV1ExecutionConditions Defines the conditions which must be met in order to fully execute the plan.
 type ScheduledrebalancingV1ExecutionConditions struct {
@@ -8235,6 +8255,9 @@ type ScheduledrebalancingV1RebalancingOptions struct {
 	// AggressiveMode When enabled will also consider rebalancing problematic pods (pods without controller, job pods, pods with removal-disabled annotation).
 	AggressiveMode       *bool                                       `json:"aggressiveMode"`
 	AggressiveModeConfig *ScheduledrebalancingV1AggressiveModeConfig `json:"aggressiveModeConfig,omitempty"`
+
+	// DrainFailureConfig Defines configuration for drain failure recovery behavior.
+	DrainFailureConfig *ScheduledrebalancingV1DrainFailureConfig `json:"drainFailureConfig,omitempty"`
 
 	// EvictGracefully Defines whether the nodes that failed to get drained until a predefined timeout, will be kept with a
 	// rebalancing.cast.ai/status=drain-failed annotation instead of forcefully drained.
@@ -9195,6 +9218,13 @@ type WorkloadoptimizationV1InitiatedBy struct {
 	Email *string `json:"email"`
 	Id    string  `json:"id"`
 	Name  *string `json:"name"`
+}
+
+// WorkloadoptimizationV1JVMContainerMetrics defines model for workloadoptimization.v1.JVMContainerMetrics.
+type WorkloadoptimizationV1JVMContainerMetrics struct {
+	HeapCommittedBytes   *[]WorkloadoptimizationV1TimeSeriesMetric `json:"heapCommittedBytes,omitempty"`
+	HeapUsedBytes        *[]WorkloadoptimizationV1TimeSeriesMetric `json:"heapUsedBytes,omitempty"`
+	RecommendedHeapBytes *[]WorkloadoptimizationV1TimeSeriesMetric `json:"recommendedHeapBytes,omitempty"`
 }
 
 // WorkloadoptimizationV1JVMMemorySettings defines model for workloadoptimization.v1.JVMMemorySettings.
@@ -10360,6 +10390,7 @@ type WorkloadoptimizationV1WorkloadMetricContainer struct {
 	CpuCoresPredictionsAggregated *WorkloadoptimizationV1AggregatedPredictionMetrics `json:"cpuCoresPredictionsAggregated,omitempty"`
 	CpuStallPct                   *[]WorkloadoptimizationV1ResourceMetrics           `json:"cpuStallPct,omitempty"`
 	CpuStallPctAggregated         *WorkloadoptimizationV1AggregatedCPUStallMetrics   `json:"cpuStallPctAggregated,omitempty"`
+	Jvm                           *WorkloadoptimizationV1JVMContainerMetrics         `json:"jvm,omitempty"`
 	MemoryGib                     []WorkloadoptimizationV1ResourceMetrics            `json:"memoryGib"`
 	MemoryGibAggregated           WorkloadoptimizationV1AggregatedMetrics            `json:"memoryGibAggregated"`
 	Name                          string                                             `json:"name"`
