@@ -129,7 +129,8 @@ func TestResourceEnterpriseRoleBindingCreateContext(t *testing.T) {
 						Name:        "engineering-viewer",
 						Description: lo.ToPtr("Engineering viewer role binding"),
 						Definition: organization_management.RoleBindingDefinition{
-							RoleId: lo.ToPtr(roleID),
+							RoleId:              lo.ToPtr(roleID),
+							ChildOrganizationId: lo.ToPtr(organizationID1),
 							Subjects: &[]organization_management.Subject{
 								{
 									User: &organization_management.UserSubject{
@@ -510,6 +511,121 @@ func TestResourceEnterpriseRoleBindingCreateContext(t *testing.T) {
 		r.NotNil(result)
 		r.True(result.HasError())
 		r.Contains(result[0].Summary, "at least one scope (organization or cluster) must be defined")
+	})
+
+	t.Run("when organization_id differs from enterprise_id then ChildOrganizationId is set in definition", func(t *testing.T) {
+		t.Parallel()
+		r := require.New(t)
+		mockClient := mockOrganizationManagement.NewMockClientWithResponsesInterface(gomock.NewController(t))
+
+		ctx := context.Background()
+		provider := &ProviderConfig{
+			organizationManagementClient: mockClient,
+		}
+
+		enterpriseID := uuid.NewString()
+		childOrgID := uuid.NewString() // different from enterpriseID
+		roleBindingID := uuid.NewString()
+		roleID := uuid.NewString()
+		userID := uuid.NewString()
+
+		expectedCreateRequest := organization_management.BatchCreateEnterpriseRoleBindingsRequest{
+			EnterpriseId: enterpriseID,
+			Requests: []organization_management.BatchCreateEnterpriseRoleBindingsRequestCreateRoleBindingRequest{
+				{
+					OrganizationId: childOrgID,
+					RoleBinding: organization_management.BatchCreateEnterpriseRoleBindingsRequestRoleBinding{
+						Name:        "child-org-binding",
+						Description: lo.ToPtr(""),
+						Definition: organization_management.RoleBindingDefinition{
+							RoleId:              lo.ToPtr(roleID),
+							ChildOrganizationId: lo.ToPtr(childOrgID),
+							Subjects: &[]organization_management.Subject{
+								{
+									User: &organization_management.UserSubject{Id: userID},
+								},
+							},
+							Scopes: &[]organization_management.Scope{
+								{
+									Organization: &organization_management.OrganizationScope{Id: childOrgID},
+								},
+							},
+						},
+					},
+				},
+			},
+		}
+
+		mockClient.EXPECT().
+			EnterpriseAPIBatchCreateEnterpriseRoleBindingsWithResponse(gomock.Any(), enterpriseID, expectedCreateRequest).
+			Return(&organization_management.EnterpriseAPIBatchCreateEnterpriseRoleBindingsResponse{
+				Body:         nil,
+				HTTPResponse: &http.Response{StatusCode: http.StatusOK},
+				JSON200: &organization_management.BatchCreateEnterpriseRoleBindingsResponse{
+					RoleBindings: &[]organization_management.RoleBinding{
+						{
+							Id:             lo.ToPtr(roleBindingID),
+							Name:           lo.ToPtr("child-org-binding"),
+							OrganizationId: lo.ToPtr(childOrgID),
+							Definition: &organization_management.RoleBindingDefinition{
+								RoleId:              lo.ToPtr(roleID),
+								ChildOrganizationId: lo.ToPtr(childOrgID),
+								Subjects: &[]organization_management.Subject{
+									{User: &organization_management.UserSubject{Id: userID}},
+								},
+								Scopes: &[]organization_management.Scope{
+									{Organization: &organization_management.OrganizationScope{Id: childOrgID}},
+								},
+							},
+						},
+					},
+				},
+			}, nil)
+
+		stateValue := cty.ObjectVal(map[string]cty.Value{
+			FieldEnterpriseRoleBindingEnterpriseID:   cty.StringVal(enterpriseID),
+			FieldEnterpriseRoleBindingOrganizationID: cty.StringVal(childOrgID),
+			FieldEnterpriseRoleBindingName:           cty.StringVal("child-org-binding"),
+			FieldEnterpriseRoleBindingDescription:    cty.StringVal(""),
+			FieldEnterpriseRoleBindingRoleID:         cty.StringVal(roleID),
+			FieldEnterpriseRoleBindingSubjects: cty.ListVal([]cty.Value{
+				cty.ObjectVal(map[string]cty.Value{
+					FieldEnterpriseRoleBindingSubjectUser: cty.ListVal([]cty.Value{
+						cty.ObjectVal(map[string]cty.Value{
+							FieldEnterpriseRoleBindingSubjectID: cty.StringVal(userID),
+						}),
+					}),
+					FieldEnterpriseRoleBindingSubjectServiceAccount: cty.ListValEmpty(cty.Object(map[string]cty.Type{
+						FieldEnterpriseRoleBindingSubjectID: cty.String,
+					})),
+					FieldEnterpriseRoleBindingSubjectGroup: cty.ListValEmpty(cty.Object(map[string]cty.Type{
+						FieldEnterpriseRoleBindingSubjectID: cty.String,
+					})),
+				}),
+			}),
+			FieldEnterpriseRoleBindingScopes: cty.ListVal([]cty.Value{
+				cty.ObjectVal(map[string]cty.Value{
+					FieldEnterpriseRoleBindingScopeOrganization: cty.ListVal([]cty.Value{
+						cty.ObjectVal(map[string]cty.Value{
+							FieldEnterpriseRoleBindingScopeID: cty.StringVal(childOrgID),
+						}),
+					}),
+					FieldEnterpriseRoleBindingScopeCluster: cty.ListValEmpty(cty.Object(map[string]cty.Type{
+						FieldEnterpriseRoleBindingScopeID: cty.String,
+					})),
+				}),
+			}),
+		})
+		state := terraform.NewInstanceStateShimmedFromValue(stateValue, 0)
+
+		resource := resourceEnterpriseRoleBinding()
+		data := resource.Data(state)
+
+		result := resource.CreateContext(ctx, data, provider)
+
+		r.Nil(result)
+		r.False(result.HasError())
+		r.Equal(roleBindingID, data.Id())
 	})
 }
 
@@ -982,7 +1098,8 @@ func TestResourceEnterpriseRoleBindingUpdateContext(t *testing.T) {
 					OrganizationId: organizationID,
 					Description:    lo.ToPtr("Updated description"),
 					Definition: organization_management.RoleBindingDefinition{
-						RoleId: lo.ToPtr(newRoleID),
+						RoleId:              lo.ToPtr(newRoleID),
+						ChildOrganizationId: lo.ToPtr(organizationID),
 						Subjects: &[]organization_management.Subject{
 							{
 								User: &organization_management.UserSubject{
@@ -1238,7 +1355,8 @@ func TestResourceEnterpriseRoleBindingUpdateContext(t *testing.T) {
 					OrganizationId: organizationID,
 					Description:    lo.ToPtr("Test description"),
 					Definition: organization_management.RoleBindingDefinition{
-						RoleId: lo.ToPtr(roleID),
+						RoleId:              lo.ToPtr(roleID),
+						ChildOrganizationId: lo.ToPtr(organizationID),
 						Subjects: &[]organization_management.Subject{
 							{
 								User: &organization_management.UserSubject{
@@ -1419,7 +1537,8 @@ func TestResourceEnterpriseRoleBindingUpdateContext(t *testing.T) {
 					OrganizationId: organizationID,
 					Description:    lo.ToPtr("Test description"),
 					Definition: organization_management.RoleBindingDefinition{
-						RoleId: lo.ToPtr(roleID),
+						RoleId:              lo.ToPtr(roleID),
+						ChildOrganizationId: lo.ToPtr(organizationID),
 						Subjects: &[]organization_management.Subject{
 							{
 								User: &organization_management.UserSubject{
