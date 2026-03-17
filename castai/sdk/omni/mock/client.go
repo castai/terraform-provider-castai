@@ -96,9 +96,9 @@ func (mr *MockClientInterfaceMockRecorder) ClustersAPIDeleteCluster(ctx, organiz
 }
 
 // ClustersAPIGetCluster mocks base method.
-func (m *MockClientInterface) ClustersAPIGetCluster(ctx context.Context, organizationId, id string, reqEditors ...omni.RequestEditorFn) (*http.Response, error) {
+func (m *MockClientInterface) ClustersAPIGetCluster(ctx context.Context, organizationId, id string, params *omni.ClustersAPIGetClusterParams, reqEditors ...omni.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
-	varargs := []interface{}{ctx, organizationId, id}
+	varargs := []interface{}{ctx, organizationId, id, params}
 	for _, a := range reqEditors {
 		varargs = append(varargs, a)
 	}
@@ -109,9 +109,9 @@ func (m *MockClientInterface) ClustersAPIGetCluster(ctx context.Context, organiz
 }
 
 // ClustersAPIGetCluster indicates an expected call of ClustersAPIGetCluster.
-func (mr *MockClientInterfaceMockRecorder) ClustersAPIGetCluster(ctx, organizationId, id interface{}, reqEditors ...interface{}) *gomock.Call {
+func (mr *MockClientInterfaceMockRecorder) ClustersAPIGetCluster(ctx, organizationId, id, params interface{}, reqEditors ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, organizationId, id}, reqEditors...)
+	varargs := append([]interface{}{ctx, organizationId, id, params}, reqEditors...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ClustersAPIGetCluster", reflect.TypeOf((*MockClientInterface)(nil).ClustersAPIGetCluster), varargs...)
 }
 
@@ -514,9 +514,9 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) ClustersAPIDeleteCluster
 }
 
 // ClustersAPIGetCluster mocks base method.
-func (m *MockClientWithResponsesInterface) ClustersAPIGetCluster(ctx context.Context, organizationId, id string, reqEditors ...omni.RequestEditorFn) (*http.Response, error) {
+func (m *MockClientWithResponsesInterface) ClustersAPIGetCluster(ctx context.Context, organizationId, id string, params *omni.ClustersAPIGetClusterParams, reqEditors ...omni.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
-	varargs := []interface{}{ctx, organizationId, id}
+	varargs := []interface{}{ctx, organizationId, id, params}
 	for _, a := range reqEditors {
 		varargs = append(varargs, a)
 	}
@@ -527,25 +527,25 @@ func (m *MockClientWithResponsesInterface) ClustersAPIGetCluster(ctx context.Con
 }
 
 // ClustersAPIGetCluster indicates an expected call of ClustersAPIGetCluster.
-func (mr *MockClientWithResponsesInterfaceMockRecorder) ClustersAPIGetCluster(ctx, organizationId, id interface{}, reqEditors ...interface{}) *gomock.Call {
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ClustersAPIGetCluster(ctx, organizationId, id, params interface{}, reqEditors ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, organizationId, id}, reqEditors...)
+	varargs := append([]interface{}{ctx, organizationId, id, params}, reqEditors...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ClustersAPIGetCluster", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ClustersAPIGetCluster), varargs...)
 }
 
 // ClustersAPIGetClusterWithResponse mocks base method.
-func (m *MockClientWithResponsesInterface) ClustersAPIGetClusterWithResponse(ctx context.Context, organizationId, id string) (*omni.ClustersAPIGetClusterResponse, error) {
+func (m *MockClientWithResponsesInterface) ClustersAPIGetClusterWithResponse(ctx context.Context, organizationId, id string, params *omni.ClustersAPIGetClusterParams) (*omni.ClustersAPIGetClusterResponse, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ClustersAPIGetClusterWithResponse", ctx, organizationId, id)
+	ret := m.ctrl.Call(m, "ClustersAPIGetClusterWithResponse", ctx, organizationId, id, params)
 	ret0, _ := ret[0].(*omni.ClustersAPIGetClusterResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // ClustersAPIGetClusterWithResponse indicates an expected call of ClustersAPIGetClusterWithResponse.
-func (mr *MockClientWithResponsesInterfaceMockRecorder) ClustersAPIGetClusterWithResponse(ctx, organizationId, id interface{}) *gomock.Call {
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ClustersAPIGetClusterWithResponse(ctx, organizationId, id, params interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ClustersAPIGetClusterWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ClustersAPIGetClusterWithResponse), ctx, organizationId, id)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ClustersAPIGetClusterWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ClustersAPIGetClusterWithResponse), ctx, organizationId, id, params)
 }
 
 // ClustersAPIListClusters mocks base method.

@@ -124,7 +124,7 @@ func (r *omniClusterResource) Read(ctx context.Context, req resource.ReadRequest
 	organizationID := state.OrganizationID.ValueString()
 	clusterID := state.ID.ValueString()
 
-	apiResp, err := client.ClustersAPIGetClusterWithResponse(ctx, organizationID, clusterID)
+	apiResp, err := client.ClustersAPIGetClusterWithResponse(ctx, organizationID, clusterID, nil)
 	if err != nil {
 		resp.Diagnostics.AddError("Failed to read omni cluster", err.Error())
 		return

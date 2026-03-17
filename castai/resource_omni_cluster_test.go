@@ -45,7 +45,7 @@ func testAccCheckOmniClusterDestroy(s *terraform.State) error {
 		organizationID := rs.Primary.Attributes["organization_id"]
 		clusterID := rs.Primary.ID
 
-		response, err := client.ClustersAPIGetClusterWithResponse(ctx, organizationID, clusterID)
+		response, err := client.ClustersAPIGetClusterWithResponse(ctx, organizationID, clusterID, nil)
 		if err != nil {
 			return err
 		}
