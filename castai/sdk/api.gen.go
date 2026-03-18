@@ -867,6 +867,7 @@ const (
 	ERRORCUSTOMWORKLOADCONTAINERSMISMATCH WorkloadoptimizationV1RecommendationErrorType = "ERROR_CUSTOM_WORKLOAD_CONTAINERS_MISMATCH"
 	ERRORCUSTOMWORKLOADINVALIDNAME        WorkloadoptimizationV1RecommendationErrorType = "ERROR_CUSTOM_WORKLOAD_INVALID_NAME"
 	ERRORDEPLOYFAILED                     WorkloadoptimizationV1RecommendationErrorType = "ERROR_DEPLOY_FAILED"
+	ERRORIMMEDIATEAPPLYBLOCKED            WorkloadoptimizationV1RecommendationErrorType = "ERROR_IMMEDIATE_APPLY_BLOCKED"
 	ERRORRECOMMENDATIONGENERATION         WorkloadoptimizationV1RecommendationErrorType = "ERROR_RECOMMENDATION_GENERATION"
 	ERRORUNKNOWN                          WorkloadoptimizationV1RecommendationErrorType = "ERROR_UNKNOWN"
 )
@@ -2324,10 +2325,13 @@ type CastaiInventoryV1beta1InstanceType struct {
 	CpuPrice *string `json:"cpuPrice,omitempty"`
 
 	// CreatedAt CreatedAt is the timestamp of the creation of this instance type object.
-	CreatedAt       *time.Time                                     `json:"createdAt,omitempty"`
-	CustomInstance  *bool                                          `json:"customInstance,omitempty"`
-	FlexibilityInfo *CastaiInventoryV1beta1InstanceFlexibilityInfo `json:"flexibilityInfo,omitempty"`
-	GpuInfo         *CastaiInventoryV1beta1GPUInfo                 `json:"gpuInfo,omitempty"`
+	CreatedAt      *time.Time `json:"createdAt,omitempty"`
+	CustomInstance *bool      `json:"customInstance,omitempty"`
+
+	// DiskControllerTypes Specifies the supported disk controller types (e.g. "NVMe", "SCSI"). Azure specific.
+	DiskControllerTypes *[]string                                      `json:"diskControllerTypes,omitempty"`
+	FlexibilityInfo     *CastaiInventoryV1beta1InstanceFlexibilityInfo `json:"flexibilityInfo,omitempty"`
+	GpuInfo             *CastaiInventoryV1beta1GPUInfo                 `json:"gpuInfo,omitempty"`
 
 	// HypervGenerations Specifies supported hypervisor generations (e.g. "v1", "v2"). Azure specific.
 	HypervGenerations *[]string `json:"hypervGenerations,omitempty"`
@@ -2360,7 +2364,10 @@ type CastaiInventoryV1beta1InstanceType struct {
 	RamPrice *string `json:"ramPrice,omitempty"`
 
 	// Region Region of the instance type. This value is provider specific.
-	Region          *string                                    `json:"region,omitempty"`
+	Region *string `json:"region,omitempty"`
+
+	// SkuTier Specifies the VM SKU tier (e.g. "Standard", "Basic"). Azure specific.
+	SkuTier         *string                                    `json:"skuTier"`
 	SpotReliability *CastaiInventoryV1beta1InstanceReliability `json:"spotReliability,omitempty"`
 
 	// StorageInfo StorageInfo describes the available local volumes for an instance type.
@@ -9587,10 +9594,14 @@ type WorkloadoptimizationV1RecommendationError struct {
 	Message string `json:"message"`
 
 	// Type RecommendationErrorType explains why the recommendation has failed to apply.
+	//
+	//  - ERROR_IMMEDIATE_APPLY_BLOCKED: Workload-autoscaler has blocked immediate applies due to too many consecutive failed attempts (circuit breaker).
 	Type WorkloadoptimizationV1RecommendationErrorType `json:"type"`
 }
 
 // WorkloadoptimizationV1RecommendationErrorType RecommendationErrorType explains why the recommendation has failed to apply.
+//
+//   - ERROR_IMMEDIATE_APPLY_BLOCKED: Workload-autoscaler has blocked immediate applies due to too many consecutive failed attempts (circuit breaker).
 type WorkloadoptimizationV1RecommendationErrorType string
 
 // WorkloadoptimizationV1RecommendationEvent defines model for workloadoptimization.v1.RecommendationEvent.
