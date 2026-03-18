@@ -376,3 +376,55 @@ func Test_NodeConfiguration_UpdateContext(t *testing.T) {
 		})
 	}
 }
+
+func TestToAKSSConfig_EnableEncryptionAtHost(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    any
+		expected any
+	}{
+		{name: "true", input: true, expected: true},
+		{name: "false", input: false, expected: false},
+		{name: "nil", input: nil, expected: nil},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			out := toAKSSConfig(map[string]any{
+				FieldNodeConfigurationAKSEncryptionAtHost: tt.input,
+			})
+
+			if tt.expected == nil {
+				require.Nil(t, out.EnableEncryptionAtHost)
+			} else {
+				require.Equal(t, tt.expected, *out.EnableEncryptionAtHost)
+			}
+		})
+	}
+
+	t.Run("empty", func(t *testing.T) {
+		out := toAKSSConfig(map[string]any{})
+
+		require.Nil(t, out.EnableEncryptionAtHost)
+	})
+}
+
+func TestFlattenAKSConfig_EnableEncryptionAtHost(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    *bool
+		expected any
+	}{
+		{name: "true", input: toPtr(true), expected: true},
+		{name: "false", input: toPtr(false), expected: false},
+		{name: "nil", input: nil, expected: nil},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := flattenAKSConfig(&sdk.NodeconfigV1AKSConfig{
+				EnableEncryptionAtHost: tt.input,
+			})
+			require.Len(t, result, 1)
+			require.Equal(t, tt.expected, result[0][FieldNodeConfigurationAKSEncryptionAtHost])
+		})
+	}
+}
