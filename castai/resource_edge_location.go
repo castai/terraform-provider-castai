@@ -383,7 +383,7 @@ func (r *edgeLocationResource) Create(ctx context.Context, req resource.CreateRe
 
 	createReq := omni.EdgeLocationsAPICreateEdgeLocationJSONRequestBody{
 		Name:   plan.Name.ValueString(),
-		Region: plan.Region.ValueString(),
+		Region: plan.Region.ValueStringPointer(),
 		Zones:  lo.ToPtr(r.toZones(plan.Zones)),
 	}
 
@@ -463,7 +463,9 @@ func (r *edgeLocationResource) Read(ctx context.Context, req resource.ReadReques
 
 	edgeLocation := apiResp.JSON200
 
-	state.Region = types.StringValue(edgeLocation.Region)
+	if edgeLocation.Region != nil {
+		state.Region = types.StringValue(*edgeLocation.Region)
+	}
 	state.Name = types.StringValue(edgeLocation.Name)
 	state.Description = types.StringNull()
 	if edgeLocation.Description != nil {

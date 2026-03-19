@@ -112,6 +112,9 @@ type ClientInterface interface {
 
 	EdgeLocationsAPIUpdateEdgeLocation(ctx context.Context, organizationId string, clusterId string, id string, params *EdgeLocationsAPIUpdateEdgeLocationParams, body EdgeLocationsAPIUpdateEdgeLocationJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// EdgeLocationsAPIGetEdgeInitdScript request
+	EdgeLocationsAPIGetEdgeInitdScript(ctx context.Context, organizationId string, clusterId string, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// EdgeLocationsAPIOffboardEdgeLocation request
 	EdgeLocationsAPIOffboardEdgeLocation(ctx context.Context, organizationId string, clusterId string, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -231,6 +234,18 @@ func (c *Client) EdgeLocationsAPIUpdateEdgeLocationWithBody(ctx context.Context,
 
 func (c *Client) EdgeLocationsAPIUpdateEdgeLocation(ctx context.Context, organizationId string, clusterId string, id string, params *EdgeLocationsAPIUpdateEdgeLocationParams, body EdgeLocationsAPIUpdateEdgeLocationJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewEdgeLocationsAPIUpdateEdgeLocationRequest(c.Server, organizationId, clusterId, id, params, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) EdgeLocationsAPIGetEdgeInitdScript(ctx context.Context, organizationId string, clusterId string, id string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewEdgeLocationsAPIGetEdgeInitdScriptRequest(c.Server, organizationId, clusterId, id)
 	if err != nil {
 		return nil, err
 	}
@@ -769,6 +784,54 @@ func NewEdgeLocationsAPIUpdateEdgeLocationRequestWithBody(server string, organiz
 	}
 
 	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewEdgeLocationsAPIGetEdgeInitdScriptRequest generates requests for EdgeLocationsAPIGetEdgeInitdScript
+func NewEdgeLocationsAPIGetEdgeInitdScriptRequest(server string, organizationId string, clusterId string, id string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "organizationId", runtime.ParamLocationPath, organizationId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "clusterId", runtime.ParamLocationPath, clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam2 string
+
+	pathParam2, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/omni-provisioner/v1beta/organizations/%s/clusters/%s/edge-locations/%s:edgeInitdScript", pathParam0, pathParam1, pathParam2)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
 
 	return req, nil
 }
@@ -1312,6 +1375,9 @@ type ClientWithResponsesInterface interface {
 
 	EdgeLocationsAPIUpdateEdgeLocationWithResponse(ctx context.Context, organizationId string, clusterId string, id string, params *EdgeLocationsAPIUpdateEdgeLocationParams, body EdgeLocationsAPIUpdateEdgeLocationJSONRequestBody) (*EdgeLocationsAPIUpdateEdgeLocationResponse, error)
 
+	// EdgeLocationsAPIGetEdgeInitdScript request
+	EdgeLocationsAPIGetEdgeInitdScriptWithResponse(ctx context.Context, organizationId string, clusterId string, id string) (*EdgeLocationsAPIGetEdgeInitdScriptResponse, error)
+
 	// EdgeLocationsAPIOffboardEdgeLocation request
 	EdgeLocationsAPIOffboardEdgeLocationWithResponse(ctx context.Context, organizationId string, clusterId string, id string) (*EdgeLocationsAPIOffboardEdgeLocationResponse, error)
 
@@ -1534,6 +1600,36 @@ func (r EdgeLocationsAPIUpdateEdgeLocationResponse) StatusCode() int {
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
 func (r EdgeLocationsAPIUpdateEdgeLocationResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type EdgeLocationsAPIGetEdgeInitdScriptResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSONDefault  *Status
+}
+
+// Status returns HTTPResponse.Status
+func (r EdgeLocationsAPIGetEdgeInitdScriptResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r EdgeLocationsAPIGetEdgeInitdScriptResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r EdgeLocationsAPIGetEdgeInitdScriptResponse) GetBody() []byte {
 	return r.Body
 }
 
@@ -1915,6 +2011,15 @@ func (c *ClientWithResponses) EdgeLocationsAPIUpdateEdgeLocationWithResponse(ctx
 	return ParseEdgeLocationsAPIUpdateEdgeLocationResponse(rsp)
 }
 
+// EdgeLocationsAPIGetEdgeInitdScriptWithResponse request returning *EdgeLocationsAPIGetEdgeInitdScriptResponse
+func (c *ClientWithResponses) EdgeLocationsAPIGetEdgeInitdScriptWithResponse(ctx context.Context, organizationId string, clusterId string, id string) (*EdgeLocationsAPIGetEdgeInitdScriptResponse, error) {
+	rsp, err := c.EdgeLocationsAPIGetEdgeInitdScript(ctx, organizationId, clusterId, id)
+	if err != nil {
+		return nil, err
+	}
+	return ParseEdgeLocationsAPIGetEdgeInitdScriptResponse(rsp)
+}
+
 // EdgeLocationsAPIOffboardEdgeLocationWithResponse request returning *EdgeLocationsAPIOffboardEdgeLocationResponse
 func (c *ClientWithResponses) EdgeLocationsAPIOffboardEdgeLocationWithResponse(ctx context.Context, organizationId string, clusterId string, id string) (*EdgeLocationsAPIOffboardEdgeLocationResponse, error) {
 	rsp, err := c.EdgeLocationsAPIOffboardEdgeLocation(ctx, organizationId, clusterId, id)
@@ -2192,6 +2297,32 @@ func ParseEdgeLocationsAPIUpdateEdgeLocationResponse(rsp *http.Response) (*EdgeL
 		}
 		response.JSON200 = &dest
 
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
+		var dest Status
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSONDefault = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseEdgeLocationsAPIGetEdgeInitdScriptResponse parses an HTTP response from a EdgeLocationsAPIGetEdgeInitdScriptWithResponse call
+func ParseEdgeLocationsAPIGetEdgeInitdScriptResponse(rsp *http.Response) (*EdgeLocationsAPIGetEdgeInitdScriptResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &EdgeLocationsAPIGetEdgeInitdScriptResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
 		var dest Status
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
