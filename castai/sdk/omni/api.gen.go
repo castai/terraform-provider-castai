@@ -177,6 +177,9 @@ type Condition struct {
 	Type *string `json:"type,omitempty"`
 }
 
+// CustomProviderParam Custom cloud provider params.
+type CustomProviderParam = map[string]interface{}
+
 // EdgeLocation Message to represent edge location.
 type EdgeLocation struct {
 	// Aws AWS specific parameters.
@@ -187,6 +190,9 @@ type EdgeLocation struct {
 
 	// CreateTime The creation timestamp.
 	CreateTime *time.Time `json:"createTime,omitempty"`
+
+	// Custom Custom cloud parameters.
+	Custom *CustomProviderParam `json:"custom,omitempty"`
 
 	// DeleteTime The deletion timestamp.
 	DeleteTime *time.Time `json:"deleteTime,omitempty"`
@@ -212,7 +218,7 @@ type EdgeLocation struct {
 	Oci *OCIParam `json:"oci,omitempty"`
 
 	// Region The region of edge location.
-	Region string `json:"region"`
+	Region *string `json:"region,omitempty"`
 
 	// State The state of the edge location on API level.
 	State *EdgeLocationState `json:"state,omitempty"`
@@ -234,6 +240,9 @@ type EdgeLocationState string
 type EdgeLocationUpdate struct {
 	// Aws AWS specific parameters.
 	Aws *AWSParam `json:"aws,omitempty"`
+
+	// Custom Custom cloud parameters.
+	Custom *CustomProviderParam `json:"custom,omitempty"`
 
 	// Description The description of the edge location.
 	Description *string `json:"description,omitempty"`
@@ -351,8 +360,14 @@ type OCIParamCredentials struct {
 
 // OCIParamNetworking Networking configuration of OCI edge location.
 type OCIParamNetworking struct {
+	// SecurityGroupId The id of the security group to be used in the selected region.
+	SecurityGroupId *string `json:"securityGroupId,omitempty"`
+
 	// SubnetId OCI subnet id of edge location.
 	SubnetId string `json:"subnetId"`
+
+	// VcnCidr VCN IPv4 CIDR block.
+	VcnCidr *string `json:"vcnCidr,omitempty"`
 
 	// VcnId OCI virtual cloud network id of edge location.
 	VcnId string `json:"vcnId"`
