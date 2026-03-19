@@ -736,7 +736,6 @@ const (
 	WorkloadoptimizationV1EventTypeEVENTTYPEFAILEDHELMTESTHOOK         WorkloadoptimizationV1EventType = "EVENT_TYPE_FAILED_HELM_TEST_HOOK"
 	WorkloadoptimizationV1EventTypeEVENTTYPEHPAALMOSTMAXEDOUT          WorkloadoptimizationV1EventType = "EVENT_TYPE_HPA_ALMOST_MAXED_OUT"
 	WorkloadoptimizationV1EventTypeEVENTTYPEHPAMAXEDOUT                WorkloadoptimizationV1EventType = "EVENT_TYPE_HPA_MAXED_OUT"
-	WorkloadoptimizationV1EventTypeEVENTTYPEINFINITESCALING            WorkloadoptimizationV1EventType = "EVENT_TYPE_INFINITE_SCALING"
 	WorkloadoptimizationV1EventTypeEVENTTYPEINVALID                    WorkloadoptimizationV1EventType = "EVENT_TYPE_INVALID"
 	WorkloadoptimizationV1EventTypeEVENTTYPEMEMORYPRESSUREEVICTION     WorkloadoptimizationV1EventType = "EVENT_TYPE_MEMORY_PRESSURE_EVICTION"
 	WorkloadoptimizationV1EventTypeEVENTTYPENATIVEVPASTATECHANGED      WorkloadoptimizationV1EventType = "EVENT_TYPE_NATIVE_VPA_STATE_CHANGED"
@@ -752,6 +751,7 @@ const (
 	WorkloadoptimizationV1EventTypeEVENTTYPESURGE                      WorkloadoptimizationV1EventType = "EVENT_TYPE_SURGE"
 	WorkloadoptimizationV1EventTypeEVENTTYPESYSTEMOVERRIDERESET        WorkloadoptimizationV1EventType = "EVENT_TYPE_SYSTEM_OVERRIDE_RESET"
 	WorkloadoptimizationV1EventTypeEVENTTYPESYSTEMOVERRIDETRIGGERED    WorkloadoptimizationV1EventType = "EVENT_TYPE_SYSTEM_OVERRIDE_TRIGGERED"
+	WorkloadoptimizationV1EventTypeEVENTTYPEUNBOUNDMEMORYGROWTH        WorkloadoptimizationV1EventType = "EVENT_TYPE_UNBOUND_MEMORY_GROWTH"
 )
 
 // Defines values for WorkloadoptimizationV1GetAgentStatusResponseAgentStatus.
@@ -984,6 +984,7 @@ const (
 // Defines values for WorkloadoptimizationV1SystemOverrideOrigin.
 const (
 	SYSTEMOVERRIDEORIGINCONTINUOUSOOMKILLED WorkloadoptimizationV1SystemOverrideOrigin = "SYSTEM_OVERRIDE_ORIGIN_CONTINUOUS_OOM_KILLED"
+	SYSTEMOVERRIDEORIGINUNBOUNDMEMORYGROWTH WorkloadoptimizationV1SystemOverrideOrigin = "SYSTEM_OVERRIDE_ORIGIN_UNBOUND_MEMORY_GROWTH"
 	SYSTEMOVERRIDEORIGINUNSPECIFIED         WorkloadoptimizationV1SystemOverrideOrigin = "SYSTEM_OVERRIDE_ORIGIN_UNSPECIFIED"
 )
 
@@ -1232,7 +1233,6 @@ const (
 	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPEFAILEDHELMTESTHOOK         WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_FAILED_HELM_TEST_HOOK"
 	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPEHPAALMOSTMAXEDOUT          WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_HPA_ALMOST_MAXED_OUT"
 	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPEHPAMAXEDOUT                WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_HPA_MAXED_OUT"
-	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPEINFINITESCALING            WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_INFINITE_SCALING"
 	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPEINVALID                    WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_INVALID"
 	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPEMEMORYPRESSUREEVICTION     WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_MEMORY_PRESSURE_EVICTION"
 	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPENATIVEVPASTATECHANGED      WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_NATIVE_VPA_STATE_CHANGED"
@@ -1248,6 +1248,7 @@ const (
 	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPESURGE                      WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_SURGE"
 	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPESYSTEMOVERRIDERESET        WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_SYSTEM_OVERRIDE_RESET"
 	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPESYSTEMOVERRIDETRIGGERED    WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_SYSTEM_OVERRIDE_TRIGGERED"
+	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPEUNBOUNDMEMORYGROWTH        WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_UNBOUND_MEMORY_GROWTH"
 )
 
 // Defines values for WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType.
@@ -1258,7 +1259,6 @@ const (
 	EVENTTYPEFAILEDHELMTESTHOOK         WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_FAILED_HELM_TEST_HOOK"
 	EVENTTYPEHPAALMOSTMAXEDOUT          WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_HPA_ALMOST_MAXED_OUT"
 	EVENTTYPEHPAMAXEDOUT                WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_HPA_MAXED_OUT"
-	EVENTTYPEINFINITESCALING            WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_INFINITE_SCALING"
 	EVENTTYPEINVALID                    WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_INVALID"
 	EVENTTYPEMEMORYPRESSUREEVICTION     WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_MEMORY_PRESSURE_EVICTION"
 	EVENTTYPENATIVEVPASTATECHANGED      WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_NATIVE_VPA_STATE_CHANGED"
@@ -1274,6 +1274,7 @@ const (
 	EVENTTYPESURGE                      WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_SURGE"
 	EVENTTYPESYSTEMOVERRIDERESET        WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_SYSTEM_OVERRIDE_RESET"
 	EVENTTYPESYSTEMOVERRIDETRIGGERED    WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_SYSTEM_OVERRIDE_TRIGGERED"
+	EVENTTYPEUNBOUNDMEMORYGROWTH        WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_UNBOUND_MEMORY_GROWTH"
 )
 
 // Defines values for WorkloadOptimizationAPIListWorkloadsParamsManagementOptions.
@@ -8422,8 +8423,15 @@ type WorkloadoptimizationV1CPUPressureResolvedEvent struct {
 // WorkloadoptimizationV1CPUPressureSettings CPUPressureSettings configures CPU pressure anomaly detection thresholds.
 // Values are percentages in the range 0-100.
 type WorkloadoptimizationV1CPUPressureSettings struct {
-	CpuStallThresholdPercentage *float64 `json:"cpuStallThresholdPercentage"`
-	MinPressuredPodPercentage   *float64 `json:"minPressuredPodPercentage"`
+	// CpuStallThresholdPercentage CPUStallThresholdPercentage is the percentage of time (0-100) that a pod
+	// must experience CPU pressure to be considered under pressure.
+	// For example, 50 means the pod must be stalled for at least 50% of the 5minute time window.
+	CpuStallThresholdPercentage float64 `json:"cpuStallThresholdPercentage"`
+
+	// MinPressuredPodPercentage MinPressuredPodPercentage is the percentage (0-100) of pods that must be
+	// experiencing pressure for the detector to trigger.
+	// For example, 50 means at least 50% of the workload's pods must be under pressure.
+	MinPressuredPodPercentage float64 `json:"minPressuredPodPercentage"`
 }
 
 // WorkloadoptimizationV1ConfidenceSettings defines model for workloadoptimization.v1.ConfidenceSettings.
@@ -8705,7 +8713,6 @@ type WorkloadoptimizationV1Event struct {
 	FailedHook                 *WorkloadoptimizationV1FailedHookEvent                 `json:"failedHook,omitempty"`
 	HpaAlmostMaxedOut          *WorkloadoptimizationV1HPAMaxedOutEvent                `json:"hpaAlmostMaxedOut,omitempty"`
 	HpaMaxedOut                *WorkloadoptimizationV1HPAMaxedOutEvent                `json:"hpaMaxedOut,omitempty"`
-	InfiniteMemoryScaling      *WorkloadoptimizationV1InfiniteMemoryScalingEvent      `json:"infiniteMemoryScaling,omitempty"`
 	MemoryPressureEviction     *WorkloadoptimizationV1MemoryPressureEvictionEvent     `json:"memoryPressureEviction,omitempty"`
 	NativeVpaStateChanged      *WorkloadoptimizationV1NativeVPAStateChangedEvent      `json:"nativeVpaStateChanged,omitempty"`
 	OomKill                    *WorkloadoptimizationV1OOMKillEvent                    `json:"oomKill,omitempty"`
@@ -8724,6 +8731,7 @@ type WorkloadoptimizationV1Event struct {
 
 	// SystemOverrideTriggered SystemOverrideTriggeredEvent is emitted when CAST AI activates a system override on a workload.
 	SystemOverrideTriggered *WorkloadoptimizationV1SystemOverrideTriggeredEvent `json:"systemOverrideTriggered,omitempty"`
+	UnboundMemoryGrowth     *WorkloadoptimizationV1UnboundMemoryGrowthEvent     `json:"unboundMemoryGrowth,omitempty"`
 }
 
 // WorkloadoptimizationV1EventContainer defines model for workloadoptimization.v1.EventContainer.
@@ -9216,9 +9224,6 @@ type WorkloadoptimizationV1HorizontalPodAutoscalerBehavior struct {
 
 // WorkloadoptimizationV1InPlaceResizeStatus InPlaceResizeStatus explains the in-place resize status.
 type WorkloadoptimizationV1InPlaceResizeStatus string
-
-// WorkloadoptimizationV1InfiniteMemoryScalingEvent defines model for workloadoptimization.v1.InfiniteMemoryScalingEvent.
-type WorkloadoptimizationV1InfiniteMemoryScalingEvent = map[string]interface{}
 
 // WorkloadoptimizationV1InitiatedBy defines model for workloadoptimization.v1.InitiatedBy.
 type WorkloadoptimizationV1InitiatedBy struct {
@@ -10125,6 +10130,7 @@ type WorkloadoptimizationV1SurgeEvent struct {
 // WorkloadoptimizationV1SystemOverrideOrigin SystemOverrideOrigin defines the reason why a system override was triggered.
 //
 //   - SYSTEM_OVERRIDE_ORIGIN_CONTINUOUS_OOM_KILLED: Override triggered due to continuous OOM kills after multiple scaling attempts.
+//   - SYSTEM_OVERRIDE_ORIGIN_UNBOUND_MEMORY_GROWTH: Override triggered due to detected unbound memory growth.
 type WorkloadoptimizationV1SystemOverrideOrigin string
 
 // WorkloadoptimizationV1SystemOverrideResetEvent SystemOverrideResetEvent is emitted when a system override on a workload is deactivated.
@@ -10161,6 +10167,7 @@ type WorkloadoptimizationV1SystemOverrideTriggeredEvent struct {
 	// Origin SystemOverrideOrigin defines the reason why a system override was triggered.
 	//
 	//  - SYSTEM_OVERRIDE_ORIGIN_CONTINUOUS_OOM_KILLED: Override triggered due to continuous OOM kills after multiple scaling attempts.
+	//  - SYSTEM_OVERRIDE_ORIGIN_UNBOUND_MEMORY_GROWTH: Override triggered due to detected unbound memory growth.
 	Origin WorkloadoptimizationV1SystemOverrideOrigin `json:"origin"`
 
 	// Target SystemOverrideTarget defines which workload optimization features are affected by the system override.
@@ -10175,6 +10182,9 @@ type WorkloadoptimizationV1TimeSeriesMetric struct {
 	Timestamp time.Time `json:"timestamp"`
 	Value     float64   `json:"value"`
 }
+
+// WorkloadoptimizationV1UnboundMemoryGrowthEvent defines model for workloadoptimization.v1.UnboundMemoryGrowthEvent.
+type WorkloadoptimizationV1UnboundMemoryGrowthEvent = map[string]interface{}
 
 // WorkloadoptimizationV1UpdateCustomMetricsDataSource defines model for workloadoptimization.v1.UpdateCustomMetricsDataSource.
 type WorkloadoptimizationV1UpdateCustomMetricsDataSource struct {

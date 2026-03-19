@@ -295,6 +295,26 @@ func (mr *MockClientInterfaceMockRecorder) EdgeLocationsAPIDeleteEdgeLocation(ct
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EdgeLocationsAPIDeleteEdgeLocation", reflect.TypeOf((*MockClientInterface)(nil).EdgeLocationsAPIDeleteEdgeLocation), varargs...)
 }
 
+// EdgeLocationsAPIGetEdgeInitdScript mocks base method.
+func (m *MockClientInterface) EdgeLocationsAPIGetEdgeInitdScript(ctx context.Context, organizationId, clusterId, id string, reqEditors ...omni.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId, clusterId, id}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "EdgeLocationsAPIGetEdgeInitdScript", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// EdgeLocationsAPIGetEdgeInitdScript indicates an expected call of EdgeLocationsAPIGetEdgeInitdScript.
+func (mr *MockClientInterfaceMockRecorder) EdgeLocationsAPIGetEdgeInitdScript(ctx, organizationId, clusterId, id interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId, clusterId, id}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EdgeLocationsAPIGetEdgeInitdScript", reflect.TypeOf((*MockClientInterface)(nil).EdgeLocationsAPIGetEdgeInitdScript), varargs...)
+}
+
 // EdgeLocationsAPIGetEdgeLocation mocks base method.
 func (m *MockClientInterface) EdgeLocationsAPIGetEdgeLocation(ctx context.Context, organizationId, clusterId, id string, reqEditors ...omni.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
@@ -861,6 +881,41 @@ func (m *MockClientWithResponsesInterface) EdgeLocationsAPIDeleteEdgeLocationWit
 func (mr *MockClientWithResponsesInterfaceMockRecorder) EdgeLocationsAPIDeleteEdgeLocationWithResponse(ctx, organizationId, clusterId, id interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EdgeLocationsAPIDeleteEdgeLocationWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).EdgeLocationsAPIDeleteEdgeLocationWithResponse), ctx, organizationId, clusterId, id)
+}
+
+// EdgeLocationsAPIGetEdgeInitdScript mocks base method.
+func (m *MockClientWithResponsesInterface) EdgeLocationsAPIGetEdgeInitdScript(ctx context.Context, organizationId, clusterId, id string, reqEditors ...omni.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId, clusterId, id}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "EdgeLocationsAPIGetEdgeInitdScript", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// EdgeLocationsAPIGetEdgeInitdScript indicates an expected call of EdgeLocationsAPIGetEdgeInitdScript.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) EdgeLocationsAPIGetEdgeInitdScript(ctx, organizationId, clusterId, id interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId, clusterId, id}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EdgeLocationsAPIGetEdgeInitdScript", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).EdgeLocationsAPIGetEdgeInitdScript), varargs...)
+}
+
+// EdgeLocationsAPIGetEdgeInitdScriptWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) EdgeLocationsAPIGetEdgeInitdScriptWithResponse(ctx context.Context, organizationId, clusterId, id string) (*omni.EdgeLocationsAPIGetEdgeInitdScriptResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "EdgeLocationsAPIGetEdgeInitdScriptWithResponse", ctx, organizationId, clusterId, id)
+	ret0, _ := ret[0].(*omni.EdgeLocationsAPIGetEdgeInitdScriptResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// EdgeLocationsAPIGetEdgeInitdScriptWithResponse indicates an expected call of EdgeLocationsAPIGetEdgeInitdScriptWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) EdgeLocationsAPIGetEdgeInitdScriptWithResponse(ctx, organizationId, clusterId, id interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EdgeLocationsAPIGetEdgeInitdScriptWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).EdgeLocationsAPIGetEdgeInitdScriptWithResponse), ctx, organizationId, clusterId, id)
 }
 
 // EdgeLocationsAPIGetEdgeLocation mocks base method.
