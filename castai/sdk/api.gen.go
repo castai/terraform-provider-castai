@@ -8423,8 +8423,15 @@ type WorkloadoptimizationV1CPUPressureResolvedEvent struct {
 // WorkloadoptimizationV1CPUPressureSettings CPUPressureSettings configures CPU pressure anomaly detection thresholds.
 // Values are percentages in the range 0-100.
 type WorkloadoptimizationV1CPUPressureSettings struct {
-	CpuStallThresholdPercentage *float64 `json:"cpuStallThresholdPercentage"`
-	MinPressuredPodPercentage   *float64 `json:"minPressuredPodPercentage"`
+	// CpuStallThresholdPercentage CPUStallThresholdPercentage is the percentage of time (0-100) that a pod
+	// must experience CPU pressure to be considered under pressure.
+	// For example, 50 means the pod must be stalled for at least 50% of the 5minute time window.
+	CpuStallThresholdPercentage float64 `json:"cpuStallThresholdPercentage"`
+
+	// MinPressuredPodPercentage MinPressuredPodPercentage is the percentage (0-100) of pods that must be
+	// experiencing pressure for the detector to trigger.
+	// For example, 50 means at least 50% of the workload's pods must be under pressure.
+	MinPressuredPodPercentage float64 `json:"minPressuredPodPercentage"`
 }
 
 // WorkloadoptimizationV1ConfidenceSettings defines model for workloadoptimization.v1.ConfidenceSettings.
