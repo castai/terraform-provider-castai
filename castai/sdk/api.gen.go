@@ -8718,6 +8718,36 @@ type WorkloadoptimizationV1CustomMetricsDataSourceStatus string
 // For each type, exactly one of the data fields should be populated.
 type WorkloadoptimizationV1CustomMetricsDataSourceType string
 
+// WorkloadoptimizationV1CustomMetricsDataSourceInput CustomMetricsDataSourceInput is the input data type for Create and Update operations on custom metrics data sources.
+type WorkloadoptimizationV1CustomMetricsDataSourceInput struct {
+	Prometheus *WorkloadoptimizationV1CustomMetricsDataSourceInputPrometheus `json:"prometheus,omitempty"`
+}
+
+// WorkloadoptimizationV1CustomMetricsDataSourceInputPrometheus defines model for workloadoptimization.v1.CustomMetricsDataSourceInput.Prometheus.
+type WorkloadoptimizationV1CustomMetricsDataSourceInputPrometheus struct {
+	DataSource WorkloadoptimizationV1CustomMetricsDataSourceInputPrometheusDataSource `json:"dataSource"`
+	Metrics    *WorkloadoptimizationV1CustomMetricsDataSourceInputPrometheusMetrics   `json:"metrics,omitempty"`
+}
+
+// WorkloadoptimizationV1CustomMetricsDataSourceInputPrometheusDataSource defines model for workloadoptimization.v1.CustomMetricsDataSourceInput.Prometheus.DataSource.
+type WorkloadoptimizationV1CustomMetricsDataSourceInputPrometheusDataSource struct {
+	Timeout *string `json:"timeout,omitempty"`
+	Url     string  `json:"url"`
+}
+
+// WorkloadoptimizationV1CustomMetricsDataSourceInputPrometheusMetric Metric defines a single Prometheus metric query. Multiple entries with the same name
+// represent multiple queries for a single metric.
+type WorkloadoptimizationV1CustomMetricsDataSourceInputPrometheusMetric struct {
+	Name  string `json:"name"`
+	Query string `json:"query"`
+}
+
+// WorkloadoptimizationV1CustomMetricsDataSourceInputPrometheusMetrics defines model for workloadoptimization.v1.CustomMetricsDataSourceInput.Prometheus.Metrics.
+type WorkloadoptimizationV1CustomMetricsDataSourceInputPrometheusMetrics struct {
+	Custom  *[]WorkloadoptimizationV1CustomMetricsDataSourceInputPrometheusMetric `json:"custom,omitempty"`
+	Presets *[]string                                                             `json:"presets,omitempty"`
+}
+
 // WorkloadoptimizationV1DeleteWorkloadScalingPolicyResponse defines model for workloadoptimization.v1.DeleteWorkloadScalingPolicyResponse.
 type WorkloadoptimizationV1DeleteWorkloadScalingPolicyResponse = map[string]interface{}
 
@@ -9550,8 +9580,9 @@ type WorkloadoptimizationV1NativeVPAStateChangedEvent struct {
 
 // WorkloadoptimizationV1NewCustomMetricsDataSource defines model for workloadoptimization.v1.NewCustomMetricsDataSource.
 type WorkloadoptimizationV1NewCustomMetricsDataSource struct {
-	Data WorkloadoptimizationV1CustomMetricsDataSourceData `json:"data"`
-	Name string                                            `json:"name"`
+	// Data CustomMetricsDataSourceInput is the input data type for Create and Update operations on custom metrics data sources.
+	Data WorkloadoptimizationV1CustomMetricsDataSourceInput `json:"data"`
+	Name string                                             `json:"name"`
 
 	// Type Type defines the type of custom metrics data source. Respective Data field will be populated based on the type.
 	// For each type, exactly one of the data fields should be populated.
@@ -10291,8 +10322,9 @@ type WorkloadoptimizationV1UnboundMemoryGrowthEvent = map[string]interface{}
 
 // WorkloadoptimizationV1UpdateCustomMetricsDataSource defines model for workloadoptimization.v1.UpdateCustomMetricsDataSource.
 type WorkloadoptimizationV1UpdateCustomMetricsDataSource struct {
-	Data *WorkloadoptimizationV1CustomMetricsDataSourceData `json:"data,omitempty"`
-	Name *string                                            `json:"name,omitempty"`
+	// Data CustomMetricsDataSourceInput is the input data type for Create and Update operations on custom metrics data sources.
+	Data *WorkloadoptimizationV1CustomMetricsDataSourceInput `json:"data,omitempty"`
+	Name *string                                             `json:"name,omitempty"`
 }
 
 // WorkloadoptimizationV1UpdateWorkloadResponseV2 defines model for workloadoptimization.v1.UpdateWorkloadResponseV2.
