@@ -417,7 +417,7 @@ func buildBatchCreateRoleBindingRequest(data *schema.ResourceData, enterpriseID 
 		return nil, fmt.Errorf("reading role binding data: %w", err)
 	}
 
-	definition := buildRoleBindingDefinition(roleBinding)
+	definition := buildRoleBindingDefinition(roleBinding, enterpriseID)
 
 	request := organization_management.BatchCreateEnterpriseRoleBindingsRequest{
 		EnterpriseId: enterpriseID,
@@ -442,7 +442,7 @@ func buildBatchUpdateRoleBindingRequest(data *schema.ResourceData, enterpriseID,
 		return nil, fmt.Errorf("reading role binding data: %w", err)
 	}
 
-	definition := buildRoleBindingDefinition(roleBinding)
+	definition := buildRoleBindingDefinition(roleBinding, enterpriseID)
 
 	request := organization_management.BatchUpdateEnterpriseRoleBindingsRequest{
 		EnterpriseId: enterpriseID,
@@ -460,12 +460,18 @@ func buildBatchUpdateRoleBindingRequest(data *schema.ResourceData, enterpriseID,
 	return &request, nil
 }
 
-func buildRoleBindingDefinition(roleBinding EnterpriseRoleBinding) organization_management.RoleBindingDefinition {
+func buildRoleBindingDefinition(roleBinding EnterpriseRoleBinding, enterpriseID string) organization_management.RoleBindingDefinition {
 	subjects := convertEnterpriseRoleBindingSubjectsToSDK(roleBinding.Subjects)
 	scopes := convertEnterpriseRoleBindingScopesToSDK(roleBinding.Scopes)
 
 	definition := organization_management.RoleBindingDefinition{
 		RoleId: lo.ToPtr(roleBinding.RoleID),
+	}
+
+	// When the role binding targets a child organization, set ChildOrganizationId so the
+	// API validates role_id against the child org's roles instead of the enterprise's roles.
+	if roleBinding.OrganizationID != enterpriseID {
+		definition.ChildOrganizationId = lo.ToPtr(roleBinding.OrganizationID)
 	}
 
 	if len(subjects) > 0 {

@@ -48,6 +48,7 @@ const (
 	FieldNodeConfigurationAKSApplicationSecurityGroups = "application_security_groups"
 	FieldNodeConfigurationAKSPublicIP                  = "public_ip"
 	FieldNodeConfigurationAKSPodSubnetID               = "pod_subnet_id"
+	FieldNodeConfigurationAKSEncryptionAtHost          = "enable_encryption_at_host"
 )
 
 const (
@@ -490,6 +491,11 @@ func resourceNodeConfiguration() *schema.Resource {
 							Type:        schema.TypeString,
 							Optional:    true,
 							Description: "ID of pod subnet to be used for provisioned nodes.",
+						},
+						FieldNodeConfigurationAKSEncryptionAtHost: {
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Description: "Whether to enable encryption at host for provisioned nodes. See https://learn.microsoft.com/en-us/azure/virtual-machines/disk-encryption#encryption-at-host---end-to-end-encryption-for-your-vm-data",
 						},
 					},
 				},
@@ -1190,6 +1196,10 @@ func toAKSSConfig(obj map[string]interface{}) *sdk.NodeconfigV1AKSConfig {
 		out.PodSubnetId = toPtr(v)
 	}
 
+	if v, ok := obj[FieldNodeConfigurationAKSEncryptionAtHost].(bool); ok {
+		out.EnableEncryptionAtHost = toPtr(v)
+	}
+
 	return out
 }
 
@@ -1384,6 +1394,10 @@ func flattenAKSConfig(config *sdk.NodeconfigV1AKSConfig) []map[string]interface{
 
 	if v := config.PodSubnetId; v != nil {
 		m[FieldNodeConfigurationAKSPodSubnetID] = *v
+	}
+
+	if v := config.EnableEncryptionAtHost; v != nil {
+		m[FieldNodeConfigurationAKSEncryptionAtHost] = *v
 	}
 
 	return []map[string]interface{}{m}

@@ -89,6 +89,7 @@ Optional:
 
 - `aks_image_family` (String) Image OS Family to use when provisioning node in AKS. If both image and family are provided, the system will use provided image and provisioning logic for given family. If only image family is provided, the system will attempt to resolve the latest image from that family based on kubernetes version and node architecture. If image family is omitted, a default family (based on cloud provider) will be used. See Cast.ai documentation for details. Possible values: (ubuntu,azure-linux,windows2019,windows2022)
 - `application_security_groups` (List of String) Application security groups to be used for provisioned nodes
+- `enable_encryption_at_host` (Boolean) Whether to enable encryption at host for provisioned nodes. See https://learn.microsoft.com/en-us/azure/virtual-machines/disk-encryption#encryption-at-host---end-to-end-encryption-for-your-vm-data
 - `ephemeral_os_disk` (Block List, Max: 1) Ephemeral OS disk configuration for CAST provisioned nodes (see [below for nested schema](#nestedblock--aks--ephemeral_os_disk))
 - `loadbalancers` (Block List) Load balancer configuration for CAST provisioned nodes (see [below for nested schema](#nestedblock--aks--loadbalancers))
 - `max_pods_per_node` (Number) Maximum number of pods that can be run on a node, which affects how many IP addresses you will need for each node. Defaults to 30
