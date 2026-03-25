@@ -88,6 +88,11 @@ resource "castai_workload_scaling_policy" "services" {
   rollout_behavior {
     type = "NO_DISRUPTION"
   }
+  jvm {
+    memory {
+      optimization = true
+    }
+  }
   excluded_containers = ["container-1", "container-2"]
 }
 ```
@@ -115,6 +120,7 @@ resource "castai_workload_scaling_policy" "services" {
 - `confidence` (Block List, Max: 1) Defines the confidence settings for applying recommendations. (see [below for nested schema](#nestedblock--confidence))
 - `downscaling` (Block List, Max: 1) (see [below for nested schema](#nestedblock--downscaling))
 - `excluded_containers` (List of String) Defines containers to be excluded from receiving recommendations. The containers are matched by exact name.
+- `jvm` (Block List, Max: 1) JVM optimization settings. (see [below for nested schema](#nestedblock--jvm))
 - `memory_event` (Block List, Max: 1) (see [below for nested schema](#nestedblock--memory_event))
 - `predictive_scaling` (Block List, Max: 1) (see [below for nested schema](#nestedblock--predictive_scaling))
 - `rollout_behavior` (Block List, Max: 1) Defines the rollout behavior used when applying recommendations. Prerequisites:
@@ -318,6 +324,22 @@ Optional:
 - `apply_type` (String) Defines the apply type to be used when downscaling.
 	- IMMEDIATE - pods are restarted immediately when new recommendation is generated.
 	- DEFERRED - pods are not restarted and recommendation values are applied during natural restarts only (new deployment, etc.)
+
+
+<a id="nestedblock--jvm"></a>
+### Nested Schema for `jvm`
+
+Optional:
+
+- `memory` (Block List, Max: 1) JVM memory optimization settings. (see [below for nested schema](#nestedblock--jvm--memory))
+
+<a id="nestedblock--jvm--memory"></a>
+### Nested Schema for `jvm.memory`
+
+Optional:
+
+- `optimization` (Boolean) Defines whether JVM memory optimization is enabled. When enabled, JVM heap size will be adjusted based on JVM metrics, if available.
+
 
 
 <a id="nestedblock--memory_event"></a>

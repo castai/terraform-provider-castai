@@ -50,6 +50,7 @@ const (
 	FieldRolloutBehaviorType                       = "type"
 	FieldRolloutBehaviorNoDisruptionType           = "NO_DISRUPTION"
 	FieldRolloutBehaviorPreferOneByOneType         = "prefer_one_by_one"
+	FieldJVM                                       = "jvm"
 	FieldPredictiveScaling                         = "predictive_scaling"
 	FieldMemoryEvent                               = "memory_event"
 	FieldApplyType                                 = "apply_type"
@@ -316,6 +317,31 @@ It can be either:
 							Type:        schema.TypeBool,
 							Optional:    true,
 							Description: `Defines if pods should be restarted one by one to avoid service disruption.`,
+						},
+					},
+				},
+			},
+			FieldJVM: {
+				Type:        schema.TypeList,
+				Optional:    true,
+				MaxItems:    1,
+				Description: "JVM optimization settings.",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"memory": {
+							Type:        schema.TypeList,
+							Optional:    true,
+							MaxItems:    1,
+							Description: "JVM memory optimization settings.",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"optimization": {
+										Type:        schema.TypeBool,
+										Optional:    true,
+										Description: "Defines whether JVM memory optimization is enabled. When enabled, JVM heap size will be adjusted based on JVM metrics, if available.",
+									},
+								},
+							},
 						},
 					},
 				},
@@ -610,6 +636,8 @@ func resourceWorkloadScalingPolicyCreate(ctx context.Context, d *schema.Resource
 
 	req.RecommendationPolicies.RolloutBehavior = toRolloutBehavior(toSection(d, FieldRolloutBehavior))
 
+	req.RecommendationPolicies.Jvm = toJvm(toSection(d, FieldJVM))
+
 	req.RecommendationPolicies.ExcludedContainers = toExcludedContainers(d)
 
 	ar, err := toAssignmentRules(toSection(d, FieldAssignmentRules))
@@ -750,6 +778,9 @@ func fetchScalingPolicy(ctx context.Context, d *schema.ResourceData, meta any) (
 	if err := d.Set(FieldRolloutBehavior, toRolloutBehaviorMap(sp.RecommendationPolicies.RolloutBehavior)); err != nil {
 		return nil, fmt.Errorf("setting rollout behavior: %w", err)
 	}
+	if err := d.Set(FieldJVM, toJvmMap(sp.RecommendationPolicies.Jvm)); err != nil {
+		return nil, fmt.Errorf("setting jvm: %w", err)
+	}
 
 	if err := d.Set(FieldAssignmentRules, toAssignmentRulesMap(getResourceFrom(d, FieldAssignmentRules), sp.AssignmentRules)); err != nil {
 		return nil, fmt.Errorf("setting assignment rules: %w", err)
@@ -788,6 +819,7 @@ func updateScalingPolicy(ctx context.Context, d *schema.ResourceData, meta any) 
 		FieldAssignmentRules,
 		FieldPredictiveScaling,
 		FieldRolloutBehavior,
+		FieldJVM,
 		FieldExcludedContainers,
 	) {
 		tflog.Info(ctx, "scaling policy up to date")
@@ -824,6 +856,7 @@ func updateScalingPolicy(ctx context.Context, d *schema.ResourceData, meta any) 
 			Confidence:         toConfidence(toSection(d, FieldConfidence)),
 			PredictiveScaling:  toPredictiveScaling(toSection(d, FieldPredictiveScaling)),
 			RolloutBehavior:    toRolloutBehavior(toSection(d, FieldRolloutBehavior)),
+			Jvm:                toJvm(toSection(d, FieldJVM)),
 			ExcludedContainers: toExcludedContainers(d),
 		},
 	}
@@ -1456,6 +1489,36 @@ func toRolloutBehaviorMap(s *sdk.WorkloadoptimizationV1RolloutBehaviorSettings) 
 		m[FieldRolloutBehaviorPreferOneByOneType] = *s.PreferOneByOne
 	}
 
+	return []map[string]any{m}
+}
+
+func toJvm(m map[string]any) *sdk.WorkloadoptimizationV1JVMSettings {
+	if len(m) == 0 {
+		return nil
+	}
+	result := &sdk.WorkloadoptimizationV1JVMSettings{}
+	if mem := getFirstElem(m, "memory"); mem != nil {
+		result.Memory = &sdk.WorkloadoptimizationV1JVMMemorySettings{}
+		if v, ok := mem["optimization"].(bool); ok {
+			result.Memory.Optimization = v
+		}
+	}
+	return result
+}
+
+func toJvmMap(s *sdk.WorkloadoptimizationV1JVMSettings) []map[string]any {
+	if s == nil {
+		return nil
+	}
+	m := map[string]any{}
+	if s.Memory != nil {
+		m["memory"] = []map[string]any{{
+			"optimization": s.Memory.Optimization,
+		}}
+	}
+	if len(m) == 0 {
+		return nil
+	}
 	return []map[string]any{m}
 }
 
