@@ -71,5 +71,10 @@ resource "castai_workload_scaling_policy" "services" {
   rollout_behavior {
     type = "NO_DISRUPTION"
   }
+  jvm {
+    memory {
+      optimization = true
+    }
+  }
   excluded_containers = ["container-1", "container-2"]
 }
