@@ -123,6 +123,7 @@ func TestAccGKE_ResourceWorkloadScalingPolicy(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "predictive_scaling.0.cpu.0.enabled", "true"),
 					// Requires workload-autoscaler from v0.35.3
 					resource.TestCheckResourceAttr(resourceName, "rollout_behavior.0.type", "NO_DISRUPTION"),
+					resource.TestCheckResourceAttr(resourceName, "jvm.0.memory.0.optimization", "true"),
 				),
 			},
 		},
@@ -391,6 +392,11 @@ func scalingPolicyConfigUpdated(clusterName, projectID, name string) string {
 		}
 		confidence {
 			threshold = 0.6
+		}
+		jvm {
+			memory {
+				optimization = true
+			}
 		}
 	}`, updatedName)
 
@@ -831,6 +837,94 @@ func Test_toRolloutBehaviorMap(t *testing.T) {
 	}
 }
 
+func Test_toJvm(t *testing.T) {
+	tests := map[string]struct {
+		args map[string]any
+		exp  *sdk.WorkloadoptimizationV1JVMSettings
+	}{
+		"should return jvm settings with memory optimization enabled": {
+			args: map[string]any{
+				"memory": []any{
+					map[string]any{
+						"optimization": true,
+					},
+				},
+			},
+			exp: &sdk.WorkloadoptimizationV1JVMSettings{
+				Memory: &sdk.WorkloadoptimizationV1JVMMemorySettings{
+					Optimization: true,
+				},
+			},
+		},
+		"should return jvm settings with memory optimization disabled": {
+			args: map[string]any{
+				"memory": []any{
+					map[string]any{
+						"optimization": false,
+					},
+				},
+			},
+			exp: &sdk.WorkloadoptimizationV1JVMSettings{
+				Memory: &sdk.WorkloadoptimizationV1JVMMemorySettings{
+					Optimization: false,
+				},
+			},
+		},
+		"should return nil on empty map": {
+			args: map[string]any{},
+			exp:  nil,
+		},
+		"should return nil on nil map": {
+			args: nil,
+			exp:  nil,
+		},
+	}
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			r := require.New(t)
+			got := toJvm(tt.args)
+			r.Equal(tt.exp, got)
+		})
+	}
+}
+
+func Test_toJvmMap(t *testing.T) {
+	tests := map[string]struct {
+		args *sdk.WorkloadoptimizationV1JVMSettings
+		exp  []map[string]any
+	}{
+		"should return jvm map with memory optimization": {
+			args: &sdk.WorkloadoptimizationV1JVMSettings{
+				Memory: &sdk.WorkloadoptimizationV1JVMMemorySettings{
+					Optimization: true,
+				},
+			},
+			exp: []map[string]any{
+				{
+					"memory": []map[string]any{{
+						"optimization": true,
+					}},
+				},
+			},
+		},
+		"should return nil for nil input": {
+			args: nil,
+			exp:  nil,
+		},
+		"should return nil for empty settings": {
+			args: &sdk.WorkloadoptimizationV1JVMSettings{},
+			exp:  nil,
+		},
+	}
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			r := require.New(t)
+			got := toJvmMap(tt.args)
+			r.Equal(tt.exp, got)
+		})
+	}
+}
+
 func Test_resourceWorkloadScalingPolicyCreate(t *testing.T) {
 	organizationId := "63d2af53-9a42-4968-be1e-39316ebfd8d4"
 	clusterId := "4e4cd9eb-82eb-407e-a926-e5fef81cab50"
@@ -987,7 +1081,7 @@ func Test_toWorkloadScalingPoliciesMap(t *testing.T) {
 		"should map limit strategy with only_if_original_exist true": {
 			previousCfg: map[string]any{},
 			policies: sdk.WorkloadoptimizationV1ResourcePolicies{
-				Function: sdk.QUANTILE,
+				Function: sdk.WorkloadoptimizationV1ResourcePoliciesFunctionQUANTILE,
 				Args:     []string{"0.9"},
 				Overhead: 0.1,
 				Limit: &sdk.WorkloadoptimizationV1ResourceLimitStrategy{
@@ -998,7 +1092,7 @@ func Test_toWorkloadScalingPoliciesMap(t *testing.T) {
 			},
 			expected: []map[string]any{
 				{
-					"function": sdk.QUANTILE,
+					"function": sdk.WorkloadoptimizationV1ResourcePoliciesFunctionQUANTILE,
 					"args":     []string{"0.9"},
 					"overhead": 0.1,
 					"min":      (*float64)(nil),
@@ -1016,7 +1110,7 @@ func Test_toWorkloadScalingPoliciesMap(t *testing.T) {
 		"should map limit strategy with only_if_original_exist false": {
 			previousCfg: map[string]any{},
 			policies: sdk.WorkloadoptimizationV1ResourcePolicies{
-				Function: sdk.MAX,
+				Function: sdk.WorkloadoptimizationV1ResourcePoliciesFunctionMAX,
 				Overhead: 0.15,
 				Limit: &sdk.WorkloadoptimizationV1ResourceLimitStrategy{
 					Type:                sdk.WorkloadoptimizationV1ResourceLimitStrategyTypeNOLIMIT,
@@ -1025,7 +1119,7 @@ func Test_toWorkloadScalingPoliciesMap(t *testing.T) {
 			},
 			expected: []map[string]any{
 				{
-					"function": sdk.MAX,
+					"function": sdk.WorkloadoptimizationV1ResourcePoliciesFunctionMAX,
 					"args":     []string(nil),
 					"overhead": 0.15,
 					"min":      (*float64)(nil),
@@ -1042,7 +1136,7 @@ func Test_toWorkloadScalingPoliciesMap(t *testing.T) {
 		"should map limit strategy with only_if_original_lower true": {
 			previousCfg: map[string]any{},
 			policies: sdk.WorkloadoptimizationV1ResourcePolicies{
-				Function: sdk.QUANTILE,
+				Function: sdk.WorkloadoptimizationV1ResourcePoliciesFunctionQUANTILE,
 				Args:     []string{"0.95"},
 				Overhead: 0.2,
 				Limit: &sdk.WorkloadoptimizationV1ResourceLimitStrategy{
@@ -1052,7 +1146,7 @@ func Test_toWorkloadScalingPoliciesMap(t *testing.T) {
 			},
 			expected: []map[string]any{
 				{
-					"function": sdk.QUANTILE,
+					"function": sdk.WorkloadoptimizationV1ResourcePoliciesFunctionQUANTILE,
 					"args":     []string{"0.95"},
 					"overhead": 0.2,
 					"min":      (*float64)(nil),
@@ -1069,7 +1163,7 @@ func Test_toWorkloadScalingPoliciesMap(t *testing.T) {
 		"should map limit strategy with only_if_original_lower false": {
 			previousCfg: map[string]any{},
 			policies: sdk.WorkloadoptimizationV1ResourcePolicies{
-				Function: sdk.QUANTILE,
+				Function: sdk.WorkloadoptimizationV1ResourcePoliciesFunctionQUANTILE,
 				Args:     []string{"0.5"},
 				Overhead: 0.05,
 				Limit: &sdk.WorkloadoptimizationV1ResourceLimitStrategy{
@@ -1080,7 +1174,7 @@ func Test_toWorkloadScalingPoliciesMap(t *testing.T) {
 			},
 			expected: []map[string]any{
 				{
-					"function": sdk.QUANTILE,
+					"function": sdk.WorkloadoptimizationV1ResourcePoliciesFunctionQUANTILE,
 					"args":     []string{"0.5"},
 					"overhead": 0.05,
 					"min":      (*float64)(nil),
@@ -1098,7 +1192,7 @@ func Test_toWorkloadScalingPoliciesMap(t *testing.T) {
 		"should map limit strategy with both only_if_original_exist and only_if_original_lower": {
 			previousCfg: map[string]any{},
 			policies: sdk.WorkloadoptimizationV1ResourcePolicies{
-				Function: sdk.MAX,
+				Function: sdk.WorkloadoptimizationV1ResourcePoliciesFunctionMAX,
 				Overhead: 0.3,
 				Limit: &sdk.WorkloadoptimizationV1ResourceLimitStrategy{
 					Type:                sdk.WorkloadoptimizationV1ResourceLimitStrategyTypeMULTIPLIER,
@@ -1109,7 +1203,7 @@ func Test_toWorkloadScalingPoliciesMap(t *testing.T) {
 			},
 			expected: []map[string]any{
 				{
-					"function": sdk.MAX,
+					"function": sdk.WorkloadoptimizationV1ResourcePoliciesFunctionMAX,
 					"args":     []string(nil),
 					"overhead": 0.3,
 					"min":      (*float64)(nil),
@@ -1128,7 +1222,7 @@ func Test_toWorkloadScalingPoliciesMap(t *testing.T) {
 		"should map limit strategy without only_if flags": {
 			previousCfg: map[string]any{},
 			policies: sdk.WorkloadoptimizationV1ResourcePolicies{
-				Function: sdk.QUANTILE,
+				Function: sdk.WorkloadoptimizationV1ResourcePoliciesFunctionQUANTILE,
 				Args:     []string{"0.8"},
 				Overhead: 0.12,
 				Limit: &sdk.WorkloadoptimizationV1ResourceLimitStrategy{
@@ -1138,7 +1232,7 @@ func Test_toWorkloadScalingPoliciesMap(t *testing.T) {
 			},
 			expected: []map[string]any{
 				{
-					"function": sdk.QUANTILE,
+					"function": sdk.WorkloadoptimizationV1ResourcePoliciesFunctionQUANTILE,
 					"args":     []string{"0.8"},
 					"overhead": 0.12,
 					"min":      (*float64)(nil),
@@ -1155,13 +1249,13 @@ func Test_toWorkloadScalingPoliciesMap(t *testing.T) {
 		"should not include limit when nil": {
 			previousCfg: map[string]any{},
 			policies: sdk.WorkloadoptimizationV1ResourcePolicies{
-				Function: sdk.MAX,
+				Function: sdk.WorkloadoptimizationV1ResourcePoliciesFunctionMAX,
 				Overhead: 0.1,
 				Limit:    nil,
 			},
 			expected: []map[string]any{
 				{
-					"function": sdk.MAX,
+					"function": sdk.WorkloadoptimizationV1ResourcePoliciesFunctionMAX,
 					"args":     []string(nil),
 					"overhead": 0.1,
 					"min":      (*float64)(nil),
