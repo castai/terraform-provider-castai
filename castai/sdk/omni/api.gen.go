@@ -180,6 +180,20 @@ type Condition struct {
 // CustomProviderParam Custom cloud provider params.
 type CustomProviderParam = map[string]interface{}
 
+// EdgeClusterControlPlane EdgeClusterControlPlane contains control plane configuration overrides for the edge cluster.
+type EdgeClusterControlPlane struct {
+	// Ha Switch from HA mode to single control plane and etcd replica. If not set default is HA.
+	Ha *bool `json:"ha,omitempty"`
+}
+
+// EdgeClusterSpec EdgeClusterSpec contains configuration overrides for the edge cluster.
+//
+//	Fields left unset will use system defaults.
+type EdgeClusterSpec struct {
+	// ControlPlane Control plane configuration overrides.
+	ControlPlane *EdgeClusterControlPlane `json:"controlPlane,omitempty"`
+}
+
 // EdgeLocation Message to represent edge location.
 type EdgeLocation struct {
 	// Aws AWS specific parameters.
@@ -199,6 +213,9 @@ type EdgeLocation struct {
 
 	// Description The description of the edge location.
 	Description *string `json:"description,omitempty"`
+
+	// EdgeClusterSpec Optional edge cluster spec overrides. Ignored during edge location update.
+	EdgeClusterSpec *EdgeClusterSpec `json:"edgeClusterSpec,omitempty"`
 
 	// Error If state if failed, this field will contain the error message.
 	Error *string `json:"error,omitempty"`
