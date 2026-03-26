@@ -8,7 +8,8 @@ export SWAGGER_LOCATION ?= https://$(API_HOST)/v1/spec/openapi.json
 SDK_SPECS := \
 	cluster_autoscaler:HibernationSchedulesAPI:https://$(API_HOST)/spec/cluster-autoscaler/openapi.yaml \
 	organization_management:EnterpriseAPI:https://$(API_HOST)/spec/organization-management/openapi.yaml \
-	omni:EdgeLocationsAPI,ClustersAPI:https://$(API_HOST)/spec/omni/openapi.yaml
+	omni:EdgeLocationsAPI,ClustersAPI:https://$(API_HOST)/spec/omni/openapi.yaml \
+	patching_engine:PodMutationsAPI:https://$(API_HOST)/spec/patching-engine/openapi.yaml
 
 default: build
 
