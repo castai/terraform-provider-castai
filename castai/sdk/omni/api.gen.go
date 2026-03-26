@@ -446,6 +446,9 @@ type ReportStatusRequest struct {
 
 // ReportStatusRequestCluster Cluster object.
 type ReportStatusRequestCluster struct {
+	// AgentVersion The omni-agent version.
+	AgentVersion *string `json:"agentVersion,omitempty"`
+
 	// ExternalCidr The external CIDR.
 	ExternalCidr *string `json:"externalCidr,omitempty"`
 
