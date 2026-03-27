@@ -88,6 +88,12 @@ resource "castai_workload_scaling_policy" "services" {
   rollout_behavior {
     type = "NO_DISRUPTION"
   }
+  anomaly_detection {
+    cpu_pressure {
+      cpu_stall_threshold_percentage = 50
+      min_pressured_pod_percentage   = 30
+    }
+  }
   jvm {
     memory {
       optimization = true
@@ -115,6 +121,7 @@ resource "castai_workload_scaling_policy" "services" {
 
 ### Optional
 
+- `anomaly_detection` (Block List, Max: 1) Defines anomaly detection settings for the scaling policy. (see [below for nested schema](#nestedblock--anomaly_detection))
 - `anti_affinity` (Block List, Max: 1) (see [below for nested schema](#nestedblock--anti_affinity))
 - `assignment_rules` (Block List) Allows defining conditions for automatically assigning workloads to this scaling policy. (see [below for nested schema](#nestedblock--assignment_rules))
 - `confidence` (Block List, Max: 1) Defines the confidence settings for applying recommendations. (see [below for nested schema](#nestedblock--confidence))
@@ -245,6 +252,23 @@ Optional:
 - `multiplier` (Number) Multiplier used to calculate the resource limit. It must be defined for the MULTIPLIER strategy.
 - `only_if_original_exist` (Boolean) Apply the strategy only when the original resource has limits defined.
 - `only_if_original_lower` (Boolean) Use the original resource limits if they are higher than recommended values.
+
+
+
+<a id="nestedblock--anomaly_detection"></a>
+### Nested Schema for `anomaly_detection`
+
+Optional:
+
+- `cpu_pressure` (Block List, Max: 1) Configures CPU pressure anomaly detection thresholds. (see [below for nested schema](#nestedblock--anomaly_detection--cpu_pressure))
+
+<a id="nestedblock--anomaly_detection--cpu_pressure"></a>
+### Nested Schema for `anomaly_detection.cpu_pressure`
+
+Required:
+
+- `cpu_stall_threshold_percentage` (Number) Percentage of time (0-100) that a pod must experience CPU pressure to be considered under pressure.
+- `min_pressured_pod_percentage` (Number) Percentage (0-100) of pods that must be experiencing pressure for the detector to trigger.
 
 
 

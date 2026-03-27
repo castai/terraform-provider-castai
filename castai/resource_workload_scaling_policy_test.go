@@ -124,6 +124,8 @@ func TestAccGKE_ResourceWorkloadScalingPolicy(t *testing.T) {
 					// Requires workload-autoscaler from v0.35.3
 					resource.TestCheckResourceAttr(resourceName, "rollout_behavior.0.type", "NO_DISRUPTION"),
 					resource.TestCheckResourceAttr(resourceName, "jvm.0.memory.0.optimization", "true"),
+					resource.TestCheckResourceAttr(resourceName, "anomaly_detection.0.cpu_pressure.0.cpu_stall_threshold_percentage", "50"),
+					resource.TestCheckResourceAttr(resourceName, "anomaly_detection.0.cpu_pressure.0.min_pressured_pod_percentage", "30"),
 				),
 			},
 		},
@@ -392,6 +394,12 @@ func scalingPolicyConfigUpdated(clusterName, projectID, name string) string {
 		}
 		confidence {
 			threshold = 0.6
+		}
+		anomaly_detection {
+			cpu_pressure {
+				cpu_stall_threshold_percentage = 50
+				min_pressured_pod_percentage   = 30
+			}
 		}
 		jvm {
 			memory {
@@ -832,6 +840,82 @@ func Test_toRolloutBehaviorMap(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			r := require.New(t)
 			got := toRolloutBehaviorMap(tt.args)
+			r.Equal(tt.exp, got)
+		})
+	}
+}
+
+func Test_toAnomalyDetection(t *testing.T) {
+	tests := map[string]struct {
+		args map[string]any
+		exp  *sdk.WorkloadoptimizationV1AnomalyDetectionSettings
+	}{
+		"should return nil on empty map": {
+			args: map[string]any{},
+			exp:  nil,
+		},
+		"should return anomaly detection settings with cpu_pressure": {
+			args: map[string]any{
+				FieldAnomalyDetectionCpuPressure: []any{
+					map[string]any{
+						FieldCpuStallThresholdPercentage: float64(50),
+						FieldMinPressuredPodPercentage:   float64(30),
+					},
+				},
+			},
+			exp: &sdk.WorkloadoptimizationV1AnomalyDetectionSettings{
+				CpuPressure: &sdk.WorkloadoptimizationV1CPUPressureSettings{
+					CpuStallThresholdPercentage: 50,
+					MinPressuredPodPercentage:   30,
+				},
+			},
+		},
+	}
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			r := require.New(t)
+			got := toAnomalyDetection(tt.args)
+			r.Equal(tt.exp, got)
+		})
+	}
+}
+
+func Test_toAnomalyDetectionMap(t *testing.T) {
+	tests := map[string]struct {
+		args *sdk.WorkloadoptimizationV1AnomalyDetectionSettings
+		exp  []map[string]any
+	}{
+		"should return nil for nil input": {
+			args: nil,
+			exp:  nil,
+		},
+		"should return anomaly detection map with cpu_pressure": {
+			args: &sdk.WorkloadoptimizationV1AnomalyDetectionSettings{
+				CpuPressure: &sdk.WorkloadoptimizationV1CPUPressureSettings{
+					CpuStallThresholdPercentage: 50,
+					MinPressuredPodPercentage:   30,
+				},
+			},
+			exp: []map[string]any{
+				{
+					FieldAnomalyDetectionCpuPressure: []map[string]any{
+						{
+							FieldCpuStallThresholdPercentage: float64(50),
+							FieldMinPressuredPodPercentage:   float64(30),
+						},
+					},
+				},
+			},
+		},
+		"should return nil for empty settings": {
+			args: &sdk.WorkloadoptimizationV1AnomalyDetectionSettings{},
+			exp:  nil,
+		},
+	}
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			r := require.New(t)
+			got := toAnomalyDetectionMap(tt.args)
 			r.Equal(tt.exp, got)
 		})
 	}
