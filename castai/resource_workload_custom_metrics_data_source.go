@@ -81,7 +81,8 @@ func resourceWorkloadCustomMetricsDataSource() *schema.Resource {
 							Type:     schema.TypeList,
 							Optional: true,
 							Description: "Manually defined metrics. Use this for advanced use cases where presets " +
-								"don't cover your needs. Each metric requires a name and one or more PromQL queries.",
+								"don't cover your needs. Each entry defines a single metric name and PromQL query. " +
+								"To specify multiple queries for the same metric, use multiple entries with the same name.",
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"name": {
@@ -90,13 +91,11 @@ func resourceWorkloadCustomMetricsDataSource() *schema.Resource {
 										Description:      "Name of the metric.",
 										ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 									},
-									"queries": {
-										Type:        schema.TypeList,
-										Required:    true,
-										Description: "PromQL queries for this metric.",
-										Elem: &schema.Schema{
-											Type: schema.TypeString,
-										},
+									"query": {
+										Type:             schema.TypeString,
+										Required:         true,
+										Description:      "PromQL query for this metric.",
+										ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 									},
 								},
 							},
@@ -349,20 +348,14 @@ func expandPrometheusInputConfig(d *schema.ResourceData) (*sdk.Workloadoptimizat
 		metrics.Presets = &presets
 	}
 
-	// Expand manual metrics. Each TF metric block with multiple queries is fanned out
-	// into separate custom metric entries (the API expects one query per entry).
 	if v, ok := promMap["metric"].([]interface{}); ok && len(v) > 0 {
-		var customMetrics []sdk.WorkloadoptimizationV1CustomMetricsDataSourceInputPrometheusMetric
+		customMetrics := make([]sdk.WorkloadoptimizationV1CustomMetricsDataSourceInputPrometheusMetric, 0, len(v))
 		for _, m := range v {
 			metricMap := m.(map[string]interface{})
-			name := metricMap["name"].(string)
-			queriesRaw := metricMap["queries"].([]interface{})
-			for _, q := range queriesRaw {
-				customMetrics = append(customMetrics, sdk.WorkloadoptimizationV1CustomMetricsDataSourceInputPrometheusMetric{
-					Name:  name,
-					Query: q.(string),
-				})
-			}
+			customMetrics = append(customMetrics, sdk.WorkloadoptimizationV1CustomMetricsDataSourceInputPrometheusMetric{
+				Name:  metricMap["name"].(string),
+				Query: metricMap["query"].(string),
+			})
 		}
 		if metrics == nil {
 			metrics = &sdk.WorkloadoptimizationV1CustomMetricsDataSourceInputPrometheusMetrics{}
@@ -416,26 +409,17 @@ func flattenPrometheusConfig(prom *sdk.WorkloadoptimizationV1CustomMetricsDataSo
 	}
 
 	if prom.Metrics != nil && prom.Metrics.Resolved != nil {
-		// Extract manual-origin queries from resolved metrics, grouped by metric name.
-		queriesByName := map[string][]string{}
-		var names []string
+		var metrics []interface{}
 		for _, rm := range *prom.Metrics.Resolved {
 			for _, q := range rm.Queries {
 				if q.Origin != sdk.WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetricsResolvedMetricQueryOriginMANUAL {
 					continue
 				}
-				if _, ok := queriesByName[rm.Name]; !ok {
-					names = append(names, rm.Name)
-				}
-				queriesByName[rm.Name] = append(queriesByName[rm.Name], q.Value)
+				metrics = append(metrics, map[string]interface{}{
+					"name":  rm.Name,
+					"query": q.Value,
+				})
 			}
-		}
-		metrics := make([]interface{}, 0, len(names))
-		for _, name := range names {
-			metrics = append(metrics, map[string]interface{}{
-				"name":    name,
-				"queries": queriesByName[name],
-			})
 		}
 		promMap["metric"] = metrics
 	} else {

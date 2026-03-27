@@ -25,13 +25,13 @@ resource "castai_workload_custom_metrics_data_source" "prometheus_custom" {
     url = "http://prometheus-server.monitoring.svc.cluster.local:9090"
 
     metric {
-      name    = "http_requests_total"
-      queries = ["sum(rate(http_requests_total[5m])) by (pod)"]
+      name  = "http_requests_total"
+      query = "sum(rate(http_requests_total[5m])) by (pod)"
     }
 
     metric {
-      name    = "custom_queue_depth"
-      queries = ["avg(queue_depth) by (pod)"]
+      name  = "custom_queue_depth"
+      query = "avg(queue_depth) by (pod)"
     }
   }
 }

@@ -40,13 +40,13 @@ resource "castai_workload_custom_metrics_data_source" "prometheus_custom" {
     url = "http://prometheus-server.monitoring.svc.cluster.local:9090"
 
     metric {
-      name    = "http_requests_total"
-      queries = ["sum(rate(http_requests_total[5m])) by (pod)"]
+      name  = "http_requests_total"
+      query = "sum(rate(http_requests_total[5m])) by (pod)"
     }
 
     metric {
-      name    = "custom_queue_depth"
-      queries = ["avg(queue_depth) by (pod)"]
+      name  = "custom_queue_depth"
+      query = "avg(queue_depth) by (pod)"
     }
   }
 }
@@ -81,7 +81,7 @@ Required:
 
 Optional:
 
-- `metric` (Block List) Manually defined metrics. Use this for advanced use cases where presets don't cover your needs. Each metric requires a name and one or more PromQL queries. (see [below for nested schema](#nestedblock--prometheus--metric))
+- `metric` (Block List) Manually defined metrics. Use this for advanced use cases where presets don't cover your needs. Each entry defines a single metric name and PromQL query. To specify multiple queries for the same metric, use multiple entries with the same name. (see [below for nested schema](#nestedblock--prometheus--metric))
 - `presets` (List of String) List of metric presets managed by CAST AI. Presets provide curated metric definitions that are kept up to date automatically. This is the recommended approach for most users. Currently available: "jvm".
 - `timeout` (String) Timeout for Prometheus queries (e.g. "30s").
 
@@ -91,7 +91,7 @@ Optional:
 Required:
 
 - `name` (String) Name of the metric.
-- `queries` (List of String) PromQL queries for this metric.
+- `query` (String) PromQL query for this metric.
 
 
 
