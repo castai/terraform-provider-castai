@@ -345,9 +345,7 @@ func expandPrometheusInputConfig(d *schema.ResourceData) (*sdk.Workloadoptimizat
 		for i, p := range v {
 			presets[i] = p.(string)
 		}
-		if metrics == nil {
-			metrics = &sdk.WorkloadoptimizationV1CustomMetricsDataSourceInputPrometheusMetrics{}
-		}
+		metrics = &sdk.WorkloadoptimizationV1CustomMetricsDataSourceInputPrometheusMetrics{}
 		metrics.Presets = &presets
 	}
 
