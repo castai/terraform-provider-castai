@@ -166,9 +166,13 @@ func TestWorkloadCustomMetricsDataSource_CreateWithManualMetrics(t *testing.T) {
 					Url: "http://prometheus:9090",
 				},
 				Metrics: &sdk.WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetrics{
-					ResolvedMetrics: &[]sdk.WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetricsMetric{
-						{Name: "http_requests_total", Queries: []string{"sum(rate(http_requests_total[5m])) by (pod)"}},
-						{Name: "queue_depth", Queries: []string{"avg(queue_depth) by (pod)"}},
+					Resolved: &[]sdk.WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetricsResolvedMetric{
+						{Name: "http_requests_total", Queries: []sdk.WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetricsResolvedMetricQuery{
+							{Value: "sum(rate(http_requests_total[5m])) by (pod)", Origin: sdk.WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetricsResolvedMetricQueryOriginMANUAL},
+						}},
+						{Name: "queue_depth", Queries: []sdk.WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetricsResolvedMetricQuery{
+							{Value: "avg(queue_depth) by (pod)", Origin: sdk.WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetricsResolvedMetricQueryOriginMANUAL},
+						}},
 					},
 				},
 			},
@@ -512,5 +516,106 @@ func TestWorkloadCustomMetricsDataSource_Importer(t *testing.T) {
 			r.Equal(tc.expectedClusterID, result[0].Get(FieldClusterID))
 		})
 	}
+}
+
+func TestWorkloadCustomMetricsDataSource_ImportReadWithManualMetrics(t *testing.T) {
+	r := require.New(t)
+	mockctrl := gomock.NewController(t)
+	mockClient := mock_sdk.NewMockClientInterface(mockctrl)
+
+	ctx := context.Background()
+	provider := &ProviderConfig{
+		api: &sdk.ClientWithResponses{
+			ClientInterface: mockClient,
+		},
+	}
+
+	res := resourceWorkloadCustomMetricsDataSource()
+
+	clusterID := "b6bfc074-a267-400f-b8f1-db0850c36gk1"
+	dsID := "ds-456"
+
+	// GIVEN — simulate post-import state: cluster_id is set but no prometheus config in state.
+	val := cty.ObjectVal(map[string]cty.Value{
+		FieldClusterID: cty.StringVal(clusterID),
+		"name":         cty.StringVal(""),
+		"prometheus": cty.ListValEmpty(cty.Object(map[string]cty.Type{
+			"url":     cty.String,
+			"timeout": cty.String,
+			"presets": cty.List(cty.String),
+			"metric": cty.List(cty.Object(map[string]cty.Type{
+				"name":    cty.String,
+				"queries": cty.List(cty.String),
+			})),
+		})),
+		"status":             cty.StringVal(""),
+		"kube_resource_name": cty.StringVal(""),
+		"managed_by_cast":    cty.False,
+	})
+	state := terraform.NewInstanceStateShimmedFromValue(val, 0)
+	state.ID = dsID
+	data := res.Data(state)
+
+	listResponse := sdk.WorkloadoptimizationV1ListCustomMetricsDataSourcesResponse{
+		Items: []sdk.WorkloadoptimizationV1CustomMetricsDataSource{
+			{
+				Id:               dsID,
+				ClusterId:        clusterID,
+				Name:             "custom-prom",
+				Type:             sdk.PROMETHEUS,
+				Status:           sdk.WorkloadoptimizationV1CustomMetricsDataSourceStatusCONNECTED,
+				KubeResourceName: "custom-prom",
+				ManagedByCast:    true,
+				Data: sdk.WorkloadoptimizationV1CustomMetricsDataSourceData{
+					Prometheus: &sdk.WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheus{
+						DataSource: sdk.WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusDataSource{
+							Url: "http://prometheus:9090",
+						},
+						Metrics: &sdk.WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetrics{
+							Resolved: &[]sdk.WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetricsResolvedMetric{
+								{Name: "http_requests_total", Queries: []sdk.WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetricsResolvedMetricQuery{
+									{Value: "sum(rate(http_requests_total[5m])) by (pod)", Origin: sdk.WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetricsResolvedMetricQueryOriginMANUAL},
+								}},
+								{Name: "queue_depth", Queries: []sdk.WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetricsResolvedMetricQuery{
+									{Value: "avg(queue_depth) by (pod)", Origin: sdk.WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetricsResolvedMetricQueryOriginMANUAL},
+								}},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+	listBody, _ := json.Marshal(listResponse)
+	mockClient.EXPECT().
+		WorkloadOptimizationAPIListCustomMetricsDataSources(ctx, clusterID).
+		Return(&http.Response{
+			StatusCode: http.StatusOK,
+			Header:     http.Header{"Content-Type": []string{"application/json"}},
+			Body:       io.NopCloser(bytes.NewReader(listBody)),
+		}, nil)
+
+	// WHEN
+	diags := resourceWorkloadCustomMetricsDataSourceRead(ctx, data, provider)
+
+	// THEN
+	r.Empty(diags)
+	r.Equal("custom-prom", data.Get("name"))
+
+	promList := data.Get("prometheus").([]interface{})
+	r.Len(promList, 1)
+	promMap := promList[0].(map[string]interface{})
+	r.Equal("http://prometheus:9090", promMap["url"])
+
+	metricList := promMap["metric"].([]interface{})
+	r.Len(metricList, 2)
+
+	metric0 := metricList[0].(map[string]interface{})
+	r.Equal("http_requests_total", metric0["name"])
+	r.Equal([]interface{}{"sum(rate(http_requests_total[5m])) by (pod)"}, metric0["queries"])
+
+	metric1 := metricList[1].(map[string]interface{})
+	r.Equal("queue_depth", metric1["name"])
+	r.Equal([]interface{}{"avg(queue_depth) by (pod)"}, metric1["queries"])
 }
 

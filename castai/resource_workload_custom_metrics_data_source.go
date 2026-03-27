@@ -367,7 +367,7 @@ func expandPrometheusInputConfig(d *schema.ResourceData) (*sdk.Workloadoptimizat
 		if metrics == nil {
 			metrics = &sdk.WorkloadoptimizationV1CustomMetricsDataSourceInputPrometheusMetrics{}
 		}
-		metrics.Custom = &customMetrics
+		metrics.Manual = &customMetrics
 	}
 
 	result.Metrics = metrics
@@ -390,7 +390,7 @@ func flattenWorkloadCustomMetricsDataSource(d *schema.ResourceData, ds *sdk.Work
 	}
 
 	if ds.Data.Prometheus != nil {
-		prom := flattenPrometheusConfig(d, ds.Data.Prometheus)
+		prom := flattenPrometheusConfig(ds.Data.Prometheus)
 		if err := d.Set("prometheus", prom); err != nil {
 			return diag.Errorf("setting prometheus: %v", err)
 		}
@@ -399,7 +399,7 @@ func flattenWorkloadCustomMetricsDataSource(d *schema.ResourceData, ds *sdk.Work
 	return nil
 }
 
-func flattenPrometheusConfig(d *schema.ResourceData, prom *sdk.WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheus) []interface{} {
+func flattenPrometheusConfig(prom *sdk.WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheus) []interface{} {
 	promMap := map[string]interface{}{
 		"url":     prom.DataSource.Url,
 		"timeout": "",
@@ -415,23 +415,27 @@ func flattenPrometheusConfig(d *schema.ResourceData, prom *sdk.Workloadoptimizat
 		promMap["presets"] = []string{}
 	}
 
-	// Only read back manual metrics that the user has configured (from state), not all resolved_metrics.
-	// The API returns resolved_metrics which includes both preset-resolved and manual metrics.
-	// We match by comparing with the user's configured metric blocks.
-	configuredMetrics := getConfiguredManualMetrics(d)
-	if len(configuredMetrics) > 0 && prom.Metrics != nil && prom.Metrics.ResolvedMetrics != nil {
-		metrics := make([]interface{}, 0, len(configuredMetrics))
-		resolvedMap := make(map[string]sdk.WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetricsMetric)
-		for _, rm := range *prom.Metrics.ResolvedMetrics {
-			resolvedMap[rm.Name] = rm
-		}
-		for _, cm := range configuredMetrics {
-			if rm, ok := resolvedMap[cm]; ok {
-				metrics = append(metrics, map[string]interface{}{
-					"name":    rm.Name,
-					"queries": rm.Queries,
-				})
+	if prom.Metrics != nil && prom.Metrics.Resolved != nil {
+		// Extract manual-origin queries from resolved metrics, grouped by metric name.
+		queriesByName := map[string][]string{}
+		var names []string
+		for _, rm := range *prom.Metrics.Resolved {
+			for _, q := range rm.Queries {
+				if q.Origin != sdk.WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetricsResolvedMetricQueryOriginMANUAL {
+					continue
+				}
+				if _, ok := queriesByName[rm.Name]; !ok {
+					names = append(names, rm.Name)
+				}
+				queriesByName[rm.Name] = append(queriesByName[rm.Name], q.Value)
 			}
+		}
+		metrics := make([]interface{}, 0, len(names))
+		for _, name := range names {
+			metrics = append(metrics, map[string]interface{}{
+				"name":    name,
+				"queries": queriesByName[name],
+			})
 		}
 		promMap["metric"] = metrics
 	} else {
@@ -439,25 +443,4 @@ func flattenPrometheusConfig(d *schema.ResourceData, prom *sdk.Workloadoptimizat
 	}
 
 	return []interface{}{promMap}
-}
-
-func getConfiguredManualMetrics(d *schema.ResourceData) []string {
-	promList := d.Get("prometheus").([]interface{})
-	if len(promList) == 0 {
-		return nil
-	}
-	promMap := promList[0].(map[string]interface{})
-	metricList, ok := promMap["metric"].([]interface{})
-	if !ok || len(metricList) == 0 {
-		return nil
-	}
-	names := make([]string, 0, len(metricList))
-	for _, m := range metricList {
-		if mm, ok := m.(map[string]interface{}); ok {
-			if name, ok := mm["name"].(string); ok {
-				names = append(names, name)
-			}
-		}
-	}
-	return names
 }
