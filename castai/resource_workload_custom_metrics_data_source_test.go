@@ -10,6 +10,7 @@ import (
 
 	"github.com/golang/mock/gomock"
 	"github.com/hashicorp/go-cty/cty"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/stretchr/testify/require"
 
@@ -43,7 +44,7 @@ func TestWorkloadCustomMetricsDataSource_CreateWithPresets(t *testing.T) {
 				"url":     cty.StringVal("http://prometheus:9090"),
 				"timeout": cty.StringVal("30s"),
 				"presets": cty.ListVal([]cty.Value{cty.StringVal("jvm")}),
-				"metric":  cty.ListValEmpty(cty.Object(map[string]cty.Type{"name": cty.String, "query": cty.String})),
+				"metric":  cty.SetValEmpty(cty.Object(map[string]cty.Type{"name": cty.String, "query": cty.String})),
 			}),
 		}),
 		"status":             cty.StringVal(""),
@@ -133,7 +134,7 @@ func TestWorkloadCustomMetricsDataSource_CreateWithManualMetrics(t *testing.T) {
 				"url":     cty.StringVal("http://prometheus:9090"),
 				"timeout": cty.StringVal(""),
 				"presets": cty.ListValEmpty(cty.String),
-				"metric": cty.ListVal([]cty.Value{
+				"metric": cty.SetVal([]cty.Value{
 					cty.ObjectVal(map[string]cty.Value{
 						"name":  cty.StringVal("http_requests_total"),
 						"query": cty.StringVal("sum(rate(http_requests_total[5m])) by (pod)"),
@@ -213,14 +214,16 @@ func TestWorkloadCustomMetricsDataSource_CreateWithManualMetrics(t *testing.T) {
 	promMap := promList[0].(map[string]interface{})
 	r.Equal("http://prometheus:9090", promMap["url"])
 
-	metricList := promMap["metric"].([]interface{})
-	r.Len(metricList, 2)
+	metricSet := promMap["metric"].(*schema.Set)
+	r.Equal(2, metricSet.Len())
 
-	metric0 := metricList[0].(map[string]interface{})
-	r.Equal("http_requests_total", metric0["name"])
-
-	metric1 := metricList[1].(map[string]interface{})
-	r.Equal("queue_depth", metric1["name"])
+	metricList := metricSet.List()
+	names := map[string]bool{}
+	for _, m := range metricList {
+		names[m.(map[string]interface{})["name"].(string)] = true
+	}
+	r.True(names["http_requests_total"])
+	r.True(names["queue_depth"])
 }
 
 func TestWorkloadCustomMetricsDataSource_ReadNotFound(t *testing.T) {
@@ -249,7 +252,7 @@ func TestWorkloadCustomMetricsDataSource_ReadNotFound(t *testing.T) {
 				"url":     cty.StringVal("http://prometheus:9090"),
 				"timeout": cty.StringVal(""),
 				"presets": cty.ListValEmpty(cty.String),
-				"metric":  cty.ListValEmpty(cty.Object(map[string]cty.Type{"name": cty.String, "query": cty.String})),
+				"metric":  cty.SetValEmpty(cty.Object(map[string]cty.Type{"name": cty.String, "query": cty.String})),
 			}),
 		}),
 		"status":             cty.StringVal(""),
@@ -306,7 +309,7 @@ func TestWorkloadCustomMetricsDataSource_Update(t *testing.T) {
 				"url":     cty.StringVal("http://new-prometheus:9090"),
 				"timeout": cty.StringVal("60s"),
 				"presets": cty.ListVal([]cty.Value{cty.StringVal("jvm")}),
-				"metric":  cty.ListValEmpty(cty.Object(map[string]cty.Type{"name": cty.String, "query": cty.String})),
+				"metric":  cty.SetValEmpty(cty.Object(map[string]cty.Type{"name": cty.String, "query": cty.String})),
 			}),
 		}),
 		"status":             cty.StringVal(""),
@@ -395,7 +398,7 @@ func TestWorkloadCustomMetricsDataSource_Delete(t *testing.T) {
 				"url":     cty.StringVal("http://prometheus:9090"),
 				"timeout": cty.StringVal(""),
 				"presets": cty.ListValEmpty(cty.String),
-				"metric":  cty.ListValEmpty(cty.Object(map[string]cty.Type{"name": cty.String, "query": cty.String})),
+				"metric":  cty.SetValEmpty(cty.Object(map[string]cty.Type{"name": cty.String, "query": cty.String})),
 			}),
 		}),
 		"status":             cty.StringVal(""),
@@ -448,7 +451,7 @@ func TestWorkloadCustomMetricsDataSource_DeleteNotFound(t *testing.T) {
 				"url":     cty.StringVal("http://prometheus:9090"),
 				"timeout": cty.StringVal(""),
 				"presets": cty.ListValEmpty(cty.String),
-				"metric":  cty.ListValEmpty(cty.Object(map[string]cty.Type{"name": cty.String, "query": cty.String})),
+				"metric":  cty.SetValEmpty(cty.Object(map[string]cty.Type{"name": cty.String, "query": cty.String})),
 			}),
 		}),
 		"status":             cty.StringVal(""),
@@ -543,7 +546,7 @@ func TestWorkloadCustomMetricsDataSource_ImportReadWithManualMetrics(t *testing.
 			"url":     cty.String,
 			"timeout": cty.String,
 			"presets": cty.List(cty.String),
-			"metric": cty.List(cty.Object(map[string]cty.Type{
+			"metric": cty.Set(cty.Object(map[string]cty.Type{
 				"name":  cty.String,
 				"query": cty.String,
 			})),
@@ -607,15 +610,15 @@ func TestWorkloadCustomMetricsDataSource_ImportReadWithManualMetrics(t *testing.
 	promMap := promList[0].(map[string]interface{})
 	r.Equal("http://prometheus:9090", promMap["url"])
 
-	metricList := promMap["metric"].([]interface{})
-	r.Len(metricList, 2)
+	metricSet := promMap["metric"].(*schema.Set)
+	r.Equal(2, metricSet.Len())
 
-	metric0 := metricList[0].(map[string]interface{})
-	r.Equal("http_requests_total", metric0["name"])
-	r.Equal("sum(rate(http_requests_total[5m])) by (pod)", metric0["query"])
-
-	metric1 := metricList[1].(map[string]interface{})
-	r.Equal("queue_depth", metric1["name"])
-	r.Equal("avg(queue_depth) by (pod)", metric1["query"])
+	metricsByName := map[string]string{}
+	for _, m := range metricSet.List() {
+		mm := m.(map[string]interface{})
+		metricsByName[mm["name"].(string)] = mm["query"].(string)
+	}
+	r.Equal("sum(rate(http_requests_total[5m])) by (pod)", metricsByName["http_requests_total"])
+	r.Equal("avg(queue_depth) by (pod)", metricsByName["queue_depth"])
 }
 

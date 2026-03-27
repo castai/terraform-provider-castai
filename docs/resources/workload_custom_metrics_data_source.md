@@ -81,7 +81,7 @@ Required:
 
 Optional:
 
-- `metric` (Block List) Manually defined metrics. Use this for advanced use cases where presets don't cover your needs. Each entry defines a single metric name and PromQL query. To specify multiple queries for the same metric, use multiple entries with the same name. (see [below for nested schema](#nestedblock--prometheus--metric))
+- `metric` (Block Set) Manually defined metrics. Use this for advanced use cases where presets don't cover your needs. Each entry defines a single metric name and PromQL query. To specify multiple queries for the same metric, use multiple entries with the same name. (see [below for nested schema](#nestedblock--prometheus--metric))
 - `presets` (List of String) List of metric presets managed by CAST AI. Presets provide curated metric definitions that are kept up to date automatically. This is the recommended approach for most users. Currently available: "jvm".
 - `timeout` (String) Timeout for Prometheus queries (e.g. "30s").
 

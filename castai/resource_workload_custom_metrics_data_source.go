@@ -78,7 +78,7 @@ func resourceWorkloadCustomMetricsDataSource() *schema.Resource {
 							},
 						},
 						"metric": {
-							Type:     schema.TypeList,
+							Type:     schema.TypeSet,
 							Optional: true,
 							Description: "Manually defined metrics. Use this for advanced use cases where presets " +
 								"don't cover your needs. Each entry defines a single metric name and PromQL query. " +
@@ -348,9 +348,10 @@ func expandPrometheusInputConfig(d *schema.ResourceData) (*sdk.Workloadoptimizat
 		metrics.Presets = &presets
 	}
 
-	if v, ok := promMap["metric"].([]interface{}); ok && len(v) > 0 {
-		customMetrics := make([]sdk.WorkloadoptimizationV1CustomMetricsDataSourceInputPrometheusMetric, 0, len(v))
-		for _, m := range v {
+	if v, ok := promMap["metric"].(*schema.Set); ok && v.Len() > 0 {
+		items := v.List()
+		customMetrics := make([]sdk.WorkloadoptimizationV1CustomMetricsDataSourceInputPrometheusMetric, 0, len(items))
+		for _, m := range items {
 			metricMap := m.(map[string]interface{})
 			customMetrics = append(customMetrics, sdk.WorkloadoptimizationV1CustomMetricsDataSourceInputPrometheusMetric{
 				Name:  metricMap["name"].(string),
