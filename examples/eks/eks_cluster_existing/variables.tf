@@ -44,3 +44,15 @@ variable "tags" {
   description = "Optional tags for new cluster nodes. This parameter applies only to new nodes - tags for old nodes are not reconciled."
   default     = {}
 }
+
+variable "agent_values" {
+  type        = list(string)
+  description = "List of YAML-formatted Helm values for the castai-agent chart. Use this to set additionalEnv, resource limits, pod annotations, etc."
+  default     = []
+}
+
+variable "cluster_controller_values" {
+  type        = list(string)
+  description = "List of YAML-formatted Helm values for the castai-cluster-controller chart. Use this to set additionalEnv, resource limits, pod annotations, etc."
+  default     = []
+}
