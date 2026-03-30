@@ -424,7 +424,7 @@ func flattenPrometheusConfig(prom *sdk.WorkloadoptimizationV1CustomMetricsDataSo
 		}
 		promMap["metric"] = metrics
 	} else {
-		promMap["metric"] = []interface{}{}
+		promMap["metric"] = nil
 	}
 
 	return []interface{}{promMap}

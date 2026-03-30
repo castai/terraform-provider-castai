@@ -476,6 +476,156 @@ func TestWorkloadCustomMetricsDataSource_DeleteNotFound(t *testing.T) {
 	r.Empty(diags)
 }
 
+func TestFlattenPrometheusConfig(t *testing.T) {
+	tests := map[string]struct {
+		prom            *sdk.WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheus
+		expectedURL     string
+		expectedTimeout string
+		expectedPresets []string
+		expectedMetric  []interface{} // nil means metric key should be nil
+	}{
+		"minimal config with nil metrics": {
+			prom: &sdk.WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheus{
+				DataSource: sdk.WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusDataSource{
+					Url: "http://prometheus:9090",
+				},
+			},
+			expectedURL:     "http://prometheus:9090",
+			expectedTimeout: "",
+			expectedPresets: []string{},
+			expectedMetric:  nil,
+		},
+		"with timeout": {
+			prom: &sdk.WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheus{
+				DataSource: sdk.WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusDataSource{
+					Url:     "http://prometheus:9090",
+					Timeout: toPtr("30s"),
+				},
+			},
+			expectedURL:     "http://prometheus:9090",
+			expectedTimeout: "30s",
+			expectedPresets: []string{},
+			expectedMetric:  nil,
+		},
+		"with presets": {
+			prom: &sdk.WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheus{
+				DataSource: sdk.WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusDataSource{
+					Url: "http://prometheus:9090",
+				},
+				Metrics: &sdk.WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetrics{
+					Presets: &[]string{"jvm", "kafka"},
+				},
+			},
+			expectedURL:     "http://prometheus:9090",
+			expectedTimeout: "",
+			expectedPresets: []string{"jvm", "kafka"},
+			expectedMetric:  nil,
+		},
+		"resolved with only preset metrics": {
+			prom: &sdk.WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheus{
+				DataSource: sdk.WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusDataSource{
+					Url: "http://prometheus:9090",
+				},
+				Metrics: &sdk.WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetrics{
+					Presets: &[]string{"jvm"},
+					Resolved: &[]sdk.WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetricsResolvedMetric{
+						{Name: "jvm_threads", Queries: []sdk.WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetricsResolvedMetricQuery{
+							{Value: "jvm_threads_current", Origin: sdk.WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetricsResolvedMetricQueryOriginPRESET},
+						}},
+					},
+				},
+			},
+			expectedURL:     "http://prometheus:9090",
+			expectedTimeout: "",
+			expectedPresets: []string{"jvm"},
+			expectedMetric:  nil,
+		},
+		"resolved with empty list": {
+			prom: &sdk.WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheus{
+				DataSource: sdk.WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusDataSource{
+					Url: "http://prometheus:9090",
+				},
+				Metrics: &sdk.WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetrics{
+					Resolved: &[]sdk.WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetricsResolvedMetric{},
+				},
+			},
+			expectedURL:     "http://prometheus:9090",
+			expectedTimeout: "",
+			expectedPresets: []string{},
+			expectedMetric:  nil,
+		},
+		"resolved with manual metrics": {
+			prom: &sdk.WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheus{
+				DataSource: sdk.WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusDataSource{
+					Url:     "http://prometheus:9090",
+					Timeout: toPtr("15s"),
+				},
+				Metrics: &sdk.WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetrics{
+					Resolved: &[]sdk.WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetricsResolvedMetric{
+						{Name: "http_requests_total", Queries: []sdk.WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetricsResolvedMetricQuery{
+							{Value: "sum(rate(http_requests_total[5m])) by (pod)", Origin: sdk.WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetricsResolvedMetricQueryOriginMANUAL},
+						}},
+						{Name: "queue_depth", Queries: []sdk.WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetricsResolvedMetricQuery{
+							{Value: "avg(queue_depth) by (pod)", Origin: sdk.WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetricsResolvedMetricQueryOriginMANUAL},
+						}},
+					},
+				},
+			},
+			expectedURL:     "http://prometheus:9090",
+			expectedTimeout: "15s",
+			expectedPresets: []string{},
+			expectedMetric: []interface{}{
+				map[string]interface{}{"name": "http_requests_total", "query": "sum(rate(http_requests_total[5m])) by (pod)"},
+				map[string]interface{}{"name": "queue_depth", "query": "avg(queue_depth) by (pod)"},
+			},
+		},
+		"resolved with mixed preset and manual metrics": {
+			prom: &sdk.WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheus{
+				DataSource: sdk.WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusDataSource{
+					Url: "http://prometheus:9090",
+				},
+				Metrics: &sdk.WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetrics{
+					Presets: &[]string{"jvm"},
+					Resolved: &[]sdk.WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetricsResolvedMetric{
+						{Name: "jvm_threads", Queries: []sdk.WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetricsResolvedMetricQuery{
+							{Value: "jvm_threads_current", Origin: sdk.WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetricsResolvedMetricQueryOriginPRESET},
+						}},
+						{Name: "custom_metric", Queries: []sdk.WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetricsResolvedMetricQuery{
+							{Value: "my_custom_query", Origin: sdk.WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetricsResolvedMetricQueryOriginMANUAL},
+						}},
+					},
+				},
+			},
+			expectedURL:     "http://prometheus:9090",
+			expectedTimeout: "",
+			expectedPresets: []string{"jvm"},
+			expectedMetric: []interface{}{
+				map[string]interface{}{"name": "custom_metric", "query": "my_custom_query"},
+			},
+		},
+	}
+
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			r := require.New(t)
+
+			result := flattenPrometheusConfig(tc.prom)
+			r.Len(result, 1)
+
+			promMap := result[0].(map[string]interface{})
+			r.Equal(tc.expectedURL, promMap["url"])
+			r.Equal(tc.expectedTimeout, promMap["timeout"])
+			r.Equal(tc.expectedPresets, promMap["presets"])
+
+			if tc.expectedMetric == nil {
+				r.Nil(promMap["metric"])
+			} else {
+				r.Equal(tc.expectedMetric, promMap["metric"])
+			}
+		})
+	}
+}
+
 func TestWorkloadCustomMetricsDataSource_Importer(t *testing.T) {
 	type testCase struct {
 		importID          string
