@@ -13,6 +13,7 @@ import (
 	"github.com/castai/terraform-provider-castai/castai/sdk/cluster_autoscaler"
 	"github.com/castai/terraform-provider-castai/castai/sdk/omni"
 	"github.com/castai/terraform-provider-castai/castai/sdk/organization_management"
+	"github.com/castai/terraform-provider-castai/castai/sdk/patching_engine"
 )
 
 type ProviderConfig struct {
@@ -20,6 +21,7 @@ type ProviderConfig struct {
 	clusterAutoscalerClient      cluster_autoscaler.ClientWithResponsesInterface
 	organizationManagementClient organization_management.ClientWithResponsesInterface
 	omniAPI                      *omni.ClientWithResponses
+	patchingEngineClient         patching_engine.ClientWithResponsesInterface
 }
 
 func Provider(version string) *schema.Provider {
@@ -74,17 +76,18 @@ func Provider(version string) *schema.Provider {
 			"castai_cache_group":                   resourceCacheGroup(),
 			"castai_cache_configuration":           resourceCacheConfiguration(),
 			"castai_cache_rule":                    resourceCacheRule(),
+			"castai_pod_mutation":                  resourcePodMutation(),
 		},
 
 		DataSourcesMap: map[string]*schema.Resource{
-			"castai_eks_settings":                   dataSourceEKSSettings(),
-			"castai_gke_user_policies":              dataSourceGKEPolicies(),
-			"castai_organization":                   dataSourceOrganization(),
-			"castai_rebalancing_schedule":           dataSourceRebalancingSchedule(),
-			"castai_hibernation_schedule":           dataSourceHibernationSchedule(),
-			"castai_workload_scaling_policy_order":  dataSourceWorkloadScalingPolicyOrder(),
-			"castai_cache_group":                    dataSourceCacheGroup(),
-			"castai_impersonation_service_account":  dataSourceImpersonationServiceAccount(),
+			"castai_eks_settings":                  dataSourceEKSSettings(),
+			"castai_gke_user_policies":             dataSourceGKEPolicies(),
+			"castai_organization":                  dataSourceOrganization(),
+			"castai_rebalancing_schedule":          dataSourceRebalancingSchedule(),
+			"castai_hibernation_schedule":          dataSourceHibernationSchedule(),
+			"castai_workload_scaling_policy_order": dataSourceWorkloadScalingPolicyOrder(),
+			"castai_cache_group":                   dataSourceCacheGroup(),
+			"castai_impersonation_service_account": dataSourceImpersonationServiceAccount(),
 		},
 
 		ConfigureContextFunc: providerConfigure(version),
@@ -127,11 +130,17 @@ func providerConfigure(version string) schema.ConfigureContextFunc {
 			return nil, diag.FromErr(err)
 		}
 
+		patchingEngineClient, err := patching_engine.CreateClient(apiURL, apiToken, agent)
+		if err != nil {
+			return nil, diag.FromErr(err)
+		}
+
 		return &ProviderConfig{
 			api:                          client,
 			clusterAutoscalerClient:      clusterAutoscalerClient,
 			organizationManagementClient: organizationManagementClient,
 			omniAPI:                      omniClient,
+			patchingEngineClient:         patchingEngineClient,
 		}, nil
 	}
 }
