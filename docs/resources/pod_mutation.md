@@ -90,7 +90,7 @@ resource "castai_pod_mutation" "multi_pool_distribution" {
     name       = "general-pool"
     percentage = 70
     config {
-      spot_type = "OPTIONAL_SPOT"
+      spot_type                     = "OPTIONAL_SPOT"
       node_templates_to_consolidate = ["default-general"]
     }
   }
