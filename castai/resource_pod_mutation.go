@@ -620,9 +620,7 @@ func stateToPodMutation(d *schema.ResourceData) patching_engine.PodMutation {
 		FieldPodMutationNodeTemplates,
 		FieldPodMutationPatch,
 	} {
-		if v, ok := d.GetOk(key); ok {
-			configMap[key] = v
-		}
+		configMap[key] = d.Get(key)
 	}
 	cfg := parseMutationConfigFromMap(configMap)
 	mutation.Labels = cfg.Labels
