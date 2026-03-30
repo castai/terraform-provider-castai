@@ -10,6 +10,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+
+	"github.com/castai/terraform-provider-castai/castai/sdk/omni"
 )
 
 var (
@@ -93,7 +95,7 @@ func (r *omniClusterResource) Create(ctx context.Context, req resource.CreateReq
 	organizationID := plan.OrganizationID.ValueString()
 	clusterID := plan.ClusterID.ValueString()
 
-	apiResp, err := client.ClustersAPIRegisterClusterWithResponse(ctx, organizationID, clusterID)
+	apiResp, err := client.ClustersAPIRegisterClusterWithResponse(ctx, organizationID, clusterID, omni.ClustersAPIRegisterClusterJSONRequestBody{})
 	if err != nil {
 		resp.Diagnostics.AddError("Failed to register omni cluster", err.Error())
 		return
