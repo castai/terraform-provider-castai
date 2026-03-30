@@ -712,6 +712,20 @@ const (
 	WorkloadoptimizationV1CustomMetricUnitTHREADS                     WorkloadoptimizationV1CustomMetricUnit = "THREADS"
 )
 
+// Defines values for WorkloadoptimizationV1CustomMetricsDataSourceDataNodeWorkloadMetricsResolvedMetricOrigin.
+const (
+	WorkloadoptimizationV1CustomMetricsDataSourceDataNodeWorkloadMetricsResolvedMetricOriginMANUAL            WorkloadoptimizationV1CustomMetricsDataSourceDataNodeWorkloadMetricsResolvedMetricOrigin = "MANUAL"
+	WorkloadoptimizationV1CustomMetricsDataSourceDataNodeWorkloadMetricsResolvedMetricOriginORIGINUNSPECIFIED WorkloadoptimizationV1CustomMetricsDataSourceDataNodeWorkloadMetricsResolvedMetricOrigin = "ORIGIN_UNSPECIFIED"
+	WorkloadoptimizationV1CustomMetricsDataSourceDataNodeWorkloadMetricsResolvedMetricOriginPRESET            WorkloadoptimizationV1CustomMetricsDataSourceDataNodeWorkloadMetricsResolvedMetricOrigin = "PRESET"
+)
+
+// Defines values for WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetricsResolvedMetricQueryOrigin.
+const (
+	WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetricsResolvedMetricQueryOriginMANUAL            WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetricsResolvedMetricQueryOrigin = "MANUAL"
+	WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetricsResolvedMetricQueryOriginORIGINUNSPECIFIED WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetricsResolvedMetricQueryOrigin = "ORIGIN_UNSPECIFIED"
+	WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetricsResolvedMetricQueryOriginPRESET            WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetricsResolvedMetricQueryOrigin = "PRESET"
+)
+
 // Defines values for WorkloadoptimizationV1CustomMetricsDataSourceStatus.
 const (
 	WorkloadoptimizationV1CustomMetricsDataSourceStatusCONNECTED     WorkloadoptimizationV1CustomMetricsDataSourceStatus = "CONNECTED"
@@ -8672,16 +8686,36 @@ type WorkloadoptimizationV1CustomMetricsDataSourceDataNodeWorkloadDataSource str
 
 // WorkloadoptimizationV1CustomMetricsDataSourceDataNodeWorkloadMetrics defines model for workloadoptimization.v1.CustomMetricsDataSource.Data.NodeWorkload.Metrics.
 type WorkloadoptimizationV1CustomMetricsDataSourceDataNodeWorkloadMetrics struct {
-	Presets         *[]string                                                                     `json:"presets,omitempty"`
+	// Presets Preset names used to resolve metrics.
+	Presets *[]string `json:"presets,omitempty"`
+
+	// Resolved All resolved metrics from presets and manual metrics combined, with origin information.
+	Resolved *[]WorkloadoptimizationV1CustomMetricsDataSourceDataNodeWorkloadMetricsResolvedMetric `json:"resolved,omitempty"`
+
+	// ResolvedMetrics Deprecated: use `resolved` field instead.
+	// Deprecated:
 	ResolvedMetrics *[]WorkloadoptimizationV1CustomMetricsDataSourceDataNodeWorkloadMetricsMetric `json:"resolvedMetrics,omitempty"`
 }
 
-// WorkloadoptimizationV1CustomMetricsDataSourceDataNodeWorkloadMetricsMetric defines model for workloadoptimization.v1.CustomMetricsDataSource.Data.NodeWorkload.Metrics.Metric.
+// WorkloadoptimizationV1CustomMetricsDataSourceDataNodeWorkloadMetricsMetric Deprecated: use `resolved` field instead.
 type WorkloadoptimizationV1CustomMetricsDataSourceDataNodeWorkloadMetricsMetric struct {
 	Errors   []string `json:"errors"`
 	Name     string   `json:"name"`
 	Warnings []string `json:"warnings"`
 }
+
+// WorkloadoptimizationV1CustomMetricsDataSourceDataNodeWorkloadMetricsResolvedMetric ResolvedMetric represents a fully resolved metric with its origin.
+type WorkloadoptimizationV1CustomMetricsDataSourceDataNodeWorkloadMetricsResolvedMetric struct {
+	Errors *[]string `json:"errors,omitempty"`
+	Name   string    `json:"name"`
+
+	// Origin Origin indicates whether this metric was manually defined or resolved from a preset.
+	Origin   WorkloadoptimizationV1CustomMetricsDataSourceDataNodeWorkloadMetricsResolvedMetricOrigin `json:"origin"`
+	Warnings *[]string                                                                                `json:"warnings,omitempty"`
+}
+
+// WorkloadoptimizationV1CustomMetricsDataSourceDataNodeWorkloadMetricsResolvedMetricOrigin Origin indicates whether this metric was manually defined or resolved from a preset.
+type WorkloadoptimizationV1CustomMetricsDataSourceDataNodeWorkloadMetricsResolvedMetricOrigin string
 
 // WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheus defines model for workloadoptimization.v1.CustomMetricsDataSource.Data.Prometheus.
 type WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheus struct {
@@ -8697,17 +8731,42 @@ type WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusDataSource struc
 
 // WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetrics defines model for workloadoptimization.v1.CustomMetricsDataSource.Data.Prometheus.Metrics.
 type WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetrics struct {
-	Presets         *[]string                                                                   `json:"presets,omitempty"`
+	// Presets Preset names used to resolve metrics.
+	Presets *[]string `json:"presets,omitempty"`
+
+	// Resolved All resolved metrics from presets and manual metrics combined, with origin information.
+	Resolved *[]WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetricsResolvedMetric `json:"resolved,omitempty"`
+
+	// ResolvedMetrics Deprecated: use `resolved` field instead.
+	// Deprecated:
 	ResolvedMetrics *[]WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetricsMetric `json:"resolvedMetrics,omitempty"`
 }
 
-// WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetricsMetric defines model for workloadoptimization.v1.CustomMetricsDataSource.Data.Prometheus.Metrics.Metric.
+// WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetricsMetric Deprecated: use `ResolvedMetric` instead.
 type WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetricsMetric struct {
 	Errors   []string `json:"errors"`
 	Name     string   `json:"name"`
 	Queries  []string `json:"queries"`
 	Warnings []string `json:"warnings"`
 }
+
+// WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetricsResolvedMetric ResolvedMetric represents a fully resolved metric with origin-tagged queries.
+type WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetricsResolvedMetric struct {
+	Errors   *[]string                                                                               `json:"errors,omitempty"`
+	Name     string                                                                                  `json:"name"`
+	Queries  []WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetricsResolvedMetricQuery `json:"queries"`
+	Warnings *[]string                                                                               `json:"warnings,omitempty"`
+}
+
+// WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetricsResolvedMetricQuery Query represents a single Prometheus query with its origin.
+type WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetricsResolvedMetricQuery struct {
+	// Origin Origin indicates whether this query was manually defined or resolved from a preset.
+	Origin WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetricsResolvedMetricQueryOrigin `json:"origin"`
+	Value  string                                                                                      `json:"value"`
+}
+
+// WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetricsResolvedMetricQueryOrigin Origin indicates whether this query was manually defined or resolved from a preset.
+type WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetricsResolvedMetricQueryOrigin string
 
 // WorkloadoptimizationV1CustomMetricsDataSourceStatus Status represents the synchronization status of the custom metrics data source. It indicates whether the data
 // source is currently being synchronized, has been successfully synchronized, is in the process of syncing, or has
@@ -8717,6 +8776,36 @@ type WorkloadoptimizationV1CustomMetricsDataSourceStatus string
 // WorkloadoptimizationV1CustomMetricsDataSourceType Type defines the type of custom metrics data source. Respective Data field will be populated based on the type.
 // For each type, exactly one of the data fields should be populated.
 type WorkloadoptimizationV1CustomMetricsDataSourceType string
+
+// WorkloadoptimizationV1CustomMetricsDataSourceInput CustomMetricsDataSourceInput is the input data type for Create and Update operations on custom metrics data sources.
+type WorkloadoptimizationV1CustomMetricsDataSourceInput struct {
+	Prometheus *WorkloadoptimizationV1CustomMetricsDataSourceInputPrometheus `json:"prometheus,omitempty"`
+}
+
+// WorkloadoptimizationV1CustomMetricsDataSourceInputPrometheus defines model for workloadoptimization.v1.CustomMetricsDataSourceInput.Prometheus.
+type WorkloadoptimizationV1CustomMetricsDataSourceInputPrometheus struct {
+	DataSource WorkloadoptimizationV1CustomMetricsDataSourceInputPrometheusDataSource `json:"dataSource"`
+	Metrics    *WorkloadoptimizationV1CustomMetricsDataSourceInputPrometheusMetrics   `json:"metrics,omitempty"`
+}
+
+// WorkloadoptimizationV1CustomMetricsDataSourceInputPrometheusDataSource defines model for workloadoptimization.v1.CustomMetricsDataSourceInput.Prometheus.DataSource.
+type WorkloadoptimizationV1CustomMetricsDataSourceInputPrometheusDataSource struct {
+	Timeout *string `json:"timeout,omitempty"`
+	Url     string  `json:"url"`
+}
+
+// WorkloadoptimizationV1CustomMetricsDataSourceInputPrometheusMetric Metric defines a single Prometheus metric query. Multiple entries with the same name
+// represent multiple queries for a single metric.
+type WorkloadoptimizationV1CustomMetricsDataSourceInputPrometheusMetric struct {
+	Name  string `json:"name"`
+	Query string `json:"query"`
+}
+
+// WorkloadoptimizationV1CustomMetricsDataSourceInputPrometheusMetrics defines model for workloadoptimization.v1.CustomMetricsDataSourceInput.Prometheus.Metrics.
+type WorkloadoptimizationV1CustomMetricsDataSourceInputPrometheusMetrics struct {
+	Manual  *[]WorkloadoptimizationV1CustomMetricsDataSourceInputPrometheusMetric `json:"manual,omitempty"`
+	Presets *[]string                                                             `json:"presets,omitempty"`
+}
 
 // WorkloadoptimizationV1DeleteWorkloadScalingPolicyResponse defines model for workloadoptimization.v1.DeleteWorkloadScalingPolicyResponse.
 type WorkloadoptimizationV1DeleteWorkloadScalingPolicyResponse = map[string]interface{}
@@ -9550,8 +9639,9 @@ type WorkloadoptimizationV1NativeVPAStateChangedEvent struct {
 
 // WorkloadoptimizationV1NewCustomMetricsDataSource defines model for workloadoptimization.v1.NewCustomMetricsDataSource.
 type WorkloadoptimizationV1NewCustomMetricsDataSource struct {
-	Data WorkloadoptimizationV1CustomMetricsDataSourceData `json:"data"`
-	Name string                                            `json:"name"`
+	// Data CustomMetricsDataSourceInput is the input data type for Create and Update operations on custom metrics data sources.
+	Data WorkloadoptimizationV1CustomMetricsDataSourceInput `json:"data"`
+	Name string                                             `json:"name"`
 
 	// Type Type defines the type of custom metrics data source. Respective Data field will be populated based on the type.
 	// For each type, exactly one of the data fields should be populated.
@@ -10291,8 +10381,9 @@ type WorkloadoptimizationV1UnboundMemoryGrowthEvent = map[string]interface{}
 
 // WorkloadoptimizationV1UpdateCustomMetricsDataSource defines model for workloadoptimization.v1.UpdateCustomMetricsDataSource.
 type WorkloadoptimizationV1UpdateCustomMetricsDataSource struct {
-	Data *WorkloadoptimizationV1CustomMetricsDataSourceData `json:"data,omitempty"`
-	Name *string                                            `json:"name,omitempty"`
+	// Data CustomMetricsDataSourceInput is the input data type for Create and Update operations on custom metrics data sources.
+	Data *WorkloadoptimizationV1CustomMetricsDataSourceInput `json:"data,omitempty"`
+	Name *string                                             `json:"name,omitempty"`
 }
 
 // WorkloadoptimizationV1UpdateWorkloadResponseV2 defines model for workloadoptimization.v1.UpdateWorkloadResponseV2.

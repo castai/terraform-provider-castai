@@ -350,6 +350,9 @@ type ListEdgeLocationsResponse struct {
 
 // OCIParam Message that represents OCI location specific parameters.
 type OCIParam struct {
+	// Client OCI WIF client configuration for token exchange.
+	Client *OCIParamClient `json:"client,omitempty"`
+
 	// CompartmentId OCI compartment id of edge location.
 	CompartmentId *string `json:"compartmentId,omitempty"`
 
@@ -361,6 +364,18 @@ type OCIParam struct {
 
 	// TenancyId OCI tenancy id of the account.
 	TenancyId *string `json:"tenancyId,omitempty"`
+}
+
+// OCIParamClient OCI WIF client configuration for token exchange.
+type OCIParamClient struct {
+	// Id ID of the OCI confidential application.
+	Id string `json:"id"`
+
+	// IdentityDomainUri OCI Identity Domain URL (e.g., "idcs-xxxx.identity.oraclecloud.com").
+	IdentityDomainUri string `json:"identityDomainUri"`
+
+	// Secret Secret of the OCI confidential application.
+	Secret *string `json:"secret,omitempty"`
 }
 
 // OCIParamCredentials OCI credentials.
@@ -426,6 +441,21 @@ type OnboardEdgeLocationResponse struct {
 // RegisterClusterResponse Response message of register cluster.
 type RegisterClusterResponse = map[string]interface{}
 
+// RegisteredCluster Cluster information to be registered.
+type RegisteredCluster struct {
+	// Status Current status information.
+	Status *RegisteredClusterStatus `json:"status,omitempty"`
+}
+
+// RegisteredClusterStatus Current status information of the cluster.
+type RegisteredClusterStatus struct {
+	// OmniAgentVersion The version of omni agent running on the cluster.
+	OmniAgentVersion string `json:"omniAgentVersion"`
+
+	// PodCidr The pod CIDR of the cluster.
+	PodCidr string `json:"podCidr"`
+}
+
 // ReportStatusRequest Message to submit object status.
 type ReportStatusRequest struct {
 	// Cluster The status of the cluster.
@@ -446,6 +476,9 @@ type ReportStatusRequest struct {
 
 // ReportStatusRequestCluster Cluster object.
 type ReportStatusRequestCluster struct {
+	// AgentVersion The omni-agent version.
+	AgentVersion *string `json:"agentVersion,omitempty"`
+
 	// ExternalCidr The external CIDR.
 	ExternalCidr *string `json:"externalCidr,omitempty"`
 
@@ -538,6 +571,9 @@ type EdgeLocationsAPICreateEdgeLocationJSONRequestBody = EdgeLocation
 
 // EdgeLocationsAPIUpdateEdgeLocationJSONRequestBody defines body for EdgeLocationsAPIUpdateEdgeLocation for application/json ContentType.
 type EdgeLocationsAPIUpdateEdgeLocationJSONRequestBody = EdgeLocationUpdate
+
+// ClustersAPIRegisterClusterJSONRequestBody defines body for ClustersAPIRegisterCluster for application/json ContentType.
+type ClustersAPIRegisterClusterJSONRequestBody = RegisteredCluster
 
 // ClustersAPIReportStatusJSONRequestBody defines body for ClustersAPIReportStatus for application/json ContentType.
 type ClustersAPIReportStatusJSONRequestBody = ReportStatusRequest
