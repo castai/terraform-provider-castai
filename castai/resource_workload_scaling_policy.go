@@ -36,6 +36,10 @@ const (
 	maxExponentValue                = 1.
 	minExponentValue                = 0.
 	defaultApplyType                = "IMMEDIATE"
+
+	// CPU stall defaults
+	defaultCPUStallMinPressuredPodPct = 50.0
+	defaultCPUStallThresholdPct       = 10.0
 )
 
 const (
@@ -355,6 +359,9 @@ It can be either:
 				Optional:    true,
 				MaxItems:    1,
 				Description: "Defines anomaly detection settings for the scaling policy.",
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					return suppressAnomalyDetectionDefaultValueDiff(old, new, d)
+				},
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						FieldAnomalyDetectionCpuPressure: {
@@ -1155,6 +1162,17 @@ func suppressMemoryEventApplyTypeDefaultValueDiff(oldValue, newValue string, d *
 		applyType := d.Get(fmt.Sprintf("%s.0.%s", FieldMemoryEvent, FieldApplyType))
 		// Suppress diff if apply type saved from API equals to default
 		return applyType == defaultApplyType
+	}
+
+	return oldValue == newValue
+}
+
+func suppressAnomalyDetectionDefaultValueDiff(oldValue, newValue string, d *schema.ResourceData) bool {
+	if isEmpty(newValue) {
+		cpuStallThreshold := d.Get(fmt.Sprintf("%s.0.%s.0.%s", FieldAnomalyDetection, FieldAnomalyDetectionCpuPressure, FieldCpuStallThresholdPercentage))
+		minPressuredPodPct := d.Get(fmt.Sprintf("%s.0.%s.0.%s", FieldAnomalyDetection, FieldAnomalyDetectionCpuPressure, FieldMinPressuredPodPercentage))
+		// Suppress diff if the API-returned values equal the defaults (meaning no explicit config is needed)
+		return cpuStallThreshold == defaultCPUStallThresholdPct && minPressuredPodPct == defaultCPUStallMinPressuredPodPct
 	}
 
 	return oldValue == newValue
