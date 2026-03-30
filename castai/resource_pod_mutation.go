@@ -1019,10 +1019,8 @@ func podMutationToState(mutation *patching_engine.PodMutation, d *schema.Resourc
 	if err := d.Set(FieldPodMutationClusterID, lo.FromPtr(mutation.ClusterId)); err != nil {
 		return diag.FromErr(err)
 	}
-	if mutation.OrganizationId != nil {
-		if err := d.Set(FieldPodMutationOrganizationID, lo.FromPtr(mutation.OrganizationId)); err != nil {
-			return diag.FromErr(err)
-		}
+	if err := d.Set(FieldPodMutationOrganizationID, lo.FromPtr(mutation.OrganizationId)); err != nil {
+		return diag.FromErr(err)
 	}
 
 	if mutation.ObjectFilterV2 != nil {
