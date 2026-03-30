@@ -57,9 +57,11 @@ type zoneModel struct {
 type awsModel struct {
 	AccountID         types.String `tfsdk:"account_id"`
 	InstanceProfile   types.String `tfsdk:"instance_profile"`
+	RoleArn           types.String `tfsdk:"role_arn"`
 	AccessKeyIDWO     types.String `tfsdk:"access_key_id_wo"`
 	SecretAccessKeyWO types.String `tfsdk:"secret_access_key_wo"`
 	VpcID             types.String `tfsdk:"vpc_id"`
+	VpcCidr           types.String `tfsdk:"vpc_cidr"`
 	VpcPeered         types.Bool   `tfsdk:"vpc_peered"`
 	SecurityGroupID   types.String `tfsdk:"security_group_id"`
 	SubnetIDs         types.Map    `tfsdk:"subnet_ids"`
@@ -70,9 +72,11 @@ type awsModel struct {
 type gcpModel struct {
 	ProjectID                        types.String `tfsdk:"project_id"`
 	InstanceServiceAccount           types.String `tfsdk:"instance_service_account"`
+	TargetServiceAccountEmail        types.String `tfsdk:"target_service_account_email"`
 	ClientServiceAccountJSONBase64WO types.String `tfsdk:"client_service_account_json_base64_wo"`
 	NetworkName                      types.String `tfsdk:"network_name"`
 	SubnetName                       types.String `tfsdk:"subnet_name"`
+	SubnetCidr                       types.String `tfsdk:"subnet_cidr"`
 	NetworkTags                      types.Set    `tfsdk:"network_tags"`
 }
 
@@ -82,11 +86,19 @@ type ociModel struct {
 	UserIDWO           types.String `tfsdk:"user_id_wo"`
 	FingerprintWO      types.String `tfsdk:"fingerprint_wo"`
 	PrivateKeyBase64WO types.String `tfsdk:"private_key_base64_wo"`
+	ClientID           types.String `tfsdk:"client_id"`
+	ClientSecretWO     types.String `tfsdk:"client_secret_wo"`
+	IdentityDomainUri  types.String `tfsdk:"identity_domain_uri"`
 	VcnID              types.String `tfsdk:"vcn_id"`
+	VcnCidr            types.String `tfsdk:"vcn_cidr"`
 	SubnetID           types.String `tfsdk:"subnet_id"`
+	SecurityGroupID    types.String `tfsdk:"security_group_id"`
 }
 
 func (m awsModel) credentials() types.String {
+	if m.AccessKeyIDWO.IsNull() && m.SecretAccessKeyWO.IsNull() {
+		return types.StringNull()
+	}
 	return types.StringValue(m.SecretAccessKeyWO.String() + m.AccessKeyIDWO.String())
 }
 
@@ -95,7 +107,9 @@ func (m awsModel) Equal(other *awsModel) bool {
 		return false
 	}
 	return m.AccountID.Equal(other.AccountID) &&
+		m.RoleArn.Equal(other.RoleArn) &&
 		m.VpcID.Equal(other.VpcID) &&
+		m.VpcCidr.Equal(other.VpcCidr) &&
 		m.VpcPeered.Equal(other.VpcPeered) &&
 		m.SecurityGroupID.Equal(other.SecurityGroupID) &&
 		m.SubnetIDs.Equal(other.SubnetIDs) &&
@@ -103,6 +117,9 @@ func (m awsModel) Equal(other *awsModel) bool {
 }
 
 func (m gcpModel) credentials() types.String {
+	if m.ClientServiceAccountJSONBase64WO.IsNull() {
+		return types.StringNull()
+	}
 	return m.ClientServiceAccountJSONBase64WO
 }
 
@@ -111,14 +128,24 @@ func (m gcpModel) Equal(other *gcpModel) bool {
 		return false
 	}
 	return m.ProjectID.Equal(other.ProjectID) &&
+		m.TargetServiceAccountEmail.Equal(other.TargetServiceAccountEmail) &&
 		m.NetworkName.Equal(other.NetworkName) &&
 		m.SubnetName.Equal(other.SubnetName) &&
+		m.SubnetCidr.Equal(other.SubnetCidr) &&
 		m.NetworkTags.Equal(other.NetworkTags) &&
 		m.InstanceServiceAccount.Equal(other.InstanceServiceAccount)
 }
 
 func (m ociModel) credentials() types.String {
-	return types.StringValue(m.UserIDWO.String() + m.PrivateKeyBase64WO.String() + m.FingerprintWO.String())
+	// WIF flow: track client secret
+	if !m.ClientSecretWO.IsNull() {
+		return m.ClientSecretWO
+	}
+	// Legacy API key flow: track user+key+fingerprint
+	if !m.UserIDWO.IsNull() || !m.FingerprintWO.IsNull() || !m.PrivateKeyBase64WO.IsNull() {
+		return types.StringValue(m.UserIDWO.String() + m.PrivateKeyBase64WO.String() + m.FingerprintWO.String())
+	}
+	return types.StringNull()
 }
 
 func (m ociModel) Equal(other *ociModel) bool {
@@ -127,8 +154,12 @@ func (m ociModel) Equal(other *ociModel) bool {
 	}
 	return m.TenancyID.Equal(other.TenancyID) &&
 		m.CompartmentID.Equal(other.CompartmentID) &&
+		m.ClientID.Equal(other.ClientID) &&
+		m.IdentityDomainUri.Equal(other.IdentityDomainUri) &&
+		m.VcnID.Equal(other.VcnID) &&
+		m.VcnCidr.Equal(other.VcnCidr) &&
 		m.SubnetID.Equal(other.SubnetID) &&
-		m.VcnID.Equal(other.VcnID)
+		m.SecurityGroupID.Equal(other.SecurityGroupID)
 }
 
 type ModelWithCredentials interface {
@@ -231,14 +262,18 @@ func (r *edgeLocationResource) Schema(_ context.Context, _ resource.SchemaReques
 						Optional:    true,
 						Description: "AWS IAM instance profile ARN to be attached to edge instances. It can be used to grant permissions to access other AWS resources such as ECR.",
 					},
+					"role_arn": schema.StringAttribute{
+						Optional:    true,
+						Description: "AWS IAM role ARN used for Google OIDC federation impersonation",
+					},
 					"access_key_id_wo": schema.StringAttribute{
-						Required:    true,
+						Optional:    true,
 						WriteOnly:   true,
 						Sensitive:   true,
 						Description: "AWS access key ID",
 					},
 					"secret_access_key_wo": schema.StringAttribute{
-						Required:    true,
+						Optional:    true,
 						Sensitive:   true,
 						WriteOnly:   true,
 						Description: "AWS secret access key",
@@ -246,6 +281,10 @@ func (r *edgeLocationResource) Schema(_ context.Context, _ resource.SchemaReques
 					"vpc_id": schema.StringAttribute{
 						Required:    true,
 						Description: "VPC ID to be used in the selected region",
+					},
+					"vpc_cidr": schema.StringAttribute{
+						Optional:    true,
+						Description: "VPC IPv4 CIDR block",
 					},
 					"vpc_peered": schema.BoolAttribute{
 						Optional:    true,
@@ -279,8 +318,12 @@ func (r *edgeLocationResource) Schema(_ context.Context, _ resource.SchemaReques
 						Optional:    true,
 						Description: "GCP service account email to be attached to edge instances. It can be used to grant permissions to access other GCP resources.",
 					},
+					"target_service_account_email": schema.StringAttribute{
+						Optional:    true,
+						Description: "Target service account email to be used for impersonation",
+					},
 					"client_service_account_json_base64_wo": schema.StringAttribute{
-						Required:    true,
+						Optional:    true,
 						Sensitive:   true,
 						WriteOnly:   true,
 						Description: "Base64 encoded service account JSON for provisioning edge resources",
@@ -295,6 +338,10 @@ func (r *edgeLocationResource) Schema(_ context.Context, _ resource.SchemaReques
 					"subnet_name": schema.StringAttribute{
 						Required:    true,
 						Description: "The name of the subnetwork to be used in the selected region",
+					},
+					"subnet_cidr": schema.StringAttribute{
+						Optional:    true,
+						Description: "VPC Subnet IPv4 CIDR block",
 					},
 					"network_tags": schema.SetAttribute{
 						Required:    true,
@@ -315,20 +362,34 @@ func (r *edgeLocationResource) Schema(_ context.Context, _ resource.SchemaReques
 						Required:    true,
 						Description: "OCI compartment ID of edge location",
 					},
+					"client_id": schema.StringAttribute{
+						Optional:    true,
+						Description: "ID of the OCI confidential application used for WIF token exchange",
+					},
+					"client_secret_wo": schema.StringAttribute{
+						Optional:    true,
+						Sensitive:   true,
+						WriteOnly:   true,
+						Description: "Secret of the OCI confidential application used for WIF token exchange",
+					},
+					"identity_domain_uri": schema.StringAttribute{
+						Optional:    true,
+						Description: "OCI Identity Domain URI (e.g., idcs-xxxx.identity.oraclecloud.com)",
+					},
 					"user_id_wo": schema.StringAttribute{
-						Required:    true,
+						Optional:    true,
 						Description: "User ID used to authenticate OCI",
 						WriteOnly:   true,
 					},
 					"fingerprint_wo": schema.StringAttribute{
-						Required:    true,
+						Optional:    true,
 						Sensitive:   true,
 						WriteOnly:   true,
 						Description: "API key fingerprint",
 					},
 					"private_key_base64_wo": schema.StringAttribute{
 						WriteOnly:   true,
-						Required:    true,
+						Optional:    true,
 						Sensitive:   true,
 						Description: "Base64 encoded API private key",
 						Validators: []validator.String{
@@ -339,9 +400,17 @@ func (r *edgeLocationResource) Schema(_ context.Context, _ resource.SchemaReques
 						Required:    true,
 						Description: "OCI virtual cloud network ID",
 					},
+					"vcn_cidr": schema.StringAttribute{
+						Optional:    true,
+						Description: "OCI VCN IPv4 CIDR block",
+					},
 					"subnet_id": schema.StringAttribute{
 						Required:    true,
 						Description: "OCI subnet ID of edge location",
+					},
+					"security_group_id": schema.StringAttribute{
+						Optional:    true,
+						Description: "OCI network security group ID",
 					},
 				},
 			},
@@ -426,8 +495,10 @@ func (r *edgeLocationResource) Create(ctx context.Context, req resource.CreateRe
 
 	plan.ID = types.StringValue(*apiResp.JSON200.Id)
 	plan.CredentialsRevision = types.Int64Value(1)
-	// Store credential hash in private state
-	resp.Diagnostics.Append(r.woCredentialsStore(resp.Private).Set(ctx, mc.credentials())...)
+	// Store credential hash in private state (skip when credentials are missing e.g. OIDC flow with AWS and GCP)
+	if mc != nil && !mc.credentials().IsNull() {
+		resp.Diagnostics.Append(r.woCredentialsStore(resp.Private).Set(ctx, mc.credentials())...)
+	}
 	resp.Diagnostics.Append(resp.State.Set(ctx, plan)...)
 }
 
@@ -561,8 +632,8 @@ func (r *edgeLocationResource) Update(ctx context.Context, req resource.UpdateRe
 		return
 	}
 
-	// Update stored credentials hash if credentials changed
-	if credentialsChanged {
+	// Update stored credentials hash if credentials changed (skip when using impersonation flow)
+	if credentialsChanged && mc != nil && !mc.credentials().IsNull() {
 		resp.Diagnostics.Append(r.woCredentialsStore(resp.Private).Set(ctx, mc.credentials())...)
 	}
 
@@ -613,27 +684,29 @@ func (r *edgeLocationResource) ModifyPlan(ctx context.Context, req resource.Modi
 		return
 	}
 
-	var (
-		credentialsEqual bool
-		diags            diag.Diagnostics
-	)
+	var mc ModelWithCredentials
 	switch {
 	case config.AWS != nil:
-		credentialsEqual, diags = r.woCredentialsStore(req.Private).Equal(ctx, config.AWS.credentials())
+		mc = config.AWS
 	case config.GCP != nil:
-		credentialsEqual, diags = r.woCredentialsStore(req.Private).Equal(ctx, config.GCP.credentials())
+		mc = config.GCP
 	case config.OCI != nil:
-		credentialsEqual, diags = r.woCredentialsStore(req.Private).Equal(ctx, config.OCI.credentials())
-	}
-	resp.Diagnostics.Append(diags...)
-	if resp.Diagnostics.HasError() {
-		return
+		mc = config.OCI
 	}
 
-	// If credentials changed, update the planned credentials_revision
-	if !credentialsEqual {
-		plan.CredentialsRevision = types.Int64Value(state.CredentialsRevision.ValueInt64() + 1)
-		resp.Diagnostics.Append(resp.Plan.Set(ctx, plan)...)
+	// Skip credentials comparison when no credentials are provided (e.g. impersonation flow)
+	if mc != nil && !mc.credentials().IsNull() {
+		credentialsEqual, diags := r.woCredentialsStore(req.Private).Equal(ctx, mc.credentials())
+		resp.Diagnostics.Append(diags...)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+
+		// If credentials changed, update the planned credentials_revision
+		if !credentialsEqual {
+			plan.CredentialsRevision = types.Int64Value(state.CredentialsRevision.ValueInt64() + 1)
+			resp.Diagnostics.Append(resp.Plan.Set(ctx, plan)...)
+		}
 	}
 }
 
@@ -704,16 +777,20 @@ func (r *edgeLocationResource) toAWS(ctx context.Context, plan, config *awsModel
 	out := &omni.AWSParam{
 		AccountId:       toPtr(plan.AccountID.ValueString()),
 		InstanceProfile: instanceProfile,
-		Credentials: &omni.AWSParamCredentials{
-			AccessKeyId:     config.AccessKeyIDWO.ValueStringPointer(),
-			SecretAccessKey: config.SecretAccessKeyWO.ValueStringPointer(),
-		},
+		RoleArn:         plan.RoleArn.ValueStringPointer(),
 		Networking: &omni.AWSParamAWSNetworking{
 			VpcId:           plan.VpcID.ValueString(),
 			VpcPeered:       plan.VpcPeered.ValueBoolPointer(),
+			VpcCidr:         plan.VpcCidr.ValueStringPointer(),
 			SecurityGroupId: plan.SecurityGroupID.ValueString(),
 			SubnetIds:       subnetMap,
 		},
+	}
+	if !config.AccessKeyIDWO.IsNull() || !config.SecretAccessKeyWO.IsNull() {
+		out.Credentials = &omni.AWSParamCredentials{
+			AccessKeyId:     config.AccessKeyIDWO.ValueStringPointer(),
+			SecretAccessKey: config.SecretAccessKeyWO.ValueStringPointer(),
+		}
 	}
 	if !plan.NameTag.IsNull() {
 		out.Networking.NameTag = lo.ToPtr(plan.NameTag.ValueString())
@@ -731,7 +808,9 @@ func (r *edgeLocationResource) toAWSModel(ctx context.Context, config *omni.AWSP
 	aws := &awsModel{
 		AccountID:         types.StringValue(lo.FromPtr(config.AccountId)),
 		InstanceProfile:   types.StringNull(),
+		RoleArn:           types.StringNull(),
 		VpcID:             types.StringNull(),
+		VpcCidr:           types.StringNull(),
 		SecurityGroupID:   types.StringNull(),
 		VpcPeered:         types.BoolNull(),
 		SubnetIDs:         types.MapNull(types.StringType),
@@ -744,10 +823,17 @@ func (r *edgeLocationResource) toAWSModel(ctx context.Context, config *omni.AWSP
 		aws.InstanceProfile = types.StringValue(*config.InstanceProfile)
 	}
 
+	if config.RoleArn != nil && *config.RoleArn != "" {
+		aws.RoleArn = types.StringValue(*config.RoleArn)
+	}
+
 	if config.Networking != nil {
 		aws.VpcID = types.StringValue(config.Networking.VpcId)
 		aws.VpcPeered = types.BoolPointerValue(config.Networking.VpcPeered)
 		aws.SecurityGroupID = types.StringValue(config.Networking.SecurityGroupId)
+		if config.Networking.VpcCidr != nil && *config.Networking.VpcCidr != "" {
+			aws.VpcCidr = types.StringValue(*config.Networking.VpcCidr)
+		}
 		if config.Networking.NameTag != nil && *config.Networking.NameTag != "" {
 			aws.NameTag = types.StringValue(*config.Networking.NameTag)
 		}
@@ -776,16 +862,20 @@ func (r *edgeLocationResource) toGCP(ctx context.Context, plan, config *gcpModel
 	}
 
 	out := &omni.GCPParam{
-		ProjectId:              plan.ProjectID.ValueString(),
-		InstanceServiceAccount: plan.InstanceServiceAccount.ValueStringPointer(),
-		Credentials: &omni.GCPParamCredentials{
-			ClientServiceAccountJsonBase64: config.ClientServiceAccountJSONBase64WO.ValueStringPointer(),
-		},
+		ProjectId:                 plan.ProjectID.ValueString(),
+		InstanceServiceAccount:    plan.InstanceServiceAccount.ValueStringPointer(),
+		TargetServiceAccountEmail: plan.TargetServiceAccountEmail.ValueStringPointer(),
 		Networking: &omni.GCPParamGCPNetworking{
 			NetworkName: plan.NetworkName.ValueString(),
 			SubnetName:  plan.SubnetName.ValueString(),
+			SubnetCidr:  plan.SubnetCidr.ValueStringPointer(),
 			Tags:        tags,
 		},
+	}
+	if !config.ClientServiceAccountJSONBase64WO.IsNull() {
+		out.Credentials = &omni.GCPParamCredentials{
+			ClientServiceAccountJsonBase64: config.ClientServiceAccountJSONBase64WO.ValueStringPointer(),
+		}
 	}
 
 	return out, diags
@@ -800,9 +890,11 @@ func (r *edgeLocationResource) toGCPModel(ctx context.Context, config *omni.GCPP
 	gcp := &gcpModel{
 		ProjectID:                        types.StringValue(config.ProjectId),
 		InstanceServiceAccount:           types.StringNull(),
+		TargetServiceAccountEmail:        types.StringNull(),
 		ClientServiceAccountJSONBase64WO: types.StringNull(),
 		NetworkName:                      types.StringNull(),
 		SubnetName:                       types.StringNull(),
+		SubnetCidr:                       types.StringNull(),
 		NetworkTags:                      types.SetNull(types.StringType),
 	}
 
@@ -810,9 +902,16 @@ func (r *edgeLocationResource) toGCPModel(ctx context.Context, config *omni.GCPP
 		gcp.InstanceServiceAccount = types.StringValue(*config.InstanceServiceAccount)
 	}
 
+	if config.TargetServiceAccountEmail != nil && *config.TargetServiceAccountEmail != "" {
+		gcp.TargetServiceAccountEmail = types.StringValue(*config.TargetServiceAccountEmail)
+	}
+
 	if config.Networking != nil {
 		gcp.NetworkName = types.StringValue(config.Networking.NetworkName)
 		gcp.SubnetName = types.StringValue(config.Networking.SubnetName)
+		if config.Networking.SubnetCidr != nil && *config.Networking.SubnetCidr != "" {
+			gcp.SubnetCidr = types.StringValue(*config.Networking.SubnetCidr)
+		}
 		if config.Networking.Tags != nil {
 			tagsSet, d := types.SetValueFrom(ctx, types.StringType, config.Networking.Tags)
 			diags.Append(d...)
@@ -831,15 +930,30 @@ func (r *edgeLocationResource) toOCI(plan, config *ociModel) *omni.OCIParam {
 	out := &omni.OCIParam{
 		TenancyId:     toPtr(plan.TenancyID.ValueString()),
 		CompartmentId: toPtr(plan.CompartmentID.ValueString()),
-		Credentials: &omni.OCIParamCredentials{
+		Networking: &omni.OCIParamNetworking{
+			VcnId:           plan.VcnID.ValueString(),
+			SubnetId:        plan.SubnetID.ValueString(),
+			VcnCidr:         plan.VcnCidr.ValueStringPointer(),
+			SecurityGroupId: plan.SecurityGroupID.ValueStringPointer(),
+		},
+	}
+
+	// WIF flow: use confidential application client
+	if !plan.ClientID.IsNull() {
+		out.Client = &omni.OCIParamClient{
+			Id:                plan.ClientID.ValueString(),
+			Secret:            config.ClientSecretWO.ValueStringPointer(),
+			IdentityDomainUri: plan.IdentityDomainUri.ValueString(),
+		}
+	}
+
+	// Legacy API key flow
+	if !config.UserIDWO.IsNull() || !config.FingerprintWO.IsNull() || !config.PrivateKeyBase64WO.IsNull() {
+		out.Credentials = &omni.OCIParamCredentials{
 			UserId:           config.UserIDWO.ValueString(),
 			Fingerprint:      config.FingerprintWO.ValueString(),
 			PrivateKeyBase64: config.PrivateKeyBase64WO.ValueString(),
-		},
-		Networking: &omni.OCIParamNetworking{
-			VcnId:    plan.VcnID.ValueString(),
-			SubnetId: plan.SubnetID.ValueString(),
-		},
+		}
 	}
 
 	return out
@@ -853,15 +967,32 @@ func (r *edgeLocationResource) toOCIModel(config *omni.OCIParam) *ociModel {
 	oci := &ociModel{
 		TenancyID:          types.StringValue(lo.FromPtr(config.TenancyId)),
 		CompartmentID:      types.StringValue(lo.FromPtr(config.CompartmentId)),
+		ClientID:           types.StringNull(),
+		IdentityDomainUri:  types.StringNull(),
+		ClientSecretWO:     types.StringNull(),
 		VcnID:              types.StringNull(),
+		VcnCidr:            types.StringNull(),
 		SubnetID:           types.StringNull(),
+		SecurityGroupID:    types.StringNull(),
 		UserIDWO:           types.StringNull(),
 		FingerprintWO:      types.StringNull(),
 		PrivateKeyBase64WO: types.StringNull(),
 	}
+
+	if config.Client != nil {
+		oci.ClientID = types.StringValue(config.Client.Id)
+		oci.IdentityDomainUri = types.StringValue(config.Client.IdentityDomainUri)
+	}
+
 	if config.Networking != nil {
-		oci.SubnetID = types.StringValue(config.Networking.SubnetId)
 		oci.VcnID = types.StringValue(config.Networking.VcnId)
+		oci.SubnetID = types.StringValue(config.Networking.SubnetId)
+		if config.Networking.VcnCidr != nil && *config.Networking.VcnCidr != "" {
+			oci.VcnCidr = types.StringValue(*config.Networking.VcnCidr)
+		}
+		if config.Networking.SecurityGroupId != nil && *config.Networking.SecurityGroupId != "" {
+			oci.SecurityGroupID = types.StringValue(*config.Networking.SecurityGroupId)
+		}
 	}
 
 	return oci

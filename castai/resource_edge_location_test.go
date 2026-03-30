@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"strings"
 	"testing"
 	"time"
 
@@ -191,20 +192,7 @@ func testAccEdgeLocationAWSCredentialsUpdated(rName, clusterName string) string 
 func testAccEdgeLocationAWSConfigWithParams(rName, clusterName, description string, zones []string, awsCredentials string) string {
 	organizationID := testAccGetOrganizationID()
 
-	zonesConfig := "zones = ["
-	subnetConfig := ""
-	for i, zone := range zones {
-		if i > 0 {
-			zonesConfig += ", "
-		}
-		zonesConfig += fmt.Sprintf(`{
-    id   = %q
-    name = %q
-  }`, zone, zone)
-		subnetConfig += fmt.Sprintf(`
-      %q = "subnet-%08d"`, zone, 12345678+i)
-	}
-	zonesConfig += "]"
+	zonesConfig, subnetConfig := formatAWSZonesAndSubnets(zones)
 
 	return ConfigCompose(testOmniClusterConfig(clusterName), fmt.Sprintf(`
 resource "castai_edge_location" "test" {
@@ -276,25 +264,8 @@ func testAccEdgeLocationGCPCredentialsUpdated(rName, clusterName string) string 
 
 func testAccEdgeLocationGCPConfigWithParams(rName, clusterName, description string, zones []string, networkTags []string, gcpCredentials string) string {
 	organizationID := testAccGetOrganizationID()
-	zonesConfig := "zones = ["
-	for i, zone := range zones {
-		if i > 0 {
-			zonesConfig += ", "
-		}
-		zonesConfig += fmt.Sprintf(`{
-    id   = %q
-    name = %q
-  }`, zone, zone)
-	}
-	zonesConfig += "]"
-
-	networkTagsConfig := ""
-	for i, tag := range networkTags {
-		if i > 0 {
-			networkTagsConfig += ", "
-		}
-		networkTagsConfig += fmt.Sprintf("%q", tag)
-	}
+	zonesConfig := formatGCPZones(zones)
+	networkTagsConfig := formatGCPNetworkTags(networkTags)
 
 	return ConfigCompose(testOmniClusterConfig(clusterName), fmt.Sprintf(`
 resource "castai_edge_location" "test" {
@@ -363,6 +334,337 @@ resource "castai_edge_location" "test" {
   }
 }
 `, rName, description, organizationID, ociCredentials))
+}
+
+// New credential-less flow tests
+// When the legacy credential fields are removed, the tests above can be deleted
+
+func TestAccCloudAgnostic_ResourceEdgeLocationAWSImpersonation(t *testing.T) {
+	rName := fmt.Sprintf("%v-edge-loc-%v", ResourcePrefix, acctest.RandString(8))
+	resourceName := "castai_edge_location.test"
+	clusterName := "omni-tf-acc-aws"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		CheckDestroy:             testAccCheckEdgeLocationDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccEdgeLocationAWSImpersonationConfig(rName, clusterName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "name", rName),
+					resource.TestCheckResourceAttr(resourceName, "description", "Test edge location impersonation"),
+					resource.TestCheckResourceAttr(resourceName, "region", "us-east-1"),
+					resource.TestCheckResourceAttr(resourceName, "zones.#", "2"),
+					resource.TestCheckResourceAttr(resourceName, "zones.0.id", "us-east-1a"),
+					resource.TestCheckResourceAttr(resourceName, "zones.0.name", "us-east-1a"),
+					resource.TestCheckResourceAttr(resourceName, "zones.1.id", "us-east-1b"),
+					resource.TestCheckResourceAttr(resourceName, "zones.1.name", "us-east-1b"),
+					resource.TestCheckResourceAttrSet(resourceName, "aws.account_id"),
+					resource.TestCheckResourceAttr(resourceName, "aws.role_arn", "arn:aws:iam::123456789012:role/castai-omni-edge"),
+					resource.TestCheckResourceAttr(resourceName, "aws.vpc_cidr", "10.0.0.0/16"),
+					resource.TestCheckResourceAttrSet(resourceName, "aws.vpc_peered"),
+					resource.TestCheckResourceAttrSet(resourceName, "aws.vpc_id"),
+					resource.TestCheckResourceAttrSet(resourceName, "aws.security_group_id"),
+					resource.TestCheckResourceAttrSet(resourceName, "id"),
+					resource.TestCheckResourceAttr(resourceName, "credentials_revision", "1"),
+				),
+			},
+			{
+				ResourceName: resourceName,
+				ImportStateIdFunc: func(s *terraform.State) (string, error) {
+					organizationID := testAccGetOrganizationID()
+					clusterID := s.RootModule().Resources["castai_omni_cluster.test"].Primary.ID
+					edgeLocationID := s.RootModule().Resources[resourceName].Primary.ID
+					return fmt.Sprintf("%v/%v/%v", organizationID, clusterID, edgeLocationID), nil
+				},
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccEdgeLocationAWSImpersonationUpdated(rName, clusterName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "description", "Updated edge location impersonation"),
+					resource.TestCheckResourceAttr(resourceName, "zones.#", "3"),
+					resource.TestCheckResourceAttr(resourceName, "zones.0.id", "us-east-1a"),
+					resource.TestCheckResourceAttr(resourceName, "zones.0.name", "us-east-1a"),
+					resource.TestCheckResourceAttr(resourceName, "zones.1.id", "us-east-1b"),
+					resource.TestCheckResourceAttr(resourceName, "zones.1.name", "us-east-1b"),
+					resource.TestCheckResourceAttr(resourceName, "zones.2.id", "us-east-1c"),
+					resource.TestCheckResourceAttr(resourceName, "zones.2.name", "us-east-1c"),
+					resource.TestCheckResourceAttr(resourceName, "aws.role_arn", "arn:aws:iam::123456789012:role/castai-omni-edge-updated"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccCloudAgnostic_ResourceEdgeLocationGCPImpersonation(t *testing.T) {
+	rName := fmt.Sprintf("%v-edge-loc-%v", ResourcePrefix, acctest.RandString(8))
+	resourceName := "castai_edge_location.test"
+	clusterName := "omni-tf-acc-gcp"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		CheckDestroy:             testAccCheckEdgeLocationDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccEdgeLocationGCPImpersonationConfig(rName, clusterName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "name", rName),
+					resource.TestCheckResourceAttr(resourceName, "description", "Test GCP edge location impersonation"),
+					resource.TestCheckResourceAttr(resourceName, "region", "us-central1"),
+					resource.TestCheckResourceAttr(resourceName, "zones.#", "2"),
+					resource.TestCheckResourceAttr(resourceName, "zones.0.id", "us-central1-a"),
+					resource.TestCheckResourceAttr(resourceName, "zones.0.name", "us-central1-a"),
+					resource.TestCheckResourceAttr(resourceName, "zones.1.id", "us-central1-b"),
+					resource.TestCheckResourceAttr(resourceName, "zones.1.name", "us-central1-b"),
+					resource.TestCheckResourceAttrSet(resourceName, "gcp.project_id"),
+					resource.TestCheckResourceAttr(resourceName, "gcp.target_service_account_email", "castai-omni@test-project-123456.iam.gserviceaccount.com"),
+					resource.TestCheckResourceAttr(resourceName, "gcp.subnet_cidr", "10.0.0.0/20"),
+					resource.TestCheckResourceAttrSet(resourceName, "id"),
+					resource.TestCheckResourceAttr(resourceName, "credentials_revision", "1"),
+				),
+			},
+			{
+				Config: testAccEdgeLocationGCPImpersonationUpdated(rName, clusterName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "description", "Updated GCP edge location impersonation"),
+					resource.TestCheckResourceAttr(resourceName, "gcp.target_service_account_email", "castai-omni-updated@test-project-123456.iam.gserviceaccount.com"),
+					resource.TestCheckResourceAttr(resourceName, "zones.#", "2"),
+					resource.TestCheckResourceAttr(resourceName, "zones.0.id", "us-central1-a"),
+					resource.TestCheckResourceAttr(resourceName, "zones.0.name", "us-central1-a"),
+					resource.TestCheckResourceAttr(resourceName, "zones.1.id", "us-central1-b"),
+					resource.TestCheckResourceAttr(resourceName, "zones.1.name", "us-central1-b"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccCloudAgnostic_ResourceEdgeLocationOCIWIF(t *testing.T) {
+	rName := fmt.Sprintf("%v-edge-loc-%v", ResourcePrefix, acctest.RandString(8))
+	resourceName := "castai_edge_location.test"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		CheckDestroy:             testAccCheckEdgeLocationDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccEdgeLocationOCIWIFConfig(rName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "name", rName),
+					resource.TestCheckResourceAttr(resourceName, "description", "Test OCI edge location WIF"),
+					resource.TestCheckResourceAttr(resourceName, "region", "us-phoenix-1"),
+					resource.TestCheckResourceAttr(resourceName, "zones.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "zones.0.id", "1"),
+					resource.TestCheckResourceAttr(resourceName, "zones.0.name", "PHX-AD-1"),
+					resource.TestCheckResourceAttrSet(resourceName, "oci.tenancy_id"),
+					resource.TestCheckResourceAttrSet(resourceName, "oci.compartment_id"),
+					resource.TestCheckResourceAttr(resourceName, "oci.client_id", "test-app-client-id"),
+					resource.TestCheckResourceAttr(resourceName, "oci.identity_domain_uri", "idcs-example.identity.oraclecloud.com"),
+					resource.TestCheckResourceAttr(resourceName, "oci.vcn_cidr", "10.0.0.0/16"),
+					resource.TestCheckResourceAttrSet(resourceName, "oci.security_group_id"),
+					resource.TestCheckResourceAttrSet(resourceName, "id"),
+					resource.TestCheckResourceAttr(resourceName, "credentials_revision", "1"),
+				),
+			},
+			{
+				Config: testAccEdgeLocationOCIWIFUpdated(rName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "description", "Updated OCI edge location WIF"),
+				),
+			},
+			// Rotate the client secret: credentials_revision must increment
+			{
+				Config: testAccEdgeLocationOCIWIFCredentialsUpdated(rName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "credentials_revision", "2"),
+				),
+			},
+		},
+	})
+}
+
+func formatAWSZonesAndSubnets(zones []string) (zonesConfig string, subnetConfig string) {
+	var zonesBuilder strings.Builder
+	var subnetBuilder strings.Builder
+
+	zonesBuilder.WriteString("zones = [")
+	for i, zone := range zones {
+		if i > 0 {
+			zonesBuilder.WriteString(", ")
+		}
+		fmt.Fprintf(&zonesBuilder, `{
+    id   = %q
+    name = %q
+	  }`, zone, zone)
+		fmt.Fprintf(&subnetBuilder, `
+	      %q = "subnet-%08d"`, zone, 12345678+i)
+	}
+	zonesBuilder.WriteString("]")
+
+	zonesConfig = zonesBuilder.String()
+	subnetConfig = subnetBuilder.String()
+
+	return
+}
+
+func testAccEdgeLocationAWSImpersonationConfig(rName, clusterName string) string {
+	return testAccEdgeLocationAWSImpersonationConfigWithParams(rName, clusterName, "Test edge location impersonation",
+		[]string{"us-east-1a", "us-east-1b"}, "arn:aws:iam::123456789012:role/castai-omni-edge")
+}
+
+func testAccEdgeLocationAWSImpersonationUpdated(rName, clusterName string) string {
+	return testAccEdgeLocationAWSImpersonationConfigWithParams(rName, clusterName, "Updated edge location impersonation",
+		[]string{"us-east-1a", "us-east-1b", "us-east-1c"}, "arn:aws:iam::123456789012:role/castai-omni-edge-updated")
+}
+
+func testAccEdgeLocationAWSImpersonationConfigWithParams(rName, clusterName, description string, zones []string, roleArn string) string {
+	organizationID := testAccGetOrganizationID()
+
+	zonesConfig, subnetConfig := formatAWSZonesAndSubnets(zones)
+
+	return ConfigCompose(testOmniClusterConfig(clusterName), fmt.Sprintf(`
+resource "castai_edge_location" "test" {
+  organization_id = %[5]q
+  cluster_id      = castai_omni_cluster.test.id
+  name            = %[1]q
+  description     = %[2]q
+  region          = "us-east-1"
+%[3]s
+
+  aws = {
+    account_id               = "123456789012"
+    role_arn                 = "%[6]s"
+    vpc_id                   = "vpc-12345678"
+    vpc_peered               = true
+    instance_service_account = "arn:aws:iam::123456789012:role/castai-omni-edge"
+    vpc_cidr                 = "10.0.0.0/16"
+    security_group_id        = "sg-12345678"
+    subnet_ids = {%[4]s
+    }
+  }
+}
+`, rName, description, zonesConfig, subnetConfig, organizationID, roleArn))
+}
+
+func testAccEdgeLocationGCPImpersonationConfig(rName, clusterName string) string {
+	return testAccEdgeLocationGCPImpersonationConfigWithParams(rName, clusterName,
+		"Test GCP edge location impersonation",
+		"castai-omni@test-project-123456.iam.gserviceaccount.com",
+		[]string{"us-central1-a", "us-central1-b"},
+		[]string{"edge-location", "castai"})
+}
+
+func testAccEdgeLocationGCPImpersonationUpdated(rName, clusterName string) string {
+	return testAccEdgeLocationGCPImpersonationConfigWithParams(rName, clusterName,
+		"Updated GCP edge location impersonation",
+		"castai-omni-updated@test-project-123456.iam.gserviceaccount.com",
+		[]string{"us-central1-a", "us-central1-b"},
+		[]string{"edge-location", "castai"})
+}
+
+func formatGCPZones(zones []string) string {
+	var builder strings.Builder
+
+	builder.WriteString("zones = [")
+	for i, zone := range zones {
+		if i > 0 {
+			builder.WriteString(", ")
+		}
+		fmt.Fprintf(&builder, `{
+    id   = %q
+    name = %q
+	  }`, zone, zone)
+	}
+	builder.WriteString("]")
+	return builder.String()
+}
+
+func formatGCPNetworkTags(networkTags []string) string {
+	var builder strings.Builder
+
+	for i, tag := range networkTags {
+		if i > 0 {
+			builder.WriteString(", ")
+		}
+		fmt.Fprintf(&builder, "%q", tag)
+	}
+	return builder.String()
+}
+
+func testAccEdgeLocationGCPImpersonationConfigWithParams(rName, clusterName, description, targetSA string, zones []string, networkTags []string) string {
+	organizationID := testAccGetOrganizationID()
+
+	zonesConfig := formatGCPZones(zones)
+	networkTagsConfig := formatGCPNetworkTags(networkTags)
+
+	return ConfigCompose(testOmniClusterConfig(clusterName), fmt.Sprintf(`
+resource "castai_edge_location" "test" {
+  organization_id = %[5]q
+  cluster_id      = castai_omni_cluster.test.id
+  name            = %[1]q
+  description     = %[2]q
+  region          = "us-central1"
+%[3]s
+
+  gcp = {
+    project_id                   = "test-project-123456"
+	instance_service_account     = "custom-sa@test-project-123456.iam.gserviceaccount.com"
+    target_service_account_email = "%[6]s"
+    network_name                 = "test-network"
+    subnet_name                  = "test-subnet"
+    subnet_cidr                  = "10.0.0.0/20"
+    network_tags                 = [%[4]s]
+  }
+}
+`, rName, description, zonesConfig, networkTagsConfig, organizationID, targetSA))
+}
+
+func testAccEdgeLocationOCIWIFConfig(rName string) string {
+	return testAccEdgeLocationOCIWIFConfigWithParams(rName, "Test OCI edge location WIF", "test-app-client-secret")
+}
+
+func testAccEdgeLocationOCIWIFUpdated(rName string) string {
+	return testAccEdgeLocationOCIWIFConfigWithParams(rName, "Updated OCI edge location WIF", "test-app-client-secret")
+}
+
+func testAccEdgeLocationOCIWIFCredentialsUpdated(rName string) string {
+	return testAccEdgeLocationOCIWIFConfigWithParams(rName, "Updated OCI edge location WIF", "test-app-client-secret-changed")
+}
+
+func testAccEdgeLocationOCIWIFConfigWithParams(rName, description, clientSecret string) string {
+	organizationID := testAccGetOrganizationID()
+	clusterName := "test-oci-cluster"
+
+	return ConfigCompose(testOmniClusterConfig(clusterName), fmt.Sprintf(`
+resource "castai_edge_location" "test" {
+  organization_id = %[3]q
+  cluster_id      = castai_omni_cluster.test.id
+  name            = %[1]q
+  description     = %[2]q
+  region          = "us-phoenix-1"
+  zones = [{
+    id   = "1"
+    name = "PHX-AD-1"
+  }]
+
+  oci = {
+    tenancy_id          = "ocid1.tenancy.oc1..example"
+    compartment_id      = "ocid1.compartment.oc1..example"
+    client_id           = "test-app-client-id"
+    client_secret_wo    = %[4]q
+    identity_domain_uri = "idcs-example.identity.oraclecloud.com"
+    vcn_id              = "ocid1.vcn.oc1.phx.example"
+    vcn_cidr            = "10.0.0.0/16"
+    subnet_id           = "ocid1.subnet.oc1.phx.example"
+    security_group_id   = "ocid1.networksecuritygroup.oc1.phx.example"
+  }
+}
+`, rName, description, organizationID, clientSecret))
 }
 
 func testAccCheckEdgeLocationDestroy(s *terraform.State) error {
