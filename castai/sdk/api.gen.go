@@ -8742,7 +8742,7 @@ type WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetrics struct {
 	ResolvedMetrics *[]WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetricsMetric `json:"resolvedMetrics,omitempty"`
 }
 
-// WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetricsMetric Deprecated: use `resolved` field instead.
+// WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetricsMetric Deprecated: use `ResolvedMetric` instead.
 type WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetricsMetric struct {
 	Errors   []string `json:"errors"`
 	Name     string   `json:"name"`

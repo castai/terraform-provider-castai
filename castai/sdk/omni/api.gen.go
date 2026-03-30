@@ -441,6 +441,21 @@ type OnboardEdgeLocationResponse struct {
 // RegisterClusterResponse Response message of register cluster.
 type RegisterClusterResponse = map[string]interface{}
 
+// RegisteredCluster Cluster information to be registered.
+type RegisteredCluster struct {
+	// Status Current status information.
+	Status *RegisteredClusterStatus `json:"status,omitempty"`
+}
+
+// RegisteredClusterStatus Current status information of the cluster.
+type RegisteredClusterStatus struct {
+	// OmniAgentVersion The version of omni agent running on the cluster.
+	OmniAgentVersion string `json:"omniAgentVersion"`
+
+	// PodCidr The pod CIDR of the cluster.
+	PodCidr string `json:"podCidr"`
+}
+
 // ReportStatusRequest Message to submit object status.
 type ReportStatusRequest struct {
 	// Cluster The status of the cluster.
@@ -556,6 +571,9 @@ type EdgeLocationsAPICreateEdgeLocationJSONRequestBody = EdgeLocation
 
 // EdgeLocationsAPIUpdateEdgeLocationJSONRequestBody defines body for EdgeLocationsAPIUpdateEdgeLocation for application/json ContentType.
 type EdgeLocationsAPIUpdateEdgeLocationJSONRequestBody = EdgeLocationUpdate
+
+// ClustersAPIRegisterClusterJSONRequestBody defines body for ClustersAPIRegisterCluster for application/json ContentType.
+type ClustersAPIRegisterClusterJSONRequestBody = RegisteredCluster
 
 // ClustersAPIReportStatusJSONRequestBody defines body for ClustersAPIReportStatus for application/json ContentType.
 type ClustersAPIReportStatusJSONRequestBody = ReportStatusRequest
