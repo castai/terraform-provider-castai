@@ -75,17 +75,19 @@ resource "castai_edge_location" "aws_example" {
 
 Required:
 
-- `access_key_id_wo` (String, Sensitive) AWS access key ID
 - `account_id` (String) AWS account ID
-- `secret_access_key_wo` (String, Sensitive) AWS secret access key
 - `security_group_id` (String) Security group ID to be used in the selected region
 - `subnet_ids` (Map of String) Map of zone names to subnet IDs to be used in the selected region
 - `vpc_id` (String) VPC ID to be used in the selected region
 
 Optional:
 
+- `access_key_id_wo` (String, Sensitive) AWS access key ID
 - `instance_profile` (String) AWS IAM instance profile ARN to be attached to edge instances. It can be used to grant permissions to access other AWS resources such as ECR.
 - `name_tag` (String, Deprecated) The value of a 'Name' tag applied to VPC resources
+- `role_arn` (String) AWS IAM role ARN used for Google OIDC federation impersonation
+- `secret_access_key_wo` (String, Sensitive) AWS secret access key
+- `vpc_cidr` (String) VPC IPv4 CIDR block
 - `vpc_peered` (Boolean) Whether existing VPC is peered with main cluster's VPC. Field is ignored if vpc_id is not provided or main cluster is not EKS
 
 
@@ -94,7 +96,6 @@ Optional:
 
 Required:
 
-- `client_service_account_json_base64_wo` (String, Sensitive) Base64 encoded service account JSON for provisioning edge resources
 - `network_name` (String) The name of the network to be used in the selected region
 - `network_tags` (Set of String) Tags applied on the provisioned cloud resources and the firewall rule
 - `project_id` (String) GCP project ID where edges run
@@ -102,7 +103,10 @@ Required:
 
 Optional:
 
+- `client_service_account_json_base64_wo` (String, Sensitive) Base64 encoded service account JSON for provisioning edge resources
 - `instance_service_account` (String) GCP service account email to be attached to edge instances. It can be used to grant permissions to access other GCP resources.
+- `subnet_cidr` (String) VPC Subnet IPv4 CIDR block
+- `target_service_account_email` (String) Target service account email to be used for impersonation
 
 
 <a id="nestedatt--oci"></a>
@@ -111,12 +115,20 @@ Optional:
 Required:
 
 - `compartment_id` (String) OCI compartment ID of edge location
-- `fingerprint_wo` (String, Sensitive) API key fingerprint
-- `private_key_base64_wo` (String, Sensitive) Base64 encoded API private key
 - `subnet_id` (String) OCI subnet ID of edge location
 - `tenancy_id` (String) OCI tenancy ID of the account
-- `user_id_wo` (String) User ID used to authenticate OCI
 - `vcn_id` (String) OCI virtual cloud network ID
+
+Optional:
+
+- `client_id` (String) ID of the OCI confidential application used for WIF token exchange
+- `client_secret_wo` (String, Sensitive) Secret of the OCI confidential application used for WIF token exchange
+- `fingerprint_wo` (String, Sensitive) API key fingerprint
+- `identity_domain_uri` (String) OCI Identity Domain URI (e.g., idcs-xxxx.identity.oraclecloud.com)
+- `private_key_base64_wo` (String, Sensitive) Base64 encoded API private key
+- `security_group_id` (String) OCI network security group ID
+- `user_id_wo` (String) User ID used to authenticate OCI
+- `vcn_cidr` (String) OCI VCN IPv4 CIDR block
 
 
 <a id="nestedatt--zones"></a>
