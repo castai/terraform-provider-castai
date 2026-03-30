@@ -24,9 +24,15 @@ type omniClusterResource struct {
 }
 
 type omniClusterModel struct {
-	ID             types.String `tfsdk:"id"`
-	OrganizationID types.String `tfsdk:"organization_id"`
-	ClusterID      types.String `tfsdk:"cluster_id"`
+	ID             types.String            `tfsdk:"id"`
+	OrganizationID types.String            `tfsdk:"organization_id"`
+	ClusterID      types.String            `tfsdk:"cluster_id"`
+	Status         *omniClusterStatusModel `tfsdk:"status"`
+}
+
+type omniClusterStatusModel struct {
+	OmniAgentVersion types.String `tfsdk:"omni_agent_version"`
+	PodCIDR          types.String `tfsdk:"pod_cidr"`
 }
 
 func newOmniClusterResource() resource.Resource {
@@ -62,6 +68,26 @@ func (r *omniClusterResource) Schema(_ context.Context, _ resource.SchemaRequest
 					stringplanmodifier.RequiresReplace(),
 				},
 			},
+			"status": schema.SingleNestedAttribute{
+				Optional:    true,
+				Description: "Current status of the cluster to report on registration.",
+				Attributes: map[string]schema.Attribute{
+					"omni_agent_version": schema.StringAttribute{
+						Required:    true,
+						Description: "Version of the omni agent running on the cluster.",
+						PlanModifiers: []planmodifier.String{
+							stringplanmodifier.RequiresReplace(),
+						},
+					},
+					"pod_cidr": schema.StringAttribute{
+						Required:    true,
+						Description: "Pod CIDR of the cluster.",
+						PlanModifiers: []planmodifier.String{
+							stringplanmodifier.RequiresReplace(),
+						},
+					},
+				},
+			},
 		},
 	}
 }
@@ -91,11 +117,19 @@ func (r *omniClusterResource) Create(ctx context.Context, req resource.CreateReq
 		return
 	}
 
+	body := omni.RegisteredCluster{}
+	if plan.Status != nil {
+		body.Status = &omni.RegisteredClusterStatus{
+			OmniAgentVersion: plan.Status.OmniAgentVersion.ValueString(),
+			PodCidr:          plan.Status.PodCIDR.ValueString(),
+		}
+	}
+
 	client := r.client.omniAPI
 	organizationID := plan.OrganizationID.ValueString()
 	clusterID := plan.ClusterID.ValueString()
 
-	apiResp, err := client.ClustersAPIRegisterClusterWithResponse(ctx, organizationID, clusterID, omni.ClustersAPIRegisterClusterJSONRequestBody{})
+	apiResp, err := client.ClustersAPIRegisterClusterWithResponse(ctx, organizationID, clusterID, body)
 	if err != nil {
 		resp.Diagnostics.AddError("Failed to register omni cluster", err.Error())
 		return
