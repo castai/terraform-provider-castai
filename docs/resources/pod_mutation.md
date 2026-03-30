@@ -120,7 +120,6 @@ resource "castai_pod_mutation" "multi_pool_distribution" {
 - `restart_matching_workloads` (Boolean) Restart matching workloads when the pod mutation is applied.
 - `spot_distribution_percentage` (Number) Percentage of pods (0-100) that receive spot scheduling constraints.
 - `spot_type` (String) Spot instance type: OPTIONAL_SPOT, USE_ONLY_SPOT, or PREFERRED_SPOT.
-- `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 - `tolerations` (Block List) Tolerations to apply to the pods. (see [below for nested schema](#nestedblock--tolerations))
 
 ### Read-Only
@@ -420,17 +419,6 @@ Optional:
 
 - `add` (Map of String)
 - `remove` (Map of String)
-
-
-<a id="nestedblock--timeouts"></a>
-### Nested Schema for `timeouts`
-
-Optional:
-
-- `create` (String)
-- `delete` (String)
-- `read` (String)
-- `update` (String)
 
 
 <a id="nestedblock--tolerations"></a>
