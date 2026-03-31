@@ -71,5 +71,16 @@ resource "castai_workload_scaling_policy" "services" {
   rollout_behavior {
     type = "NO_DISRUPTION"
   }
+  anomaly_detection {
+    cpu_pressure {
+      cpu_stall_threshold_percentage = 50
+      min_pressured_pod_percentage   = 30
+    }
+  }
+  jvm {
+    memory {
+      optimization = true
+    }
+  }
   excluded_containers = ["container-1", "container-2"]
 }

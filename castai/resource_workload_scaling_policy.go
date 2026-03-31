@@ -36,6 +36,10 @@ const (
 	maxExponentValue                = 1.
 	minExponentValue                = 0.
 	defaultApplyType                = "IMMEDIATE"
+
+	// CPU stall defaults
+	defaultCPUStallMinPressuredPodPct = 50.0
+	defaultCPUStallThresholdPct       = 10.0
 )
 
 const (
@@ -50,6 +54,7 @@ const (
 	FieldRolloutBehaviorType                       = "type"
 	FieldRolloutBehaviorNoDisruptionType           = "NO_DISRUPTION"
 	FieldRolloutBehaviorPreferOneByOneType         = "prefer_one_by_one"
+	FieldJVM                                       = "jvm"
 	FieldPredictiveScaling                         = "predictive_scaling"
 	FieldMemoryEvent                               = "memory_event"
 	FieldApplyType                                 = "apply_type"
@@ -65,6 +70,10 @@ const (
 	FieldApplyThresholdStrategyDefaultAdaptiveType = "DEFAULT_ADAPTIVE"
 	FieldApplyThresholdStrategyCustomAdaptiveType  = "CUSTOM_ADAPTIVE"
 	FieldAssignmentRules                           = "assignment_rules"
+	FieldAnomalyDetection                          = "anomaly_detection"
+	FieldAnomalyDetectionCpuPressure               = "cpu_pressure"
+	FieldCpuStallThresholdPercentage               = "cpu_stall_threshold_percentage"
+	FieldMinPressuredPodPercentage                 = "min_pressured_pod_percentage"
 )
 
 const (
@@ -316,6 +325,66 @@ It can be either:
 							Type:        schema.TypeBool,
 							Optional:    true,
 							Description: `Defines if pods should be restarted one by one to avoid service disruption.`,
+						},
+					},
+				},
+			},
+			FieldJVM: {
+				Type:        schema.TypeList,
+				Optional:    true,
+				MaxItems:    1,
+				Description: "JVM optimization settings.",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"memory": {
+							Type:        schema.TypeList,
+							Optional:    true,
+							MaxItems:    1,
+							Description: "JVM memory optimization settings.",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"optimization": {
+										Type:        schema.TypeBool,
+										Optional:    true,
+										Description: "Defines whether JVM memory optimization is enabled. When enabled, JVM heap size will be adjusted based on JVM metrics, if available.",
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			FieldAnomalyDetection: {
+				Type:        schema.TypeList,
+				Optional:    true,
+				MaxItems:    1,
+				Description: "Defines anomaly detection settings for the scaling policy.",
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					return suppressAnomalyDetectionDefaultValueDiff(old, new, d)
+				},
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						FieldAnomalyDetectionCpuPressure: {
+							Type:        schema.TypeList,
+							Optional:    true,
+							MaxItems:    1,
+							Description: "Configures CPU pressure anomaly detection thresholds.",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									FieldCpuStallThresholdPercentage: {
+										Type:             schema.TypeFloat,
+										Required:         true,
+										Description:      "Percentage of time (0-100) that a pod must experience CPU pressure to be considered under pressure.",
+										ValidateDiagFunc: validation.ToDiagFunc(validation.FloatBetween(0, 100)),
+									},
+									FieldMinPressuredPodPercentage: {
+										Type:             schema.TypeFloat,
+										Required:         true,
+										Description:      "Percentage (0-100) of pods that must be experiencing pressure for the detector to trigger.",
+										ValidateDiagFunc: validation.ToDiagFunc(validation.FloatBetween(0, 100)),
+									},
+								},
+							},
 						},
 					},
 				},
@@ -610,6 +679,10 @@ func resourceWorkloadScalingPolicyCreate(ctx context.Context, d *schema.Resource
 
 	req.RecommendationPolicies.RolloutBehavior = toRolloutBehavior(toSection(d, FieldRolloutBehavior))
 
+	req.RecommendationPolicies.Jvm = toJvm(toSection(d, FieldJVM))
+
+	req.RecommendationPolicies.AnomalyDetection = toAnomalyDetection(toSection(d, FieldAnomalyDetection))
+
 	req.RecommendationPolicies.ExcludedContainers = toExcludedContainers(d)
 
 	ar, err := toAssignmentRules(toSection(d, FieldAssignmentRules))
@@ -750,7 +823,12 @@ func fetchScalingPolicy(ctx context.Context, d *schema.ResourceData, meta any) (
 	if err := d.Set(FieldRolloutBehavior, toRolloutBehaviorMap(sp.RecommendationPolicies.RolloutBehavior)); err != nil {
 		return nil, fmt.Errorf("setting rollout behavior: %w", err)
 	}
-
+	if err := d.Set(FieldJVM, toJvmMap(sp.RecommendationPolicies.Jvm)); err != nil {
+		return nil, fmt.Errorf("setting jvm: %w", err)
+	}
+	if err := d.Set(FieldAnomalyDetection, toAnomalyDetectionMap(sp.RecommendationPolicies.AnomalyDetection)); err != nil {
+		return nil, fmt.Errorf("setting anomaly detection: %w", err)
+	}
 	if err := d.Set(FieldAssignmentRules, toAssignmentRulesMap(getResourceFrom(d, FieldAssignmentRules), sp.AssignmentRules)); err != nil {
 		return nil, fmt.Errorf("setting assignment rules: %w", err)
 	}
@@ -788,6 +866,8 @@ func updateScalingPolicy(ctx context.Context, d *schema.ResourceData, meta any) 
 		FieldAssignmentRules,
 		FieldPredictiveScaling,
 		FieldRolloutBehavior,
+		FieldJVM,
+		FieldAnomalyDetection,
 		FieldExcludedContainers,
 	) {
 		tflog.Info(ctx, "scaling policy up to date")
@@ -824,6 +904,8 @@ func updateScalingPolicy(ctx context.Context, d *schema.ResourceData, meta any) 
 			Confidence:         toConfidence(toSection(d, FieldConfidence)),
 			PredictiveScaling:  toPredictiveScaling(toSection(d, FieldPredictiveScaling)),
 			RolloutBehavior:    toRolloutBehavior(toSection(d, FieldRolloutBehavior)),
+			Jvm:                toJvm(toSection(d, FieldJVM)),
+			AnomalyDetection:   toAnomalyDetection(toSection(d, FieldAnomalyDetection)),
 			ExcludedContainers: toExcludedContainers(d),
 		},
 	}
@@ -1080,6 +1162,17 @@ func suppressMemoryEventApplyTypeDefaultValueDiff(oldValue, newValue string, d *
 		applyType := d.Get(fmt.Sprintf("%s.0.%s", FieldMemoryEvent, FieldApplyType))
 		// Suppress diff if apply type saved from API equals to default
 		return applyType == defaultApplyType
+	}
+
+	return oldValue == newValue
+}
+
+func suppressAnomalyDetectionDefaultValueDiff(oldValue, newValue string, d *schema.ResourceData) bool {
+	if isEmpty(newValue) {
+		cpuStallThreshold := d.Get(fmt.Sprintf("%s.0.%s.0.%s", FieldAnomalyDetection, FieldAnomalyDetectionCpuPressure, FieldCpuStallThresholdPercentage))
+		minPressuredPodPct := d.Get(fmt.Sprintf("%s.0.%s.0.%s", FieldAnomalyDetection, FieldAnomalyDetectionCpuPressure, FieldMinPressuredPodPercentage))
+		// Suppress diff if the API-returned values equal the defaults (meaning no explicit config is needed)
+		return cpuStallThreshold == defaultCPUStallThresholdPct && minPressuredPodPct == defaultCPUStallMinPressuredPodPct
 	}
 
 	return oldValue == newValue
@@ -1456,6 +1549,70 @@ func toRolloutBehaviorMap(s *sdk.WorkloadoptimizationV1RolloutBehaviorSettings) 
 		m[FieldRolloutBehaviorPreferOneByOneType] = *s.PreferOneByOne
 	}
 
+	return []map[string]any{m}
+}
+
+func toAnomalyDetection(m map[string]any) *sdk.WorkloadoptimizationV1AnomalyDetectionSettings {
+	if len(m) == 0 {
+		return nil
+	}
+	result := &sdk.WorkloadoptimizationV1AnomalyDetectionSettings{}
+	if cpuPressure := getFirstElem(m, FieldAnomalyDetectionCpuPressure); cpuPressure != nil {
+		result.CpuPressure = &sdk.WorkloadoptimizationV1CPUPressureSettings{
+			// schema already handles type validation, so casting is safe
+			CpuStallThresholdPercentage: cpuPressure[FieldCpuStallThresholdPercentage].(float64),
+			MinPressuredPodPercentage:   cpuPressure[FieldMinPressuredPodPercentage].(float64),
+		}
+	}
+	return result
+}
+
+func toAnomalyDetectionMap(s *sdk.WorkloadoptimizationV1AnomalyDetectionSettings) []map[string]any {
+	if s == nil {
+		return nil
+	}
+	m := map[string]any{}
+	if s.CpuPressure != nil {
+		m[FieldAnomalyDetectionCpuPressure] = []map[string]any{
+			{
+				FieldCpuStallThresholdPercentage: s.CpuPressure.CpuStallThresholdPercentage,
+				FieldMinPressuredPodPercentage:   s.CpuPressure.MinPressuredPodPercentage,
+			},
+		}
+	}
+	if len(m) == 0 {
+		return nil
+	}
+	return []map[string]any{m}
+}
+
+func toJvm(m map[string]any) *sdk.WorkloadoptimizationV1JVMSettings {
+	if len(m) == 0 {
+		return nil
+	}
+	result := &sdk.WorkloadoptimizationV1JVMSettings{}
+	if mem := getFirstElem(m, "memory"); mem != nil {
+		result.Memory = &sdk.WorkloadoptimizationV1JVMMemorySettings{}
+		if v, ok := mem["optimization"].(bool); ok {
+			result.Memory.Optimization = v
+		}
+	}
+	return result
+}
+
+func toJvmMap(s *sdk.WorkloadoptimizationV1JVMSettings) []map[string]any {
+	if s == nil {
+		return nil
+	}
+	m := map[string]any{}
+	if s.Memory != nil {
+		m["memory"] = []map[string]any{{
+			"optimization": s.Memory.Optimization,
+		}}
+	}
+	if len(m) == 0 {
+		return nil
+	}
 	return []map[string]any{m}
 }
 

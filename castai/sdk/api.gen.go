@@ -712,6 +712,20 @@ const (
 	WorkloadoptimizationV1CustomMetricUnitTHREADS                     WorkloadoptimizationV1CustomMetricUnit = "THREADS"
 )
 
+// Defines values for WorkloadoptimizationV1CustomMetricsDataSourceDataNodeWorkloadMetricsResolvedMetricOrigin.
+const (
+	WorkloadoptimizationV1CustomMetricsDataSourceDataNodeWorkloadMetricsResolvedMetricOriginMANUAL            WorkloadoptimizationV1CustomMetricsDataSourceDataNodeWorkloadMetricsResolvedMetricOrigin = "MANUAL"
+	WorkloadoptimizationV1CustomMetricsDataSourceDataNodeWorkloadMetricsResolvedMetricOriginORIGINUNSPECIFIED WorkloadoptimizationV1CustomMetricsDataSourceDataNodeWorkloadMetricsResolvedMetricOrigin = "ORIGIN_UNSPECIFIED"
+	WorkloadoptimizationV1CustomMetricsDataSourceDataNodeWorkloadMetricsResolvedMetricOriginPRESET            WorkloadoptimizationV1CustomMetricsDataSourceDataNodeWorkloadMetricsResolvedMetricOrigin = "PRESET"
+)
+
+// Defines values for WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetricsResolvedMetricQueryOrigin.
+const (
+	WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetricsResolvedMetricQueryOriginMANUAL            WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetricsResolvedMetricQueryOrigin = "MANUAL"
+	WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetricsResolvedMetricQueryOriginORIGINUNSPECIFIED WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetricsResolvedMetricQueryOrigin = "ORIGIN_UNSPECIFIED"
+	WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetricsResolvedMetricQueryOriginPRESET            WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetricsResolvedMetricQueryOrigin = "PRESET"
+)
+
 // Defines values for WorkloadoptimizationV1CustomMetricsDataSourceStatus.
 const (
 	WorkloadoptimizationV1CustomMetricsDataSourceStatusCONNECTED     WorkloadoptimizationV1CustomMetricsDataSourceStatus = "CONNECTED"
@@ -900,6 +914,14 @@ const (
 	WorkloadoptimizationV1RecommendationStatusTypeSTATUSWAITING WorkloadoptimizationV1RecommendationStatusType = "STATUS_WAITING"
 )
 
+// Defines values for WorkloadoptimizationV1RecommendationStepLabelUnit.
+const (
+	BYTE            WorkloadoptimizationV1RecommendationStepLabelUnit = "BYTE"
+	MILLICORE       WorkloadoptimizationV1RecommendationStepLabelUnit = "MILLICORE"
+	PERCENT         WorkloadoptimizationV1RecommendationStepLabelUnit = "PERCENT"
+	UNITUNSPECIFIED WorkloadoptimizationV1RecommendationStepLabelUnit = "UNIT_UNSPECIFIED"
+)
+
 // Defines values for WorkloadoptimizationV1RecommendationStopReasonType.
 const (
 	STOPREASONOOMKILL WorkloadoptimizationV1RecommendationStopReasonType = "STOP_REASON_OOMKILL"
@@ -948,8 +970,8 @@ const (
 
 // Defines values for WorkloadoptimizationV1ResourcePoliciesFunction.
 const (
-	MAX      WorkloadoptimizationV1ResourcePoliciesFunction = "MAX"
-	QUANTILE WorkloadoptimizationV1ResourcePoliciesFunction = "QUANTILE"
+	WorkloadoptimizationV1ResourcePoliciesFunctionMAX      WorkloadoptimizationV1ResourcePoliciesFunction = "MAX"
+	WorkloadoptimizationV1ResourcePoliciesFunctionQUANTILE WorkloadoptimizationV1ResourcePoliciesFunction = "QUANTILE"
 )
 
 // Defines values for WorkloadoptimizationV1RolloutBehaviorType.
@@ -1331,6 +1353,15 @@ const (
 	WorkloadOptimizationAPIGetInstallScriptParamsCmePresetsMICROMETER    WorkloadOptimizationAPIGetInstallScriptParamsCmePresets = "MICROMETER"
 	WorkloadOptimizationAPIGetInstallScriptParamsCmePresetsOTELJAVAAGENT WorkloadOptimizationAPIGetInstallScriptParamsCmePresets = "OTEL_JAVA_AGENT"
 	WorkloadOptimizationAPIGetInstallScriptParamsCmePresetsSDKPROMETHEUS WorkloadOptimizationAPIGetInstallScriptParamsCmePresets = "SDK_PROMETHEUS"
+)
+
+// Defines values for WorkloadOptimizationAPIGetAggregatedWorkloadCustomMetricsV1BetaParamsAggregationType.
+const (
+	WorkloadOptimizationAPIGetAggregatedWorkloadCustomMetricsV1BetaParamsAggregationTypeAVERAGE                                WorkloadOptimizationAPIGetAggregatedWorkloadCustomMetricsV1BetaParamsAggregationType = "AVERAGE"
+	WorkloadOptimizationAPIGetAggregatedWorkloadCustomMetricsV1BetaParamsAggregationTypeCUSTOMMETRICAGGREGATIONTYPEUNSPECIFIED WorkloadOptimizationAPIGetAggregatedWorkloadCustomMetricsV1BetaParamsAggregationType = "CUSTOM_METRIC_AGGREGATION_TYPE_UNSPECIFIED"
+	WorkloadOptimizationAPIGetAggregatedWorkloadCustomMetricsV1BetaParamsAggregationTypeMAX                                    WorkloadOptimizationAPIGetAggregatedWorkloadCustomMetricsV1BetaParamsAggregationType = "MAX"
+	WorkloadOptimizationAPIGetAggregatedWorkloadCustomMetricsV1BetaParamsAggregationTypeMIN                                    WorkloadOptimizationAPIGetAggregatedWorkloadCustomMetricsV1BetaParamsAggregationType = "MIN"
+	WorkloadOptimizationAPIGetAggregatedWorkloadCustomMetricsV1BetaParamsAggregationTypePERCENTILE                             WorkloadOptimizationAPIGetAggregatedWorkloadCustomMetricsV1BetaParamsAggregationType = "PERCENTILE"
 )
 
 // CommitmentsAPIBatchDeleteCommitmentsRequest defines model for CommitmentsAPI_BatchDeleteCommitments_request.
@@ -8328,6 +8359,15 @@ type WorkloadoptimizationV1AggregatedCPUStallMetrics struct {
 	Avg float64 `json:"avg"`
 }
 
+// WorkloadoptimizationV1AggregatedCustomMetricGroup AggregatedCustomMetricGroup contains aggregated data points for a single metric name.
+type WorkloadoptimizationV1AggregatedCustomMetricGroup struct {
+	DataPoints []WorkloadoptimizationV1CustomMetricDataPoint `json:"dataPoints"`
+	MetricName string                                        `json:"metricName"`
+
+	// Unit CustomMetricUnit identifies the unit of a custom metric, inferred from naming conventions.
+	Unit WorkloadoptimizationV1CustomMetricUnit `json:"unit"`
+}
+
 // WorkloadoptimizationV1AggregatedMetrics defines model for workloadoptimization.v1.AggregatedMetrics.
 type WorkloadoptimizationV1AggregatedMetrics struct {
 	Avg float64 `json:"avg"`
@@ -8423,8 +8463,15 @@ type WorkloadoptimizationV1CPUPressureResolvedEvent struct {
 // WorkloadoptimizationV1CPUPressureSettings CPUPressureSettings configures CPU pressure anomaly detection thresholds.
 // Values are percentages in the range 0-100.
 type WorkloadoptimizationV1CPUPressureSettings struct {
-	CpuStallThresholdPercentage *float64 `json:"cpuStallThresholdPercentage"`
-	MinPressuredPodPercentage   *float64 `json:"minPressuredPodPercentage"`
+	// CpuStallThresholdPercentage CPUStallThresholdPercentage is the percentage of time (0-100) that a pod
+	// must experience CPU pressure to be considered under pressure.
+	// For example, 50 means the pod must be stalled for at least 50% of the 5minute time window.
+	CpuStallThresholdPercentage float64 `json:"cpuStallThresholdPercentage"`
+
+	// MinPressuredPodPercentage MinPressuredPodPercentage is the percentage (0-100) of pods that must be
+	// experiencing pressure for the detector to trigger.
+	// For example, 50 means at least 50% of the workload's pods must be under pressure.
+	MinPressuredPodPercentage float64 `json:"minPressuredPodPercentage"`
 }
 
 // WorkloadoptimizationV1ConfidenceSettings defines model for workloadoptimization.v1.ConfidenceSettings.
@@ -8639,16 +8686,36 @@ type WorkloadoptimizationV1CustomMetricsDataSourceDataNodeWorkloadDataSource str
 
 // WorkloadoptimizationV1CustomMetricsDataSourceDataNodeWorkloadMetrics defines model for workloadoptimization.v1.CustomMetricsDataSource.Data.NodeWorkload.Metrics.
 type WorkloadoptimizationV1CustomMetricsDataSourceDataNodeWorkloadMetrics struct {
-	Presets         *[]string                                                                     `json:"presets,omitempty"`
+	// Presets Preset names used to resolve metrics.
+	Presets *[]string `json:"presets,omitempty"`
+
+	// Resolved All resolved metrics from presets and manual metrics combined, with origin information.
+	Resolved *[]WorkloadoptimizationV1CustomMetricsDataSourceDataNodeWorkloadMetricsResolvedMetric `json:"resolved,omitempty"`
+
+	// ResolvedMetrics Deprecated: use `resolved` field instead.
+	// Deprecated:
 	ResolvedMetrics *[]WorkloadoptimizationV1CustomMetricsDataSourceDataNodeWorkloadMetricsMetric `json:"resolvedMetrics,omitempty"`
 }
 
-// WorkloadoptimizationV1CustomMetricsDataSourceDataNodeWorkloadMetricsMetric defines model for workloadoptimization.v1.CustomMetricsDataSource.Data.NodeWorkload.Metrics.Metric.
+// WorkloadoptimizationV1CustomMetricsDataSourceDataNodeWorkloadMetricsMetric Deprecated: use `resolved` field instead.
 type WorkloadoptimizationV1CustomMetricsDataSourceDataNodeWorkloadMetricsMetric struct {
 	Errors   []string `json:"errors"`
 	Name     string   `json:"name"`
 	Warnings []string `json:"warnings"`
 }
+
+// WorkloadoptimizationV1CustomMetricsDataSourceDataNodeWorkloadMetricsResolvedMetric ResolvedMetric represents a fully resolved metric with its origin.
+type WorkloadoptimizationV1CustomMetricsDataSourceDataNodeWorkloadMetricsResolvedMetric struct {
+	Errors *[]string `json:"errors,omitempty"`
+	Name   string    `json:"name"`
+
+	// Origin Origin indicates whether this metric was manually defined or resolved from a preset.
+	Origin   WorkloadoptimizationV1CustomMetricsDataSourceDataNodeWorkloadMetricsResolvedMetricOrigin `json:"origin"`
+	Warnings *[]string                                                                                `json:"warnings,omitempty"`
+}
+
+// WorkloadoptimizationV1CustomMetricsDataSourceDataNodeWorkloadMetricsResolvedMetricOrigin Origin indicates whether this metric was manually defined or resolved from a preset.
+type WorkloadoptimizationV1CustomMetricsDataSourceDataNodeWorkloadMetricsResolvedMetricOrigin string
 
 // WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheus defines model for workloadoptimization.v1.CustomMetricsDataSource.Data.Prometheus.
 type WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheus struct {
@@ -8664,17 +8731,42 @@ type WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusDataSource struc
 
 // WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetrics defines model for workloadoptimization.v1.CustomMetricsDataSource.Data.Prometheus.Metrics.
 type WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetrics struct {
-	Presets         *[]string                                                                   `json:"presets,omitempty"`
+	// Presets Preset names used to resolve metrics.
+	Presets *[]string `json:"presets,omitempty"`
+
+	// Resolved All resolved metrics from presets and manual metrics combined, with origin information.
+	Resolved *[]WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetricsResolvedMetric `json:"resolved,omitempty"`
+
+	// ResolvedMetrics Deprecated: use `resolved` field instead.
+	// Deprecated:
 	ResolvedMetrics *[]WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetricsMetric `json:"resolvedMetrics,omitempty"`
 }
 
-// WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetricsMetric defines model for workloadoptimization.v1.CustomMetricsDataSource.Data.Prometheus.Metrics.Metric.
+// WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetricsMetric Deprecated: use `ResolvedMetric` instead.
 type WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetricsMetric struct {
 	Errors   []string `json:"errors"`
 	Name     string   `json:"name"`
 	Queries  []string `json:"queries"`
 	Warnings []string `json:"warnings"`
 }
+
+// WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetricsResolvedMetric ResolvedMetric represents a fully resolved metric with origin-tagged queries.
+type WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetricsResolvedMetric struct {
+	Errors   *[]string                                                                               `json:"errors,omitempty"`
+	Name     string                                                                                  `json:"name"`
+	Queries  []WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetricsResolvedMetricQuery `json:"queries"`
+	Warnings *[]string                                                                               `json:"warnings,omitempty"`
+}
+
+// WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetricsResolvedMetricQuery Query represents a single Prometheus query with its origin.
+type WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetricsResolvedMetricQuery struct {
+	// Origin Origin indicates whether this query was manually defined or resolved from a preset.
+	Origin WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetricsResolvedMetricQueryOrigin `json:"origin"`
+	Value  string                                                                                      `json:"value"`
+}
+
+// WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetricsResolvedMetricQueryOrigin Origin indicates whether this query was manually defined or resolved from a preset.
+type WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetricsResolvedMetricQueryOrigin string
 
 // WorkloadoptimizationV1CustomMetricsDataSourceStatus Status represents the synchronization status of the custom metrics data source. It indicates whether the data
 // source is currently being synchronized, has been successfully synchronized, is in the process of syncing, or has
@@ -8684,6 +8776,36 @@ type WorkloadoptimizationV1CustomMetricsDataSourceStatus string
 // WorkloadoptimizationV1CustomMetricsDataSourceType Type defines the type of custom metrics data source. Respective Data field will be populated based on the type.
 // For each type, exactly one of the data fields should be populated.
 type WorkloadoptimizationV1CustomMetricsDataSourceType string
+
+// WorkloadoptimizationV1CustomMetricsDataSourceInput CustomMetricsDataSourceInput is the input data type for Create and Update operations on custom metrics data sources.
+type WorkloadoptimizationV1CustomMetricsDataSourceInput struct {
+	Prometheus *WorkloadoptimizationV1CustomMetricsDataSourceInputPrometheus `json:"prometheus,omitempty"`
+}
+
+// WorkloadoptimizationV1CustomMetricsDataSourceInputPrometheus defines model for workloadoptimization.v1.CustomMetricsDataSourceInput.Prometheus.
+type WorkloadoptimizationV1CustomMetricsDataSourceInputPrometheus struct {
+	DataSource WorkloadoptimizationV1CustomMetricsDataSourceInputPrometheusDataSource `json:"dataSource"`
+	Metrics    *WorkloadoptimizationV1CustomMetricsDataSourceInputPrometheusMetrics   `json:"metrics,omitempty"`
+}
+
+// WorkloadoptimizationV1CustomMetricsDataSourceInputPrometheusDataSource defines model for workloadoptimization.v1.CustomMetricsDataSourceInput.Prometheus.DataSource.
+type WorkloadoptimizationV1CustomMetricsDataSourceInputPrometheusDataSource struct {
+	Timeout *string `json:"timeout,omitempty"`
+	Url     string  `json:"url"`
+}
+
+// WorkloadoptimizationV1CustomMetricsDataSourceInputPrometheusMetric Metric defines a single Prometheus metric query. Multiple entries with the same name
+// represent multiple queries for a single metric.
+type WorkloadoptimizationV1CustomMetricsDataSourceInputPrometheusMetric struct {
+	Name  string `json:"name"`
+	Query string `json:"query"`
+}
+
+// WorkloadoptimizationV1CustomMetricsDataSourceInputPrometheusMetrics defines model for workloadoptimization.v1.CustomMetricsDataSourceInput.Prometheus.Metrics.
+type WorkloadoptimizationV1CustomMetricsDataSourceInputPrometheusMetrics struct {
+	Manual  *[]WorkloadoptimizationV1CustomMetricsDataSourceInputPrometheusMetric `json:"manual,omitempty"`
+	Presets *[]string                                                             `json:"presets,omitempty"`
+}
 
 // WorkloadoptimizationV1DeleteWorkloadScalingPolicyResponse defines model for workloadoptimization.v1.DeleteWorkloadScalingPolicyResponse.
 type WorkloadoptimizationV1DeleteWorkloadScalingPolicyResponse = map[string]interface{}
@@ -8784,6 +8906,16 @@ type WorkloadoptimizationV1GetAgentStatusResponse struct {
 // WorkloadoptimizationV1GetAgentStatusResponseAgentStatus AgentStatus defines the status of workload-autoscaler.
 type WorkloadoptimizationV1GetAgentStatusResponseAgentStatus string
 
+// WorkloadoptimizationV1GetAggregatedWorkloadCustomMetricsV1BetaResponse defines model for workloadoptimization.v1.GetAggregatedWorkloadCustomMetricsV1BetaResponse.
+type WorkloadoptimizationV1GetAggregatedWorkloadCustomMetricsV1BetaResponse struct {
+	// MetricGroups Aggregated custom metrics time-series data grouped by metric name.
+	MetricGroups []WorkloadoptimizationV1AggregatedCustomMetricGroup `json:"metricGroups"`
+
+	// Step Step used to calculate metrics. May differ from the requested value if the server determines
+	// the query would be too expensive. When the request does not provide a step, the server calculates one internally.
+	Step string `json:"step"`
+}
+
 // WorkloadoptimizationV1GetHPAV2MigrationEligibilityResponse defines model for workloadoptimization.v1.GetHPAV2MigrationEligibilityResponse.
 type WorkloadoptimizationV1GetHPAV2MigrationEligibilityResponse struct {
 	EligibleCount int32 `json:"eligibleCount"`
@@ -8811,8 +8943,8 @@ type WorkloadoptimizationV1GetOrganizationAgentStatusesResponse struct {
 	ClusterAgentStatuses []WorkloadoptimizationV1GetAgentStatusResponse `json:"clusterAgentStatuses"`
 }
 
-// WorkloadoptimizationV1GetWorkloadCustomMetricsResponse defines model for workloadoptimization.v1.GetWorkloadCustomMetricsResponse.
-type WorkloadoptimizationV1GetWorkloadCustomMetricsResponse struct {
+// WorkloadoptimizationV1GetWorkloadCustomMetricsV1BetaResponse defines model for workloadoptimization.v1.GetWorkloadCustomMetricsV1BetaResponse.
+type WorkloadoptimizationV1GetWorkloadCustomMetricsV1BetaResponse struct {
 	// MetricGroups Custom metrics time-series data grouped by metric name.
 	MetricGroups []WorkloadoptimizationV1CustomMetricGroup `json:"metricGroups"`
 
@@ -9174,6 +9306,57 @@ type WorkloadoptimizationV1HPAV2Config struct {
 	TakeOwnership bool `json:"takeOwnership"`
 }
 
+// WorkloadoptimizationV1HeapCommited defines model for workloadoptimization.v1.HeapCommited.
+type WorkloadoptimizationV1HeapCommited struct {
+	AggregatedGib WorkloadoptimizationV1HeapCommitedAggregatedMetrics `json:"aggregatedGib"`
+	MetricsGib    []WorkloadoptimizationV1HeapCommitedMetrics         `json:"metricsGib"`
+}
+
+// WorkloadoptimizationV1HeapCommitedAggregatedMetrics defines model for workloadoptimization.v1.HeapCommitedAggregatedMetrics.
+type WorkloadoptimizationV1HeapCommitedAggregatedMetrics struct {
+	Avg float64 `json:"avg"`
+}
+
+// WorkloadoptimizationV1HeapCommitedMetrics defines model for workloadoptimization.v1.HeapCommitedMetrics.
+type WorkloadoptimizationV1HeapCommitedMetrics struct {
+	Avg       float64   `json:"avg"`
+	Timestamp time.Time `json:"timestamp"`
+}
+
+// WorkloadoptimizationV1HeapRecommended defines model for workloadoptimization.v1.HeapRecommended.
+type WorkloadoptimizationV1HeapRecommended struct {
+	AggregatedGib WorkloadoptimizationV1HeapRecommendedAggregatedMetrics `json:"aggregatedGib"`
+	MetricsGib    []WorkloadoptimizationV1HeapRecommendedMetrics         `json:"metricsGib"`
+}
+
+// WorkloadoptimizationV1HeapRecommendedAggregatedMetrics defines model for workloadoptimization.v1.HeapRecommendedAggregatedMetrics.
+type WorkloadoptimizationV1HeapRecommendedAggregatedMetrics struct {
+	Avg float64 `json:"avg"`
+}
+
+// WorkloadoptimizationV1HeapRecommendedMetrics defines model for workloadoptimization.v1.HeapRecommendedMetrics.
+type WorkloadoptimizationV1HeapRecommendedMetrics struct {
+	Avg       float64   `json:"avg"`
+	Timestamp time.Time `json:"timestamp"`
+}
+
+// WorkloadoptimizationV1HeapUsed defines model for workloadoptimization.v1.HeapUsed.
+type WorkloadoptimizationV1HeapUsed struct {
+	AggregatedGib WorkloadoptimizationV1HeapUsedAggregatedMetrics `json:"aggregatedGib"`
+	MetricsGib    []WorkloadoptimizationV1HeapUsedMetrics         `json:"metricsGib"`
+}
+
+// WorkloadoptimizationV1HeapUsedAggregatedMetrics defines model for workloadoptimization.v1.HeapUsedAggregatedMetrics.
+type WorkloadoptimizationV1HeapUsedAggregatedMetrics struct {
+	P95 float64 `json:"p95"`
+}
+
+// WorkloadoptimizationV1HeapUsedMetrics defines model for workloadoptimization.v1.HeapUsedMetrics.
+type WorkloadoptimizationV1HeapUsedMetrics struct {
+	P95       float64   `json:"p95"`
+	Timestamp time.Time `json:"timestamp"`
+}
+
 // WorkloadoptimizationV1HorizontalOverrides defines model for workloadoptimization.v1.HorizontalOverrides.
 type WorkloadoptimizationV1HorizontalOverrides struct {
 	// Behavior HorizontalPodAutoscalerBehavior configures the scaling behavior of the target
@@ -9227,9 +9410,9 @@ type WorkloadoptimizationV1InitiatedBy struct {
 
 // WorkloadoptimizationV1JVMContainerMetrics defines model for workloadoptimization.v1.JVMContainerMetrics.
 type WorkloadoptimizationV1JVMContainerMetrics struct {
-	HeapCommittedBytes   *[]WorkloadoptimizationV1TimeSeriesMetric `json:"heapCommittedBytes,omitempty"`
-	HeapUsedBytes        *[]WorkloadoptimizationV1TimeSeriesMetric `json:"heapUsedBytes,omitempty"`
-	RecommendedHeapBytes *[]WorkloadoptimizationV1TimeSeriesMetric `json:"recommendedHeapBytes,omitempty"`
+	HeapCommitted   *WorkloadoptimizationV1HeapCommited    `json:"heapCommitted,omitempty"`
+	HeapUsed        *WorkloadoptimizationV1HeapUsed        `json:"heapUsed,omitempty"`
+	RecommendedHeap *WorkloadoptimizationV1HeapRecommended `json:"recommendedHeap,omitempty"`
 }
 
 // WorkloadoptimizationV1JVMMemorySettings defines model for workloadoptimization.v1.JVMMemorySettings.
@@ -9456,8 +9639,9 @@ type WorkloadoptimizationV1NativeVPAStateChangedEvent struct {
 
 // WorkloadoptimizationV1NewCustomMetricsDataSource defines model for workloadoptimization.v1.NewCustomMetricsDataSource.
 type WorkloadoptimizationV1NewCustomMetricsDataSource struct {
-	Data WorkloadoptimizationV1CustomMetricsDataSourceData `json:"data"`
-	Name string                                            `json:"name"`
+	// Data CustomMetricsDataSourceInput is the input data type for Create and Update operations on custom metrics data sources.
+	Data WorkloadoptimizationV1CustomMetricsDataSourceInput `json:"data"`
+	Name string                                             `json:"name"`
 
 	// Type Type defines the type of custom metrics data source. Respective Data field will be populated based on the type.
 	// For each type, exactly one of the data fields should be populated.
@@ -9676,9 +9860,25 @@ type WorkloadoptimizationV1RecommendationStep struct {
 
 // WorkloadoptimizationV1RecommendationStepLabel defines model for workloadoptimization.v1.RecommendationStepLabel.
 type WorkloadoptimizationV1RecommendationStepLabel struct {
-	Key   *string `json:"key,omitempty"`
-	Value *string `json:"value,omitempty"`
+	Key *string `json:"key,omitempty"`
+
+	// Unit The optional unit of the label.
+	// PERCENT - for percentages sent as floats.
+	// MILLICORE - CPU millicores.
+	// BYTE - Memory bytes.
+	Unit *WorkloadoptimizationV1RecommendationStepLabelUnit `json:"unit,omitempty"`
+
+	// Value This field contains a map with one key in the format {"data": value}.
+	// The "data" key holds the actual value of the label.
+	// E.g. if the label value is 3.14 then value = {"data": 3.14}.
+	Value *map[string]interface{} `json:"value,omitempty"`
 }
+
+// WorkloadoptimizationV1RecommendationStepLabelUnit The optional unit of the label.
+// PERCENT - for percentages sent as floats.
+// MILLICORE - CPU millicores.
+// BYTE - Memory bytes.
+type WorkloadoptimizationV1RecommendationStepLabelUnit string
 
 // WorkloadoptimizationV1RecommendationStopReason defines model for workloadoptimization.v1.RecommendationStopReason.
 type WorkloadoptimizationV1RecommendationStopReason struct {
@@ -10181,8 +10381,9 @@ type WorkloadoptimizationV1UnboundMemoryGrowthEvent = map[string]interface{}
 
 // WorkloadoptimizationV1UpdateCustomMetricsDataSource defines model for workloadoptimization.v1.UpdateCustomMetricsDataSource.
 type WorkloadoptimizationV1UpdateCustomMetricsDataSource struct {
-	Data *WorkloadoptimizationV1CustomMetricsDataSourceData `json:"data,omitempty"`
-	Name *string                                            `json:"name,omitempty"`
+	// Data CustomMetricsDataSourceInput is the input data type for Create and Update operations on custom metrics data sources.
+	Data *WorkloadoptimizationV1CustomMetricsDataSourceInput `json:"data,omitempty"`
+	Name *string                                             `json:"name,omitempty"`
 }
 
 // WorkloadoptimizationV1UpdateWorkloadResponseV2 defines model for workloadoptimization.v1.UpdateWorkloadResponseV2.
@@ -11144,6 +11345,9 @@ type ExternalClusterAPIGetCredentialsScriptParams struct {
 
 	// InstallOperator Whether to install the Operator.
 	InstallOperator *bool `form:"installOperator,omitempty" json:"installOperator,omitempty"`
+
+	// InstallUmbrella Whether to install with umbrella helm chart.
+	InstallUmbrella *bool `form:"installUmbrella,omitempty" json:"installUmbrella,omitempty"`
 }
 
 // ExternalClusterAPIGetCredentialsScriptParamsKentParams defines parameters for ExternalClusterAPIGetCredentialsScript.
@@ -11819,8 +12023,8 @@ type InventoryAPIListZonesParams struct {
 	PageToken *string `form:"pageToken,omitempty" json:"pageToken,omitempty"`
 }
 
-// WorkloadOptimizationAPIGetWorkloadCustomMetricsParams defines parameters for WorkloadOptimizationAPIGetWorkloadCustomMetrics.
-type WorkloadOptimizationAPIGetWorkloadCustomMetricsParams struct {
+// WorkloadOptimizationAPIGetWorkloadCustomMetricsV1BetaParams defines parameters for WorkloadOptimizationAPIGetWorkloadCustomMetricsV1Beta.
+type WorkloadOptimizationAPIGetWorkloadCustomMetricsV1BetaParams struct {
 	ContainerName string `form:"containerName" json:"containerName"`
 
 	// Step Sampling interval for metrics. For long time ranges, the server may enforce a step even if one is
@@ -11829,6 +12033,27 @@ type WorkloadOptimizationAPIGetWorkloadCustomMetricsParams struct {
 	FromTime time.Time `form:"fromTime" json:"fromTime"`
 	ToTime   time.Time `form:"toTime" json:"toTime"`
 }
+
+// WorkloadOptimizationAPIGetAggregatedWorkloadCustomMetricsV1BetaParams defines parameters for WorkloadOptimizationAPIGetAggregatedWorkloadCustomMetricsV1Beta.
+type WorkloadOptimizationAPIGetAggregatedWorkloadCustomMetricsV1BetaParams struct {
+	ContainerName string    `form:"containerName" json:"containerName"`
+	FromTime      time.Time `form:"fromTime" json:"fromTime"`
+	ToTime        time.Time `form:"toTime" json:"toTime"`
+
+	// Step Sampling interval for metrics. The server may enforce a step even when one is not provided, or change it
+	// if it's too short. The actual step used is returned in the response.
+	Step *string `form:"step,omitempty" json:"step,omitempty"`
+
+	// AggregationSlidingWindow Sliding window duration for aggregation (e.g. 30 minutes).
+	AggregationSlidingWindow string                                                                               `form:"aggregationSlidingWindow" json:"aggregationSlidingWindow"`
+	AggregationType          WorkloadOptimizationAPIGetAggregatedWorkloadCustomMetricsV1BetaParamsAggregationType `form:"aggregation.type" json:"aggregation.type"`
+
+	// AggregationPercentile Only used when type is PERCENTILE (e.g. 95 for p95).
+	AggregationPercentile *float64 `form:"aggregation.percentile,omitempty" json:"aggregation.percentile,omitempty"`
+}
+
+// WorkloadOptimizationAPIGetAggregatedWorkloadCustomMetricsV1BetaParamsAggregationType defines parameters for WorkloadOptimizationAPIGetAggregatedWorkloadCustomMetricsV1Beta.
+type WorkloadOptimizationAPIGetAggregatedWorkloadCustomMetricsV1BetaParamsAggregationType string
 
 // CommitmentsAPIBatchDeleteCommitmentsJSONRequestBody defines body for CommitmentsAPIBatchDeleteCommitments for application/json ContentType.
 type CommitmentsAPIBatchDeleteCommitmentsJSONRequestBody = CommitmentsAPIBatchDeleteCommitmentsRequest

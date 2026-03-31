@@ -383,7 +383,7 @@ func (r *edgeLocationResource) Create(ctx context.Context, req resource.CreateRe
 
 	createReq := omni.EdgeLocationsAPICreateEdgeLocationJSONRequestBody{
 		Name:   plan.Name.ValueString(),
-		Region: lo.ToPtr(plan.Region.ValueString()),
+		Region: plan.Region.ValueStringPointer(),
 		Zones:  lo.ToPtr(r.toZones(plan.Zones)),
 	}
 

@@ -1037,8 +1037,11 @@ type ClientInterface interface {
 	// InventoryAPIListZones request
 	InventoryAPIListZones(ctx context.Context, params *InventoryAPIListZonesParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// WorkloadOptimizationAPIGetWorkloadCustomMetrics request
-	WorkloadOptimizationAPIGetWorkloadCustomMetrics(ctx context.Context, clusterId string, workloadId string, params *WorkloadOptimizationAPIGetWorkloadCustomMetricsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// WorkloadOptimizationAPIGetWorkloadCustomMetricsV1Beta request
+	WorkloadOptimizationAPIGetWorkloadCustomMetricsV1Beta(ctx context.Context, clusterId string, workloadId string, params *WorkloadOptimizationAPIGetWorkloadCustomMetricsV1BetaParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// WorkloadOptimizationAPIGetAggregatedWorkloadCustomMetricsV1Beta request
+	WorkloadOptimizationAPIGetAggregatedWorkloadCustomMetricsV1Beta(ctx context.Context, clusterId string, workloadId string, params *WorkloadOptimizationAPIGetAggregatedWorkloadCustomMetricsV1BetaParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// WorkloadOptimizationAPIPatchWorkloadV2WithBody request with any body
 	WorkloadOptimizationAPIPatchWorkloadV2WithBody(ctx context.Context, clusterId string, workloadId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -5179,8 +5182,20 @@ func (c *Client) InventoryAPIListZones(ctx context.Context, params *InventoryAPI
 	return c.Client.Do(req)
 }
 
-func (c *Client) WorkloadOptimizationAPIGetWorkloadCustomMetrics(ctx context.Context, clusterId string, workloadId string, params *WorkloadOptimizationAPIGetWorkloadCustomMetricsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewWorkloadOptimizationAPIGetWorkloadCustomMetricsRequest(c.Server, clusterId, workloadId, params)
+func (c *Client) WorkloadOptimizationAPIGetWorkloadCustomMetricsV1Beta(ctx context.Context, clusterId string, workloadId string, params *WorkloadOptimizationAPIGetWorkloadCustomMetricsV1BetaParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewWorkloadOptimizationAPIGetWorkloadCustomMetricsV1BetaRequest(c.Server, clusterId, workloadId, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) WorkloadOptimizationAPIGetAggregatedWorkloadCustomMetricsV1Beta(ctx context.Context, clusterId string, workloadId string, params *WorkloadOptimizationAPIGetAggregatedWorkloadCustomMetricsV1BetaParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewWorkloadOptimizationAPIGetAggregatedWorkloadCustomMetricsV1BetaRequest(c.Server, clusterId, workloadId, params)
 	if err != nil {
 		return nil, err
 	}
@@ -11983,6 +11998,22 @@ func NewExternalClusterAPIGetCredentialsScriptRequest(server string, clusterId s
 		if params.InstallOperator != nil {
 
 			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "installOperator", runtime.ParamLocationQuery, *params.InstallOperator); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.InstallUmbrella != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "installUmbrella", runtime.ParamLocationQuery, *params.InstallUmbrella); err != nil {
 				return nil, err
 			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
 				return nil, err
@@ -20988,8 +21019,8 @@ func NewInventoryAPIListZonesRequest(server string, params *InventoryAPIListZone
 	return req, nil
 }
 
-// NewWorkloadOptimizationAPIGetWorkloadCustomMetricsRequest generates requests for WorkloadOptimizationAPIGetWorkloadCustomMetrics
-func NewWorkloadOptimizationAPIGetWorkloadCustomMetricsRequest(server string, clusterId string, workloadId string, params *WorkloadOptimizationAPIGetWorkloadCustomMetricsParams) (*http.Request, error) {
+// NewWorkloadOptimizationAPIGetWorkloadCustomMetricsV1BetaRequest generates requests for WorkloadOptimizationAPIGetWorkloadCustomMetricsV1Beta
+func NewWorkloadOptimizationAPIGetWorkloadCustomMetricsV1BetaRequest(server string, clusterId string, workloadId string, params *WorkloadOptimizationAPIGetWorkloadCustomMetricsV1BetaParams) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -21074,6 +21105,145 @@ func NewWorkloadOptimizationAPIGetWorkloadCustomMetricsRequest(server string, cl
 					queryValues.Add(k, v2)
 				}
 			}
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewWorkloadOptimizationAPIGetAggregatedWorkloadCustomMetricsV1BetaRequest generates requests for WorkloadOptimizationAPIGetAggregatedWorkloadCustomMetricsV1Beta
+func NewWorkloadOptimizationAPIGetAggregatedWorkloadCustomMetricsV1BetaRequest(server string, clusterId string, workloadId string, params *WorkloadOptimizationAPIGetAggregatedWorkloadCustomMetricsV1BetaParams) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "clusterId", runtime.ParamLocationPath, clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "workloadId", runtime.ParamLocationPath, workloadId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1beta/workload-autoscaling/clusters/%s/workloads/%s/custom-metrics:aggregate", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "containerName", runtime.ParamLocationQuery, params.ContainerName); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "fromTime", runtime.ParamLocationQuery, params.FromTime); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "toTime", runtime.ParamLocationQuery, params.ToTime); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+		if params.Step != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "step", runtime.ParamLocationQuery, *params.Step); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "aggregationSlidingWindow", runtime.ParamLocationQuery, params.AggregationSlidingWindow); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "aggregation.type", runtime.ParamLocationQuery, params.AggregationType); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+		if params.AggregationPercentile != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "aggregation.percentile", runtime.ParamLocationQuery, *params.AggregationPercentile); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
 		}
 
 		queryURL.RawQuery = queryValues.Encode()
@@ -22186,8 +22356,11 @@ type ClientWithResponsesInterface interface {
 	// InventoryAPIListZones request
 	InventoryAPIListZonesWithResponse(ctx context.Context, params *InventoryAPIListZonesParams) (*InventoryAPIListZonesResponse, error)
 
-	// WorkloadOptimizationAPIGetWorkloadCustomMetrics request
-	WorkloadOptimizationAPIGetWorkloadCustomMetricsWithResponse(ctx context.Context, clusterId string, workloadId string, params *WorkloadOptimizationAPIGetWorkloadCustomMetricsParams) (*WorkloadOptimizationAPIGetWorkloadCustomMetricsResponse, error)
+	// WorkloadOptimizationAPIGetWorkloadCustomMetricsV1Beta request
+	WorkloadOptimizationAPIGetWorkloadCustomMetricsV1BetaWithResponse(ctx context.Context, clusterId string, workloadId string, params *WorkloadOptimizationAPIGetWorkloadCustomMetricsV1BetaParams) (*WorkloadOptimizationAPIGetWorkloadCustomMetricsV1BetaResponse, error)
+
+	// WorkloadOptimizationAPIGetAggregatedWorkloadCustomMetricsV1Beta request
+	WorkloadOptimizationAPIGetAggregatedWorkloadCustomMetricsV1BetaWithResponse(ctx context.Context, clusterId string, workloadId string, params *WorkloadOptimizationAPIGetAggregatedWorkloadCustomMetricsV1BetaParams) (*WorkloadOptimizationAPIGetAggregatedWorkloadCustomMetricsV1BetaResponse, error)
 
 	// WorkloadOptimizationAPIPatchWorkloadV2 request  with any body
 	WorkloadOptimizationAPIPatchWorkloadV2WithBodyWithResponse(ctx context.Context, clusterId string, workloadId string, contentType string, body io.Reader) (*WorkloadOptimizationAPIPatchWorkloadV2Response, error)
@@ -29976,14 +30149,14 @@ func (r InventoryAPIListZonesResponse) GetBody() []byte {
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
-type WorkloadOptimizationAPIGetWorkloadCustomMetricsResponse struct {
+type WorkloadOptimizationAPIGetWorkloadCustomMetricsV1BetaResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON200      *WorkloadoptimizationV1GetWorkloadCustomMetricsResponse
+	JSON200      *WorkloadoptimizationV1GetWorkloadCustomMetricsV1BetaResponse
 }
 
 // Status returns HTTPResponse.Status
-func (r WorkloadOptimizationAPIGetWorkloadCustomMetricsResponse) Status() string {
+func (r WorkloadOptimizationAPIGetWorkloadCustomMetricsV1BetaResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -29991,7 +30164,7 @@ func (r WorkloadOptimizationAPIGetWorkloadCustomMetricsResponse) Status() string
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r WorkloadOptimizationAPIGetWorkloadCustomMetricsResponse) StatusCode() int {
+func (r WorkloadOptimizationAPIGetWorkloadCustomMetricsV1BetaResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -30000,7 +30173,37 @@ func (r WorkloadOptimizationAPIGetWorkloadCustomMetricsResponse) StatusCode() in
 
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
-func (r WorkloadOptimizationAPIGetWorkloadCustomMetricsResponse) GetBody() []byte {
+func (r WorkloadOptimizationAPIGetWorkloadCustomMetricsV1BetaResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type WorkloadOptimizationAPIGetAggregatedWorkloadCustomMetricsV1BetaResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *WorkloadoptimizationV1GetAggregatedWorkloadCustomMetricsV1BetaResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r WorkloadOptimizationAPIGetAggregatedWorkloadCustomMetricsV1BetaResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r WorkloadOptimizationAPIGetAggregatedWorkloadCustomMetricsV1BetaResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r WorkloadOptimizationAPIGetAggregatedWorkloadCustomMetricsV1BetaResponse) GetBody() []byte {
 	return r.Body
 }
 
@@ -33077,13 +33280,22 @@ func (c *ClientWithResponses) InventoryAPIListZonesWithResponse(ctx context.Cont
 	return ParseInventoryAPIListZonesResponse(rsp)
 }
 
-// WorkloadOptimizationAPIGetWorkloadCustomMetricsWithResponse request returning *WorkloadOptimizationAPIGetWorkloadCustomMetricsResponse
-func (c *ClientWithResponses) WorkloadOptimizationAPIGetWorkloadCustomMetricsWithResponse(ctx context.Context, clusterId string, workloadId string, params *WorkloadOptimizationAPIGetWorkloadCustomMetricsParams) (*WorkloadOptimizationAPIGetWorkloadCustomMetricsResponse, error) {
-	rsp, err := c.WorkloadOptimizationAPIGetWorkloadCustomMetrics(ctx, clusterId, workloadId, params)
+// WorkloadOptimizationAPIGetWorkloadCustomMetricsV1BetaWithResponse request returning *WorkloadOptimizationAPIGetWorkloadCustomMetricsV1BetaResponse
+func (c *ClientWithResponses) WorkloadOptimizationAPIGetWorkloadCustomMetricsV1BetaWithResponse(ctx context.Context, clusterId string, workloadId string, params *WorkloadOptimizationAPIGetWorkloadCustomMetricsV1BetaParams) (*WorkloadOptimizationAPIGetWorkloadCustomMetricsV1BetaResponse, error) {
+	rsp, err := c.WorkloadOptimizationAPIGetWorkloadCustomMetricsV1Beta(ctx, clusterId, workloadId, params)
 	if err != nil {
 		return nil, err
 	}
-	return ParseWorkloadOptimizationAPIGetWorkloadCustomMetricsResponse(rsp)
+	return ParseWorkloadOptimizationAPIGetWorkloadCustomMetricsV1BetaResponse(rsp)
+}
+
+// WorkloadOptimizationAPIGetAggregatedWorkloadCustomMetricsV1BetaWithResponse request returning *WorkloadOptimizationAPIGetAggregatedWorkloadCustomMetricsV1BetaResponse
+func (c *ClientWithResponses) WorkloadOptimizationAPIGetAggregatedWorkloadCustomMetricsV1BetaWithResponse(ctx context.Context, clusterId string, workloadId string, params *WorkloadOptimizationAPIGetAggregatedWorkloadCustomMetricsV1BetaParams) (*WorkloadOptimizationAPIGetAggregatedWorkloadCustomMetricsV1BetaResponse, error) {
+	rsp, err := c.WorkloadOptimizationAPIGetAggregatedWorkloadCustomMetricsV1Beta(ctx, clusterId, workloadId, params)
+	if err != nil {
+		return nil, err
+	}
+	return ParseWorkloadOptimizationAPIGetAggregatedWorkloadCustomMetricsV1BetaResponse(rsp)
 }
 
 // WorkloadOptimizationAPIPatchWorkloadV2WithBodyWithResponse request with arbitrary body returning *WorkloadOptimizationAPIPatchWorkloadV2Response
@@ -39815,22 +40027,48 @@ func ParseInventoryAPIListZonesResponse(rsp *http.Response) (*InventoryAPIListZo
 	return response, nil
 }
 
-// ParseWorkloadOptimizationAPIGetWorkloadCustomMetricsResponse parses an HTTP response from a WorkloadOptimizationAPIGetWorkloadCustomMetricsWithResponse call
-func ParseWorkloadOptimizationAPIGetWorkloadCustomMetricsResponse(rsp *http.Response) (*WorkloadOptimizationAPIGetWorkloadCustomMetricsResponse, error) {
+// ParseWorkloadOptimizationAPIGetWorkloadCustomMetricsV1BetaResponse parses an HTTP response from a WorkloadOptimizationAPIGetWorkloadCustomMetricsV1BetaWithResponse call
+func ParseWorkloadOptimizationAPIGetWorkloadCustomMetricsV1BetaResponse(rsp *http.Response) (*WorkloadOptimizationAPIGetWorkloadCustomMetricsV1BetaResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
 	defer rsp.Body.Close()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &WorkloadOptimizationAPIGetWorkloadCustomMetricsResponse{
+	response := &WorkloadOptimizationAPIGetWorkloadCustomMetricsV1BetaResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest WorkloadoptimizationV1GetWorkloadCustomMetricsResponse
+		var dest WorkloadoptimizationV1GetWorkloadCustomMetricsV1BetaResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseWorkloadOptimizationAPIGetAggregatedWorkloadCustomMetricsV1BetaResponse parses an HTTP response from a WorkloadOptimizationAPIGetAggregatedWorkloadCustomMetricsV1BetaWithResponse call
+func ParseWorkloadOptimizationAPIGetAggregatedWorkloadCustomMetricsV1BetaResponse(rsp *http.Response) (*WorkloadOptimizationAPIGetAggregatedWorkloadCustomMetricsV1BetaResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &WorkloadOptimizationAPIGetAggregatedWorkloadCustomMetricsV1BetaResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest WorkloadoptimizationV1GetAggregatedWorkloadCustomMetricsV1BetaResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
