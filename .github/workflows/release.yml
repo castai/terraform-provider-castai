@@ -36,7 +36,29 @@ jobs:
         uses: goreleaser/goreleaser-action@v7
         with:
           version: '~> v2'
-          args: release --clean --config=.github/.goreleaser.yml
+          args: release --clean --skip=publish --config=.github/.goreleaser.yml
         env:
           GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Verify release artifacts
+        run: |
+          cd dist
+          checksums=$(ls *_SHA256SUMS)
+          signature=$(ls *_SHA256SUMS.sig)
+
+          # Verify GPG signature on the checksum file
+          # Goreleaser had bug so extra verifying as a safeguard (goreleaser#6508)
+          gpg --verify "$signature" "$checksums"
+
+          # Verify checksums match actual artifacts
+          sha256sum -c "$checksums"
+
+      - name: Publish release
+        uses: goreleaser/goreleaser-action@v7
+        with:
+          version: '~> v2'
+          args: continue --config=.github/.goreleaser.yml
+          workdir: .
+        env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
