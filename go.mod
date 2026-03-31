@@ -1,6 +1,6 @@
 module github.com/castai/terraform-provider-castai
 
-go 1.24.0
+go 1.25.5
 
 require (
 	github.com/cenkalti/backoff/v4 v4.1.3

@@ -15,28 +15,50 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
 
       - name: Unshallow
         run: git fetch --prune --unshallow
 
       - name: Set up Go
-        uses: actions/setup-go@v4
+        uses: actions/setup-go@v6
         with:
-          go-version: 1.23.6
+          go-version: 1.25.5
 
       - name: Import GPG key
         id: import_gpg
-        uses: paultyng/ghaction-import-gpg@v2.1.0
-        env:
-          GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
-          PASSPHRASE: ${{ secrets.PASSPHRASE }}
+        uses: crazy-max/ghaction-import-gpg@v7
+        with:
+          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
+          passphrase: ${{ secrets.PASSPHRASE }}
 
       - name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@v6
+        uses: goreleaser/goreleaser-action@v7
         with:
           version: '~> v2'
-          args: release --clean --config=.github/.goreleaser.yml
+          args: release --clean --skip=publish --config=.github/.goreleaser.yml
         env:
           GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Verify release artifacts
+        run: |
+          cd dist
+          checksums=$(ls *_SHA256SUMS)
+          signature=$(ls *_SHA256SUMS.sig)
+
+          # Verify GPG signature on the checksum file
+          # Goreleaser had bug so extra verifying as a safeguard (goreleaser#6508)
+          gpg --verify "$signature" "$checksums"
+
+          # Verify checksums match actual artifacts
+          sha256sum -c "$checksums"
+
+      - name: Publish release
+        uses: goreleaser/goreleaser-action@v7
+        with:
+          version: '~> v2'
+          args: continue --config=.github/.goreleaser.yml
+          workdir: .
+        env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
