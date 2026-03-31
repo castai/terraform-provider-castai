@@ -23,10 +23,10 @@ jobs:
       - name: Print tf version
         run: terraform version
 
-      - name: Setup Go 1.24.0
+      - name: Setup Go 1.25.5
         uses: actions/setup-go@v6
         with:
-          go-version: '1.24.0'
+          go-version: '1.25.5'
           cache: true
 
       - name: Build binary
