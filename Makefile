@@ -7,7 +7,9 @@ export SWAGGER_LOCATION ?= https://$(API_HOST)/v1/spec/openapi.json
 #  To add a new SDK, add a line here in the format: package_name:ApiTagName:spec_location
 SDK_SPECS := \
 	cluster_autoscaler:HibernationSchedulesAPI:https://$(API_HOST)/spec/cluster-autoscaler/openapi.yaml \
-	organization_management:EnterpriseAPI:https://$(API_HOST)/spec/organization-management/openapi.yaml \
+	organization_management:EnterpriseAPI:https://$(API_HOST)/spec/organization-management/openapi.yaml
+
+OMNI_SDK_SPECS := \
 	omni:EdgeLocationsAPI,ClustersAPI:https://$(API_HOST)/spec/omni/openapi.yaml
 
 default: build
@@ -16,17 +18,25 @@ default: build
 format-tf:
 	terraform fmt -recursive -list=false
 
-.PHONY: generate-sdk 
-generate-sdk: generate-sdk-new
+.PHONY: generate-sdk
+generate-sdk:
 	@echo "==> Generating main sdk client"
+	$(MAKE) generate-sdk-new SPECS="$(SDK_SPECS)"
 	go generate castai/sdk/generate.go
 
+.PHONY: generate-omni-sdk
+generate-omni-sdk:
+	@echo "==> Generating omni sdk client"
+	$(MAKE) generate-sdk-new SPECS="$(OMNI_SDK_SPECS)"
+
 .PHONY: generate-sdk-new
+# Internal target: run oapi-codegen for the given SPECS variable.
+# Not meant to be called directly; use generate-sdk or generate-omni-sdk.
 generate-sdk-new:
 	@echo "==> Generating api sdk clients"
 	@go install github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen@v2.4.1
 	@go install github.com/golang/mock/mockgen
-	@cd castai/sdk && for spec in $(SDK_SPECS); do \
+	@cd castai/sdk && for spec in $(SPECS); do \
 		IFS=':' read -r pkg tag loc <<< "$$spec"; \
 		[ -z "$$pkg" ] && continue; \
 		echo "generating sdk for: $$tag from $$loc"; \
