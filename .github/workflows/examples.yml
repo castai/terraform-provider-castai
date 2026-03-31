@@ -13,20 +13,20 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4  # Updated to use Node.js 20
+        uses: actions/checkout@v6
 
       - name: Set up Terraform
-        uses: hashicorp/setup-terraform@v3  # Updated to use Node.js 20
+        uses: hashicorp/setup-terraform@v4
         with:
           terraform_version: ${{ matrix.version }}
 
       - name: Print tf version
         run: terraform version
 
-      - name: Setup Go 1.24.0
-        uses: actions/setup-go@v5
+      - name: Setup Go
+        uses: actions/setup-go@v6
         with:
-          go-version: '1.24.0'
+          go-version: '1.25.5'
           cache: true
 
       - name: Build binary

@@ -18,15 +18,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout source
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
 
-      - name: Setup Go 1.24.0
-        uses: actions/setup-go@v4
+      - name: Setup Go
+        uses: actions/setup-go@v6
         with:
-          go-version: '1.24.0'
+          go-version: '1.25.5'
 
       - name: Cache Go modules
-        uses: actions/cache@v3
+        uses: actions/cache@v5
         with:
           path: ~/go/pkg/mod
           key: ${{ runner.os }}-build-${{ hashFiles('**/go.sum') }}
@@ -34,18 +34,18 @@ jobs:
             ${{ runner.os }}-build-
 
       - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v2
+        uses: hashicorp/setup-terraform@v4
         with:
           terraform_version: '1.11.*'
           terraform_wrapper: false
 
       - name: Authenticate to GCP
-        uses: google-github-actions/auth@v2
+        uses: google-github-actions/auth@v3
         with:
           credentials_json: ${{ secrets.GOOGLE_TF_ACCEPTANCE_TEST_CREDENTIALS }}
 
       - name: Get GKE credentials
-        uses: google-github-actions/get-gke-credentials@v2
+        uses: google-github-actions/get-gke-credentials@v3
         with:
           cluster_name: tf-core-acc-20230723
           location: us-central1-c

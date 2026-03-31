@@ -20,8 +20,20 @@ Omni cluster resource allows registering a cluster with CAST AI Omni provider.
 - `cluster_id` (String) CAST AI cluster ID to register
 - `organization_id` (String) CAST AI organization ID
 
+### Optional
+
+- `status` (Attributes) Current status of the cluster to report on registration. (see [below for nested schema](#nestedatt--status))
+
 ### Read-Only
 
 - `id` (String) Resource ID (same as cluster_id)
+
+<a id="nestedatt--status"></a>
+### Nested Schema for `status`
+
+Required:
+
+- `omni_agent_version` (String) Version of the omni agent running on the cluster.
+- `pod_cidr` (String) Pod CIDR of the cluster.
 
 
