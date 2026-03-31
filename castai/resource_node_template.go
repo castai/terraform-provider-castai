@@ -1369,7 +1369,7 @@ func updateNodeTemplate(ctx context.Context, d *schema.ResourceData, meta any, s
 		req.Gpu = toTemplateGpu(v[0].(map[string]any))
 	}
 
-	if v, ok := d.GetOk(FieldNodeTemplateClmEnabled); ok {
+	if v, _ := d.GetOk(FieldNodeTemplateClmEnabled); v != nil {
 		req.ClmEnabled = lo.ToPtr(v.(bool))
 	}
 
