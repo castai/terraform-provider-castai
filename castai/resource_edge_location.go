@@ -7,12 +7,15 @@ import (
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/resourcevalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -35,18 +38,24 @@ type edgeLocationResource struct {
 }
 
 type edgeLocationModel struct {
-	ID             types.String `tfsdk:"id"`
-	OrganizationID types.String `tfsdk:"organization_id"`
-	ClusterID      types.String `tfsdk:"cluster_id"`
-	Name           types.String `tfsdk:"name"`
-	Description    types.String `tfsdk:"description"`
-	Region         types.String `tfsdk:"region"`
-	Zones          []zoneModel  `tfsdk:"zones"`
-	AWS            *awsModel    `tfsdk:"aws"`
-	GCP            *gcpModel    `tfsdk:"gcp"`
-	OCI            *ociModel    `tfsdk:"oci"`
+	ID               types.String       `tfsdk:"id"`
+	OrganizationID   types.String       `tfsdk:"organization_id"`
+	ClusterID        types.String       `tfsdk:"cluster_id"`
+	Name             types.String       `tfsdk:"name"`
+	Description      types.String       `tfsdk:"description"`
+	Region           types.String       `tfsdk:"region"`
+	ControlPlaneMode types.String       `tfsdk:"control_plane_mode"`
+	ControlPlane     *controlPlaneModel `tfsdk:"control_plane"`
+	Zones            []zoneModel        `tfsdk:"zones"`
+	AWS              *awsModel          `tfsdk:"aws"`
+	GCP              *gcpModel          `tfsdk:"gcp"`
+	OCI              *ociModel          `tfsdk:"oci"`
 	// Computed revision number incremented each time credentials have changed.
 	CredentialsRevision types.Int64 `tfsdk:"credentials_revision"`
+}
+
+type controlPlaneModel struct {
+	Ha types.Bool `tfsdk:"ha"`
 }
 
 type zoneModel struct {
@@ -225,6 +234,31 @@ func (r *edgeLocationResource) Schema(_ context.Context, _ resource.SchemaReques
 				Description: "The region where the edge location is deployed",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
+				},
+			},
+			"control_plane_mode": schema.StringAttribute{
+				Optional:    true,
+				Computed:    true,
+				Default:     stringdefault.StaticString(string(omni.DEDICATED)),
+				Description: "The mode of control plane inside edge location. Valid values: DEDICATED, SHARED.",
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.RequiresReplace(),
+				},
+				Validators: []validator.String{
+					stringvalidator.OneOf(string(omni.DEDICATED), string(omni.SHARED)),
+				},
+			},
+			"control_plane": schema.SingleNestedAttribute{
+				Optional:    true,
+				Description: "Control plane configuration. Only valid when control_plane_mode is SHARED.",
+				Attributes: map[string]schema.Attribute{
+					"ha": schema.BoolAttribute{
+						Required:    true,
+						Description: "Whether to use HA mode for control plane. If not set, default is HA.",
+						PlanModifiers: []planmodifier.Bool{
+							boolplanmodifier.RequiresReplace(),
+						},
+					},
 				},
 			},
 			"zones": schema.ListNestedAttribute{
@@ -451,13 +485,22 @@ func (r *edgeLocationResource) Create(ctx context.Context, req resource.CreateRe
 	clusterID := plan.ClusterID.ValueString()
 
 	createReq := omni.EdgeLocationsAPICreateEdgeLocationJSONRequestBody{
-		Name:   plan.Name.ValueString(),
-		Region: plan.Region.ValueStringPointer(),
-		Zones:  lo.ToPtr(r.toZones(plan.Zones)),
+		Name:             plan.Name.ValueString(),
+		Region:           plan.Region.ValueStringPointer(),
+		Zones:            lo.ToPtr(r.toZones(plan.Zones)),
+		ControlPlaneMode: lo.ToPtr(omni.EdgeLocationControlPlaneMode(plan.ControlPlaneMode.ValueString())),
 	}
 
 	if !plan.Description.IsNull() {
 		createReq.Description = lo.ToPtr(plan.Description.ValueString())
+	}
+
+	if plan.ControlPlane != nil {
+		createReq.EdgeClusterSpec = &omni.EdgeClusterSpec{
+			ControlPlane: &omni.EdgeClusterControlPlane{
+				Ha: plan.ControlPlane.Ha.ValueBoolPointer(),
+			},
+		}
 	}
 
 	// Map cloud provider specific configurations.
@@ -541,6 +584,9 @@ func (r *edgeLocationResource) Read(ctx context.Context, req resource.ReadReques
 	state.Description = types.StringNull()
 	if edgeLocation.Description != nil {
 		state.Description = types.StringValue(*edgeLocation.Description)
+	}
+	if edgeLocation.ControlPlaneMode != nil {
+		state.ControlPlaneMode = types.StringValue(string(*edgeLocation.ControlPlaneMode))
 	}
 
 	if edgeLocation.Zones != nil {
