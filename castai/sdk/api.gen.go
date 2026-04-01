@@ -8611,7 +8611,7 @@ type WorkloadoptimizationV1CrossVersionObjectReference struct {
 // WorkloadoptimizationV1CustomMetricDataPoint CustomMetricDataPoint represents a single data point in a custom metric time series.
 type WorkloadoptimizationV1CustomMetricDataPoint struct {
 	Timestamp time.Time `json:"timestamp"`
-	Value     float64   `json:"value"`
+	Value     *float64  `json:"value"`
 }
 
 // WorkloadoptimizationV1CustomMetricGroup CustomMetricGroup groups all time series for a single metric name.
@@ -11296,6 +11296,16 @@ type ExternalClusterAPIGetConnectAndEnableCASTAICmdParams struct {
 
 	// InstallOperator Whether cluster should be onboarded with Castware Operator.
 	InstallOperator *bool `form:"installOperator,omitempty" json:"installOperator,omitempty"`
+
+	// InstallSecurityImageScanning Whether to install image scanning as part of security.
+	// No-op if install_security_agent is set to false.
+	// To enable backwards compatibility, when the field is omitted, it is defaulted to true.
+	InstallSecurityImageScanning *bool `form:"installSecurityImageScanning,omitempty" json:"installSecurityImageScanning,omitempty"`
+
+	// InstallSecurityCompliance Whether to install compliance scanning as part of security.
+	// No-op if install_security_agent is set to false.
+	// To enable backwards compatibility, when the field is omitted, it is defaulted to true.
+	InstallSecurityCompliance *bool `form:"installSecurityCompliance,omitempty" json:"installSecurityCompliance,omitempty"`
 }
 
 // ExternalClusterAPIGetCredentialsScriptParams defines parameters for ExternalClusterAPIGetCredentialsScript.
@@ -11348,6 +11358,16 @@ type ExternalClusterAPIGetCredentialsScriptParams struct {
 
 	// InstallUmbrella Whether to install with umbrella helm chart.
 	InstallUmbrella *bool `form:"installUmbrella,omitempty" json:"installUmbrella,omitempty"`
+
+	// InstallSecurityImageScanning Whether to install image scanning as part of security.
+	// No-op if install_security_agent is set to false.
+	// To enable backwards compatibility, when the field is omitted, it is defaulted to true.
+	InstallSecurityImageScanning *bool `form:"installSecurityImageScanning,omitempty" json:"installSecurityImageScanning,omitempty"`
+
+	// InstallSecurityCompliance Whether to install compliance scanning as part of security.
+	// No-op if install_security_agent is set to false.
+	// To enable backwards compatibility, when the field is omitted, it is defaulted to true.
+	InstallSecurityCompliance *bool `form:"installSecurityCompliance,omitempty" json:"installSecurityCompliance,omitempty"`
 }
 
 // ExternalClusterAPIGetCredentialsScriptParamsKentParams defines parameters for ExternalClusterAPIGetCredentialsScript.
@@ -12032,6 +12052,10 @@ type WorkloadOptimizationAPIGetWorkloadCustomMetricsV1BetaParams struct {
 	Step     *string   `form:"step,omitempty" json:"step,omitempty"`
 	FromTime time.Time `form:"fromTime" json:"fromTime"`
 	ToTime   time.Time `form:"toTime" json:"toTime"`
+
+	// BackfillDataPoints When true, missing data points in the time range are backfilled with null values at each step interval.
+	// Requires a step to be in effect (explicitly requested or server-calculated). Ignored when no step applies.
+	BackfillDataPoints *bool `form:"backfillDataPoints,omitempty" json:"backfillDataPoints,omitempty"`
 }
 
 // WorkloadOptimizationAPIGetAggregatedWorkloadCustomMetricsV1BetaParams defines parameters for WorkloadOptimizationAPIGetAggregatedWorkloadCustomMetricsV1Beta.
@@ -12050,6 +12074,9 @@ type WorkloadOptimizationAPIGetAggregatedWorkloadCustomMetricsV1BetaParams struc
 
 	// AggregationPercentile Only used when type is PERCENTILE (e.g. 95 for p95).
 	AggregationPercentile *float64 `form:"aggregation.percentile,omitempty" json:"aggregation.percentile,omitempty"`
+
+	// BackfillDataPoints When true, missing data points in the time range are backfilled with null values at each step interval.
+	BackfillDataPoints *bool `form:"backfillDataPoints,omitempty" json:"backfillDataPoints,omitempty"`
 }
 
 // WorkloadOptimizationAPIGetAggregatedWorkloadCustomMetricsV1BetaParamsAggregationType defines parameters for WorkloadOptimizationAPIGetAggregatedWorkloadCustomMetricsV1Beta.

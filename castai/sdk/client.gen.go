@@ -11412,6 +11412,38 @@ func NewExternalClusterAPIGetConnectAndEnableCASTAICmdRequest(server string, par
 
 		}
 
+		if params.InstallSecurityImageScanning != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "installSecurityImageScanning", runtime.ParamLocationQuery, *params.InstallSecurityImageScanning); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.InstallSecurityCompliance != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "installSecurityCompliance", runtime.ParamLocationQuery, *params.InstallSecurityCompliance); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
 		queryURL.RawQuery = queryValues.Encode()
 	}
 
@@ -12014,6 +12046,38 @@ func NewExternalClusterAPIGetCredentialsScriptRequest(server string, clusterId s
 		if params.InstallUmbrella != nil {
 
 			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "installUmbrella", runtime.ParamLocationQuery, *params.InstallUmbrella); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.InstallSecurityImageScanning != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "installSecurityImageScanning", runtime.ParamLocationQuery, *params.InstallSecurityImageScanning); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.InstallSecurityCompliance != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "installSecurityCompliance", runtime.ParamLocationQuery, *params.InstallSecurityCompliance); err != nil {
 				return nil, err
 			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
 				return nil, err
@@ -21107,6 +21171,22 @@ func NewWorkloadOptimizationAPIGetWorkloadCustomMetricsV1BetaRequest(server stri
 			}
 		}
 
+		if params.BackfillDataPoints != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "backfillDataPoints", runtime.ParamLocationQuery, *params.BackfillDataPoints); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
 		queryURL.RawQuery = queryValues.Encode()
 	}
 
@@ -21233,6 +21313,22 @@ func NewWorkloadOptimizationAPIGetAggregatedWorkloadCustomMetricsV1BetaRequest(s
 		if params.AggregationPercentile != nil {
 
 			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "aggregation.percentile", runtime.ParamLocationQuery, *params.AggregationPercentile); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.BackfillDataPoints != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "backfillDataPoints", runtime.ParamLocationQuery, *params.BackfillDataPoints); err != nil {
 				return nil, err
 			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
 				return nil, err

@@ -31,6 +31,13 @@ const (
 	ClusterStateWARNING          ClusterState = "WARNING"
 )
 
+// Defines values for EdgeLocationControlPlaneMode.
+const (
+	CONTROLPLANEMODEUNSPECIFIED EdgeLocationControlPlaneMode = "CONTROL_PLANE_MODE_UNSPECIFIED"
+	DEDICATED                   EdgeLocationControlPlaneMode = "DEDICATED"
+	SHARED                      EdgeLocationControlPlaneMode = "SHARED"
+)
+
 // Defines values for EdgeLocationState.
 const (
 	EdgeLocationStateDELETED           EdgeLocationState = "DELETED"
@@ -202,6 +209,9 @@ type EdgeLocation struct {
 	// CloudResourceId Name used to create/tag cloud resources.
 	CloudResourceId *string `json:"cloudResourceId,omitempty"`
 
+	// ControlPlaneMode The mode of control plane inside edge location.
+	ControlPlaneMode *EdgeLocationControlPlaneMode `json:"controlPlaneMode,omitempty"`
+
 	// CreateTime The creation timestamp.
 	CreateTime *time.Time `json:"createTime,omitempty"`
 
@@ -249,6 +259,9 @@ type EdgeLocation struct {
 	// Zones The zones of edge location.
 	Zones *[]Zone `json:"zones,omitempty"`
 }
+
+// EdgeLocationControlPlaneMode The mode of control plane inside edge location.
+type EdgeLocationControlPlaneMode string
 
 // EdgeLocationState The state of the edge location on API level.
 type EdgeLocationState string
