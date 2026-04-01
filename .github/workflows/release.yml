@@ -58,7 +58,7 @@ jobs:
         uses: goreleaser/goreleaser-action@v7
         with:
           version: '~> v2'
-          args: release --config=.github/.goreleaser.yml
+          args: release --clean --config=.github/.goreleaser.yml
         env:
           GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
