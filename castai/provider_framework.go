@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	"github.com/castai/terraform-provider-castai/castai/sdk"
+	"github.com/castai/terraform-provider-castai/castai/sdk/ai_optimizer"
 	"github.com/castai/terraform-provider-castai/castai/sdk/cluster_autoscaler"
 	omnisdk "github.com/castai/terraform-provider-castai/castai/sdk/omni"
 	"github.com/castai/terraform-provider-castai/castai/sdk/organization_management"
@@ -113,11 +114,18 @@ func (p *frameworkProvider) Configure(ctx context.Context, req tfprovider.Config
 		return
 	}
 
+	aiOptimizerClient, err := ai_optimizer.CreateClient(apiURL, apiToken, agent)
+	if err != nil {
+		resp.Diagnostics.AddError("Failed to create ai optimizer client", err.Error())
+		return
+	}
+
 	providerConfig := &ProviderConfig{
 		api:                          client,
 		clusterAutoscalerClient:      clusterAutoscalerClient,
 		organizationManagementClient: organizationManagementClient,
 		omniAPI:                      omniClient,
+		aiOptimizerClient:            aiOptimizerClient,
 	}
 
 	resp.DataSourceData = providerConfig
