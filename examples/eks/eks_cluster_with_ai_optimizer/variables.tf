@@ -81,3 +81,9 @@ variable "custom_model_name" {
   description = "Name for the custom model."
   default     = "my-custom-model"
 }
+
+variable "tags" {
+  type        = map(any)
+  description = "Optional tags for new cluster nodes. This parameter applies only to new nodes - tags for old nodes are not reconciled."
+  default     = {}
+}
