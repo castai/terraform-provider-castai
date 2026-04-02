@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/castai/terraform-provider-castai/castai/sdk"
+	"github.com/castai/terraform-provider-castai/castai/sdk/ai_optimizer"
 	"github.com/castai/terraform-provider-castai/castai/sdk/cluster_autoscaler"
 	"github.com/castai/terraform-provider-castai/castai/sdk/omni"
 	"github.com/castai/terraform-provider-castai/castai/sdk/organization_management"
@@ -20,6 +21,7 @@ type ProviderConfig struct {
 	clusterAutoscalerClient      cluster_autoscaler.ClientWithResponsesInterface
 	organizationManagementClient organization_management.ClientWithResponsesInterface
 	omniAPI                      *omni.ClientWithResponses
+	aiOptimizerClient            ai_optimizer.ClientWithResponsesInterface
 }
 
 func Provider(version string) *schema.Provider {
@@ -76,6 +78,10 @@ func Provider(version string) *schema.Provider {
 			"castai_workload_scaling_policy":             resourceWorkloadScalingPolicy(),
 			"castai_workload_scaling_policy_order":       resourceWorkloadScalingPolicyOrder(),
 			"castai_workload_custom_metrics_data_source": resourceWorkloadCustomMetricsDataSource(),
+
+			"castai_ai_optimizer_model_registry": resourceAIModelRegistry(),
+			"castai_ai_optimizer_model_specs":    resourceAIModelSpecs(),
+			"castai_ai_optimizer_hosted_model":   resourceAIHostedModel(),
 		},
 
 		DataSourcesMap: map[string]*schema.Resource{
@@ -129,11 +135,17 @@ func providerConfigure(version string) schema.ConfigureContextFunc {
 			return nil, diag.FromErr(err)
 		}
 
+		aiOptimizerClient, err := ai_optimizer.CreateClient(apiURL, apiToken, agent)
+		if err != nil {
+			return nil, diag.FromErr(err)
+		}
+
 		return &ProviderConfig{
 			api:                          client,
 			clusterAutoscalerClient:      clusterAutoscalerClient,
 			organizationManagementClient: organizationManagementClient,
 			omniAPI:                      omniClient,
+			aiOptimizerClient:            aiOptimizerClient,
 		}, nil
 	}
 }
