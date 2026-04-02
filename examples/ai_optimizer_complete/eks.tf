@@ -39,7 +39,7 @@ module "eks" {
       capacity_type  = "SPOT"
 
       labels = {
-        "cast.ai/workload" = "ai-optimizer"
+        "cast.ai/workload"       = "ai-optimizer"
         "nvidia.com/gpu.present" = "true"
       }
 

@@ -70,8 +70,8 @@ module "castai-eks-cluster" {
       is_enabled = true
     }
     gpu = {
-      name       = "gpu"
-      is_enabled = true
+      name         = "gpu"
+      is_enabled   = true
       should_taint = true
       custom_taints = [
         {
