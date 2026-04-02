@@ -43,6 +43,8 @@ module "castai-eks-cluster" {
   aws_assume_role_arn        = module.castai-eks-role-iam.role_arn
   delete_nodes_on_disconnect = var.delete_nodes_on_disconnect
 
+  default_node_configuration = module.castai-eks-cluster.castai_node_configurations["default"]
+
   node_configurations = {
     default = {
       subnets              = module.vpc.private_subnets
@@ -107,15 +109,16 @@ resource "helm_release" "ai_optimizer" {
 
   create_namespace = true
 
-  set {
-    name  = "castai.apiKey"
-    value = var.castai_api_token
-  }
-
-  set {
-    name  = "castai.clusterID"
-    value = castai_eks_clusterid.cluster_id.id
-  }
+  set = [
+    {
+      name  = "castai.apiKey"
+      value = var.castai_api_token
+    },
+    {
+      name  = "castai.clusterID"
+      value = castai_eks_clusterid.cluster_id.id
+    }
+  ]
 
   depends_on = [module.castai-eks-cluster]
 }

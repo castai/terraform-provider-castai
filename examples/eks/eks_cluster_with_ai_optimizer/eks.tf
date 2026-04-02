@@ -43,11 +43,13 @@ module "eks" {
         "nvidia.com/gpu.present" = "true"
       }
 
-      taints = [{
-        key    = "nvidia.com/gpu"
-        value  = "true"
-        effect = "NO_SCHEDULE"
-      }]
+      taints = {
+        gpu = {
+          key    = "nvidia.com/gpu"
+          value  = "true"
+          effect = "NO_SCHEDULE"
+        }
+      }
 
       metadata_options = {
         http_endpoint               = "enabled"

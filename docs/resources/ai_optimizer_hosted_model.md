@@ -25,11 +25,11 @@ resource "castai_ai_optimizer_hosted_model" "hf_example" {
   }
 
   horizontal_autoscaling {
-    enabled        = true
-    min_replicas   = 1
-    max_replicas   = 4
-    target_metric  = "REQUESTS_PER_SECOND"
-    target_value   = 10
+    enabled       = true
+    min_replicas  = 1
+    max_replicas  = 4
+    target_metric = "REQUESTS_PER_SECOND"
+    target_value  = 10
   }
 }
 
@@ -100,7 +100,7 @@ Required:
 
 Optional:
 
-- `request_count` (Number) Request count threshold.
+- `request_count` (Number) Request count threshold. Value of 0 is treated as not set.
 
 
 <a id="nestedblock--hibernation--resume_condition"></a>
@@ -112,7 +112,7 @@ Required:
 
 Optional:
 
-- `request_count` (Number) Request count threshold.
+- `request_count` (Number) Request count threshold. Value of 0 is treated as not set.
 
 
 
