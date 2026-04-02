@@ -38,7 +38,7 @@ func TestAIModelSpecsRead(t *testing.T) {
 			json200: &ai_optimizer.ModelSpecs{
 				Model:        "llama-3.1-8b",
 				RegistryType: "HUGGING_FACE",
-				Type:         strPtr("chat"),
+				Type:         toPtr("chat"),
 				Routable:     &trueBool,
 				HuggingFace: &ai_optimizer.HuggingFaceModel{
 					ModelName: hfModelName,
@@ -127,8 +127,4 @@ func TestAIModelSpecsRead(t *testing.T) {
 			}
 		})
 	}
-}
-
-func strPtr(s string) *string {
-	return &s
 }

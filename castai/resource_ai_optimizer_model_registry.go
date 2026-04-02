@@ -130,6 +130,9 @@ func resourceAIModelRegistryRead(ctx context.Context, d *schema.ResourceData, me
 	}
 
 	reg := resp.JSON200
+	if reg == nil {
+		return diag.FromErr(fmt.Errorf("unexpected empty response reading model registry %q", d.Id()))
+	}
 
 	if reg.Provider.S3 != nil {
 		if err := d.Set(fieldAIModelRegistryBucket, reg.Provider.S3.Bucket); err != nil {

@@ -18,6 +18,149 @@ import (
 	mock_sdk "github.com/castai/terraform-provider-castai/castai/sdk/mock"
 )
 
+func TestExpandFlattenVllmConfig(t *testing.T) {
+	t.Parallel()
+
+	tests := map[string]struct {
+		input *ai_optimizer.VLLMConfig
+	}{
+		"secret name only": {
+			input: &ai_optimizer.VLLMConfig{SecretName: toPtr("my-secret")},
+		},
+		"hf token only": {
+			input: &ai_optimizer.VLLMConfig{HuggingFaceToken: toPtr("hf-tok")},
+		},
+		"both fields": {
+			input: &ai_optimizer.VLLMConfig{SecretName: toPtr("s"), HuggingFaceToken: toPtr("t")},
+		},
+	}
+
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+			r := require.New(t)
+			flat := toAnySlice(flattenVllmConfig(tc.input))
+			result := expandVllmConfig(flat)
+			r.Equal(tc.input, result)
+		})
+	}
+}
+
+func TestExpandFlattenHorizontalAutoscaling(t *testing.T) {
+	t.Parallel()
+
+	enabled := true
+	tests := map[string]struct {
+		input *ai_optimizer.HorizontalAutoscaling
+	}{
+		"enabled with all fields": {
+			input: &ai_optimizer.HorizontalAutoscaling{
+				Enabled:      &enabled,
+				MinReplicas:  1,
+				MaxReplicas:  5,
+				TargetMetric: ai_optimizer.HorizontalAutoscalingTargetMetric("REQUESTS_PER_SECOND"),
+				TargetValue:  0.8,
+			},
+		},
+		"no enabled flag": {
+			input: &ai_optimizer.HorizontalAutoscaling{
+				MinReplicas:  2,
+				MaxReplicas:  10,
+				TargetMetric: ai_optimizer.HorizontalAutoscalingTargetMetric("GPU_UTILIZATION"),
+				TargetValue:  0.5,
+			},
+		},
+	}
+
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+			r := require.New(t)
+			flat := toAnySlice(flattenHorizontalAutoscaling(tc.input))
+			result := expandHorizontalAutoscaling(flat)
+			r.Equal(tc.input, result)
+		})
+	}
+}
+
+func TestExpandFlattenHibernation(t *testing.T) {
+	t.Parallel()
+
+	enabled := true
+	rc := uint32(10)
+	tests := map[string]struct {
+		input *ai_optimizer.Hibernation
+	}{
+		"enabled with request count": {
+			input: &ai_optimizer.Hibernation{
+				Enabled: &enabled,
+				ResumeCondition: ai_optimizer.HibernationCondition{
+					Duration:     "5m",
+					RequestCount: &rc,
+				},
+				HibernateCondition: ai_optimizer.HibernationCondition{
+					Duration:     "10m",
+					RequestCount: &rc,
+				},
+			},
+		},
+		"no request count": {
+			input: &ai_optimizer.Hibernation{
+				ResumeCondition:    ai_optimizer.HibernationCondition{Duration: "1h"},
+				HibernateCondition: ai_optimizer.HibernationCondition{Duration: "2h"},
+			},
+		},
+	}
+
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+			r := require.New(t)
+			flat := toAnySlice(flattenHibernation(tc.input))
+			result := expandHibernation(flat)
+			r.Equal(tc.input, result)
+		})
+	}
+}
+
+func TestExpandFlattenFallback(t *testing.T) {
+	t.Parallel()
+
+	enabled := true
+	tests := map[string]struct {
+		input *ai_optimizer.Fallback
+	}{
+		"all fields": {
+			input: &ai_optimizer.Fallback{
+				Enabled:    &enabled,
+				ProviderId: toPtr("provider-1"),
+				Model:      toPtr("gpt-4"),
+			},
+		},
+		"enabled only": {
+			input: &ai_optimizer.Fallback{Enabled: &enabled},
+		},
+	}
+
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+			r := require.New(t)
+			flat := toAnySlice(flattenFallback(tc.input))
+			result := expandFallback(flat)
+			r.Equal(tc.input, result)
+		})
+	}
+}
+
+func toAnySlice(in []map[string]interface{}) []interface{} {
+	out := make([]interface{}, len(in))
+	for i, v := range in {
+		out[i] = v
+	}
+	return out
+}
+
 func TestAIHostedModelRead(t *testing.T) {
 	t.Parallel()
 

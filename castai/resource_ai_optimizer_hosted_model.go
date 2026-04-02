@@ -3,7 +3,6 @@ package castai
 import (
 	"context"
 	"fmt"
-	"net/http"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-log/tflog"
@@ -38,7 +37,7 @@ const (
 	fieldAIHostedModelHibernation        = "hibernation"
 	fieldAIHostedModelHibEnabled         = "enabled"
 	fieldAIHostedModelHibResumeCondition = "resume_condition"
-	fieldAIHostedModelHibHibCondition    = "hibernate_condition"
+	fieldAIHostedModelHibernateCondition = "hibernate_condition"
 	fieldAIHostedModelConditionDuration  = "duration"
 	fieldAIHostedModelConditionReqCount  = "request_count"
 	fieldAIHostedModelFallback           = "fallback"
@@ -57,7 +56,7 @@ var hibernationConditionSchema = &schema.Resource{
 		fieldAIHostedModelConditionReqCount: {
 			Type:        schema.TypeInt,
 			Optional:    true,
-			Description: "Request count threshold.",
+			Description: "Request count threshold. Value of 0 is treated as not set.",
 		},
 	},
 }
@@ -178,7 +177,7 @@ func resourceAIHostedModel() *schema.Resource {
 							MaxItems: 1,
 							Elem:     hibernationConditionSchema,
 						},
-						fieldAIHostedModelHibHibCondition: {
+						fieldAIHostedModelHibernateCondition: {
 							Type:     schema.TypeList,
 							Required: true,
 							MaxItems: 1,
@@ -295,6 +294,7 @@ func resourceAIHostedModelRead(ctx context.Context, d *schema.ResourceData, meta
 	clusterID := d.Get(fieldAIHostedModelClusterID).(string)
 	modelID := d.Id()
 
+	// The API does not expose a single-item GET endpoint; list and find by ID.
 	resp, err := client.HostedModelsAPIListHostedModelsWithResponse(ctx, orgID, clusterID, nil)
 	if err != nil {
 		return diag.FromErr(err)
@@ -542,14 +542,14 @@ func expandHibernationCondition(raw []interface{}) ai_optimizer.HibernationCondi
 	return out
 }
 
-func flattenHibernationCondition(c ai_optimizer.HibernationCondition) []map[string]interface{} {
+func flattenHibernationCondition(c ai_optimizer.HibernationCondition) []interface{} {
 	m := map[string]interface{}{
 		fieldAIHostedModelConditionDuration: c.Duration,
 	}
 	if c.RequestCount != nil {
 		m[fieldAIHostedModelConditionReqCount] = int(*c.RequestCount)
 	}
-	return []map[string]interface{}{m}
+	return []interface{}{m}
 }
 
 func expandHibernation(raw []interface{}) *ai_optimizer.Hibernation {
@@ -559,7 +559,7 @@ func expandHibernation(raw []interface{}) *ai_optimizer.Hibernation {
 	cfg := raw[0].(map[string]interface{})
 	out := &ai_optimizer.Hibernation{
 		ResumeCondition:    expandHibernationCondition(cfg[fieldAIHostedModelHibResumeCondition].([]interface{})),
-		HibernateCondition: expandHibernationCondition(cfg[fieldAIHostedModelHibHibCondition].([]interface{})),
+		HibernateCondition: expandHibernationCondition(cfg[fieldAIHostedModelHibernateCondition].([]interface{})),
 	}
 	if v, ok := cfg[fieldAIHostedModelHibEnabled].(bool); ok {
 		out.Enabled = &v
@@ -573,7 +573,7 @@ func flattenHibernation(h *ai_optimizer.Hibernation) []map[string]interface{} {
 	}
 	m := map[string]interface{}{
 		fieldAIHostedModelHibResumeCondition: flattenHibernationCondition(h.ResumeCondition),
-		fieldAIHostedModelHibHibCondition:    flattenHibernationCondition(h.HibernateCondition),
+		fieldAIHostedModelHibernateCondition: flattenHibernationCondition(h.HibernateCondition),
 	}
 	if h.Enabled != nil {
 		m[fieldAIHostedModelHibEnabled] = *h.Enabled
@@ -614,26 +614,4 @@ func flattenFallback(f *ai_optimizer.Fallback) []map[string]interface{} {
 		m[fieldAIHostedModelFallbackModel] = *f.Model
 	}
 	return []map[string]interface{}{m}
-}
-
-func hostedModelExists(ctx context.Context, client ai_optimizer.ClientWithResponsesInterface, orgID, clusterID, modelID string) (bool, error) {
-	resp, err := client.HostedModelsAPIListHostedModelsWithResponse(ctx, orgID, clusterID, nil)
-	if err != nil {
-		return false, err
-	}
-	if resp.StatusCode() == http.StatusNotFound {
-		return false, nil
-	}
-	if err := sdk.CheckOKResponse(resp, nil); err != nil {
-		return false, err
-	}
-	if resp.JSON200 == nil {
-		return false, nil
-	}
-	for _, item := range resp.JSON200.Items {
-		if item.Id != nil && *item.Id == modelID {
-			return true, nil
-		}
-	}
-	return false, nil
 }
