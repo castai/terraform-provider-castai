@@ -29,7 +29,7 @@ module "castai-eks-role-iam" {
 # CAST AI EKS cluster connection.
 module "castai-eks-cluster" {
   source  = "castai/eks-cluster/castai"
-  version = "~> 16.0"
+  version = "~> 14.1"
 
   api_url                = var.castai_api_url
   castai_api_token       = var.castai_api_token
