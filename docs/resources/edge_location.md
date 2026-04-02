@@ -60,6 +60,8 @@ resource "castai_edge_location" "aws_example" {
 ### Optional
 
 - `aws` (Attributes) AWS configuration for the edge location (see [below for nested schema](#nestedatt--aws))
+- `control_plane` (Attributes) Control plane configuration. Only valid when control_plane_mode is SHARED. (see [below for nested schema](#nestedatt--control_plane))
+- `control_plane_mode` (String) The mode of control plane inside edge location. Valid values: DEDICATED, SHARED.
 - `description` (String) Description of the edge location
 - `gcp` (Attributes) GCP configuration for the edge location (see [below for nested schema](#nestedatt--gcp))
 - `oci` (Attributes) OCI configuration for the edge location (see [below for nested schema](#nestedatt--oci))
@@ -89,6 +91,14 @@ Optional:
 - `secret_access_key_wo` (String, Sensitive) AWS secret access key
 - `vpc_cidr` (String) VPC IPv4 CIDR block
 - `vpc_peered` (Boolean) Whether existing VPC is peered with main cluster's VPC. Field is ignored if vpc_id is not provided or main cluster is not EKS
+
+
+<a id="nestedatt--control_plane"></a>
+### Nested Schema for `control_plane`
+
+Required:
+
+- `ha` (Boolean) Whether to use HA mode for control plane. If not set, default is HA.
 
 
 <a id="nestedatt--gcp"></a>
