@@ -34,7 +34,7 @@ locals {
 
   node_configuration = merge(local.default_node_cfg, {
     live = {
-      subnets              = var.subnets,
+      subnets              = var.subnets[0],
       instance_profile_arn = var.castai-eks-role-iam_instance_profile_arn
       security_groups      = var.security_groups
 
