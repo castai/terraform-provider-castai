@@ -37,7 +37,6 @@ resource "castai_pod_mutation" "spot_scheduling" {
     distribution_percentage = 80
   }
 
-
   patch = jsonencode([
     {
       op    = "add"
@@ -103,9 +102,8 @@ resource "castai_pod_mutation" "eviction_annotation_migration" {
 
   patch = jsonencode([
     {
-      op    = "remove"
-      path  = "/metadata/annotations/cluster-autoscaler.kubernetes.io~1safe-to-evict"
-      value = "true"
+      op   = "remove"
+      path = "/metadata/annotations/cluster-autoscaler.kubernetes.io~1safe-to-evict"
     },
     {
       op    = "add"

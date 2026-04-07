@@ -749,6 +749,286 @@ func TestStateToObjectFilterV2(t *testing.T) {
 	})
 }
 
+func TestPodMutation_ReadContext_WithPatch(t *testing.T) {
+	t.Parallel()
+
+	t.Run("when API responds with patch then populate state", func(t *testing.T) {
+		r := require.New(t)
+		mockClient := mock_patching_engine.NewMockClientInterface(gomock.NewController(t))
+
+		ctx := context.Background()
+		provider := &ProviderConfig{
+			patchingEngineClient: &patching_engine.ClientWithResponses{
+				ClientInterface: mockClient,
+			},
+		}
+
+		mutation := patching_engine.PodMutation{
+			Id:             lo.ToPtr(testMutationID),
+			Name:           lo.ToPtr("patch-mutation"),
+			Enabled:        lo.ToPtr(true),
+			ClusterId:      lo.ToPtr(testClusterID),
+			OrganizationId: lo.ToPtr(testOrgID),
+			Source:         lo.ToPtr(patching_engine.API),
+			Patch: &[]map[string]interface{}{
+				{"op": "add", "path": "/metadata/annotations/mutated", "value": "true"},
+				{"op": "remove", "path": "/metadata/labels/old-label"},
+			},
+		}
+
+		respBody, _ := json.Marshal(mutation)
+		mockClient.EXPECT().
+			PodMutationsAPIGetPodMutation(gomock.Any(), testOrgID, testClusterID, testMutationID).
+			Return(&http.Response{
+				StatusCode: http.StatusOK,
+				Body:       io.NopCloser(bytes.NewReader(respBody)),
+				Header:     map[string][]string{"Content-Type": {"application/json"}},
+			}, nil)
+
+		stateValue := cty.ObjectVal(map[string]cty.Value{
+			"organization_id": cty.StringVal(testOrgID),
+			"cluster_id":      cty.StringVal(testClusterID),
+			"name":            cty.StringVal("patch-mutation"),
+			"enabled":         cty.BoolVal(true),
+		})
+		state := terraform.NewInstanceStateShimmedFromValue(stateValue, 0)
+		state.ID = testMutationID
+
+		resource := resourcePodMutation()
+		data := resource.Data(state)
+
+		result := resource.ReadContext(ctx, data, provider)
+
+		r.Nil(result)
+		r.Equal(testMutationID, data.Id())
+
+		patchStr := data.Get(FieldPodMutationPatch).(string)
+		r.NotEmpty(patchStr)
+
+		var patchArr []map[string]interface{}
+		r.NoError(json.Unmarshal([]byte(patchStr), &patchArr))
+		r.Len(patchArr, 2)
+		r.Equal("add", patchArr[0]["op"])
+		r.Equal("/metadata/annotations/mutated", patchArr[0]["path"])
+		r.Equal("remove", patchArr[1]["op"])
+	})
+}
+
+func TestPodMutation_CreateContext_Error(t *testing.T) {
+	t.Parallel()
+
+	t.Run("when API responds with error then return diagnostics", func(t *testing.T) {
+		r := require.New(t)
+		mockClient := mock_patching_engine.NewMockClientInterface(gomock.NewController(t))
+
+		ctx := context.Background()
+		provider := &ProviderConfig{
+			patchingEngineClient: &patching_engine.ClientWithResponses{
+				ClientInterface: mockClient,
+			},
+		}
+
+		body := io.NopCloser(bytes.NewReader([]byte(`{"message":"validation error"}`)))
+		mockClient.EXPECT().
+			PodMutationsAPICreatePodMutation(gomock.Any(), testOrgID, testClusterID, gomock.Any()).
+			Return(&http.Response{
+				StatusCode: http.StatusBadRequest,
+				Body:       body,
+				Header:     map[string][]string{"Content-Type": {"application/json"}},
+			}, nil)
+
+		stateValue := cty.ObjectVal(map[string]cty.Value{
+			"organization_id": cty.StringVal(testOrgID),
+			"cluster_id":      cty.StringVal(testClusterID),
+			"name":            cty.StringVal("bad-mutation"),
+			"enabled":         cty.BoolVal(true),
+		})
+		state := terraform.NewInstanceStateShimmedFromValue(stateValue, 0)
+
+		resource := resourcePodMutation()
+		data := resource.Data(state)
+
+		result := resource.CreateContext(ctx, data, provider)
+
+		r.NotNil(result)
+		r.True(result.HasError())
+	})
+}
+
+func TestPodMutation_UpdateContext_Error(t *testing.T) {
+	t.Parallel()
+
+	t.Run("when API responds with error then return diagnostics", func(t *testing.T) {
+		r := require.New(t)
+		mockClient := mock_patching_engine.NewMockClientInterface(gomock.NewController(t))
+
+		ctx := context.Background()
+		provider := &ProviderConfig{
+			patchingEngineClient: &patching_engine.ClientWithResponses{
+				ClientInterface: mockClient,
+			},
+		}
+
+		body := io.NopCloser(bytes.NewReader([]byte(`{"message":"internal error"}`)))
+		mockClient.EXPECT().
+			PodMutationsAPIUpdatePodMutation(gomock.Any(), testOrgID, testClusterID, testMutationID, gomock.Any()).
+			Return(&http.Response{
+				StatusCode: http.StatusInternalServerError,
+				Body:       body,
+				Header:     map[string][]string{"Content-Type": {"application/json"}},
+			}, nil)
+
+		stateValue := cty.ObjectVal(map[string]cty.Value{
+			"organization_id": cty.StringVal(testOrgID),
+			"cluster_id":      cty.StringVal(testClusterID),
+			"name":            cty.StringVal("fail-mutation"),
+			"enabled":         cty.BoolVal(true),
+		})
+		state := terraform.NewInstanceStateShimmedFromValue(stateValue, 0)
+		state.ID = testMutationID
+
+		resource := resourcePodMutation()
+		data := resource.Data(state)
+
+		result := resource.UpdateContext(ctx, data, provider)
+
+		r.NotNil(result)
+		r.True(result.HasError())
+	})
+}
+
+func TestPodMutation_DeleteContext_Error(t *testing.T) {
+	t.Parallel()
+
+	t.Run("when API responds with error then return diagnostics", func(t *testing.T) {
+		r := require.New(t)
+		mockClient := mock_patching_engine.NewMockClientInterface(gomock.NewController(t))
+
+		ctx := context.Background()
+		provider := &ProviderConfig{
+			patchingEngineClient: &patching_engine.ClientWithResponses{
+				ClientInterface: mockClient,
+			},
+		}
+
+		body := io.NopCloser(bytes.NewReader([]byte(`{"message":"forbidden"}`)))
+		mockClient.EXPECT().
+			PodMutationsAPIDeletePodMutation(gomock.Any(), testOrgID, testClusterID, testMutationID).
+			Return(&http.Response{
+				StatusCode: http.StatusForbidden,
+				Body:       body,
+				Header:     map[string][]string{"Content-Type": {"application/json"}},
+			}, nil)
+
+		stateValue := cty.ObjectVal(map[string]cty.Value{
+			"organization_id": cty.StringVal(testOrgID),
+			"cluster_id":      cty.StringVal(testClusterID),
+			"name":            cty.StringVal("test-mutation"),
+			"enabled":         cty.BoolVal(true),
+		})
+		state := terraform.NewInstanceStateShimmedFromValue(stateValue, 0)
+		state.ID = testMutationID
+
+		resource := resourcePodMutation()
+		data := resource.Data(state)
+
+		result := resource.DeleteContext(ctx, data, provider)
+
+		r.NotNil(result)
+		r.True(result.HasError())
+	})
+}
+
+func TestPodMutation_UpdateContext_WithDistributionGroups(t *testing.T) {
+	t.Parallel()
+
+	t.Run("when updating distribution groups then read back updated state", func(t *testing.T) {
+		r := require.New(t)
+		mockClient := mock_patching_engine.NewMockClientInterface(gomock.NewController(t))
+
+		ctx := context.Background()
+		provider := &ProviderConfig{
+			patchingEngineClient: &patching_engine.ClientWithResponses{
+				ClientInterface: mockClient,
+			},
+		}
+
+		updatedMutation := patching_engine.PodMutation{
+			Id:             lo.ToPtr(testMutationID),
+			Name:           lo.ToPtr("dg-mutation"),
+			Enabled:        lo.ToPtr(true),
+			ClusterId:      lo.ToPtr(testClusterID),
+			OrganizationId: lo.ToPtr(testOrgID),
+			Source:         lo.ToPtr(patching_engine.API),
+			DistributionGroups: &[]patching_engine.DistributionGroup{
+				{
+					Name:       lo.ToPtr("spot-group"),
+					Percentage: lo.ToPtr(int32(50)),
+					Config: &patching_engine.DistributionGroupConfig{
+						SpotType: lo.ToPtr(patching_engine.DistributionGroupConfigSpotTypeUSEONLYSPOT),
+					},
+				},
+				{
+					Name:       lo.ToPtr("on-demand-group"),
+					Percentage: lo.ToPtr(int32(50)),
+					Config: &patching_engine.DistributionGroupConfig{
+						SpotType: lo.ToPtr(patching_engine.DistributionGroupConfigSpotTypeOPTIONALSPOT),
+					},
+				},
+			},
+		}
+
+		updateRespBody, _ := json.Marshal(updatedMutation)
+		mockClient.EXPECT().
+			PodMutationsAPIUpdatePodMutation(gomock.Any(), testOrgID, testClusterID, testMutationID, gomock.Any()).
+			Return(&http.Response{
+				StatusCode: http.StatusOK,
+				Body:       io.NopCloser(bytes.NewReader(updateRespBody)),
+				Header:     map[string][]string{"Content-Type": {"application/json"}},
+			}, nil)
+
+		getRespBody, _ := json.Marshal(updatedMutation)
+		mockClient.EXPECT().
+			PodMutationsAPIGetPodMutation(gomock.Any(), testOrgID, testClusterID, testMutationID).
+			Return(&http.Response{
+				StatusCode: http.StatusOK,
+				Body:       io.NopCloser(bytes.NewReader(getRespBody)),
+				Header:     map[string][]string{"Content-Type": {"application/json"}},
+			}, nil)
+
+		stateValue := cty.ObjectVal(map[string]cty.Value{
+			"organization_id": cty.StringVal(testOrgID),
+			"cluster_id":      cty.StringVal(testClusterID),
+			"name":            cty.StringVal("dg-mutation"),
+			"enabled":         cty.BoolVal(true),
+		})
+		state := terraform.NewInstanceStateShimmedFromValue(stateValue, 0)
+		state.ID = testMutationID
+
+		resource := resourcePodMutation()
+		data := resource.Data(state)
+
+		result := resource.UpdateContext(ctx, data, provider)
+
+		r.Nil(result)
+		r.Equal(testMutationID, data.Id())
+
+		dgs := data.Get(FieldPodMutationDistributionGroups).([]interface{})
+		r.Len(dgs, 2)
+
+		dg0 := dgs[0].(map[string]interface{})
+		r.Equal("spot-group", dg0[FieldPodMutationDistributionGroupName])
+		r.Equal(50, dg0[FieldPodMutationDistributionGroupPct])
+		dg0Config := dg0[FieldPodMutationDistributionGroupConfiguration].([]interface{})
+		r.Len(dg0Config, 1)
+		r.Equal(string(patching_engine.DistributionGroupConfigSpotTypeUSEONLYSPOT), dg0Config[0].(map[string]interface{})[FieldPodMutationSpotMode])
+
+		dg1 := dgs[1].(map[string]interface{})
+		r.Equal("on-demand-group", dg1[FieldPodMutationDistributionGroupName])
+		r.Equal(50, dg1[FieldPodMutationDistributionGroupPct])
+	})
+}
+
 func TestAccCloudAgnostic_ResourcePodMutation(t *testing.T) {
 	rName := fmt.Sprintf("%v-pod-mutation-%v", ResourcePrefix, acctest.RandString(8))
 	resourceName := "castai_pod_mutation.test"

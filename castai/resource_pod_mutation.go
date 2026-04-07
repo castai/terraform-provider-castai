@@ -25,8 +25,6 @@ const (
 	FieldPodMutationFilterV2                 = "filter_v2"
 	FieldPodMutationFilterWorkload           = "workload"
 	FieldPodMutationFilterPod                = "pod"
-	FieldPodMutationLabels                   = "labels"
-	FieldPodMutationAnnotations              = "annotations"
 	FieldPodMutationSpotConfig               = "spot_config"
 	FieldPodMutationSpotMode                 = "spot_mode"
 	FieldPodMutationSpotDistributionPct      = "distribution_percentage"
@@ -50,7 +48,6 @@ const (
 	FieldPodMutationLabelsFilterMatchers     = "matchers"
 	FieldPodMutationLabelMatcherKey          = "key"
 	FieldPodMutationLabelMatcherValue        = "value"
-	FieldPodMutationValues                   = "values"
 )
 
 var spotModeValues = []string{
@@ -63,7 +60,6 @@ var matcherTypeValues = []string{
 	string(patching_engine.EXACT),
 	string(patching_engine.REGEX),
 }
-
 
 var labelsFilterOperatorValues = []string{
 	string(patching_engine.AND),
@@ -511,7 +507,6 @@ func stateToPodMutation(d *schema.ResourceData) patching_engine.PodMutation {
 		mutation.SpotDistributionPercentage = &pct
 	}
 
-	// Restart policy
 	// Distribution groups
 	if v, ok := d.GetOk(FieldPodMutationDistributionGroups); ok {
 		groups := stateToDistributionGroups(v.([]interface{}))
@@ -520,7 +515,6 @@ func stateToPodMutation(d *schema.ResourceData) patching_engine.PodMutation {
 
 	return mutation
 }
-
 
 func stateToObjectFilterV2(m map[string]interface{}) *patching_engine.ObjectFilterV2 {
 	filter := &patching_engine.ObjectFilterV2{}
