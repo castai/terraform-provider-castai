@@ -8691,17 +8691,6 @@ type WorkloadoptimizationV1CustomMetricsDataSourceDataNodeWorkloadMetrics struct
 
 	// Resolved All resolved metrics from presets and manual metrics combined, with origin information.
 	Resolved *[]WorkloadoptimizationV1CustomMetricsDataSourceDataNodeWorkloadMetricsResolvedMetric `json:"resolved,omitempty"`
-
-	// ResolvedMetrics Deprecated: use `resolved` field instead.
-	// Deprecated:
-	ResolvedMetrics *[]WorkloadoptimizationV1CustomMetricsDataSourceDataNodeWorkloadMetricsMetric `json:"resolvedMetrics,omitempty"`
-}
-
-// WorkloadoptimizationV1CustomMetricsDataSourceDataNodeWorkloadMetricsMetric Deprecated: use `resolved` field instead.
-type WorkloadoptimizationV1CustomMetricsDataSourceDataNodeWorkloadMetricsMetric struct {
-	Errors   []string `json:"errors"`
-	Name     string   `json:"name"`
-	Warnings []string `json:"warnings"`
 }
 
 // WorkloadoptimizationV1CustomMetricsDataSourceDataNodeWorkloadMetricsResolvedMetric ResolvedMetric represents a fully resolved metric with its origin.
@@ -8736,18 +8725,6 @@ type WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetrics struct {
 
 	// Resolved All resolved metrics from presets and manual metrics combined, with origin information.
 	Resolved *[]WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetricsResolvedMetric `json:"resolved,omitempty"`
-
-	// ResolvedMetrics Deprecated: use `resolved` field instead.
-	// Deprecated:
-	ResolvedMetrics *[]WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetricsMetric `json:"resolvedMetrics,omitempty"`
-}
-
-// WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetricsMetric Deprecated: use `ResolvedMetric` instead.
-type WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetricsMetric struct {
-	Errors   []string `json:"errors"`
-	Name     string   `json:"name"`
-	Queries  []string `json:"queries"`
-	Warnings []string `json:"warnings"`
 }
 
 // WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetricsResolvedMetric ResolvedMetric represents a fully resolved metric with origin-tagged queries.
@@ -11306,6 +11283,9 @@ type ExternalClusterAPIGetConnectAndEnableCASTAICmdParams struct {
 	// No-op if install_security_agent is set to false.
 	// To enable backwards compatibility, when the field is omitted, it is defaulted to true.
 	InstallSecurityCompliance *bool `form:"installSecurityCompliance,omitempty" json:"installSecurityCompliance,omitempty"`
+
+	// UseUmbrella Whether to use umbrella Helm chart for onboarding.
+	UseUmbrella *bool `form:"useUmbrella,omitempty" json:"useUmbrella,omitempty"`
 }
 
 // ExternalClusterAPIGetCredentialsScriptParams defines parameters for ExternalClusterAPIGetCredentialsScript.
