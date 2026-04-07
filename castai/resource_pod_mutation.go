@@ -541,6 +541,8 @@ func stateToPodMutation(d *schema.ResourceData) patching_engine.PodMutation {
 		if err := json.Unmarshal([]byte(s), &patchArr); err == nil {
 			mutation.Patch = &patchArr
 		}
+	} else {
+		mutation.Patch = nil
 	}
 
 	// Spot config
@@ -552,6 +554,9 @@ func stateToPodMutation(d *schema.ResourceData) patching_engine.PodMutation {
 		}
 		pct := int32(sm[FieldPodMutationSpotDistributionPct].(int))
 		mutation.SpotDistributionPercentage = &pct
+	} else {
+		mutation.SpotType = nil
+		mutation.SpotDistributionPercentage = nil
 	}
 
 	// Distribution groups
