@@ -13,6 +13,7 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	tfterraform "github.com/hashicorp/terraform-plugin-testing/terraform"
@@ -282,18 +283,10 @@ func TestPodMutation_CreateContext(t *testing.T) {
 				Header:     map[string][]string{"Content-Type": {"application/json"}},
 			}, nil)
 
-		stateValue := cty.ObjectVal(map[string]cty.Value{
-			"organization_id": cty.StringVal(testOrgID),
-			"cluster_id":      cty.StringVal(testClusterID),
-			"name":            cty.StringVal("new-mutation"),
-			"enabled":         cty.BoolVal(true),
-		})
-		state := terraform.NewInstanceStateShimmedFromValue(stateValue, 0)
+		res := resourcePodMutation()
+		data := schema.TestResourceDataRaw(t, res.Schema, testPodMutationBaseState("new-mutation", true))
 
-		resource := resourcePodMutation()
-		data := resource.Data(state)
-
-		result := resource.CreateContext(ctx, data, provider)
+		result := res.CreateContext(ctx, data, provider)
 
 		r.Nil(result)
 		r.Equal(testMutationID, data.Id())
@@ -380,19 +373,11 @@ func TestPodMutation_UpdateContext(t *testing.T) {
 				Header:     map[string][]string{"Content-Type": {"application/json"}},
 			}, nil)
 
-		stateValue := cty.ObjectVal(map[string]cty.Value{
-			"organization_id": cty.StringVal(testOrgID),
-			"cluster_id":      cty.StringVal(testClusterID),
-			"name":            cty.StringVal("updated-mutation"),
-			"enabled":         cty.BoolVal(false),
-		})
-		state := terraform.NewInstanceStateShimmedFromValue(stateValue, 0)
-		state.ID = testMutationID
+		res := resourcePodMutation()
+		data := schema.TestResourceDataRaw(t, res.Schema, testPodMutationBaseState("updated-mutation", false))
+		data.SetId(testMutationID)
 
-		resource := resourcePodMutation()
-		data := resource.Data(state)
-
-		result := resource.UpdateContext(ctx, data, provider)
+		result := res.UpdateContext(ctx, data, provider)
 
 		r.Nil(result)
 		r.Equal(testMutationID, data.Id())
@@ -837,21 +822,14 @@ func TestPodMutation_CreateContext_Error(t *testing.T) {
 				Header:     map[string][]string{"Content-Type": {"application/json"}},
 			}, nil)
 
-		stateValue := cty.ObjectVal(map[string]cty.Value{
-			"organization_id": cty.StringVal(testOrgID),
-			"cluster_id":      cty.StringVal(testClusterID),
-			"name":            cty.StringVal("bad-mutation"),
-			"enabled":         cty.BoolVal(true),
-		})
-		state := terraform.NewInstanceStateShimmedFromValue(stateValue, 0)
+		res := resourcePodMutation()
+		data := schema.TestResourceDataRaw(t, res.Schema, testPodMutationBaseState("bad-mutation", true))
 
-		resource := resourcePodMutation()
-		data := resource.Data(state)
-
-		result := resource.CreateContext(ctx, data, provider)
+		result := res.CreateContext(ctx, data, provider)
 
 		r.NotNil(result)
 		r.True(result.HasError())
+		r.Contains(result[0].Summary, "creating pod mutation")
 	})
 }
 
@@ -878,22 +856,15 @@ func TestPodMutation_UpdateContext_Error(t *testing.T) {
 				Header:     map[string][]string{"Content-Type": {"application/json"}},
 			}, nil)
 
-		stateValue := cty.ObjectVal(map[string]cty.Value{
-			"organization_id": cty.StringVal(testOrgID),
-			"cluster_id":      cty.StringVal(testClusterID),
-			"name":            cty.StringVal("fail-mutation"),
-			"enabled":         cty.BoolVal(true),
-		})
-		state := terraform.NewInstanceStateShimmedFromValue(stateValue, 0)
-		state.ID = testMutationID
+		res := resourcePodMutation()
+		data := schema.TestResourceDataRaw(t, res.Schema, testPodMutationBaseState("fail-mutation", true))
+		data.SetId(testMutationID)
 
-		resource := resourcePodMutation()
-		data := resource.Data(state)
-
-		result := resource.UpdateContext(ctx, data, provider)
+		result := res.UpdateContext(ctx, data, provider)
 
 		r.NotNil(result)
 		r.True(result.HasError())
+		r.Contains(result[0].Summary, "updating pod mutation")
 	})
 }
 
@@ -996,19 +967,11 @@ func TestPodMutation_UpdateContext_WithDistributionGroups(t *testing.T) {
 				Header:     map[string][]string{"Content-Type": {"application/json"}},
 			}, nil)
 
-		stateValue := cty.ObjectVal(map[string]cty.Value{
-			"organization_id": cty.StringVal(testOrgID),
-			"cluster_id":      cty.StringVal(testClusterID),
-			"name":            cty.StringVal("dg-mutation"),
-			"enabled":         cty.BoolVal(true),
-		})
-		state := terraform.NewInstanceStateShimmedFromValue(stateValue, 0)
-		state.ID = testMutationID
+		res := resourcePodMutation()
+		data := schema.TestResourceDataRaw(t, res.Schema, testPodMutationBaseState("dg-mutation", true))
+		data.SetId(testMutationID)
 
-		resource := resourcePodMutation()
-		data := resource.Data(state)
-
-		result := resource.UpdateContext(ctx, data, provider)
+		result := res.UpdateContext(ctx, data, provider)
 
 		r.Nil(result)
 		r.Equal(testMutationID, data.Id())
@@ -1026,6 +989,414 @@ func TestPodMutation_UpdateContext_WithDistributionGroups(t *testing.T) {
 		dg1 := dgs[1].(map[string]interface{})
 		r.Equal("on-demand-group", dg1[FieldPodMutationDistributionGroupName])
 		r.Equal(50, dg1[FieldPodMutationDistributionGroupPct])
+	})
+}
+
+// testPodMutationBaseState returns a minimal valid state map that includes filter_v2
+// so that stateToPodMutation won't panic when indexing the filter list.
+func testPodMutationBaseState(name string, enabled bool) map[string]interface{} {
+	return map[string]interface{}{
+		FieldPodMutationOrganizationID: testOrgID,
+		FieldPodMutationClusterID:      testClusterID,
+		FieldPodMutationName:           name,
+		FieldPodMutationEnabled:        enabled,
+		FieldPodMutationFilterV2: []interface{}{
+			map[string]interface{}{
+				FieldPodMutationFilterWorkload: []interface{}{
+					map[string]interface{}{
+						FieldPodMutationFilterNamespaces: []interface{}{
+							map[string]interface{}{FieldPodMutationMatcherType: "EXACT", FieldPodMutationMatcherValue: "default"},
+						},
+						FieldPodMutationFilterNames:             []interface{}{},
+						FieldPodMutationFilterKinds:             []interface{}{},
+						FieldPodMutationFilterExcludeNames:      []interface{}{},
+						FieldPodMutationFilterExcludeNamespaces: []interface{}{},
+						FieldPodMutationFilterExcludeKinds:      []interface{}{},
+					},
+				},
+				FieldPodMutationFilterPod: []interface{}{},
+			},
+		},
+	}
+}
+
+func TestPodMutation_ReadContext_Error(t *testing.T) {
+	t.Parallel()
+
+	t.Run("when API responds with 500 then return diagnostics", func(t *testing.T) {
+		r := require.New(t)
+		mockClient := mock_patching_engine.NewMockClientInterface(gomock.NewController(t))
+
+		ctx := context.Background()
+		provider := &ProviderConfig{
+			patchingEngineClient: &patching_engine.ClientWithResponses{
+				ClientInterface: mockClient,
+			},
+		}
+
+		body := io.NopCloser(bytes.NewReader([]byte(`{"message":"internal server error"}`)))
+		mockClient.EXPECT().
+			PodMutationsAPIGetPodMutation(gomock.Any(), testOrgID, testClusterID, testMutationID).
+			Return(&http.Response{
+				StatusCode: http.StatusInternalServerError,
+				Body:       body,
+				Header:     map[string][]string{"Content-Type": {"application/json"}},
+			}, nil)
+
+		stateValue := cty.ObjectVal(map[string]cty.Value{
+			"organization_id": cty.StringVal(testOrgID),
+			"cluster_id":      cty.StringVal(testClusterID),
+			"name":            cty.StringVal("test-mutation"),
+			"enabled":         cty.BoolVal(true),
+		})
+		state := terraform.NewInstanceStateShimmedFromValue(stateValue, 0)
+		state.ID = testMutationID
+
+		res := resourcePodMutation()
+		data := res.Data(state)
+
+		result := res.ReadContext(ctx, data, provider)
+
+		r.NotNil(result)
+		r.True(result.HasError())
+		r.Contains(result[0].Summary, "getting pod mutation")
+	})
+}
+
+func TestPodMutation_DeleteContext_Error_NotFound(t *testing.T) {
+	t.Parallel()
+
+	t.Run("when API responds with error then return diagnostics with message", func(t *testing.T) {
+		r := require.New(t)
+		mockClient := mock_patching_engine.NewMockClientInterface(gomock.NewController(t))
+
+		ctx := context.Background()
+		provider := &ProviderConfig{
+			patchingEngineClient: &patching_engine.ClientWithResponses{
+				ClientInterface: mockClient,
+			},
+		}
+
+		body := io.NopCloser(bytes.NewReader([]byte(`{"message":"forbidden"}`)))
+		mockClient.EXPECT().
+			PodMutationsAPIDeletePodMutation(gomock.Any(), testOrgID, testClusterID, testMutationID).
+			Return(&http.Response{
+				StatusCode: http.StatusForbidden,
+				Body:       body,
+				Header:     map[string][]string{"Content-Type": {"application/json"}},
+			}, nil)
+
+		stateValue := cty.ObjectVal(map[string]cty.Value{
+			"organization_id": cty.StringVal(testOrgID),
+			"cluster_id":      cty.StringVal(testClusterID),
+			"name":            cty.StringVal("test-mutation"),
+			"enabled":         cty.BoolVal(true),
+		})
+		state := terraform.NewInstanceStateShimmedFromValue(stateValue, 0)
+		state.ID = testMutationID
+
+		res := resourcePodMutation()
+		data := res.Data(state)
+
+		result := res.DeleteContext(ctx, data, provider)
+
+		r.NotNil(result)
+		r.True(result.HasError())
+		r.Contains(result[0].Summary, "deleting pod mutation")
+	})
+}
+
+func TestPodMutation_StateImporter_EmptyID(t *testing.T) {
+	t.Parallel()
+
+	t.Run("empty string returns error", func(t *testing.T) {
+		r := require.New(t)
+		res := resourcePodMutation()
+		d := res.Data(nil)
+		d.SetId("")
+
+		_, err := res.Importer.StateContext(t.Context(), d, nil)
+
+		r.Error(err)
+		r.Contains(err.Error(), "invalid import ID")
+	})
+}
+
+func TestFlattenDistributionGroups_NilConfig(t *testing.T) {
+	t.Parallel()
+
+	t.Run("group with nil config omits configuration block", func(t *testing.T) {
+		r := require.New(t)
+
+		groups := []patching_engine.DistributionGroup{
+			{
+				Name:       lo.ToPtr("bare-group"),
+				Percentage: lo.ToPtr(int32(100)),
+				Config:     nil,
+			},
+		}
+
+		result, err := flattenDistributionGroups(groups)
+		r.NoError(err)
+		r.Len(result, 1)
+		r.Equal("bare-group", result[0][FieldPodMutationDistributionGroupName])
+		r.Equal(100, result[0][FieldPodMutationDistributionGroupPct])
+		_, hasConfig := result[0][FieldPodMutationDistributionGroupConfiguration]
+		r.False(hasConfig)
+	})
+}
+
+func TestFlattenDistributionGroups_WithPatch(t *testing.T) {
+	t.Parallel()
+
+	t.Run("group config with patch is serialized to JSON", func(t *testing.T) {
+		r := require.New(t)
+
+		patchOps := []map[string]interface{}{
+			{"op": "add", "path": "/metadata/labels/test", "value": "true"},
+		}
+		groups := []patching_engine.DistributionGroup{
+			{
+				Name:       lo.ToPtr("patch-group"),
+				Percentage: lo.ToPtr(int32(100)),
+				Config: &patching_engine.DistributionGroupConfig{
+					Patch: &patchOps,
+				},
+			},
+		}
+
+		result, err := flattenDistributionGroups(groups)
+		r.NoError(err)
+		r.Len(result, 1)
+
+		configList := result[0][FieldPodMutationDistributionGroupConfiguration].([]map[string]interface{})
+		r.Len(configList, 1)
+
+		patchStr, ok := configList[0][FieldPodMutationPatch].(string)
+		r.True(ok)
+		r.NotEmpty(patchStr)
+
+		var parsed []map[string]interface{}
+		r.NoError(json.Unmarshal([]byte(patchStr), &parsed))
+		r.Len(parsed, 1)
+		r.Equal("add", parsed[0]["op"])
+		r.Equal("/metadata/labels/test", parsed[0]["path"])
+	})
+}
+
+func TestFlattenLabelsFilter_NilMatchers(t *testing.T) {
+	t.Parallel()
+
+	t.Run("labels filter with nil matchers omits matchers key", func(t *testing.T) {
+		r := require.New(t)
+
+		op := patching_engine.AND
+		filter := &patching_engine.ObjectFilterV2LabelsFilter{
+			Operator: &op,
+			Matchers: nil,
+		}
+
+		result := flattenLabelsFilter(filter)
+		r.Len(result, 1)
+		r.Equal("AND", result[0][FieldPodMutationLabelsFilterOperator])
+		_, hasMatchers := result[0][FieldPodMutationLabelsFilterMatchers]
+		r.False(hasMatchers)
+	})
+}
+
+func TestFlattenObjectFilterV2_NilFilter(t *testing.T) {
+	t.Parallel()
+
+	t.Run("nil filter returns empty wrapper", func(t *testing.T) {
+		r := require.New(t)
+
+		result := flattenObjectFilterV2(&patching_engine.ObjectFilterV2{})
+		r.Len(result, 1)
+		_, hasWorkload := result[0][FieldPodMutationFilterWorkload]
+		r.False(hasWorkload)
+		_, hasPod := result[0][FieldPodMutationFilterPod]
+		r.False(hasPod)
+	})
+}
+
+func TestFlattenLabelsFilter_LabelMatcherKeyOnly(t *testing.T) {
+	t.Parallel()
+
+	t.Run("label matcher with key but no value", func(t *testing.T) {
+		r := require.New(t)
+
+		op := patching_engine.OR
+		filter := &patching_engine.ObjectFilterV2LabelsFilter{
+			Operator: &op,
+			Matchers: &[]patching_engine.ObjectFilterV2LabelMatcher{
+				{
+					Key:   &patching_engine.ObjectFilterV2Matcher{Type: lo.ToPtr(patching_engine.EXACT), Value: lo.ToPtr("env")},
+					Value: nil,
+				},
+			},
+		}
+
+		result := flattenLabelsFilter(filter)
+		r.Len(result, 1)
+		matchers := result[0][FieldPodMutationLabelsFilterMatchers].([]map[string]interface{})
+		r.Len(matchers, 1)
+
+		_, hasKey := matchers[0][FieldPodMutationLabelMatcherKey]
+		r.True(hasKey)
+		_, hasValue := matchers[0][FieldPodMutationLabelMatcherValue]
+		r.False(hasValue)
+	})
+}
+
+func TestStateToObjectFilterV2_EmptyWorkloadAndPod(t *testing.T) {
+	t.Parallel()
+
+	t.Run("empty workload and pod produces empty filter", func(t *testing.T) {
+		r := require.New(t)
+
+		state := map[string]interface{}{
+			FieldPodMutationFilterWorkload: []interface{}{},
+			FieldPodMutationFilterPod:      []interface{}{},
+		}
+
+		filter := stateToObjectFilterV2(state)
+		r.Nil(filter.Names)
+		r.Nil(filter.Namespaces)
+		r.Nil(filter.Kinds)
+		r.Nil(filter.ExcludeNames)
+		r.Nil(filter.ExcludeNamespaces)
+		r.Nil(filter.ExcludeKinds)
+		r.Nil(filter.Labels)
+		r.Nil(filter.ExcludeLabels)
+	})
+}
+
+func TestStateToObjectFilterV2_AllWorkloadFields(t *testing.T) {
+	t.Parallel()
+
+	t.Run("all workload filter fields populated", func(t *testing.T) {
+		r := require.New(t)
+
+		state := map[string]interface{}{
+			FieldPodMutationFilterWorkload: []interface{}{
+				map[string]interface{}{
+					FieldPodMutationFilterNames: []interface{}{
+						map[string]interface{}{FieldPodMutationMatcherType: "EXACT", FieldPodMutationMatcherValue: "my-deploy"},
+					},
+					FieldPodMutationFilterNamespaces: []interface{}{
+						map[string]interface{}{FieldPodMutationMatcherType: "REGEX", FieldPodMutationMatcherValue: "^prod-.*"},
+					},
+					FieldPodMutationFilterKinds: []interface{}{
+						map[string]interface{}{FieldPodMutationMatcherType: "EXACT", FieldPodMutationMatcherValue: "Deployment"},
+					},
+					FieldPodMutationFilterExcludeNames: []interface{}{
+						map[string]interface{}{FieldPodMutationMatcherType: "EXACT", FieldPodMutationMatcherValue: "skip-me"},
+					},
+					FieldPodMutationFilterExcludeNamespaces: []interface{}{
+						map[string]interface{}{FieldPodMutationMatcherType: "EXACT", FieldPodMutationMatcherValue: "kube-system"},
+					},
+					FieldPodMutationFilterExcludeKinds: []interface{}{
+						map[string]interface{}{FieldPodMutationMatcherType: "EXACT", FieldPodMutationMatcherValue: "Job"},
+					},
+				},
+			},
+			FieldPodMutationFilterPod: []interface{}{},
+		}
+
+		filter := stateToObjectFilterV2(state)
+
+		r.NotNil(filter.Names)
+		r.Len(*filter.Names, 1)
+		r.Equal("my-deploy", lo.FromPtr((*filter.Names)[0].Value))
+
+		r.NotNil(filter.Namespaces)
+		r.Len(*filter.Namespaces, 1)
+		r.Equal("^prod-.*", lo.FromPtr((*filter.Namespaces)[0].Value))
+
+		r.NotNil(filter.Kinds)
+		r.Len(*filter.Kinds, 1)
+
+		r.NotNil(filter.ExcludeNames)
+		r.Len(*filter.ExcludeNames, 1)
+		r.Equal("skip-me", lo.FromPtr((*filter.ExcludeNames)[0].Value))
+
+		r.NotNil(filter.ExcludeNamespaces)
+		r.Len(*filter.ExcludeNamespaces, 1)
+		r.Equal("kube-system", lo.FromPtr((*filter.ExcludeNamespaces)[0].Value))
+
+		r.NotNil(filter.ExcludeKinds)
+		r.Len(*filter.ExcludeKinds, 1)
+		r.Equal("Job", lo.FromPtr((*filter.ExcludeKinds)[0].Value))
+	})
+}
+
+func TestStateToObjectFilterV2_ExcludeLabels(t *testing.T) {
+	t.Parallel()
+
+	t.Run("exclude_labels_filter is converted", func(t *testing.T) {
+		r := require.New(t)
+
+		state := map[string]interface{}{
+			FieldPodMutationFilterWorkload: []interface{}{},
+			FieldPodMutationFilterPod: []interface{}{
+				map[string]interface{}{
+					FieldPodMutationFilterLabelsFilter: []interface{}{},
+					FieldPodMutationFilterExcludeLabels: []interface{}{
+						map[string]interface{}{
+							FieldPodMutationLabelsFilterOperator: "OR",
+							FieldPodMutationLabelsFilterMatchers: []interface{}{
+								map[string]interface{}{
+									FieldPodMutationLabelMatcherKey: []interface{}{
+										map[string]interface{}{FieldPodMutationMatcherType: "EXACT", FieldPodMutationMatcherValue: "env"},
+									},
+									FieldPodMutationLabelMatcherValue: []interface{}{
+										map[string]interface{}{FieldPodMutationMatcherType: "EXACT", FieldPodMutationMatcherValue: "staging"},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		}
+
+		filter := stateToObjectFilterV2(state)
+
+		r.Nil(filter.Labels)
+		r.NotNil(filter.ExcludeLabels)
+		r.Equal(patching_engine.OR, lo.FromPtr(filter.ExcludeLabels.Operator))
+		r.Len(*filter.ExcludeLabels.Matchers, 1)
+		r.Equal("env", lo.FromPtr((*filter.ExcludeLabels.Matchers)[0].Key.Value))
+		r.Equal("staging", lo.FromPtr((*filter.ExcludeLabels.Matchers)[0].Value.Value))
+	})
+}
+
+func TestFlattenObjectFilterV2_AllWorkloadExcludeFields(t *testing.T) {
+	t.Parallel()
+
+	t.Run("all workload exclude fields are flattened", func(t *testing.T) {
+		r := require.New(t)
+
+		filter := &patching_engine.ObjectFilterV2{
+			Names: &[]patching_engine.ObjectFilterV2Matcher{
+				{Type: lo.ToPtr(patching_engine.EXACT), Value: lo.ToPtr("deploy-a")},
+			},
+			ExcludeNames: &[]patching_engine.ObjectFilterV2Matcher{
+				{Type: lo.ToPtr(patching_engine.EXACT), Value: lo.ToPtr("skip-a")},
+			},
+			ExcludeNamespaces: &[]patching_engine.ObjectFilterV2Matcher{
+				{Type: lo.ToPtr(patching_engine.REGEX), Value: lo.ToPtr("^kube-.*")},
+			},
+		}
+
+		result := flattenObjectFilterV2(filter)
+		r.Len(result, 1)
+
+		wl := result[0][FieldPodMutationFilterWorkload].([]map[string]interface{})
+		r.Len(wl, 1)
+		r.Len(wl[0][FieldPodMutationFilterNames].([]map[string]interface{}), 1)
+		r.Len(wl[0][FieldPodMutationFilterExcludeNames].([]map[string]interface{}), 1)
+		r.Len(wl[0][FieldPodMutationFilterExcludeNamespaces].([]map[string]interface{}), 1)
 	})
 }
 
@@ -1113,7 +1484,7 @@ func testAccCheckPodMutationDestroy(s *tfterraform.State) error {
 		}
 
 		if response.StatusCode() == http.StatusNotFound {
-			return nil
+			continue
 		}
 
 		return fmt.Errorf("pod mutation %s still exists", rs.Primary.ID)
