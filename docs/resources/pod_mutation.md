@@ -20,13 +20,15 @@ resource "castai_pod_mutation" "spot_scheduling" {
   enabled    = true
 
   filter_v2 {
-    namespaces {
-      type  = "EXACT"
-      value = "default"
-    }
-    kinds {
-      type  = "EXACT"
-      value = "Deployment"
+    workload {
+      namespaces {
+        type  = "EXACT"
+        value = "default"
+      }
+      kinds {
+        type  = "EXACT"
+        value = "Deployment"
+      }
     }
   }
 
@@ -49,20 +51,24 @@ resource "castai_pod_mutation" "multi_pool_distribution" {
   enabled    = true
 
   filter_v2 {
-    namespaces {
-      type  = "REGEX"
-      value = "^prod-.*$"
+    workload {
+      namespaces {
+        type  = "REGEX"
+        value = "^prod-.*$"
+      }
     }
-    labels_filter {
-      operator = "AND"
-      matchers {
-        key {
-          type  = "EXACT"
-          value = "app"
-        }
-        value {
-          type  = "EXACT"
-          value = "web"
+    pod {
+      labels_filter {
+        operator = "AND"
+        matchers {
+          key {
+            type  = "EXACT"
+            value = "app"
+          }
+          value {
+            type  = "EXACT"
+            value = "web"
+          }
         }
       }
     }
@@ -132,120 +138,38 @@ resource "castai_pod_mutation" "multi_pool_distribution" {
 
 Optional:
 
-- `exclude_kinds` (Block List) (see [below for nested schema](#nestedblock--filter_v2--exclude_kinds))
-- `exclude_labels_filter` (Block List, Max: 1) (see [below for nested schema](#nestedblock--filter_v2--exclude_labels_filter))
-- `exclude_names` (Block List) (see [below for nested schema](#nestedblock--filter_v2--exclude_names))
-- `exclude_namespaces` (Block List) (see [below for nested schema](#nestedblock--filter_v2--exclude_namespaces))
-- `kinds` (Block List) (see [below for nested schema](#nestedblock--filter_v2--kinds))
-- `labels_filter` (Block List, Max: 1) (see [below for nested schema](#nestedblock--filter_v2--labels_filter))
-- `names` (Block List) (see [below for nested schema](#nestedblock--filter_v2--names))
-- `namespaces` (Block List) (see [below for nested schema](#nestedblock--filter_v2--namespaces))
+- `pod` (Block List, Max: 1) Pod filter for labels. (see [below for nested schema](#nestedblock--filter_v2--pod))
+- `workload` (Block List, Max: 1) Workload filter for kinds, names, and namespaces. (see [below for nested schema](#nestedblock--filter_v2--workload))
 
-<a id="nestedblock--filter_v2--exclude_kinds"></a>
-### Nested Schema for `filter_v2.exclude_kinds`
-
-Required:
-
-- `type` (String) Matcher type: EXACT or REGEX.
-- `value` (String) Value to match against.
-
-
-<a id="nestedblock--filter_v2--exclude_labels_filter"></a>
-### Nested Schema for `filter_v2.exclude_labels_filter`
-
-Required:
-
-- `matchers` (Block List, Min: 1) (see [below for nested schema](#nestedblock--filter_v2--exclude_labels_filter--matchers))
-- `operator` (String) Logical operator to combine label matchers: AND or OR.
-
-<a id="nestedblock--filter_v2--exclude_labels_filter--matchers"></a>
-### Nested Schema for `filter_v2.exclude_labels_filter.matchers`
-
-Required:
-
-- `key` (Block List, Min: 1, Max: 1) (see [below for nested schema](#nestedblock--filter_v2--exclude_labels_filter--matchers--key))
+<a id="nestedblock--filter_v2--pod"></a>
+### Nested Schema for `filter_v2.pod`
 
 Optional:
 
-- `value` (Block List, Max: 1) (see [below for nested schema](#nestedblock--filter_v2--exclude_labels_filter--matchers--value))
+- `exclude_labels_filter` (Block List, Max: 1) (see [below for nested schema](#nestedblock--filter_v2--pod--exclude_labels_filter))
+- `labels_filter` (Block List, Max: 1) (see [below for nested schema](#nestedblock--filter_v2--pod--labels_filter))
 
-<a id="nestedblock--filter_v2--exclude_labels_filter--matchers--key"></a>
-### Nested Schema for `filter_v2.exclude_labels_filter.matchers.key`
-
-Required:
-
-- `type` (String) Matcher type: EXACT or REGEX.
-- `value` (String) Value to match against.
-
-
-<a id="nestedblock--filter_v2--exclude_labels_filter--matchers--value"></a>
-### Nested Schema for `filter_v2.exclude_labels_filter.matchers.value`
+<a id="nestedblock--filter_v2--pod--exclude_labels_filter"></a>
+### Nested Schema for `filter_v2.pod.exclude_labels_filter`
 
 Required:
 
-- `type` (String) Matcher type: EXACT or REGEX.
-- `value` (String) Value to match against.
-
-
-
-
-<a id="nestedblock--filter_v2--exclude_names"></a>
-### Nested Schema for `filter_v2.exclude_names`
-
-Required:
-
-- `type` (String) Matcher type: EXACT or REGEX.
-- `value` (String) Value to match against.
-
-
-<a id="nestedblock--filter_v2--exclude_namespaces"></a>
-### Nested Schema for `filter_v2.exclude_namespaces`
-
-Required:
-
-- `type` (String) Matcher type: EXACT or REGEX.
-- `value` (String) Value to match against.
-
-
-<a id="nestedblock--filter_v2--kinds"></a>
-### Nested Schema for `filter_v2.kinds`
-
-Required:
-
-- `type` (String) Matcher type: EXACT or REGEX.
-- `value` (String) Value to match against.
-
-
-<a id="nestedblock--filter_v2--labels_filter"></a>
-### Nested Schema for `filter_v2.labels_filter`
-
-Required:
-
-- `matchers` (Block List, Min: 1) (see [below for nested schema](#nestedblock--filter_v2--labels_filter--matchers))
+- `matchers` (Block List, Min: 1) (see [below for nested schema](#nestedblock--filter_v2--pod--exclude_labels_filter--matchers))
 - `operator` (String) Logical operator to combine label matchers: AND or OR.
 
-<a id="nestedblock--filter_v2--labels_filter--matchers"></a>
-### Nested Schema for `filter_v2.labels_filter.matchers`
+<a id="nestedblock--filter_v2--pod--exclude_labels_filter--matchers"></a>
+### Nested Schema for `filter_v2.pod.exclude_labels_filter.matchers`
 
 Required:
 
-- `key` (Block List, Min: 1, Max: 1) (see [below for nested schema](#nestedblock--filter_v2--labels_filter--matchers--key))
+- `key` (Block List, Min: 1, Max: 1) (see [below for nested schema](#nestedblock--filter_v2--pod--exclude_labels_filter--matchers--key))
 
 Optional:
 
-- `value` (Block List, Max: 1) (see [below for nested schema](#nestedblock--filter_v2--labels_filter--matchers--value))
+- `value` (Block List, Max: 1) (see [below for nested schema](#nestedblock--filter_v2--pod--exclude_labels_filter--matchers--value))
 
-<a id="nestedblock--filter_v2--labels_filter--matchers--key"></a>
-### Nested Schema for `filter_v2.labels_filter.matchers.key`
-
-Required:
-
-- `type` (String) Matcher type: EXACT or REGEX.
-- `value` (String) Value to match against.
-
-
-<a id="nestedblock--filter_v2--labels_filter--matchers--value"></a>
-### Nested Schema for `filter_v2.labels_filter.matchers.value`
+<a id="nestedblock--filter_v2--pod--exclude_labels_filter--matchers--key"></a>
+### Nested Schema for `filter_v2.pod.exclude_labels_filter.matchers.key`
 
 Required:
 
@@ -253,10 +177,8 @@ Required:
 - `value` (String) Value to match against.
 
 
-
-
-<a id="nestedblock--filter_v2--names"></a>
-### Nested Schema for `filter_v2.names`
+<a id="nestedblock--filter_v2--pod--exclude_labels_filter--matchers--value"></a>
+### Nested Schema for `filter_v2.pod.exclude_labels_filter.matchers.value`
 
 Required:
 
@@ -264,13 +186,113 @@ Required:
 - `value` (String) Value to match against.
 
 
-<a id="nestedblock--filter_v2--namespaces"></a>
-### Nested Schema for `filter_v2.namespaces`
+
+
+<a id="nestedblock--filter_v2--pod--labels_filter"></a>
+### Nested Schema for `filter_v2.pod.labels_filter`
+
+Required:
+
+- `matchers` (Block List, Min: 1) (see [below for nested schema](#nestedblock--filter_v2--pod--labels_filter--matchers))
+- `operator` (String) Logical operator to combine label matchers: AND or OR.
+
+<a id="nestedblock--filter_v2--pod--labels_filter--matchers"></a>
+### Nested Schema for `filter_v2.pod.labels_filter.matchers`
+
+Required:
+
+- `key` (Block List, Min: 1, Max: 1) (see [below for nested schema](#nestedblock--filter_v2--pod--labels_filter--matchers--key))
+
+Optional:
+
+- `value` (Block List, Max: 1) (see [below for nested schema](#nestedblock--filter_v2--pod--labels_filter--matchers--value))
+
+<a id="nestedblock--filter_v2--pod--labels_filter--matchers--key"></a>
+### Nested Schema for `filter_v2.pod.labels_filter.matchers.key`
 
 Required:
 
 - `type` (String) Matcher type: EXACT or REGEX.
 - `value` (String) Value to match against.
+
+
+<a id="nestedblock--filter_v2--pod--labels_filter--matchers--value"></a>
+### Nested Schema for `filter_v2.pod.labels_filter.matchers.value`
+
+Required:
+
+- `type` (String) Matcher type: EXACT or REGEX.
+- `value` (String) Value to match against.
+
+
+
+
+
+<a id="nestedblock--filter_v2--workload"></a>
+### Nested Schema for `filter_v2.workload`
+
+Optional:
+
+- `exclude_kinds` (Block List) (see [below for nested schema](#nestedblock--filter_v2--workload--exclude_kinds))
+- `exclude_names` (Block List) (see [below for nested schema](#nestedblock--filter_v2--workload--exclude_names))
+- `exclude_namespaces` (Block List) (see [below for nested schema](#nestedblock--filter_v2--workload--exclude_namespaces))
+- `kinds` (Block List) (see [below for nested schema](#nestedblock--filter_v2--workload--kinds))
+- `names` (Block List) (see [below for nested schema](#nestedblock--filter_v2--workload--names))
+- `namespaces` (Block List) (see [below for nested schema](#nestedblock--filter_v2--workload--namespaces))
+
+<a id="nestedblock--filter_v2--workload--exclude_kinds"></a>
+### Nested Schema for `filter_v2.workload.exclude_kinds`
+
+Required:
+
+- `type` (String) Matcher type: EXACT or REGEX.
+- `value` (String) Value to match against.
+
+
+<a id="nestedblock--filter_v2--workload--exclude_names"></a>
+### Nested Schema for `filter_v2.workload.exclude_names`
+
+Required:
+
+- `type` (String) Matcher type: EXACT or REGEX.
+- `value` (String) Value to match against.
+
+
+<a id="nestedblock--filter_v2--workload--exclude_namespaces"></a>
+### Nested Schema for `filter_v2.workload.exclude_namespaces`
+
+Required:
+
+- `type` (String) Matcher type: EXACT or REGEX.
+- `value` (String) Value to match against.
+
+
+<a id="nestedblock--filter_v2--workload--kinds"></a>
+### Nested Schema for `filter_v2.workload.kinds`
+
+Required:
+
+- `type` (String) Matcher type: EXACT or REGEX.
+- `value` (String) Value to match against.
+
+
+<a id="nestedblock--filter_v2--workload--names"></a>
+### Nested Schema for `filter_v2.workload.names`
+
+Required:
+
+- `type` (String) Matcher type: EXACT or REGEX.
+- `value` (String) Value to match against.
+
+
+<a id="nestedblock--filter_v2--workload--namespaces"></a>
+### Nested Schema for `filter_v2.workload.namespaces`
+
+Required:
+
+- `type` (String) Matcher type: EXACT or REGEX.
+- `value` (String) Value to match against.
+
 
 
 

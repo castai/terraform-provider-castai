@@ -137,6 +137,25 @@ func TestPodMutation_ReadContext(t *testing.T) {
 		r.Equal("OPTIONAL_SPOT", data.Get(FieldPodMutationSpotType))
 		r.Equal(80, data.Get(FieldPodMutationSpotDistributionPct))
 		r.Equal("API", data.Get(FieldPodMutationSource))
+
+		// Verify filter_v2 is flattened under workload sub-block
+		filterV2 := data.Get(FieldPodMutationFilterV2).([]interface{})
+		r.Len(filterV2, 1)
+		filterMap := filterV2[0].(map[string]interface{})
+
+		workloadList := filterMap[FieldPodMutationFilterWorkload].([]interface{})
+		r.Len(workloadList, 1)
+		wm := workloadList[0].(map[string]interface{})
+
+		namespaces := wm[FieldPodMutationFilterNamespaces].([]interface{})
+		r.Len(namespaces, 1)
+		r.Equal("EXACT", namespaces[0].(map[string]interface{})[FieldPodMutationMatcherType])
+		r.Equal("default", namespaces[0].(map[string]interface{})[FieldPodMutationMatcherValue])
+
+		kinds := wm[FieldPodMutationFilterKinds].([]interface{})
+		r.Len(kinds, 1)
+		r.Equal("EXACT", kinds[0].(map[string]interface{})[FieldPodMutationMatcherType])
+		r.Equal("Deployment", kinds[0].(map[string]interface{})[FieldPodMutationMatcherValue])
 	})
 }
 
@@ -592,6 +611,188 @@ func TestStateToDistributionGroups(t *testing.T) {
 	})
 }
 
+func TestFlattenObjectFilterV2(t *testing.T) {
+	t.Parallel()
+
+	t.Run("workload only", func(t *testing.T) {
+		r := require.New(t)
+
+		filter := &patching_engine.ObjectFilterV2{
+			Namespaces: &[]patching_engine.ObjectFilterV2Matcher{
+				{Type: lo.ToPtr(patching_engine.EXACT), Value: lo.ToPtr("default")},
+			},
+			ExcludeKinds: &[]patching_engine.ObjectFilterV2Matcher{
+				{Type: lo.ToPtr(patching_engine.REGEX), Value: lo.ToPtr("^Job$")},
+			},
+		}
+
+		result := flattenObjectFilterV2(filter)
+		r.Len(result, 1)
+		m := result[0]
+
+		wl := m[FieldPodMutationFilterWorkload].([]map[string]interface{})
+		r.Len(wl, 1)
+		r.Len(wl[0][FieldPodMutationFilterNamespaces].([]map[string]interface{}), 1)
+		r.Len(wl[0][FieldPodMutationFilterExcludeKinds].([]map[string]interface{}), 1)
+
+		_, hasPod := m[FieldPodMutationFilterPod]
+		r.False(hasPod)
+	})
+
+	t.Run("pod only", func(t *testing.T) {
+		r := require.New(t)
+
+		op := patching_engine.AND
+		filter := &patching_engine.ObjectFilterV2{
+			Labels: &patching_engine.ObjectFilterV2LabelsFilter{
+				Operator: &op,
+				Matchers: &[]patching_engine.ObjectFilterV2LabelMatcher{
+					{
+						Key:   &patching_engine.ObjectFilterV2Matcher{Type: lo.ToPtr(patching_engine.EXACT), Value: lo.ToPtr("app")},
+						Value: &patching_engine.ObjectFilterV2Matcher{Type: lo.ToPtr(patching_engine.EXACT), Value: lo.ToPtr("web")},
+					},
+				},
+			},
+		}
+
+		result := flattenObjectFilterV2(filter)
+		r.Len(result, 1)
+		m := result[0]
+
+		_, hasWorkload := m[FieldPodMutationFilterWorkload]
+		r.False(hasWorkload)
+
+		pod := m[FieldPodMutationFilterPod].([]map[string]interface{})
+		r.Len(pod, 1)
+		lf := pod[0][FieldPodMutationFilterLabelsFilter].([]map[string]interface{})
+		r.Len(lf, 1)
+		r.Equal("AND", lf[0][FieldPodMutationLabelsFilterOperator])
+	})
+
+	t.Run("workload and pod combined", func(t *testing.T) {
+		r := require.New(t)
+
+		op := patching_engine.OR
+		filter := &patching_engine.ObjectFilterV2{
+			Names: &[]patching_engine.ObjectFilterV2Matcher{
+				{Type: lo.ToPtr(patching_engine.EXACT), Value: lo.ToPtr("my-deploy")},
+			},
+			ExcludeLabels: &patching_engine.ObjectFilterV2LabelsFilter{
+				Operator: &op,
+				Matchers: &[]patching_engine.ObjectFilterV2LabelMatcher{
+					{
+						Key: &patching_engine.ObjectFilterV2Matcher{Type: lo.ToPtr(patching_engine.EXACT), Value: lo.ToPtr("env")},
+					},
+				},
+			},
+		}
+
+		result := flattenObjectFilterV2(filter)
+		r.Len(result, 1)
+		m := result[0]
+
+		wl := m[FieldPodMutationFilterWorkload].([]map[string]interface{})
+		r.Len(wl, 1)
+		r.Len(wl[0][FieldPodMutationFilterNames].([]map[string]interface{}), 1)
+
+		pod := m[FieldPodMutationFilterPod].([]map[string]interface{})
+		r.Len(pod, 1)
+		el := pod[0][FieldPodMutationFilterExcludeLabels].([]map[string]interface{})
+		r.Len(el, 1)
+		r.Equal("OR", el[0][FieldPodMutationLabelsFilterOperator])
+	})
+
+	t.Run("empty filter", func(t *testing.T) {
+		r := require.New(t)
+
+		result := flattenObjectFilterV2(&patching_engine.ObjectFilterV2{})
+		r.Len(result, 1)
+		m := result[0]
+		_, hasWorkload := m[FieldPodMutationFilterWorkload]
+		r.False(hasWorkload)
+		_, hasPod := m[FieldPodMutationFilterPod]
+		r.False(hasPod)
+	})
+}
+
+func TestStateToObjectFilterV2(t *testing.T) {
+	t.Parallel()
+
+	t.Run("workload fields", func(t *testing.T) {
+		r := require.New(t)
+
+		state := map[string]interface{}{
+			FieldPodMutationFilterWorkload: []interface{}{
+				map[string]interface{}{
+					FieldPodMutationFilterNamespaces: []interface{}{
+						map[string]interface{}{FieldPodMutationMatcherType: "EXACT", FieldPodMutationMatcherValue: "prod"},
+					},
+					FieldPodMutationFilterKinds: []interface{}{
+						map[string]interface{}{FieldPodMutationMatcherType: "REGEX", FieldPodMutationMatcherValue: "^Deploy.*"},
+					},
+					FieldPodMutationFilterNames:             []interface{}{},
+					FieldPodMutationFilterExcludeNames:      []interface{}{},
+					FieldPodMutationFilterExcludeNamespaces: []interface{}{},
+					FieldPodMutationFilterExcludeKinds:      []interface{}{},
+				},
+			},
+			FieldPodMutationFilterPod: []interface{}{},
+		}
+
+		filter := stateToObjectFilterV2(state)
+
+		r.NotNil(filter.Namespaces)
+		r.Len(*filter.Namespaces, 1)
+		r.Equal("prod", lo.FromPtr((*filter.Namespaces)[0].Value))
+
+		r.NotNil(filter.Kinds)
+		r.Len(*filter.Kinds, 1)
+
+		r.Nil(filter.Names)
+		r.Nil(filter.Labels)
+		r.Nil(filter.ExcludeLabels)
+	})
+
+	t.Run("pod fields", func(t *testing.T) {
+		r := require.New(t)
+
+		state := map[string]interface{}{
+			FieldPodMutationFilterWorkload: []interface{}{},
+			FieldPodMutationFilterPod: []interface{}{
+				map[string]interface{}{
+					FieldPodMutationFilterLabelsFilter: []interface{}{
+						map[string]interface{}{
+							FieldPodMutationLabelsFilterOperator: "AND",
+							FieldPodMutationLabelsFilterMatchers: []interface{}{
+								map[string]interface{}{
+									FieldPodMutationLabelMatcherKey: []interface{}{
+										map[string]interface{}{FieldPodMutationMatcherType: "EXACT", FieldPodMutationMatcherValue: "app"},
+									},
+									FieldPodMutationLabelMatcherValue: []interface{}{
+										map[string]interface{}{FieldPodMutationMatcherType: "EXACT", FieldPodMutationMatcherValue: "web"},
+									},
+								},
+							},
+						},
+					},
+					FieldPodMutationFilterExcludeLabels: []interface{}{},
+				},
+			},
+		}
+
+		filter := stateToObjectFilterV2(state)
+
+		r.Nil(filter.Namespaces)
+		r.Nil(filter.Kinds)
+		r.NotNil(filter.Labels)
+		r.Equal(patching_engine.AND, lo.FromPtr(filter.Labels.Operator))
+		r.Len(*filter.Labels.Matchers, 1)
+		r.Equal("app", lo.FromPtr((*filter.Labels.Matchers)[0].Key.Value))
+		r.Equal("web", lo.FromPtr((*filter.Labels.Matchers)[0].Value.Value))
+		r.Nil(filter.ExcludeLabels)
+	})
+}
+
 func TestAccCloudAgnostic_ResourcePodMutation(t *testing.T) {
 	rName := fmt.Sprintf("%v-pod-mutation-%v", ResourcePrefix, acctest.RandString(8))
 	resourceName := "castai_pod_mutation.test"
@@ -612,10 +813,10 @@ func TestAccCloudAgnostic_ResourcePodMutation(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "enabled", "true"),
 					resource.TestCheckResourceAttr(resourceName, "spot_type", "PREFERRED_SPOT"),
 					resource.TestCheckResourceAttr(resourceName, "spot_distribution_percentage", "80"),
-					resource.TestCheckResourceAttr(resourceName, "filter_v2.0.namespaces.0.type", "EXACT"),
-					resource.TestCheckResourceAttr(resourceName, "filter_v2.0.namespaces.0.value", "default"),
-					resource.TestCheckResourceAttr(resourceName, "filter_v2.0.kinds.0.type", "EXACT"),
-					resource.TestCheckResourceAttr(resourceName, "filter_v2.0.kinds.0.value", "Deployment"),
+					resource.TestCheckResourceAttr(resourceName, "filter_v2.0.workload.0.namespaces.0.type", "EXACT"),
+					resource.TestCheckResourceAttr(resourceName, "filter_v2.0.workload.0.namespaces.0.value", "default"),
+					resource.TestCheckResourceAttr(resourceName, "filter_v2.0.workload.0.kinds.0.type", "EXACT"),
+					resource.TestCheckResourceAttr(resourceName, "filter_v2.0.workload.0.kinds.0.value", "Deployment"),
 					resource.TestCheckResourceAttr(resourceName, "tolerations.0.key", "scheduling.cast.ai/spot"),
 					resource.TestCheckResourceAttr(resourceName, "tolerations.0.operator", "Exists"),
 					resource.TestCheckResourceAttr(resourceName, "tolerations.0.effect", "NoSchedule"),
@@ -630,8 +831,8 @@ func TestAccCloudAgnostic_ResourcePodMutation(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "enabled", "false"),
 					resource.TestCheckResourceAttr(resourceName, "spot_type", "OPTIONAL_SPOT"),
 					resource.TestCheckResourceAttr(resourceName, "spot_distribution_percentage", "50"),
-					resource.TestCheckResourceAttr(resourceName, "filter_v2.0.namespaces.0.type", "REGEX"),
-					resource.TestCheckResourceAttr(resourceName, "filter_v2.0.namespaces.0.value", "^prod-.*$"),
+					resource.TestCheckResourceAttr(resourceName, "filter_v2.0.workload.0.namespaces.0.type", "REGEX"),
+					resource.TestCheckResourceAttr(resourceName, "filter_v2.0.workload.0.namespaces.0.value", "^prod-.*$"),
 				),
 			},
 			{
@@ -704,13 +905,15 @@ resource "castai_pod_mutation" "test" {
   enabled         = true
 
   filter_v2 {
-    namespaces {
-      type  = "EXACT"
-      value = "default"
-    }
-    kinds {
-      type  = "EXACT"
-      value = "Deployment"
+    workload {
+      namespaces {
+        type  = "EXACT"
+        value = "default"
+      }
+      kinds {
+        type  = "EXACT"
+        value = "Deployment"
+      }
     }
   }
 
@@ -741,9 +944,11 @@ resource "castai_pod_mutation" "test" {
   enabled         = false
 
   filter_v2 {
-    namespaces {
-      type  = "REGEX"
-      value = "^prod-.*$"
+    workload {
+      namespaces {
+        type  = "REGEX"
+        value = "^prod-.*$"
+      }
     }
   }
 
@@ -768,9 +973,11 @@ resource "castai_pod_mutation" "test" {
   enabled         = true
 
   filter_v2 {
-    namespaces {
-      type  = "REGEX"
-      value = "^prod-.*$"
+    workload {
+      namespaces {
+        type  = "REGEX"
+        value = "^prod-.*$"
+      }
     }
   }
 
