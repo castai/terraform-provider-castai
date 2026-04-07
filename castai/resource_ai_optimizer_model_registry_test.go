@@ -26,7 +26,7 @@ func newModelRegistryProvider(ctrl *gomock.Controller, mockSDK *mock_sdk.MockCli
 	}
 }
 
-func TestAIModelRegistryCreate(t *testing.T) {
+func TestAIModelRegistryCreateS3(t *testing.T) {
 	t.Parallel()
 
 	prefix := "models/"
@@ -59,7 +59,7 @@ func TestAIModelRegistryCreate(t *testing.T) {
 
 			r := require.New(t)
 			ctrl := gomock.NewController(t)
-			mockSDK := mock_sdk.NewMockClientInterface(gomock.NewController(t))
+			mockSDK := mock_sdk.NewMockClientInterface(ctrl)
 			mockAIClient := mock_ai_optimizer.NewMockClientWithResponsesInterface(ctrl)
 
 			provider := newModelRegistryProvider(ctrl, mockSDK, mockAIClient)
@@ -99,19 +99,26 @@ func TestAIModelRegistryCreate(t *testing.T) {
 			state := terraform.NewInstanceStateShimmedFromValue(cty.ObjectVal(map[string]cty.Value{}), 0)
 			res := resourceAIModelRegistry()
 			data := res.Data(state)
-			_ = data.Set(fieldAIModelRegistryBucket, tc.bucket)
-			_ = data.Set(fieldAIModelRegistryRegion, tc.region)
+			_ = data.Set(fieldAIModelRegistryProviderType, "S3")
 			_ = data.Set(fieldAIModelRegistryCredentials, tc.credentials)
-			if tc.prefix != "" {
-				_ = data.Set(fieldAIModelRegistryPrefix, tc.prefix)
+			s3Block := []interface{}{
+				map[string]interface{}{
+					fieldAIModelRegistryBucket: tc.bucket,
+					fieldAIModelRegistryRegion: tc.region,
+					fieldAIModelRegistryPrefix: tc.prefix,
+				},
 			}
+			_ = data.Set(fieldAIModelRegistryS3, s3Block)
 
 			result := res.CreateContext(context.Background(), data, provider)
 			r.Nil(result)
 			r.Equal(registryID, data.Id())
-			r.Equal(tc.bucket, data.Get(fieldAIModelRegistryBucket).(string))
-			r.Equal(tc.region, data.Get(fieldAIModelRegistryRegion).(string))
-			r.Equal(userName, data.Get(fieldAIModelRegistryUserName).(string))
+
+			s3List := data.Get(fieldAIModelRegistryS3).([]interface{})
+			r.Len(s3List, 1)
+			s3Map := s3List[0].(map[string]interface{})
+			r.Equal(tc.bucket, s3Map[fieldAIModelRegistryBucket].(string))
+			r.Equal(userName, s3Map[fieldAIModelRegistryUserName].(string))
 			r.Equal("ACTIVE", data.Get(fieldAIModelRegistryStatus).(string))
 		})
 	}
@@ -136,7 +143,7 @@ func TestAIModelRegistryRead(t *testing.T) {
 		expectedStatus       string
 		expectedStatusReason string
 	}{
-		"full response": {
+		"full S3 response": {
 			registryID: "reg-123",
 			statusCode: 200,
 			json200: &ai_optimizer.ModelRegistry{
@@ -195,7 +202,7 @@ func TestAIModelRegistryRead(t *testing.T) {
 
 			r := require.New(t)
 			ctrl := gomock.NewController(t)
-			mockSDK := mock_sdk.NewMockClientInterface(gomock.NewController(t))
+			mockSDK := mock_sdk.NewMockClientInterface(ctrl)
 			mockAIClient := mock_ai_optimizer.NewMockClientWithResponsesInterface(ctrl)
 
 			provider := newModelRegistryProvider(ctrl, mockSDK, mockAIClient)
@@ -231,10 +238,13 @@ func TestAIModelRegistryRead(t *testing.T) {
 				r.Equal("", data.Id())
 			} else {
 				r.Equal(tc.registryID, data.Id())
-				r.Equal(tc.expectedBucket, data.Get(fieldAIModelRegistryBucket).(string))
-				r.Equal(tc.expectedRegion, data.Get(fieldAIModelRegistryRegion).(string))
-				r.Equal(tc.expectedPrefix, data.Get(fieldAIModelRegistryPrefix).(string))
-				r.Equal(tc.expectedUserName, data.Get(fieldAIModelRegistryUserName).(string))
+				s3List := data.Get(fieldAIModelRegistryS3).([]interface{})
+				r.Len(s3List, 1)
+				s3Map := s3List[0].(map[string]interface{})
+				r.Equal(tc.expectedBucket, s3Map[fieldAIModelRegistryBucket].(string))
+				r.Equal(tc.expectedRegion, s3Map[fieldAIModelRegistryRegion].(string))
+				r.Equal(tc.expectedPrefix, s3Map[fieldAIModelRegistryPrefix].(string))
+				r.Equal(tc.expectedUserName, s3Map[fieldAIModelRegistryUserName].(string))
 				r.Equal(tc.expectedStatus, data.Get(fieldAIModelRegistryStatus).(string))
 				r.Equal(tc.expectedStatusReason, data.Get(fieldAIModelRegistryStatusReason).(string))
 			}
@@ -267,7 +277,7 @@ func TestAIModelRegistryDelete(t *testing.T) {
 
 			r := require.New(t)
 			ctrl := gomock.NewController(t)
-			mockSDK := mock_sdk.NewMockClientInterface(gomock.NewController(t))
+			mockSDK := mock_sdk.NewMockClientInterface(ctrl)
 			mockAIClient := mock_ai_optimizer.NewMockClientWithResponsesInterface(ctrl)
 
 			provider := newModelRegistryProvider(ctrl, mockSDK, mockAIClient)

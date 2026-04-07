@@ -155,11 +155,11 @@ func getDefaultOrganizationId(ctx context.Context, meta any) (string, error) {
 		return "", fmt.Errorf("no organizations found")
 	}
 
-	// The first organization is the default one
 	id := response.JSON200.Organizations[0].Id
 	if id == nil {
 		return "", fmt.Errorf("organization id is nil")
 	}
+	cfg.organizationID = *id
 	return *id, nil
 }
 

@@ -13,7 +13,7 @@ resource "castai_ai_optimizer_hosted_model" "hf_example" {
     enabled       = true
     min_replicas  = 1
     max_replicas  = 4
-    target_metric = "REQUESTS_PER_SECOND"
+    target_metric = "NUMBER_OF_REQUESTS_WAITING"
     target_value  = 10
   }
 }

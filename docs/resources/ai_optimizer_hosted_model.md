@@ -3,7 +3,7 @@
 page_title: "castai_ai_optimizer_hosted_model Resource - terraform-provider-castai"
 subcategory: ""
 description: |-
-  
+
 ---
 
 # castai_ai_optimizer_hosted_model (Resource)
@@ -28,7 +28,7 @@ resource "castai_ai_optimizer_hosted_model" "hf_example" {
     enabled       = true
     min_replicas  = 1
     max_replicas  = 4
-    target_metric = "REQUESTS_PER_SECOND"
+    target_metric = "NUMBER_OF_REQUESTS_WAITING"
     target_value  = 10
   }
 }
@@ -54,11 +54,11 @@ resource "castai_ai_optimizer_hosted_model" "private_example" {
 
 ### Optional
 
+- `edge_location_ids` (List of String) List of edge location IDs where the model can be deployed.
 - `fallback` (Block List, Max: 1) Fallback model settings. (see [below for nested schema](#nestedblock--fallback))
 - `hibernation` (Block List, Max: 1) Automatic hibernation settings. (see [below for nested schema](#nestedblock--hibernation))
 - `horizontal_autoscaling` (Block List, Max: 1) Horizontal autoscaling settings. (see [below for nested schema](#nestedblock--horizontal_autoscaling))
 - `node_template_name` (String) Node template name for model deployment.
-- `region` (String) Region the model is deployed in.
 - `vllm_config` (Block List, Max: 1) vLLM configuration for HuggingFace models. (see [below for nested schema](#nestedblock--vllm_config))
 
 ### Read-Only
@@ -67,7 +67,9 @@ resource "castai_ai_optimizer_hosted_model" "private_example" {
 - `current_replicas` (Number) Current number of replicas.
 - `id` (String) The ID of this resource.
 - `namespace` (String) Kubernetes namespace.
+- `region` (String) Region the model is deployed in.
 - `status` (String) Hosted model status.
+- `status_reason` (String) Reason for the current status.
 
 <a id="nestedblock--fallback"></a>
 ### Nested Schema for `fallback`
@@ -136,7 +138,7 @@ Optional:
 
 Optional:
 
-- `hugging_face_token` (String, Sensitive) HuggingFace token (used when secret_name is not provided).
+- `hugging_face_token` (String, Sensitive) HuggingFace token. Mutually exclusive with secret_name.
 - `secret_name` (String) Kubernetes secret name containing the HuggingFace token.
 
 

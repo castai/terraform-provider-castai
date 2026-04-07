@@ -48,7 +48,8 @@ func resourceAIModelSpecs() *schema.Resource {
 				ForceNew:    true,
 				Description: "Registry type: HUGGING_FACE or PRIVATE.",
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{
-					"HUGGING_FACE", "PRIVATE",
+					string(ai_optimizer.ModelSpecsRegistryTypeHUGGINGFACE),
+					string(ai_optimizer.ModelSpecsRegistryTypePRIVATE),
 				}, false)),
 			},
 			fieldAIModelSpecsDescription: {
@@ -70,11 +71,13 @@ func resourceAIModelSpecs() *schema.Resource {
 				Description: "Whether the model is routable.",
 			},
 			fieldAIModelSpecsHuggingFace: {
-				Type:        schema.TypeList,
-				Optional:    true,
-				ForceNew:    true,
-				MaxItems:    1,
-				Description: "HuggingFace registry configuration. Required when registry_type is HUGGING_FACE.",
+				Type:          schema.TypeList,
+				Optional:      true,
+				ForceNew:      true,
+				MaxItems:      1,
+				Description:   "HuggingFace registry configuration. Required when registry_type is HUGGING_FACE.",
+				ConflictsWith: []string{fieldAIModelSpecsPrivateRegistry},
+				AtLeastOneOf:  []string{fieldAIModelSpecsHuggingFace, fieldAIModelSpecsPrivateRegistry},
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						fieldAIModelSpecsHFModelName: {
@@ -86,11 +89,13 @@ func resourceAIModelSpecs() *schema.Resource {
 				},
 			},
 			fieldAIModelSpecsPrivateRegistry: {
-				Type:        schema.TypeList,
-				Optional:    true,
-				ForceNew:    true,
-				MaxItems:    1,
-				Description: "Private registry configuration. Required when registry_type is PRIVATE.",
+				Type:          schema.TypeList,
+				Optional:      true,
+				ForceNew:      true,
+				MaxItems:      1,
+				Description:   "Private registry configuration. Required when registry_type is PRIVATE.",
+				ConflictsWith: []string{fieldAIModelSpecsHuggingFace},
+				AtLeastOneOf:  []string{fieldAIModelSpecsHuggingFace, fieldAIModelSpecsPrivateRegistry},
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						fieldAIModelSpecsPRBaseModelID: {

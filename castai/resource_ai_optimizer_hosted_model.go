@@ -3,6 +3,8 @@ package castai
 import (
 	"context"
 	"fmt"
+	"math"
+	"net/http"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-log/tflog"
@@ -22,9 +24,11 @@ const (
 	fieldAIHostedModelNodeTemplateName   = "node_template_name"
 	fieldAIHostedModelRegion             = "region"
 	fieldAIHostedModelStatus             = "status"
+	fieldAIHostedModelStatusReason       = "status_reason"
 	fieldAIHostedModelCurrentReplicas    = "current_replicas"
 	fieldAIHostedModelCloudProvider      = "cloud_provider"
 	fieldAIHostedModelNamespace          = "namespace"
+	fieldAIHostedModelEdgeLocationIDs    = "edge_location_ids"
 	fieldAIHostedModelVllmConfig         = "vllm_config"
 	fieldAIHostedModelVllmSecretName     = "secret_name"
 	fieldAIHostedModelVllmHFToken        = "hugging_face_token"
@@ -102,9 +106,16 @@ func resourceAIHostedModel() *schema.Resource {
 			},
 			fieldAIHostedModelRegion: {
 				Type:        schema.TypeString,
-				Optional:    true,
 				Computed:    true,
 				Description: "Region the model is deployed in.",
+			},
+			fieldAIHostedModelEdgeLocationIDs: {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Description: "List of edge location IDs where the model can be deployed.",
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
 			},
 			fieldAIHostedModelVllmConfig: {
 				Type:        schema.TypeList,
@@ -114,15 +125,17 @@ func resourceAIHostedModel() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						fieldAIHostedModelVllmSecretName: {
-							Type:        schema.TypeString,
-							Optional:    true,
-							Description: "Kubernetes secret name containing the HuggingFace token.",
+							Type:          schema.TypeString,
+							Optional:      true,
+							Description:   "Kubernetes secret name containing the HuggingFace token.",
+							ConflictsWith: []string{fieldAIHostedModelVllmConfig + ".0." + fieldAIHostedModelVllmHFToken},
 						},
 						fieldAIHostedModelVllmHFToken: {
-							Type:        schema.TypeString,
-							Optional:    true,
-							Sensitive:   true,
-							Description: "HuggingFace token (used when secret_name is not provided).",
+							Type:          schema.TypeString,
+							Optional:      true,
+							Sensitive:     true,
+							Description:   "HuggingFace token. Mutually exclusive with secret_name.",
+							ConflictsWith: []string{fieldAIHostedModelVllmConfig + ".0." + fieldAIHostedModelVllmSecretName},
 						},
 					},
 				},
@@ -214,6 +227,11 @@ func resourceAIHostedModel() *schema.Resource {
 				Computed:    true,
 				Description: "Hosted model status.",
 			},
+			fieldAIHostedModelStatusReason: {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "Reason for the current status.",
+			},
 			fieldAIHostedModelCurrentReplicas: {
 				Type:        schema.TypeInt,
 				Computed:    true,
@@ -255,6 +273,9 @@ func resourceAIHostedModelCreate(ctx context.Context, d *schema.ResourceData, me
 		s := v.(string)
 		body.NodeTemplateName = &s
 	}
+	if v, ok := d.GetOk(fieldAIHostedModelEdgeLocationIDs); ok {
+		body.EdgeLocations = expandEdgeLocations(v.([]interface{}))
+	}
 	if v, ok := d.GetOk(fieldAIHostedModelVllmConfig); ok {
 		body.VllmConfig = expandVllmConfig(v.([]interface{}))
 	}
@@ -295,24 +316,14 @@ func resourceAIHostedModelRead(ctx context.Context, d *schema.ResourceData, meta
 	clusterID := d.Get(fieldAIHostedModelClusterID).(string)
 	modelID := d.Id()
 
-	// The API does not expose a single-item GET endpoint; list and find by ID.
-	resp, err := client.HostedModelsAPIListHostedModelsWithResponse(ctx, orgID, clusterID, nil)
+	model, err := findHostedModelByID(ctx, client, orgID, clusterID, modelID)
 	if err != nil {
-		return diag.FromErr(err)
-	}
-	if err := sdk.CheckOKResponse(resp, nil); err != nil {
-		return diag.FromErr(fmt.Errorf("listing hosted models: %w", err))
-	}
-
-	var model *ai_optimizer.HostedModel
-	if resp.JSON200 != nil {
-		for i := range resp.JSON200.Items {
-			item := &resp.JSON200.Items[i]
-			if item.Id != nil && *item.Id == modelID {
-				model = item
-				break
-			}
+		if !d.IsNewResource() && isNotFoundError(err) {
+			tflog.Warn(ctx, "AI hosted model not found, removing from state", map[string]any{"id": modelID})
+			d.SetId("")
+			return nil
 		}
+		return diag.FromErr(fmt.Errorf("reading hosted model: %w", err))
 	}
 
 	if model == nil {
@@ -327,6 +338,52 @@ func resourceAIHostedModelRead(ctx context.Context, d *schema.ResourceData, meta
 	return setAIHostedModelData(d, model)
 }
 
+func findHostedModelByID(ctx context.Context, client ai_optimizer.ClientWithResponsesInterface, orgID, clusterID, modelID string) (*ai_optimizer.HostedModel, error) {
+	var cursor *string
+	for {
+		params := &ai_optimizer.HostedModelsAPIListHostedModelsParams{
+			PageCursor: cursor,
+		}
+		resp, err := client.HostedModelsAPIListHostedModelsWithResponse(ctx, orgID, clusterID, params)
+		if err != nil {
+			return nil, err
+		}
+		if resp.StatusCode() == http.StatusNotFound {
+			return nil, &notFoundError{msg: fmt.Sprintf("cluster %q not found", clusterID)}
+		}
+		if err := sdk.CheckOKResponse(resp, nil); err != nil {
+			return nil, err
+		}
+		if resp.JSON200 == nil {
+			return nil, nil
+		}
+		for i := range resp.JSON200.Items {
+			item := &resp.JSON200.Items[i]
+			if item.Id != nil && *item.Id == modelID {
+				return item, nil
+			}
+		}
+		if resp.JSON200.NextPageCursor == nil || *resp.JSON200.NextPageCursor == "" {
+			break
+		}
+		cursor = resp.JSON200.NextPageCursor
+	}
+	return nil, nil
+}
+
+type notFoundError struct {
+	msg string
+}
+
+func (e *notFoundError) Error() string {
+	return e.msg
+}
+
+func isNotFoundError(err error) bool {
+	_, ok := err.(*notFoundError)
+	return ok
+}
+
 func resourceAIHostedModelUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(*ProviderConfig).aiOptimizerClient
 
@@ -337,23 +394,17 @@ func resourceAIHostedModelUpdate(ctx context.Context, d *schema.ResourceData, me
 
 	clusterID := d.Get(fieldAIHostedModelClusterID).(string)
 
-	body := ai_optimizer.HostedModelUpdate{}
+	body := ai_optimizer.HostedModelUpdate{
+		VllmConfig:            expandVllmConfig(d.Get(fieldAIHostedModelVllmConfig).([]interface{})),
+		HorizontalAutoscaling: expandHorizontalAutoscaling(d.Get(fieldAIHostedModelHorizontalAS).([]interface{})),
+		Hibernation:           expandHibernation(d.Get(fieldAIHostedModelHibernation).([]interface{})),
+		Fallback:              expandFallback(d.Get(fieldAIHostedModelFallback).([]interface{})),
+		EdgeLocations:         expandEdgeLocations(d.Get(fieldAIHostedModelEdgeLocationIDs).([]interface{})),
+	}
 
 	if v, ok := d.GetOk(fieldAIHostedModelNodeTemplateName); ok {
 		s := v.(string)
 		body.NodeTemplateName = &s
-	}
-	if v, ok := d.GetOk(fieldAIHostedModelVllmConfig); ok {
-		body.VllmConfig = expandVllmConfig(v.([]interface{}))
-	}
-	if v, ok := d.GetOk(fieldAIHostedModelHorizontalAS); ok {
-		body.HorizontalAutoscaling = expandHorizontalAutoscaling(v.([]interface{}))
-	}
-	if v, ok := d.GetOk(fieldAIHostedModelHibernation); ok {
-		body.Hibernation = expandHibernation(v.([]interface{}))
-	}
-	if v, ok := d.GetOk(fieldAIHostedModelFallback); ok {
-		body.Fallback = expandFallback(v.([]interface{}))
 	}
 
 	tflog.Debug(ctx, "Updating AI hosted model", map[string]any{"id": d.Id()})
@@ -428,6 +479,11 @@ func setAIHostedModelData(d *schema.ResourceData, m *ai_optimizer.HostedModel) d
 			return diag.FromErr(fmt.Errorf("setting status: %w", err))
 		}
 	}
+	if m.StatusReason != nil {
+		if err := d.Set(fieldAIHostedModelStatusReason, *m.StatusReason); err != nil {
+			return diag.FromErr(fmt.Errorf("setting status_reason: %w", err))
+		}
+	}
 	if m.CurrentReplicas != nil {
 		if err := d.Set(fieldAIHostedModelCurrentReplicas, int(*m.CurrentReplicas)); err != nil {
 			return diag.FromErr(fmt.Errorf("setting current_replicas: %w", err))
@@ -441,6 +497,11 @@ func setAIHostedModelData(d *schema.ResourceData, m *ai_optimizer.HostedModel) d
 	if m.Namespace != nil {
 		if err := d.Set(fieldAIHostedModelNamespace, *m.Namespace); err != nil {
 			return diag.FromErr(fmt.Errorf("setting namespace: %w", err))
+		}
+	}
+	if m.EdgeLocations != nil {
+		if err := d.Set(fieldAIHostedModelEdgeLocationIDs, flattenEdgeLocations(m.EdgeLocations)); err != nil {
+			return diag.FromErr(fmt.Errorf("setting edge_location_ids: %w", err))
 		}
 	}
 	if m.VllmConfig != nil {
@@ -464,6 +525,29 @@ func setAIHostedModelData(d *schema.ResourceData, m *ai_optimizer.HostedModel) d
 		}
 	}
 	return nil
+}
+
+func expandEdgeLocations(raw []interface{}) *ai_optimizer.EdgeLocations {
+	if len(raw) == 0 {
+		return nil
+	}
+	ids := make([]string, 0, len(raw))
+	for _, v := range raw {
+		if s, ok := v.(string); ok && s != "" {
+			ids = append(ids, s)
+		}
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	return &ai_optimizer.EdgeLocations{Ids: &ids}
+}
+
+func flattenEdgeLocations(el *ai_optimizer.EdgeLocations) []string {
+	if el == nil || el.Ids == nil {
+		return nil
+	}
+	return *el.Ids
 }
 
 func expandVllmConfig(raw []interface{}) *ai_optimizer.VLLMConfig {
@@ -520,12 +604,17 @@ func flattenHorizontalAutoscaling(has *ai_optimizer.HorizontalAutoscaling) []map
 		fieldAIHostedModelHASMinReplicas:  int(has.MinReplicas),
 		fieldAIHostedModelHASMaxReplicas:  int(has.MaxReplicas),
 		fieldAIHostedModelHASTargetMetric: string(has.TargetMetric),
-		fieldAIHostedModelHASTargetValue:  float64(has.TargetValue),
+		fieldAIHostedModelHASTargetValue:  roundFloat64(float64(has.TargetValue), 6),
 	}
 	if has.Enabled != nil {
 		m[fieldAIHostedModelHASEnabled] = *has.Enabled
 	}
 	return []map[string]interface{}{m}
+}
+
+func roundFloat64(val float64, precision int) float64 {
+	ratio := math.Pow(10, float64(precision))
+	return math.Round(val*ratio) / ratio
 }
 
 func expandHibernationCondition(raw []interface{}) ai_optimizer.HibernationCondition {
