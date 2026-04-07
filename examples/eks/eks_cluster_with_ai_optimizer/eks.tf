@@ -25,52 +25,9 @@ module "eks" {
 
   enable_cluster_creator_admin_permissions = true
 
-  self_managed_node_groups = {
-    node_group_1 = {
-      name          = "${var.cluster_name}-ng-1"
-      instance_type = "m5.large"
-      max_size      = 5
-      min_size      = 2
-      desired_size  = 2
-
-      metadata_options = {
-        http_endpoint               = "enabled"
-        http_tokens                 = "required"
-        http_put_response_hop_limit = 2
-      }
-    }
-  }
+  self_managed_node_groups = {}
 
   eks_managed_node_groups = {
-    ai_optimizer_gpu = {
-      name         = "${var.cluster_name}-ai-gpu"
-      min_size     = 1
-      max_size     = 4
-      desired_size = 1
-
-      instance_types = ["g5.xlarge"]
-      capacity_type  = "SPOT"
-
-      labels = {
-        "cast.ai/workload"       = "ai-optimizer"
-        "nvidia.com/gpu.present" = "true"
-      }
-
-      taints = {
-        gpu = {
-          key    = "nvidia.com/gpu"
-          value  = "true"
-          effect = "NO_SCHEDULE"
-        }
-      }
-
-      metadata_options = {
-        http_endpoint               = "enabled"
-        http_tokens                 = "required"
-        http_put_response_hop_limit = 2
-      }
-    }
-
     general = {
       name         = "${var.cluster_name}-general"
       min_size     = 2

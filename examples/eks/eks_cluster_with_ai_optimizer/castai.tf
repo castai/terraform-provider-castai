@@ -117,34 +117,6 @@ module "castai-eks-cluster" {
         spot_interruption_predictions_type    = "aws-rebalance-recommendations"
       }
     }
-
-    gpu = {
-      name               = "gpu"
-      configuration_name = "gpu"
-      is_enabled         = true
-      should_taint       = true
-
-      custom_taints = [
-        {
-          key    = "nvidia.com/gpu"
-          value  = "true"
-          effect = "NoSchedule"
-        }
-      ]
-
-      custom_labels = {
-        "nvidia.com/gpu.present" = "true"
-      }
-
-      constraints = {
-        instance_families = {
-          include = ["g5", "p4", "p5"]
-        }
-        min_cpu = 4
-        max_cpu = 96
-        spot    = true
-      }
-    }
   }
 
   autoscaler_settings = {
@@ -183,33 +155,10 @@ module "castai-eks-cluster" {
     }
   }
 
+  # Install AI Optimizer
+  install_ai_optimizer = var.enable_ai_optimizer
+
   # depends_on helps Terraform with creating proper dependencies graph in case of resource creation and in this case destroy.
   # module "castai-eks-cluster" has to be destroyed before module "castai-eks-role-iam".
   depends_on = [module.castai-eks-role-iam, module.vpc, module.eks]
-}
-
-# Install AI Optimizer Helm chart.
-resource "helm_release" "ai_optimizer" {
-  count = var.enable_ai_optimizer ? 1 : 0
-
-  name       = "ai-optimizer"
-  repository = "https://castai.github.io/helm-charts"
-  chart      = "castai-ai-optimizer"
-  version    = "0.1.0"
-  namespace  = "castai-agent"
-
-  create_namespace = true
-
-  set = [
-    {
-      name  = "castai.apiKey"
-      value = var.castai_api_token
-    },
-    {
-      name  = "castai.clusterID"
-      value = castai_eks_clusterid.cluster_id.id
-    }
-  ]
-
-  depends_on = [module.castai-eks-cluster]
 }
