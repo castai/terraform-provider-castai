@@ -24,6 +24,8 @@ const (
 	FieldPodMutationName                     = "name"
 	FieldPodMutationEnabled                  = "enabled"
 	FieldPodMutationFilterV2                 = "filter_v2"
+	FieldPodMutationFilterWorkload           = "workload"
+	FieldPodMutationFilterPod                = "pod"
 	FieldPodMutationLabels                   = "labels"
 	FieldPodMutationAnnotations              = "annotations"
 	FieldPodMutationNodeSelector             = "node_selector"
@@ -333,47 +335,67 @@ func resourcePodMutation() *schema.Resource {
 			Description: "Advanced object filter with support for exact and regex matching.",
 			Elem: &schema.Resource{
 				Schema: map[string]*schema.Schema{
-					FieldPodMutationFilterNames: {
-						Type:     schema.TypeList,
-						Optional: true,
-						Elem:     matcherSchema,
+					FieldPodMutationFilterWorkload: {
+						Type:        schema.TypeList,
+						Optional:    true,
+						MaxItems:    1,
+						Description: "Workload filter for kinds, names, and namespaces.",
+						Elem: &schema.Resource{
+							Schema: map[string]*schema.Schema{
+								FieldPodMutationFilterNames: {
+									Type:     schema.TypeList,
+									Optional: true,
+									Elem:     matcherSchema,
+								},
+								FieldPodMutationFilterNamespaces: {
+									Type:     schema.TypeList,
+									Optional: true,
+									Elem:     matcherSchema,
+								},
+								FieldPodMutationFilterKinds: {
+									Type:     schema.TypeList,
+									Optional: true,
+									Elem:     matcherSchema,
+								},
+								FieldPodMutationFilterExcludeNames: {
+									Type:     schema.TypeList,
+									Optional: true,
+									Elem:     matcherSchema,
+								},
+								FieldPodMutationFilterExcludeNamespaces: {
+									Type:     schema.TypeList,
+									Optional: true,
+									Elem:     matcherSchema,
+								},
+								FieldPodMutationFilterExcludeKinds: {
+									Type:     schema.TypeList,
+									Optional: true,
+									Elem:     matcherSchema,
+								},
+							},
+						},
 					},
-					FieldPodMutationFilterNamespaces: {
-						Type:     schema.TypeList,
-						Optional: true,
-						Elem:     matcherSchema,
-					},
-					FieldPodMutationFilterKinds: {
-						Type:     schema.TypeList,
-						Optional: true,
-						Elem:     matcherSchema,
-					},
-					FieldPodMutationFilterLabelsFilter: {
-						Type:     schema.TypeList,
-						Optional: true,
-						MaxItems: 1,
-						Elem:     labelsFilterSchema,
-					},
-					FieldPodMutationFilterExcludeNames: {
-						Type:     schema.TypeList,
-						Optional: true,
-						Elem:     matcherSchema,
-					},
-					FieldPodMutationFilterExcludeNamespaces: {
-						Type:     schema.TypeList,
-						Optional: true,
-						Elem:     matcherSchema,
-					},
-					FieldPodMutationFilterExcludeKinds: {
-						Type:     schema.TypeList,
-						Optional: true,
-						Elem:     matcherSchema,
-					},
-					FieldPodMutationFilterExcludeLabels: {
-						Type:     schema.TypeList,
-						Optional: true,
-						MaxItems: 1,
-						Elem:     labelsFilterSchema,
+					FieldPodMutationFilterPod: {
+						Type:        schema.TypeList,
+						Optional:    true,
+						MaxItems:    1,
+						Description: "Pod filter for labels.",
+						Elem: &schema.Resource{
+							Schema: map[string]*schema.Schema{
+								FieldPodMutationFilterLabelsFilter: {
+									Type:     schema.TypeList,
+									Optional: true,
+									MaxItems: 1,
+									Elem:     labelsFilterSchema,
+								},
+								FieldPodMutationFilterExcludeLabels: {
+									Type:     schema.TypeList,
+									Optional: true,
+									MaxItems: 1,
+									Elem:     labelsFilterSchema,
+								},
+							},
+						},
 					},
 				},
 			},
@@ -725,52 +747,67 @@ func parseMutationConfigFromMap(m map[string]interface{}) mutationConfigResult {
 func stateToObjectFilterV2(m map[string]interface{}) *patching_engine.ObjectFilterV2 {
 	filter := &patching_engine.ObjectFilterV2{}
 
-	if v, ok := m[FieldPodMutationFilterNames]; ok {
-		matchers := stateToMatchers(v.([]interface{}))
-		if len(matchers) > 0 {
-			filter.Names = &matchers
+	// Workload filter: kinds, names, namespaces
+	if wl, ok := m[FieldPodMutationFilterWorkload]; ok {
+		wlList := wl.([]interface{})
+		if len(wlList) > 0 && wlList[0] != nil {
+			wm := wlList[0].(map[string]interface{})
+			if v, ok := wm[FieldPodMutationFilterNames]; ok {
+				matchers := stateToMatchers(v.([]interface{}))
+				if len(matchers) > 0 {
+					filter.Names = &matchers
+				}
+			}
+			if v, ok := wm[FieldPodMutationFilterNamespaces]; ok {
+				matchers := stateToMatchers(v.([]interface{}))
+				if len(matchers) > 0 {
+					filter.Namespaces = &matchers
+				}
+			}
+			if v, ok := wm[FieldPodMutationFilterKinds]; ok {
+				matchers := stateToMatchers(v.([]interface{}))
+				if len(matchers) > 0 {
+					filter.Kinds = &matchers
+				}
+			}
+			if v, ok := wm[FieldPodMutationFilterExcludeNames]; ok {
+				matchers := stateToMatchers(v.([]interface{}))
+				if len(matchers) > 0 {
+					filter.ExcludeNames = &matchers
+				}
+			}
+			if v, ok := wm[FieldPodMutationFilterExcludeNamespaces]; ok {
+				matchers := stateToMatchers(v.([]interface{}))
+				if len(matchers) > 0 {
+					filter.ExcludeNamespaces = &matchers
+				}
+			}
+			if v, ok := wm[FieldPodMutationFilterExcludeKinds]; ok {
+				matchers := stateToMatchers(v.([]interface{}))
+				if len(matchers) > 0 {
+					filter.ExcludeKinds = &matchers
+				}
+			}
 		}
 	}
-	if v, ok := m[FieldPodMutationFilterNamespaces]; ok {
-		matchers := stateToMatchers(v.([]interface{}))
-		if len(matchers) > 0 {
-			filter.Namespaces = &matchers
-		}
-	}
-	if v, ok := m[FieldPodMutationFilterKinds]; ok {
-		matchers := stateToMatchers(v.([]interface{}))
-		if len(matchers) > 0 {
-			filter.Kinds = &matchers
-		}
-	}
-	if v, ok := m[FieldPodMutationFilterLabelsFilter]; ok {
-		filterList := v.([]interface{})
-		if len(filterList) > 0 && filterList[0] != nil {
-			filter.Labels = stateToLabelsFilter(filterList[0].(map[string]interface{}))
-		}
-	}
-	if v, ok := m[FieldPodMutationFilterExcludeNames]; ok {
-		matchers := stateToMatchers(v.([]interface{}))
-		if len(matchers) > 0 {
-			filter.ExcludeNames = &matchers
-		}
-	}
-	if v, ok := m[FieldPodMutationFilterExcludeNamespaces]; ok {
-		matchers := stateToMatchers(v.([]interface{}))
-		if len(matchers) > 0 {
-			filter.ExcludeNamespaces = &matchers
-		}
-	}
-	if v, ok := m[FieldPodMutationFilterExcludeKinds]; ok {
-		matchers := stateToMatchers(v.([]interface{}))
-		if len(matchers) > 0 {
-			filter.ExcludeKinds = &matchers
-		}
-	}
-	if v, ok := m[FieldPodMutationFilterExcludeLabels]; ok {
-		filterList := v.([]interface{})
-		if len(filterList) > 0 && filterList[0] != nil {
-			filter.ExcludeLabels = stateToLabelsFilter(filterList[0].(map[string]interface{}))
+
+	// Pod filter: labels
+	if p, ok := m[FieldPodMutationFilterPod]; ok {
+		pList := p.([]interface{})
+		if len(pList) > 0 && pList[0] != nil {
+			pm := pList[0].(map[string]interface{})
+			if v, ok := pm[FieldPodMutationFilterLabelsFilter]; ok {
+				filterList := v.([]interface{})
+				if len(filterList) > 0 && filterList[0] != nil {
+					filter.Labels = stateToLabelsFilter(filterList[0].(map[string]interface{}))
+				}
+			}
+			if v, ok := pm[FieldPodMutationFilterExcludeLabels]; ok {
+				filterList := v.([]interface{})
+				if len(filterList) > 0 && filterList[0] != nil {
+					filter.ExcludeLabels = stateToLabelsFilter(filterList[0].(map[string]interface{}))
+				}
+			}
 		}
 	}
 
@@ -1139,29 +1176,50 @@ func podMutationToState(mutation *patching_engine.PodMutation, d *schema.Resourc
 func flattenObjectFilterV2(filter *patching_engine.ObjectFilterV2) []map[string]interface{} {
 	m := map[string]interface{}{}
 
+	// Workload filter
+	wm := map[string]interface{}{}
+	hasWorkload := false
 	if filter.Names != nil {
-		m[FieldPodMutationFilterNames] = flattenMatchers(*filter.Names)
+		wm[FieldPodMutationFilterNames] = flattenMatchers(*filter.Names)
+		hasWorkload = true
 	}
 	if filter.Namespaces != nil {
-		m[FieldPodMutationFilterNamespaces] = flattenMatchers(*filter.Namespaces)
+		wm[FieldPodMutationFilterNamespaces] = flattenMatchers(*filter.Namespaces)
+		hasWorkload = true
 	}
 	if filter.Kinds != nil {
-		m[FieldPodMutationFilterKinds] = flattenMatchers(*filter.Kinds)
-	}
-	if filter.Labels != nil {
-		m[FieldPodMutationFilterLabelsFilter] = flattenLabelsFilter(filter.Labels)
+		wm[FieldPodMutationFilterKinds] = flattenMatchers(*filter.Kinds)
+		hasWorkload = true
 	}
 	if filter.ExcludeNames != nil {
-		m[FieldPodMutationFilterExcludeNames] = flattenMatchers(*filter.ExcludeNames)
+		wm[FieldPodMutationFilterExcludeNames] = flattenMatchers(*filter.ExcludeNames)
+		hasWorkload = true
 	}
 	if filter.ExcludeNamespaces != nil {
-		m[FieldPodMutationFilterExcludeNamespaces] = flattenMatchers(*filter.ExcludeNamespaces)
+		wm[FieldPodMutationFilterExcludeNamespaces] = flattenMatchers(*filter.ExcludeNamespaces)
+		hasWorkload = true
 	}
 	if filter.ExcludeKinds != nil {
-		m[FieldPodMutationFilterExcludeKinds] = flattenMatchers(*filter.ExcludeKinds)
+		wm[FieldPodMutationFilterExcludeKinds] = flattenMatchers(*filter.ExcludeKinds)
+		hasWorkload = true
+	}
+	if hasWorkload {
+		m[FieldPodMutationFilterWorkload] = []map[string]interface{}{wm}
+	}
+
+	// Pod filter
+	pm := map[string]interface{}{}
+	hasPod := false
+	if filter.Labels != nil {
+		pm[FieldPodMutationFilterLabelsFilter] = flattenLabelsFilter(filter.Labels)
+		hasPod = true
 	}
 	if filter.ExcludeLabels != nil {
-		m[FieldPodMutationFilterExcludeLabels] = flattenLabelsFilter(filter.ExcludeLabels)
+		pm[FieldPodMutationFilterExcludeLabels] = flattenLabelsFilter(filter.ExcludeLabels)
+		hasPod = true
+	}
+	if hasPod {
+		m[FieldPodMutationFilterPod] = []map[string]interface{}{pm}
 	}
 
 	return []map[string]interface{}{m}

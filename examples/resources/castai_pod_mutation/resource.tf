@@ -5,13 +5,15 @@ resource "castai_pod_mutation" "spot_scheduling" {
   enabled    = true
 
   filter_v2 {
-    namespaces {
-      type  = "EXACT"
-      value = "default"
-    }
-    kinds {
-      type  = "EXACT"
-      value = "Deployment"
+    workload {
+      namespaces {
+        type  = "EXACT"
+        value = "default"
+      }
+      kinds {
+        type  = "EXACT"
+        value = "Deployment"
+      }
     }
   }
 
@@ -34,20 +36,24 @@ resource "castai_pod_mutation" "multi_pool_distribution" {
   enabled    = true
 
   filter_v2 {
-    namespaces {
-      type  = "REGEX"
-      value = "^prod-.*$"
+    workload {
+      namespaces {
+        type  = "REGEX"
+        value = "^prod-.*$"
+      }
     }
-    labels_filter {
-      operator = "AND"
-      matchers {
-        key {
-          type  = "EXACT"
-          value = "app"
-        }
-        value {
-          type  = "EXACT"
-          value = "web"
+    pod {
+      labels_filter {
+        operator = "AND"
+        matchers {
+          key {
+            type  = "EXACT"
+            value = "app"
+          }
+          value {
+            type  = "EXACT"
+            value = "web"
+          }
         }
       }
     }
