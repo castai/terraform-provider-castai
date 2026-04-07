@@ -58,7 +58,7 @@ func TestExpandFlattenHorizontalAutoscaling(t *testing.T) {
 				Enabled:      &enabled,
 				MinReplicas:  1,
 				MaxReplicas:  5,
-				TargetMetric: ai_optimizer.HorizontalAutoscalingTargetMetric("REQUESTS_PER_SECOND"),
+				TargetMetric: ai_optimizer.HorizontalAutoscalingTargetMetricGPUCACHEUSAGEPERCENTAGE,
 				TargetValue:  0.8,
 			},
 		},
@@ -66,7 +66,7 @@ func TestExpandFlattenHorizontalAutoscaling(t *testing.T) {
 			input: &ai_optimizer.HorizontalAutoscaling{
 				MinReplicas:  2,
 				MaxReplicas:  10,
-				TargetMetric: ai_optimizer.HorizontalAutoscalingTargetMetric("GPU_UTILIZATION"),
+				TargetMetric: ai_optimizer.HorizontalAutoscalingTargetMetricNUMBEROFREQUESTSWAITING,
 				TargetValue:  0.5,
 			},
 		},

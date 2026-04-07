@@ -36,7 +36,7 @@ resource "castai_ai_optimizer_hosted_model" "custom_model" {
     enabled       = true
     min_replicas  = 1
     max_replicas  = 2
-    target_metric = "REQUESTS_PER_SECOND"
+    target_metric = "GPU_CACHE_USAGE_PERCENTAGE"
     target_value  = 5
   }
 

@@ -25,8 +25,9 @@ type frameworkProvider struct {
 }
 
 type frameworkProviderModel struct {
-	APIUrl   types.String `tfsdk:"api_url"`
-	APIToken types.String `tfsdk:"api_token"`
+	APIUrl         types.String `tfsdk:"api_url"`
+	APIToken       types.String `tfsdk:"api_token"`
+	OrganizationID types.String `tfsdk:"organization_id"`
 }
 
 func NewFrameworkProvider(version string) tfprovider.Provider {
@@ -50,6 +51,10 @@ func (p *frameworkProvider) Schema(_ context.Context, _ tfprovider.SchemaRequest
 				Optional:    true,
 				Sensitive:   true,
 				Description: "The token used to connect to CAST AI API.",
+			},
+			"organization_id": schema.StringAttribute{
+				Optional:    true,
+				Description: "CAST AI organization ID. Required when the API token has access to multiple organizations.",
 			},
 		},
 	}
@@ -120,12 +125,18 @@ func (p *frameworkProvider) Configure(ctx context.Context, req tfprovider.Config
 		return
 	}
 
+	organizationID := config.OrganizationID.ValueString()
+	if organizationID == "" {
+		organizationID = os.Getenv("CASTAI_ORGANIZATION_ID")
+	}
+
 	providerConfig := &ProviderConfig{
 		api:                          client,
 		clusterAutoscalerClient:      clusterAutoscalerClient,
 		organizationManagementClient: organizationManagementClient,
 		omniAPI:                      omniClient,
 		aiOptimizerClient:            aiOptimizerClient,
+		organizationID:               organizationID,
 	}
 
 	resp.DataSourceData = providerConfig

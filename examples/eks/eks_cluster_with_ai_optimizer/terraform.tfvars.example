@@ -3,20 +3,19 @@ cluster_name   = "ai-optimizer-demo"
 cluster_region = "us-east-1"
 
 # Required: CAST AI API token from console.cast.ai.
-castai_api_token = "your-api-token-here"
+castai_api_token       = "your-api-token-here"
+# Required when the API token has access to multiple organizations.
+# castai_organization_id = "your-organization-id-here"
 
 # Optional: Enable AI Optimizer (default: true).
 enable_ai_optimizer = true
 
 # Optional: Deploy predefined HuggingFace model (default: true).
 deploy_predefined_model = true
+hf_token = "your-hf-token-here"
 
 # Optional: Deploy custom model from S3 (default: false).
 # When enabled, you must provide model_registry_bucket.
 deploy_custom_model = false
 # model_registry_bucket = "my-company-model-bucket"
 # custom_model_name     = "my-custom-model"
-
-# Optional: HuggingFace token secret name (default: "huggingface-token").
-# This secret must exist in the castai-agent namespace.
-# hf_token_secret_name = "huggingface-token"

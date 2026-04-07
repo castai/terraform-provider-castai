@@ -22,6 +22,7 @@ type ProviderConfig struct {
 	organizationManagementClient organization_management.ClientWithResponsesInterface
 	omniAPI                      *omni.ClientWithResponses
 	aiOptimizerClient            ai_optimizer.ClientWithResponsesInterface
+	organizationID               string
 }
 
 func Provider(version string) *schema.Provider {
@@ -41,6 +42,12 @@ func Provider(version string) *schema.Provider {
 				Sensitive:   true,
 				DefaultFunc: schema.EnvDefaultFunc("CASTAI_API_TOKEN", nil),
 				Description: "The token used to connect to CAST AI API.",
+			},
+			"organization_id": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("CASTAI_ORGANIZATION_ID", nil),
+				Description: "CAST AI organization ID. Required when the API token has access to multiple organizations.",
 			},
 		},
 
@@ -105,6 +112,7 @@ func providerConfigure(version string) schema.ConfigureContextFunc {
 	return func(ctx context.Context, data *schema.ResourceData) (interface{}, diag.Diagnostics) {
 		apiURL := data.Get("api_url").(string)
 		apiToken := data.Get("api_token").(string)
+		organizationID := data.Get("organization_id").(string)
 
 		if apiToken == "" {
 			return nil, diag.Errorf("api_token must be set either in provider configuration or via CASTAI_API_TOKEN environment variable")
@@ -146,6 +154,7 @@ func providerConfigure(version string) schema.ConfigureContextFunc {
 			organizationManagementClient: organizationManagementClient,
 			omniAPI:                      omniClient,
 			aiOptimizerClient:            aiOptimizerClient,
+			organizationID:               organizationID,
 		}, nil
 	}
 }

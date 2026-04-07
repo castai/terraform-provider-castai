@@ -27,6 +27,12 @@ variable "castai_api_token" {
   description = "CAST AI API token created in console.cast.ai API Access keys section"
 }
 
+variable "castai_organization_id" {
+  type        = string
+  description = "CAST AI organization ID. Required when the API token has access to multiple organizations."
+  default     = ""
+}
+
 variable "castai_grpc_url" {
   type        = string
   description = "CAST AI gRPC URL"
@@ -58,15 +64,14 @@ variable "model_registry_region" {
   default     = "us-east-1"
 }
 
-variable "hf_token_secret_name" {
+variable "hf_token" {
   type        = string
-  description = "Name of the Kubernetes secret containing HuggingFace token."
-  default     = "huggingface-token"
+  description = "Hugging Face token for accessing Hugging Face Hub models. Required when deploying predefined models with vLLM configuration."
 }
 
 variable "deploy_predefined_model" {
   type        = bool
-  description = "Deploy a predefined HuggingFace model (Llama 3.1 8B Instruct)."
+  description = "Deploy a predefined CastAI-managed model using an existing model specs ID."
   default     = true
 }
 

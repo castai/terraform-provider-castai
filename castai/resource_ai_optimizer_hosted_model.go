@@ -81,7 +81,7 @@ func resourceAIHostedModel() *schema.Resource {
 				Type:        schema.TypeString,
 				Required:    true,
 				ForceNew:    true,
-				Description: "ID of the castai_ai_optimizer_model_specs resource.",
+				Description: "ID of the model specs. Can reference a castai_ai_optimizer_model_specs resource or a pre-existing model specs ID for predefined (CastAI-managed) models.",
 			},
 			fieldAIHostedModelService: {
 				Type:        schema.TypeString,
@@ -150,7 +150,8 @@ func resourceAIHostedModel() *schema.Resource {
 							Type:     schema.TypeString,
 							Required: true,
 							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{
-								"REQUESTS_PER_SECOND", "GPU_UTILIZATION", "CPU_UTILIZATION",
+								string(ai_optimizer.HorizontalAutoscalingTargetMetricGPUCACHEUSAGEPERCENTAGE),
+								string(ai_optimizer.HorizontalAutoscalingTargetMetricNUMBEROFREQUESTSWAITING),
 							}, false)),
 						},
 						fieldAIHostedModelHASTargetValue: {

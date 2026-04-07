@@ -12,8 +12,9 @@ resource "castai_eks_user_arn" "castai_user_arn" {
 }
 
 provider "castai" {
-  api_url   = var.castai_api_url
-  api_token = var.castai_api_token
+  api_url         = var.castai_api_url
+  api_token       = var.castai_api_token
+  organization_id = var.castai_organization_id
 }
 
 provider "helm" {
@@ -79,21 +80,6 @@ module "castai-eks-cluster" {
         aws_security_group.additional.id,
       ]
       instance_profile_arn = module.castai-eks-role-iam.instance_profile_arn
-    }
-
-    gpu = {
-      subnets = module.vpc.private_subnets
-      tags    = var.tags
-      security_groups = [
-        module.eks.cluster_security_group_id,
-        module.eks.node_security_group_id,
-        aws_security_group.additional.id,
-      ]
-      instance_profile_arn = module.castai-eks-role-iam.instance_profile_arn
-      container_runtime    = "containerd"
-      volume_type          = "gp3"
-      volume_iops          = 3000
-      volume_throughput    = 125
     }
   }
 

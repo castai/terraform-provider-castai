@@ -7,6 +7,10 @@ module "eks" {
   kubernetes_version     = var.cluster_version
   endpoint_public_access = true
 
+  tags = {
+    ttl = "5d"
+  }
+
   addons = {
     coredns = {
       most_recent = true
