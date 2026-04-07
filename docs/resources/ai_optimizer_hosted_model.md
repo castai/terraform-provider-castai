@@ -3,7 +3,7 @@
 page_title: "castai_ai_optimizer_hosted_model Resource - terraform-provider-castai"
 subcategory: ""
 description: |-
-
+  
 ---
 
 # castai_ai_optimizer_hosted_model (Resource)

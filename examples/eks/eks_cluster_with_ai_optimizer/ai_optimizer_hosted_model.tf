@@ -4,10 +4,11 @@
 resource "castai_ai_optimizer_hosted_model" "llama_3_1_8b" {
   count = var.deploy_predefined_model ? 1 : 0
 
-  cluster_id     = castai_eks_clusterid.cluster_id.id
-  model_specs_id = "099581b9-fe24-4021-b11b-52c513eb44b8" # Predefined model specs ID for Llama 3.1 8B Instruct
-  service        = "llama3-1-8b"
-  port           = 11434
+  cluster_id         = castai_eks_clusterid.cluster_id.id
+  model_specs_id     = "099581b9-fe24-4021-b11b-52c513eb44b8" # Predefined model specs ID for Llama 3.1 8B Instruct
+  service            = "llama3-1-8b"
+  port               = 11434
+  node_template_name = "llms-by-castai"
 
   vllm_config {
     hugging_face_token = var.hf_token

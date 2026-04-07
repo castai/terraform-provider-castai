@@ -72,6 +72,8 @@ resource "castai_ai_optimizer_model_specs" "custom_model" {
 
   model         = var.custom_model_name
   registry_type = "PRIVATE"
+  routable      = true
+  type          = "chat"
 
   private_registry {
     base_model_id = var.custom_base_model_spec_id
@@ -82,10 +84,11 @@ resource "castai_ai_optimizer_model_specs" "custom_model" {
 resource "castai_ai_optimizer_hosted_model" "custom_model" {
   count = var.deploy_custom_model ? 1 : 0
 
-  cluster_id     = castai_eks_clusterid.cluster_id.id
-  model_specs_id = castai_ai_optimizer_model_specs.custom_model[0].id
-  service        = "${var.custom_model_name}-service"
-  port           = 8080
+  cluster_id         = castai_eks_clusterid.cluster_id.id
+  model_specs_id     = castai_ai_optimizer_model_specs.custom_model[0].id
+  service            = "${var.custom_model_name}-service"
+  port               = 8080
+  node_template_name = "llms-by-castai"
 
   horizontal_autoscaling {
     enabled       = true
