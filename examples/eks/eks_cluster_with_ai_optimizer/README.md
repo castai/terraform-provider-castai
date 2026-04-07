@@ -56,7 +56,7 @@ To deploy a custom model from S3:
 ```hcl
 deploy_predefined_model = false
 deploy_custom_model     = true
-model_registry_bucket   = "my-company-model-bucket"
+custom_model_registry_bucket   = "my-company-model-bucket"
 custom_model_name       = "my-fine-tuned-model"
 ```
 
@@ -65,7 +65,7 @@ custom_model_name       = "my-fine-tuned-model"
 ```hcl
 deploy_predefined_model = true
 deploy_custom_model     = true
-model_registry_bucket   = "my-company-model-bucket"
+custom_model_registry_bucket   = "my-company-model-bucket"
 custom_model_name       = "my-custom-model"
 ```
 

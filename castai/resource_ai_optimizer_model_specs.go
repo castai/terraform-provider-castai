@@ -249,7 +249,7 @@ func resourceAIModelSpecsDelete(ctx context.Context, d *schema.ResourceData, met
 	tflog.Debug(ctx, "Deleting AI model specs", map[string]any{"id": d.Id()})
 
 	resp, err := client.ModelSpecsAPIDeleteModelSpecsWithResponse(ctx, orgID, d.Id())
-	if err := sdk.CheckResponseNoContent(resp, err); err != nil {
+	if err := sdk.CheckOKResponse(resp, err); err != nil {
 		return diag.FromErr(fmt.Errorf("deleting model specs: %w", err))
 	}
 

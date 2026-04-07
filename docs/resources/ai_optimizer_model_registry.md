@@ -26,6 +26,7 @@ resource "castai_ai_optimizer_model_registry" "example" {
 ### Required
 
 - `bucket` (String) S3 bucket name.
+- `credentials` (String, Sensitive) JSON-encoded credentials for accessing the S3 bucket.
 - `region` (String) AWS region of the S3 bucket.
 
 ### Optional

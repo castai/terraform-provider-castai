@@ -1,13 +1,68 @@
-# Model Registry for custom models (S3 bucket).
+locals {
+  model_registry_iam_user_name = "castai-${substr(sha256("${var.castai_organization_id}|${var.custom_model_registry_bucket}"), 0, 12)}"
+}
+
+resource "aws_iam_user" "model_registry" {
+  count = var.deploy_custom_model ? 1 : 0
+
+  name = local.model_registry_iam_user_name
+
+  tags = {
+    Name    = "CAST AI S3 ReadOnly - ${var.custom_model_registry_bucket}"
+    Purpose = "CAST AI read-only access to S3 bucket ${var.custom_model_registry_bucket}"
+  }
+}
+
+resource "aws_iam_user_policy" "model_registry" {
+  count = var.deploy_custom_model ? 1 : 0
+
+  name = "CastAIReadOnlyPolicy"
+  user = aws_iam_user.model_registry[0].name
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "s3:GetObject",
+          "s3:GetObjectVersion",
+          "s3:GetObjectAttributes",
+          "s3:GetObjectVersionAttributes",
+          "s3:HeadObject",
+          "s3:ListBucket",
+          "s3:ListBucketVersions",
+          "s3:GetBucketLocation",
+        ]
+        Resource = [
+          "arn:aws:s3:::${var.custom_model_registry_bucket}",
+          "arn:aws:s3:::${var.custom_model_registry_bucket}/*",
+        ]
+      },
+    ]
+  })
+}
+
+resource "aws_iam_access_key" "model_registry" {
+  count = var.deploy_custom_model ? 1 : 0
+
+  user = aws_iam_user.model_registry[0].name
+}
+
 resource "castai_ai_optimizer_model_registry" "custom_models" {
   count = var.deploy_custom_model ? 1 : 0
 
-  bucket = var.model_registry_bucket
-  region = var.model_registry_region
-  prefix = "models/"
+  bucket  = var.custom_model_registry_bucket
+  region  = var.custom_model_registry_region
+  prefix  = "models"
+  credentials = jsonencode({
+    access_key_id     = aws_iam_access_key.model_registry[0].id
+    secret_access_key = aws_iam_access_key.model_registry[0].secret
+  })
+
+  depends_on = [aws_iam_user_policy.model_registry]
 }
 
-# Custom private model specs.
 resource "castai_ai_optimizer_model_specs" "custom_model" {
   count = var.deploy_custom_model ? 1 : 0
 
@@ -15,12 +70,11 @@ resource "castai_ai_optimizer_model_specs" "custom_model" {
   registry_type = "PRIVATE"
 
   private_registry {
-    base_model_id = var.custom_model_name
+    base_model_id = var.custom_base_model_spec_id
     registry_id   = castai_ai_optimizer_model_registry.custom_models[0].id
   }
 }
 
-# Hosted model deployment for custom private model.
 resource "castai_ai_optimizer_hosted_model" "custom_model" {
   count = var.deploy_custom_model ? 1 : 0
 
@@ -29,9 +83,6 @@ resource "castai_ai_optimizer_hosted_model" "custom_model" {
   service        = "${var.custom_model_name}-service"
   port           = 8080
 
-  # No vllm_config needed for private models.
-
-  # Horizontal autoscaling configuration.
   horizontal_autoscaling {
     enabled       = true
     min_replicas  = 1

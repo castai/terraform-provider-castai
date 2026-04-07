@@ -52,16 +52,11 @@ variable "enable_ai_optimizer" {
   default     = true
 }
 
-variable "model_registry_bucket" {
-  type        = string
-  description = "S3 bucket name for private model registry. Required when deploying custom models."
-  default     = ""
-}
-
-variable "model_registry_region" {
-  type        = string
-  description = "AWS region for the model registry S3 bucket."
-  default     = "us-east-1"
+# Optional variables for predefined model deployment.
+variable "deploy_predefined_model" {
+  type        = bool
+  description = "Deploy a predefined CastAI-managed model using an existing model specs ID."
+  default     = true
 }
 
 variable "hf_token" {
@@ -69,16 +64,23 @@ variable "hf_token" {
   description = "Hugging Face token for accessing Hugging Face Hub models. Required when deploying predefined models with vLLM configuration."
 }
 
-variable "deploy_predefined_model" {
-  type        = bool
-  description = "Deploy a predefined CastAI-managed model using an existing model specs ID."
-  default     = true
-}
-
+# Optional variables for custom model deployment from S3 registry.
 variable "deploy_custom_model" {
   type        = bool
   description = "Deploy a custom model from S3 registry."
   default     = false
+}
+
+variable "custom_model_registry_bucket" {
+  type        = string
+  description = "S3 bucket name for private model registry. Required when deploying custom models."
+  default     = ""
+}
+
+variable "custom_model_registry_region" {
+  type        = string
+  description = "AWS region for the model registry S3 bucket."
+  default     = "us-east-1"
 }
 
 variable "custom_model_name" {
@@ -87,6 +89,13 @@ variable "custom_model_name" {
   default     = "my-custom-model"
 }
 
+variable "custom_base_model_spec_id" {
+  type        = string
+  description = "UUID of the base model specs to use for the custom private registry model."
+  default     = ""
+}
+
+# Common variables.
 variable "tags" {
   type        = map(any)
   description = "Optional tags for new cluster nodes. This parameter applies only to new nodes - tags for old nodes are not reconciled."

@@ -1,9 +1,5 @@
 # 3. Connect EKS cluster to CAST AI.
 
-locals {
-  role_name = "castai-eks-role"
-}
-
 # Configure Data sources and providers required for CAST AI connection.
 data "aws_caller_identity" "current" {}
 

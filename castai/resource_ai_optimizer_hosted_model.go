@@ -379,7 +379,7 @@ func resourceAIHostedModelDelete(ctx context.Context, d *schema.ResourceData, me
 	tflog.Debug(ctx, "Deleting AI hosted model", map[string]any{"id": d.Id()})
 
 	resp, err := client.HostedModelsAPIDeleteHostedModelWithResponse(ctx, orgID, clusterID, d.Id())
-	if err := sdk.CheckResponseNoContent(resp, err); err != nil {
+	if err := sdk.CheckOKResponse(resp, err); err != nil {
 		return diag.FromErr(fmt.Errorf("deleting hosted model: %w", err))
 	}
 

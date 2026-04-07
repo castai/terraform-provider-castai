@@ -12,6 +12,10 @@ func (r ModelRegistriesAPIDeleteModelRegistryResponse) GetBody() []byte {
 	return r.Body
 }
 
+func (r ModelSpecsAPIListModelSpecsResponse) GetBody() []byte {
+	return r.Body
+}
+
 func (r ModelSpecsAPICreateModelSpecsResponse) GetBody() []byte {
 	return r.Body
 }

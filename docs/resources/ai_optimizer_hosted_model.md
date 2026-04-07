@@ -48,7 +48,7 @@ resource "castai_ai_optimizer_hosted_model" "private_example" {
 ### Required
 
 - `cluster_id` (String) CAST AI cluster ID where the model will be deployed.
-- `model_specs_id` (String) ID of the castai_ai_optimizer_model_specs resource.
+- `model_specs_id` (String) ID of the model specs. Can reference a castai_ai_optimizer_model_specs resource or a pre-existing model specs ID for predefined (CastAI-managed) models.
 - `port` (Number) Port on which the model will be exposed.
 - `service` (String) Kubernetes service name for the deployed model.
 

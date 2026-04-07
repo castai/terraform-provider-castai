@@ -17,6 +17,7 @@ const (
 	fieldAIModelRegistryBucket       = "bucket"
 	fieldAIModelRegistryRegion       = "region"
 	fieldAIModelRegistryPrefix       = "prefix"
+	fieldAIModelRegistryCredentials  = "credentials"
 	fieldAIModelRegistryUserName     = "user_name"
 	fieldAIModelRegistryStatus       = "status"
 	fieldAIModelRegistryStatusReason = "status_reason"
@@ -48,6 +49,13 @@ func resourceAIModelRegistry() *schema.Resource {
 				Optional:    true,
 				ForceNew:    true,
 				Description: "Path prefix within the bucket.",
+			},
+			fieldAIModelRegistryCredentials: {
+				Type:        schema.TypeString,
+				Required:    true,
+				ForceNew:    true,
+				Sensitive:   true,
+				Description: "JSON-encoded credentials for accessing the S3 bucket.",
 			},
 			fieldAIModelRegistryUserName: {
 				Type:        schema.TypeString,
@@ -85,7 +93,9 @@ func resourceAIModelRegistryCreate(ctx context.Context, d *schema.ResourceData, 
 		s3Config.Prefix = &prefix
 	}
 
+	credentials := d.Get(fieldAIModelRegistryCredentials).(string)
 	body := ai_optimizer.ModelRegistry{
+		Credentials: &credentials,
 		Provider: ai_optimizer.Provider{
 			Type: "S3",
 			S3:   &s3Config,
@@ -177,7 +187,7 @@ func resourceAIModelRegistryDelete(ctx context.Context, d *schema.ResourceData, 
 	tflog.Debug(ctx, "Deleting AI model registry", map[string]any{"id": d.Id()})
 
 	resp, err := client.ModelRegistriesAPIDeleteModelRegistryWithResponse(ctx, orgID, d.Id())
-	if err := sdk.CheckResponseNoContent(resp, err); err != nil {
+	if err := sdk.CheckOKResponse(resp, err); err != nil {
 		return diag.FromErr(fmt.Errorf("deleting model registry: %w", err))
 	}
 
