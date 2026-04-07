@@ -139,8 +139,10 @@ type ClientInterface interface {
 	// ClustersAPIOnboardClusterScript request
 	ClustersAPIOnboardClusterScript(ctx context.Context, organizationId string, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// ClustersAPIRegisterCluster request
-	ClustersAPIRegisterCluster(ctx context.Context, organizationId string, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// ClustersAPIRegisterClusterWithBody request with any body
+	ClustersAPIRegisterClusterWithBody(ctx context.Context, organizationId string, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	ClustersAPIRegisterCluster(ctx context.Context, organizationId string, id string, body ClustersAPIRegisterClusterJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// ClustersAPIReportStatusWithBody request with any body
 	ClustersAPIReportStatusWithBody(ctx context.Context, organizationId string, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -352,8 +354,20 @@ func (c *Client) ClustersAPIOnboardClusterScript(ctx context.Context, organizati
 	return c.Client.Do(req)
 }
 
-func (c *Client) ClustersAPIRegisterCluster(ctx context.Context, organizationId string, id string, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewClustersAPIRegisterClusterRequest(c.Server, organizationId, id)
+func (c *Client) ClustersAPIRegisterClusterWithBody(ctx context.Context, organizationId string, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewClustersAPIRegisterClusterRequestWithBody(c.Server, organizationId, id, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) ClustersAPIRegisterCluster(ctx context.Context, organizationId string, id string, body ClustersAPIRegisterClusterJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewClustersAPIRegisterClusterRequest(c.Server, organizationId, id, body)
 	if err != nil {
 		return nil, err
 	}
@@ -1214,8 +1228,19 @@ func NewClustersAPIOnboardClusterScriptRequest(server string, organizationId str
 	return req, nil
 }
 
-// NewClustersAPIRegisterClusterRequest generates requests for ClustersAPIRegisterCluster
-func NewClustersAPIRegisterClusterRequest(server string, organizationId string, id string) (*http.Request, error) {
+// NewClustersAPIRegisterClusterRequest calls the generic ClustersAPIRegisterCluster builder with application/json body
+func NewClustersAPIRegisterClusterRequest(server string, organizationId string, id string, body ClustersAPIRegisterClusterJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewClustersAPIRegisterClusterRequestWithBody(server, organizationId, id, "application/json", bodyReader)
+}
+
+// NewClustersAPIRegisterClusterRequestWithBody generates requests for ClustersAPIRegisterCluster with any type of body
+func NewClustersAPIRegisterClusterRequestWithBody(server string, organizationId string, id string, contentType string, body io.Reader) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -1247,10 +1272,12 @@ func NewClustersAPIRegisterClusterRequest(server string, organizationId string, 
 		return nil, err
 	}
 
-	req, err := http.NewRequest("POST", queryURL.String(), nil)
+	req, err := http.NewRequest("POST", queryURL.String(), body)
 	if err != nil {
 		return nil, err
 	}
+
+	req.Header.Add("Content-Type", contentType)
 
 	return req, nil
 }
@@ -1402,8 +1429,10 @@ type ClientWithResponsesInterface interface {
 	// ClustersAPIOnboardClusterScript request
 	ClustersAPIOnboardClusterScriptWithResponse(ctx context.Context, organizationId string, id string) (*ClustersAPIOnboardClusterScriptResponse, error)
 
-	// ClustersAPIRegisterCluster request
-	ClustersAPIRegisterClusterWithResponse(ctx context.Context, organizationId string, id string) (*ClustersAPIRegisterClusterResponse, error)
+	// ClustersAPIRegisterCluster request  with any body
+	ClustersAPIRegisterClusterWithBodyWithResponse(ctx context.Context, organizationId string, id string, contentType string, body io.Reader) (*ClustersAPIRegisterClusterResponse, error)
+
+	ClustersAPIRegisterClusterWithResponse(ctx context.Context, organizationId string, id string, body ClustersAPIRegisterClusterJSONRequestBody) (*ClustersAPIRegisterClusterResponse, error)
 
 	// ClustersAPIReportStatus request  with any body
 	ClustersAPIReportStatusWithBodyWithResponse(ctx context.Context, organizationId string, id string, contentType string, body io.Reader) (*ClustersAPIReportStatusResponse, error)
@@ -2092,9 +2121,17 @@ func (c *ClientWithResponses) ClustersAPIOnboardClusterScriptWithResponse(ctx co
 	return ParseClustersAPIOnboardClusterScriptResponse(rsp)
 }
 
-// ClustersAPIRegisterClusterWithResponse request returning *ClustersAPIRegisterClusterResponse
-func (c *ClientWithResponses) ClustersAPIRegisterClusterWithResponse(ctx context.Context, organizationId string, id string) (*ClustersAPIRegisterClusterResponse, error) {
-	rsp, err := c.ClustersAPIRegisterCluster(ctx, organizationId, id)
+// ClustersAPIRegisterClusterWithBodyWithResponse request with arbitrary body returning *ClustersAPIRegisterClusterResponse
+func (c *ClientWithResponses) ClustersAPIRegisterClusterWithBodyWithResponse(ctx context.Context, organizationId string, id string, contentType string, body io.Reader) (*ClustersAPIRegisterClusterResponse, error) {
+	rsp, err := c.ClustersAPIRegisterClusterWithBody(ctx, organizationId, id, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseClustersAPIRegisterClusterResponse(rsp)
+}
+
+func (c *ClientWithResponses) ClustersAPIRegisterClusterWithResponse(ctx context.Context, organizationId string, id string, body ClustersAPIRegisterClusterJSONRequestBody) (*ClustersAPIRegisterClusterResponse, error) {
+	rsp, err := c.ClustersAPIRegisterCluster(ctx, organizationId, id, body)
 	if err != nil {
 		return nil, err
 	}

@@ -31,6 +31,13 @@ const (
 	ClusterStateWARNING          ClusterState = "WARNING"
 )
 
+// Defines values for EdgeLocationControlPlaneMode.
+const (
+	CONTROLPLANEMODEUNSPECIFIED EdgeLocationControlPlaneMode = "CONTROL_PLANE_MODE_UNSPECIFIED"
+	DEDICATED                   EdgeLocationControlPlaneMode = "DEDICATED"
+	SHARED                      EdgeLocationControlPlaneMode = "SHARED"
+)
+
 // Defines values for EdgeLocationState.
 const (
 	EdgeLocationStateDELETED           EdgeLocationState = "DELETED"
@@ -202,6 +209,9 @@ type EdgeLocation struct {
 	// CloudResourceId Name used to create/tag cloud resources.
 	CloudResourceId *string `json:"cloudResourceId,omitempty"`
 
+	// ControlPlaneMode The mode of control plane inside edge location.
+	ControlPlaneMode *EdgeLocationControlPlaneMode `json:"controlPlaneMode,omitempty"`
+
 	// CreateTime The creation timestamp.
 	CreateTime *time.Time `json:"createTime,omitempty"`
 
@@ -249,6 +259,9 @@ type EdgeLocation struct {
 	// Zones The zones of edge location.
 	Zones *[]Zone `json:"zones,omitempty"`
 }
+
+// EdgeLocationControlPlaneMode The mode of control plane inside edge location.
+type EdgeLocationControlPlaneMode string
 
 // EdgeLocationState The state of the edge location on API level.
 type EdgeLocationState string
@@ -441,6 +454,21 @@ type OnboardEdgeLocationResponse struct {
 // RegisterClusterResponse Response message of register cluster.
 type RegisterClusterResponse = map[string]interface{}
 
+// RegisteredCluster Cluster information to be registered.
+type RegisteredCluster struct {
+	// Status Current status information.
+	Status *RegisteredClusterStatus `json:"status,omitempty"`
+}
+
+// RegisteredClusterStatus Current status information of the cluster.
+type RegisteredClusterStatus struct {
+	// OmniAgentVersion The version of omni agent running on the cluster.
+	OmniAgentVersion string `json:"omniAgentVersion"`
+
+	// PodCidr The pod CIDR of the cluster.
+	PodCidr string `json:"podCidr"`
+}
+
 // ReportStatusRequest Message to submit object status.
 type ReportStatusRequest struct {
 	// Cluster The status of the cluster.
@@ -556,6 +584,9 @@ type EdgeLocationsAPICreateEdgeLocationJSONRequestBody = EdgeLocation
 
 // EdgeLocationsAPIUpdateEdgeLocationJSONRequestBody defines body for EdgeLocationsAPIUpdateEdgeLocation for application/json ContentType.
 type EdgeLocationsAPIUpdateEdgeLocationJSONRequestBody = EdgeLocationUpdate
+
+// ClustersAPIRegisterClusterJSONRequestBody defines body for ClustersAPIRegisterCluster for application/json ContentType.
+type ClustersAPIRegisterClusterJSONRequestBody = RegisteredCluster
 
 // ClustersAPIReportStatusJSONRequestBody defines body for ClustersAPIReportStatus for application/json ContentType.
 type ClustersAPIReportStatusJSONRequestBody = ReportStatusRequest

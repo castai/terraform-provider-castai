@@ -176,9 +176,9 @@ func (mr *MockClientInterfaceMockRecorder) ClustersAPIOnboardClusterScript(ctx, 
 }
 
 // ClustersAPIRegisterCluster mocks base method.
-func (m *MockClientInterface) ClustersAPIRegisterCluster(ctx context.Context, organizationId, id string, reqEditors ...omni.RequestEditorFn) (*http.Response, error) {
+func (m *MockClientInterface) ClustersAPIRegisterCluster(ctx context.Context, organizationId, id string, body omni.ClustersAPIRegisterClusterJSONRequestBody, reqEditors ...omni.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
-	varargs := []interface{}{ctx, organizationId, id}
+	varargs := []interface{}{ctx, organizationId, id, body}
 	for _, a := range reqEditors {
 		varargs = append(varargs, a)
 	}
@@ -189,10 +189,30 @@ func (m *MockClientInterface) ClustersAPIRegisterCluster(ctx context.Context, or
 }
 
 // ClustersAPIRegisterCluster indicates an expected call of ClustersAPIRegisterCluster.
-func (mr *MockClientInterfaceMockRecorder) ClustersAPIRegisterCluster(ctx, organizationId, id interface{}, reqEditors ...interface{}) *gomock.Call {
+func (mr *MockClientInterfaceMockRecorder) ClustersAPIRegisterCluster(ctx, organizationId, id, body interface{}, reqEditors ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, organizationId, id}, reqEditors...)
+	varargs := append([]interface{}{ctx, organizationId, id, body}, reqEditors...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ClustersAPIRegisterCluster", reflect.TypeOf((*MockClientInterface)(nil).ClustersAPIRegisterCluster), varargs...)
+}
+
+// ClustersAPIRegisterClusterWithBody mocks base method.
+func (m *MockClientInterface) ClustersAPIRegisterClusterWithBody(ctx context.Context, organizationId, id, contentType string, body io.Reader, reqEditors ...omni.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId, id, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ClustersAPIRegisterClusterWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ClustersAPIRegisterClusterWithBody indicates an expected call of ClustersAPIRegisterClusterWithBody.
+func (mr *MockClientInterfaceMockRecorder) ClustersAPIRegisterClusterWithBody(ctx, organizationId, id, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId, id, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ClustersAPIRegisterClusterWithBody", reflect.TypeOf((*MockClientInterface)(nil).ClustersAPIRegisterClusterWithBody), varargs...)
 }
 
 // ClustersAPIReportStatus mocks base method.
@@ -674,9 +694,9 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) ClustersAPIOnboardCluste
 }
 
 // ClustersAPIRegisterCluster mocks base method.
-func (m *MockClientWithResponsesInterface) ClustersAPIRegisterCluster(ctx context.Context, organizationId, id string, reqEditors ...omni.RequestEditorFn) (*http.Response, error) {
+func (m *MockClientWithResponsesInterface) ClustersAPIRegisterCluster(ctx context.Context, organizationId, id string, body omni.ClustersAPIRegisterClusterJSONRequestBody, reqEditors ...omni.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
-	varargs := []interface{}{ctx, organizationId, id}
+	varargs := []interface{}{ctx, organizationId, id, body}
 	for _, a := range reqEditors {
 		varargs = append(varargs, a)
 	}
@@ -687,25 +707,60 @@ func (m *MockClientWithResponsesInterface) ClustersAPIRegisterCluster(ctx contex
 }
 
 // ClustersAPIRegisterCluster indicates an expected call of ClustersAPIRegisterCluster.
-func (mr *MockClientWithResponsesInterfaceMockRecorder) ClustersAPIRegisterCluster(ctx, organizationId, id interface{}, reqEditors ...interface{}) *gomock.Call {
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ClustersAPIRegisterCluster(ctx, organizationId, id, body interface{}, reqEditors ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, organizationId, id}, reqEditors...)
+	varargs := append([]interface{}{ctx, organizationId, id, body}, reqEditors...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ClustersAPIRegisterCluster", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ClustersAPIRegisterCluster), varargs...)
 }
 
-// ClustersAPIRegisterClusterWithResponse mocks base method.
-func (m *MockClientWithResponsesInterface) ClustersAPIRegisterClusterWithResponse(ctx context.Context, organizationId, id string) (*omni.ClustersAPIRegisterClusterResponse, error) {
+// ClustersAPIRegisterClusterWithBody mocks base method.
+func (m *MockClientWithResponsesInterface) ClustersAPIRegisterClusterWithBody(ctx context.Context, organizationId, id, contentType string, body io.Reader, reqEditors ...omni.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ClustersAPIRegisterClusterWithResponse", ctx, organizationId, id)
+	varargs := []interface{}{ctx, organizationId, id, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ClustersAPIRegisterClusterWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ClustersAPIRegisterClusterWithBody indicates an expected call of ClustersAPIRegisterClusterWithBody.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ClustersAPIRegisterClusterWithBody(ctx, organizationId, id, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId, id, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ClustersAPIRegisterClusterWithBody", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ClustersAPIRegisterClusterWithBody), varargs...)
+}
+
+// ClustersAPIRegisterClusterWithBodyWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) ClustersAPIRegisterClusterWithBodyWithResponse(ctx context.Context, organizationId, id, contentType string, body io.Reader) (*omni.ClustersAPIRegisterClusterResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ClustersAPIRegisterClusterWithBodyWithResponse", ctx, organizationId, id, contentType, body)
+	ret0, _ := ret[0].(*omni.ClustersAPIRegisterClusterResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ClustersAPIRegisterClusterWithBodyWithResponse indicates an expected call of ClustersAPIRegisterClusterWithBodyWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ClustersAPIRegisterClusterWithBodyWithResponse(ctx, organizationId, id, contentType, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ClustersAPIRegisterClusterWithBodyWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ClustersAPIRegisterClusterWithBodyWithResponse), ctx, organizationId, id, contentType, body)
+}
+
+// ClustersAPIRegisterClusterWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) ClustersAPIRegisterClusterWithResponse(ctx context.Context, organizationId, id string, body omni.ClustersAPIRegisterClusterJSONRequestBody) (*omni.ClustersAPIRegisterClusterResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ClustersAPIRegisterClusterWithResponse", ctx, organizationId, id, body)
 	ret0, _ := ret[0].(*omni.ClustersAPIRegisterClusterResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // ClustersAPIRegisterClusterWithResponse indicates an expected call of ClustersAPIRegisterClusterWithResponse.
-func (mr *MockClientWithResponsesInterfaceMockRecorder) ClustersAPIRegisterClusterWithResponse(ctx, organizationId, id interface{}) *gomock.Call {
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ClustersAPIRegisterClusterWithResponse(ctx, organizationId, id, body interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ClustersAPIRegisterClusterWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ClustersAPIRegisterClusterWithResponse), ctx, organizationId, id)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ClustersAPIRegisterClusterWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ClustersAPIRegisterClusterWithResponse), ctx, organizationId, id, body)
 }
 
 // ClustersAPIReportStatus mocks base method.

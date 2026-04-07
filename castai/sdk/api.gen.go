@@ -712,6 +712,20 @@ const (
 	WorkloadoptimizationV1CustomMetricUnitTHREADS                     WorkloadoptimizationV1CustomMetricUnit = "THREADS"
 )
 
+// Defines values for WorkloadoptimizationV1CustomMetricsDataSourceDataNodeWorkloadMetricsResolvedMetricOrigin.
+const (
+	WorkloadoptimizationV1CustomMetricsDataSourceDataNodeWorkloadMetricsResolvedMetricOriginMANUAL            WorkloadoptimizationV1CustomMetricsDataSourceDataNodeWorkloadMetricsResolvedMetricOrigin = "MANUAL"
+	WorkloadoptimizationV1CustomMetricsDataSourceDataNodeWorkloadMetricsResolvedMetricOriginORIGINUNSPECIFIED WorkloadoptimizationV1CustomMetricsDataSourceDataNodeWorkloadMetricsResolvedMetricOrigin = "ORIGIN_UNSPECIFIED"
+	WorkloadoptimizationV1CustomMetricsDataSourceDataNodeWorkloadMetricsResolvedMetricOriginPRESET            WorkloadoptimizationV1CustomMetricsDataSourceDataNodeWorkloadMetricsResolvedMetricOrigin = "PRESET"
+)
+
+// Defines values for WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetricsResolvedMetricQueryOrigin.
+const (
+	WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetricsResolvedMetricQueryOriginMANUAL            WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetricsResolvedMetricQueryOrigin = "MANUAL"
+	WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetricsResolvedMetricQueryOriginORIGINUNSPECIFIED WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetricsResolvedMetricQueryOrigin = "ORIGIN_UNSPECIFIED"
+	WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetricsResolvedMetricQueryOriginPRESET            WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetricsResolvedMetricQueryOrigin = "PRESET"
+)
+
 // Defines values for WorkloadoptimizationV1CustomMetricsDataSourceStatus.
 const (
 	WorkloadoptimizationV1CustomMetricsDataSourceStatusCONNECTED     WorkloadoptimizationV1CustomMetricsDataSourceStatus = "CONNECTED"
@@ -8597,7 +8611,7 @@ type WorkloadoptimizationV1CrossVersionObjectReference struct {
 // WorkloadoptimizationV1CustomMetricDataPoint CustomMetricDataPoint represents a single data point in a custom metric time series.
 type WorkloadoptimizationV1CustomMetricDataPoint struct {
 	Timestamp time.Time `json:"timestamp"`
-	Value     float64   `json:"value"`
+	Value     *float64  `json:"value"`
 }
 
 // WorkloadoptimizationV1CustomMetricGroup CustomMetricGroup groups all time series for a single metric name.
@@ -8672,16 +8686,36 @@ type WorkloadoptimizationV1CustomMetricsDataSourceDataNodeWorkloadDataSource str
 
 // WorkloadoptimizationV1CustomMetricsDataSourceDataNodeWorkloadMetrics defines model for workloadoptimization.v1.CustomMetricsDataSource.Data.NodeWorkload.Metrics.
 type WorkloadoptimizationV1CustomMetricsDataSourceDataNodeWorkloadMetrics struct {
-	Presets         *[]string                                                                     `json:"presets,omitempty"`
+	// Presets Preset names used to resolve metrics.
+	Presets *[]string `json:"presets,omitempty"`
+
+	// Resolved All resolved metrics from presets and manual metrics combined, with origin information.
+	Resolved *[]WorkloadoptimizationV1CustomMetricsDataSourceDataNodeWorkloadMetricsResolvedMetric `json:"resolved,omitempty"`
+
+	// ResolvedMetrics Deprecated: use `resolved` field instead.
+	// Deprecated:
 	ResolvedMetrics *[]WorkloadoptimizationV1CustomMetricsDataSourceDataNodeWorkloadMetricsMetric `json:"resolvedMetrics,omitempty"`
 }
 
-// WorkloadoptimizationV1CustomMetricsDataSourceDataNodeWorkloadMetricsMetric defines model for workloadoptimization.v1.CustomMetricsDataSource.Data.NodeWorkload.Metrics.Metric.
+// WorkloadoptimizationV1CustomMetricsDataSourceDataNodeWorkloadMetricsMetric Deprecated: use `resolved` field instead.
 type WorkloadoptimizationV1CustomMetricsDataSourceDataNodeWorkloadMetricsMetric struct {
 	Errors   []string `json:"errors"`
 	Name     string   `json:"name"`
 	Warnings []string `json:"warnings"`
 }
+
+// WorkloadoptimizationV1CustomMetricsDataSourceDataNodeWorkloadMetricsResolvedMetric ResolvedMetric represents a fully resolved metric with its origin.
+type WorkloadoptimizationV1CustomMetricsDataSourceDataNodeWorkloadMetricsResolvedMetric struct {
+	Errors *[]string `json:"errors,omitempty"`
+	Name   string    `json:"name"`
+
+	// Origin Origin indicates whether this metric was manually defined or resolved from a preset.
+	Origin   WorkloadoptimizationV1CustomMetricsDataSourceDataNodeWorkloadMetricsResolvedMetricOrigin `json:"origin"`
+	Warnings *[]string                                                                                `json:"warnings,omitempty"`
+}
+
+// WorkloadoptimizationV1CustomMetricsDataSourceDataNodeWorkloadMetricsResolvedMetricOrigin Origin indicates whether this metric was manually defined or resolved from a preset.
+type WorkloadoptimizationV1CustomMetricsDataSourceDataNodeWorkloadMetricsResolvedMetricOrigin string
 
 // WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheus defines model for workloadoptimization.v1.CustomMetricsDataSource.Data.Prometheus.
 type WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheus struct {
@@ -8697,17 +8731,42 @@ type WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusDataSource struc
 
 // WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetrics defines model for workloadoptimization.v1.CustomMetricsDataSource.Data.Prometheus.Metrics.
 type WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetrics struct {
-	Presets         *[]string                                                                   `json:"presets,omitempty"`
+	// Presets Preset names used to resolve metrics.
+	Presets *[]string `json:"presets,omitempty"`
+
+	// Resolved All resolved metrics from presets and manual metrics combined, with origin information.
+	Resolved *[]WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetricsResolvedMetric `json:"resolved,omitempty"`
+
+	// ResolvedMetrics Deprecated: use `resolved` field instead.
+	// Deprecated:
 	ResolvedMetrics *[]WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetricsMetric `json:"resolvedMetrics,omitempty"`
 }
 
-// WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetricsMetric defines model for workloadoptimization.v1.CustomMetricsDataSource.Data.Prometheus.Metrics.Metric.
+// WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetricsMetric Deprecated: use `ResolvedMetric` instead.
 type WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetricsMetric struct {
 	Errors   []string `json:"errors"`
 	Name     string   `json:"name"`
 	Queries  []string `json:"queries"`
 	Warnings []string `json:"warnings"`
 }
+
+// WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetricsResolvedMetric ResolvedMetric represents a fully resolved metric with origin-tagged queries.
+type WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetricsResolvedMetric struct {
+	Errors   *[]string                                                                               `json:"errors,omitempty"`
+	Name     string                                                                                  `json:"name"`
+	Queries  []WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetricsResolvedMetricQuery `json:"queries"`
+	Warnings *[]string                                                                               `json:"warnings,omitempty"`
+}
+
+// WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetricsResolvedMetricQuery Query represents a single Prometheus query with its origin.
+type WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetricsResolvedMetricQuery struct {
+	// Origin Origin indicates whether this query was manually defined or resolved from a preset.
+	Origin WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetricsResolvedMetricQueryOrigin `json:"origin"`
+	Value  string                                                                                      `json:"value"`
+}
+
+// WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetricsResolvedMetricQueryOrigin Origin indicates whether this query was manually defined or resolved from a preset.
+type WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetricsResolvedMetricQueryOrigin string
 
 // WorkloadoptimizationV1CustomMetricsDataSourceStatus Status represents the synchronization status of the custom metrics data source. It indicates whether the data
 // source is currently being synchronized, has been successfully synchronized, is in the process of syncing, or has
@@ -8744,7 +8803,7 @@ type WorkloadoptimizationV1CustomMetricsDataSourceInputPrometheusMetric struct {
 
 // WorkloadoptimizationV1CustomMetricsDataSourceInputPrometheusMetrics defines model for workloadoptimization.v1.CustomMetricsDataSourceInput.Prometheus.Metrics.
 type WorkloadoptimizationV1CustomMetricsDataSourceInputPrometheusMetrics struct {
-	Custom  *[]WorkloadoptimizationV1CustomMetricsDataSourceInputPrometheusMetric `json:"custom,omitempty"`
+	Manual  *[]WorkloadoptimizationV1CustomMetricsDataSourceInputPrometheusMetric `json:"manual,omitempty"`
 	Presets *[]string                                                             `json:"presets,omitempty"`
 }
 
@@ -11237,6 +11296,16 @@ type ExternalClusterAPIGetConnectAndEnableCASTAICmdParams struct {
 
 	// InstallOperator Whether cluster should be onboarded with Castware Operator.
 	InstallOperator *bool `form:"installOperator,omitempty" json:"installOperator,omitempty"`
+
+	// InstallSecurityImageScanning Whether to install image scanning as part of security.
+	// No-op if install_security_agent is set to false.
+	// To enable backwards compatibility, when the field is omitted, it is defaulted to true.
+	InstallSecurityImageScanning *bool `form:"installSecurityImageScanning,omitempty" json:"installSecurityImageScanning,omitempty"`
+
+	// InstallSecurityCompliance Whether to install compliance scanning as part of security.
+	// No-op if install_security_agent is set to false.
+	// To enable backwards compatibility, when the field is omitted, it is defaulted to true.
+	InstallSecurityCompliance *bool `form:"installSecurityCompliance,omitempty" json:"installSecurityCompliance,omitempty"`
 }
 
 // ExternalClusterAPIGetCredentialsScriptParams defines parameters for ExternalClusterAPIGetCredentialsScript.
@@ -11289,6 +11358,16 @@ type ExternalClusterAPIGetCredentialsScriptParams struct {
 
 	// InstallUmbrella Whether to install with umbrella helm chart.
 	InstallUmbrella *bool `form:"installUmbrella,omitempty" json:"installUmbrella,omitempty"`
+
+	// InstallSecurityImageScanning Whether to install image scanning as part of security.
+	// No-op if install_security_agent is set to false.
+	// To enable backwards compatibility, when the field is omitted, it is defaulted to true.
+	InstallSecurityImageScanning *bool `form:"installSecurityImageScanning,omitempty" json:"installSecurityImageScanning,omitempty"`
+
+	// InstallSecurityCompliance Whether to install compliance scanning as part of security.
+	// No-op if install_security_agent is set to false.
+	// To enable backwards compatibility, when the field is omitted, it is defaulted to true.
+	InstallSecurityCompliance *bool `form:"installSecurityCompliance,omitempty" json:"installSecurityCompliance,omitempty"`
 }
 
 // ExternalClusterAPIGetCredentialsScriptParamsKentParams defines parameters for ExternalClusterAPIGetCredentialsScript.
@@ -11973,6 +12052,10 @@ type WorkloadOptimizationAPIGetWorkloadCustomMetricsV1BetaParams struct {
 	Step     *string   `form:"step,omitempty" json:"step,omitempty"`
 	FromTime time.Time `form:"fromTime" json:"fromTime"`
 	ToTime   time.Time `form:"toTime" json:"toTime"`
+
+	// BackfillDataPoints When true, missing data points in the time range are backfilled with null values at each step interval.
+	// Requires a step to be in effect (explicitly requested or server-calculated). Ignored when no step applies.
+	BackfillDataPoints *bool `form:"backfillDataPoints,omitempty" json:"backfillDataPoints,omitempty"`
 }
 
 // WorkloadOptimizationAPIGetAggregatedWorkloadCustomMetricsV1BetaParams defines parameters for WorkloadOptimizationAPIGetAggregatedWorkloadCustomMetricsV1Beta.
@@ -11991,6 +12074,9 @@ type WorkloadOptimizationAPIGetAggregatedWorkloadCustomMetricsV1BetaParams struc
 
 	// AggregationPercentile Only used when type is PERCENTILE (e.g. 95 for p95).
 	AggregationPercentile *float64 `form:"aggregation.percentile,omitempty" json:"aggregation.percentile,omitempty"`
+
+	// BackfillDataPoints When true, missing data points in the time range are backfilled with null values at each step interval.
+	BackfillDataPoints *bool `form:"backfillDataPoints,omitempty" json:"backfillDataPoints,omitempty"`
 }
 
 // WorkloadOptimizationAPIGetAggregatedWorkloadCustomMetricsV1BetaParamsAggregationType defines parameters for WorkloadOptimizationAPIGetAggregatedWorkloadCustomMetricsV1Beta.
