@@ -4,7 +4,7 @@ resource "castai_pod_mutation" "spot_scheduling" {
   name       = "spot-scheduling"
   enabled    = true
 
-  object_filter_v2 {
+  filter_v2 {
     namespaces {
       type  = "EXACT"
       value = "default"
@@ -33,7 +33,7 @@ resource "castai_pod_mutation" "multi_pool_distribution" {
   name       = "multi-pool-distribution"
   enabled    = true
 
-  object_filter_v2 {
+  filter_v2 {
     namespaces {
       type  = "REGEX"
       value = "^prod-.*$"

@@ -23,7 +23,7 @@ const (
 	FieldPodMutationClusterID                = "cluster_id"
 	FieldPodMutationName                     = "name"
 	FieldPodMutationEnabled                  = "enabled"
-	FieldPodMutationObjectFilterV2           = "object_filter_v2"
+	FieldPodMutationFilterV2                 = "filter_v2"
 	FieldPodMutationLabels                   = "labels"
 	FieldPodMutationAnnotations              = "annotations"
 	FieldPodMutationNodeSelector             = "node_selector"
@@ -326,7 +326,7 @@ func resourcePodMutation() *schema.Resource {
 			Required:    true,
 			Description: "Whether the pod mutation is enabled.",
 		},
-		FieldPodMutationObjectFilterV2: {
+		FieldPodMutationFilterV2: {
 			Type:        schema.TypeList,
 			Required:    true,
 			MaxItems:    1,
@@ -420,7 +420,7 @@ func resourcePodMutation() *schema.Resource {
 		},
 
 		Description: "CAST AI pod mutation resource allows managing pod mutations for Kubernetes workloads.",
-		Schema: s,
+		Schema:      s,
 	}
 }
 
@@ -596,8 +596,8 @@ func stateToPodMutation(d *schema.ResourceData) patching_engine.PodMutation {
 		Enabled: &enabled,
 	}
 
-	// Object filter V2
-	if filterList, ok := d.Get(FieldPodMutationObjectFilterV2).([]interface{}); ok && len(filterList) > 0 && filterList[0] != nil {
+	// Filter V2
+	if filterList, ok := d.Get(FieldPodMutationFilterV2).([]interface{}); ok && len(filterList) > 0 && filterList[0] != nil {
 		mutation.ObjectFilterV2 = stateToObjectFilterV2(filterList[0].(map[string]interface{}))
 	}
 
@@ -1017,7 +1017,7 @@ func podMutationToState(mutation *patching_engine.PodMutation, d *schema.Resourc
 	}
 
 	if mutation.ObjectFilterV2 != nil {
-		if err := d.Set(FieldPodMutationObjectFilterV2, flattenObjectFilterV2(mutation.ObjectFilterV2)); err != nil {
+		if err := d.Set(FieldPodMutationFilterV2, flattenObjectFilterV2(mutation.ObjectFilterV2)); err != nil {
 			return diag.FromErr(err)
 		}
 	}

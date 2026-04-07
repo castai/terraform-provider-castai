@@ -612,10 +612,10 @@ func TestAccCloudAgnostic_ResourcePodMutation(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "enabled", "true"),
 					resource.TestCheckResourceAttr(resourceName, "spot_type", "PREFERRED_SPOT"),
 					resource.TestCheckResourceAttr(resourceName, "spot_distribution_percentage", "80"),
-					resource.TestCheckResourceAttr(resourceName, "object_filter_v2.0.namespaces.0.type", "EXACT"),
-					resource.TestCheckResourceAttr(resourceName, "object_filter_v2.0.namespaces.0.value", "default"),
-					resource.TestCheckResourceAttr(resourceName, "object_filter_v2.0.kinds.0.type", "EXACT"),
-					resource.TestCheckResourceAttr(resourceName, "object_filter_v2.0.kinds.0.value", "Deployment"),
+					resource.TestCheckResourceAttr(resourceName, "filter_v2.0.namespaces.0.type", "EXACT"),
+					resource.TestCheckResourceAttr(resourceName, "filter_v2.0.namespaces.0.value", "default"),
+					resource.TestCheckResourceAttr(resourceName, "filter_v2.0.kinds.0.type", "EXACT"),
+					resource.TestCheckResourceAttr(resourceName, "filter_v2.0.kinds.0.value", "Deployment"),
 					resource.TestCheckResourceAttr(resourceName, "tolerations.0.key", "scheduling.cast.ai/spot"),
 					resource.TestCheckResourceAttr(resourceName, "tolerations.0.operator", "Exists"),
 					resource.TestCheckResourceAttr(resourceName, "tolerations.0.effect", "NoSchedule"),
@@ -630,8 +630,8 @@ func TestAccCloudAgnostic_ResourcePodMutation(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "enabled", "false"),
 					resource.TestCheckResourceAttr(resourceName, "spot_type", "OPTIONAL_SPOT"),
 					resource.TestCheckResourceAttr(resourceName, "spot_distribution_percentage", "50"),
-					resource.TestCheckResourceAttr(resourceName, "object_filter_v2.0.namespaces.0.type", "REGEX"),
-					resource.TestCheckResourceAttr(resourceName, "object_filter_v2.0.namespaces.0.value", "^prod-.*$"),
+					resource.TestCheckResourceAttr(resourceName, "filter_v2.0.namespaces.0.type", "REGEX"),
+					resource.TestCheckResourceAttr(resourceName, "filter_v2.0.namespaces.0.value", "^prod-.*$"),
 				),
 			},
 			{
@@ -703,7 +703,7 @@ resource "castai_pod_mutation" "test" {
   name            = %[1]q
   enabled         = true
 
-  object_filter_v2 {
+  filter_v2 {
     namespaces {
       type  = "EXACT"
       value = "default"
@@ -740,7 +740,7 @@ resource "castai_pod_mutation" "test" {
   name            = %[1]q
   enabled         = false
 
-  object_filter_v2 {
+  filter_v2 {
     namespaces {
       type  = "REGEX"
       value = "^prod-.*$"
@@ -767,7 +767,7 @@ resource "castai_pod_mutation" "test" {
   name            = %[1]q
   enabled         = true
 
-  object_filter_v2 {
+  filter_v2 {
     namespaces {
       type  = "REGEX"
       value = "^prod-.*$"

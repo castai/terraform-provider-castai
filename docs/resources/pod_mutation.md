@@ -19,7 +19,7 @@ resource "castai_pod_mutation" "spot_scheduling" {
   name       = "spot-scheduling"
   enabled    = true
 
-  object_filter_v2 {
+  filter_v2 {
     namespaces {
       type  = "EXACT"
       value = "default"
@@ -48,7 +48,7 @@ resource "castai_pod_mutation" "multi_pool_distribution" {
   name       = "multi-pool-distribution"
   enabled    = true
 
-  object_filter_v2 {
+  filter_v2 {
     namespaces {
       type  = "REGEX"
       value = "^prod-.*$"
@@ -104,8 +104,8 @@ resource "castai_pod_mutation" "multi_pool_distribution" {
 
 - `cluster_id` (String) ID of the cluster.
 - `enabled` (Boolean) Whether the pod mutation is enabled.
+- `filter_v2` (Block List, Min: 1, Max: 1) Advanced object filter with support for exact and regex matching. (see [below for nested schema](#nestedblock--filter_v2))
 - `name` (String) Name of the pod mutation.
-- `object_filter_v2` (Block List, Min: 1, Max: 1) Advanced object filter with support for exact and regex matching. (see [below for nested schema](#nestedblock--object_filter_v2))
 
 ### Optional
 
@@ -127,22 +127,22 @@ resource "castai_pod_mutation" "multi_pool_distribution" {
 - `id` (String) The ID of this resource.
 - `source` (String) Source of the pod mutation (API or CUSTOM_RESOURCE).
 
-<a id="nestedblock--object_filter_v2"></a>
-### Nested Schema for `object_filter_v2`
+<a id="nestedblock--filter_v2"></a>
+### Nested Schema for `filter_v2`
 
 Optional:
 
-- `exclude_kinds` (Block List) (see [below for nested schema](#nestedblock--object_filter_v2--exclude_kinds))
-- `exclude_labels_filter` (Block List, Max: 1) (see [below for nested schema](#nestedblock--object_filter_v2--exclude_labels_filter))
-- `exclude_names` (Block List) (see [below for nested schema](#nestedblock--object_filter_v2--exclude_names))
-- `exclude_namespaces` (Block List) (see [below for nested schema](#nestedblock--object_filter_v2--exclude_namespaces))
-- `kinds` (Block List) (see [below for nested schema](#nestedblock--object_filter_v2--kinds))
-- `labels_filter` (Block List, Max: 1) (see [below for nested schema](#nestedblock--object_filter_v2--labels_filter))
-- `names` (Block List) (see [below for nested schema](#nestedblock--object_filter_v2--names))
-- `namespaces` (Block List) (see [below for nested schema](#nestedblock--object_filter_v2--namespaces))
+- `exclude_kinds` (Block List) (see [below for nested schema](#nestedblock--filter_v2--exclude_kinds))
+- `exclude_labels_filter` (Block List, Max: 1) (see [below for nested schema](#nestedblock--filter_v2--exclude_labels_filter))
+- `exclude_names` (Block List) (see [below for nested schema](#nestedblock--filter_v2--exclude_names))
+- `exclude_namespaces` (Block List) (see [below for nested schema](#nestedblock--filter_v2--exclude_namespaces))
+- `kinds` (Block List) (see [below for nested schema](#nestedblock--filter_v2--kinds))
+- `labels_filter` (Block List, Max: 1) (see [below for nested schema](#nestedblock--filter_v2--labels_filter))
+- `names` (Block List) (see [below for nested schema](#nestedblock--filter_v2--names))
+- `namespaces` (Block List) (see [below for nested schema](#nestedblock--filter_v2--namespaces))
 
-<a id="nestedblock--object_filter_v2--exclude_kinds"></a>
-### Nested Schema for `object_filter_v2.exclude_kinds`
+<a id="nestedblock--filter_v2--exclude_kinds"></a>
+### Nested Schema for `filter_v2.exclude_kinds`
 
 Required:
 
@@ -150,36 +150,27 @@ Required:
 - `value` (String) Value to match against.
 
 
-<a id="nestedblock--object_filter_v2--exclude_labels_filter"></a>
-### Nested Schema for `object_filter_v2.exclude_labels_filter`
+<a id="nestedblock--filter_v2--exclude_labels_filter"></a>
+### Nested Schema for `filter_v2.exclude_labels_filter`
 
 Required:
 
-- `matchers` (Block List, Min: 1) (see [below for nested schema](#nestedblock--object_filter_v2--exclude_labels_filter--matchers))
+- `matchers` (Block List, Min: 1) (see [below for nested schema](#nestedblock--filter_v2--exclude_labels_filter--matchers))
 - `operator` (String) Logical operator to combine label matchers: AND or OR.
 
-<a id="nestedblock--object_filter_v2--exclude_labels_filter--matchers"></a>
-### Nested Schema for `object_filter_v2.exclude_labels_filter.matchers`
+<a id="nestedblock--filter_v2--exclude_labels_filter--matchers"></a>
+### Nested Schema for `filter_v2.exclude_labels_filter.matchers`
 
 Required:
 
-- `key` (Block List, Min: 1, Max: 1) (see [below for nested schema](#nestedblock--object_filter_v2--exclude_labels_filter--matchers--key))
+- `key` (Block List, Min: 1, Max: 1) (see [below for nested schema](#nestedblock--filter_v2--exclude_labels_filter--matchers--key))
 
 Optional:
 
-- `value` (Block List, Max: 1) (see [below for nested schema](#nestedblock--object_filter_v2--exclude_labels_filter--matchers--value))
+- `value` (Block List, Max: 1) (see [below for nested schema](#nestedblock--filter_v2--exclude_labels_filter--matchers--value))
 
-<a id="nestedblock--object_filter_v2--exclude_labels_filter--matchers--key"></a>
-### Nested Schema for `object_filter_v2.exclude_labels_filter.matchers.key`
-
-Required:
-
-- `type` (String) Matcher type: EXACT or REGEX.
-- `value` (String) Value to match against.
-
-
-<a id="nestedblock--object_filter_v2--exclude_labels_filter--matchers--value"></a>
-### Nested Schema for `object_filter_v2.exclude_labels_filter.matchers.value`
+<a id="nestedblock--filter_v2--exclude_labels_filter--matchers--key"></a>
+### Nested Schema for `filter_v2.exclude_labels_filter.matchers.key`
 
 Required:
 
@@ -187,10 +178,8 @@ Required:
 - `value` (String) Value to match against.
 
 
-
-
-<a id="nestedblock--object_filter_v2--exclude_names"></a>
-### Nested Schema for `object_filter_v2.exclude_names`
+<a id="nestedblock--filter_v2--exclude_labels_filter--matchers--value"></a>
+### Nested Schema for `filter_v2.exclude_labels_filter.matchers.value`
 
 Required:
 
@@ -198,8 +187,10 @@ Required:
 - `value` (String) Value to match against.
 
 
-<a id="nestedblock--object_filter_v2--exclude_namespaces"></a>
-### Nested Schema for `object_filter_v2.exclude_namespaces`
+
+
+<a id="nestedblock--filter_v2--exclude_names"></a>
+### Nested Schema for `filter_v2.exclude_names`
 
 Required:
 
@@ -207,8 +198,8 @@ Required:
 - `value` (String) Value to match against.
 
 
-<a id="nestedblock--object_filter_v2--kinds"></a>
-### Nested Schema for `object_filter_v2.kinds`
+<a id="nestedblock--filter_v2--exclude_namespaces"></a>
+### Nested Schema for `filter_v2.exclude_namespaces`
 
 Required:
 
@@ -216,36 +207,36 @@ Required:
 - `value` (String) Value to match against.
 
 
-<a id="nestedblock--object_filter_v2--labels_filter"></a>
-### Nested Schema for `object_filter_v2.labels_filter`
+<a id="nestedblock--filter_v2--kinds"></a>
+### Nested Schema for `filter_v2.kinds`
 
 Required:
 
-- `matchers` (Block List, Min: 1) (see [below for nested schema](#nestedblock--object_filter_v2--labels_filter--matchers))
+- `type` (String) Matcher type: EXACT or REGEX.
+- `value` (String) Value to match against.
+
+
+<a id="nestedblock--filter_v2--labels_filter"></a>
+### Nested Schema for `filter_v2.labels_filter`
+
+Required:
+
+- `matchers` (Block List, Min: 1) (see [below for nested schema](#nestedblock--filter_v2--labels_filter--matchers))
 - `operator` (String) Logical operator to combine label matchers: AND or OR.
 
-<a id="nestedblock--object_filter_v2--labels_filter--matchers"></a>
-### Nested Schema for `object_filter_v2.labels_filter.matchers`
+<a id="nestedblock--filter_v2--labels_filter--matchers"></a>
+### Nested Schema for `filter_v2.labels_filter.matchers`
 
 Required:
 
-- `key` (Block List, Min: 1, Max: 1) (see [below for nested schema](#nestedblock--object_filter_v2--labels_filter--matchers--key))
+- `key` (Block List, Min: 1, Max: 1) (see [below for nested schema](#nestedblock--filter_v2--labels_filter--matchers--key))
 
 Optional:
 
-- `value` (Block List, Max: 1) (see [below for nested schema](#nestedblock--object_filter_v2--labels_filter--matchers--value))
+- `value` (Block List, Max: 1) (see [below for nested schema](#nestedblock--filter_v2--labels_filter--matchers--value))
 
-<a id="nestedblock--object_filter_v2--labels_filter--matchers--key"></a>
-### Nested Schema for `object_filter_v2.labels_filter.matchers.key`
-
-Required:
-
-- `type` (String) Matcher type: EXACT or REGEX.
-- `value` (String) Value to match against.
-
-
-<a id="nestedblock--object_filter_v2--labels_filter--matchers--value"></a>
-### Nested Schema for `object_filter_v2.labels_filter.matchers.value`
+<a id="nestedblock--filter_v2--labels_filter--matchers--key"></a>
+### Nested Schema for `filter_v2.labels_filter.matchers.key`
 
 Required:
 
@@ -253,10 +244,8 @@ Required:
 - `value` (String) Value to match against.
 
 
-
-
-<a id="nestedblock--object_filter_v2--names"></a>
-### Nested Schema for `object_filter_v2.names`
+<a id="nestedblock--filter_v2--labels_filter--matchers--value"></a>
+### Nested Schema for `filter_v2.labels_filter.matchers.value`
 
 Required:
 
@@ -264,8 +253,19 @@ Required:
 - `value` (String) Value to match against.
 
 
-<a id="nestedblock--object_filter_v2--namespaces"></a>
-### Nested Schema for `object_filter_v2.namespaces`
+
+
+<a id="nestedblock--filter_v2--names"></a>
+### Nested Schema for `filter_v2.names`
+
+Required:
+
+- `type` (String) Matcher type: EXACT or REGEX.
+- `value` (String) Value to match against.
+
+
+<a id="nestedblock--filter_v2--namespaces"></a>
+### Nested Schema for `filter_v2.namespaces`
 
 Required:
 
