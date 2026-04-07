@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"strconv"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-log/tflog"
@@ -28,32 +27,14 @@ const (
 	FieldPodMutationFilterPod                = "pod"
 	FieldPodMutationLabels                   = "labels"
 	FieldPodMutationAnnotations              = "annotations"
-	FieldPodMutationNodeSelector             = "node_selector"
-	FieldPodMutationNodeSelectorAdd          = "add"
-	FieldPodMutationNodeSelectorRemove       = "remove"
-	FieldPodMutationTolerations              = "tolerations"
-	FieldPodMutationTolerationKey            = "key"
-	FieldPodMutationTolerationOperator       = "operator"
-	FieldPodMutationTolerationValue          = "value"
-	FieldPodMutationTolerationEffect         = "effect"
-	FieldPodMutationTolerationSeconds        = "toleration_seconds"
-	FieldPodMutationAffinity                 = "affinity"
-	FieldPodMutationNodeAffinity             = "node_affinity"
-	FieldPodMutationPreferred                = "preferred_during_scheduling_ignored_during_execution"
-	FieldPodMutationWeight                   = "weight"
-	FieldPodMutationPreference               = "preference"
-	FieldPodMutationMatchExpressions         = "match_expressions"
-	FieldPodMutationMatchExpressionsKey      = "key"
-	FieldPodMutationMatchExpressionsOperator = "operator"
-	FieldPodMutationSpotType                 = "spot_type"
-	FieldPodMutationSpotDistributionPct      = "spot_distribution_percentage"
-	FieldPodMutationNodeTemplates            = "node_templates_to_consolidate"
-	FieldPodMutationRestartWorkloads         = "restart_matching_workloads"
+	FieldPodMutationSpotConfig               = "spot_config"
+	FieldPodMutationSpotMode                 = "spot_mode"
+	FieldPodMutationSpotDistributionPct      = "distribution_percentage"
 	FieldPodMutationPatch                    = "patch"
 	FieldPodMutationDistributionGroups       = "distribution_groups"
 	FieldPodMutationDistributionGroupName    = "name"
 	FieldPodMutationDistributionGroupPct     = "percentage"
-	FieldPodMutationDistributionGroupConfig  = "config"
+	FieldPodMutationDistributionGroupConfiguration = "configuration"
 	FieldPodMutationSource                   = "source"
 	FieldPodMutationFilterNames              = "names"
 	FieldPodMutationFilterNamespaces         = "namespaces"
@@ -72,7 +53,7 @@ const (
 	FieldPodMutationValues                   = "values"
 )
 
-var spotTypeValues = []string{
+var spotModeValues = []string{
 	string(patching_engine.PodMutationSpotTypeOPTIONALSPOT),
 	string(patching_engine.PodMutationSpotTypePREFERREDSPOT),
 	string(patching_engine.PodMutationSpotTypeUSEONLYSPOT),
@@ -82,6 +63,7 @@ var matcherTypeValues = []string{
 	string(patching_engine.EXACT),
 	string(patching_engine.REGEX),
 }
+
 
 var labelsFilterOperatorValues = []string{
 	string(patching_engine.AND),
@@ -135,153 +117,7 @@ var labelsFilterSchema = &schema.Resource{
 	},
 }
 
-var tolerationSchema = &schema.Resource{
-	Schema: map[string]*schema.Schema{
-		FieldPodMutationTolerationKey: {
-			Type:        schema.TypeString,
-			Optional:    true,
-			Description: "Toleration key.",
-		},
-		FieldPodMutationTolerationOperator: {
-			Type:        schema.TypeString,
-			Optional:    true,
-			Description: "Toleration operator.",
-		},
-		FieldPodMutationTolerationValue: {
-			Type:        schema.TypeString,
-			Optional:    true,
-			Description: "Toleration value.",
-		},
-		FieldPodMutationTolerationEffect: {
-			Type:        schema.TypeString,
-			Optional:    true,
-			Description: "Toleration effect.",
-		},
-		FieldPodMutationTolerationSeconds: {
-			Type:        schema.TypeInt,
-			Optional:    true,
-			Description: "Toleration seconds.",
-		},
-	},
-}
-
-var nodeSelectorSchema = &schema.Resource{
-	Schema: map[string]*schema.Schema{
-		FieldPodMutationNodeSelectorAdd: {
-			Type:     schema.TypeMap,
-			Optional: true,
-			Elem:     &schema.Schema{Type: schema.TypeString},
-		},
-		FieldPodMutationNodeSelectorRemove: {
-			Type:     schema.TypeMap,
-			Optional: true,
-			Elem:     &schema.Schema{Type: schema.TypeString},
-		},
-	},
-}
-
-var affinitySchema = &schema.Resource{
-	Schema: map[string]*schema.Schema{
-		FieldPodMutationNodeAffinity: {
-			Type:     schema.TypeList,
-			Optional: true,
-			MaxItems: 1,
-			Elem: &schema.Resource{
-				Schema: map[string]*schema.Schema{
-					FieldPodMutationPreferred: {
-						Type:     schema.TypeList,
-						Optional: true,
-						Elem: &schema.Resource{
-							Schema: map[string]*schema.Schema{
-								FieldPodMutationWeight: {
-									Type:        schema.TypeInt,
-									Required:    true,
-									Description: "Weight of the node affinity term.",
-								},
-								FieldPodMutationPreference: {
-									Type:     schema.TypeList,
-									Required: true,
-									MaxItems: 1,
-									Elem: &schema.Resource{
-										Schema: map[string]*schema.Schema{
-											FieldPodMutationMatchExpressions: {
-												Type:     schema.TypeList,
-												Optional: true,
-												Elem: &schema.Resource{
-													Schema: map[string]*schema.Schema{
-														FieldPodMutationMatchExpressionsKey: {
-															Type:     schema.TypeString,
-															Required: true,
-														},
-														FieldPodMutationMatchExpressionsOperator: {
-															Type:     schema.TypeString,
-															Required: true,
-														},
-														FieldPodMutationValues: {
-															Type:     schema.TypeList,
-															Optional: true,
-															Elem:     &schema.Schema{Type: schema.TypeString},
-														},
-													},
-												},
-											},
-										},
-									},
-								},
-							},
-						},
-					},
-				},
-			},
-		},
-	},
-}
-
 var mutationConfigSchema = map[string]*schema.Schema{
-	FieldPodMutationLabels: {
-		Type:        schema.TypeMap,
-		Optional:    true,
-		Elem:        &schema.Schema{Type: schema.TypeString},
-		Description: "Labels to add to the pods.",
-	},
-	FieldPodMutationAnnotations: {
-		Type:        schema.TypeMap,
-		Optional:    true,
-		Elem:        &schema.Schema{Type: schema.TypeString},
-		Description: "Annotations to add to the pods.",
-	},
-	FieldPodMutationNodeSelector: {
-		Type:        schema.TypeList,
-		Optional:    true,
-		MaxItems:    1,
-		Elem:        nodeSelectorSchema,
-		Description: "Node selector to apply to the pods (add/remove key-value pairs).",
-	},
-	FieldPodMutationTolerations: {
-		Type:        schema.TypeList,
-		Optional:    true,
-		Elem:        tolerationSchema,
-		Description: "Tolerations to apply to the pods.",
-	},
-	FieldPodMutationAffinity: {
-		Type:        schema.TypeList,
-		Optional:    true,
-		MaxItems:    1,
-		Elem:        affinitySchema,
-		Description: "Affinity to apply to the pods.",
-	},
-	FieldPodMutationSpotType: {
-		Type:             schema.TypeString,
-		Optional:         true,
-		ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice(spotTypeValues, false)),
-		Description:      "Spot instance type: OPTIONAL_SPOT, USE_ONLY_SPOT, or PREFERRED_SPOT.",
-	},
-	FieldPodMutationNodeTemplates: {
-		Type:        schema.TypeList,
-		Optional:    true,
-		Elem:        &schema.Schema{Type: schema.TypeString},
-		Description: "Node template names to consolidate.",
-	},
 	FieldPodMutationPatch: {
 		Type:        schema.TypeString,
 		Optional:    true,
@@ -294,6 +130,20 @@ var mutationConfigSchema = map[string]*schema.Schema{
 			var arr []map[string]interface{}
 			if err := json.Unmarshal([]byte(s), &arr); err != nil {
 				return nil, []error{fmt.Errorf("%q must be a valid JSON array of patch operations: %w", key, err)}
+			}
+			validOps := map[string]struct{}{"add": {}, "remove": {}, "replace": {}, "move": {}, "copy": {}, "test": {}}
+			for i, op := range arr {
+				opVal, ok := op["op"].(string)
+				if !ok || opVal == "" {
+					return nil, []error{fmt.Errorf("%q operation %d: missing or invalid \"op\" field", key, i)}
+				}
+				if _, ok := validOps[opVal]; !ok {
+					return nil, []error{fmt.Errorf("%q operation %d: \"op\" must be one of add, remove, replace, move, copy, test; got %q", key, i, opVal)}
+				}
+				path, ok := op["path"].(string)
+				if !ok || path == "" {
+					return nil, []error{fmt.Errorf("%q operation %d: missing or empty \"path\" field", key, i)}
+				}
 			}
 			return nil, nil
 		}),
@@ -400,16 +250,27 @@ func resourcePodMutation() *schema.Resource {
 				},
 			},
 		},
-		FieldPodMutationSpotDistributionPct: {
-			Type:             schema.TypeInt,
-			Optional:         true,
-			ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(0, 100)),
-			Description:      "Percentage of pods (0-100) that receive spot scheduling constraints.",
-		},
-		FieldPodMutationRestartWorkloads: {
-			Type:        schema.TypeBool,
+		FieldPodMutationSpotConfig: {
+			Type:        schema.TypeList,
 			Optional:    true,
-			Description: "Restart matching workloads when the pod mutation is applied.",
+			MaxItems:    1,
+			Description: "Spot configuration for the mutation.",
+			Elem: &schema.Resource{
+				Schema: map[string]*schema.Schema{
+					FieldPodMutationSpotMode: {
+						Type:             schema.TypeString,
+						Optional:         true,
+						ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice(spotModeValues, false)),
+						Description:      "Spot mode: OPTIONAL_SPOT, USE_ONLY_SPOT, or PREFERRED_SPOT.",
+					},
+					FieldPodMutationSpotDistributionPct: {
+						Type:             schema.TypeInt,
+						Optional:         true,
+						ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(0, 100)),
+						Description:      "Percentage of pods (0-100) that receive spot scheduling constraints.",
+					},
+				},
+			},
 		},
 		FieldPodMutationDistributionGroups: {
 			Type:        schema.TypeList,
@@ -451,6 +312,12 @@ func distributionGroupSchema() map[string]*schema.Schema {
 	for k, v := range mutationConfigSchema {
 		configSchema[k] = v
 	}
+	configSchema[FieldPodMutationSpotMode] = &schema.Schema{
+		Type:             schema.TypeString,
+		Optional:         true,
+		ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice(spotModeValues, false)),
+		Description:      "Spot mode: OPTIONAL_SPOT, USE_ONLY_SPOT, or PREFERRED_SPOT.",
+	}
 
 	return map[string]*schema.Schema{
 		FieldPodMutationDistributionGroupName: {
@@ -465,7 +332,7 @@ func distributionGroupSchema() map[string]*schema.Schema {
 			ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(0, 100)),
 			Description:      "Percentage of pods (0-100) that should receive this configuration.",
 		},
-		FieldPodMutationDistributionGroupConfig: {
+		FieldPodMutationDistributionGroupConfiguration: {
 			Type:     schema.TypeList,
 			Required: true,
 			MaxItems: 1,
@@ -623,41 +490,28 @@ func stateToPodMutation(d *schema.ResourceData) patching_engine.PodMutation {
 		mutation.ObjectFilterV2 = stateToObjectFilterV2(filterList[0].(map[string]interface{}))
 	}
 
-	// Mutation config fields
-	configMap := map[string]interface{}{}
-	for _, key := range []string{
-		FieldPodMutationLabels,
-		FieldPodMutationAnnotations,
-		FieldPodMutationNodeSelector,
-		FieldPodMutationTolerations,
-		FieldPodMutationAffinity,
-		FieldPodMutationSpotType,
-		FieldPodMutationNodeTemplates,
-		FieldPodMutationPatch,
-	} {
-		configMap[key] = d.Get(key)
+	// Patch
+	if patchStr, ok := d.GetOk(FieldPodMutationPatch); ok {
+		if s := patchStr.(string); s != "" {
+			var patchArr []map[string]interface{}
+			if err := json.Unmarshal([]byte(s), &patchArr); err == nil {
+				mutation.Patch = &patchArr
+			}
+		}
 	}
-	cfg := parseMutationConfigFromMap(configMap)
-	mutation.Labels = cfg.Labels
-	mutation.Annotations = cfg.Annotations
-	mutation.NodeSelector = cfg.NodeSelector
-	mutation.Tolerations = cfg.Tolerations
-	mutation.Affinity = cfg.Affinity
-	if cfg.SpotType != "" {
-		st := patching_engine.PodMutationSpotType(cfg.SpotType)
-		mutation.SpotType = &st
+
+	// Spot config
+	if spotList, ok := d.Get(FieldPodMutationSpotConfig).([]interface{}); ok && len(spotList) > 0 && spotList[0] != nil {
+		sm := spotList[0].(map[string]interface{})
+		if mode, ok := sm[FieldPodMutationSpotMode].(string); ok && mode != "" {
+			st := patching_engine.PodMutationSpotType(mode)
+			mutation.SpotType = &st
+		}
+		pct := int32(sm[FieldPodMutationSpotDistributionPct].(int))
+		mutation.SpotDistributionPercentage = &pct
 	}
-	mutation.NodeTemplatesToConsolidate = cfg.NodeTemplates
-	mutation.Patch = cfg.Patch
 
-	// Spot distribution percentage
-	pct := int32(d.Get(FieldPodMutationSpotDistributionPct).(int))
-	mutation.SpotDistributionPercentage = &pct
-
-	// Restart matching workloads
-	restart := d.Get(FieldPodMutationRestartWorkloads).(bool)
-	mutation.RestartMatchingWorkloads = &restart
-
+	// Restart policy
 	// Distribution groups
 	if v, ok := d.GetOk(FieldPodMutationDistributionGroups); ok {
 		groups := stateToDistributionGroups(v.([]interface{}))
@@ -667,82 +521,6 @@ func stateToPodMutation(d *schema.ResourceData) patching_engine.PodMutation {
 	return mutation
 }
 
-// mutationConfigResult holds the parsed mutation config fields extracted from a map.
-type mutationConfigResult struct {
-	Labels        *map[string]string
-	Annotations   *map[string]string
-	NodeSelector  *patching_engine.PatchOptions
-	Tolerations   *[]patching_engine.Toleration
-	Affinity      *patching_engine.Affinity
-	SpotType      string
-	NodeTemplates *[]string
-	Patch         *[]map[string]interface{}
-}
-
-// parseMutationConfigFromMap extracts mutation config fields from a raw map.
-func parseMutationConfigFromMap(m map[string]interface{}) mutationConfigResult {
-	var result mutationConfigResult
-
-	if v, ok := m[FieldPodMutationLabels]; ok && v != nil {
-		if labelsMap, ok := v.(map[string]interface{}); ok && len(labelsMap) > 0 {
-			sm := toStringMap(labelsMap)
-			result.Labels = &sm
-		}
-	}
-
-	if v, ok := m[FieldPodMutationAnnotations]; ok && v != nil {
-		if annotationsMap, ok := v.(map[string]interface{}); ok && len(annotationsMap) > 0 {
-			sm := toStringMap(annotationsMap)
-			result.Annotations = &sm
-		}
-	}
-
-	if v, ok := m[FieldPodMutationNodeSelector]; ok {
-		nsList := v.([]interface{})
-		if len(nsList) > 0 && nsList[0] != nil {
-			result.NodeSelector = stateToNodeSelector(nsList[0].(map[string]interface{}))
-		}
-	}
-
-	if v, ok := m[FieldPodMutationTolerations]; ok {
-		tolList := v.([]interface{})
-		if len(tolList) > 0 {
-			tols := stateToTolerations(tolList)
-			result.Tolerations = &tols
-		}
-	}
-
-	if v, ok := m[FieldPodMutationAffinity]; ok {
-		affList := v.([]interface{})
-		if len(affList) > 0 && affList[0] != nil {
-			result.Affinity = stateToAffinity(affList[0].(map[string]interface{}))
-		}
-	}
-
-	if v, ok := m[FieldPodMutationSpotType]; ok {
-		if s, ok := v.(string); ok && s != "" {
-			result.SpotType = s
-		}
-	}
-
-	if v, ok := m[FieldPodMutationNodeTemplates]; ok {
-		templates := toStringList(v.([]interface{}))
-		if len(templates) > 0 {
-			result.NodeTemplates = &templates
-		}
-	}
-
-	if v, ok := m[FieldPodMutationPatch]; ok {
-		if patchStr, ok := v.(string); ok && patchStr != "" {
-			var patchArr []map[string]interface{}
-			if err := json.Unmarshal([]byte(patchStr), &patchArr); err == nil {
-				result.Patch = &patchArr
-			}
-		}
-	}
-
-	return result
-}
 
 func stateToObjectFilterV2(m map[string]interface{}) *patching_engine.ObjectFilterV2 {
 	filter := &patching_engine.ObjectFilterV2{}
@@ -881,119 +659,6 @@ func stateToLabelsFilter(m map[string]interface{}) *patching_engine.ObjectFilter
 	return filter
 }
 
-func stateToNodeSelector(m map[string]interface{}) *patching_engine.PatchOptions {
-	ns := &patching_engine.PatchOptions{}
-	if v, ok := m[FieldPodMutationNodeSelectorAdd]; ok {
-		addMap := toStringMap(v.(map[string]interface{}))
-		if len(addMap) > 0 {
-			ns.Add = &addMap
-		}
-	}
-	if v, ok := m[FieldPodMutationNodeSelectorRemove]; ok {
-		removeMap := toStringMap(v.(map[string]interface{}))
-		if len(removeMap) > 0 {
-			ns.Remove = &removeMap
-		}
-	}
-	return ns
-}
-
-func stateToTolerations(items []interface{}) []patching_engine.Toleration {
-	tolerations := make([]patching_engine.Toleration, 0, len(items))
-	for _, item := range items {
-		if item == nil {
-			continue
-		}
-		m := item.(map[string]interface{})
-		t := patching_engine.Toleration{}
-		if v := m[FieldPodMutationTolerationKey].(string); v != "" {
-			t.Key = &v
-		}
-		if v := m[FieldPodMutationTolerationOperator].(string); v != "" {
-			t.Operator = &v
-		}
-		if v := m[FieldPodMutationTolerationValue].(string); v != "" {
-			t.Value = &v
-		}
-		if v := m[FieldPodMutationTolerationEffect].(string); v != "" {
-			t.Effect = &v
-		}
-		if v, ok := m[FieldPodMutationTolerationSeconds].(int); ok && v != 0 {
-			s := strconv.Itoa(v)
-			t.TolerationSeconds = &s
-		}
-		tolerations = append(tolerations, t)
-	}
-	return tolerations
-}
-
-func stateToAffinity(m map[string]interface{}) *patching_engine.Affinity {
-	affinity := &patching_engine.Affinity{}
-
-	if v, ok := m[FieldPodMutationNodeAffinity]; ok {
-		naList := v.([]interface{})
-		if len(naList) > 0 && naList[0] != nil {
-			naMap := naList[0].(map[string]interface{})
-			nodeAffinity := &patching_engine.NodeAffinity{}
-
-			if preferred, ok := naMap[FieldPodMutationPreferred]; ok {
-				prefList := preferred.([]interface{})
-				terms := make([]patching_engine.NodeAffinityWeightedNodeAffinityTerm, 0, len(prefList))
-				for _, p := range prefList {
-					if p == nil {
-						continue
-					}
-					pm := p.(map[string]interface{})
-					weight := int32(pm[FieldPodMutationWeight].(int))
-					term := patching_engine.NodeAffinityWeightedNodeAffinityTerm{
-						Weight: &weight,
-					}
-
-					if prefNode, ok := pm[FieldPodMutationPreference]; ok {
-						prefNodeList := prefNode.([]interface{})
-						if len(prefNodeList) > 0 && prefNodeList[0] != nil {
-							prefNodeMap := prefNodeList[0].(map[string]interface{})
-							selectorTerm := &patching_engine.NodeSelectorTerm{}
-							if exprs, ok := prefNodeMap[FieldPodMutationMatchExpressions]; ok {
-								exprList := exprs.([]interface{})
-								reqs := make([]patching_engine.NodeSelectorRequirement, 0, len(exprList))
-								for _, e := range exprList {
-									if e == nil {
-										continue
-									}
-									em := e.(map[string]interface{})
-									key := em[FieldPodMutationMatchExpressionsKey].(string)
-									operator := em[FieldPodMutationMatchExpressionsOperator].(string)
-									req := patching_engine.NodeSelectorRequirement{
-										Key:      &key,
-										Operator: &operator,
-									}
-									if vals, ok := em[FieldPodMutationValues]; ok {
-										valStrs := toStringList(vals.([]interface{}))
-										if len(valStrs) > 0 {
-											req.Values = &valStrs
-										}
-									}
-									reqs = append(reqs, req)
-								}
-								selectorTerm.MatchExpressions = &reqs
-							}
-							term.Preference = selectorTerm
-						}
-					}
-
-					terms = append(terms, term)
-				}
-				nodeAffinity.PreferredDuringSchedulingIgnoredDuringExecution = &terms
-			}
-
-			affinity.NodeAffinity = nodeAffinity
-		}
-	}
-
-	return affinity
-}
-
 func stateToDistributionGroups(items []interface{}) []patching_engine.DistributionGroup {
 	groups := make([]patching_engine.DistributionGroup, 0, len(items))
 	for _, item := range items {
@@ -1008,25 +673,25 @@ func stateToDistributionGroups(items []interface{}) []patching_engine.Distributi
 			Percentage: &pct,
 		}
 
-		if configList, ok := m[FieldPodMutationDistributionGroupConfig]; ok {
+		if configList, ok := m[FieldPodMutationDistributionGroupConfiguration]; ok {
 			cl := configList.([]interface{})
 			if len(cl) > 0 && cl[0] != nil {
 				configMap := cl[0].(map[string]interface{})
-				cfg := parseMutationConfigFromMap(configMap)
-				config := &patching_engine.DistributionGroupConfig{
-					Labels:                     cfg.Labels,
-					Annotations:                cfg.Annotations,
-					NodeSelector:               cfg.NodeSelector,
-					Tolerations:                cfg.Tolerations,
-					Affinity:                   cfg.Affinity,
-					NodeTemplatesToConsolidate: cfg.NodeTemplates,
-					Patch:                      cfg.Patch,
+				config := &patching_engine.DistributionGroupConfig{}
+				if v, ok := configMap[FieldPodMutationSpotMode]; ok {
+					if s, ok := v.(string); ok && s != "" {
+						st := patching_engine.DistributionGroupConfigSpotType(s)
+						config.SpotType = &st
+					}
 				}
-				if cfg.SpotType != "" {
-					st := patching_engine.DistributionGroupConfigSpotType(cfg.SpotType)
-					config.SpotType = &st
+				if v, ok := configMap[FieldPodMutationPatch]; ok {
+					if patchStr, ok := v.(string); ok && patchStr != "" {
+						var patchArr []map[string]interface{}
+						if err := json.Unmarshal([]byte(patchStr), &patchArr); err == nil {
+							config.Patch = &patchArr
+						}
+					}
 				}
-
 				group.Config = config
 			}
 		}
@@ -1059,86 +724,15 @@ func podMutationToState(mutation *patching_engine.PodMutation, d *schema.Resourc
 		}
 	}
 
-	if mutation.Labels != nil {
-		if err := d.Set(FieldPodMutationLabels, *mutation.Labels); err != nil {
-			return diag.FromErr(err)
-		}
-	} else {
-		if err := d.Set(FieldPodMutationLabels, map[string]string{}); err != nil {
-			return diag.FromErr(err)
-		}
-	}
-
-	if mutation.Annotations != nil {
-		if err := d.Set(FieldPodMutationAnnotations, *mutation.Annotations); err != nil {
-			return diag.FromErr(err)
-		}
-	} else {
-		if err := d.Set(FieldPodMutationAnnotations, map[string]string{}); err != nil {
-			return diag.FromErr(err)
-		}
-	}
-
-	if mutation.NodeSelector != nil {
-		if err := d.Set(FieldPodMutationNodeSelector, flattenPodMutationNodeSelector(mutation.NodeSelector)); err != nil {
-			return diag.FromErr(err)
-		}
-	} else {
-		if err := d.Set(FieldPodMutationNodeSelector, []map[string]interface{}{}); err != nil {
-			return diag.FromErr(err)
-		}
-	}
-
-	if mutation.Tolerations != nil {
-		flatTolerations, err := flattenTolerations(*mutation.Tolerations)
-		if err != nil {
-			return diag.Errorf("flattening tolerations: %v", err)
-		}
-
-		if err := d.Set(FieldPodMutationTolerations, flatTolerations); err != nil {
-			return diag.FromErr(err)
-		}
-	} else {
-		if err := d.Set(FieldPodMutationTolerations, []map[string]interface{}{}); err != nil {
-			return diag.FromErr(err)
-		}
-	}
-
-	if mutation.Affinity != nil {
-		if err := d.Set(FieldPodMutationAffinity, flattenAffinity(mutation.Affinity)); err != nil {
-			return diag.FromErr(err)
-		}
-	} else {
-		if err := d.Set(FieldPodMutationAffinity, []map[string]interface{}{}); err != nil {
-			return diag.FromErr(err)
-		}
-	}
-
-	// Spot type — treat UNSPECIFIED as empty to avoid drift when user doesn't set it
+	// Spot config — only populate block when a meaningful spot mode is set
 	if mutation.SpotType != nil && *mutation.SpotType != patching_engine.PodMutationSpotTypeSPOTTYPEUNSPECIFIED {
-		if err := d.Set(FieldPodMutationSpotType, string(*mutation.SpotType)); err != nil {
-			return diag.FromErr(err)
+		spotConfig := map[string]interface{}{
+			FieldPodMutationSpotMode: string(*mutation.SpotType),
 		}
-	} else {
-		if err := d.Set(FieldPodMutationSpotType, ""); err != nil {
-			return diag.FromErr(err)
+		if mutation.SpotDistributionPercentage != nil {
+			spotConfig[FieldPodMutationSpotDistributionPct] = int(*mutation.SpotDistributionPercentage)
 		}
-	}
-
-	if mutation.SpotDistributionPercentage != nil {
-		if err := d.Set(FieldPodMutationSpotDistributionPct, int(*mutation.SpotDistributionPercentage)); err != nil {
-			return diag.FromErr(err)
-		}
-	}
-
-	if mutation.NodeTemplatesToConsolidate != nil {
-		if err := d.Set(FieldPodMutationNodeTemplates, *mutation.NodeTemplatesToConsolidate); err != nil {
-			return diag.FromErr(err)
-		}
-	}
-
-	if mutation.RestartMatchingWorkloads != nil {
-		if err := d.Set(FieldPodMutationRestartWorkloads, *mutation.RestartMatchingWorkloads); err != nil {
+		if err := d.Set(FieldPodMutationSpotConfig, []map[string]interface{}{spotConfig}); err != nil {
 			return diag.FromErr(err)
 		}
 	}
@@ -1269,90 +863,6 @@ func flattenLabelsFilter(filter *patching_engine.ObjectFilterV2LabelsFilter) []m
 	return []map[string]interface{}{m}
 }
 
-func flattenPodMutationNodeSelector(ns *patching_engine.PatchOptions) []map[string]interface{} {
-	m := map[string]interface{}{}
-	if ns.Add != nil {
-		m[FieldPodMutationNodeSelectorAdd] = *ns.Add
-	}
-	if ns.Remove != nil {
-		m[FieldPodMutationNodeSelectorRemove] = *ns.Remove
-	}
-	return []map[string]interface{}{m}
-}
-
-func flattenTolerations(tolerations []patching_engine.Toleration) ([]map[string]interface{}, error) {
-	result := make([]map[string]interface{}, 0, len(tolerations))
-	for _, t := range tolerations {
-		tolerationSeconds, err := tolerationSecondsToInt(t.TolerationSeconds)
-		if err != nil {
-			return nil, fmt.Errorf("converting tolerationSeconds: %w", err)
-		}
-
-		result = append(result, map[string]interface{}{
-			FieldPodMutationTolerationKey:      lo.FromPtr(t.Key),
-			FieldPodMutationTolerationOperator: lo.FromPtr(t.Operator),
-			FieldPodMutationTolerationValue:    lo.FromPtr(t.Value),
-			FieldPodMutationTolerationEffect:   lo.FromPtr(t.Effect),
-			FieldPodMutationTolerationSeconds:  tolerationSeconds,
-		})
-	}
-	return result, nil
-}
-
-func tolerationSecondsToInt(s *string) (int, error) {
-	if s == nil {
-		return 0, nil
-	}
-
-	v, err := strconv.Atoi(*s)
-	if err != nil {
-		return 0, fmt.Errorf("atoi tolerationSeconds: %w", err)
-	}
-
-	return v, nil
-}
-
-func flattenAffinity(affinity *patching_engine.Affinity) []map[string]interface{} {
-	if affinity.NodeAffinity == nil {
-		return nil
-	}
-
-	naMap := map[string]interface{}{}
-	if affinity.NodeAffinity.PreferredDuringSchedulingIgnoredDuringExecution != nil {
-		terms := make([]map[string]interface{}, 0)
-		for _, term := range *affinity.NodeAffinity.PreferredDuringSchedulingIgnoredDuringExecution {
-			termMap := map[string]interface{}{
-				FieldPodMutationWeight: int(lo.FromPtr(term.Weight)),
-			}
-
-			if term.Preference != nil && term.Preference.MatchExpressions != nil {
-				exprs := make([]map[string]interface{}, 0)
-				for _, req := range *term.Preference.MatchExpressions {
-					exprMap := map[string]interface{}{
-						FieldPodMutationMatchExpressionsKey:      lo.FromPtr(req.Key),
-						FieldPodMutationMatchExpressionsOperator: lo.FromPtr(req.Operator),
-					}
-					if req.Values != nil {
-						exprMap[FieldPodMutationValues] = *req.Values
-					}
-					exprs = append(exprs, exprMap)
-				}
-				termMap[FieldPodMutationPreference] = []map[string]interface{}{
-					{FieldPodMutationMatchExpressions: exprs},
-				}
-			}
-			terms = append(terms, termMap)
-		}
-		naMap[FieldPodMutationPreferred] = terms
-	}
-
-	return []map[string]interface{}{
-		{
-			FieldPodMutationNodeAffinity: []map[string]interface{}{naMap},
-		},
-	}
-}
-
 func flattenDistributionGroups(groups []patching_engine.DistributionGroup) ([]map[string]interface{}, error) {
 	result := make([]map[string]interface{}, 0, len(groups))
 	for _, g := range groups {
@@ -1363,41 +873,17 @@ func flattenDistributionGroups(groups []patching_engine.DistributionGroup) ([]ma
 
 		if g.Config != nil {
 			configMap := map[string]interface{}{}
-			if g.Config.Labels != nil {
-				configMap[FieldPodMutationLabels] = *g.Config.Labels
-			}
-			if g.Config.Annotations != nil {
-				configMap[FieldPodMutationAnnotations] = *g.Config.Annotations
-			}
-			if g.Config.NodeSelector != nil {
-				configMap[FieldPodMutationNodeSelector] = flattenPodMutationNodeSelector(g.Config.NodeSelector)
-			}
-			if g.Config.Tolerations != nil {
-				flatTolerations, err := flattenTolerations(*g.Config.Tolerations)
-				if err != nil {
-					return nil, fmt.Errorf("flattening tolerations: %w", err)
-				}
-
-				configMap[FieldPodMutationTolerations] = flatTolerations
-			}
-			if g.Config.Affinity != nil {
-				configMap[FieldPodMutationAffinity] = flattenAffinity(g.Config.Affinity)
-			}
-			if g.Config.SpotType != nil && *g.Config.SpotType != "SPOT_TYPE_UNSPECIFIED" {
-				configMap[FieldPodMutationSpotType] = string(*g.Config.SpotType)
-			}
-			if g.Config.NodeTemplatesToConsolidate != nil {
-				configMap[FieldPodMutationNodeTemplates] = *g.Config.NodeTemplatesToConsolidate
+			if g.Config.SpotType != nil && *g.Config.SpotType != patching_engine.DistributionGroupConfigSpotTypeSPOTTYPEUNSPECIFIED {
+				configMap[FieldPodMutationSpotMode] = string(*g.Config.SpotType)
 			}
 			if g.Config.Patch != nil && len(*g.Config.Patch) > 0 {
 				patchJSON, err := json.Marshal(*g.Config.Patch)
 				if err != nil {
 					return nil, fmt.Errorf("failed to marshal patch: %w", err)
 				}
-
 				configMap[FieldPodMutationPatch] = string(patchJSON)
 			}
-			gMap[FieldPodMutationDistributionGroupConfig] = []map[string]interface{}{configMap}
+			gMap[FieldPodMutationDistributionGroupConfiguration] = []map[string]interface{}{configMap}
 		}
 
 		result = append(result, gMap)

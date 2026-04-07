@@ -83,9 +83,6 @@ func TestPodMutation_ReadContext(t *testing.T) {
 			Enabled:        lo.ToPtr(true),
 			ClusterId:      lo.ToPtr(testClusterID),
 			OrganizationId: lo.ToPtr(testOrgID),
-			Labels: &map[string]string{
-				"app": "web",
-			},
 			SpotType:                   lo.ToPtr(patching_engine.PodMutationSpotTypeOPTIONALSPOT),
 			SpotDistributionPercentage: lo.ToPtr(int32(80)),
 			Source:                     lo.ToPtr(patching_engine.API),
@@ -95,14 +92,6 @@ func TestPodMutation_ReadContext(t *testing.T) {
 				},
 				Kinds: &[]patching_engine.ObjectFilterV2Matcher{
 					{Type: lo.ToPtr(patching_engine.EXACT), Value: lo.ToPtr("Deployment")},
-				},
-			},
-			Tolerations: &[]patching_engine.Toleration{
-				{
-					Key:      lo.ToPtr("dedicated"),
-					Operator: lo.ToPtr("Equal"),
-					Value:    lo.ToPtr("spot"),
-					Effect:   lo.ToPtr("NoSchedule"),
 				},
 			},
 		}
@@ -134,8 +123,11 @@ func TestPodMutation_ReadContext(t *testing.T) {
 		r.Equal(testMutationID, data.Id())
 		r.Equal("test-mutation", data.Get(FieldPodMutationName))
 		r.Equal(true, data.Get(FieldPodMutationEnabled))
-		r.Equal("OPTIONAL_SPOT", data.Get(FieldPodMutationSpotType))
-		r.Equal(80, data.Get(FieldPodMutationSpotDistributionPct))
+		spotConfig := data.Get(FieldPodMutationSpotConfig).([]interface{})
+		r.Len(spotConfig, 1)
+		spotConfigMap := spotConfig[0].(map[string]interface{})
+		r.Equal("OPTIONAL_SPOT", spotConfigMap[FieldPodMutationSpotMode])
+		r.Equal(80, spotConfigMap[FieldPodMutationSpotDistributionPct])
 		r.Equal("API", data.Get(FieldPodMutationSource))
 
 		// Verify filter_v2 is flattened under workload sub-block
@@ -186,17 +178,6 @@ func TestPodMutation_ReadContext_WithDistributionGroups(t *testing.T) {
 					Percentage: lo.ToPtr(int32(70)),
 					Config: &patching_engine.DistributionGroupConfig{
 						SpotType: lo.ToPtr(patching_engine.DistributionGroupConfigSpotTypePREFERREDSPOT),
-						Labels: &map[string]string{
-							"group": "spot",
-						},
-						Tolerations: &[]patching_engine.Toleration{
-							{
-								Key:      lo.ToPtr("dedicated"),
-								Operator: lo.ToPtr("Equal"),
-								Value:    lo.ToPtr("spot"),
-								Effect:   lo.ToPtr("NoSchedule"),
-							},
-						},
 					},
 				},
 				{
@@ -204,9 +185,6 @@ func TestPodMutation_ReadContext_WithDistributionGroups(t *testing.T) {
 					Percentage: lo.ToPtr(int32(30)),
 					Config: &patching_engine.DistributionGroupConfig{
 						SpotType: lo.ToPtr(patching_engine.DistributionGroupConfigSpotTypeOPTIONALSPOT),
-						Annotations: &map[string]string{
-							"cost-center": "default",
-						},
 					},
 				},
 			},
@@ -246,19 +224,19 @@ func TestPodMutation_ReadContext_WithDistributionGroups(t *testing.T) {
 		r.Equal("spot-group", dg0[FieldPodMutationDistributionGroupName])
 		r.Equal(70, dg0[FieldPodMutationDistributionGroupPct])
 
-		dg0Config := dg0[FieldPodMutationDistributionGroupConfig].([]interface{})
+		dg0Config := dg0[FieldPodMutationDistributionGroupConfiguration].([]interface{})
 		r.Len(dg0Config, 1)
 		dg0ConfigMap := dg0Config[0].(map[string]interface{})
-		r.Equal(string(patching_engine.DistributionGroupConfigSpotTypePREFERREDSPOT), dg0ConfigMap[FieldPodMutationSpotType])
+		r.Equal(string(patching_engine.DistributionGroupConfigSpotTypePREFERREDSPOT), dg0ConfigMap[FieldPodMutationSpotMode])
 
 		dg1 := dgs[1].(map[string]interface{})
 		r.Equal("on-demand-group", dg1[FieldPodMutationDistributionGroupName])
 		r.Equal(30, dg1[FieldPodMutationDistributionGroupPct])
 
-		dg1Config := dg1[FieldPodMutationDistributionGroupConfig].([]interface{})
+		dg1Config := dg1[FieldPodMutationDistributionGroupConfiguration].([]interface{})
 		r.Len(dg1Config, 1)
 		dg1ConfigMap := dg1Config[0].(map[string]interface{})
-		r.Equal(string(patching_engine.DistributionGroupConfigSpotTypeOPTIONALSPOT), dg1ConfigMap[FieldPodMutationSpotType])
+		r.Equal(string(patching_engine.DistributionGroupConfigSpotTypeOPTIONALSPOT), dg1ConfigMap[FieldPodMutationSpotMode])
 	})
 }
 
@@ -468,21 +446,6 @@ func TestFlattenDistributionGroups(t *testing.T) {
 				Percentage: lo.ToPtr(int32(60)),
 				Config: &patching_engine.DistributionGroupConfig{
 					SpotType: lo.ToPtr(patching_engine.DistributionGroupConfigSpotTypePREFERREDSPOT),
-					Labels: &map[string]string{
-						"env": "prod",
-					},
-					Annotations: &map[string]string{
-						"note": "important",
-					},
-					Tolerations: &[]patching_engine.Toleration{
-						{
-							Key:      lo.ToPtr("key1"),
-							Operator: lo.ToPtr("Equal"),
-							Value:    lo.ToPtr("val1"),
-							Effect:   lo.ToPtr("NoSchedule"),
-						},
-					},
-					NodeTemplatesToConsolidate: &[]string{"template-1"},
 				},
 			},
 			{
@@ -498,12 +461,9 @@ func TestFlattenDistributionGroups(t *testing.T) {
 
 		r.Equal("group-a", result[0][FieldPodMutationDistributionGroupName])
 		r.Equal(60, result[0][FieldPodMutationDistributionGroupPct])
-		configList := result[0][FieldPodMutationDistributionGroupConfig].([]map[string]interface{})
+		configList := result[0][FieldPodMutationDistributionGroupConfiguration].([]map[string]interface{})
 		r.Len(configList, 1)
-		r.Equal(string(patching_engine.DistributionGroupConfigSpotTypePREFERREDSPOT), configList[0][FieldPodMutationSpotType])
-		r.Equal(map[string]string{"env": "prod"}, configList[0][FieldPodMutationLabels])
-		r.Equal(map[string]string{"note": "important"}, configList[0][FieldPodMutationAnnotations])
-		r.Equal([]string{"template-1"}, configList[0][FieldPodMutationNodeTemplates])
+		r.Equal(string(patching_engine.DistributionGroupConfigSpotTypePREFERREDSPOT), configList[0][FieldPodMutationSpotMode])
 
 		r.Equal("group-b", result[1][FieldPodMutationDistributionGroupName])
 		r.Equal(40, result[1][FieldPodMutationDistributionGroupPct])
@@ -533,8 +493,8 @@ func TestFlattenDistributionGroups(t *testing.T) {
 		result, err := flattenDistributionGroups(groups)
 		r.NoError(err)
 		r.Len(result, 1)
-		configList := result[0][FieldPodMutationDistributionGroupConfig].([]map[string]interface{})
-		_, hasSpotType := configList[0][FieldPodMutationSpotType]
+		configList := result[0][FieldPodMutationDistributionGroupConfiguration].([]map[string]interface{})
+		_, hasSpotType := configList[0][FieldPodMutationSpotMode]
 		r.False(hasSpotType)
 	})
 }
@@ -549,21 +509,18 @@ func TestStateToDistributionGroups(t *testing.T) {
 			map[string]interface{}{
 				FieldPodMutationDistributionGroupName: "spot-group",
 				FieldPodMutationDistributionGroupPct:  70,
-				FieldPodMutationDistributionGroupConfig: []interface{}{
+				FieldPodMutationDistributionGroupConfiguration: []interface{}{
 					map[string]interface{}{
-						FieldPodMutationSpotType: "PREFERRED_SPOT",
-						FieldPodMutationLabels: map[string]interface{}{
-							"tier": "spot",
-						},
+						FieldPodMutationSpotMode: "PREFERRED_SPOT",
 					},
 				},
 			},
 			map[string]interface{}{
 				FieldPodMutationDistributionGroupName: "on-demand-group",
 				FieldPodMutationDistributionGroupPct:  30,
-				FieldPodMutationDistributionGroupConfig: []interface{}{
+				FieldPodMutationDistributionGroupConfiguration: []interface{}{
 					map[string]interface{}{
-						FieldPodMutationSpotType: string(patching_engine.DistributionGroupConfigSpotTypeOPTIONALSPOT),
+						FieldPodMutationSpotMode: string(patching_engine.DistributionGroupConfigSpotTypeOPTIONALSPOT),
 					},
 				},
 			},
@@ -576,7 +533,6 @@ func TestStateToDistributionGroups(t *testing.T) {
 		r.Equal(int32(70), lo.FromPtr(groups[0].Percentage))
 		r.NotNil(groups[0].Config)
 		r.Equal(patching_engine.DistributionGroupConfigSpotTypePREFERREDSPOT, lo.FromPtr(groups[0].Config.SpotType))
-		r.Equal(map[string]string{"tier": "spot"}, lo.FromPtr(groups[0].Config.Labels))
 
 		r.Equal("on-demand-group", lo.FromPtr(groups[1].Name))
 		r.Equal(int32(30), lo.FromPtr(groups[1].Percentage))
@@ -599,7 +555,7 @@ func TestStateToDistributionGroups(t *testing.T) {
 			map[string]interface{}{
 				FieldPodMutationDistributionGroupName:   "bare-group",
 				FieldPodMutationDistributionGroupPct:    100,
-				FieldPodMutationDistributionGroupConfig: []interface{}{},
+				FieldPodMutationDistributionGroupConfiguration: []interface{}{},
 			},
 		}
 
@@ -811,15 +767,12 @@ func TestAccCloudAgnostic_ResourcePodMutation(t *testing.T) {
 					resource.TestCheckResourceAttrSet(resourceName, "id"),
 					resource.TestCheckResourceAttr(resourceName, "name", rName),
 					resource.TestCheckResourceAttr(resourceName, "enabled", "true"),
-					resource.TestCheckResourceAttr(resourceName, "spot_type", "PREFERRED_SPOT"),
-					resource.TestCheckResourceAttr(resourceName, "spot_distribution_percentage", "80"),
+					resource.TestCheckResourceAttr(resourceName, "spot_config.0.spot_mode", "PREFERRED_SPOT"),
+					resource.TestCheckResourceAttr(resourceName, "spot_config.0.distribution_percentage", "80"),
 					resource.TestCheckResourceAttr(resourceName, "filter_v2.0.workload.0.namespaces.0.type", "EXACT"),
 					resource.TestCheckResourceAttr(resourceName, "filter_v2.0.workload.0.namespaces.0.value", "default"),
 					resource.TestCheckResourceAttr(resourceName, "filter_v2.0.workload.0.kinds.0.type", "EXACT"),
 					resource.TestCheckResourceAttr(resourceName, "filter_v2.0.workload.0.kinds.0.value", "Deployment"),
-					resource.TestCheckResourceAttr(resourceName, "tolerations.0.key", "scheduling.cast.ai/spot"),
-					resource.TestCheckResourceAttr(resourceName, "tolerations.0.operator", "Exists"),
-					resource.TestCheckResourceAttr(resourceName, "tolerations.0.effect", "NoSchedule"),
 				),
 			},
 			{
@@ -829,8 +782,8 @@ func TestAccCloudAgnostic_ResourcePodMutation(t *testing.T) {
 					resource.TestCheckResourceAttrSet(resourceName, "id"),
 					resource.TestCheckResourceAttr(resourceName, "name", rName),
 					resource.TestCheckResourceAttr(resourceName, "enabled", "false"),
-					resource.TestCheckResourceAttr(resourceName, "spot_type", "OPTIONAL_SPOT"),
-					resource.TestCheckResourceAttr(resourceName, "spot_distribution_percentage", "50"),
+					resource.TestCheckResourceAttr(resourceName, "spot_config.0.spot_mode", "OPTIONAL_SPOT"),
+					resource.TestCheckResourceAttr(resourceName, "spot_config.0.distribution_percentage", "50"),
 					resource.TestCheckResourceAttr(resourceName, "filter_v2.0.workload.0.namespaces.0.type", "REGEX"),
 					resource.TestCheckResourceAttr(resourceName, "filter_v2.0.workload.0.namespaces.0.value", "^prod-.*$"),
 				),
@@ -853,9 +806,8 @@ func TestAccCloudAgnostic_ResourcePodMutation(t *testing.T) {
 					resource.TestCheckResourceAttrSet(resourceName, "id"),
 					resource.TestCheckResourceAttr(resourceName, "name", rName),
 					resource.TestCheckResourceAttr(resourceName, "enabled", "true"),
-					resource.TestCheckResourceAttr(resourceName, "spot_type", "OPTIONAL_SPOT"),
-					resource.TestCheckResourceAttr(resourceName, "spot_distribution_percentage", "0"),
-					resource.TestCheckResourceAttr(resourceName, "restart_matching_workloads", "false"),
+					resource.TestCheckResourceAttr(resourceName, "spot_config.0.spot_mode", "OPTIONAL_SPOT"),
+					resource.TestCheckResourceAttr(resourceName, "spot_config.0.distribution_percentage", "0"),
 				),
 			},
 		},
@@ -917,13 +869,9 @@ resource "castai_pod_mutation" "test" {
     }
   }
 
-  spot_type                    = "PREFERRED_SPOT"
-  spot_distribution_percentage = 80
-
-  tolerations {
-    key      = "scheduling.cast.ai/spot"
-    operator = "Exists"
-    effect   = "NoSchedule"
+  spot_config {
+    spot_mode               = "PREFERRED_SPOT"
+    distribution_percentage = 80
   }
 }
 `, rName, clusterName, organizationID)
@@ -952,8 +900,10 @@ resource "castai_pod_mutation" "test" {
     }
   }
 
-  spot_type                    = "OPTIONAL_SPOT"
-  spot_distribution_percentage = 50
+  spot_config {
+    spot_mode               = "OPTIONAL_SPOT"
+    distribution_percentage = 50
+  }
 }
 `, rName, clusterName, organizationID)
 }
@@ -981,9 +931,10 @@ resource "castai_pod_mutation" "test" {
     }
   }
 
-  spot_type                    = "OPTIONAL_SPOT"
-  spot_distribution_percentage = 0
-  restart_matching_workloads   = false
+  spot_config {
+    spot_mode               = "OPTIONAL_SPOT"
+    distribution_percentage = 0
+  }
 }
 `, rName, clusterName, organizationID)
 }

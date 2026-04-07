@@ -13,7 +13,7 @@ CAST AI pod mutation resource allows managing pod mutations for Kubernetes workl
 ## Example Usage
 
 ```terraform
-# Basic pod mutation that adds spot scheduling to workloads in the "default" namespace.
+# Pod mutation that adds spot scheduling and annotates pods in the "default" namespace.
 resource "castai_pod_mutation" "spot_scheduling" {
   cluster_id = castai_eks_cluster.example.id
   name       = "spot-scheduling"
@@ -32,19 +32,90 @@ resource "castai_pod_mutation" "spot_scheduling" {
     }
   }
 
-  spot_type                    = "PREFERRED_SPOT"
-  spot_distribution_percentage = 80
-  restart_matching_workloads   = true
-
-  tolerations {
-    key      = "scheduling.cast.ai/spot"
-    operator = "Exists"
-    effect   = "NoSchedule"
+  spot_config {
+    spot_mode               = "PREFERRED_SPOT"
+    distribution_percentage = 80
   }
+
+
+  patch = jsonencode([
+    {
+      op    = "add"
+      path  = "/metadata/annotations/mutated-by-pod-mutator"
+      value = "true"
+    }
+  ])
 }
 
-# Pod mutation with distribution groups to split pods across different node pools
-# with distinct configurations (tolerations, node selectors, node templates).
+# Pod mutation that assigns pods to a node template via node selector and toleration.
+resource "castai_pod_mutation" "node_template_assignment" {
+  cluster_id = castai_eks_cluster.example.id
+  name       = "node-template-assignment"
+  enabled    = true
+
+  filter_v2 {
+    workload {
+      namespaces {
+        type  = "REGEX"
+        value = "^jobs-.*$"
+      }
+    }
+  }
+
+  patch = jsonencode([
+    {
+      op    = "add"
+      path  = "/spec/nodeSelector/scheduling.cast.ai~1node-template"
+      value = "jobs-nodes"
+    },
+    {
+      op   = "add"
+      path = "/spec/tolerations/-"
+      value = {
+        key      = "scheduling.cast.ai/node-template"
+        value    = "jobs-nodes"
+        effect   = "NoSchedule"
+        operator = "Equal"
+      }
+    },
+    {
+      op    = "add"
+      path  = "/metadata/annotations/cast.ai~1node-template"
+      value = "jobs-nodes"
+    }
+  ])
+}
+
+# Pod mutation that migrates from cluster-autoscaler eviction annotation to CAST AI removal disabled.
+resource "castai_pod_mutation" "eviction_annotation_migration" {
+  cluster_id = castai_eks_cluster.example.id
+  name       = "eviction-annotation-migration"
+  enabled    = true
+
+  filter_v2 {
+    workload {
+      namespaces {
+        type  = "REGEX"
+        value = ".*"
+      }
+    }
+  }
+
+  patch = jsonencode([
+    {
+      op    = "remove"
+      path  = "/metadata/annotations/cluster-autoscaler.kubernetes.io~1safe-to-evict"
+      value = "true"
+    },
+    {
+      op    = "add"
+      path  = "/metadata/annotations/autoscaling.cast.ai~1removal-disabled"
+      value = "true"
+    }
+  ])
+}
+
+# Pod mutation with distribution groups, each routing pods to a different node pool via patches.
 resource "castai_pod_mutation" "multi_pool_distribution" {
   cluster_id = castai_eks_cluster.example.id
   name       = "multi-pool-distribution"
@@ -75,29 +146,32 @@ resource "castai_pod_mutation" "multi_pool_distribution" {
   }
 
   distribution_groups {
-    name       = "gpu-pool"
-    percentage = 30
-    config {
-      spot_type = "PREFERRED_SPOT"
-      tolerations {
-        key      = "nvidia.com/gpu"
-        operator = "Exists"
-        effect   = "NoSchedule"
-      }
-      node_selector {
-        add = {
-          "node.kubernetes.io/gpu" = "true"
+    name       = "spot-pool"
+    percentage = 70
+    configuration {
+      spot_mode = "PREFERRED_SPOT"
+      patch = jsonencode([
+        {
+          op    = "add"
+          path  = "/spec/nodeSelector/agentpool"
+          value = "spot"
         }
-      }
+      ])
     }
   }
 
   distribution_groups {
-    name       = "general-pool"
-    percentage = 70
-    config {
-      spot_type                     = "OPTIONAL_SPOT"
-      node_templates_to_consolidate = ["default-general"]
+    name       = "on-demand-pool"
+    percentage = 30
+    configuration {
+      spot_mode = "OPTIONAL_SPOT"
+      patch = jsonencode([
+        {
+          op    = "add"
+          path  = "/spec/nodeSelector/agentpool"
+          value = "common"
+        }
+      ])
     }
   }
 }
@@ -115,18 +189,10 @@ resource "castai_pod_mutation" "multi_pool_distribution" {
 
 ### Optional
 
-- `affinity` (Block List, Max: 1) Affinity to apply to the pods. (see [below for nested schema](#nestedblock--affinity))
-- `annotations` (Map of String) Annotations to add to the pods.
 - `distribution_groups` (Block List) Distribution groups for percentage-based pod distribution. (see [below for nested schema](#nestedblock--distribution_groups))
-- `labels` (Map of String) Labels to add to the pods.
-- `node_selector` (Block List, Max: 1) Node selector to apply to the pods (add/remove key-value pairs). (see [below for nested schema](#nestedblock--node_selector))
-- `node_templates_to_consolidate` (List of String) Node template names to consolidate.
 - `organization_id` (String) ID of the organization. If not provided, will be inferred from the API client.
 - `patch` (String) JSON patch to apply to pods. Must be a JSON array of patch operations.
-- `restart_matching_workloads` (Boolean) Restart matching workloads when the pod mutation is applied.
-- `spot_distribution_percentage` (Number) Percentage of pods (0-100) that receive spot scheduling constraints.
-- `spot_type` (String) Spot instance type: OPTIONAL_SPOT, USE_ONLY_SPOT, or PREFERRED_SPOT.
-- `tolerations` (Block List) Tolerations to apply to the pods. (see [below for nested schema](#nestedblock--tolerations))
+- `spot_config` (Block List, Max: 1) Spot configuration for the mutation. (see [below for nested schema](#nestedblock--spot_config))
 
 ### Read-Only
 
@@ -296,162 +362,31 @@ Required:
 
 
 
-<a id="nestedblock--affinity"></a>
-### Nested Schema for `affinity`
-
-Optional:
-
-- `node_affinity` (Block List, Max: 1) (see [below for nested schema](#nestedblock--affinity--node_affinity))
-
-<a id="nestedblock--affinity--node_affinity"></a>
-### Nested Schema for `affinity.node_affinity`
-
-Optional:
-
-- `preferred_during_scheduling_ignored_during_execution` (Block List) (see [below for nested schema](#nestedblock--affinity--node_affinity--preferred_during_scheduling_ignored_during_execution))
-
-<a id="nestedblock--affinity--node_affinity--preferred_during_scheduling_ignored_during_execution"></a>
-### Nested Schema for `affinity.node_affinity.preferred_during_scheduling_ignored_during_execution`
-
-Required:
-
-- `preference` (Block List, Min: 1, Max: 1) (see [below for nested schema](#nestedblock--affinity--node_affinity--preferred_during_scheduling_ignored_during_execution--preference))
-- `weight` (Number) Weight of the node affinity term.
-
-<a id="nestedblock--affinity--node_affinity--preferred_during_scheduling_ignored_during_execution--preference"></a>
-### Nested Schema for `affinity.node_affinity.preferred_during_scheduling_ignored_during_execution.preference`
-
-Optional:
-
-- `match_expressions` (Block List) (see [below for nested schema](#nestedblock--affinity--node_affinity--preferred_during_scheduling_ignored_during_execution--preference--match_expressions))
-
-<a id="nestedblock--affinity--node_affinity--preferred_during_scheduling_ignored_during_execution--preference--match_expressions"></a>
-### Nested Schema for `affinity.node_affinity.preferred_during_scheduling_ignored_during_execution.preference.match_expressions`
-
-Required:
-
-- `key` (String)
-- `operator` (String)
-
-Optional:
-
-- `values` (List of String)
-
-
-
-
-
-
 <a id="nestedblock--distribution_groups"></a>
 ### Nested Schema for `distribution_groups`
 
 Required:
 
-- `config` (Block List, Min: 1, Max: 1) (see [below for nested schema](#nestedblock--distribution_groups--config))
+- `configuration` (Block List, Min: 1, Max: 1) (see [below for nested schema](#nestedblock--distribution_groups--configuration))
 - `name` (String) Unique name for this distribution group.
 - `percentage` (Number) Percentage of pods (0-100) that should receive this configuration.
 
-<a id="nestedblock--distribution_groups--config"></a>
-### Nested Schema for `distribution_groups.config`
+<a id="nestedblock--distribution_groups--configuration"></a>
+### Nested Schema for `distribution_groups.configuration`
 
 Optional:
 
-- `affinity` (Block List, Max: 1) Affinity to apply to the pods. (see [below for nested schema](#nestedblock--distribution_groups--config--affinity))
-- `annotations` (Map of String) Annotations to add to the pods.
-- `labels` (Map of String) Labels to add to the pods.
-- `node_selector` (Block List, Max: 1) Node selector to apply to the pods (add/remove key-value pairs). (see [below for nested schema](#nestedblock--distribution_groups--config--node_selector))
-- `node_templates_to_consolidate` (List of String) Node template names to consolidate.
 - `patch` (String) JSON patch to apply to pods. Must be a JSON array of patch operations.
-- `spot_type` (String) Spot instance type: OPTIONAL_SPOT, USE_ONLY_SPOT, or PREFERRED_SPOT.
-- `tolerations` (Block List) Tolerations to apply to the pods. (see [below for nested schema](#nestedblock--distribution_groups--config--tolerations))
+- `spot_mode` (String) Spot mode: OPTIONAL_SPOT, USE_ONLY_SPOT, or PREFERRED_SPOT.
 
-<a id="nestedblock--distribution_groups--config--affinity"></a>
-### Nested Schema for `distribution_groups.config.affinity`
 
-Optional:
 
-- `node_affinity` (Block List, Max: 1) (see [below for nested schema](#nestedblock--distribution_groups--config--affinity--node_affinity))
-
-<a id="nestedblock--distribution_groups--config--affinity--node_affinity"></a>
-### Nested Schema for `distribution_groups.config.affinity.node_affinity`
+<a id="nestedblock--spot_config"></a>
+### Nested Schema for `spot_config`
 
 Optional:
 
-- `preferred_during_scheduling_ignored_during_execution` (Block List) (see [below for nested schema](#nestedblock--distribution_groups--config--affinity--node_affinity--preferred_during_scheduling_ignored_during_execution))
-
-<a id="nestedblock--distribution_groups--config--affinity--node_affinity--preferred_during_scheduling_ignored_during_execution"></a>
-### Nested Schema for `distribution_groups.config.affinity.node_affinity.preferred_during_scheduling_ignored_during_execution`
-
-Required:
-
-- `preference` (Block List, Min: 1, Max: 1) (see [below for nested schema](#nestedblock--distribution_groups--config--affinity--node_affinity--preferred_during_scheduling_ignored_during_execution--preference))
-- `weight` (Number) Weight of the node affinity term.
-
-<a id="nestedblock--distribution_groups--config--affinity--node_affinity--preferred_during_scheduling_ignored_during_execution--preference"></a>
-### Nested Schema for `distribution_groups.config.affinity.node_affinity.preferred_during_scheduling_ignored_during_execution.preference`
-
-Optional:
-
-- `match_expressions` (Block List) (see [below for nested schema](#nestedblock--distribution_groups--config--affinity--node_affinity--preferred_during_scheduling_ignored_during_execution--preference--match_expressions))
-
-<a id="nestedblock--distribution_groups--config--affinity--node_affinity--preferred_during_scheduling_ignored_during_execution--preference--match_expressions"></a>
-### Nested Schema for `distribution_groups.config.affinity.node_affinity.preferred_during_scheduling_ignored_during_execution.preference.match_expressions`
-
-Required:
-
-- `key` (String)
-- `operator` (String)
-
-Optional:
-
-- `values` (List of String)
-
-
-
-
-
-
-<a id="nestedblock--distribution_groups--config--node_selector"></a>
-### Nested Schema for `distribution_groups.config.node_selector`
-
-Optional:
-
-- `add` (Map of String)
-- `remove` (Map of String)
-
-
-<a id="nestedblock--distribution_groups--config--tolerations"></a>
-### Nested Schema for `distribution_groups.config.tolerations`
-
-Optional:
-
-- `effect` (String) Toleration effect.
-- `key` (String) Toleration key.
-- `operator` (String) Toleration operator.
-- `toleration_seconds` (Number) Toleration seconds.
-- `value` (String) Toleration value.
-
-
-
-
-<a id="nestedblock--node_selector"></a>
-### Nested Schema for `node_selector`
-
-Optional:
-
-- `add` (Map of String)
-- `remove` (Map of String)
-
-
-<a id="nestedblock--tolerations"></a>
-### Nested Schema for `tolerations`
-
-Optional:
-
-- `effect` (String) Toleration effect.
-- `key` (String) Toleration key.
-- `operator` (String) Toleration operator.
-- `toleration_seconds` (Number) Toleration seconds.
-- `value` (String) Toleration value.
+- `distribution_percentage` (Number) Percentage of pods (0-100) that receive spot scheduling constraints.
+- `spot_mode` (String) Spot mode: OPTIONAL_SPOT, USE_ONLY_SPOT, or PREFERRED_SPOT.
 
 

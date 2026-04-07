@@ -11283,6 +11283,9 @@ type ExternalClusterAPIGetConnectAndEnableCASTAICmdParams struct {
 	// No-op if install_security_agent is set to false.
 	// To enable backwards compatibility, when the field is omitted, it is defaulted to true.
 	InstallSecurityCompliance *bool `form:"installSecurityCompliance,omitempty" json:"installSecurityCompliance,omitempty"`
+
+	// UseUmbrella Whether to use umbrella Helm chart for onboarding.
+	UseUmbrella *bool `form:"useUmbrella,omitempty" json:"useUmbrella,omitempty"`
 }
 
 // ExternalClusterAPIGetCredentialsScriptParams defines parameters for ExternalClusterAPIGetCredentialsScript.
