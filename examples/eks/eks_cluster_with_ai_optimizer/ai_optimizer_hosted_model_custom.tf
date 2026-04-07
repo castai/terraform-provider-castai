@@ -52,9 +52,9 @@ resource "aws_iam_access_key" "model_registry" {
 resource "castai_ai_optimizer_model_registry" "custom_models" {
   count = var.deploy_custom_model ? 1 : 0
 
-  bucket  = var.custom_model_registry_bucket
-  region  = var.custom_model_registry_region
-  prefix  = "models"
+  bucket = var.custom_model_registry_bucket
+  region = var.custom_model_registry_region
+  prefix = "models"
   credentials = jsonencode({
     access_key_id     = aws_iam_access_key.model_registry[0].id
     secret_access_key = aws_iam_access_key.model_registry[0].secret
