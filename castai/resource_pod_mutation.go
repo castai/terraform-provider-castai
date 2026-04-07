@@ -18,36 +18,36 @@ import (
 )
 
 const (
-	FieldPodMutationOrganizationID           = "organization_id"
-	FieldPodMutationClusterID                = "cluster_id"
-	FieldPodMutationName                     = "name"
-	FieldPodMutationEnabled                  = "enabled"
-	FieldPodMutationFilterV2                 = "filter_v2"
-	FieldPodMutationFilterWorkload           = "workload"
-	FieldPodMutationFilterPod                = "pod"
-	FieldPodMutationSpotConfig               = "spot_config"
-	FieldPodMutationSpotMode                 = "spot_mode"
-	FieldPodMutationSpotDistributionPct      = "distribution_percentage"
-	FieldPodMutationPatch                    = "patch"
-	FieldPodMutationDistributionGroups       = "distribution_groups"
-	FieldPodMutationDistributionGroupName    = "name"
-	FieldPodMutationDistributionGroupPct     = "percentage"
+	FieldPodMutationOrganizationID                 = "organization_id"
+	FieldPodMutationClusterID                      = "cluster_id"
+	FieldPodMutationName                           = "name"
+	FieldPodMutationEnabled                        = "enabled"
+	FieldPodMutationFilterV2                       = "filter_v2"
+	FieldPodMutationFilterWorkload                 = "workload"
+	FieldPodMutationFilterPod                      = "pod"
+	FieldPodMutationSpotConfig                     = "spot_config"
+	FieldPodMutationSpotMode                       = "spot_mode"
+	FieldPodMutationSpotDistributionPct            = "distribution_percentage"
+	FieldPodMutationPatch                          = "patch"
+	FieldPodMutationDistributionGroups             = "distribution_groups"
+	FieldPodMutationDistributionGroupName          = "name"
+	FieldPodMutationDistributionGroupPct           = "percentage"
 	FieldPodMutationDistributionGroupConfiguration = "configuration"
-	FieldPodMutationSource                   = "source"
-	FieldPodMutationFilterNames              = "names"
-	FieldPodMutationFilterNamespaces         = "namespaces"
-	FieldPodMutationFilterKinds              = "kinds"
-	FieldPodMutationFilterLabelsFilter       = "labels_filter"
-	FieldPodMutationFilterExcludeNames       = "exclude_names"
-	FieldPodMutationFilterExcludeNamespaces  = "exclude_namespaces"
-	FieldPodMutationFilterExcludeKinds       = "exclude_kinds"
-	FieldPodMutationFilterExcludeLabels      = "exclude_labels_filter"
-	FieldPodMutationMatcherType              = "type"
-	FieldPodMutationMatcherValue             = "value"
-	FieldPodMutationLabelsFilterOperator     = "operator"
-	FieldPodMutationLabelsFilterMatchers     = "matchers"
-	FieldPodMutationLabelMatcherKey          = "key"
-	FieldPodMutationLabelMatcherValue        = "value"
+	FieldPodMutationSource                         = "source"
+	FieldPodMutationFilterNames                    = "names"
+	FieldPodMutationFilterNamespaces               = "namespaces"
+	FieldPodMutationFilterKinds                    = "kinds"
+	FieldPodMutationFilterLabelsFilter             = "labels_filter"
+	FieldPodMutationFilterExcludeNames             = "exclude_names"
+	FieldPodMutationFilterExcludeNamespaces        = "exclude_namespaces"
+	FieldPodMutationFilterExcludeKinds             = "exclude_kinds"
+	FieldPodMutationFilterExcludeLabels            = "exclude_labels_filter"
+	FieldPodMutationMatcherType                    = "type"
+	FieldPodMutationMatcherValue                   = "value"
+	FieldPodMutationLabelsFilterOperator           = "operator"
+	FieldPodMutationLabelsFilterMatchers           = "matchers"
+	FieldPodMutationLabelMatcherKey                = "key"
+	FieldPodMutationLabelMatcherValue              = "value"
 )
 
 var spotModeValues = []string{
@@ -298,9 +298,59 @@ func resourcePodMutation() *schema.Resource {
 			StateContext: podMutationStateImporter,
 		},
 
+		CustomizeDiff: resourcePodMutationCustomizeDiff,
+
 		Description: "CAST AI pod mutation resource allows managing pod mutations for Kubernetes workloads.",
 		Schema:      s,
 	}
+}
+
+func resourcePodMutationCustomizeDiff(_ context.Context, d *schema.ResourceDiff, _ interface{}) error {
+	filterV2 := d.Get(FieldPodMutationFilterV2).([]interface{})
+	if len(filterV2) == 0 || filterV2[0] == nil {
+		return fmt.Errorf("filter_v2 must not be empty")
+	}
+	fm := filterV2[0].(map[string]interface{})
+
+	workloadFields := []string{
+		FieldPodMutationFilterNames,
+		FieldPodMutationFilterNamespaces,
+		FieldPodMutationFilterKinds,
+		FieldPodMutationFilterExcludeNames,
+		FieldPodMutationFilterExcludeNamespaces,
+		FieldPodMutationFilterExcludeKinds,
+	}
+	podFields := []string{
+		FieldPodMutationFilterLabelsFilter,
+		FieldPodMutationFilterExcludeLabels,
+	}
+
+	workloadHasFilter := false
+	if wl := fm[FieldPodMutationFilterWorkload].([]interface{}); len(wl) > 0 && wl[0] != nil {
+		wm := wl[0].(map[string]interface{})
+		for _, f := range workloadFields {
+			if v, ok := wm[f].([]interface{}); ok && len(v) > 0 {
+				workloadHasFilter = true
+				break
+			}
+		}
+	}
+
+	podHasFilter := false
+	if pl := fm[FieldPodMutationFilterPod].([]interface{}); len(pl) > 0 && pl[0] != nil {
+		pm := pl[0].(map[string]interface{})
+		for _, f := range podFields {
+			if v, ok := pm[f].([]interface{}); ok && len(v) > 0 {
+				podHasFilter = true
+				break
+			}
+		}
+	}
+
+	if !workloadHasFilter && !podHasFilter {
+		return fmt.Errorf("filter_v2 must specify at least one filter in workload or pod")
+	}
+	return nil
 }
 
 func distributionGroupSchema() map[string]*schema.Schema {
@@ -482,17 +532,14 @@ func stateToPodMutation(d *schema.ResourceData) patching_engine.PodMutation {
 	}
 
 	// Filter V2
-	if filterList, ok := d.Get(FieldPodMutationFilterV2).([]interface{}); ok && len(filterList) > 0 && filterList[0] != nil {
-		mutation.ObjectFilterV2 = stateToObjectFilterV2(filterList[0].(map[string]interface{}))
-	}
+	filterList := d.Get(FieldPodMutationFilterV2).([]interface{})
+	mutation.ObjectFilterV2 = stateToObjectFilterV2(filterList[0].(map[string]interface{}))
 
 	// Patch
-	if patchStr, ok := d.GetOk(FieldPodMutationPatch); ok {
-		if s := patchStr.(string); s != "" {
-			var patchArr []map[string]interface{}
-			if err := json.Unmarshal([]byte(s), &patchArr); err == nil {
-				mutation.Patch = &patchArr
-			}
+	if s := d.Get(FieldPodMutationPatch).(string); s != "" {
+		var patchArr []map[string]interface{}
+		if err := json.Unmarshal([]byte(s), &patchArr); err == nil {
+			mutation.Patch = &patchArr
 		}
 	}
 
@@ -508,10 +555,8 @@ func stateToPodMutation(d *schema.ResourceData) patching_engine.PodMutation {
 	}
 
 	// Distribution groups
-	if v, ok := d.GetOk(FieldPodMutationDistributionGroups); ok {
-		groups := stateToDistributionGroups(v.([]interface{}))
-		mutation.DistributionGroups = &groups
-	}
+	groups := stateToDistributionGroups(d.Get(FieldPodMutationDistributionGroups).([]interface{}))
+	mutation.DistributionGroups = &groups
 
 	return mutation
 }
