@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -500,32 +501,25 @@ func validatePodMutationFilter(filterV2 []interface{}) error {
 		FieldPodMutationFilterExcludeLabels,
 	}
 
-	workloadHasFilter := false
 	if wl, ok := fm[FieldPodMutationFilterWorkload].([]interface{}); ok && len(wl) > 0 && wl[0] != nil {
 		wm := wl[0].(map[string]interface{})
 		for _, f := range workloadFields {
 			if v, ok := wm[f].([]interface{}); ok && len(v) > 0 {
-				workloadHasFilter = true
-				break
+				return nil
 			}
 		}
 	}
 
-	podHasFilter := false
 	if pl, ok := fm[FieldPodMutationFilterPod].([]interface{}); ok && len(pl) > 0 && pl[0] != nil {
 		pm := pl[0].(map[string]interface{})
 		for _, f := range podFields {
 			if v, ok := pm[f].([]interface{}); ok && len(v) > 0 {
-				podHasFilter = true
-				break
+				return nil
 			}
 		}
 	}
 
-	if !workloadHasFilter && !podHasFilter {
-		return fmt.Errorf("filter_v2 must specify at least one filter in workload or pod")
-	}
-	return nil
+	return fmt.Errorf("filter_v2 must specify at least one filter in workload or pod")
 }
 
 func distributionGroupSchema() map[string]*schema.Schema {
@@ -568,6 +562,11 @@ func podMutationStateImporter(ctx context.Context, d *schema.ResourceData, meta 
 	parts := strings.Split(d.Id(), "/")
 	if len(parts) != 3 {
 		return nil, fmt.Errorf("invalid import ID %s, expected format: organization_id/cluster_id/mutation_id", d.Id())
+	}
+	for i, name := range []string{"organization_id", "cluster_id", "pod_mutation_id"} {
+		if _, err := uuid.Parse(parts[i]); err != nil {
+			return nil, fmt.Errorf("invalid %s %q: expected a valid UUID", name, parts[i])
+		}
 	}
 	if err := d.Set(FieldPodMutationOrganizationID, parts[0]); err != nil {
 		return nil, err
