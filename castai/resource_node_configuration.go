@@ -66,6 +66,8 @@ const (
 	aksEphemeralDiskPlacementCacheDisk    = "cacheDisk"
 	aksEphemeralDiskPlacementResourceDisk = "resourceDisk"
 	aksEphemeralDiskPlacementNVME         = "nvmeDisk"
+	aksAcceleratedNetworkingEnabledIfSupported = "enabled_if_supported"
+	aksAcceleratedNetworkingDisabled           = "disabled"
 )
 
 const (
@@ -501,8 +503,8 @@ func resourceNodeConfiguration() *schema.Resource {
 						FieldNodeConfigurationAKSAcceleratedNetworking: {
 							Type:         schema.TypeString,
 							Optional:     true,
-							Description:  "Controls SR-IOV accelerated networking on the node NIC. Allowed values: `enabled_if_supported` (default — enable when the VM SKU supports it), `disabled` (force off regardless of SKU capability).",
-							ValidateFunc: validation.StringInSlice([]string{"enabled_if_supported", "disabled"}, false),
+							Description:  "Controls SR-IOV accelerated networking on the node NIC. Allowed values: `enabled_if_supported` (enable when the VM SKU supports it), `disabled` (force off regardless of SKU capability). When omitted, the field is not sent to the API and the API default applies.",
+							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{aksAcceleratedNetworkingEnabledIfSupported, aksAcceleratedNetworkingDisabled}, false)),
 						},
 					},
 				},
@@ -1216,21 +1218,21 @@ func toAKSSConfig(obj map[string]interface{}) *sdk.NodeconfigV1AKSConfig {
 
 func toAKSAcceleratedNetworkingMode(v string) *sdk.NodeconfigV1AKSConfigAcceleratedNetworkingMode {
 	switch v {
-	case "disabled":
-		m := sdk.ACCELERATEDNETWORKINGMODEDISABLED
-		return &m
+	case aksAcceleratedNetworkingDisabled:
+		return toPtr(sdk.ACCELERATEDNETWORKINGMODEDISABLED)
+	case aksAcceleratedNetworkingEnabledIfSupported:
+		return toPtr(sdk.ACCELERATEDNETWORKINGMODEENABLEDIFSUPPORTED)
 	default:
-		m := sdk.ACCELERATEDNETWORKINGMODEENABLEDIFSUPPORTED
-		return &m
+		return nil
 	}
 }
 
 func fromAKSAcceleratedNetworkingMode(v sdk.NodeconfigV1AKSConfigAcceleratedNetworkingMode) string {
 	switch v {
 	case sdk.ACCELERATEDNETWORKINGMODEDISABLED:
-		return "disabled"
+		return aksAcceleratedNetworkingDisabled
 	default:
-		return "enabled_if_supported"
+		return aksAcceleratedNetworkingEnabledIfSupported
 	}
 }
 
