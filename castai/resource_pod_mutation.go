@@ -50,7 +50,6 @@ const (
 	FieldPodMutationSpotType                 = "spot_type"
 	FieldPodMutationSpotDistributionPct      = "distribution_percentage"
 	FieldPodMutationNodeTemplates            = "node_templates_to_consolidate"
-	FieldPodMutationRestartWorkloads         = "restart_matching_workloads"
 	FieldPodMutationPatch                    = "patch"
 	FieldPodMutationDistributionGroups       = "distribution_groups"
 	FieldPodMutationDistributionGroupName    = "name"
@@ -1163,11 +1162,6 @@ func podMutationToState(mutation *patching_engine.PodMutation, d *schema.Resourc
 		}
 	}
 
-	if mutation.RestartMatchingWorkloads != nil {
-		if err := d.Set(FieldPodMutationRestartWorkloads, *mutation.RestartMatchingWorkloads); err != nil {
-			return diag.FromErr(err)
-		}
-	}
 
 	if mutation.Patch != nil && len(*mutation.Patch) > 0 {
 		patchJSON, err := json.Marshal(*mutation.Patch)

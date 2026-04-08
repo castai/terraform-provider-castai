@@ -858,7 +858,6 @@ func TestAccCloudAgnostic_ResourcePodMutation(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "enabled", "true"),
 					resource.TestCheckResourceAttr(resourceName, "spot_config.0.spot_mode", "OPTIONAL_SPOT"),
 					resource.TestCheckResourceAttr(resourceName, "spot_config.0.distribution_percentage", "0"),
-					resource.TestCheckResourceAttr(resourceName, "restart_matching_workloads", "false"),
 				),
 			},
 		},
@@ -992,7 +991,6 @@ resource "castai_pod_mutation" "test" {
     spot_mode               = "OPTIONAL_SPOT"
     distribution_percentage = 0
   }
-  restart_matching_workloads   = false
 }
 `, rName, clusterName, organizationID)
 }

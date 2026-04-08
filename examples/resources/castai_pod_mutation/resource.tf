@@ -21,7 +21,6 @@ resource "castai_pod_mutation" "spot_scheduling" {
     spot_mode               = "PREFERRED_SPOT"
     distribution_percentage = 80
   }
-  restart_matching_workloads   = true
 
   tolerations {
     key      = "scheduling.cast.ai/spot"
