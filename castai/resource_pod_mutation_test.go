@@ -159,6 +159,82 @@ func TestPodMutation_ReadContext(t *testing.T) {
 		r.Len(kinds, 1)
 		r.Equal("EXACT", kinds[0].(map[string]interface{})[FieldPodMutationMatcherType])
 		r.Equal("Deployment", kinds[0].(map[string]interface{})[FieldPodMutationMatcherValue])
+
+		// Verify labels
+		r.Equal("web", data.Get("labels.app"))
+
+		// Verify tolerations
+		r.Equal("dedicated", data.Get("tolerations.0.key"))
+		r.Equal("Equal", data.Get("tolerations.0.operator"))
+		r.Equal("spot", data.Get("tolerations.0.value"))
+		r.Equal("NoSchedule", data.Get("tolerations.0.effect"))
+	})
+
+	t.Run("when API returns 500 then return error", func(t *testing.T) {
+		r := require.New(t)
+		mockClient := mock_patching_engine.NewMockClientInterface(gomock.NewController(t))
+
+		ctx := context.Background()
+		provider := &ProviderConfig{
+			patchingEngineClient: &patching_engine.ClientWithResponses{
+				ClientInterface: mockClient,
+			},
+		}
+
+		body := io.NopCloser(bytes.NewReader([]byte(`{"message":"internal error"}`)))
+		mockClient.EXPECT().
+			PodMutationsAPIGetPodMutation(gomock.Any(), testOrgID, testClusterID, testMutationID).
+			Return(&http.Response{StatusCode: http.StatusInternalServerError, Body: body, Header: map[string][]string{"Content-Type": {"application/json"}}}, nil)
+
+		stateValue := cty.ObjectVal(map[string]cty.Value{
+			"organization_id": cty.StringVal(testOrgID),
+			"cluster_id":      cty.StringVal(testClusterID),
+			"name":            cty.StringVal("test-mutation"),
+			"enabled":         cty.BoolVal(true),
+		})
+		state := terraform.NewInstanceStateShimmedFromValue(stateValue, 0)
+		state.ID = testMutationID
+
+		resource := resourcePodMutation()
+		data := resource.Data(state)
+
+		result := resource.ReadContext(ctx, data, provider)
+
+		r.NotNil(result)
+		r.True(result.HasError())
+	})
+
+	t.Run("when API returns network error then return error", func(t *testing.T) {
+		r := require.New(t)
+		mockClient := mock_patching_engine.NewMockClientInterface(gomock.NewController(t))
+
+		ctx := context.Background()
+		provider := &ProviderConfig{
+			patchingEngineClient: &patching_engine.ClientWithResponses{
+				ClientInterface: mockClient,
+			},
+		}
+
+		mockClient.EXPECT().
+			PodMutationsAPIGetPodMutation(gomock.Any(), testOrgID, testClusterID, testMutationID).
+			Return(nil, fmt.Errorf("connection refused"))
+
+		stateValue := cty.ObjectVal(map[string]cty.Value{
+			"organization_id": cty.StringVal(testOrgID),
+			"cluster_id":      cty.StringVal(testClusterID),
+			"name":            cty.StringVal("test-mutation"),
+			"enabled":         cty.BoolVal(true),
+		})
+		state := terraform.NewInstanceStateShimmedFromValue(stateValue, 0)
+		state.ID = testMutationID
+
+		resource := resourcePodMutation()
+		data := resource.Data(state)
+
+		result := resource.ReadContext(ctx, data, provider)
+
+		r.NotNil(result)
+		r.True(result.HasError())
 	})
 }
 
@@ -183,6 +259,11 @@ func TestPodMutation_ReadContext_WithDistributionGroups(t *testing.T) {
 			ClusterId:      lo.ToPtr(testClusterID),
 			OrganizationId: lo.ToPtr(testOrgID),
 			Source:         lo.ToPtr(patching_engine.API),
+			ObjectFilterV2: &patching_engine.ObjectFilterV2{
+				Namespaces: &[]patching_engine.ObjectFilterV2Matcher{
+					{Type: lo.ToPtr(patching_engine.EXACT), Value: lo.ToPtr("default")},
+				},
+			},
 			DistributionGroups: &[]patching_engine.DistributionGroup{
 				{
 					Name:       lo.ToPtr("spot-group"),
@@ -291,11 +372,19 @@ func TestPodMutation_CreateContext(t *testing.T) {
 		createRespBody, _ := json.Marshal(createdMutation)
 		mockClient.EXPECT().
 			PodMutationsAPICreatePodMutation(gomock.Any(), testOrgID, testClusterID, gomock.Any()).
-			Return(&http.Response{
-				StatusCode: http.StatusOK,
-				Body:       io.NopCloser(bytes.NewReader(createRespBody)),
-				Header:     map[string][]string{"Content-Type": {"application/json"}},
-			}, nil)
+			DoAndReturn(func(_ context.Context, _, _ string, body patching_engine.PodMutationsAPICreatePodMutationJSONRequestBody, _ ...patching_engine.RequestEditorFn) (*http.Response, error) {
+				r.Equal("new-mutation", lo.FromPtr(body.Name))
+				r.Equal(true, lo.FromPtr(body.Enabled))
+				r.NotNil(body.ObjectFilterV2)
+				r.NotNil(body.ObjectFilterV2.Namespaces)
+				r.Len(*body.ObjectFilterV2.Namespaces, 1)
+				r.Equal("default", lo.FromPtr((*body.ObjectFilterV2.Namespaces)[0].Value))
+				return &http.Response{
+					StatusCode: http.StatusOK,
+					Body:       io.NopCloser(bytes.NewReader(createRespBody)),
+					Header:     map[string][]string{"Content-Type": {"application/json"}},
+				}, nil
+			})
 
 		// Expect read-back after create
 		getRespBody, _ := json.Marshal(createdMutation)
@@ -337,6 +426,53 @@ func TestPodMutation_CreateContext(t *testing.T) {
 		r.Nil(result)
 		r.Equal(testMutationID, data.Id())
 	})
+
+	t.Run("when API returns 500 then return error", func(t *testing.T) {
+		r := require.New(t)
+		mockClient := mock_patching_engine.NewMockClientInterface(gomock.NewController(t))
+
+		ctx := context.Background()
+		provider := &ProviderConfig{
+			patchingEngineClient: &patching_engine.ClientWithResponses{
+				ClientInterface: mockClient,
+			},
+		}
+
+		body := io.NopCloser(bytes.NewReader([]byte(`{"message":"internal error"}`)))
+		mockClient.EXPECT().
+			PodMutationsAPICreatePodMutation(gomock.Any(), testOrgID, testClusterID, gomock.Any()).
+			Return(&http.Response{StatusCode: http.StatusInternalServerError, Body: body, Header: map[string][]string{"Content-Type": {"application/json"}}}, nil)
+
+		stateValue := cty.ObjectVal(map[string]cty.Value{
+			"organization_id": cty.StringVal(testOrgID),
+			"cluster_id":      cty.StringVal(testClusterID),
+			"name":            cty.StringVal("new-mutation"),
+			"enabled":         cty.BoolVal(true),
+		})
+		state := terraform.NewInstanceStateShimmedFromValue(stateValue, 0)
+
+		resource := resourcePodMutation()
+		data := resource.Data(state)
+		r.NoError(data.Set(FieldPodMutationFilterV2, []interface{}{
+			map[string]interface{}{
+				FieldPodMutationFilterWorkload: []interface{}{
+					map[string]interface{}{
+						FieldPodMutationFilterNamespaces: []interface{}{
+							map[string]interface{}{
+								FieldPodMutationMatcherType:  string(patching_engine.EXACT),
+								FieldPodMutationMatcherValue: "default",
+							},
+						},
+					},
+				},
+			},
+		}))
+
+		result := resource.CreateContext(ctx, data, provider)
+
+		r.NotNil(result)
+		r.True(result.HasError())
+	})
 }
 
 func TestPodMutation_DeleteContext(t *testing.T) {
@@ -375,6 +511,40 @@ func TestPodMutation_DeleteContext(t *testing.T) {
 		r.Nil(result)
 		r.Empty(data.Id())
 	})
+
+	t.Run("when API returns 500 then return error", func(t *testing.T) {
+		r := require.New(t)
+		mockClient := mock_patching_engine.NewMockClientInterface(gomock.NewController(t))
+
+		ctx := context.Background()
+		provider := &ProviderConfig{
+			patchingEngineClient: &patching_engine.ClientWithResponses{
+				ClientInterface: mockClient,
+			},
+		}
+
+		body := io.NopCloser(bytes.NewReader([]byte(`{"message":"internal error"}`)))
+		mockClient.EXPECT().
+			PodMutationsAPIDeletePodMutation(gomock.Any(), testOrgID, testClusterID, testMutationID).
+			Return(&http.Response{StatusCode: http.StatusInternalServerError, Body: body, Header: map[string][]string{"Content-Type": {"application/json"}}}, nil)
+
+		stateValue := cty.ObjectVal(map[string]cty.Value{
+			"organization_id": cty.StringVal(testOrgID),
+			"cluster_id":      cty.StringVal(testClusterID),
+			"name":            cty.StringVal("test-mutation"),
+			"enabled":         cty.BoolVal(true),
+		})
+		state := terraform.NewInstanceStateShimmedFromValue(stateValue, 0)
+		state.ID = testMutationID
+
+		resource := resourcePodMutation()
+		data := resource.Data(state)
+
+		result := resource.DeleteContext(ctx, data, provider)
+
+		r.NotNil(result)
+		r.True(result.HasError())
+	})
 }
 
 func TestPodMutation_UpdateContext(t *testing.T) {
@@ -403,11 +573,20 @@ func TestPodMutation_UpdateContext(t *testing.T) {
 		updateRespBody, _ := json.Marshal(updatedMutation)
 		mockClient.EXPECT().
 			PodMutationsAPIUpdatePodMutation(gomock.Any(), testOrgID, testClusterID, testMutationID, gomock.Any()).
-			Return(&http.Response{
-				StatusCode: http.StatusOK,
-				Body:       io.NopCloser(bytes.NewReader(updateRespBody)),
-				Header:     map[string][]string{"Content-Type": {"application/json"}},
-			}, nil)
+			DoAndReturn(func(_ context.Context, _, _, _ string, body patching_engine.PodMutationsAPIUpdatePodMutationJSONRequestBody, _ ...patching_engine.RequestEditorFn) (*http.Response, error) {
+				r.Equal("updated-mutation", lo.FromPtr(body.Name))
+				r.Equal(false, lo.FromPtr(body.Enabled))
+				r.Equal(testMutationID, lo.FromPtr(body.Id))
+				r.NotNil(body.ObjectFilterV2)
+				r.NotNil(body.ObjectFilterV2.Namespaces)
+				r.Len(*body.ObjectFilterV2.Namespaces, 1)
+				r.Equal("default", lo.FromPtr((*body.ObjectFilterV2.Namespaces)[0].Value))
+				return &http.Response{
+					StatusCode: http.StatusOK,
+					Body:       io.NopCloser(bytes.NewReader(updateRespBody)),
+					Header:     map[string][]string{"Content-Type": {"application/json"}},
+				}, nil
+			})
 
 		// Expect read-back after update
 		getRespBody, _ := json.Marshal(updatedMutation)
@@ -822,6 +1001,364 @@ func TestStateToObjectFilterV2(t *testing.T) {
 		r.Equal("web", lo.FromPtr((*filter.Labels.Matchers)[0].Value.Value))
 		r.Nil(filter.ExcludeLabels)
 	})
+}
+
+func TestNodeSelectorRoundTrip(t *testing.T) {
+	t.Parallel()
+
+	t.Run("state to API and back", func(t *testing.T) {
+		r := require.New(t)
+
+		state := map[string]interface{}{
+			FieldPodMutationNodeSelectorAdd: map[string]interface{}{
+				"node.kubernetes.io/gpu": "true",
+				"tier":                   "compute",
+			},
+			FieldPodMutationNodeSelectorRemove: map[string]interface{}{
+				"old-label": "remove-me",
+			},
+		}
+
+		ns := stateToNodeSelector(state)
+		r.NotNil(ns.Add)
+		r.Equal("true", (*ns.Add)["node.kubernetes.io/gpu"])
+		r.Equal("compute", (*ns.Add)["tier"])
+		r.NotNil(ns.Remove)
+		r.Equal("remove-me", (*ns.Remove)["old-label"])
+
+		flat := flattenPodMutationNodeSelector(ns)
+		r.Len(flat, 1)
+		r.Equal(map[string]string{"node.kubernetes.io/gpu": "true", "tier": "compute"}, flat[0][FieldPodMutationNodeSelectorAdd])
+		r.Equal(map[string]string{"old-label": "remove-me"}, flat[0][FieldPodMutationNodeSelectorRemove])
+	})
+
+	t.Run("add only", func(t *testing.T) {
+		r := require.New(t)
+
+		state := map[string]interface{}{
+			FieldPodMutationNodeSelectorAdd:    map[string]interface{}{"key": "val"},
+			FieldPodMutationNodeSelectorRemove: map[string]interface{}{},
+		}
+
+		ns := stateToNodeSelector(state)
+		r.NotNil(ns.Add)
+		r.Nil(ns.Remove)
+	})
+
+	t.Run("empty maps", func(t *testing.T) {
+		r := require.New(t)
+
+		state := map[string]interface{}{
+			FieldPodMutationNodeSelectorAdd:    map[string]interface{}{},
+			FieldPodMutationNodeSelectorRemove: map[string]interface{}{},
+		}
+
+		ns := stateToNodeSelector(state)
+		r.Nil(ns.Add)
+		r.Nil(ns.Remove)
+	})
+}
+
+func TestAffinityRoundTrip(t *testing.T) {
+	t.Parallel()
+
+	t.Run("state to API and back", func(t *testing.T) {
+		r := require.New(t)
+
+		state := map[string]interface{}{
+			FieldPodMutationNodeAffinity: []interface{}{
+				map[string]interface{}{
+					FieldPodMutationPreferred: []interface{}{
+						map[string]interface{}{
+							FieldPodMutationWeight: 100,
+							FieldPodMutationPreference: []interface{}{
+								map[string]interface{}{
+									FieldPodMutationMatchExpressions: []interface{}{
+										map[string]interface{}{
+											FieldPodMutationMatchExpressionsKey:      "kubernetes.io/arch",
+											FieldPodMutationMatchExpressionsOperator: "In",
+											FieldPodMutationValues:                   []interface{}{"amd64", "arm64"},
+										},
+										map[string]interface{}{
+											FieldPodMutationMatchExpressionsKey:      "node-type",
+											FieldPodMutationMatchExpressionsOperator: "Exists",
+											FieldPodMutationValues:                   []interface{}{},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		}
+
+		affinity := stateToAffinity(state)
+		r.NotNil(affinity.NodeAffinity)
+		r.NotNil(affinity.NodeAffinity.PreferredDuringSchedulingIgnoredDuringExecution)
+		terms := *affinity.NodeAffinity.PreferredDuringSchedulingIgnoredDuringExecution
+		r.Len(terms, 1)
+		r.Equal(int32(100), lo.FromPtr(terms[0].Weight))
+		r.NotNil(terms[0].Preference)
+		reqs := *terms[0].Preference.MatchExpressions
+		r.Len(reqs, 2)
+		r.Equal("kubernetes.io/arch", lo.FromPtr(reqs[0].Key))
+		r.Equal("In", lo.FromPtr(reqs[0].Operator))
+		r.Equal([]string{"amd64", "arm64"}, *reqs[0].Values)
+		r.Equal("node-type", lo.FromPtr(reqs[1].Key))
+		r.Equal("Exists", lo.FromPtr(reqs[1].Operator))
+		r.Nil(reqs[1].Values)
+
+		// Flatten back
+		flat := flattenAffinity(affinity)
+		r.Len(flat, 1)
+		na := flat[0][FieldPodMutationNodeAffinity].([]map[string]interface{})
+		r.Len(na, 1)
+		prefTerms := na[0][FieldPodMutationPreferred].([]map[string]interface{})
+		r.Len(prefTerms, 1)
+		r.Equal(100, prefTerms[0][FieldPodMutationWeight])
+		pref := prefTerms[0][FieldPodMutationPreference].([]map[string]interface{})
+		r.Len(pref, 1)
+		exprs := pref[0][FieldPodMutationMatchExpressions].([]map[string]interface{})
+		r.Len(exprs, 2)
+		r.Equal("kubernetes.io/arch", exprs[0][FieldPodMutationMatchExpressionsKey])
+		r.Equal("In", exprs[0][FieldPodMutationMatchExpressionsOperator])
+		r.Equal([]string{"amd64", "arm64"}, exprs[0][FieldPodMutationValues])
+	})
+
+	t.Run("nil node affinity returns nil", func(t *testing.T) {
+		r := require.New(t)
+
+		result := flattenAffinity(&patching_engine.Affinity{})
+		r.Nil(result)
+	})
+}
+
+func TestTolerationsRoundTrip(t *testing.T) {
+	t.Parallel()
+
+	t.Run("state to API and back", func(t *testing.T) {
+		r := require.New(t)
+
+		items := []interface{}{
+			map[string]interface{}{
+				FieldPodMutationTolerationKey:      "dedicated",
+				FieldPodMutationTolerationOperator: "Equal",
+				FieldPodMutationTolerationValue:    "spot",
+				FieldPodMutationTolerationEffect:   "NoSchedule",
+				FieldPodMutationTolerationSeconds:  300,
+			},
+			map[string]interface{}{
+				FieldPodMutationTolerationKey:      "node.kubernetes.io/not-ready",
+				FieldPodMutationTolerationOperator: "Exists",
+				FieldPodMutationTolerationValue:    "",
+				FieldPodMutationTolerationEffect:   "NoExecute",
+				FieldPodMutationTolerationSeconds:  0,
+			},
+		}
+
+		tols := stateToTolerations(items)
+		r.Len(tols, 2)
+		r.Equal("dedicated", lo.FromPtr(tols[0].Key))
+		r.Equal("Equal", lo.FromPtr(tols[0].Operator))
+		r.Equal("spot", lo.FromPtr(tols[0].Value))
+		r.Equal("NoSchedule", lo.FromPtr(tols[0].Effect))
+		r.Equal("300", lo.FromPtr(tols[0].TolerationSeconds))
+
+		r.Equal("node.kubernetes.io/not-ready", lo.FromPtr(tols[1].Key))
+		r.Equal("Exists", lo.FromPtr(tols[1].Operator))
+		r.Nil(tols[1].Value)
+		r.Equal("NoExecute", lo.FromPtr(tols[1].Effect))
+		r.Nil(tols[1].TolerationSeconds)
+
+		// Flatten back
+		flat, err := flattenTolerations(tols)
+		r.NoError(err)
+		r.Len(flat, 2)
+		r.Equal("dedicated", flat[0][FieldPodMutationTolerationKey])
+		r.Equal("Equal", flat[0][FieldPodMutationTolerationOperator])
+		r.Equal("spot", flat[0][FieldPodMutationTolerationValue])
+		r.Equal("NoSchedule", flat[0][FieldPodMutationTolerationEffect])
+		r.Equal(300, flat[0][FieldPodMutationTolerationSeconds])
+
+		r.Equal("node.kubernetes.io/not-ready", flat[1][FieldPodMutationTolerationKey])
+		r.Equal("Exists", flat[1][FieldPodMutationTolerationOperator])
+	})
+
+	t.Run("skips nil items", func(t *testing.T) {
+		r := require.New(t)
+
+		tols := stateToTolerations([]interface{}{nil})
+		r.Empty(tols)
+	})
+
+	t.Run("tolerationSecondsToInt with invalid string returns error", func(t *testing.T) {
+		r := require.New(t)
+
+		s := "not-a-number"
+		_, err := tolerationSecondsToInt(&s)
+		r.Error(err)
+	})
+
+	t.Run("tolerationSecondsToInt with nil returns zero", func(t *testing.T) {
+		r := require.New(t)
+
+		v, err := tolerationSecondsToInt(nil)
+		r.NoError(err)
+		r.Equal(0, v)
+	})
+}
+
+func TestPatchRoundTrip(t *testing.T) {
+	t.Parallel()
+
+	t.Run("parseMutationConfigFromMap parses patch JSON", func(t *testing.T) {
+		r := require.New(t)
+
+		m := map[string]interface{}{
+			FieldPodMutationPatch: `[{"op":"add","path":"/metadata/labels/foo","value":"bar"},{"op":"remove","path":"/metadata/labels/old"}]`,
+		}
+
+		result := parseMutationConfigFromMap(m)
+		r.NotNil(result.Patch)
+		r.Len(*result.Patch, 2)
+		r.Equal("add", (*result.Patch)[0]["op"])
+		r.Equal("/metadata/labels/foo", (*result.Patch)[0]["path"])
+		r.Equal("bar", (*result.Patch)[0]["value"])
+		r.Equal("remove", (*result.Patch)[1]["op"])
+	})
+
+	t.Run("empty patch string produces nil", func(t *testing.T) {
+		r := require.New(t)
+
+		m := map[string]interface{}{
+			FieldPodMutationPatch: "",
+		}
+
+		result := parseMutationConfigFromMap(m)
+		r.Nil(result.Patch)
+	})
+
+	t.Run("flatten then parse round-trips", func(t *testing.T) {
+		r := require.New(t)
+
+		apiPatch := []map[string]interface{}{
+			{"op": "add", "path": "/spec/containers/0/env/-", "value": map[string]interface{}{"name": "ENV_VAR", "value": "test"}},
+		}
+
+		// Flatten (API → state): marshal to JSON string
+		patchJSON, err := json.Marshal(apiPatch)
+		r.NoError(err)
+		patchStr := string(patchJSON)
+
+		// Parse back (state → API): unmarshal from JSON string
+		m := map[string]interface{}{
+			FieldPodMutationPatch: patchStr,
+		}
+		result := parseMutationConfigFromMap(m)
+		r.NotNil(result.Patch)
+		r.Len(*result.Patch, 1)
+		r.Equal("add", (*result.Patch)[0]["op"])
+		r.Equal("/spec/containers/0/env/-", (*result.Patch)[0]["path"])
+	})
+}
+
+func TestPodMutationCustomizeDiff(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name      string
+		filterV2  []interface{}
+		expectErr string
+	}{
+		{
+			name: "valid workload filter passes",
+			filterV2: []interface{}{
+				map[string]interface{}{
+					FieldPodMutationFilterWorkload: []interface{}{
+						map[string]interface{}{
+							FieldPodMutationFilterNamespaces: []interface{}{
+								map[string]interface{}{FieldPodMutationMatcherType: "EXACT", FieldPodMutationMatcherValue: "default"},
+							},
+						},
+					},
+					FieldPodMutationFilterPod: []interface{}{},
+				},
+			},
+		},
+		{
+			name: "valid pod filter passes",
+			filterV2: []interface{}{
+				map[string]interface{}{
+					FieldPodMutationFilterWorkload: []interface{}{},
+					FieldPodMutationFilterPod: []interface{}{
+						map[string]interface{}{
+							FieldPodMutationFilterLabelsFilter: []interface{}{
+								map[string]interface{}{
+									FieldPodMutationLabelsFilterOperator: "AND",
+									FieldPodMutationLabelsFilterMatchers: []interface{}{
+										map[string]interface{}{
+											FieldPodMutationLabelMatcherKey: []interface{}{
+												map[string]interface{}{FieldPodMutationMatcherType: "EXACT", FieldPodMutationMatcherValue: "app"},
+											},
+										},
+									},
+								},
+							},
+							FieldPodMutationFilterExcludeLabels: []interface{}{},
+						},
+					},
+				},
+			},
+		},
+		{
+			name: "empty workload and pod fails",
+			filterV2: []interface{}{
+				map[string]interface{}{
+					FieldPodMutationFilterWorkload: []interface{}{},
+					FieldPodMutationFilterPod:      []interface{}{},
+				},
+			},
+			expectErr: "filter_v2 must specify at least one filter in workload or pod",
+		},
+		{
+			name: "workload present but all sub-fields empty fails",
+			filterV2: []interface{}{
+				map[string]interface{}{
+					FieldPodMutationFilterWorkload: []interface{}{
+						map[string]interface{}{
+							FieldPodMutationFilterNames:             []interface{}{},
+							FieldPodMutationFilterNamespaces:        []interface{}{},
+							FieldPodMutationFilterKinds:             []interface{}{},
+							FieldPodMutationFilterExcludeNames:      []interface{}{},
+							FieldPodMutationFilterExcludeNamespaces: []interface{}{},
+							FieldPodMutationFilterExcludeKinds:      []interface{}{},
+						},
+					},
+					FieldPodMutationFilterPod: []interface{}{},
+				},
+			},
+			expectErr: "filter_v2 must specify at least one filter in workload or pod",
+		},
+		{
+			name:      "nil filter_v2 fails",
+			filterV2:  []interface{}{nil},
+			expectErr: "filter_v2 must not be empty",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			r := require.New(t)
+
+			err := validatePodMutationFilter(tt.filterV2)
+			if tt.expectErr != "" {
+				r.EqualError(err, tt.expectErr)
+			} else {
+				r.NoError(err)
+			}
+		})
+	}
 }
 
 func TestAccCloudAgnostic_ResourcePodMutation(t *testing.T) {

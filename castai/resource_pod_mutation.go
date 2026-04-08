@@ -478,7 +478,10 @@ func resourcePodMutation() *schema.Resource {
 }
 
 func resourcePodMutationCustomizeDiff(_ context.Context, d *schema.ResourceDiff, _ interface{}) error {
-	filterV2 := d.Get(FieldPodMutationFilterV2).([]interface{})
+	return validatePodMutationFilter(d.Get(FieldPodMutationFilterV2).([]interface{}))
+}
+
+func validatePodMutationFilter(filterV2 []interface{}) error {
 	if len(filterV2) == 0 || filterV2[0] == nil {
 		return fmt.Errorf("filter_v2 must not be empty")
 	}
