@@ -19,58 +19,58 @@ import (
 )
 
 const (
-	FieldPodMutationOrganizationID           = "organization_id"
-	FieldPodMutationClusterID                = "cluster_id"
-	FieldPodMutationName                     = "name"
-	FieldPodMutationEnabled                  = "enabled"
-	FieldPodMutationFilterV2                 = "filter_v2"
-	FieldPodMutationFilterWorkload           = "workload"
-	FieldPodMutationFilterPod                = "pod"
-	FieldPodMutationLabels                   = "labels"
-	FieldPodMutationAnnotations              = "annotations"
-	FieldPodMutationNodeSelector             = "node_selector"
-	FieldPodMutationNodeSelectorAdd          = "add"
-	FieldPodMutationNodeSelectorRemove       = "remove"
-	FieldPodMutationTolerations              = "tolerations"
-	FieldPodMutationTolerationKey            = "key"
-	FieldPodMutationTolerationOperator       = "operator"
-	FieldPodMutationTolerationValue          = "value"
-	FieldPodMutationTolerationEffect         = "effect"
-	FieldPodMutationTolerationSeconds        = "toleration_seconds"
-	FieldPodMutationAffinity                 = "affinity"
-	FieldPodMutationNodeAffinity             = "node_affinity"
-	FieldPodMutationPreferred                = "preferred_during_scheduling_ignored_during_execution"
-	FieldPodMutationWeight                   = "weight"
-	FieldPodMutationPreference               = "preference"
-	FieldPodMutationMatchExpressions         = "match_expressions"
-	FieldPodMutationMatchExpressionsKey      = "key"
-	FieldPodMutationMatchExpressionsOperator = "operator"
-	FieldPodMutationSpotConfig               = "spot_config"
-	FieldPodMutationSpotMode                 = "spot_mode"
-	FieldPodMutationSpotType                 = "spot_type"
-	FieldPodMutationSpotDistributionPct      = "distribution_percentage"
-	FieldPodMutationNodeTemplates            = "node_templates_to_consolidate"
-	FieldPodMutationPatch                    = "patch"
-	FieldPodMutationDistributionGroups       = "distribution_groups"
-	FieldPodMutationDistributionGroupName    = "name"
-	FieldPodMutationDistributionGroupPct     = "percentage"
+	FieldPodMutationOrganizationID                 = "organization_id"
+	FieldPodMutationClusterID                      = "cluster_id"
+	FieldPodMutationName                           = "name"
+	FieldPodMutationEnabled                        = "enabled"
+	FieldPodMutationFilterV2                       = "filter_v2"
+	FieldPodMutationFilterWorkload                 = "workload"
+	FieldPodMutationFilterPod                      = "pod"
+	FieldPodMutationLabels                         = "labels"
+	FieldPodMutationAnnotations                    = "annotations"
+	FieldPodMutationNodeSelector                   = "node_selector"
+	FieldPodMutationNodeSelectorAdd                = "add"
+	FieldPodMutationNodeSelectorRemove             = "remove"
+	FieldPodMutationTolerations                    = "tolerations"
+	FieldPodMutationTolerationKey                  = "key"
+	FieldPodMutationTolerationOperator             = "operator"
+	FieldPodMutationTolerationValue                = "value"
+	FieldPodMutationTolerationEffect               = "effect"
+	FieldPodMutationTolerationSeconds              = "toleration_seconds"
+	FieldPodMutationAffinity                       = "affinity"
+	FieldPodMutationNodeAffinity                   = "node_affinity"
+	FieldPodMutationPreferred                      = "preferred_during_scheduling_ignored_during_execution"
+	FieldPodMutationWeight                         = "weight"
+	FieldPodMutationPreference                     = "preference"
+	FieldPodMutationMatchExpressions               = "match_expressions"
+	FieldPodMutationMatchExpressionsKey            = "key"
+	FieldPodMutationMatchExpressionsOperator       = "operator"
+	FieldPodMutationSpotConfig                     = "spot_config"
+	FieldPodMutationSpotMode                       = "spot_mode"
+	FieldPodMutationSpotType                       = "spot_type"
+	FieldPodMutationSpotDistributionPct            = "distribution_percentage"
+	FieldPodMutationNodeTemplates                  = "node_templates_to_consolidate"
+	FieldPodMutationPatch                          = "patch"
+	FieldPodMutationDistributionGroups             = "distribution_groups"
+	FieldPodMutationDistributionGroupName          = "name"
+	FieldPodMutationDistributionGroupPct           = "percentage"
 	FieldPodMutationDistributionGroupConfiguration = "configuration"
-	FieldPodMutationSource                   = "source"
-	FieldPodMutationFilterNames              = "names"
-	FieldPodMutationFilterNamespaces         = "namespaces"
-	FieldPodMutationFilterKinds              = "kinds"
-	FieldPodMutationFilterLabelsFilter       = "labels_filter"
-	FieldPodMutationFilterExcludeNames       = "exclude_names"
-	FieldPodMutationFilterExcludeNamespaces  = "exclude_namespaces"
-	FieldPodMutationFilterExcludeKinds       = "exclude_kinds"
-	FieldPodMutationFilterExcludeLabels      = "exclude_labels_filter"
-	FieldPodMutationMatcherType              = "type"
-	FieldPodMutationMatcherValue             = "value"
-	FieldPodMutationLabelsFilterOperator     = "operator"
-	FieldPodMutationLabelsFilterMatchers     = "matchers"
-	FieldPodMutationLabelMatcherKey          = "key"
-	FieldPodMutationLabelMatcherValue        = "value"
-	FieldPodMutationValues                   = "values"
+	FieldPodMutationSource                         = "source"
+	FieldPodMutationFilterNames                    = "names"
+	FieldPodMutationFilterNamespaces               = "namespaces"
+	FieldPodMutationFilterKinds                    = "kinds"
+	FieldPodMutationFilterLabelsFilter             = "labels_filter"
+	FieldPodMutationFilterExcludeNames             = "exclude_names"
+	FieldPodMutationFilterExcludeNamespaces        = "exclude_namespaces"
+	FieldPodMutationFilterExcludeKinds             = "exclude_kinds"
+	FieldPodMutationFilterExcludeLabels            = "exclude_labels_filter"
+	FieldPodMutationMatcherType                    = "type"
+	FieldPodMutationMatcherValue                   = "value"
+	FieldPodMutationLabelsFilterOperator           = "operator"
+	FieldPodMutationLabelsFilterMatchers           = "matchers"
+	FieldPodMutationLabelMatcherKey                = "key"
+	FieldPodMutationLabelMatcherValue              = "value"
+	FieldPodMutationValues                         = "values"
 )
 
 var spotModeValues = []string{
@@ -271,12 +271,6 @@ var mutationConfigSchema = map[string]*schema.Schema{
 		Elem:        affinitySchema,
 		Description: "Affinity to apply to the pods.",
 	},
-	FieldPodMutationSpotType: {
-		Type:             schema.TypeString,
-		Optional:         true,
-		ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice(spotModeValues, false)),
-		Description:      "Spot instance type: OPTIONAL_SPOT, USE_ONLY_SPOT, or PREFERRED_SPOT.",
-	},
 	FieldPodMutationNodeTemplates: {
 		Type:        schema.TypeList,
 		Optional:    true,
@@ -296,7 +290,16 @@ var mutationConfigSchema = map[string]*schema.Schema{
 			if err := json.Unmarshal([]byte(s), &arr); err != nil {
 				return nil, []error{fmt.Errorf("%q must be a valid JSON array of patch operations: %w", key, err)}
 			}
-			validOps := map[string]struct{}{"add": {}, "remove": {}, "replace": {}, "move": {}, "copy": {}, "test": {}}
+
+			validOps := map[string]struct{}{
+				"add":     {},
+				"remove":  {},
+				"replace": {},
+				"move":    {},
+				"copy":    {},
+				"test":    {},
+			}
+
 			for i, op := range arr {
 				opVal, ok := op["op"].(string)
 				if !ok || opVal == "" {
@@ -527,6 +530,12 @@ func distributionGroupSchema() map[string]*schema.Schema {
 	for k, v := range mutationConfigSchema {
 		configSchema[k] = v
 	}
+	configSchema[FieldPodMutationSpotType] = &schema.Schema{
+		Type:             schema.TypeString,
+		Optional:         true,
+		ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice(spotModeValues, false)),
+		Description:      "Spot instance type: OPTIONAL_SPOT, USE_ONLY_SPOT, or PREFERRED_SPOT.",
+	}
 
 	return map[string]*schema.Schema{
 		FieldPodMutationDistributionGroupName: {
@@ -706,7 +715,6 @@ func stateToPodMutation(d *schema.ResourceData) patching_engine.PodMutation {
 		FieldPodMutationNodeSelector,
 		FieldPodMutationTolerations,
 		FieldPodMutationAffinity,
-		FieldPodMutationSpotType,
 		FieldPodMutationNodeTemplates,
 		FieldPodMutationPatch,
 	} {
@@ -718,10 +726,6 @@ func stateToPodMutation(d *schema.ResourceData) patching_engine.PodMutation {
 	mutation.NodeSelector = cfg.NodeSelector
 	mutation.Tolerations = cfg.Tolerations
 	mutation.Affinity = cfg.Affinity
-	if cfg.SpotType != "" {
-		st := patching_engine.PodMutationSpotType(cfg.SpotType)
-		mutation.SpotType = &st
-	}
 	mutation.NodeTemplatesToConsolidate = cfg.NodeTemplates
 	mutation.Patch = cfg.Patch
 
@@ -732,13 +736,17 @@ func stateToPodMutation(d *schema.ResourceData) patching_engine.PodMutation {
 			st := patching_engine.PodMutationSpotType(mode)
 			mutation.SpotType = &st
 		}
-		pct := int32(sm[FieldPodMutationSpotDistributionPct].(int))
-		mutation.SpotDistributionPercentage = &pct
+		if pct, ok := sm[FieldPodMutationSpotDistributionPct].(int); ok && pct > 0 {
+			pct32 := int32(pct)
+			mutation.SpotDistributionPercentage = &pct32
+		}
 	}
 
 	// Distribution groups
 	groups := stateToDistributionGroups(d.Get(FieldPodMutationDistributionGroups).([]interface{}))
-	mutation.DistributionGroups = &groups
+	if len(groups) > 0 {
+		mutation.DistributionGroups = &groups
+	}
 
 	return mutation
 }
@@ -1201,6 +1209,10 @@ func podMutationToState(mutation *patching_engine.PodMutation, d *schema.Resourc
 		if err := d.Set(FieldPodMutationSpotConfig, []map[string]interface{}{spotConfig}); err != nil {
 			return diag.FromErr(err)
 		}
+	} else {
+		if err := d.Set(FieldPodMutationSpotConfig, []map[string]interface{}{}); err != nil {
+			return diag.FromErr(err)
+		}
 	}
 
 	if mutation.NodeTemplatesToConsolidate != nil {
@@ -1208,7 +1220,6 @@ func podMutationToState(mutation *patching_engine.PodMutation, d *schema.Resourc
 			return diag.FromErr(err)
 		}
 	}
-
 
 	if mutation.Patch != nil && len(*mutation.Patch) > 0 {
 		patchJSON, err := json.Marshal(*mutation.Patch)
@@ -1218,15 +1229,23 @@ func podMutationToState(mutation *patching_engine.PodMutation, d *schema.Resourc
 		if err := d.Set(FieldPodMutationPatch, string(patchJSON)); err != nil {
 			return diag.FromErr(err)
 		}
+	} else {
+		if err := d.Set(FieldPodMutationPatch, ""); err != nil {
+			return diag.FromErr(err)
+		}
 	}
 
-	if mutation.DistributionGroups != nil {
+	if mutation.DistributionGroups != nil && len(*mutation.DistributionGroups) > 0 {
 		dgs, err := flattenDistributionGroups(*mutation.DistributionGroups)
 		if err != nil {
 			return diag.FromErr(err)
 		}
 
 		if err := d.Set(FieldPodMutationDistributionGroups, dgs); err != nil {
+			return diag.FromErr(err)
+		}
+	} else {
+		if err := d.Set(FieldPodMutationDistributionGroups, []map[string]interface{}{}); err != nil {
 			return diag.FromErr(err)
 		}
 	}
@@ -1450,7 +1469,7 @@ func flattenDistributionGroups(groups []patching_engine.DistributionGroup) ([]ma
 			if g.Config.Affinity != nil {
 				configMap[FieldPodMutationAffinity] = flattenAffinity(g.Config.Affinity)
 			}
-			if g.Config.SpotType != nil && *g.Config.SpotType != "SPOT_TYPE_UNSPECIFIED" {
+			if g.Config.SpotType != nil && *g.Config.SpotType != patching_engine.DistributionGroupConfigSpotTypeSPOTTYPEUNSPECIFIED {
 				configMap[FieldPodMutationSpotType] = string(*g.Config.SpotType)
 			}
 			if g.Config.NodeTemplatesToConsolidate != nil {

@@ -125,7 +125,6 @@ resource "castai_pod_mutation" "multi_pool_distribution" {
 - `organization_id` (String) ID of the organization. If not provided, will be inferred from the API client.
 - `patch` (String) JSON patch to apply to pods. Must be a JSON array of patch operations.
 - `spot_config` (Block List, Max: 1) Spot configuration for the mutation. (see [below for nested schema](#nestedblock--spot_config))
-- `spot_type` (String) Spot instance type: OPTIONAL_SPOT, USE_ONLY_SPOT, or PREFERRED_SPOT.
 - `tolerations` (Block List) Tolerations to apply to the pods. (see [below for nested schema](#nestedblock--tolerations))
 
 ### Read-Only
