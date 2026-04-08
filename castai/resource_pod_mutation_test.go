@@ -317,6 +317,20 @@ func TestPodMutation_CreateContext(t *testing.T) {
 
 		resource := resourcePodMutation()
 		data := resource.Data(state)
+		r.NoError(data.Set(FieldPodMutationFilterV2, []interface{}{
+			map[string]interface{}{
+				FieldPodMutationFilterWorkload: []interface{}{
+					map[string]interface{}{
+						FieldPodMutationFilterNamespaces: []interface{}{
+							map[string]interface{}{
+								FieldPodMutationMatcherType:  string(patching_engine.EXACT),
+								FieldPodMutationMatcherValue: "default",
+							},
+						},
+					},
+				},
+			},
+		}))
 
 		result := resource.CreateContext(ctx, data, provider)
 
@@ -416,6 +430,20 @@ func TestPodMutation_UpdateContext(t *testing.T) {
 
 		resource := resourcePodMutation()
 		data := resource.Data(state)
+		r.NoError(data.Set(FieldPodMutationFilterV2, []interface{}{
+			map[string]interface{}{
+				FieldPodMutationFilterWorkload: []interface{}{
+					map[string]interface{}{
+						FieldPodMutationFilterNamespaces: []interface{}{
+							map[string]interface{}{
+								FieldPodMutationMatcherType:  string(patching_engine.EXACT),
+								FieldPodMutationMatcherValue: "default",
+							},
+						},
+					},
+				},
+			},
+		}))
 
 		result := resource.UpdateContext(ctx, data, provider)
 
