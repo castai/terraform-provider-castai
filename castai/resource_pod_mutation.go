@@ -578,8 +578,12 @@ func podMutationStateImporter(ctx context.Context, d *schema.ResourceData, meta 
 	return []*schema.ResourceData{d}, nil
 }
 
+func getPatchingEngineClient(meta interface{}) patching_engine.ClientWithResponsesInterface {
+	return meta.(*ProviderConfig).patchingEngineClient
+}
+
 func resourcePodMutationCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*ProviderConfig).patchingEngineClient
+	client := getPatchingEngineClient(meta)
 
 	organizationID, err := getPodMutationOrganizationID(ctx, d, meta)
 	if err != nil {
@@ -606,7 +610,7 @@ func resourcePodMutationCreate(ctx context.Context, d *schema.ResourceData, meta
 }
 
 func resourcePodMutationRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*ProviderConfig).patchingEngineClient
+	client := getPatchingEngineClient(meta)
 
 	organizationID, err := getPodMutationOrganizationID(ctx, d, meta)
 	if err != nil {
@@ -633,7 +637,7 @@ func resourcePodMutationRead(ctx context.Context, d *schema.ResourceData, meta i
 }
 
 func resourcePodMutationUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*ProviderConfig).patchingEngineClient
+	client := getPatchingEngineClient(meta)
 
 	organizationID, err := getPodMutationOrganizationID(ctx, d, meta)
 	if err != nil {
@@ -660,7 +664,7 @@ func resourcePodMutationUpdate(ctx context.Context, d *schema.ResourceData, meta
 }
 
 func resourcePodMutationDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*ProviderConfig).patchingEngineClient
+	client := getPatchingEngineClient(meta)
 
 	organizationID, err := getPodMutationOrganizationID(ctx, d, meta)
 	if err != nil {

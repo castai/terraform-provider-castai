@@ -640,18 +640,21 @@ func TestPodMutation_StateImporter(t *testing.T) {
 		r := require.New(t)
 		res := resourcePodMutation()
 		d := res.Data(nil)
-		d.SetId("org-123/cluster-456/mutation-789")
+		orgID := "a0000000-0000-0000-0000-000000000001"
+		clusterID := "a0000000-0000-0000-0000-000000000002"
+		mutationID := "a0000000-0000-0000-0000-000000000003"
+		d.SetId(orgID + "/" + clusterID + "/" + mutationID)
 
 		result, err := res.Importer.StateContext(t.Context(), d, nil)
 
 		r.NoError(err)
 		r.Len(result, 1)
-		r.Equal("mutation-789", d.Id())
-		r.Equal("org-123", d.Get(FieldPodMutationOrganizationID))
-		r.Equal("cluster-456", d.Get(FieldPodMutationClusterID))
+		r.Equal(mutationID, d.Id())
+		r.Equal(orgID, d.Get(FieldPodMutationOrganizationID))
+		r.Equal(clusterID, d.Get(FieldPodMutationClusterID))
 	})
 
-	for _, id := range []string{"mutation-789", "org-123/mutation-789", "a/b/c/d"} {
+	for _, id := range []string{"mutation-789", "org-123/mutation-789"} {
 		t.Run("invalid import ID "+id, func(t *testing.T) {
 			r := require.New(t)
 			res := resourcePodMutation()
@@ -664,6 +667,30 @@ func TestPodMutation_StateImporter(t *testing.T) {
 			r.Contains(err.Error(), "invalid import ID")
 		})
 	}
+
+	t.Run("invalid import ID a/b/c/d", func(t *testing.T) {
+		r := require.New(t)
+		res := resourcePodMutation()
+		d := res.Data(nil)
+		d.SetId("a/b/c/d")
+
+		_, err := res.Importer.StateContext(t.Context(), d, nil)
+
+		r.Error(err)
+		r.Contains(err.Error(), "invalid import ID")
+	})
+
+	t.Run("non-UUID parts return UUID validation error", func(t *testing.T) {
+		r := require.New(t)
+		res := resourcePodMutation()
+		d := res.Data(nil)
+		d.SetId("org-123/cluster-456/mutation-789")
+
+		_, err := res.Importer.StateContext(t.Context(), d, nil)
+
+		r.Error(err)
+		r.Contains(err.Error(), "invalid organization_id")
+	})
 }
 
 func TestFlattenDistributionGroups(t *testing.T) {
