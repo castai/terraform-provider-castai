@@ -1028,6 +1028,184 @@ func TestStateToObjectFilterV2(t *testing.T) {
 		r.Equal("web", lo.FromPtr((*filter.Labels.Matchers)[0].Value.Value))
 		r.Nil(filter.ExcludeLabels)
 	})
+
+	t.Run("workload exclusion fields", func(t *testing.T) {
+		r := require.New(t)
+
+		state := map[string]interface{}{
+			FieldPodMutationFilterWorkload: []interface{}{
+				map[string]interface{}{
+					FieldPodMutationFilterNamespaces: []interface{}{},
+					FieldPodMutationFilterKinds:      []interface{}{},
+					FieldPodMutationFilterNames:      []interface{}{},
+					FieldPodMutationFilterExcludeNamespaces: []interface{}{
+						map[string]interface{}{FieldPodMutationMatcherType: "EXACT", FieldPodMutationMatcherValue: "kube-system"},
+					},
+					FieldPodMutationFilterExcludeKinds: []interface{}{
+						map[string]interface{}{FieldPodMutationMatcherType: "EXACT", FieldPodMutationMatcherValue: "DaemonSet"},
+					},
+					FieldPodMutationFilterExcludeNames: []interface{}{
+						map[string]interface{}{FieldPodMutationMatcherType: "REGEX", FieldPodMutationMatcherValue: "^skip-.*"},
+					},
+				},
+			},
+			FieldPodMutationFilterPod: []interface{}{},
+		}
+
+		filter := stateToObjectFilterV2(state)
+
+		r.Nil(filter.Namespaces)
+		r.Nil(filter.Kinds)
+		r.Nil(filter.Names)
+
+		r.NotNil(filter.ExcludeNamespaces)
+		r.Len(*filter.ExcludeNamespaces, 1)
+		r.Equal("kube-system", lo.FromPtr((*filter.ExcludeNamespaces)[0].Value))
+
+		r.NotNil(filter.ExcludeKinds)
+		r.Len(*filter.ExcludeKinds, 1)
+		r.Equal("DaemonSet", lo.FromPtr((*filter.ExcludeKinds)[0].Value))
+
+		r.NotNil(filter.ExcludeNames)
+		r.Len(*filter.ExcludeNames, 1)
+		r.Equal("^skip-.*", lo.FromPtr((*filter.ExcludeNames)[0].Value))
+		r.Equal(patching_engine.REGEX, lo.FromPtr((*filter.ExcludeNames)[0].Type))
+	})
+
+	t.Run("pod exclude_labels", func(t *testing.T) {
+		r := require.New(t)
+
+		state := map[string]interface{}{
+			FieldPodMutationFilterWorkload: []interface{}{},
+			FieldPodMutationFilterPod: []interface{}{
+				map[string]interface{}{
+					FieldPodMutationFilterLabelsFilter: []interface{}{},
+					FieldPodMutationFilterExcludeLabels: []interface{}{
+						map[string]interface{}{
+							FieldPodMutationLabelsFilterOperator: "OR",
+							FieldPodMutationLabelsFilterMatchers: []interface{}{
+								map[string]interface{}{
+									FieldPodMutationLabelMatcherKey: []interface{}{
+										map[string]interface{}{FieldPodMutationMatcherType: "EXACT", FieldPodMutationMatcherValue: "env"},
+									},
+									FieldPodMutationLabelMatcherValue: []interface{}{
+										map[string]interface{}{FieldPodMutationMatcherType: "EXACT", FieldPodMutationMatcherValue: "dev"},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		}
+
+		filter := stateToObjectFilterV2(state)
+
+		r.Nil(filter.Labels)
+		r.NotNil(filter.ExcludeLabels)
+		r.Equal(patching_engine.OR, lo.FromPtr(filter.ExcludeLabels.Operator))
+		r.Len(*filter.ExcludeLabels.Matchers, 1)
+		r.Equal("env", lo.FromPtr((*filter.ExcludeLabels.Matchers)[0].Key.Value))
+		r.Equal("dev", lo.FromPtr((*filter.ExcludeLabels.Matchers)[0].Value.Value))
+	})
+}
+
+func TestFlattenObjectFilterV2_MatcherValues(t *testing.T) {
+	t.Parallel()
+
+	t.Run("labels_filter matcher key and value are preserved", func(t *testing.T) {
+		r := require.New(t)
+
+		op := patching_engine.AND
+		filter := &patching_engine.ObjectFilterV2{
+			Labels: &patching_engine.ObjectFilterV2LabelsFilter{
+				Operator: &op,
+				Matchers: &[]patching_engine.ObjectFilterV2LabelMatcher{
+					{
+						Key:   &patching_engine.ObjectFilterV2Matcher{Type: lo.ToPtr(patching_engine.EXACT), Value: lo.ToPtr("app")},
+						Value: &patching_engine.ObjectFilterV2Matcher{Type: lo.ToPtr(patching_engine.REGEX), Value: lo.ToPtr("^web-.*")},
+					},
+				},
+			},
+		}
+
+		result := flattenObjectFilterV2(filter)
+		pod := result[0][FieldPodMutationFilterPod].([]map[string]interface{})
+		lf := pod[0][FieldPodMutationFilterLabelsFilter].([]map[string]interface{})
+		matchers := lf[0][FieldPodMutationLabelsFilterMatchers].([]map[string]interface{})
+		r.Len(matchers, 1)
+
+		key := matchers[0][FieldPodMutationLabelMatcherKey].([]map[string]interface{})
+		r.Equal("EXACT", key[0][FieldPodMutationMatcherType])
+		r.Equal("app", key[0][FieldPodMutationMatcherValue])
+
+		val := matchers[0][FieldPodMutationLabelMatcherValue].([]map[string]interface{})
+		r.Equal("REGEX", val[0][FieldPodMutationMatcherType])
+		r.Equal("^web-.*", val[0][FieldPodMutationMatcherValue])
+	})
+
+	t.Run("exclude_labels matcher content is preserved", func(t *testing.T) {
+		r := require.New(t)
+
+		op := patching_engine.OR
+		filter := &patching_engine.ObjectFilterV2{
+			ExcludeLabels: &patching_engine.ObjectFilterV2LabelsFilter{
+				Operator: &op,
+				Matchers: &[]patching_engine.ObjectFilterV2LabelMatcher{
+					{
+						Key:   &patching_engine.ObjectFilterV2Matcher{Type: lo.ToPtr(patching_engine.EXACT), Value: lo.ToPtr("tier")},
+						Value: &patching_engine.ObjectFilterV2Matcher{Type: lo.ToPtr(patching_engine.EXACT), Value: lo.ToPtr("frontend")},
+					},
+				},
+			},
+		}
+
+		result := flattenObjectFilterV2(filter)
+		pod := result[0][FieldPodMutationFilterPod].([]map[string]interface{})
+		el := pod[0][FieldPodMutationFilterExcludeLabels].([]map[string]interface{})
+		r.Equal("OR", el[0][FieldPodMutationLabelsFilterOperator])
+
+		matchers := el[0][FieldPodMutationLabelsFilterMatchers].([]map[string]interface{})
+		r.Len(matchers, 1)
+
+		key := matchers[0][FieldPodMutationLabelMatcherKey].([]map[string]interface{})
+		r.Equal("tier", key[0][FieldPodMutationMatcherValue])
+
+		val := matchers[0][FieldPodMutationLabelMatcherValue].([]map[string]interface{})
+		r.Equal("frontend", val[0][FieldPodMutationMatcherValue])
+	})
+
+	t.Run("workload exclusion fields are preserved", func(t *testing.T) {
+		r := require.New(t)
+
+		filter := &patching_engine.ObjectFilterV2{
+			ExcludeNamespaces: &[]patching_engine.ObjectFilterV2Matcher{
+				{Type: lo.ToPtr(patching_engine.EXACT), Value: lo.ToPtr("kube-system")},
+			},
+			ExcludeKinds: &[]patching_engine.ObjectFilterV2Matcher{
+				{Type: lo.ToPtr(patching_engine.EXACT), Value: lo.ToPtr("DaemonSet")},
+			},
+			ExcludeNames: &[]patching_engine.ObjectFilterV2Matcher{
+				{Type: lo.ToPtr(patching_engine.REGEX), Value: lo.ToPtr("^skip-.*")},
+			},
+		}
+
+		result := flattenObjectFilterV2(filter)
+		wl := result[0][FieldPodMutationFilterWorkload].([]map[string]interface{})
+
+		exNs := wl[0][FieldPodMutationFilterExcludeNamespaces].([]map[string]interface{})
+		r.Len(exNs, 1)
+		r.Equal("kube-system", exNs[0][FieldPodMutationMatcherValue])
+
+		exKinds := wl[0][FieldPodMutationFilterExcludeKinds].([]map[string]interface{})
+		r.Len(exKinds, 1)
+		r.Equal("DaemonSet", exKinds[0][FieldPodMutationMatcherValue])
+
+		exNames := wl[0][FieldPodMutationFilterExcludeNames].([]map[string]interface{})
+		r.Len(exNames, 1)
+		r.Equal("^skip-.*", exNames[0][FieldPodMutationMatcherValue])
+		r.Equal("REGEX", exNames[0][FieldPodMutationMatcherType])
+	})
 }
 
 func TestNodeSelectorRoundTrip(t *testing.T) {
