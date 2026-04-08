@@ -45,15 +45,17 @@ const (
 	FieldPodMutationMatchExpressions         = "match_expressions"
 	FieldPodMutationMatchExpressionsKey      = "key"
 	FieldPodMutationMatchExpressionsOperator = "operator"
+	FieldPodMutationSpotConfig               = "spot_config"
+	FieldPodMutationSpotMode                 = "spot_mode"
 	FieldPodMutationSpotType                 = "spot_type"
-	FieldPodMutationSpotDistributionPct      = "spot_distribution_percentage"
+	FieldPodMutationSpotDistributionPct      = "distribution_percentage"
 	FieldPodMutationNodeTemplates            = "node_templates_to_consolidate"
 	FieldPodMutationRestartWorkloads         = "restart_matching_workloads"
 	FieldPodMutationPatch                    = "patch"
 	FieldPodMutationDistributionGroups       = "distribution_groups"
 	FieldPodMutationDistributionGroupName    = "name"
 	FieldPodMutationDistributionGroupPct     = "percentage"
-	FieldPodMutationDistributionGroupConfig  = "config"
+	FieldPodMutationDistributionGroupConfiguration = "configuration"
 	FieldPodMutationSource                   = "source"
 	FieldPodMutationFilterNames              = "names"
 	FieldPodMutationFilterNamespaces         = "namespaces"
@@ -72,7 +74,7 @@ const (
 	FieldPodMutationValues                   = "values"
 )
 
-var spotTypeValues = []string{
+var spotModeValues = []string{
 	string(patching_engine.PodMutationSpotTypeOPTIONALSPOT),
 	string(patching_engine.PodMutationSpotTypePREFERREDSPOT),
 	string(patching_engine.PodMutationSpotTypeUSEONLYSPOT),
@@ -273,7 +275,7 @@ var mutationConfigSchema = map[string]*schema.Schema{
 	FieldPodMutationSpotType: {
 		Type:             schema.TypeString,
 		Optional:         true,
-		ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice(spotTypeValues, false)),
+		ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice(spotModeValues, false)),
 		Description:      "Spot instance type: OPTIONAL_SPOT, USE_ONLY_SPOT, or PREFERRED_SPOT.",
 	},
 	FieldPodMutationNodeTemplates: {
@@ -294,6 +296,20 @@ var mutationConfigSchema = map[string]*schema.Schema{
 			var arr []map[string]interface{}
 			if err := json.Unmarshal([]byte(s), &arr); err != nil {
 				return nil, []error{fmt.Errorf("%q must be a valid JSON array of patch operations: %w", key, err)}
+			}
+			validOps := map[string]struct{}{"add": {}, "remove": {}, "replace": {}, "move": {}, "copy": {}, "test": {}}
+			for i, op := range arr {
+				opVal, ok := op["op"].(string)
+				if !ok || opVal == "" {
+					return nil, []error{fmt.Errorf("%q operation %d: missing or invalid \"op\" field", key, i)}
+				}
+				if _, ok := validOps[opVal]; !ok {
+					return nil, []error{fmt.Errorf("%q operation %d: \"op\" must be one of add, remove, replace, move, copy, test; got %q", key, i, opVal)}
+				}
+				path, ok := op["path"].(string)
+				if !ok || path == "" {
+					return nil, []error{fmt.Errorf("%q operation %d: missing or empty \"path\" field", key, i)}
+				}
 			}
 			return nil, nil
 		}),
@@ -400,16 +416,27 @@ func resourcePodMutation() *schema.Resource {
 				},
 			},
 		},
-		FieldPodMutationSpotDistributionPct: {
-			Type:             schema.TypeInt,
-			Optional:         true,
-			ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(0, 100)),
-			Description:      "Percentage of pods (0-100) that receive spot scheduling constraints.",
-		},
-		FieldPodMutationRestartWorkloads: {
-			Type:        schema.TypeBool,
+		FieldPodMutationSpotConfig: {
+			Type:        schema.TypeList,
 			Optional:    true,
-			Description: "Restart matching workloads when the pod mutation is applied.",
+			MaxItems:    1,
+			Description: "Spot configuration for the mutation.",
+			Elem: &schema.Resource{
+				Schema: map[string]*schema.Schema{
+					FieldPodMutationSpotMode: {
+						Type:             schema.TypeString,
+						Optional:         true,
+						ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice(spotModeValues, false)),
+						Description:      "Spot mode: OPTIONAL_SPOT, USE_ONLY_SPOT, or PREFERRED_SPOT.",
+					},
+					FieldPodMutationSpotDistributionPct: {
+						Type:             schema.TypeInt,
+						Optional:         true,
+						ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(0, 100)),
+						Description:      "Percentage of pods (0-100) that receive spot scheduling constraints.",
+					},
+				},
+			},
 		},
 		FieldPodMutationDistributionGroups: {
 			Type:        schema.TypeList,
@@ -465,7 +492,7 @@ func distributionGroupSchema() map[string]*schema.Schema {
 			ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(0, 100)),
 			Description:      "Percentage of pods (0-100) that should receive this configuration.",
 		},
-		FieldPodMutationDistributionGroupConfig: {
+		FieldPodMutationDistributionGroupConfiguration: {
 			Type:     schema.TypeList,
 			Required: true,
 			MaxItems: 1,
@@ -650,13 +677,16 @@ func stateToPodMutation(d *schema.ResourceData) patching_engine.PodMutation {
 	mutation.NodeTemplatesToConsolidate = cfg.NodeTemplates
 	mutation.Patch = cfg.Patch
 
-	// Spot distribution percentage
-	pct := int32(d.Get(FieldPodMutationSpotDistributionPct).(int))
-	mutation.SpotDistributionPercentage = &pct
-
-	// Restart matching workloads
-	restart := d.Get(FieldPodMutationRestartWorkloads).(bool)
-	mutation.RestartMatchingWorkloads = &restart
+	// Spot config
+	if spotList, ok := d.Get(FieldPodMutationSpotConfig).([]interface{}); ok && len(spotList) > 0 && spotList[0] != nil {
+		sm := spotList[0].(map[string]interface{})
+		if mode, ok := sm[FieldPodMutationSpotMode].(string); ok && mode != "" {
+			st := patching_engine.PodMutationSpotType(mode)
+			mutation.SpotType = &st
+		}
+		pct := int32(sm[FieldPodMutationSpotDistributionPct].(int))
+		mutation.SpotDistributionPercentage = &pct
+	}
 
 	// Distribution groups
 	if v, ok := d.GetOk(FieldPodMutationDistributionGroups); ok {
@@ -1008,7 +1038,7 @@ func stateToDistributionGroups(items []interface{}) []patching_engine.Distributi
 			Percentage: &pct,
 		}
 
-		if configList, ok := m[FieldPodMutationDistributionGroupConfig]; ok {
+		if configList, ok := m[FieldPodMutationDistributionGroupConfiguration]; ok {
 			cl := configList.([]interface{})
 			if len(cl) > 0 && cl[0] != nil {
 				configMap := cl[0].(map[string]interface{})
@@ -1114,19 +1144,15 @@ func podMutationToState(mutation *patching_engine.PodMutation, d *schema.Resourc
 		}
 	}
 
-	// Spot type — treat UNSPECIFIED as empty to avoid drift when user doesn't set it
+	// Spot config — only populate block when a meaningful spot mode is set
 	if mutation.SpotType != nil && *mutation.SpotType != patching_engine.PodMutationSpotTypeSPOTTYPEUNSPECIFIED {
-		if err := d.Set(FieldPodMutationSpotType, string(*mutation.SpotType)); err != nil {
-			return diag.FromErr(err)
+		spotConfig := map[string]interface{}{
+			FieldPodMutationSpotMode: string(*mutation.SpotType),
 		}
-	} else {
-		if err := d.Set(FieldPodMutationSpotType, ""); err != nil {
-			return diag.FromErr(err)
+		if mutation.SpotDistributionPercentage != nil {
+			spotConfig[FieldPodMutationSpotDistributionPct] = int(*mutation.SpotDistributionPercentage)
 		}
-	}
-
-	if mutation.SpotDistributionPercentage != nil {
-		if err := d.Set(FieldPodMutationSpotDistributionPct, int(*mutation.SpotDistributionPercentage)); err != nil {
+		if err := d.Set(FieldPodMutationSpotConfig, []map[string]interface{}{spotConfig}); err != nil {
 			return diag.FromErr(err)
 		}
 	}
@@ -1397,7 +1423,7 @@ func flattenDistributionGroups(groups []patching_engine.DistributionGroup) ([]ma
 
 				configMap[FieldPodMutationPatch] = string(patchJSON)
 			}
-			gMap[FieldPodMutationDistributionGroupConfig] = []map[string]interface{}{configMap}
+			gMap[FieldPodMutationDistributionGroupConfiguration] = []map[string]interface{}{configMap}
 		}
 
 		result = append(result, gMap)

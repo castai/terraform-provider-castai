@@ -17,8 +17,10 @@ resource "castai_pod_mutation" "spot_scheduling" {
     }
   }
 
-  spot_type                    = "PREFERRED_SPOT"
-  spot_distribution_percentage = 80
+  spot_config {
+    spot_mode               = "PREFERRED_SPOT"
+    distribution_percentage = 80
+  }
   restart_matching_workloads   = true
 
   tolerations {
@@ -62,7 +64,7 @@ resource "castai_pod_mutation" "multi_pool_distribution" {
   distribution_groups {
     name       = "gpu-pool"
     percentage = 30
-    config {
+    configuration {
       spot_type = "PREFERRED_SPOT"
       tolerations {
         key      = "nvidia.com/gpu"
@@ -80,7 +82,7 @@ resource "castai_pod_mutation" "multi_pool_distribution" {
   distribution_groups {
     name       = "general-pool"
     percentage = 70
-    config {
+    configuration {
       spot_type                     = "OPTIONAL_SPOT"
       node_templates_to_consolidate = ["default-general"]
     }
