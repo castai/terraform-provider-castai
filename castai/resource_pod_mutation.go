@@ -498,7 +498,7 @@ func resourcePodMutationCustomizeDiff(_ context.Context, d *schema.ResourceDiff,
 	}
 
 	workloadHasFilter := false
-	if wl := fm[FieldPodMutationFilterWorkload].([]interface{}); len(wl) > 0 && wl[0] != nil {
+	if wl, ok := fm[FieldPodMutationFilterWorkload].([]interface{}); ok && len(wl) > 0 && wl[0] != nil {
 		wm := wl[0].(map[string]interface{})
 		for _, f := range workloadFields {
 			if v, ok := wm[f].([]interface{}); ok && len(v) > 0 {
@@ -509,7 +509,7 @@ func resourcePodMutationCustomizeDiff(_ context.Context, d *schema.ResourceDiff,
 	}
 
 	podHasFilter := false
-	if pl := fm[FieldPodMutationFilterPod].([]interface{}); len(pl) > 0 && pl[0] != nil {
+	if pl, ok := fm[FieldPodMutationFilterPod].([]interface{}); ok && len(pl) > 0 && pl[0] != nil {
 		pm := pl[0].(map[string]interface{})
 		for _, f := range podFields {
 			if v, ok := pm[f].([]interface{}); ok && len(v) > 0 {
@@ -736,7 +736,7 @@ func stateToPodMutation(d *schema.ResourceData) patching_engine.PodMutation {
 			st := patching_engine.PodMutationSpotType(mode)
 			mutation.SpotType = &st
 		}
-		if pct, ok := sm[FieldPodMutationSpotDistributionPct].(int); ok && pct > 0 {
+		if pct, ok := sm[FieldPodMutationSpotDistributionPct].(int); ok {
 			pct32 := int32(pct)
 			mutation.SpotDistributionPercentage = &pct32
 		}
