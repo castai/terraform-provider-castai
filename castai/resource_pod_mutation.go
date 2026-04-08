@@ -722,7 +722,9 @@ func stateToPodMutation(d *schema.ResourceData) patching_engine.PodMutation {
 	} {
 		configMap[key] = d.Get(key)
 	}
+
 	cfg := parseMutationConfigFromMap(configMap)
+
 	mutation.Labels = cfg.Labels
 	mutation.Annotations = cfg.Annotations
 	mutation.NodeSelector = cfg.NodeSelector
