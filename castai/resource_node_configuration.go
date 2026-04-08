@@ -49,6 +49,7 @@ const (
 	FieldNodeConfigurationAKSPublicIP                  = "public_ip"
 	FieldNodeConfigurationAKSPodSubnetID               = "pod_subnet_id"
 	FieldNodeConfigurationAKSEncryptionAtHost          = "enable_encryption_at_host"
+	FieldNodeConfigurationAKSAcceleratedNetworking     = "accelerated_networking"
 )
 
 const (
@@ -496,6 +497,12 @@ func resourceNodeConfiguration() *schema.Resource {
 							Type:        schema.TypeBool,
 							Optional:    true,
 							Description: "Whether to enable encryption at host for provisioned nodes. See https://learn.microsoft.com/en-us/azure/virtual-machines/disk-encryption#encryption-at-host---end-to-end-encryption-for-your-vm-data",
+						},
+						FieldNodeConfigurationAKSAcceleratedNetworking: {
+							Type:         schema.TypeString,
+							Optional:     true,
+							Description:  "Controls SR-IOV accelerated networking on the node NIC. Allowed values: `enabled_if_supported` (default — enable when the VM SKU supports it), `disabled` (force off regardless of SKU capability).",
+							ValidateFunc: validation.StringInSlice([]string{"enabled_if_supported", "disabled"}, false),
 						},
 					},
 				},
@@ -1200,7 +1207,31 @@ func toAKSSConfig(obj map[string]interface{}) *sdk.NodeconfigV1AKSConfig {
 		out.EnableEncryptionAtHost = toPtr(v)
 	}
 
+	if v, ok := obj[FieldNodeConfigurationAKSAcceleratedNetworking].(string); ok && v != "" {
+		out.AcceleratedNetworking = toAKSAcceleratedNetworkingMode(v)
+	}
+
 	return out
+}
+
+func toAKSAcceleratedNetworkingMode(v string) *sdk.NodeconfigV1AKSConfigAcceleratedNetworkingMode {
+	switch v {
+	case "disabled":
+		m := sdk.ACCELERATEDNETWORKINGMODEDISABLED
+		return &m
+	default:
+		m := sdk.ACCELERATEDNETWORKINGMODEENABLEDIFSUPPORTED
+		return &m
+	}
+}
+
+func fromAKSAcceleratedNetworkingMode(v sdk.NodeconfigV1AKSConfigAcceleratedNetworkingMode) string {
+	switch v {
+	case sdk.ACCELERATEDNETWORKINGMODEDISABLED:
+		return "disabled"
+	default:
+		return "enabled_if_supported"
+	}
 }
 
 func toAKSNodePublicIP(obj any) *sdk.NodeconfigV1AKSConfigPublicIP {
@@ -1398,6 +1429,10 @@ func flattenAKSConfig(config *sdk.NodeconfigV1AKSConfig) []map[string]interface{
 
 	if v := config.EnableEncryptionAtHost; v != nil {
 		m[FieldNodeConfigurationAKSEncryptionAtHost] = *v
+	}
+
+	if v := config.AcceleratedNetworking; v != nil {
+		m[FieldNodeConfigurationAKSAcceleratedNetworking] = fromAKSAcceleratedNetworkingMode(*v)
 	}
 
 	return []map[string]interface{}{m}
