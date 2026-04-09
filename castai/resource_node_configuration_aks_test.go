@@ -79,6 +79,7 @@ resource "castai_node_configuration" "test" {
 		idle_timeout_in_minutes = 10
     }
    pod_subnet_id = data.azurerm_subnet.internal.id
+   accelerated_networking = "disabled"
   }
 }
 `, rName, resourceGroupName))
