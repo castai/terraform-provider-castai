@@ -14,6 +14,7 @@ import (
 	"github.com/castai/terraform-provider-castai/castai/sdk/cluster_autoscaler"
 	"github.com/castai/terraform-provider-castai/castai/sdk/omni"
 	"github.com/castai/terraform-provider-castai/castai/sdk/organization_management"
+	"github.com/castai/terraform-provider-castai/castai/sdk/patching_engine"
 )
 
 type ProviderConfig struct {
@@ -22,6 +23,7 @@ type ProviderConfig struct {
 	organizationManagementClient organization_management.ClientWithResponsesInterface
 	omniAPI                      *omni.ClientWithResponses
 	aiOptimizerClient            ai_optimizer.ClientWithResponsesInterface
+	patchingEngineClient         patching_engine.ClientWithResponsesInterface
 	organizationID               string
 }
 
@@ -89,6 +91,7 @@ func Provider(version string) *schema.Provider {
 			"castai_ai_optimizer_model_registry": resourceAIModelRegistry(),
 			"castai_ai_optimizer_model_specs":    resourceAIModelSpecs(),
 			"castai_ai_optimizer_hosted_model":   resourceAIHostedModel(),
+			"castai_pod_mutation":                resourcePodMutation(),
 		},
 
 		DataSourcesMap: map[string]*schema.Resource{
@@ -148,12 +151,18 @@ func providerConfigure(version string) schema.ConfigureContextFunc {
 			return nil, diag.FromErr(err)
 		}
 
+		patchingEngineClient, err := patching_engine.CreateClient(apiURL, apiToken, agent)
+		if err != nil {
+			return nil, diag.FromErr(err)
+		}
+
 		return &ProviderConfig{
 			api:                          client,
 			clusterAutoscalerClient:      clusterAutoscalerClient,
 			organizationManagementClient: organizationManagementClient,
 			omniAPI:                      omniClient,
 			aiOptimizerClient:            aiOptimizerClient,
+			patchingEngineClient:         patchingEngineClient,
 			organizationID:               organizationID,
 		}, nil
 	}
