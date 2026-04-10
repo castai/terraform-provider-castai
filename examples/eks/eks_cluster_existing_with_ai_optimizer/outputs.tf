@@ -1,3 +1,7 @@
+output "eks_cluster_authentication_mode" {
+  value = data.aws_eks_cluster.existing_cluster.access_config[0].authentication_mode
+}
+
 output "cluster_id" {
   description = "CAST AI cluster ID"
   value       = castai_eks_clusterid.cluster_id.id
@@ -5,17 +9,17 @@ output "cluster_id" {
 
 output "cluster_endpoint" {
   description = "EKS cluster endpoint"
-  value       = module.eks.cluster_endpoint
+  value       = data.aws_eks_cluster.existing_cluster.endpoint
 }
 
 output "cluster_name" {
   description = "EKS cluster name"
-  value       = module.eks.cluster_name
+  value       = data.aws_eks_cluster.existing_cluster.name
 }
 
-output "predicted_model_service" {
-  description = "Kubernetes service name for the predefined Llama 3.1 model"
-  value       = var.deploy_predefined_model ? "llama31-service" : null
+output "predefined_model_service" {
+  description = "Kubernetes service name for the predefined Llama 3.2 1B model"
+  value       = var.deploy_predefined_model ? "llama3-2-1b" : null
 }
 
 output "custom_model_service" {

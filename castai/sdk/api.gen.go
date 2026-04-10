@@ -7184,6 +7184,9 @@ type NodetemplatesV1NewNodeTemplate struct {
 	// Based on the template constraints, the template may still have additional taints.
 	// For example, if both lifecycles (spot, on-demand) are enabled, to use spot nodes, the spot nodes of this template will have the spot taint.
 	ShouldTaint *bool `json:"shouldTaint"`
+
+	// StopEnabled Nodes in this node-template have Storage Optimization (STOP) enabled.
+	StopEnabled *bool `json:"stopEnabled"`
 }
 
 // NodetemplatesV1NodeTemplate defines model for nodetemplates.v1.NodeTemplate.
@@ -7218,7 +7221,10 @@ type NodetemplatesV1NodeTemplate struct {
 	RebalancingConfig            *NodetemplatesV1RebalancingConfiguration     `json:"rebalancingConfig,omitempty"`
 
 	// ShouldTaint Marks whether the templated nodes will have a taint.
-	ShouldTaint *bool   `json:"shouldTaint,omitempty"`
+	ShouldTaint *bool `json:"shouldTaint,omitempty"`
+
+	// StopEnabled Nodes in this node-template have Storage Optimization (STOP) enabled.
+	StopEnabled *bool   `json:"stopEnabled,omitempty"`
 	Version     *string `json:"version,omitempty"`
 }
 
@@ -7481,6 +7487,9 @@ type NodetemplatesV1UpdateNodeTemplate struct {
 
 	// ShouldTaint Marks whether the templated nodes will have a taint.
 	ShouldTaint *bool `json:"shouldTaint"`
+
+	// StopEnabled Nodes in this node-template have Storage Optimization (STOP) enabled.
+	StopEnabled *bool `json:"stopEnabled"`
 }
 
 // PoliciesV1ClusterLimitsCpu Defines the minimum and maximum amount of vCPUs for cluster's worker nodes.

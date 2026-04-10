@@ -1,6 +1,3 @@
-# Hosted model deployment for a predefined CastAI-managed model.
-# The model_specs_id references a pre-existing model specs entry managed by CastAI.
-# Obtain the ID from the CAST AI console or API — no castai_ai_optimizer_model_specs resource is needed.
 resource "castai_ai_optimizer_hosted_model" "llama_3_2_1b" {
   count = var.deploy_predefined_model ? 1 : 0
 
@@ -14,7 +11,6 @@ resource "castai_ai_optimizer_hosted_model" "llama_3_2_1b" {
     hugging_face_token = var.hf_token
   }
 
-  # Horizontal autoscaling configuration.
   horizontal_autoscaling {
     enabled       = true
     min_replicas  = 1
@@ -23,8 +19,6 @@ resource "castai_ai_optimizer_hosted_model" "llama_3_2_1b" {
     target_value  = 50
   }
 
-  # Hibernation configuration — automatically scale down the model when idle
-  # and resume it when traffic returns.
   hibernation {
     enabled = true
 
@@ -39,5 +33,5 @@ resource "castai_ai_optimizer_hosted_model" "llama_3_2_1b" {
     }
   }
 
-  depends_on = [module.castai-eks-cluster]
+  depends_on = [module.castai_eks_cluster]
 }

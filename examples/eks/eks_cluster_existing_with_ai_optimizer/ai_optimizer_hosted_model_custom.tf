@@ -98,5 +98,5 @@ resource "castai_ai_optimizer_hosted_model" "custom_model" {
     target_value  = 5
   }
 
-  depends_on = [module.castai-eks-cluster]
+  depends_on = [module.castai_eks_cluster]
 }

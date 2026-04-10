@@ -1,4 +1,9 @@
-# EKS Cluster variables.
+variable "profile" {
+  type        = string
+  description = "Profile used with AWS CLI"
+  default     = "default"
+}
+
 variable "cluster_name" {
   type        = string
   description = "EKS cluster name in AWS account."
@@ -6,16 +11,9 @@ variable "cluster_name" {
 
 variable "cluster_region" {
   type        = string
-  description = "AWS Region in which EKS cluster and supporting resources will be created."
+  description = "AWS Region in which the EKS cluster is located."
 }
 
-variable "cluster_version" {
-  type        = string
-  description = "EKS cluster version."
-  default     = "1.33"
-}
-
-# CAST AI variables.
 variable "castai_api_url" {
   type        = string
   description = "URL of alternative CAST AI API to be used during development or testing"
@@ -41,30 +39,28 @@ variable "castai_grpc_url" {
 
 variable "delete_nodes_on_disconnect" {
   type        = bool
-  description = "Optional parameter, if set to true - CAST AI provisioned nodes will be deleted from cloud on cluster disconnection."
+  description = "Optional parameter, if set to true - CAST AI provisioned nodes will be deleted from cloud on cluster disconnection. For production use it is recommended to set it to false."
   default     = true
 }
 
-# AI Optimizer variables.
 variable "enable_ai_optimizer" {
   type        = bool
   description = "Enable CAST AI AI Optimizer for LLM model serving."
   default     = true
 }
 
-# Optional variables for predefined model deployment.
 variable "deploy_predefined_model" {
   type        = bool
   description = "Deploy a predefined CastAI-managed model using an existing model specs ID."
-  default     = true
+  default     = false
 }
 
 variable "hf_token" {
   type        = string
   description = "Hugging Face token for accessing Hugging Face Hub models. Required when deploying predefined models with vLLM configuration."
+  default     = ""
 }
 
-# Optional variables for custom model deployment from S3 registry.
 variable "deploy_custom_model" {
   type        = bool
   description = "Deploy a custom model from S3 registry."
@@ -95,7 +91,6 @@ variable "custom_base_model_spec_id" {
   default     = ""
 }
 
-# Common variables.
 variable "tags" {
   type        = map(any)
   description = "Optional tags for new cluster nodes. This parameter applies only to new nodes - tags for old nodes are not reconciled."
