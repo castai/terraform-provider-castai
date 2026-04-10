@@ -314,6 +314,9 @@ func resourceAIHostedModelRead(ctx context.Context, d *schema.ResourceData, meta
 	}
 
 	clusterID := d.Get(fieldAIHostedModelClusterID).(string)
+	if clusterID == "" {
+		return diag.Errorf("cluster_id is required but was empty in state")
+	}
 	modelID := d.Id()
 
 	model, err := findHostedModelByID(ctx, client, orgID, clusterID, modelID)
@@ -393,6 +396,9 @@ func resourceAIHostedModelUpdate(ctx context.Context, d *schema.ResourceData, me
 	}
 
 	clusterID := d.Get(fieldAIHostedModelClusterID).(string)
+	if clusterID == "" {
+		return diag.Errorf("cluster_id is required but was empty in state")
+	}
 
 	body := ai_optimizer.HostedModelUpdate{
 		VllmConfig:            expandVllmConfig(d.Get(fieldAIHostedModelVllmConfig).([]interface{})),
@@ -426,10 +432,16 @@ func resourceAIHostedModelDelete(ctx context.Context, d *schema.ResourceData, me
 	}
 
 	clusterID := d.Get(fieldAIHostedModelClusterID).(string)
+	if clusterID == "" {
+		return diag.Errorf("cluster_id is required but was empty in state")
+	}
 
 	tflog.Debug(ctx, "Deleting AI hosted model", map[string]any{"id": d.Id()})
 
 	resp, err := client.HostedModelsAPIDeleteHostedModelWithResponse(ctx, orgID, clusterID, d.Id())
+	if resp != nil && resp.StatusCode() == http.StatusNotFound {
+		return nil
+	}
 	if err := sdk.CheckOKResponse(resp, err); err != nil {
 		return diag.FromErr(fmt.Errorf("deleting hosted model: %w", err))
 	}

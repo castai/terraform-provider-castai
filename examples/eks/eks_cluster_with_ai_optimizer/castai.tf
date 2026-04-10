@@ -99,6 +99,41 @@ module "castai-eks-cluster" {
         spot_interruption_predictions_type    = "aws-rebalance-recommendations"
       }
     }
+
+    llms-by-castai = {
+      name               = "llms-by-castai"
+      configuration_name = "default"
+      is_default         = false
+      is_enabled         = true
+      should_taint       = true
+
+      custom_taints = [
+        {
+          key    = "scheduling.cast.ai/node-template"
+          value  = "llms-by-castai"
+          effect = "NoSchedule"
+        }
+      ]
+
+      constraints = {
+        on_demand          = true
+        spot               = true
+        use_spot_fallbacks = true
+        is_gpu_only        = true
+
+        enable_spot_diversity                       = false
+        spot_diversity_price_increase_limit_percent = 20
+
+        spot_interruption_predictions_enabled = true
+        spot_interruption_predictions_type    = "aws-rebalance-recommendations"
+
+        gpu = {
+          manufacturers = ["NVIDIA"]
+          exclude_names = ["K80", "M60", "P100", "P40", "T4"]
+          min_count     = 1
+        }
+      }
+    }
   }
 
   autoscaler_settings = {

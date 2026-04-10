@@ -280,6 +280,9 @@ func resourceAIModelRegistryDelete(ctx context.Context, d *schema.ResourceData, 
 	tflog.Debug(ctx, "Deleting AI model registry", map[string]any{"id": d.Id()})
 
 	resp, err := client.ModelRegistriesAPIDeleteModelRegistryWithResponse(ctx, orgID, d.Id())
+	if resp != nil && resp.StatusCode() == http.StatusNotFound {
+		return nil
+	}
 	if err := sdk.CheckOKResponse(resp, err); err != nil {
 		return diag.FromErr(fmt.Errorf("deleting model registry: %w", err))
 	}

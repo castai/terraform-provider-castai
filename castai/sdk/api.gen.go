@@ -461,6 +461,12 @@ const (
 	K8sSelectorV1OperatorNotIn1        K8sSelectorV1Operator = "notIn"
 )
 
+// Defines values for NodeconfigV1AKSConfigAcceleratedNetworkingMode.
+const (
+	ACCELERATEDNETWORKINGMODEDISABLED           NodeconfigV1AKSConfigAcceleratedNetworkingMode = "ACCELERATED_NETWORKING_MODE_DISABLED"
+	ACCELERATEDNETWORKINGMODEENABLEDIFSUPPORTED NodeconfigV1AKSConfigAcceleratedNetworkingMode = "ACCELERATED_NETWORKING_MODE_ENABLED_IF_SUPPORTED"
+)
+
 // Defines values for NodeconfigV1AKSConfigImageFamily.
 const (
 	NodeconfigV1AKSConfigImageFamilyFAMILYAZURELINUX  NodeconfigV1AKSConfigImageFamily = "FAMILY_AZURE_LINUX"
@@ -6513,6 +6519,12 @@ type K8sSelectorV1Operator string
 
 // NodeconfigV1AKSConfig defines model for nodeconfig.v1.AKSConfig.
 type NodeconfigV1AKSConfig struct {
+	// AcceleratedNetworking AcceleratedNetworkingMode controls SR-IOV accelerated networking on the node NIC.
+	//
+	//  - ACCELERATED_NETWORKING_MODE_ENABLED_IF_SUPPORTED: Enable accelerated networking when the VM SKU supports it.
+	//  - ACCELERATED_NETWORKING_MODE_DISABLED: Force accelerated networking off regardless of SKU support.
+	AcceleratedNetworking *NodeconfigV1AKSConfigAcceleratedNetworkingMode `json:"acceleratedNetworking,omitempty"`
+
 	// ApplicationSecurityGroupIds Specifies an array of references to application security group.
 	ApplicationSecurityGroupIds *[]string `json:"applicationSecurityGroupIds,omitempty"`
 	EnableEncryptionAtHost      *bool     `json:"enableEncryptionAtHost"`
@@ -6539,6 +6551,12 @@ type NodeconfigV1AKSConfig struct {
 	PodSubnetId *string                        `json:"podSubnetId"`
 	PublicIp    *NodeconfigV1AKSConfigPublicIP `json:"publicIp,omitempty"`
 }
+
+// NodeconfigV1AKSConfigAcceleratedNetworkingMode AcceleratedNetworkingMode controls SR-IOV accelerated networking on the node NIC.
+//
+//   - ACCELERATED_NETWORKING_MODE_ENABLED_IF_SUPPORTED: Enable accelerated networking when the VM SKU supports it.
+//   - ACCELERATED_NETWORKING_MODE_DISABLED: Force accelerated networking off regardless of SKU support.
+type NodeconfigV1AKSConfigAcceleratedNetworkingMode string
 
 // NodeconfigV1AKSConfigImageFamily List of supported image families (OSes) for AKS.
 type NodeconfigV1AKSConfigImageFamily string
