@@ -461,6 +461,12 @@ const (
 	K8sSelectorV1OperatorNotIn1        K8sSelectorV1Operator = "notIn"
 )
 
+// Defines values for NodeconfigV1AKSConfigAcceleratedNetworkingMode.
+const (
+	ACCELERATEDNETWORKINGMODEDISABLED           NodeconfigV1AKSConfigAcceleratedNetworkingMode = "ACCELERATED_NETWORKING_MODE_DISABLED"
+	ACCELERATEDNETWORKINGMODEENABLEDIFSUPPORTED NodeconfigV1AKSConfigAcceleratedNetworkingMode = "ACCELERATED_NETWORKING_MODE_ENABLED_IF_SUPPORTED"
+)
+
 // Defines values for NodeconfigV1AKSConfigImageFamily.
 const (
 	NodeconfigV1AKSConfigImageFamilyFAMILYAZURELINUX  NodeconfigV1AKSConfigImageFamily = "FAMILY_AZURE_LINUX"
@@ -6513,6 +6519,12 @@ type K8sSelectorV1Operator string
 
 // NodeconfigV1AKSConfig defines model for nodeconfig.v1.AKSConfig.
 type NodeconfigV1AKSConfig struct {
+	// AcceleratedNetworking AcceleratedNetworkingMode controls SR-IOV accelerated networking on the node NIC.
+	//
+	//  - ACCELERATED_NETWORKING_MODE_ENABLED_IF_SUPPORTED: Enable accelerated networking when the VM SKU supports it.
+	//  - ACCELERATED_NETWORKING_MODE_DISABLED: Force accelerated networking off regardless of SKU support.
+	AcceleratedNetworking *NodeconfigV1AKSConfigAcceleratedNetworkingMode `json:"acceleratedNetworking,omitempty"`
+
 	// ApplicationSecurityGroupIds Specifies an array of references to application security group.
 	ApplicationSecurityGroupIds *[]string `json:"applicationSecurityGroupIds,omitempty"`
 	EnableEncryptionAtHost      *bool     `json:"enableEncryptionAtHost"`
@@ -6539,6 +6551,12 @@ type NodeconfigV1AKSConfig struct {
 	PodSubnetId *string                        `json:"podSubnetId"`
 	PublicIp    *NodeconfigV1AKSConfigPublicIP `json:"publicIp,omitempty"`
 }
+
+// NodeconfigV1AKSConfigAcceleratedNetworkingMode AcceleratedNetworkingMode controls SR-IOV accelerated networking on the node NIC.
+//
+//   - ACCELERATED_NETWORKING_MODE_ENABLED_IF_SUPPORTED: Enable accelerated networking when the VM SKU supports it.
+//   - ACCELERATED_NETWORKING_MODE_DISABLED: Force accelerated networking off regardless of SKU support.
+type NodeconfigV1AKSConfigAcceleratedNetworkingMode string
 
 // NodeconfigV1AKSConfigImageFamily List of supported image families (OSes) for AKS.
 type NodeconfigV1AKSConfigImageFamily string
@@ -7166,6 +7184,9 @@ type NodetemplatesV1NewNodeTemplate struct {
 	// Based on the template constraints, the template may still have additional taints.
 	// For example, if both lifecycles (spot, on-demand) are enabled, to use spot nodes, the spot nodes of this template will have the spot taint.
 	ShouldTaint *bool `json:"shouldTaint"`
+
+	// StopEnabled Nodes in this node-template have Storage Optimization (STOP) enabled.
+	StopEnabled *bool `json:"stopEnabled"`
 }
 
 // NodetemplatesV1NodeTemplate defines model for nodetemplates.v1.NodeTemplate.
@@ -7200,7 +7221,10 @@ type NodetemplatesV1NodeTemplate struct {
 	RebalancingConfig            *NodetemplatesV1RebalancingConfiguration     `json:"rebalancingConfig,omitempty"`
 
 	// ShouldTaint Marks whether the templated nodes will have a taint.
-	ShouldTaint *bool   `json:"shouldTaint,omitempty"`
+	ShouldTaint *bool `json:"shouldTaint,omitempty"`
+
+	// StopEnabled Nodes in this node-template have Storage Optimization (STOP) enabled.
+	StopEnabled *bool   `json:"stopEnabled,omitempty"`
 	Version     *string `json:"version,omitempty"`
 }
 
@@ -7463,6 +7487,9 @@ type NodetemplatesV1UpdateNodeTemplate struct {
 
 	// ShouldTaint Marks whether the templated nodes will have a taint.
 	ShouldTaint *bool `json:"shouldTaint"`
+
+	// StopEnabled Nodes in this node-template have Storage Optimization (STOP) enabled.
+	StopEnabled *bool `json:"stopEnabled"`
 }
 
 // PoliciesV1ClusterLimitsCpu Defines the minimum and maximum amount of vCPUs for cluster's worker nodes.
@@ -8691,17 +8718,6 @@ type WorkloadoptimizationV1CustomMetricsDataSourceDataNodeWorkloadMetrics struct
 
 	// Resolved All resolved metrics from presets and manual metrics combined, with origin information.
 	Resolved *[]WorkloadoptimizationV1CustomMetricsDataSourceDataNodeWorkloadMetricsResolvedMetric `json:"resolved,omitempty"`
-
-	// ResolvedMetrics Deprecated: use `resolved` field instead.
-	// Deprecated:
-	ResolvedMetrics *[]WorkloadoptimizationV1CustomMetricsDataSourceDataNodeWorkloadMetricsMetric `json:"resolvedMetrics,omitempty"`
-}
-
-// WorkloadoptimizationV1CustomMetricsDataSourceDataNodeWorkloadMetricsMetric Deprecated: use `resolved` field instead.
-type WorkloadoptimizationV1CustomMetricsDataSourceDataNodeWorkloadMetricsMetric struct {
-	Errors   []string `json:"errors"`
-	Name     string   `json:"name"`
-	Warnings []string `json:"warnings"`
 }
 
 // WorkloadoptimizationV1CustomMetricsDataSourceDataNodeWorkloadMetricsResolvedMetric ResolvedMetric represents a fully resolved metric with its origin.
@@ -8736,18 +8752,6 @@ type WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetrics struct {
 
 	// Resolved All resolved metrics from presets and manual metrics combined, with origin information.
 	Resolved *[]WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetricsResolvedMetric `json:"resolved,omitempty"`
-
-	// ResolvedMetrics Deprecated: use `resolved` field instead.
-	// Deprecated:
-	ResolvedMetrics *[]WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetricsMetric `json:"resolvedMetrics,omitempty"`
-}
-
-// WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetricsMetric Deprecated: use `ResolvedMetric` instead.
-type WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetricsMetric struct {
-	Errors   []string `json:"errors"`
-	Name     string   `json:"name"`
-	Queries  []string `json:"queries"`
-	Warnings []string `json:"warnings"`
 }
 
 // WorkloadoptimizationV1CustomMetricsDataSourceDataPrometheusMetricsResolvedMetric ResolvedMetric represents a fully resolved metric with origin-tagged queries.
@@ -9868,10 +9872,9 @@ type WorkloadoptimizationV1RecommendationStepLabel struct {
 	// BYTE - Memory bytes.
 	Unit *WorkloadoptimizationV1RecommendationStepLabelUnit `json:"unit,omitempty"`
 
-	// Value This field contains a map with one key in the format {"data": value}.
-	// The "data" key holds the actual value of the label.
-	// E.g. if the label value is 3.14 then value = {"data": 3.14}.
-	Value *map[string]interface{} `json:"value,omitempty"`
+	// Value The value of the label as a string.
+	// Numeric values are encoded as their string representation.
+	Value *string `json:"value,omitempty"`
 }
 
 // WorkloadoptimizationV1RecommendationStepLabelUnit The optional unit of the label.
@@ -11306,6 +11309,9 @@ type ExternalClusterAPIGetConnectAndEnableCASTAICmdParams struct {
 	// No-op if install_security_agent is set to false.
 	// To enable backwards compatibility, when the field is omitted, it is defaulted to true.
 	InstallSecurityCompliance *bool `form:"installSecurityCompliance,omitempty" json:"installSecurityCompliance,omitempty"`
+
+	// UseUmbrella Whether to use umbrella Helm chart for onboarding.
+	UseUmbrella *bool `form:"useUmbrella,omitempty" json:"useUmbrella,omitempty"`
 }
 
 // ExternalClusterAPIGetCredentialsScriptParams defines parameters for ExternalClusterAPIGetCredentialsScript.

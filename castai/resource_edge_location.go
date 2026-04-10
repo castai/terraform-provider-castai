@@ -588,6 +588,11 @@ func (r *edgeLocationResource) Read(ctx context.Context, req resource.ReadReques
 	if edgeLocation.ControlPlaneMode != nil {
 		state.ControlPlaneMode = types.StringValue(string(*edgeLocation.ControlPlaneMode))
 	}
+	if edgeLocation.EdgeClusterSpec != nil && edgeLocation.EdgeClusterSpec.ControlPlane != nil {
+		state.ControlPlane = &controlPlaneModel{
+			Ha: types.BoolPointerValue(edgeLocation.EdgeClusterSpec.ControlPlane.Ha),
+		}
+	}
 
 	if edgeLocation.Zones != nil {
 		state.Zones = r.toZoneModel(edgeLocation.Zones)
