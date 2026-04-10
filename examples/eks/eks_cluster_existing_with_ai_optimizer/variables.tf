@@ -91,6 +91,12 @@ variable "custom_base_model_spec_id" {
   default     = ""
 }
 
+variable "install_nvidia_device_plugin" {
+  type        = bool
+  description = "Install NVIDIA device plugin required for GPU support."
+  default     = false
+}
+
 variable "tags" {
   type        = map(any)
   description = "Optional tags for new cluster nodes. This parameter applies only to new nodes - tags for old nodes are not reconciled."

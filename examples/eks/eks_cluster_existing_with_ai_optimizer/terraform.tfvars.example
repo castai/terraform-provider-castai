@@ -11,6 +11,9 @@ castai_api_token = ""
 # Optional: Enable AI Optimizer.
 enable_ai_optimizer = true
 
+# Optional: Install NVIDIA device plugin for GPU support.
+install_nvidia_device_plugin = true
+
 # Optional: Deploy predefined HuggingFace model.
 # When enabled, provide hf_token for accessing Hugging Face Hub models.
 deploy_predefined_model = false
