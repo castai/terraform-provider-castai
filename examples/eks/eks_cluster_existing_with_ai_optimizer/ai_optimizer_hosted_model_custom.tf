@@ -86,7 +86,7 @@ resource "castai_ai_optimizer_hosted_model" "custom_model" {
 
   cluster_id         = castai_eks_clusterid.cluster_id.id
   model_specs_id     = castai_ai_optimizer_model_specs.custom_model[0].id
-  service            = "${var.custom_model_name}-service"
+  service            = "custom-llm"
   port               = 8080
   node_template_name = "llms-by-castai"
 
