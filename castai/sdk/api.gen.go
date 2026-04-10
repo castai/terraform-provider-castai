@@ -9872,10 +9872,9 @@ type WorkloadoptimizationV1RecommendationStepLabel struct {
 	// BYTE - Memory bytes.
 	Unit *WorkloadoptimizationV1RecommendationStepLabelUnit `json:"unit,omitempty"`
 
-	// Value This field contains a map with one key in the format {"data": value}.
-	// The "data" key holds the actual value of the label.
-	// E.g. if the label value is 3.14 then value = {"data": 3.14}.
-	Value *map[string]interface{} `json:"value,omitempty"`
+	// Value The value of the label as a string.
+	// Numeric values are encoded as their string representation.
+	Value *string `json:"value,omitempty"`
 }
 
 // WorkloadoptimizationV1RecommendationStepLabelUnit The optional unit of the label.
