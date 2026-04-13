@@ -66,8 +66,7 @@ const (
 	aksEphemeralDiskPlacementCacheDisk    = "cacheDisk"
 	aksEphemeralDiskPlacementResourceDisk = "resourceDisk"
 	aksEphemeralDiskPlacementNVME         = "nvmeDisk"
-	aksAcceleratedNetworkingEnabledIfSupported = "enabled_if_supported"
-	aksAcceleratedNetworkingDisabled           = "disabled"
+	aksAcceleratedNetworkingDisabled      = "disabled"
 )
 
 const (
@@ -501,10 +500,10 @@ func resourceNodeConfiguration() *schema.Resource {
 							Description: "Whether to enable encryption at host for provisioned nodes. See https://learn.microsoft.com/en-us/azure/virtual-machines/disk-encryption#encryption-at-host---end-to-end-encryption-for-your-vm-data",
 						},
 						FieldNodeConfigurationAKSAcceleratedNetworking: {
-							Type:         schema.TypeString,
-							Optional:     true,
-							Description:  "Controls SR-IOV accelerated networking on the node NIC. Allowed values: `enabled_if_supported` (enable when the VM SKU supports it), `disabled` (force off regardless of SKU capability). When omitted, the field is not sent to the API and the API default applies.",
-							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{aksAcceleratedNetworkingEnabledIfSupported, aksAcceleratedNetworkingDisabled}, false)),
+							Type:             schema.TypeString,
+							Optional:         true,
+							Description:      "Controls SR-IOV accelerated networking on the node NIC. Allowed values: `disabled` (force off regardless of SKU capability). When omitted, the field is not sent to the API and the API default applies.",
+							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{aksAcceleratedNetworkingDisabled}, false)),
 						},
 					},
 				},
@@ -1220,8 +1219,6 @@ func toAKSAcceleratedNetworkingMode(v string) *sdk.NodeconfigV1AKSConfigAccelera
 	switch v {
 	case aksAcceleratedNetworkingDisabled:
 		return toPtr(sdk.ACCELERATEDNETWORKINGMODEDISABLED)
-	case aksAcceleratedNetworkingEnabledIfSupported:
-		return toPtr(sdk.ACCELERATEDNETWORKINGMODEENABLEDIFSUPPORTED)
 	default:
 		return nil
 	}
@@ -1232,7 +1229,7 @@ func fromAKSAcceleratedNetworkingMode(v sdk.NodeconfigV1AKSConfigAcceleratedNetw
 	case sdk.ACCELERATEDNETWORKINGMODEDISABLED:
 		return aksAcceleratedNetworkingDisabled
 	default:
-		return aksAcceleratedNetworkingEnabledIfSupported
+		return ""
 	}
 }
 
@@ -1434,7 +1431,9 @@ func flattenAKSConfig(config *sdk.NodeconfigV1AKSConfig) []map[string]interface{
 	}
 
 	if v := config.AcceleratedNetworking; v != nil {
-		m[FieldNodeConfigurationAKSAcceleratedNetworking] = fromAKSAcceleratedNetworkingMode(*v)
+		if s := fromAKSAcceleratedNetworkingMode(*v); s != "" {
+			m[FieldNodeConfigurationAKSAcceleratedNetworking] = s
+		}
 	}
 
 	return []map[string]interface{}{m}

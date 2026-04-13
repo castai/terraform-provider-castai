@@ -457,6 +457,7 @@ func TestAccAKS_ResourceAKSCluster(t *testing.T) {
 					resource.TestCheckResourceAttr(nodeConfResourceName, "min_disk_size", "122"),
 					resource.TestCheckResourceAttr(nodeConfResourceName, "aks.0.max_pods_per_node", "31"),
 					resource.TestCheckResourceAttr(nodeConfResourceName, "aks.0.aks_image_family", "ubuntu"),
+					resource.TestCheckNoResourceAttr(nodeConfResourceName, "aks.0.accelerated_networking"),
 					resource.TestCheckResourceAttr(nodeConfResourceName, "eks.#", "0"),
 					resource.TestCheckResourceAttr(nodeConfResourceName, "kops.#", "0"),
 					resource.TestCheckResourceAttr(nodeConfResourceName, "gke.#", "0"),

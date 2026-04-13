@@ -441,11 +441,6 @@ func TestToAKSSConfig_AcceleratedNetworking(t *testing.T) {
 			expected: toPtr(sdk.ACCELERATEDNETWORKINGMODEDISABLED),
 		},
 		{
-			name:     "enabled_if_supported",
-			input:    "enabled_if_supported",
-			expected: toPtr(sdk.ACCELERATEDNETWORKINGMODEENABLEDIFSUPPORTED),
-		},
-		{
 			name:     "empty string",
 			input:    "",
 			expected: nil,
@@ -468,14 +463,12 @@ func TestToAKSSConfig_AcceleratedNetworking(t *testing.T) {
 
 func TestFlattenAKSConfig_AcceleratedNetworking(t *testing.T) {
 	disabled := sdk.ACCELERATEDNETWORKINGMODEDISABLED
-	enabled := sdk.ACCELERATEDNETWORKINGMODEENABLEDIFSUPPORTED
 	tests := []struct {
 		name     string
 		input    *sdk.NodeconfigV1AKSConfigAcceleratedNetworkingMode
 		expected any
 	}{
 		{name: "disabled", input: &disabled, expected: "disabled"},
-		{name: "enabled_if_supported", input: &enabled, expected: "enabled_if_supported"},
 		{name: "nil", input: nil, expected: nil},
 	}
 	for _, tt := range tests {
