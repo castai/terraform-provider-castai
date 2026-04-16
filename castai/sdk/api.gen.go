@@ -463,8 +463,8 @@ const (
 
 // Defines values for NodeconfigV1AKSConfigAcceleratedNetworkingMode.
 const (
-	ACCELERATEDNETWORKINGMODEDISABLED           NodeconfigV1AKSConfigAcceleratedNetworkingMode = "ACCELERATED_NETWORKING_MODE_DISABLED"
-	ACCELERATEDNETWORKINGMODEENABLEDIFSUPPORTED NodeconfigV1AKSConfigAcceleratedNetworkingMode = "ACCELERATED_NETWORKING_MODE_ENABLED_IF_SUPPORTED"
+	ACCELERATEDNETWORKINGMODEDISABLED    NodeconfigV1AKSConfigAcceleratedNetworkingMode = "ACCELERATED_NETWORKING_MODE_DISABLED"
+	ACCELERATEDNETWORKINGMODEUNSPECIFIED NodeconfigV1AKSConfigAcceleratedNetworkingMode = "ACCELERATED_NETWORKING_MODE_UNSPECIFIED"
 )
 
 // Defines values for NodeconfigV1AKSConfigImageFamily.
@@ -6127,6 +6127,10 @@ type ExternalclusterV1NodeVolume struct {
 
 	// Size Volume size in GiB.
 	Size *int32 `json:"size,omitempty"`
+
+	// StopEnabled Storage Optimization enabled - if true, allows root disk to be provisioned based on size from Node Disk Recommendation.
+	// Usually it means the root disk size will be lower than what is defined in the Node Configuration.
+	StopEnabled *bool `json:"stopEnabled"`
 }
 
 // ExternalclusterV1OKEClusterParams OKEClusterParams defines OKE -specific arguments.
@@ -6521,7 +6525,7 @@ type K8sSelectorV1Operator string
 type NodeconfigV1AKSConfig struct {
 	// AcceleratedNetworking AcceleratedNetworkingMode controls SR-IOV accelerated networking on the node NIC.
 	//
-	//  - ACCELERATED_NETWORKING_MODE_ENABLED_IF_SUPPORTED: Enable accelerated networking when the VM SKU supports it.
+	//  - ACCELERATED_NETWORKING_MODE_UNSPECIFIED: Enable accelerated networking when the VM SKU supports it.
 	//  - ACCELERATED_NETWORKING_MODE_DISABLED: Force accelerated networking off regardless of SKU support.
 	AcceleratedNetworking *NodeconfigV1AKSConfigAcceleratedNetworkingMode `json:"acceleratedNetworking,omitempty"`
 
@@ -6554,7 +6558,7 @@ type NodeconfigV1AKSConfig struct {
 
 // NodeconfigV1AKSConfigAcceleratedNetworkingMode AcceleratedNetworkingMode controls SR-IOV accelerated networking on the node NIC.
 //
-//   - ACCELERATED_NETWORKING_MODE_ENABLED_IF_SUPPORTED: Enable accelerated networking when the VM SKU supports it.
+//   - ACCELERATED_NETWORKING_MODE_UNSPECIFIED: Enable accelerated networking when the VM SKU supports it.
 //   - ACCELERATED_NETWORKING_MODE_DISABLED: Force accelerated networking off regardless of SKU support.
 type NodeconfigV1AKSConfigAcceleratedNetworkingMode string
 
@@ -8668,6 +8672,9 @@ type WorkloadoptimizationV1CustomMetricsDataSource struct {
 	Errors    *[]string                                         `json:"errors,omitempty"`
 	Id        string                                            `json:"id"`
 
+	// InstalledByCast InstalledByCast indicates whether this data source was installed by CAST AI.
+	InstalledByCast bool `json:"installedByCast"`
+
 	// KubeResourceName KubeResourceName is the name of the resource in Kubernetes. Cannot be updated, as it would break the sync.
 	// It is NOT unique per cluster as multiple data source entries in the DB may form a single resource in the cluster.
 	// When not provided, it is generated based on name field.
@@ -9427,6 +9434,9 @@ type WorkloadoptimizationV1JVMMemorySettings struct {
 
 // WorkloadoptimizationV1JVMRuntimeConfiguration JVMRuntimeConfiguration defines set of settings that enables and configures for JVM optimization.
 type WorkloadoptimizationV1JVMRuntimeConfiguration struct {
+	// AutoInstrument When true, JMX exporter will be automatically injected into this container.
+	AutoInstrument *bool `json:"autoInstrument"`
+
 	// Enabled Flag to enable JVM optimization.
 	Enabled *bool `json:"enabled"`
 
@@ -9436,6 +9446,9 @@ type WorkloadoptimizationV1JVMRuntimeConfiguration struct {
 
 // WorkloadoptimizationV1JVMRuntimeConfigurationUpdate JVMRuntimeConfigurationUpdate defines set of settings that enables and configures for JVM optimization.
 type WorkloadoptimizationV1JVMRuntimeConfigurationUpdate struct {
+	// AutoInstrument When true, JMX exporter will be automatically injected into this container.
+	AutoInstrument *bool `json:"autoInstrument"`
+
 	// Enabled Flag to enable JVM optimization.
 	Enabled *bool `json:"enabled"`
 
@@ -9445,7 +9458,9 @@ type WorkloadoptimizationV1JVMRuntimeConfigurationUpdate struct {
 
 // WorkloadoptimizationV1JVMSettings defines model for workloadoptimization.v1.JVMSettings.
 type WorkloadoptimizationV1JVMSettings struct {
-	Memory *WorkloadoptimizationV1JVMMemorySettings `json:"memory,omitempty"`
+	// AutoInstrument When true, JMX exporter will be automatically injected into pods where JVM runtime is detected.
+	AutoInstrument *bool                                    `json:"autoInstrument"`
+	Memory         *WorkloadoptimizationV1JVMMemorySettings `json:"memory,omitempty"`
 }
 
 // WorkloadoptimizationV1KeyValuePair defines model for workloadoptimization.v1.KeyValuePair.
@@ -10519,7 +10534,12 @@ type WorkloadoptimizationV1Workload struct {
 	HpaState     *WorkloadoptimizationV1HPAState `json:"hpaState,omitempty"`
 	Id           string                          `json:"id"`
 	IsCustom     bool                            `json:"isCustom"`
-	Kind         string                          `json:"kind"`
+
+	// IsJobLike Whether the workload runs to completion (as opposed to running continuously).
+	// True for native Jobs/CronJobs and workloads that exhibit equivalent behavior
+	// (e.g. bare pods or custom resources identified by kind, hierarchy, or annotations).
+	IsJobLike bool   `json:"isJobLike"`
+	Kind      string `json:"kind"`
 
 	// Labels Labels as defined on the workload manifest. These are labels from the controller meta, not the pod meta.
 	Labels []WorkloadoptimizationV1KeyValuePair `json:"labels"`
@@ -11002,6 +11022,9 @@ type DboAPIGetCacheEfficiencyParams struct {
 
 	// TemplateHash Optionally filter the results by a specific template hash
 	TemplateHash *string `form:"templateHash,omitempty" json:"templateHash,omitempty"`
+
+	// Username Filter by username.
+	Username *string `form:"username,omitempty" json:"username,omitempty"`
 }
 
 // DboAPIGetCacheQueriesParams defines parameters for DboAPIGetCacheQueries.
