@@ -125,19 +125,16 @@ Optional:
 Required:
 
 - `compartment_id` (String) OCI compartment ID of edge location
+- `fingerprint_wo` (String, Sensitive) API key fingerprint
+- `private_key_base64_wo` (String, Sensitive) Base64 encoded API private key
 - `subnet_id` (String) OCI subnet ID of edge location
 - `tenancy_id` (String) OCI tenancy ID of the account
+- `user_id_wo` (String) User ID used to authenticate OCI
 - `vcn_id` (String) OCI virtual cloud network ID
 
 Optional:
 
-- `client_id` (String) ID of the OCI confidential application used for WIF token exchange
-- `client_secret_wo` (String, Sensitive) Secret of the OCI confidential application used for WIF token exchange
-- `fingerprint_wo` (String, Sensitive) API key fingerprint
-- `identity_domain_uri` (String) OCI Identity Domain URI (e.g., idcs-xxxx.identity.oraclecloud.com)
-- `private_key_base64_wo` (String, Sensitive) Base64 encoded API private key
 - `security_group_id` (String) OCI network security group ID
-- `user_id_wo` (String) User ID used to authenticate OCI
 - `vcn_cidr` (String) OCI VCN IPv4 CIDR block
 
 
