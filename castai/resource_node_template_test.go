@@ -1041,6 +1041,7 @@ resource "castai_edge_location" "test_1" {
     vpc_id               = "vpc-12345678"
     security_group_id    = "sg-12345678"
 	vpc_peered           = false
+    vpc_cidr             = "10.0.0.0/16"
     subnet_ids = {
       "us-east-1a" = "subnet-12345678"
       "us-east-1b" = "subnet-12345679"
@@ -1071,6 +1072,7 @@ resource "castai_edge_location" "test_2" {
     vpc_id               = "vpc-87654321"
     security_group_id    = "sg-87654321"
 	vpc_peered           = false
+    vpc_cidr             = "10.1.0.0/16"
     subnet_ids = {
       "us-west-2a" = "subnet-87654321"
     }

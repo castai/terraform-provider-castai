@@ -210,6 +210,7 @@ resource "castai_edge_location" "test" {
     %[6]s
     vpc_id               = "vpc-12345678"
 	vpc_peered           = true
+    vpc_cidr             = "10.0.0.0/16"
     security_group_id    = "sg-12345678"
     subnet_ids = {%[4]s
     }
@@ -284,6 +285,7 @@ resource "castai_edge_location" "test" {
     %[5]s
     network_name             = "test-network"
     subnet_name              = "test-subnet"
+    subnet_cidr              = "10.0.0.0/20"
     network_tags             = [%[4]s]
   }
 }
@@ -333,6 +335,7 @@ resource "castai_edge_location" "test" {
     compartment_id  = "ocid1.compartment.oc1..example"
     %[4]s
     vcn_id          = "ocid1.vcn.oc1.phx.example"
+    vcn_cidr        = "10.0.0.0/16"
     subnet_id       = "ocid1.subnet.oc1.phx.example"
   }
 }
