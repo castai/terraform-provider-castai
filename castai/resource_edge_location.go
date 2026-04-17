@@ -95,9 +95,6 @@ type ociModel struct {
 	UserIDWO           types.String `tfsdk:"user_id_wo"`
 	FingerprintWO      types.String `tfsdk:"fingerprint_wo"`
 	PrivateKeyBase64WO types.String `tfsdk:"private_key_base64_wo"`
-	ClientID           types.String `tfsdk:"client_id"`
-	ClientSecretWO     types.String `tfsdk:"client_secret_wo"`
-	IdentityDomainUri  types.String `tfsdk:"identity_domain_uri"`
 	VcnID              types.String `tfsdk:"vcn_id"`
 	VcnCidr            types.String `tfsdk:"vcn_cidr"`
 	SubnetID           types.String `tfsdk:"subnet_id"`
@@ -146,15 +143,7 @@ func (m gcpModel) Equal(other *gcpModel) bool {
 }
 
 func (m ociModel) credentials() types.String {
-	// WIF flow: track client secret
-	if !m.ClientSecretWO.IsNull() {
-		return m.ClientSecretWO
-	}
-	// Legacy API key flow: track user+key+fingerprint
-	if !m.UserIDWO.IsNull() || !m.FingerprintWO.IsNull() || !m.PrivateKeyBase64WO.IsNull() {
-		return types.StringValue(m.UserIDWO.String() + m.PrivateKeyBase64WO.String() + m.FingerprintWO.String())
-	}
-	return types.StringNull()
+	return types.StringValue(m.UserIDWO.String() + m.PrivateKeyBase64WO.String() + m.FingerprintWO.String())
 }
 
 func (m ociModel) Equal(other *ociModel) bool {
@@ -163,8 +152,6 @@ func (m ociModel) Equal(other *ociModel) bool {
 	}
 	return m.TenancyID.Equal(other.TenancyID) &&
 		m.CompartmentID.Equal(other.CompartmentID) &&
-		m.ClientID.Equal(other.ClientID) &&
-		m.IdentityDomainUri.Equal(other.IdentityDomainUri) &&
 		m.VcnID.Equal(other.VcnID) &&
 		m.VcnCidr.Equal(other.VcnCidr) &&
 		m.SubnetID.Equal(other.SubnetID) &&
@@ -396,34 +383,20 @@ func (r *edgeLocationResource) Schema(_ context.Context, _ resource.SchemaReques
 						Required:    true,
 						Description: "OCI compartment ID of edge location",
 					},
-					"client_id": schema.StringAttribute{
-						Optional:    true,
-						Description: "ID of the OCI confidential application used for WIF token exchange",
-					},
-					"client_secret_wo": schema.StringAttribute{
-						Optional:    true,
-						Sensitive:   true,
-						WriteOnly:   true,
-						Description: "Secret of the OCI confidential application used for WIF token exchange",
-					},
-					"identity_domain_uri": schema.StringAttribute{
-						Optional:    true,
-						Description: "OCI Identity Domain URI (e.g., idcs-xxxx.identity.oraclecloud.com)",
-					},
 					"user_id_wo": schema.StringAttribute{
-						Optional:    true,
+						Required:    true,
 						Description: "User ID used to authenticate OCI",
 						WriteOnly:   true,
 					},
 					"fingerprint_wo": schema.StringAttribute{
-						Optional:    true,
+						Required:    true,
 						Sensitive:   true,
 						WriteOnly:   true,
 						Description: "API key fingerprint",
 					},
 					"private_key_base64_wo": schema.StringAttribute{
 						WriteOnly:   true,
-						Optional:    true,
+						Required:    true,
 						Sensitive:   true,
 						Description: "Base64 encoded API private key",
 						Validators: []validator.String{
@@ -587,6 +560,11 @@ func (r *edgeLocationResource) Read(ctx context.Context, req resource.ReadReques
 	}
 	if edgeLocation.ControlPlaneMode != nil {
 		state.ControlPlaneMode = types.StringValue(string(*edgeLocation.ControlPlaneMode))
+	}
+	if edgeLocation.EdgeClusterSpec != nil && edgeLocation.EdgeClusterSpec.ControlPlane != nil {
+		state.ControlPlane = &controlPlaneModel{
+			Ha: types.BoolPointerValue(edgeLocation.EdgeClusterSpec.ControlPlane.Ha),
+		}
 	}
 
 	if edgeLocation.Zones != nil {
@@ -982,24 +960,11 @@ func (r *edgeLocationResource) toOCI(plan, config *ociModel) *omni.OCIParam {
 			VcnCidr:         plan.VcnCidr.ValueStringPointer(),
 			SecurityGroupId: plan.SecurityGroupID.ValueStringPointer(),
 		},
-	}
-
-	// WIF flow: use confidential application client
-	if !plan.ClientID.IsNull() {
-		out.Client = &omni.OCIParamClient{
-			Id:                plan.ClientID.ValueString(),
-			Secret:            config.ClientSecretWO.ValueStringPointer(),
-			IdentityDomainUri: plan.IdentityDomainUri.ValueString(),
-		}
-	}
-
-	// Legacy API key flow
-	if !config.UserIDWO.IsNull() || !config.FingerprintWO.IsNull() || !config.PrivateKeyBase64WO.IsNull() {
-		out.Credentials = &omni.OCIParamCredentials{
+		Credentials: &omni.OCIParamCredentials{
 			UserId:           config.UserIDWO.ValueString(),
 			Fingerprint:      config.FingerprintWO.ValueString(),
 			PrivateKeyBase64: config.PrivateKeyBase64WO.ValueString(),
-		}
+		},
 	}
 
 	return out
@@ -1013,9 +978,6 @@ func (r *edgeLocationResource) toOCIModel(config *omni.OCIParam) *ociModel {
 	oci := &ociModel{
 		TenancyID:          types.StringValue(lo.FromPtr(config.TenancyId)),
 		CompartmentID:      types.StringValue(lo.FromPtr(config.CompartmentId)),
-		ClientID:           types.StringNull(),
-		IdentityDomainUri:  types.StringNull(),
-		ClientSecretWO:     types.StringNull(),
 		VcnID:              types.StringNull(),
 		VcnCidr:            types.StringNull(),
 		SubnetID:           types.StringNull(),
@@ -1023,11 +985,6 @@ func (r *edgeLocationResource) toOCIModel(config *omni.OCIParam) *ociModel {
 		UserIDWO:           types.StringNull(),
 		FingerprintWO:      types.StringNull(),
 		PrivateKeyBase64WO: types.StringNull(),
-	}
-
-	if config.Client != nil {
-		oci.ClientID = types.StringValue(config.Client.Id)
-		oci.IdentityDomainUri = types.StringValue(config.Client.IdentityDomainUri)
 	}
 
 	if config.Networking != nil {

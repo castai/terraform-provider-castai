@@ -7,7 +7,8 @@ export SWAGGER_LOCATION ?= https://$(API_HOST)/v1/spec/openapi.json
 #  To add a new SDK, add a line here in the format: package_name:ApiTagName:spec_location
 SDK_SPECS := \
 	cluster_autoscaler:HibernationSchedulesAPI:https://$(API_HOST)/spec/cluster-autoscaler/openapi.yaml \
-	organization_management:EnterpriseAPI:https://$(API_HOST)/spec/organization-management/openapi.yaml
+	organization_management:EnterpriseAPI:https://$(API_HOST)/spec/organization-management/openapi.yaml \
+	patching_engine:PodMutationsAPI:https://$(API_HOST)/spec/patching-engine/openapi.yaml
 
 OMNI_SDK_SPECS := \
 	omni:EdgeLocationsAPI,ClustersAPI:https://$(API_HOST)/spec/omni/openapi.yaml

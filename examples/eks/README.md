@@ -5,6 +5,7 @@
 - [EKS cluster](eks_cluster_assumerole/) - Onboard EKS cluster to CAST AI in Full Access mode. [CAST AI IAM module](https://github.com/castai/terraform-castai-eks-role-iam) is used to create required IAM resources.
 - [EKS cluster with custom IAM polices](eks_cluster_custom_iam/) -  Onboard EKS cluster to CAST AI in Full Access mode. Custom IAM policies are used to configure required IAM resources.
 - [EKS cluster with autoscaler policies](eks_cluster_autoscaler_policies/) -  Onboard EKS cluster to CAST AI in Full Access mode with configured autoscaler CAST AI policies.
+- [EKS cluster with AI Optimizer](eks_cluster_with_ai_optimizer/) - Onboard EKS cluster to CAST AI with AI Optimizer enabled for LLM model serving. Includes GPU node groups, model registry, and hosted model deployments.
 - [EKS cluster onboarded through GitOps](eks_cluster_gitops/) - Onboard EKS cluster to CAST AI in Full Access mode when CAST AI K8s components are installed using GitOps (e.g. ArgoCD, manual Helm releases). This example can also be used to import CAST AI cluster to Terraform if it was onboarded using [onboarding script](https://docs.cast.ai/docs/cluster-onboarding).
 - [EKS cluster with demo application](eks_cluster_webshop) - Onboard EKS cluster to CAST AI in Full Access mode. This example contains Demo application installed into cluster to showcase CAST AI cost saving capabilities.
  

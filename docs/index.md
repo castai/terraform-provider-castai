@@ -106,3 +106,4 @@ resource "helm_release" "castai_agent" {
 
 - `api_token` (String, Sensitive) The token used to connect to CAST AI API.
 - `api_url` (String) CAST.AI API url.
+- `organization_id` (String) CAST AI organization ID. Required when the API token has access to multiple organizations.

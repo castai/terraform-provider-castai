@@ -443,51 +443,6 @@ func TestAccCloudAgnostic_ResourceEdgeLocationGCPImpersonation(t *testing.T) {
 	})
 }
 
-func TestAccCloudAgnostic_ResourceEdgeLocationOCIWIF(t *testing.T) {
-	rName := fmt.Sprintf("%v-edge-loc-%v", ResourcePrefix, acctest.RandString(8))
-	resourceName := "castai_edge_location.test"
-
-	resource.Test(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
-		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
-		CheckDestroy:             testAccCheckEdgeLocationDestroy,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccEdgeLocationOCIWIFConfig(rName),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceName, "name", rName),
-					resource.TestCheckResourceAttr(resourceName, "description", "Test OCI edge location WIF"),
-					resource.TestCheckResourceAttr(resourceName, "region", "us-phoenix-1"),
-					resource.TestCheckResourceAttr(resourceName, "zones.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "zones.0.id", "1"),
-					resource.TestCheckResourceAttr(resourceName, "zones.0.name", "PHX-AD-1"),
-					resource.TestCheckResourceAttrSet(resourceName, "oci.tenancy_id"),
-					resource.TestCheckResourceAttrSet(resourceName, "oci.compartment_id"),
-					resource.TestCheckResourceAttr(resourceName, "oci.client_id", "test-app-client-id"),
-					resource.TestCheckResourceAttr(resourceName, "oci.identity_domain_uri", "idcs-example.identity.oraclecloud.com"),
-					resource.TestCheckResourceAttr(resourceName, "oci.vcn_cidr", "10.0.0.0/16"),
-					resource.TestCheckResourceAttrSet(resourceName, "oci.security_group_id"),
-					resource.TestCheckResourceAttrSet(resourceName, "id"),
-					resource.TestCheckResourceAttr(resourceName, "credentials_revision", "1"),
-				),
-			},
-			{
-				Config: testAccEdgeLocationOCIWIFUpdated(rName),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceName, "description", "Updated OCI edge location WIF"),
-				),
-			},
-			// Rotate the client secret: credentials_revision must increment
-			{
-				Config: testAccEdgeLocationOCIWIFCredentialsUpdated(rName),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceName, "credentials_revision", "2"),
-				),
-			},
-		},
-	})
-}
-
 func formatAWSZonesAndSubnets(zones []string) (zonesConfig string, subnetConfig string) {
 	var zonesBuilder strings.Builder
 	var subnetBuilder strings.Builder
@@ -622,49 +577,6 @@ resource "castai_edge_location" "test" {
   }
 }
 `, rName, description, zonesConfig, networkTagsConfig, organizationID, targetSA))
-}
-
-func testAccEdgeLocationOCIWIFConfig(rName string) string {
-	return testAccEdgeLocationOCIWIFConfigWithParams(rName, "Test OCI edge location WIF", "test-app-client-secret")
-}
-
-func testAccEdgeLocationOCIWIFUpdated(rName string) string {
-	return testAccEdgeLocationOCIWIFConfigWithParams(rName, "Updated OCI edge location WIF", "test-app-client-secret")
-}
-
-func testAccEdgeLocationOCIWIFCredentialsUpdated(rName string) string {
-	return testAccEdgeLocationOCIWIFConfigWithParams(rName, "Updated OCI edge location WIF", "test-app-client-secret-changed")
-}
-
-func testAccEdgeLocationOCIWIFConfigWithParams(rName, description, clientSecret string) string {
-	organizationID := testAccGetOrganizationID()
-	clusterName := "test-oci-cluster"
-
-	return ConfigCompose(testOmniClusterConfig(clusterName), fmt.Sprintf(`
-resource "castai_edge_location" "test" {
-  organization_id = %[3]q
-  cluster_id      = castai_omni_cluster.test.id
-  name            = %[1]q
-  description     = %[2]q
-  region          = "us-phoenix-1"
-  zones = [{
-    id   = "1"
-    name = "PHX-AD-1"
-  }]
-
-  oci = {
-    tenancy_id          = "ocid1.tenancy.oc1..example"
-    compartment_id      = "ocid1.compartment.oc1..example"
-    client_id           = "test-app-client-id"
-    client_secret_wo    = %[4]q
-    identity_domain_uri = "idcs-example.identity.oraclecloud.com"
-    vcn_id              = "ocid1.vcn.oc1.phx.example"
-    vcn_cidr            = "10.0.0.0/16"
-    subnet_id           = "ocid1.subnet.oc1.phx.example"
-    security_group_id   = "ocid1.networksecuritygroup.oc1.phx.example"
-  }
-}
-`, rName, description, organizationID, clientSecret))
 }
 
 func testAccCheckEdgeLocationDestroy(s *terraform.State) error {

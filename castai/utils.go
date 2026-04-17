@@ -142,7 +142,12 @@ func normalizeJSON(bytes []byte) ([]byte, error) {
 }
 
 func getDefaultOrganizationId(ctx context.Context, meta any) (string, error) {
-	response, err := meta.(*ProviderConfig).api.UsersAPIListOrganizationsWithResponse(ctx)
+	cfg := meta.(*ProviderConfig)
+	if cfg.organizationID != "" {
+		return cfg.organizationID, nil
+	}
+
+	response, err := cfg.api.UsersAPIListOrganizationsWithResponse(ctx)
 	if checkErr := sdk.CheckOKResponse(response, err); checkErr != nil {
 		return "", fmt.Errorf("fetching organizations: %w", checkErr)
 	}
@@ -150,11 +155,11 @@ func getDefaultOrganizationId(ctx context.Context, meta any) (string, error) {
 		return "", fmt.Errorf("no organizations found")
 	}
 
-	// The first organization is the default one
 	id := response.JSON200.Organizations[0].Id
 	if id == nil {
 		return "", fmt.Errorf("organization id is nil")
 	}
+	cfg.organizationID = *id
 	return *id, nil
 }
 
