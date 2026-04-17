@@ -1009,14 +1009,19 @@ func testAccEdgeLocationsConfig(rName, clusterName string) string {
 resource "castai_omni_cluster" "test_omni" {
   organization_id = %[1]q
   cluster_id      = castai_eks_cluster.test.id
+  status = {
+    omni_agent_version = "0.0.0"
+    pod_cidr           = "10.244.0.0/16"
+  }
 }
 
 resource "castai_edge_location" "test_1" {
-  organization_id = %[1]q
-  cluster_id      = castai_omni_cluster.test_omni.id
-  name            = "edge-loc-1"
-  description     = "Test edge location 1"
-  region          = "us-east-1"
+  organization_id    = %[1]q
+  cluster_id         = castai_omni_cluster.test_omni.id
+  name               = "edge-loc-1"
+  description        = "Test edge location 1"
+  region             = "us-east-1"
+  control_plane_mode = "SHARED"
   zones = [
     {
       id   = "us-east-1a"
@@ -1045,11 +1050,12 @@ resource "castai_edge_location" "test_1" {
 }
 
 resource "castai_edge_location" "test_2" {
-  organization_id = %[1]q
-  cluster_id      = castai_omni_cluster.test_omni.id
-  name            = "edge-loc-2"
-  description     = "Test edge location 2"
-  region          = "us-west-2"
+  organization_id    = %[1]q
+  cluster_id         = castai_omni_cluster.test_omni.id
+  name               = "edge-loc-2"
+  description        = "Test edge location 2"
+  region             = "us-west-2"
+  control_plane_mode = "SHARED"
   zones = [
     {
       id   = "us-west-2a"
