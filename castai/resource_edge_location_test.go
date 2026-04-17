@@ -326,11 +326,12 @@ resource "castai_edge_location" "test" {
   }]
 
   oci = {
-    tenancy_id      = "ocid1.tenancy.oc1..example"
-    compartment_id  = "ocid1.compartment.oc1..example"
+    tenancy_id        = "ocid1.tenancy.oc1..example"
+    compartment_id    = "ocid1.compartment.oc1..example"
     %[4]s
-    vcn_id          = "ocid1.vcn.oc1.phx.example"
-    subnet_id       = "ocid1.subnet.oc1.phx.example"
+    vcn_id            = "ocid1.vcn.oc1.phx.example"
+    subnet_id         = "ocid1.subnet.oc1.phx.example"
+    security_group_id = "ocid1.networksecuritygroup.oc1.phx.example"
   }
 }
 `, rName, description, organizationID, ociCredentials))

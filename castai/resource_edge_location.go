@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/resourcevalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
@@ -691,6 +692,20 @@ func (r *edgeLocationResource) Delete(ctx context.Context, req resource.DeleteRe
 			fmt.Sprintf("unexpected status code: %d, body: %s", apiResp.StatusCode(), string(apiResp.Body)),
 		)
 		return
+	}
+
+	// Poll until the edge location is fully removed, so dependent resources
+	// (e.g. the omni cluster) can be deleted without hitting a race condition.
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case <-time.After(3 * time.Second):
+		}
+		getResp, err := client.EdgeLocationsAPIGetEdgeLocationWithResponse(ctx, organizationID, clusterID, state.ID.ValueString())
+		if err != nil || getResp.StatusCode() == http.StatusNotFound {
+			return
+		}
 	}
 }
 
