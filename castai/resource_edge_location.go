@@ -227,8 +227,8 @@ func (r *edgeLocationResource) Schema(_ context.Context, _ resource.SchemaReques
 			"control_plane_mode": schema.StringAttribute{
 				Optional:    true,
 				Computed:    true,
-				Default:     stringdefault.StaticString(string(omni.DEDICATED)),
-				Description: "The mode of control plane inside edge location. Valid values: DEDICATED, SHARED.",
+				Default:     stringdefault.StaticString(string(omni.SHARED)),
+				Description: "The mode of control plane inside edge location. Valid values: DEDICATED (deprecated), SHARED.",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
 				},
