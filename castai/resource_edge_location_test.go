@@ -196,11 +196,12 @@ func testAccEdgeLocationAWSConfigWithParams(rName, clusterName, description stri
 
 	return ConfigCompose(testOmniClusterConfig(clusterName), fmt.Sprintf(`
 resource "castai_edge_location" "test" {
-  organization_id = %[5]q
-  cluster_id      = castai_omni_cluster.test.id
-  name            = %[1]q
-  description     = %[2]q
-  region          = "us-east-1"
+  organization_id 	 = %[5]q
+  cluster_id      	 = castai_omni_cluster.test.id
+  name            	 = %[1]q
+  description     	 = %[2]q
+  region         	 = "us-east-1"
+  control_plane_mode = "SHARED"
 %[3]s
 
   aws = {
@@ -269,11 +270,12 @@ func testAccEdgeLocationGCPConfigWithParams(rName, clusterName, description stri
 
 	return ConfigCompose(testOmniClusterConfig(clusterName), fmt.Sprintf(`
 resource "castai_edge_location" "test" {
-  organization_id = %[6]q
-  cluster_id      = castai_omni_cluster.test.id
-  name            = %[1]q
-  description     = %[2]q
-  region          = "us-central1"
+  organization_id 	 = %[6]q
+  cluster_id      	 = castai_omni_cluster.test.id
+  name            	 = %[1]q
+  description     	 = %[2]q
+  region          	 = "us-central1"
+  control_plane_mode = "SHARED"
 %[3]s
 
   gcp = {
@@ -315,11 +317,12 @@ func testAccEdgeLocationOCIConfigWithParams(rName, description, ociCredentials s
 
 	return ConfigCompose(testOmniClusterConfig(clusterName), fmt.Sprintf(`
 resource "castai_edge_location" "test" {
-  organization_id = %[3]q
-  cluster_id      = castai_omni_cluster.test.id
-  name            = %[1]q
-  description     = %[2]q
-  region          = "us-phoenix-1"
+  organization_id 	 = %[3]q
+  cluster_id      	 = castai_omni_cluster.test.id
+  name            	 = %[1]q
+  description     	 = %[2]q
+  region          	 = "us-phoenix-1"
+  control_plane_mode = "SHARED"
   zones = [{
     id   = "1"
     name = "PHX-AD-1"
@@ -484,11 +487,12 @@ func testAccEdgeLocationAWSImpersonationConfigWithParams(rName, clusterName, des
 
 	return ConfigCompose(testOmniClusterConfig(clusterName), fmt.Sprintf(`
 resource "castai_edge_location" "test" {
-  organization_id = %[5]q
-  cluster_id      = castai_omni_cluster.test.id
-  name            = %[1]q
-  description     = %[2]q
-  region          = "us-east-1"
+  organization_id 	 = %[5]q
+  cluster_id      	 = castai_omni_cluster.test.id
+  name            	 = %[1]q
+  description     	 = %[2]q
+  region          	 = "us-east-1"
+  control_plane_mode = "SHARED"
 %[3]s
 
   aws = {
@@ -559,11 +563,12 @@ func testAccEdgeLocationGCPImpersonationConfigWithParams(rName, clusterName, des
 
 	return ConfigCompose(testOmniClusterConfig(clusterName), fmt.Sprintf(`
 resource "castai_edge_location" "test" {
-  organization_id = %[5]q
-  cluster_id      = castai_omni_cluster.test.id
-  name            = %[1]q
-  description     = %[2]q
-  region          = "us-central1"
+  organization_id 	 = %[5]q
+  cluster_id      	 = castai_omni_cluster.test.id
+  name            	 = %[1]q
+  description     	 = %[2]q
+  region          	 = "us-central1"
+  control_plane_mode = "SHARED"
 %[3]s
 
   gcp = {
