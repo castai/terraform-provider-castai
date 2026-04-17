@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/resourcevalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
@@ -674,8 +675,9 @@ func (r *edgeLocationResource) Delete(ctx context.Context, req resource.DeleteRe
 	client := r.client.omniAPI
 	organizationID := state.OrganizationID.ValueString()
 	clusterID := state.ClusterID.ValueString()
+	edgeLocationID := state.ID.ValueString()
 
-	apiResp, err := client.EdgeLocationsAPIDeleteEdgeLocationWithResponse(ctx, organizationID, clusterID, state.ID.ValueString())
+	apiResp, err := client.EdgeLocationsAPIDeleteEdgeLocationWithResponse(ctx, organizationID, clusterID, edgeLocationID)
 	if err != nil {
 		resp.Diagnostics.AddError("Failed to delete edge location", err.Error())
 		return
@@ -691,6 +693,32 @@ func (r *edgeLocationResource) Delete(ctx context.Context, req resource.DeleteRe
 			fmt.Sprintf("unexpected status code: %d, body: %s", apiResp.StatusCode(), string(apiResp.Body)),
 		)
 		return
+	}
+
+	// Edge location deletion is async. Wait until it's fully removed
+	// so that dependent resources (e.g. omni cluster) can be deleted.
+	if err := r.waitForDeletion(ctx, client, organizationID, clusterID, edgeLocationID); err != nil {
+		resp.Diagnostics.AddError("Failed waiting for edge location deletion", err.Error())
+	}
+}
+
+func (r *edgeLocationResource) waitForDeletion(ctx context.Context, client omni.ClientWithResponsesInterface, organizationID, clusterID, edgeLocationID string) error {
+	ticker := time.NewTicker(5 * time.Second)
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case <-ticker.C:
+			resp, err := client.EdgeLocationsAPIGetEdgeLocationWithResponse(ctx, organizationID, clusterID, edgeLocationID)
+			if err != nil {
+				return fmt.Errorf("polling edge location status: %w", err)
+			}
+			if resp.StatusCode() == http.StatusNotFound {
+				return nil
+			}
+		}
 	}
 }
 
