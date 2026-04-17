@@ -620,6 +620,10 @@ resource "castai_gke_cluster" "test" {
 resource "castai_omni_cluster" "test" {
   organization_id = %[1]q
   cluster_id      = castai_gke_cluster.test.id
+  status = {
+    omni_agent_version = "0.1.0"
+    pod_cidr           = "10.0.0.0/16"
+  }
 }
 `, organizationID, clusterName)
 }
