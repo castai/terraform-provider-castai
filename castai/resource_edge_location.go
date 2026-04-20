@@ -227,8 +227,8 @@ func (r *edgeLocationResource) Schema(_ context.Context, _ resource.SchemaReques
 			"control_plane_mode": schema.StringAttribute{
 				Optional:    true,
 				Computed:    true,
-				Default:     stringdefault.StaticString(string(omni.SHARED)),
-				Description: "The mode of control plane inside edge location. Valid values: DEDICATED (deprecated), SHARED.",
+				Default:     stringdefault.StaticString(string(omni.DEDICATED)),
+				Description: "The mode of control plane inside edge location. Valid values: DEDICATED, SHARED.",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
 				},
@@ -675,8 +675,9 @@ func (r *edgeLocationResource) Delete(ctx context.Context, req resource.DeleteRe
 	client := r.client.omniAPI
 	organizationID := state.OrganizationID.ValueString()
 	clusterID := state.ClusterID.ValueString()
+	edgeLocationID := state.ID.ValueString()
 
-	apiResp, err := client.EdgeLocationsAPIDeleteEdgeLocationWithResponse(ctx, organizationID, clusterID, state.ID.ValueString())
+	apiResp, err := client.EdgeLocationsAPIDeleteEdgeLocationWithResponse(ctx, organizationID, clusterID, edgeLocationID)
 	if err != nil {
 		resp.Diagnostics.AddError("Failed to delete edge location", err.Error())
 		return
@@ -694,17 +695,29 @@ func (r *edgeLocationResource) Delete(ctx context.Context, req resource.DeleteRe
 		return
 	}
 
-	// Poll until the edge location is fully removed, so dependent resources
-	// (e.g. the omni cluster) can be deleted without hitting a race condition.
+	// Edge location deletion is async. Wait until it's fully removed
+	// so that dependent resources (e.g. omni cluster) can be deleted.
+	if err := r.waitForDeletion(ctx, client, organizationID, clusterID, edgeLocationID); err != nil {
+		resp.Diagnostics.AddError("Failed waiting for edge location deletion", err.Error())
+	}
+}
+
+func (r *edgeLocationResource) waitForDeletion(ctx context.Context, client omni.ClientWithResponsesInterface, organizationID, clusterID, edgeLocationID string) error {
+	ticker := time.NewTicker(5 * time.Second)
+	defer ticker.Stop()
+
 	for {
 		select {
 		case <-ctx.Done():
-			return
-		case <-time.After(3 * time.Second):
-		}
-		getResp, err := client.EdgeLocationsAPIGetEdgeLocationWithResponse(ctx, organizationID, clusterID, state.ID.ValueString())
-		if err != nil || getResp.StatusCode() == http.StatusNotFound {
-			return
+			return ctx.Err()
+		case <-ticker.C:
+			resp, err := client.EdgeLocationsAPIGetEdgeLocationWithResponse(ctx, organizationID, clusterID, edgeLocationID)
+			if err != nil {
+				return fmt.Errorf("polling edge location status: %w", err)
+			}
+			if resp.StatusCode() == http.StatusNotFound {
+				return nil
+			}
 		}
 	}
 }
