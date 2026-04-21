@@ -428,3 +428,56 @@ func TestFlattenAKSConfig_EnableEncryptionAtHost(t *testing.T) {
 		})
 	}
 }
+
+func TestToAKSSConfig_AcceleratedNetworking(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    any
+		expected *sdk.NodeconfigV1AKSConfigAcceleratedNetworkingMode
+	}{
+		{
+			name:     "disabled",
+			input:    "disabled",
+			expected: toPtr(sdk.ACCELERATEDNETWORKINGMODEDISABLED),
+		},
+		{
+			name:     "empty string",
+			input:    "",
+			expected: nil,
+		},
+		{
+			name:     "nil",
+			input:    nil,
+			expected: nil,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			out := toAKSSConfig(map[string]any{
+				FieldNodeConfigurationAKSAcceleratedNetworking: tt.input,
+			})
+			require.Equal(t, tt.expected, out.AcceleratedNetworking)
+		})
+	}
+}
+
+func TestFlattenAKSConfig_AcceleratedNetworking(t *testing.T) {
+	disabled := sdk.ACCELERATEDNETWORKINGMODEDISABLED
+	tests := []struct {
+		name     string
+		input    *sdk.NodeconfigV1AKSConfigAcceleratedNetworkingMode
+		expected any
+	}{
+		{name: "disabled", input: &disabled, expected: "disabled"},
+		{name: "nil", input: nil, expected: nil},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := flattenAKSConfig(&sdk.NodeconfigV1AKSConfig{
+				AcceleratedNetworking: tt.input,
+			})
+			require.Len(t, result, 1)
+			require.Equal(t, tt.expected, result[0][FieldNodeConfigurationAKSAcceleratedNetworking])
+		})
+	}
+}
