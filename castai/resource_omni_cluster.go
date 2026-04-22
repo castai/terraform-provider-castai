@@ -10,8 +10,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/samber/lo"
-
 	"github.com/castai/terraform-provider-castai/castai/sdk/omni"
 )
 
@@ -190,23 +188,23 @@ func (r *omniClusterResource) Update(ctx context.Context, req resource.UpdateReq
 	organizationID := plan.OrganizationID.ValueString()
 	clusterID := plan.ClusterID.ValueString()
 
-	body := omni.ReportStatusRequest{
-		Cluster: &omni.ReportStatusRequestCluster{},
-	}
+	body := omni.RegisteredCluster{}
 	if plan.Status != nil {
-		body.Cluster.AgentVersion = lo.ToPtr(plan.Status.OmniAgentVersion.ValueString())
-		body.Cluster.PodCidr = lo.ToPtr(plan.Status.PodCIDR.ValueString())
+		body.Status = &omni.RegisteredClusterStatus{
+			OmniAgentVersion: plan.Status.OmniAgentVersion.ValueString(),
+			PodCidr:          plan.Status.PodCIDR.ValueString(),
+		}
 	}
 
-	apiResp, err := client.ClustersAPIReportStatusWithResponse(ctx, organizationID, clusterID, body)
+	apiResp, err := client.ClustersAPIRegisterClusterWithResponse(ctx, organizationID, clusterID, body)
 	if err != nil {
-		resp.Diagnostics.AddError("Failed to report omni cluster status", err.Error())
+		resp.Diagnostics.AddError("Failed to update omni cluster", err.Error())
 		return
 	}
 
 	if apiResp.StatusCode() != http.StatusOK {
 		resp.Diagnostics.AddError(
-			"Failed to report omni cluster status",
+			"Failed to update omni cluster",
 			fmt.Sprintf("unexpected status code: %d, body: %s", apiResp.StatusCode(), string(apiResp.Body)),
 		)
 		return
