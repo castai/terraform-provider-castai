@@ -301,7 +301,21 @@ Optional:
 
 Optional:
 
+- `labels_expressions` (Block List) Defines matching by label selector requirements. (see [below for nested schema](#nestedblock--assignment_rules--rules--namespace--labels_expressions))
 - `names` (List of String) Defines matching by namespace names.
+
+<a id="nestedblock--assignment_rules--rules--namespace--labels_expressions"></a>
+### Nested Schema for `assignment_rules.rules.namespace.labels_expressions`
+
+Required:
+
+- `operator` (String) The operator to use for matching the label.
+
+Optional:
+
+- `key` (String) The label key to match. Required for all operators except `Regex` and `Contains`. If not specified, it will search through all labels.
+- `values` (List of String) A list of values to match against the label key. It is required for `In`, `NotIn`, `Regex`, and `Contains` operators.
+
 
 
 <a id="nestedblock--assignment_rules--rules--workload"></a>
