@@ -10,7 +10,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-
 	"github.com/castai/terraform-provider-castai/castai/sdk/omni"
 )
 
@@ -75,9 +74,6 @@ func (r *omniClusterResource) Schema(_ context.Context, _ resource.SchemaRequest
 					"omni_agent_version": schema.StringAttribute{
 						Required:    true,
 						Description: "Version of the omni agent running on the cluster.",
-						PlanModifiers: []planmodifier.String{
-							stringplanmodifier.RequiresReplace(),
-						},
 					},
 					"pod_cidr": schema.StringAttribute{
 						Required:    true,
@@ -185,7 +181,39 @@ func (r *omniClusterResource) Read(ctx context.Context, req resource.ReadRequest
 }
 
 func (r *omniClusterResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	// No update operation - all fields require replacement
+	var plan omniClusterModel
+	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	client := r.client.omniAPI
+	organizationID := plan.OrganizationID.ValueString()
+	clusterID := plan.ClusterID.ValueString()
+
+	body := omni.RegisteredCluster{}
+	if plan.Status != nil {
+		body.Status = &omni.RegisteredClusterStatus{
+			OmniAgentVersion: plan.Status.OmniAgentVersion.ValueString(),
+			PodCidr:          plan.Status.PodCIDR.ValueString(),
+		}
+	}
+
+	apiResp, err := client.ClustersAPIRegisterClusterWithResponse(ctx, organizationID, clusterID, body)
+	if err != nil {
+		resp.Diagnostics.AddError("Failed to update omni cluster", err.Error())
+		return
+	}
+
+	if apiResp.StatusCode() != http.StatusOK {
+		resp.Diagnostics.AddError(
+			"Failed to update omni cluster",
+			fmt.Sprintf("unexpected status code: %d, body: %s", apiResp.StatusCode(), string(apiResp.Body)),
+		)
+		return
+	}
+
+	resp.Diagnostics.Append(resp.State.Set(ctx, plan)...)
 }
 
 func (r *omniClusterResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
