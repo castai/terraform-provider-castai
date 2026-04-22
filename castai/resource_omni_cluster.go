@@ -78,6 +78,9 @@ func (r *omniClusterResource) Schema(_ context.Context, _ resource.SchemaRequest
 					"pod_cidr": schema.StringAttribute{
 						Required:    true,
 						Description: "Pod CIDR of the cluster.",
+						PlanModifiers: []planmodifier.String{
+							stringplanmodifier.RequiresReplace(),
+						},
 					},
 				},
 			},
