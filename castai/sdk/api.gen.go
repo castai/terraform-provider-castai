@@ -11091,6 +11091,9 @@ type DboAPIGetCacheSummaryParams struct {
 
 	// EndTime End of period.
 	EndTime *time.Time `form:"endTime,omitempty" json:"endTime,omitempty"`
+
+	// Username Filter by username.
+	Username *string `form:"username,omitempty" json:"username,omitempty"`
 }
 
 // DboAPIGetCacheGroupParams defines parameters for DboAPIGetCacheGroup.
