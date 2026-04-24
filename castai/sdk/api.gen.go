@@ -8533,6 +8533,42 @@ type WorkloadoptimizationV1Constraints struct {
 	Min *float64 `json:"min"`
 }
 
+// WorkloadoptimizationV1ConstraintsV2 ConstraintsV2 defines min/max bounds for the recommendation.
+// Each bound can be configured as a fixed constant value or as a percentage
+// of the original pod-spec request.
+type WorkloadoptimizationV1ConstraintsV2 struct {
+	// Max Strategy defines how a single bound (min or max) is expressed.
+	Max *WorkloadoptimizationV1ConstraintsV2Strategy `json:"max,omitempty"`
+
+	// Min Strategy defines how a single bound (min or max) is expressed.
+	Min *WorkloadoptimizationV1ConstraintsV2Strategy `json:"min,omitempty"`
+}
+
+// WorkloadoptimizationV1ConstraintsV2Constant Constant bound. For memory - this is in MiB, for CPU - this is in cores.
+// Matches the semantics of the legacy min/max doubles on ResourcePolicies.
+type WorkloadoptimizationV1ConstraintsV2Constant struct {
+	Value float64 `json:"value"`
+}
+
+// WorkloadoptimizationV1ConstraintsV2PercentageOfOriginal PercentageOfOriginal expresses the bound as a percentage of the original
+// pod-spec request. Example: 150 means the limit equals 150% of the
+// original container CPU/memory request.
+type WorkloadoptimizationV1ConstraintsV2PercentageOfOriginal struct {
+	Value float64 `json:"value"`
+}
+
+// WorkloadoptimizationV1ConstraintsV2Strategy Strategy defines how a single bound (min or max) is expressed.
+type WorkloadoptimizationV1ConstraintsV2Strategy struct {
+	// Constant Constant bound. For memory - this is in MiB, for CPU - this is in cores.
+	// Matches the semantics of the legacy min/max doubles on ResourcePolicies.
+	Constant *WorkloadoptimizationV1ConstraintsV2Constant `json:"constant,omitempty"`
+
+	// PercentageOfOriginal PercentageOfOriginal expresses the bound as a percentage of the original
+	// pod-spec request. Example: 150 means the limit equals 150% of the
+	// original container CPU/memory request.
+	PercentageOfOriginal *WorkloadoptimizationV1ConstraintsV2PercentageOfOriginal `json:"percentageOfOriginal,omitempty"`
+}
+
 // WorkloadoptimizationV1Container defines model for workloadoptimization.v1.Container.
 type WorkloadoptimizationV1Container struct {
 	// Name Name of the container.
@@ -9981,6 +10017,11 @@ type WorkloadoptimizationV1ResourceConfig struct {
 	// Args The arguments for the function - i.e. for a quantile, this should be a [0, 1] float.
 	Args []string `json:"args"`
 
+	// Constraints ConstraintsV2 defines min/max bounds for the recommendation.
+	// Each bound can be configured as a fixed constant value or as a percentage
+	// of the original pod-spec request.
+	Constraints *WorkloadoptimizationV1ConstraintsV2 `json:"constraints,omitempty"`
+
 	// Function The function which to use when calculating the resource recommendation.
 	// QUANTILE - the quantile function.
 	// MAX - the max function.
@@ -9997,10 +10038,12 @@ type WorkloadoptimizationV1ResourceConfig struct {
 
 	// Max Max values for the recommendation. For memory - this is in MiB, for CPU - this is in cores.
 	// If not set, there will be no upper bound for the recommendation (default behaviour).
+	// Superseded by constraints when it is set.
 	Max *float64 `json:"max"`
 
 	// Min Min values for the recommendation. For memory - this is in MiB, for CPU - this is in cores.
 	// If not set, there will be no lower bound for the recommendation (default behaviour).
+	// Superseded by constraints when it is set.
 	Min *float64 `json:"min"`
 
 	// Overhead The overhead for the recommendation, the formula is: (1 + overhead) * function(args).
@@ -10118,6 +10161,11 @@ type WorkloadoptimizationV1ResourcePolicies struct {
 	// Args The arguments for the function - i.e. for a quantile, this should be a [0, 1] float.
 	Args []string `json:"args"`
 
+	// Constraints ConstraintsV2 defines min/max bounds for the recommendation.
+	// Each bound can be configured as a fixed constant value or as a percentage
+	// of the original pod-spec request.
+	Constraints *WorkloadoptimizationV1ConstraintsV2 `json:"constraints,omitempty"`
+
 	// Function The function which to use when calculating the resource recommendation.
 	// QUANTILE - the quantile function.
 	// MAX - the max function.
@@ -10134,11 +10182,13 @@ type WorkloadoptimizationV1ResourcePolicies struct {
 
 	// Max Max values for the recommendation, applies to every container. For memory - this is in MiB, for CPU - this is in cores.
 	// If not set, there will be no upper bound for the recommendation (default behaviour). This value will be overridden if configured on workload level.
+	// Superseded by constraints when it is set.
 	Max *float64 `json:"max"`
 
 	// Min Min values for the recommendation, applies to every container. For memory - this is in MiB, for CPU - this is in cores.
 	// If not set, the default value will be 10m for CPU and 10MiB for memory. This value will be overridden if configured on workload level.
 	// Value cannot be lower than 10m for CPU and 10MiB for memory.
+	// Superseded by constraints when it is set.
 	Min *float64 `json:"min"`
 
 	// Overhead The overhead for the recommendation, the formula is: (1 + overhead) * function(args).
