@@ -954,6 +954,30 @@ func Test_toJvm(t *testing.T) {
 				},
 			},
 		},
+		"should return jvm settings with auto instrument enabled": {
+			args: map[string]any{
+				"auto_instrument": true,
+			},
+			exp: &sdk.WorkloadoptimizationV1JVMSettings{
+				AutoInstrument: lo.ToPtr(true),
+			},
+		},
+		"should return jvm settings with auto instrument disabled": {
+			args: map[string]any{
+				"auto_instrument": false,
+				"memory": []any{
+					map[string]any{
+						"optimization": true,
+					},
+				},
+			},
+			exp: &sdk.WorkloadoptimizationV1JVMSettings{
+				AutoInstrument: lo.ToPtr(false),
+				Memory: &sdk.WorkloadoptimizationV1JVMMemorySettings{
+					Optimization: true,
+				},
+			},
+		},
 		"should return nil on empty map": {
 			args: map[string]any{},
 			exp:  nil,
@@ -985,6 +1009,32 @@ func Test_toJvmMap(t *testing.T) {
 			},
 			exp: []map[string]any{
 				{
+					"memory": []map[string]any{{
+						"optimization": true,
+					}},
+				},
+			},
+		},
+		"should return jvm map with auto instrument enabled": {
+			args: &sdk.WorkloadoptimizationV1JVMSettings{
+				AutoInstrument: lo.ToPtr(true),
+			},
+			exp: []map[string]any{
+				{
+					"auto_instrument": true,
+				},
+			},
+		},
+		"should return jvm map with auto instrument disabled": {
+			args: &sdk.WorkloadoptimizationV1JVMSettings{
+				AutoInstrument: lo.ToPtr(false),
+				Memory: &sdk.WorkloadoptimizationV1JVMMemorySettings{
+					Optimization: true,
+				},
+			},
+			exp: []map[string]any{
+				{
+					"auto_instrument": false,
 					"memory": []map[string]any{{
 						"optimization": true,
 					}},
