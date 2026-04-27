@@ -132,8 +132,7 @@ func resourceWorkloadScalingPolicy() *schema.Resource {
 													Description: "Defines matching by namespace names.",
 													Elem:        &schema.Schema{Type: schema.TypeString},
 												},
-												// TODO(WOOP-714): enable label expressions
-												//"labels_expressions": k8sLabelExpressionsSchema(),
+												"labels_expressions": k8sLabelExpressionsSchema(),
 											},
 										},
 									},
