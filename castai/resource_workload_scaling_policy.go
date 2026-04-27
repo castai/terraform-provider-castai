@@ -335,6 +335,11 @@ It can be either:
 				Description: "JVM optimization settings.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
+						"auto_instrument": {
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Description: "When true, JMX exporter will be automatically injected into pods where JVM runtime is detected.",
+						},
 						"memory": {
 							Type:        schema.TypeList,
 							Optional:    true,
@@ -1590,6 +1595,9 @@ func toJvm(m map[string]any) *sdk.WorkloadoptimizationV1JVMSettings {
 		return nil
 	}
 	result := &sdk.WorkloadoptimizationV1JVMSettings{}
+	if v, ok := m["auto_instrument"].(bool); ok {
+		result.AutoInstrument = lo.ToPtr(v)
+	}
 	if mem := getFirstElem(m, "memory"); mem != nil {
 		result.Memory = &sdk.WorkloadoptimizationV1JVMMemorySettings{}
 		if v, ok := mem["optimization"].(bool); ok {
@@ -1604,6 +1612,9 @@ func toJvmMap(s *sdk.WorkloadoptimizationV1JVMSettings) []map[string]any {
 		return nil
 	}
 	m := map[string]any{}
+	if s.AutoInstrument != nil {
+		m["auto_instrument"] = *s.AutoInstrument
+	}
 	if s.Memory != nil {
 		m["memory"] = []map[string]any{{
 			"optimization": s.Memory.Optimization,
