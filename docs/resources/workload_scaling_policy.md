@@ -369,6 +369,7 @@ Optional:
 
 Optional:
 
+- `auto_instrument` (Boolean) When true, JMX exporter will be automatically injected into pods where JVM runtime is detected.
 - `memory` (Block List, Max: 1) JVM memory optimization settings. (see [below for nested schema](#nestedblock--jvm--memory))
 
 <a id="nestedblock--jvm--memory"></a>
