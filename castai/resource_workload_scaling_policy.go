@@ -1535,7 +1535,7 @@ func toRolloutBehavior(m map[string]any) *sdk.WorkloadoptimizationV1RolloutBehav
 	if v, ok := m[FieldRolloutBehaviorPreferOneByOneType].(bool); ok {
 		r.PreferOneByOne = lo.ToPtr(v)
 	}
-	if v, ok := m[FieldRolloutBehaviorDelaySeconds].(int); ok && v > 0 {
+	if v, ok := m[FieldRolloutBehaviorDelaySeconds].(int); ok {
 		r.DelaySeconds = lo.ToPtr(int32(v))
 	}
 
