@@ -2956,9 +2956,9 @@ func (mr *MockClientInterfaceMockRecorder) ExternalClusterAPIRegisterClusterWith
 }
 
 // ExternalClusterAPITriggerHibernateCluster mocks base method.
-func (m *MockClientInterface) ExternalClusterAPITriggerHibernateCluster(ctx context.Context, clusterId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+func (m *MockClientInterface) ExternalClusterAPITriggerHibernateCluster(ctx context.Context, clusterId string, params *sdk.ExternalClusterAPITriggerHibernateClusterParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
-	varargs := []interface{}{ctx, clusterId}
+	varargs := []interface{}{ctx, clusterId, params}
 	for _, a := range reqEditors {
 		varargs = append(varargs, a)
 	}
@@ -2969,16 +2969,16 @@ func (m *MockClientInterface) ExternalClusterAPITriggerHibernateCluster(ctx cont
 }
 
 // ExternalClusterAPITriggerHibernateCluster indicates an expected call of ExternalClusterAPITriggerHibernateCluster.
-func (mr *MockClientInterfaceMockRecorder) ExternalClusterAPITriggerHibernateCluster(ctx, clusterId interface{}, reqEditors ...interface{}) *gomock.Call {
+func (mr *MockClientInterfaceMockRecorder) ExternalClusterAPITriggerHibernateCluster(ctx, clusterId, params interface{}, reqEditors ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, clusterId}, reqEditors...)
+	varargs := append([]interface{}{ctx, clusterId, params}, reqEditors...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPITriggerHibernateCluster", reflect.TypeOf((*MockClientInterface)(nil).ExternalClusterAPITriggerHibernateCluster), varargs...)
 }
 
 // ExternalClusterAPITriggerResumeCluster mocks base method.
-func (m *MockClientInterface) ExternalClusterAPITriggerResumeCluster(ctx context.Context, clusterId string, body sdk.ExternalClusterAPITriggerResumeClusterJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+func (m *MockClientInterface) ExternalClusterAPITriggerResumeCluster(ctx context.Context, clusterId string, params *sdk.ExternalClusterAPITriggerResumeClusterParams, body sdk.ExternalClusterAPITriggerResumeClusterJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
-	varargs := []interface{}{ctx, clusterId, body}
+	varargs := []interface{}{ctx, clusterId, params, body}
 	for _, a := range reqEditors {
 		varargs = append(varargs, a)
 	}
@@ -2989,16 +2989,16 @@ func (m *MockClientInterface) ExternalClusterAPITriggerResumeCluster(ctx context
 }
 
 // ExternalClusterAPITriggerResumeCluster indicates an expected call of ExternalClusterAPITriggerResumeCluster.
-func (mr *MockClientInterfaceMockRecorder) ExternalClusterAPITriggerResumeCluster(ctx, clusterId, body interface{}, reqEditors ...interface{}) *gomock.Call {
+func (mr *MockClientInterfaceMockRecorder) ExternalClusterAPITriggerResumeCluster(ctx, clusterId, params, body interface{}, reqEditors ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, clusterId, body}, reqEditors...)
+	varargs := append([]interface{}{ctx, clusterId, params, body}, reqEditors...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPITriggerResumeCluster", reflect.TypeOf((*MockClientInterface)(nil).ExternalClusterAPITriggerResumeCluster), varargs...)
 }
 
 // ExternalClusterAPITriggerResumeClusterWithBody mocks base method.
-func (m *MockClientInterface) ExternalClusterAPITriggerResumeClusterWithBody(ctx context.Context, clusterId, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+func (m *MockClientInterface) ExternalClusterAPITriggerResumeClusterWithBody(ctx context.Context, clusterId string, params *sdk.ExternalClusterAPITriggerResumeClusterParams, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
-	varargs := []interface{}{ctx, clusterId, contentType, body}
+	varargs := []interface{}{ctx, clusterId, params, contentType, body}
 	for _, a := range reqEditors {
 		varargs = append(varargs, a)
 	}
@@ -3009,9 +3009,9 @@ func (m *MockClientInterface) ExternalClusterAPITriggerResumeClusterWithBody(ctx
 }
 
 // ExternalClusterAPITriggerResumeClusterWithBody indicates an expected call of ExternalClusterAPITriggerResumeClusterWithBody.
-func (mr *MockClientInterfaceMockRecorder) ExternalClusterAPITriggerResumeClusterWithBody(ctx, clusterId, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+func (mr *MockClientInterfaceMockRecorder) ExternalClusterAPITriggerResumeClusterWithBody(ctx, clusterId, params, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, clusterId, contentType, body}, reqEditors...)
+	varargs := append([]interface{}{ctx, clusterId, params, contentType, body}, reqEditors...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPITriggerResumeClusterWithBody", reflect.TypeOf((*MockClientInterface)(nil).ExternalClusterAPITriggerResumeClusterWithBody), varargs...)
 }
 
@@ -12139,9 +12139,9 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIRegist
 }
 
 // ExternalClusterAPITriggerHibernateCluster mocks base method.
-func (m *MockClientWithResponsesInterface) ExternalClusterAPITriggerHibernateCluster(ctx context.Context, clusterId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+func (m *MockClientWithResponsesInterface) ExternalClusterAPITriggerHibernateCluster(ctx context.Context, clusterId string, params *sdk.ExternalClusterAPITriggerHibernateClusterParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
-	varargs := []interface{}{ctx, clusterId}
+	varargs := []interface{}{ctx, clusterId, params}
 	for _, a := range reqEditors {
 		varargs = append(varargs, a)
 	}
@@ -12152,31 +12152,31 @@ func (m *MockClientWithResponsesInterface) ExternalClusterAPITriggerHibernateClu
 }
 
 // ExternalClusterAPITriggerHibernateCluster indicates an expected call of ExternalClusterAPITriggerHibernateCluster.
-func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPITriggerHibernateCluster(ctx, clusterId interface{}, reqEditors ...interface{}) *gomock.Call {
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPITriggerHibernateCluster(ctx, clusterId, params interface{}, reqEditors ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, clusterId}, reqEditors...)
+	varargs := append([]interface{}{ctx, clusterId, params}, reqEditors...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPITriggerHibernateCluster", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPITriggerHibernateCluster), varargs...)
 }
 
 // ExternalClusterAPITriggerHibernateClusterWithResponse mocks base method.
-func (m *MockClientWithResponsesInterface) ExternalClusterAPITriggerHibernateClusterWithResponse(ctx context.Context, clusterId string) (*sdk.ExternalClusterAPITriggerHibernateClusterResponse, error) {
+func (m *MockClientWithResponsesInterface) ExternalClusterAPITriggerHibernateClusterWithResponse(ctx context.Context, clusterId string, params *sdk.ExternalClusterAPITriggerHibernateClusterParams) (*sdk.ExternalClusterAPITriggerHibernateClusterResponse, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ExternalClusterAPITriggerHibernateClusterWithResponse", ctx, clusterId)
+	ret := m.ctrl.Call(m, "ExternalClusterAPITriggerHibernateClusterWithResponse", ctx, clusterId, params)
 	ret0, _ := ret[0].(*sdk.ExternalClusterAPITriggerHibernateClusterResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // ExternalClusterAPITriggerHibernateClusterWithResponse indicates an expected call of ExternalClusterAPITriggerHibernateClusterWithResponse.
-func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPITriggerHibernateClusterWithResponse(ctx, clusterId interface{}) *gomock.Call {
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPITriggerHibernateClusterWithResponse(ctx, clusterId, params interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPITriggerHibernateClusterWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPITriggerHibernateClusterWithResponse), ctx, clusterId)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPITriggerHibernateClusterWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPITriggerHibernateClusterWithResponse), ctx, clusterId, params)
 }
 
 // ExternalClusterAPITriggerResumeCluster mocks base method.
-func (m *MockClientWithResponsesInterface) ExternalClusterAPITriggerResumeCluster(ctx context.Context, clusterId string, body sdk.ExternalClusterAPITriggerResumeClusterJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+func (m *MockClientWithResponsesInterface) ExternalClusterAPITriggerResumeCluster(ctx context.Context, clusterId string, params *sdk.ExternalClusterAPITriggerResumeClusterParams, body sdk.ExternalClusterAPITriggerResumeClusterJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
-	varargs := []interface{}{ctx, clusterId, body}
+	varargs := []interface{}{ctx, clusterId, params, body}
 	for _, a := range reqEditors {
 		varargs = append(varargs, a)
 	}
@@ -12187,16 +12187,16 @@ func (m *MockClientWithResponsesInterface) ExternalClusterAPITriggerResumeCluste
 }
 
 // ExternalClusterAPITriggerResumeCluster indicates an expected call of ExternalClusterAPITriggerResumeCluster.
-func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPITriggerResumeCluster(ctx, clusterId, body interface{}, reqEditors ...interface{}) *gomock.Call {
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPITriggerResumeCluster(ctx, clusterId, params, body interface{}, reqEditors ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, clusterId, body}, reqEditors...)
+	varargs := append([]interface{}{ctx, clusterId, params, body}, reqEditors...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPITriggerResumeCluster", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPITriggerResumeCluster), varargs...)
 }
 
 // ExternalClusterAPITriggerResumeClusterWithBody mocks base method.
-func (m *MockClientWithResponsesInterface) ExternalClusterAPITriggerResumeClusterWithBody(ctx context.Context, clusterId, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+func (m *MockClientWithResponsesInterface) ExternalClusterAPITriggerResumeClusterWithBody(ctx context.Context, clusterId string, params *sdk.ExternalClusterAPITriggerResumeClusterParams, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
-	varargs := []interface{}{ctx, clusterId, contentType, body}
+	varargs := []interface{}{ctx, clusterId, params, contentType, body}
 	for _, a := range reqEditors {
 		varargs = append(varargs, a)
 	}
@@ -12207,40 +12207,40 @@ func (m *MockClientWithResponsesInterface) ExternalClusterAPITriggerResumeCluste
 }
 
 // ExternalClusterAPITriggerResumeClusterWithBody indicates an expected call of ExternalClusterAPITriggerResumeClusterWithBody.
-func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPITriggerResumeClusterWithBody(ctx, clusterId, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPITriggerResumeClusterWithBody(ctx, clusterId, params, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, clusterId, contentType, body}, reqEditors...)
+	varargs := append([]interface{}{ctx, clusterId, params, contentType, body}, reqEditors...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPITriggerResumeClusterWithBody", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPITriggerResumeClusterWithBody), varargs...)
 }
 
 // ExternalClusterAPITriggerResumeClusterWithBodyWithResponse mocks base method.
-func (m *MockClientWithResponsesInterface) ExternalClusterAPITriggerResumeClusterWithBodyWithResponse(ctx context.Context, clusterId, contentType string, body io.Reader) (*sdk.ExternalClusterAPITriggerResumeClusterResponse, error) {
+func (m *MockClientWithResponsesInterface) ExternalClusterAPITriggerResumeClusterWithBodyWithResponse(ctx context.Context, clusterId string, params *sdk.ExternalClusterAPITriggerResumeClusterParams, contentType string, body io.Reader) (*sdk.ExternalClusterAPITriggerResumeClusterResponse, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ExternalClusterAPITriggerResumeClusterWithBodyWithResponse", ctx, clusterId, contentType, body)
+	ret := m.ctrl.Call(m, "ExternalClusterAPITriggerResumeClusterWithBodyWithResponse", ctx, clusterId, params, contentType, body)
 	ret0, _ := ret[0].(*sdk.ExternalClusterAPITriggerResumeClusterResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // ExternalClusterAPITriggerResumeClusterWithBodyWithResponse indicates an expected call of ExternalClusterAPITriggerResumeClusterWithBodyWithResponse.
-func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPITriggerResumeClusterWithBodyWithResponse(ctx, clusterId, contentType, body interface{}) *gomock.Call {
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPITriggerResumeClusterWithBodyWithResponse(ctx, clusterId, params, contentType, body interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPITriggerResumeClusterWithBodyWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPITriggerResumeClusterWithBodyWithResponse), ctx, clusterId, contentType, body)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPITriggerResumeClusterWithBodyWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPITriggerResumeClusterWithBodyWithResponse), ctx, clusterId, params, contentType, body)
 }
 
 // ExternalClusterAPITriggerResumeClusterWithResponse mocks base method.
-func (m *MockClientWithResponsesInterface) ExternalClusterAPITriggerResumeClusterWithResponse(ctx context.Context, clusterId string, body sdk.ExternalClusterAPITriggerResumeClusterJSONRequestBody) (*sdk.ExternalClusterAPITriggerResumeClusterResponse, error) {
+func (m *MockClientWithResponsesInterface) ExternalClusterAPITriggerResumeClusterWithResponse(ctx context.Context, clusterId string, params *sdk.ExternalClusterAPITriggerResumeClusterParams, body sdk.ExternalClusterAPITriggerResumeClusterJSONRequestBody) (*sdk.ExternalClusterAPITriggerResumeClusterResponse, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ExternalClusterAPITriggerResumeClusterWithResponse", ctx, clusterId, body)
+	ret := m.ctrl.Call(m, "ExternalClusterAPITriggerResumeClusterWithResponse", ctx, clusterId, params, body)
 	ret0, _ := ret[0].(*sdk.ExternalClusterAPITriggerResumeClusterResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // ExternalClusterAPITriggerResumeClusterWithResponse indicates an expected call of ExternalClusterAPITriggerResumeClusterWithResponse.
-func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPITriggerResumeClusterWithResponse(ctx, clusterId, body interface{}) *gomock.Call {
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPITriggerResumeClusterWithResponse(ctx, clusterId, params, body interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPITriggerResumeClusterWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPITriggerResumeClusterWithResponse), ctx, clusterId, body)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPITriggerResumeClusterWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPITriggerResumeClusterWithResponse), ctx, clusterId, params, body)
 }
 
 // ExternalClusterAPIUpdateCluster mocks base method.

@@ -416,6 +416,12 @@ type PatchOptions struct {
 	Remove *map[string]string `json:"remove,omitempty"`
 }
 
+// PodEviction PodEviction defines eviction settings for enforcement of pod mutations.
+type PodEviction struct {
+	// Enabled Whether non-conforming pods are eligible for eviction.
+	Enabled *bool `json:"enabled,omitempty"`
+}
+
 // PodMutation PodMutation represents a mutation that can be applied to pods in a cluster.
 type PodMutation struct {
 	// Affinity Affinity to apply to the pods.
@@ -480,6 +486,9 @@ type PodMutation struct {
 	//  For more detailed explanation read JSON patching section in kubernetes documentation:
 	//  https://kubernetes.io/docs/reference/kubectl/generated/kubectl_patch/
 	Patch *[]map[string]interface{} `json:"patch,omitempty"`
+
+	// PodEviction Eviction settings for enforcement of pod mutations.
+	PodEviction *PodEviction `json:"podEviction,omitempty"`
 
 	// RestartMatchingWorkloads Restart matching workloads when the pod mutation is applied.
 	RestartMatchingWorkloads *bool `json:"restartMatchingWorkloads,omitempty"`

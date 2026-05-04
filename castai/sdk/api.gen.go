@@ -445,6 +445,13 @@ const (
 	Worker          ExternalclusterV1NodeType = "worker"
 )
 
+// Defines values for ExternalclusterV1OperationMode.
+const (
+	ExternalclusterV1OperationModeOPERATIONMODEDEFAULT     ExternalclusterV1OperationMode = "OPERATION_MODE_DEFAULT"
+	ExternalclusterV1OperationModeOPERATIONMODEDRYRUN      ExternalclusterV1OperationMode = "OPERATION_MODE_DRY_RUN"
+	ExternalclusterV1OperationModeOPERATIONMODEUNSPECIFIED ExternalclusterV1OperationMode = "OPERATION_MODE_UNSPECIFIED"
+)
+
 // Defines values for K8sSelectorV1Operator.
 const (
 	K8sSelectorV1OperatorDoesNotExist  K8sSelectorV1Operator = "DoesNotExist"
@@ -1117,6 +1124,13 @@ const (
 	InstallEvictor                   ExternalClusterAPIGetCredentialsScriptParamsKentParams = "install_evictor"
 )
 
+// Defines values for ExternalClusterAPITriggerHibernateClusterParamsMode.
+const (
+	ExternalClusterAPITriggerHibernateClusterParamsModeOPERATIONMODEDEFAULT     ExternalClusterAPITriggerHibernateClusterParamsMode = "OPERATION_MODE_DEFAULT"
+	ExternalClusterAPITriggerHibernateClusterParamsModeOPERATIONMODEDRYRUN      ExternalClusterAPITriggerHibernateClusterParamsMode = "OPERATION_MODE_DRY_RUN"
+	ExternalClusterAPITriggerHibernateClusterParamsModeOPERATIONMODEUNSPECIFIED ExternalClusterAPITriggerHibernateClusterParamsMode = "OPERATION_MODE_UNSPECIFIED"
+)
+
 // Defines values for ExternalClusterAPIListNodesParamsNodeStatus.
 const (
 	ExternalClusterAPIListNodesParamsNodeStatusCordoned              ExternalClusterAPIListNodesParamsNodeStatus = "cordoned"
@@ -1138,6 +1152,13 @@ const (
 	ExternalClusterAPIListNodesParamsLifecycleTypeLifecycleTypeUnspecified ExternalClusterAPIListNodesParamsLifecycleType = "lifecycle_type_unspecified"
 	ExternalClusterAPIListNodesParamsLifecycleTypeOnDemand                 ExternalClusterAPIListNodesParamsLifecycleType = "on_demand"
 	ExternalClusterAPIListNodesParamsLifecycleTypeSpot                     ExternalClusterAPIListNodesParamsLifecycleType = "spot"
+)
+
+// Defines values for ExternalClusterAPITriggerResumeClusterParamsMode.
+const (
+	OPERATIONMODEDEFAULT     ExternalClusterAPITriggerResumeClusterParamsMode = "OPERATION_MODE_DEFAULT"
+	OPERATIONMODEDRYRUN      ExternalClusterAPITriggerResumeClusterParamsMode = "OPERATION_MODE_DRY_RUN"
+	OPERATIONMODEUNSPECIFIED ExternalClusterAPITriggerResumeClusterParamsMode = "OPERATION_MODE_UNSPECIFIED"
 )
 
 // Defines values for RbacServiceAPIListRoleBindingsParamsScopeType.
@@ -6161,6 +6182,13 @@ type ExternalclusterV1OpenshiftClusterParams struct {
 	Region *string `json:"region,omitempty"`
 }
 
+// ExternalclusterV1OperationMode OperationMode defines the execution mode for hibernate/resume operations.
+//
+//   - OPERATION_MODE_UNSPECIFIED: Default value.
+//   - OPERATION_MODE_DEFAULT: Normal operation - executes the hibernate/resume.
+//   - OPERATION_MODE_DRY_RUN: Dry-run mode - validates only without executing.
+type ExternalclusterV1OperationMode string
+
 // ExternalclusterV1RaidConfig RaidConfig allow You have two or more devices, of approximately the same size, and you want to combine their storage capacity
 // and also combine their performance by accessing them in parallel.
 type ExternalclusterV1RaidConfig struct {
@@ -6273,19 +6301,33 @@ type ExternalclusterV1Taint struct {
 
 // ExternalclusterV1TriggerHibernateClusterResponse TriggerHibernateClusterResponse is the result of HibernateClusterRequest.
 type ExternalclusterV1TriggerHibernateClusterResponse struct {
-	// ClusterId The ID of the node.
+	// ClusterId The ID of the cluster.
 	ClusterId string `json:"clusterId"`
 
-	// OperationId Add node operation ID.
+	// Mode OperationMode defines the execution mode for hibernate/resume operations.
+	//
+	//  - OPERATION_MODE_UNSPECIFIED: Default value.
+	//  - OPERATION_MODE_DEFAULT: Normal operation - executes the hibernate/resume.
+	//  - OPERATION_MODE_DRY_RUN: Dry-run mode - validates only without executing.
+	Mode ExternalclusterV1OperationMode `json:"mode"`
+
+	// OperationId Hibernate operation ID. Empty when mode is dry-run.
 	OperationId string `json:"operationId"`
 }
 
 // ExternalclusterV1TriggerResumeClusterResponse TriggerResumeClusterResponse is the result of ResumeClusterRequest.
 type ExternalclusterV1TriggerResumeClusterResponse struct {
-	// ClusterId The ID of the node.
+	// ClusterId The ID of the cluster.
 	ClusterId string `json:"clusterId"`
 
-	// OperationId Add node operation ID.
+	// Mode OperationMode defines the execution mode for hibernate/resume operations.
+	//
+	//  - OPERATION_MODE_UNSPECIFIED: Default value.
+	//  - OPERATION_MODE_DEFAULT: Normal operation - executes the hibernate/resume.
+	//  - OPERATION_MODE_DRY_RUN: Dry-run mode - validates only without executing.
+	Mode ExternalclusterV1OperationMode `json:"mode"`
+
+	// OperationId Resume operation ID. Empty when mode is dry-run.
 	OperationId string `json:"operationId"`
 }
 
@@ -10243,6 +10285,9 @@ type WorkloadoptimizationV1Resources struct {
 
 // WorkloadoptimizationV1RolloutBehaviorSettings defines model for workloadoptimization.v1.RolloutBehaviorSettings.
 type WorkloadoptimizationV1RolloutBehaviorSettings struct {
+	// DelaySeconds Number of seconds to delay before applying the recommendation rollout. Must be between 0 and 3600.
+	DelaySeconds *int32 `json:"delaySeconds"`
+
 	// PreferOneByOne If true, prefer rolling out recommendations one pod at a time.
 	PreferOneByOne *bool `json:"preferOneByOne"`
 
@@ -11455,6 +11500,19 @@ type ExternalClusterAPIGetCredentialsScriptParams struct {
 // ExternalClusterAPIGetCredentialsScriptParamsKentParams defines parameters for ExternalClusterAPIGetCredentialsScript.
 type ExternalClusterAPIGetCredentialsScriptParamsKentParams string
 
+// ExternalClusterAPITriggerHibernateClusterParams defines parameters for ExternalClusterAPITriggerHibernateCluster.
+type ExternalClusterAPITriggerHibernateClusterParams struct {
+	// Mode Mode of the operation.
+	//
+	//  - OPERATION_MODE_UNSPECIFIED: Default value.
+	//  - OPERATION_MODE_DEFAULT: Normal operation - executes the hibernate/resume.
+	//  - OPERATION_MODE_DRY_RUN: Dry-run mode - validates only without executing.
+	Mode *ExternalClusterAPITriggerHibernateClusterParamsMode `form:"mode,omitempty" json:"mode,omitempty"`
+}
+
+// ExternalClusterAPITriggerHibernateClusterParamsMode defines parameters for ExternalClusterAPITriggerHibernateCluster.
+type ExternalClusterAPITriggerHibernateClusterParamsMode string
+
 // ExternalClusterAPIListNodesParams defines parameters for ExternalClusterAPIListNodes.
 type ExternalClusterAPIListNodesParams struct {
 	PageLimit *string `form:"page.limit,omitempty" json:"page.limit,omitempty"`
@@ -11497,6 +11555,19 @@ type ExternalClusterAPIReconcileClusterParams struct {
 	// SkipAksInitData Whether to skip AKS refresh of instance-template.
 	SkipAksInitData *bool `form:"skipAksInitData,omitempty" json:"skipAksInitData,omitempty"`
 }
+
+// ExternalClusterAPITriggerResumeClusterParams defines parameters for ExternalClusterAPITriggerResumeCluster.
+type ExternalClusterAPITriggerResumeClusterParams struct {
+	// Mode Mode of the operation.
+	//
+	//  - OPERATION_MODE_UNSPECIFIED: Default value.
+	//  - OPERATION_MODE_DEFAULT: Normal operation - executes the hibernate/resume.
+	//  - OPERATION_MODE_DRY_RUN: Dry-run mode - validates only without executing.
+	Mode *ExternalClusterAPITriggerResumeClusterParamsMode `form:"mode,omitempty" json:"mode,omitempty"`
+}
+
+// ExternalClusterAPITriggerResumeClusterParamsMode defines parameters for ExternalClusterAPITriggerResumeCluster.
+type ExternalClusterAPITriggerResumeClusterParamsMode string
 
 // ExternalClusterAPIUpdateClusterTagsJSONBody defines parameters for ExternalClusterAPIUpdateClusterTags.
 type ExternalClusterAPIUpdateClusterTagsJSONBody map[string]string
@@ -11987,6 +12058,9 @@ type RuntimeSecurityAPIGetClusterWorkloadsNetflowParams struct {
 	StartTime     *time.Time `form:"startTime,omitempty" json:"startTime,omitempty"`
 	EndTime       *time.Time `form:"endTime,omitempty" json:"endTime,omitempty"`
 	UsePodDetails *bool      `form:"usePodDetails,omitempty" json:"usePodDetails,omitempty"`
+
+	// IncludeDstAddrs Controls whether destination addresses are included in the response. Defaults to true.
+	IncludeDstAddrs *bool `form:"includeDstAddrs,omitempty" json:"includeDstAddrs,omitempty"`
 }
 
 // WorkloadOptimizationAPIListWorkloadEventsParams defines parameters for WorkloadOptimizationAPIListWorkloadEvents.

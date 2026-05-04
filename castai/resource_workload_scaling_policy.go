@@ -54,6 +54,7 @@ const (
 	FieldRolloutBehaviorType                       = "type"
 	FieldRolloutBehaviorNoDisruptionType           = "NO_DISRUPTION"
 	FieldRolloutBehaviorPreferOneByOneType         = "prefer_one_by_one"
+	FieldRolloutBehaviorDelaySeconds               = "delay_seconds"
 	FieldJVM                                       = "jvm"
 	FieldPredictiveScaling                         = "predictive_scaling"
 	FieldMemoryEvent                               = "memory_event"
@@ -324,6 +325,12 @@ It can be either:
 							Type:        schema.TypeBool,
 							Optional:    true,
 							Description: `Defines if pods should be restarted one by one to avoid service disruption.`,
+						},
+						FieldRolloutBehaviorDelaySeconds: {
+							Type:             schema.TypeInt,
+							Optional:         true,
+							Description:      "Number of seconds to delay before applying the recommendation rollout. Must be between 0 and 3600.",
+							ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(0, 3600)),
 						},
 					},
 				},
@@ -1528,8 +1535,11 @@ func toRolloutBehavior(m map[string]any) *sdk.WorkloadoptimizationV1RolloutBehav
 	if v, ok := m[FieldRolloutBehaviorPreferOneByOneType].(bool); ok {
 		r.PreferOneByOne = lo.ToPtr(v)
 	}
+	if v, ok := m[FieldRolloutBehaviorDelaySeconds].(int); ok && v > 0 {
+		r.DelaySeconds = lo.ToPtr(int32(v))
+	}
 
-	if r.Type == nil && r.PreferOneByOne == nil {
+	if r.Type == nil && r.PreferOneByOne == nil && r.DelaySeconds == nil {
 		return nil
 	}
 
@@ -1541,7 +1551,7 @@ func toRolloutBehaviorMap(s *sdk.WorkloadoptimizationV1RolloutBehaviorSettings) 
 		return nil
 	}
 
-	if s.Type == nil && s.PreferOneByOne == nil {
+	if s.Type == nil && s.PreferOneByOne == nil && s.DelaySeconds == nil {
 		return nil
 	}
 
@@ -1551,6 +1561,9 @@ func toRolloutBehaviorMap(s *sdk.WorkloadoptimizationV1RolloutBehaviorSettings) 
 	}
 	if s.PreferOneByOne != nil {
 		m[FieldRolloutBehaviorPreferOneByOneType] = *s.PreferOneByOne
+	}
+	if s.DelaySeconds != nil {
+		m[FieldRolloutBehaviorDelaySeconds] = int(*s.DelaySeconds)
 	}
 
 	return []map[string]any{m}
