@@ -13,6 +13,7 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	tfterraform "github.com/hashicorp/terraform-plugin-testing/terraform"
@@ -150,12 +151,12 @@ func TestPodMutation_ReadContext(t *testing.T) {
 		r.Len(workloadList, 1)
 		wm := workloadList[0].(map[string]interface{})
 
-		namespaces := wm[FieldPodMutationFilterNamespaces].([]interface{})
+		namespaces := wm[FieldPodMutationFilterNamespaces].(*schema.Set).List()
 		r.Len(namespaces, 1)
 		r.Equal("EXACT", namespaces[0].(map[string]interface{})[FieldPodMutationMatcherType])
 		r.Equal("default", namespaces[0].(map[string]interface{})[FieldPodMutationMatcherValue])
 
-		kinds := wm[FieldPodMutationFilterKinds].([]interface{})
+		kinds := wm[FieldPodMutationFilterKinds].(*schema.Set).List()
 		r.Len(kinds, 1)
 		r.Equal("EXACT", kinds[0].(map[string]interface{})[FieldPodMutationMatcherType])
 		r.Equal("Deployment", kinds[0].(map[string]interface{})[FieldPodMutationMatcherValue])
@@ -834,8 +835,8 @@ func TestStateToDistributionGroups(t *testing.T) {
 
 		items := []interface{}{
 			map[string]interface{}{
-				FieldPodMutationDistributionGroupName:   "bare-group",
-				FieldPodMutationDistributionGroupPct:    100,
+				FieldPodMutationDistributionGroupName:          "bare-group",
+				FieldPodMutationDistributionGroupPct:           100,
 				FieldPodMutationDistributionGroupConfiguration: []interface{}{},
 			},
 		}
@@ -961,16 +962,16 @@ func TestStateToObjectFilterV2(t *testing.T) {
 		state := map[string]interface{}{
 			FieldPodMutationFilterWorkload: []interface{}{
 				map[string]interface{}{
-					FieldPodMutationFilterNamespaces: []interface{}{
+					FieldPodMutationFilterNamespaces: matcherSet(
 						map[string]interface{}{FieldPodMutationMatcherType: "EXACT", FieldPodMutationMatcherValue: "prod"},
-					},
-					FieldPodMutationFilterKinds: []interface{}{
+					),
+					FieldPodMutationFilterKinds: matcherSet(
 						map[string]interface{}{FieldPodMutationMatcherType: "REGEX", FieldPodMutationMatcherValue: "^Deploy.*"},
-					},
-					FieldPodMutationFilterNames:             []interface{}{},
-					FieldPodMutationFilterExcludeNames:      []interface{}{},
-					FieldPodMutationFilterExcludeNamespaces: []interface{}{},
-					FieldPodMutationFilterExcludeKinds:      []interface{}{},
+					),
+					FieldPodMutationFilterNames:             matcherSet(),
+					FieldPodMutationFilterExcludeNames:      matcherSet(),
+					FieldPodMutationFilterExcludeNamespaces: matcherSet(),
+					FieldPodMutationFilterExcludeKinds:      matcherSet(),
 				},
 			},
 			FieldPodMutationFilterPod: []interface{}{},
@@ -1000,7 +1001,7 @@ func TestStateToObjectFilterV2(t *testing.T) {
 					FieldPodMutationFilterLabelsFilter: []interface{}{
 						map[string]interface{}{
 							FieldPodMutationLabelsFilterOperator: "AND",
-							FieldPodMutationLabelsFilterMatchers: []interface{}{
+							FieldPodMutationLabelsFilterMatchers: labelMatcherSet(
 								map[string]interface{}{
 									FieldPodMutationLabelMatcherKey: []interface{}{
 										map[string]interface{}{FieldPodMutationMatcherType: "EXACT", FieldPodMutationMatcherValue: "app"},
@@ -1009,7 +1010,7 @@ func TestStateToObjectFilterV2(t *testing.T) {
 										map[string]interface{}{FieldPodMutationMatcherType: "EXACT", FieldPodMutationMatcherValue: "web"},
 									},
 								},
-							},
+							),
 						},
 					},
 					FieldPodMutationFilterExcludeLabels: []interface{}{},
@@ -1035,18 +1036,18 @@ func TestStateToObjectFilterV2(t *testing.T) {
 		state := map[string]interface{}{
 			FieldPodMutationFilterWorkload: []interface{}{
 				map[string]interface{}{
-					FieldPodMutationFilterNamespaces: []interface{}{},
-					FieldPodMutationFilterKinds:      []interface{}{},
-					FieldPodMutationFilterNames:      []interface{}{},
-					FieldPodMutationFilterExcludeNamespaces: []interface{}{
+					FieldPodMutationFilterNamespaces: matcherSet(),
+					FieldPodMutationFilterKinds:      matcherSet(),
+					FieldPodMutationFilterNames:      matcherSet(),
+					FieldPodMutationFilterExcludeNamespaces: matcherSet(
 						map[string]interface{}{FieldPodMutationMatcherType: "EXACT", FieldPodMutationMatcherValue: "kube-system"},
-					},
-					FieldPodMutationFilterExcludeKinds: []interface{}{
+					),
+					FieldPodMutationFilterExcludeKinds: matcherSet(
 						map[string]interface{}{FieldPodMutationMatcherType: "EXACT", FieldPodMutationMatcherValue: "DaemonSet"},
-					},
-					FieldPodMutationFilterExcludeNames: []interface{}{
+					),
+					FieldPodMutationFilterExcludeNames: matcherSet(
 						map[string]interface{}{FieldPodMutationMatcherType: "REGEX", FieldPodMutationMatcherValue: "^skip-.*"},
-					},
+					),
 				},
 			},
 			FieldPodMutationFilterPod: []interface{}{},
@@ -1083,7 +1084,7 @@ func TestStateToObjectFilterV2(t *testing.T) {
 					FieldPodMutationFilterExcludeLabels: []interface{}{
 						map[string]interface{}{
 							FieldPodMutationLabelsFilterOperator: "OR",
-							FieldPodMutationLabelsFilterMatchers: []interface{}{
+							FieldPodMutationLabelsFilterMatchers: labelMatcherSet(
 								map[string]interface{}{
 									FieldPodMutationLabelMatcherKey: []interface{}{
 										map[string]interface{}{FieldPodMutationMatcherType: "EXACT", FieldPodMutationMatcherValue: "env"},
@@ -1092,7 +1093,7 @@ func TestStateToObjectFilterV2(t *testing.T) {
 										map[string]interface{}{FieldPodMutationMatcherType: "EXACT", FieldPodMutationMatcherValue: "dev"},
 									},
 								},
-							},
+							),
 						},
 					},
 				},
@@ -1482,9 +1483,9 @@ func TestPodMutationCustomizeDiff(t *testing.T) {
 				map[string]interface{}{
 					FieldPodMutationFilterWorkload: []interface{}{
 						map[string]interface{}{
-							FieldPodMutationFilterNamespaces: []interface{}{
+							FieldPodMutationFilterNamespaces: matcherSet(
 								map[string]interface{}{FieldPodMutationMatcherType: "EXACT", FieldPodMutationMatcherValue: "default"},
-							},
+							),
 						},
 					},
 					FieldPodMutationFilterPod: []interface{}{},
@@ -1501,13 +1502,13 @@ func TestPodMutationCustomizeDiff(t *testing.T) {
 							FieldPodMutationFilterLabelsFilter: []interface{}{
 								map[string]interface{}{
 									FieldPodMutationLabelsFilterOperator: "AND",
-									FieldPodMutationLabelsFilterMatchers: []interface{}{
+									FieldPodMutationLabelsFilterMatchers: labelMatcherSet(
 										map[string]interface{}{
 											FieldPodMutationLabelMatcherKey: []interface{}{
 												map[string]interface{}{FieldPodMutationMatcherType: "EXACT", FieldPodMutationMatcherValue: "app"},
 											},
 										},
-									},
+									),
 								},
 							},
 							FieldPodMutationFilterExcludeLabels: []interface{}{},
@@ -1532,12 +1533,12 @@ func TestPodMutationCustomizeDiff(t *testing.T) {
 				map[string]interface{}{
 					FieldPodMutationFilterWorkload: []interface{}{
 						map[string]interface{}{
-							FieldPodMutationFilterNames:             []interface{}{},
-							FieldPodMutationFilterNamespaces:        []interface{}{},
-							FieldPodMutationFilterKinds:             []interface{}{},
-							FieldPodMutationFilterExcludeNames:      []interface{}{},
-							FieldPodMutationFilterExcludeNamespaces: []interface{}{},
-							FieldPodMutationFilterExcludeKinds:      []interface{}{},
+							FieldPodMutationFilterNames:             matcherSet(),
+							FieldPodMutationFilterNamespaces:        matcherSet(),
+							FieldPodMutationFilterKinds:             matcherSet(),
+							FieldPodMutationFilterExcludeNames:      matcherSet(),
+							FieldPodMutationFilterExcludeNamespaces: matcherSet(),
+							FieldPodMutationFilterExcludeKinds:      matcherSet(),
 						},
 					},
 					FieldPodMutationFilterPod: []interface{}{},
@@ -1566,6 +1567,103 @@ func TestPodMutationCustomizeDiff(t *testing.T) {
 	}
 }
 
+func TestStateToObjectFilterV2_UnorderedSet(t *testing.T) {
+	t.Parallel()
+	r := require.New(t)
+
+	state := map[string]interface{}{
+		FieldPodMutationFilterWorkload: []interface{}{
+			map[string]interface{}{
+				FieldPodMutationFilterNamespaces: matcherSet(
+					map[string]interface{}{FieldPodMutationMatcherType: "EXACT", FieldPodMutationMatcherValue: "a"},
+					map[string]interface{}{FieldPodMutationMatcherType: "EXACT", FieldPodMutationMatcherValue: "b"},
+					map[string]interface{}{FieldPodMutationMatcherType: "EXACT", FieldPodMutationMatcherValue: "c"},
+				),
+			},
+		},
+	}
+
+	got := stateToObjectFilterV2(state)
+	r.NotNil(got.Namespaces)
+	r.Len(*got.Namespaces, 3)
+
+	values := map[string]bool{}
+	for _, m := range *got.Namespaces {
+		r.NotNil(m.Value)
+		values[*m.Value] = true
+	}
+	r.Equal(map[string]bool{"a": true, "b": true, "c": true}, values)
+}
+
+func TestPodMutation_ReadContext_RoundTrip_UnorderedNamespaces(t *testing.T) {
+	t.Parallel()
+	r := require.New(t)
+
+	mockClient := mock_patching_engine.NewMockClientInterface(gomock.NewController(t))
+	ctx := context.Background()
+	provider := &ProviderConfig{
+		patchingEngineClient: &patching_engine.ClientWithResponses{
+			ClientInterface: mockClient,
+		},
+	}
+
+	// Server returns namespaces in a different order than the user's config.
+	mutation := patching_engine.PodMutation{
+		Id:             lo.ToPtr(testMutationID),
+		Name:           lo.ToPtr("test-mutation"),
+		Enabled:        lo.ToPtr(true),
+		ClusterId:      lo.ToPtr(testClusterID),
+		OrganizationId: lo.ToPtr(testOrgID),
+		SpotType:       lo.ToPtr(patching_engine.PodMutationSpotTypeOPTIONALSPOT),
+		Source:         lo.ToPtr(patching_engine.API),
+		ObjectFilterV2: &patching_engine.ObjectFilterV2{
+			Namespaces: &[]patching_engine.ObjectFilterV2Matcher{
+				{Type: lo.ToPtr(patching_engine.EXACT), Value: lo.ToPtr("c")},
+				{Type: lo.ToPtr(patching_engine.EXACT), Value: lo.ToPtr("a")},
+				{Type: lo.ToPtr(patching_engine.EXACT), Value: lo.ToPtr("b")},
+			},
+		},
+	}
+	respBody, _ := json.Marshal(mutation)
+	mockClient.EXPECT().
+		PodMutationsAPIGetPodMutation(gomock.Any(), testOrgID, testClusterID, testMutationID).
+		Return(&http.Response{
+			StatusCode: http.StatusOK,
+			Body:       io.NopCloser(bytes.NewReader(respBody)),
+			Header:     map[string][]string{"Content-Type": {"application/json"}},
+		}, nil)
+
+	stateValue := cty.ObjectVal(map[string]cty.Value{
+		"organization_id": cty.StringVal(testOrgID),
+		"cluster_id":      cty.StringVal(testClusterID),
+		"name":            cty.StringVal("test-mutation"),
+		"enabled":         cty.BoolVal(true),
+	})
+	state := terraform.NewInstanceStateShimmedFromValue(stateValue, 0)
+	state.ID = testMutationID
+
+	resource := resourcePodMutation()
+	data := resource.Data(state)
+
+	result := resource.ReadContext(ctx, data, provider)
+	r.Nil(result)
+
+	filterV2 := data.Get(FieldPodMutationFilterV2).([]interface{})
+	r.Len(filterV2, 1)
+	workloadList := filterV2[0].(map[string]interface{})[FieldPodMutationFilterWorkload].([]interface{})
+	r.Len(workloadList, 1)
+	wm := workloadList[0].(map[string]interface{})
+
+	namespaces := wm[FieldPodMutationFilterNamespaces].(*schema.Set).List()
+	r.Len(namespaces, 3)
+
+	values := map[string]bool{}
+	for _, n := range namespaces {
+		values[n.(map[string]interface{})[FieldPodMutationMatcherValue].(string)] = true
+	}
+	r.Equal(map[string]bool{"a": true, "b": true, "c": true}, values)
+}
+
 func TestAccCloudAgnostic_ResourcePodMutation(t *testing.T) {
 	rName := fmt.Sprintf("%v-pod-mutation-%v", ResourcePrefix, acctest.RandString(8))
 	resourceName := "castai_pod_mutation.test"
@@ -1586,10 +1684,14 @@ func TestAccCloudAgnostic_ResourcePodMutation(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "enabled", "true"),
 					resource.TestCheckResourceAttr(resourceName, "spot_config.0.spot_mode", "PREFERRED_SPOT"),
 					resource.TestCheckResourceAttr(resourceName, "spot_config.0.distribution_percentage", "80"),
-					resource.TestCheckResourceAttr(resourceName, "filter_v2.0.workload.0.namespaces.0.type", "EXACT"),
-					resource.TestCheckResourceAttr(resourceName, "filter_v2.0.workload.0.namespaces.0.value", "default"),
-					resource.TestCheckResourceAttr(resourceName, "filter_v2.0.workload.0.kinds.0.type", "EXACT"),
-					resource.TestCheckResourceAttr(resourceName, "filter_v2.0.workload.0.kinds.0.value", "Deployment"),
+					resource.TestCheckTypeSetElemNestedAttrs(resourceName, "filter_v2.0.workload.0.namespaces.*", map[string]string{
+						"type":  "EXACT",
+						"value": "default",
+					}),
+					resource.TestCheckTypeSetElemNestedAttrs(resourceName, "filter_v2.0.workload.0.kinds.*", map[string]string{
+						"type":  "EXACT",
+						"value": "Deployment",
+					}),
 					resource.TestCheckResourceAttr(resourceName, "tolerations.0.key", "scheduling.cast.ai/spot"),
 					resource.TestCheckResourceAttr(resourceName, "tolerations.0.operator", "Exists"),
 					resource.TestCheckResourceAttr(resourceName, "tolerations.0.effect", "NoSchedule"),
@@ -1604,8 +1706,10 @@ func TestAccCloudAgnostic_ResourcePodMutation(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "enabled", "false"),
 					resource.TestCheckResourceAttr(resourceName, "spot_config.0.spot_mode", "OPTIONAL_SPOT"),
 					resource.TestCheckResourceAttr(resourceName, "spot_config.0.distribution_percentage", "50"),
-					resource.TestCheckResourceAttr(resourceName, "filter_v2.0.workload.0.namespaces.0.type", "REGEX"),
-					resource.TestCheckResourceAttr(resourceName, "filter_v2.0.workload.0.namespaces.0.value", "^prod-.*$"),
+					resource.TestCheckTypeSetElemNestedAttrs(resourceName, "filter_v2.0.workload.0.namespaces.*", map[string]string{
+						"type":  "REGEX",
+						"value": "^prod-.*$",
+					}),
 				),
 			},
 			{
@@ -1763,4 +1867,20 @@ resource "castai_pod_mutation" "test" {
   }
 }
 `, rName, clusterName, organizationID)
+}
+
+func matcherSet(items ...map[string]interface{}) *schema.Set {
+	raw := make([]interface{}, 0, len(items))
+	for _, it := range items {
+		raw = append(raw, it)
+	}
+	return schema.NewSet(schema.HashResource(matcherSchema), raw)
+}
+
+func labelMatcherSet(items ...map[string]interface{}) *schema.Set {
+	raw := make([]interface{}, 0, len(items))
+	for _, it := range items {
+		raw = append(raw, it)
+	}
+	return schema.NewSet(schema.HashResource(labelMatcherElemSchema), raw)
 }

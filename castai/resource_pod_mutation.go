@@ -106,6 +106,23 @@ var matcherSchema = &schema.Resource{
 	},
 }
 
+var labelMatcherElemSchema = &schema.Resource{
+	Schema: map[string]*schema.Schema{
+		FieldPodMutationLabelMatcherKey: {
+			Type:     schema.TypeList,
+			Required: true,
+			MaxItems: 1,
+			Elem:     matcherSchema,
+		},
+		FieldPodMutationLabelMatcherValue: {
+			Type:     schema.TypeList,
+			Optional: true,
+			MaxItems: 1,
+			Elem:     matcherSchema,
+		},
+	},
+}
+
 var labelsFilterSchema = &schema.Resource{
 	Schema: map[string]*schema.Schema{
 		FieldPodMutationLabelsFilterOperator: {
@@ -115,24 +132,10 @@ var labelsFilterSchema = &schema.Resource{
 			Description:      "Logical operator to combine label matchers: AND or OR.",
 		},
 		FieldPodMutationLabelsFilterMatchers: {
-			Type:     schema.TypeList,
+			Type:     schema.TypeSet,
 			Required: true,
-			Elem: &schema.Resource{
-				Schema: map[string]*schema.Schema{
-					FieldPodMutationLabelMatcherKey: {
-						Type:     schema.TypeList,
-						Required: true,
-						MaxItems: 1,
-						Elem:     matcherSchema,
-					},
-					FieldPodMutationLabelMatcherValue: {
-						Type:     schema.TypeList,
-						Optional: true,
-						MaxItems: 1,
-						Elem:     matcherSchema,
-					},
-				},
-			},
+			Set:      schema.HashResource(labelMatcherElemSchema),
+			Elem:     labelMatcherElemSchema,
 		},
 	},
 }
@@ -362,34 +365,40 @@ func resourcePodMutation() *schema.Resource {
 						Elem: &schema.Resource{
 							Schema: map[string]*schema.Schema{
 								FieldPodMutationFilterNames: {
-									Type:     schema.TypeList,
+									Type:     schema.TypeSet,
 									Optional: true,
 									Elem:     matcherSchema,
+									Set:      schema.HashResource(matcherSchema),
 								},
 								FieldPodMutationFilterNamespaces: {
-									Type:     schema.TypeList,
+									Type:     schema.TypeSet,
 									Optional: true,
 									Elem:     matcherSchema,
+									Set:      schema.HashResource(matcherSchema),
 								},
 								FieldPodMutationFilterKinds: {
-									Type:     schema.TypeList,
+									Type:     schema.TypeSet,
 									Optional: true,
 									Elem:     matcherSchema,
+									Set:      schema.HashResource(matcherSchema),
 								},
 								FieldPodMutationFilterExcludeNames: {
-									Type:     schema.TypeList,
+									Type:     schema.TypeSet,
 									Optional: true,
 									Elem:     matcherSchema,
+									Set:      schema.HashResource(matcherSchema),
 								},
 								FieldPodMutationFilterExcludeNamespaces: {
-									Type:     schema.TypeList,
+									Type:     schema.TypeSet,
 									Optional: true,
 									Elem:     matcherSchema,
+									Set:      schema.HashResource(matcherSchema),
 								},
 								FieldPodMutationFilterExcludeKinds: {
-									Type:     schema.TypeList,
+									Type:     schema.TypeSet,
 									Optional: true,
 									Elem:     matcherSchema,
+									Set:      schema.HashResource(matcherSchema),
 								},
 							},
 						},
@@ -504,7 +513,7 @@ func validatePodMutationFilter(filterV2 []interface{}) error {
 	if wl, ok := fm[FieldPodMutationFilterWorkload].([]interface{}); ok && len(wl) > 0 && wl[0] != nil {
 		wm := wl[0].(map[string]interface{})
 		for _, f := range workloadFields {
-			if v, ok := wm[f].([]interface{}); ok && len(v) > 0 {
+			if set, ok := wm[f].(*schema.Set); ok && set.Len() > 0 {
 				return nil
 			}
 		}
@@ -844,38 +853,38 @@ func stateToObjectFilterV2(m map[string]interface{}) *patching_engine.ObjectFilt
 		wlList := wl.([]interface{})
 		if len(wlList) > 0 && wlList[0] != nil {
 			wm := wlList[0].(map[string]interface{})
-			if v, ok := wm[FieldPodMutationFilterNames]; ok {
-				matchers := stateToMatchers(v.([]interface{}))
+			if v, ok := wm[FieldPodMutationFilterNames].(*schema.Set); ok {
+				matchers := stateToMatchers(v)
 				if len(matchers) > 0 {
 					filter.Names = &matchers
 				}
 			}
-			if v, ok := wm[FieldPodMutationFilterNamespaces]; ok {
-				matchers := stateToMatchers(v.([]interface{}))
+			if v, ok := wm[FieldPodMutationFilterNamespaces].(*schema.Set); ok {
+				matchers := stateToMatchers(v)
 				if len(matchers) > 0 {
 					filter.Namespaces = &matchers
 				}
 			}
-			if v, ok := wm[FieldPodMutationFilterKinds]; ok {
-				matchers := stateToMatchers(v.([]interface{}))
+			if v, ok := wm[FieldPodMutationFilterKinds].(*schema.Set); ok {
+				matchers := stateToMatchers(v)
 				if len(matchers) > 0 {
 					filter.Kinds = &matchers
 				}
 			}
-			if v, ok := wm[FieldPodMutationFilterExcludeNames]; ok {
-				matchers := stateToMatchers(v.([]interface{}))
+			if v, ok := wm[FieldPodMutationFilterExcludeNames].(*schema.Set); ok {
+				matchers := stateToMatchers(v)
 				if len(matchers) > 0 {
 					filter.ExcludeNames = &matchers
 				}
 			}
-			if v, ok := wm[FieldPodMutationFilterExcludeNamespaces]; ok {
-				matchers := stateToMatchers(v.([]interface{}))
+			if v, ok := wm[FieldPodMutationFilterExcludeNamespaces].(*schema.Set); ok {
+				matchers := stateToMatchers(v)
 				if len(matchers) > 0 {
 					filter.ExcludeNamespaces = &matchers
 				}
 			}
-			if v, ok := wm[FieldPodMutationFilterExcludeKinds]; ok {
-				matchers := stateToMatchers(v.([]interface{}))
+			if v, ok := wm[FieldPodMutationFilterExcludeKinds].(*schema.Set); ok {
+				matchers := stateToMatchers(v)
 				if len(matchers) > 0 {
 					filter.ExcludeKinds = &matchers
 				}
@@ -906,7 +915,11 @@ func stateToObjectFilterV2(m map[string]interface{}) *patching_engine.ObjectFilt
 	return filter
 }
 
-func stateToMatchers(items []interface{}) []patching_engine.ObjectFilterV2Matcher {
+func stateToMatchers(set *schema.Set) []patching_engine.ObjectFilterV2Matcher {
+	if set == nil {
+		return nil
+	}
+	items := set.List()
 	matchers := make([]patching_engine.ObjectFilterV2Matcher, 0, len(items))
 	for _, item := range items {
 		if item == nil {
@@ -929,8 +942,8 @@ func stateToLabelsFilter(m map[string]interface{}) *patching_engine.ObjectFilter
 		Operator: &op,
 	}
 
-	if v, ok := m[FieldPodMutationLabelsFilterMatchers]; ok {
-		matchersList := v.([]interface{})
+	if set, ok := m[FieldPodMutationLabelsFilterMatchers].(*schema.Set); ok && set != nil {
+		matchersList := set.List()
 		matchers := make([]patching_engine.ObjectFilterV2LabelMatcher, 0, len(matchersList))
 		for _, item := range matchersList {
 			if item == nil {
