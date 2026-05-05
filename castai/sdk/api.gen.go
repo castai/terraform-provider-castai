@@ -445,6 +445,13 @@ const (
 	Worker          ExternalclusterV1NodeType = "worker"
 )
 
+// Defines values for ExternalclusterV1OperationMode.
+const (
+	ExternalclusterV1OperationModeOPERATIONMODEDEFAULT     ExternalclusterV1OperationMode = "OPERATION_MODE_DEFAULT"
+	ExternalclusterV1OperationModeOPERATIONMODEDRYRUN      ExternalclusterV1OperationMode = "OPERATION_MODE_DRY_RUN"
+	ExternalclusterV1OperationModeOPERATIONMODEUNSPECIFIED ExternalclusterV1OperationMode = "OPERATION_MODE_UNSPECIFIED"
+)
+
 // Defines values for K8sSelectorV1Operator.
 const (
 	K8sSelectorV1OperatorDoesNotExist  K8sSelectorV1Operator = "DoesNotExist"
@@ -790,6 +797,12 @@ const (
 	WorkloadoptimizationV1GetHPAV2MigrationEligibilityResponseMigrationStatusUNSPECIFIED WorkloadoptimizationV1GetHPAV2MigrationEligibilityResponseMigrationStatus = "UNSPECIFIED"
 )
 
+// Defines values for WorkloadoptimizationV1HPAConverterType.
+const (
+	AVERAGEVALUEFROMORIGINALREQUESTS WorkloadoptimizationV1HPAConverterType = "AVERAGE_VALUE_FROM_ORIGINAL_REQUESTS"
+	HPACONVERTERTYPEUNSPECIFIED      WorkloadoptimizationV1HPAConverterType = "HPA_CONVERTER_TYPE_UNSPECIFIED"
+)
+
 // Defines values for WorkloadoptimizationV1HPALegacyUnsupportedReasonType.
 const (
 	HPALEGACYUNSUPPORTEDREASONHASNATIVEHPA        WorkloadoptimizationV1HPALegacyUnsupportedReasonType = "HPA_LEGACY_UNSUPPORTED_REASON_HAS_NATIVE_HPA"
@@ -1117,6 +1130,13 @@ const (
 	InstallEvictor                   ExternalClusterAPIGetCredentialsScriptParamsKentParams = "install_evictor"
 )
 
+// Defines values for ExternalClusterAPITriggerHibernateClusterParamsMode.
+const (
+	ExternalClusterAPITriggerHibernateClusterParamsModeOPERATIONMODEDEFAULT     ExternalClusterAPITriggerHibernateClusterParamsMode = "OPERATION_MODE_DEFAULT"
+	ExternalClusterAPITriggerHibernateClusterParamsModeOPERATIONMODEDRYRUN      ExternalClusterAPITriggerHibernateClusterParamsMode = "OPERATION_MODE_DRY_RUN"
+	ExternalClusterAPITriggerHibernateClusterParamsModeOPERATIONMODEUNSPECIFIED ExternalClusterAPITriggerHibernateClusterParamsMode = "OPERATION_MODE_UNSPECIFIED"
+)
+
 // Defines values for ExternalClusterAPIListNodesParamsNodeStatus.
 const (
 	ExternalClusterAPIListNodesParamsNodeStatusCordoned              ExternalClusterAPIListNodesParamsNodeStatus = "cordoned"
@@ -1138,6 +1158,13 @@ const (
 	ExternalClusterAPIListNodesParamsLifecycleTypeLifecycleTypeUnspecified ExternalClusterAPIListNodesParamsLifecycleType = "lifecycle_type_unspecified"
 	ExternalClusterAPIListNodesParamsLifecycleTypeOnDemand                 ExternalClusterAPIListNodesParamsLifecycleType = "on_demand"
 	ExternalClusterAPIListNodesParamsLifecycleTypeSpot                     ExternalClusterAPIListNodesParamsLifecycleType = "spot"
+)
+
+// Defines values for ExternalClusterAPITriggerResumeClusterParamsMode.
+const (
+	OPERATIONMODEDEFAULT     ExternalClusterAPITriggerResumeClusterParamsMode = "OPERATION_MODE_DEFAULT"
+	OPERATIONMODEDRYRUN      ExternalClusterAPITriggerResumeClusterParamsMode = "OPERATION_MODE_DRY_RUN"
+	OPERATIONMODEUNSPECIFIED ExternalClusterAPITriggerResumeClusterParamsMode = "OPERATION_MODE_UNSPECIFIED"
 )
 
 // Defines values for RbacServiceAPIListRoleBindingsParamsScopeType.
@@ -6161,6 +6188,13 @@ type ExternalclusterV1OpenshiftClusterParams struct {
 	Region *string `json:"region,omitempty"`
 }
 
+// ExternalclusterV1OperationMode OperationMode defines the execution mode for hibernate/resume operations.
+//
+//   - OPERATION_MODE_UNSPECIFIED: Default value.
+//   - OPERATION_MODE_DEFAULT: Normal operation - executes the hibernate/resume.
+//   - OPERATION_MODE_DRY_RUN: Dry-run mode - validates only without executing.
+type ExternalclusterV1OperationMode string
+
 // ExternalclusterV1RaidConfig RaidConfig allow You have two or more devices, of approximately the same size, and you want to combine their storage capacity
 // and also combine their performance by accessing them in parallel.
 type ExternalclusterV1RaidConfig struct {
@@ -6273,19 +6307,33 @@ type ExternalclusterV1Taint struct {
 
 // ExternalclusterV1TriggerHibernateClusterResponse TriggerHibernateClusterResponse is the result of HibernateClusterRequest.
 type ExternalclusterV1TriggerHibernateClusterResponse struct {
-	// ClusterId The ID of the node.
+	// ClusterId The ID of the cluster.
 	ClusterId string `json:"clusterId"`
 
-	// OperationId Add node operation ID.
+	// Mode OperationMode defines the execution mode for hibernate/resume operations.
+	//
+	//  - OPERATION_MODE_UNSPECIFIED: Default value.
+	//  - OPERATION_MODE_DEFAULT: Normal operation - executes the hibernate/resume.
+	//  - OPERATION_MODE_DRY_RUN: Dry-run mode - validates only without executing.
+	Mode ExternalclusterV1OperationMode `json:"mode"`
+
+	// OperationId Hibernate operation ID. Empty when mode is dry-run.
 	OperationId string `json:"operationId"`
 }
 
 // ExternalclusterV1TriggerResumeClusterResponse TriggerResumeClusterResponse is the result of ResumeClusterRequest.
 type ExternalclusterV1TriggerResumeClusterResponse struct {
-	// ClusterId The ID of the node.
+	// ClusterId The ID of the cluster.
 	ClusterId string `json:"clusterId"`
 
-	// OperationId Add node operation ID.
+	// Mode OperationMode defines the execution mode for hibernate/resume operations.
+	//
+	//  - OPERATION_MODE_UNSPECIFIED: Default value.
+	//  - OPERATION_MODE_DEFAULT: Normal operation - executes the hibernate/resume.
+	//  - OPERATION_MODE_DRY_RUN: Dry-run mode - validates only without executing.
+	Mode ExternalclusterV1OperationMode `json:"mode"`
+
+	// OperationId Resume operation ID. Empty when mode is dry-run.
 	OperationId string `json:"operationId"`
 }
 
@@ -9170,6 +9218,19 @@ type WorkloadoptimizationV1HPAConfigUpdate struct {
 	UseNative *bool `json:"useNative"`
 }
 
+// WorkloadoptimizationV1HPAConverterType HPAConverterType defines the strategy for converting HPA.
+//
+//   - AVERAGE_VALUE_FROM_ORIGINAL_REQUESTS: Converts HPA utilization (%) targets to AverageValue using workload container requests.
+type WorkloadoptimizationV1HPAConverterType string
+
+// WorkloadoptimizationV1HPAConverters defines model for workloadoptimization.v1.HPAConverters.
+type WorkloadoptimizationV1HPAConverters struct {
+	// Type HPAConverterType defines the strategy for converting HPA.
+	//
+	//  - AVERAGE_VALUE_FROM_ORIGINAL_REQUESTS: Converts HPA utilization (%) targets to AverageValue using workload container requests.
+	Type WorkloadoptimizationV1HPAConverterType `json:"type"`
+}
+
 // WorkloadoptimizationV1HPALegacyConfig HPALegacyConfig holds the resolved configuration for legacy CAST AI HPA.
 type WorkloadoptimizationV1HPALegacyConfig struct {
 	// ManagementOption Defines possible options for workload management.
@@ -9868,7 +9929,11 @@ type WorkloadoptimizationV1RecommendationPolicies struct {
 	Cpu                WorkloadoptimizationV1ResourcePolicies          `json:"cpu"`
 	Downscaling        *WorkloadoptimizationV1DownscalingSettings      `json:"downscaling,omitempty"`
 	ExcludedContainers *[]string                                       `json:"excludedContainers,omitempty"`
-	Jvm                *WorkloadoptimizationV1JVMSettings              `json:"jvm,omitempty"`
+
+	// HpaConverters Configuration for converting existing HPAs when VPA is the sole optimization.
+	// If HPA management is enabled, it takes precedence over this setting.
+	HpaConverters *[]WorkloadoptimizationV1HPAConverters `json:"hpaConverters,omitempty"`
+	Jvm           *WorkloadoptimizationV1JVMSettings     `json:"jvm,omitempty"`
 
 	// ManagementOption Defines possible options for workload management.
 	// READ_ONLY - workload watched (metrics collected), but no actions may be performed by CAST AI.
@@ -10243,6 +10308,9 @@ type WorkloadoptimizationV1Resources struct {
 
 // WorkloadoptimizationV1RolloutBehaviorSettings defines model for workloadoptimization.v1.RolloutBehaviorSettings.
 type WorkloadoptimizationV1RolloutBehaviorSettings struct {
+	// DelaySeconds Number of seconds to delay before applying the recommendation rollout. Must be between 0 and 3600.
+	DelaySeconds *int32 `json:"delaySeconds"`
+
 	// PreferOneByOne If true, prefer rolling out recommendations one pod at a time.
 	PreferOneByOne *bool `json:"preferOneByOne"`
 
@@ -10493,6 +10561,10 @@ type WorkloadoptimizationV1VPAConfig struct {
 	Downscaling        *WorkloadoptimizationV1DownscalingSettings `json:"downscaling,omitempty"`
 	ExcludedContainers *[]string                                  `json:"excludedContainers,omitempty"`
 
+	// HpaConverters Configuration for converting existing HPAs when VPA is the sole optimization.
+	// If HPA management is enabled, it takes precedence over this setting.
+	HpaConverters *[]WorkloadoptimizationV1HPAConverters `json:"hpaConverters,omitempty"`
+
 	// Jvm JVMRuntimeConfiguration defines set of settings that enables and configures for JVM optimization.
 	Jvm *WorkloadoptimizationV1JVMRuntimeConfiguration `json:"jvm,omitempty"`
 
@@ -10544,6 +10616,10 @@ type WorkloadoptimizationV1VerticalOverrides struct {
 
 	// ExcludedContainers Containers to exclude from optimization.
 	ExcludedContainers *[]string `json:"excludedContainers,omitempty"`
+
+	// HpaConverters Configuration for converting existing HPAs when VPA is the sole optimization.
+	// If HPA management is enabled, it takes precedence over this setting.
+	HpaConverters *[]WorkloadoptimizationV1HPAConverters `json:"hpaConverters,omitempty"`
 
 	// Jvm JVMRuntimeConfiguration defines set of settings that enables and configures for JVM optimization.
 	Jvm *WorkloadoptimizationV1JVMRuntimeConfiguration `json:"jvm,omitempty"`
@@ -11455,6 +11531,19 @@ type ExternalClusterAPIGetCredentialsScriptParams struct {
 // ExternalClusterAPIGetCredentialsScriptParamsKentParams defines parameters for ExternalClusterAPIGetCredentialsScript.
 type ExternalClusterAPIGetCredentialsScriptParamsKentParams string
 
+// ExternalClusterAPITriggerHibernateClusterParams defines parameters for ExternalClusterAPITriggerHibernateCluster.
+type ExternalClusterAPITriggerHibernateClusterParams struct {
+	// Mode Mode of the operation.
+	//
+	//  - OPERATION_MODE_UNSPECIFIED: Default value.
+	//  - OPERATION_MODE_DEFAULT: Normal operation - executes the hibernate/resume.
+	//  - OPERATION_MODE_DRY_RUN: Dry-run mode - validates only without executing.
+	Mode *ExternalClusterAPITriggerHibernateClusterParamsMode `form:"mode,omitempty" json:"mode,omitempty"`
+}
+
+// ExternalClusterAPITriggerHibernateClusterParamsMode defines parameters for ExternalClusterAPITriggerHibernateCluster.
+type ExternalClusterAPITriggerHibernateClusterParamsMode string
+
 // ExternalClusterAPIListNodesParams defines parameters for ExternalClusterAPIListNodes.
 type ExternalClusterAPIListNodesParams struct {
 	PageLimit *string `form:"page.limit,omitempty" json:"page.limit,omitempty"`
@@ -11497,6 +11586,19 @@ type ExternalClusterAPIReconcileClusterParams struct {
 	// SkipAksInitData Whether to skip AKS refresh of instance-template.
 	SkipAksInitData *bool `form:"skipAksInitData,omitempty" json:"skipAksInitData,omitempty"`
 }
+
+// ExternalClusterAPITriggerResumeClusterParams defines parameters for ExternalClusterAPITriggerResumeCluster.
+type ExternalClusterAPITriggerResumeClusterParams struct {
+	// Mode Mode of the operation.
+	//
+	//  - OPERATION_MODE_UNSPECIFIED: Default value.
+	//  - OPERATION_MODE_DEFAULT: Normal operation - executes the hibernate/resume.
+	//  - OPERATION_MODE_DRY_RUN: Dry-run mode - validates only without executing.
+	Mode *ExternalClusterAPITriggerResumeClusterParamsMode `form:"mode,omitempty" json:"mode,omitempty"`
+}
+
+// ExternalClusterAPITriggerResumeClusterParamsMode defines parameters for ExternalClusterAPITriggerResumeCluster.
+type ExternalClusterAPITriggerResumeClusterParamsMode string
 
 // ExternalClusterAPIUpdateClusterTagsJSONBody defines parameters for ExternalClusterAPIUpdateClusterTags.
 type ExternalClusterAPIUpdateClusterTagsJSONBody map[string]string
@@ -11987,6 +12089,9 @@ type RuntimeSecurityAPIGetClusterWorkloadsNetflowParams struct {
 	StartTime     *time.Time `form:"startTime,omitempty" json:"startTime,omitempty"`
 	EndTime       *time.Time `form:"endTime,omitempty" json:"endTime,omitempty"`
 	UsePodDetails *bool      `form:"usePodDetails,omitempty" json:"usePodDetails,omitempty"`
+
+	// IncludeDstAddrs Controls whether destination addresses are included in the response. Defaults to true.
+	IncludeDstAddrs *bool `form:"includeDstAddrs,omitempty" json:"includeDstAddrs,omitempty"`
 }
 
 // WorkloadOptimizationAPIListWorkloadEventsParams defines parameters for WorkloadOptimizationAPIListWorkloadEvents.
