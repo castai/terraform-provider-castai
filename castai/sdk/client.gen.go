@@ -508,7 +508,7 @@ type ClientInterface interface {
 	ExternalClusterAPIDisableGKESA(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// ExternalClusterAPITriggerHibernateCluster request
-	ExternalClusterAPITriggerHibernateCluster(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+	ExternalClusterAPITriggerHibernateCluster(ctx context.Context, clusterId string, params *ExternalClusterAPITriggerHibernateClusterParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// ExternalClusterAPIIngestInstanceLogsWithBody request with any body
 	ExternalClusterAPIIngestInstanceLogsWithBody(ctx context.Context, clusterId string, instanceId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -546,9 +546,9 @@ type ClientInterface interface {
 	ExternalClusterAPIReconcileCluster(ctx context.Context, clusterId string, params *ExternalClusterAPIReconcileClusterParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// ExternalClusterAPITriggerResumeClusterWithBody request with any body
-	ExternalClusterAPITriggerResumeClusterWithBody(ctx context.Context, clusterId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+	ExternalClusterAPITriggerResumeClusterWithBody(ctx context.Context, clusterId string, params *ExternalClusterAPITriggerResumeClusterParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	ExternalClusterAPITriggerResumeCluster(ctx context.Context, clusterId string, body ExternalClusterAPITriggerResumeClusterJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+	ExternalClusterAPITriggerResumeCluster(ctx context.Context, clusterId string, params *ExternalClusterAPITriggerResumeClusterParams, body ExternalClusterAPITriggerResumeClusterJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// ExternalClusterAPIUpdateClusterTagsWithBody request with any body
 	ExternalClusterAPIUpdateClusterTagsWithBody(ctx context.Context, clusterId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -2866,8 +2866,8 @@ func (c *Client) ExternalClusterAPIDisableGKESA(ctx context.Context, clusterId s
 	return c.Client.Do(req)
 }
 
-func (c *Client) ExternalClusterAPITriggerHibernateCluster(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewExternalClusterAPITriggerHibernateClusterRequest(c.Server, clusterId)
+func (c *Client) ExternalClusterAPITriggerHibernateCluster(ctx context.Context, clusterId string, params *ExternalClusterAPITriggerHibernateClusterParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewExternalClusterAPITriggerHibernateClusterRequest(c.Server, clusterId, params)
 	if err != nil {
 		return nil, err
 	}
@@ -3034,8 +3034,8 @@ func (c *Client) ExternalClusterAPIReconcileCluster(ctx context.Context, cluster
 	return c.Client.Do(req)
 }
 
-func (c *Client) ExternalClusterAPITriggerResumeClusterWithBody(ctx context.Context, clusterId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewExternalClusterAPITriggerResumeClusterRequestWithBody(c.Server, clusterId, contentType, body)
+func (c *Client) ExternalClusterAPITriggerResumeClusterWithBody(ctx context.Context, clusterId string, params *ExternalClusterAPITriggerResumeClusterParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewExternalClusterAPITriggerResumeClusterRequestWithBody(c.Server, clusterId, params, contentType, body)
 	if err != nil {
 		return nil, err
 	}
@@ -3046,8 +3046,8 @@ func (c *Client) ExternalClusterAPITriggerResumeClusterWithBody(ctx context.Cont
 	return c.Client.Do(req)
 }
 
-func (c *Client) ExternalClusterAPITriggerResumeCluster(ctx context.Context, clusterId string, body ExternalClusterAPITriggerResumeClusterJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewExternalClusterAPITriggerResumeClusterRequest(c.Server, clusterId, body)
+func (c *Client) ExternalClusterAPITriggerResumeCluster(ctx context.Context, clusterId string, params *ExternalClusterAPITriggerResumeClusterParams, body ExternalClusterAPITriggerResumeClusterJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewExternalClusterAPITriggerResumeClusterRequest(c.Server, clusterId, params, body)
 	if err != nil {
 		return nil, err
 	}
@@ -12407,7 +12407,7 @@ func NewExternalClusterAPIDisableGKESARequest(server string, clusterId string) (
 }
 
 // NewExternalClusterAPITriggerHibernateClusterRequest generates requests for ExternalClusterAPITriggerHibernateCluster
-func NewExternalClusterAPITriggerHibernateClusterRequest(server string, clusterId string) (*http.Request, error) {
+func NewExternalClusterAPITriggerHibernateClusterRequest(server string, clusterId string, params *ExternalClusterAPITriggerHibernateClusterParams) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -12430,6 +12430,28 @@ func NewExternalClusterAPITriggerHibernateClusterRequest(server string, clusterI
 	queryURL, err := serverURL.Parse(operationPath)
 	if err != nil {
 		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if params.Mode != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "mode", runtime.ParamLocationQuery, *params.Mode); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
 	}
 
 	req, err := http.NewRequest("POST", queryURL.String(), nil)
@@ -13140,18 +13162,18 @@ func NewExternalClusterAPIReconcileClusterRequest(server string, clusterId strin
 }
 
 // NewExternalClusterAPITriggerResumeClusterRequest calls the generic ExternalClusterAPITriggerResumeCluster builder with application/json body
-func NewExternalClusterAPITriggerResumeClusterRequest(server string, clusterId string, body ExternalClusterAPITriggerResumeClusterJSONRequestBody) (*http.Request, error) {
+func NewExternalClusterAPITriggerResumeClusterRequest(server string, clusterId string, params *ExternalClusterAPITriggerResumeClusterParams, body ExternalClusterAPITriggerResumeClusterJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
 	buf, err := json.Marshal(body)
 	if err != nil {
 		return nil, err
 	}
 	bodyReader = bytes.NewReader(buf)
-	return NewExternalClusterAPITriggerResumeClusterRequestWithBody(server, clusterId, "application/json", bodyReader)
+	return NewExternalClusterAPITriggerResumeClusterRequestWithBody(server, clusterId, params, "application/json", bodyReader)
 }
 
 // NewExternalClusterAPITriggerResumeClusterRequestWithBody generates requests for ExternalClusterAPITriggerResumeCluster with any type of body
-func NewExternalClusterAPITriggerResumeClusterRequestWithBody(server string, clusterId string, contentType string, body io.Reader) (*http.Request, error) {
+func NewExternalClusterAPITriggerResumeClusterRequestWithBody(server string, clusterId string, params *ExternalClusterAPITriggerResumeClusterParams, contentType string, body io.Reader) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -13174,6 +13196,28 @@ func NewExternalClusterAPITriggerResumeClusterRequestWithBody(server string, clu
 	queryURL, err := serverURL.Parse(operationPath)
 	if err != nil {
 		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if params.Mode != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "mode", runtime.ParamLocationQuery, *params.Mode); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
 	}
 
 	req, err := http.NewRequest("POST", queryURL.String(), body)
@@ -18821,6 +18865,22 @@ func NewRuntimeSecurityAPIGetClusterWorkloadsNetflowRequest(server string, clust
 
 		}
 
+		if params.IncludeDstAddrs != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "includeDstAddrs", runtime.ParamLocationQuery, *params.IncludeDstAddrs); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
 		queryURL.RawQuery = queryValues.Encode()
 	}
 
@@ -21971,7 +22031,7 @@ type ClientWithResponsesInterface interface {
 	ExternalClusterAPIDisableGKESAWithResponse(ctx context.Context, clusterId string) (*ExternalClusterAPIDisableGKESAResponse, error)
 
 	// ExternalClusterAPITriggerHibernateCluster request
-	ExternalClusterAPITriggerHibernateClusterWithResponse(ctx context.Context, clusterId string) (*ExternalClusterAPITriggerHibernateClusterResponse, error)
+	ExternalClusterAPITriggerHibernateClusterWithResponse(ctx context.Context, clusterId string, params *ExternalClusterAPITriggerHibernateClusterParams) (*ExternalClusterAPITriggerHibernateClusterResponse, error)
 
 	// ExternalClusterAPIIngestInstanceLogs request  with any body
 	ExternalClusterAPIIngestInstanceLogsWithBodyWithResponse(ctx context.Context, clusterId string, instanceId string, contentType string, body io.Reader) (*ExternalClusterAPIIngestInstanceLogsResponse, error)
@@ -22009,9 +22069,9 @@ type ClientWithResponsesInterface interface {
 	ExternalClusterAPIReconcileClusterWithResponse(ctx context.Context, clusterId string, params *ExternalClusterAPIReconcileClusterParams) (*ExternalClusterAPIReconcileClusterResponse, error)
 
 	// ExternalClusterAPITriggerResumeCluster request  with any body
-	ExternalClusterAPITriggerResumeClusterWithBodyWithResponse(ctx context.Context, clusterId string, contentType string, body io.Reader) (*ExternalClusterAPITriggerResumeClusterResponse, error)
+	ExternalClusterAPITriggerResumeClusterWithBodyWithResponse(ctx context.Context, clusterId string, params *ExternalClusterAPITriggerResumeClusterParams, contentType string, body io.Reader) (*ExternalClusterAPITriggerResumeClusterResponse, error)
 
-	ExternalClusterAPITriggerResumeClusterWithResponse(ctx context.Context, clusterId string, body ExternalClusterAPITriggerResumeClusterJSONRequestBody) (*ExternalClusterAPITriggerResumeClusterResponse, error)
+	ExternalClusterAPITriggerResumeClusterWithResponse(ctx context.Context, clusterId string, params *ExternalClusterAPITriggerResumeClusterParams, body ExternalClusterAPITriggerResumeClusterJSONRequestBody) (*ExternalClusterAPITriggerResumeClusterResponse, error)
 
 	// ExternalClusterAPIUpdateClusterTags request  with any body
 	ExternalClusterAPIUpdateClusterTagsWithBodyWithResponse(ctx context.Context, clusterId string, contentType string, body io.Reader) (*ExternalClusterAPIUpdateClusterTagsResponse, error)
@@ -31737,8 +31797,8 @@ func (c *ClientWithResponses) ExternalClusterAPIDisableGKESAWithResponse(ctx con
 }
 
 // ExternalClusterAPITriggerHibernateClusterWithResponse request returning *ExternalClusterAPITriggerHibernateClusterResponse
-func (c *ClientWithResponses) ExternalClusterAPITriggerHibernateClusterWithResponse(ctx context.Context, clusterId string) (*ExternalClusterAPITriggerHibernateClusterResponse, error) {
-	rsp, err := c.ExternalClusterAPITriggerHibernateCluster(ctx, clusterId)
+func (c *ClientWithResponses) ExternalClusterAPITriggerHibernateClusterWithResponse(ctx context.Context, clusterId string, params *ExternalClusterAPITriggerHibernateClusterParams) (*ExternalClusterAPITriggerHibernateClusterResponse, error) {
+	rsp, err := c.ExternalClusterAPITriggerHibernateCluster(ctx, clusterId, params)
 	if err != nil {
 		return nil, err
 	}
@@ -31859,16 +31919,16 @@ func (c *ClientWithResponses) ExternalClusterAPIReconcileClusterWithResponse(ctx
 }
 
 // ExternalClusterAPITriggerResumeClusterWithBodyWithResponse request with arbitrary body returning *ExternalClusterAPITriggerResumeClusterResponse
-func (c *ClientWithResponses) ExternalClusterAPITriggerResumeClusterWithBodyWithResponse(ctx context.Context, clusterId string, contentType string, body io.Reader) (*ExternalClusterAPITriggerResumeClusterResponse, error) {
-	rsp, err := c.ExternalClusterAPITriggerResumeClusterWithBody(ctx, clusterId, contentType, body)
+func (c *ClientWithResponses) ExternalClusterAPITriggerResumeClusterWithBodyWithResponse(ctx context.Context, clusterId string, params *ExternalClusterAPITriggerResumeClusterParams, contentType string, body io.Reader) (*ExternalClusterAPITriggerResumeClusterResponse, error) {
+	rsp, err := c.ExternalClusterAPITriggerResumeClusterWithBody(ctx, clusterId, params, contentType, body)
 	if err != nil {
 		return nil, err
 	}
 	return ParseExternalClusterAPITriggerResumeClusterResponse(rsp)
 }
 
-func (c *ClientWithResponses) ExternalClusterAPITriggerResumeClusterWithResponse(ctx context.Context, clusterId string, body ExternalClusterAPITriggerResumeClusterJSONRequestBody) (*ExternalClusterAPITriggerResumeClusterResponse, error) {
-	rsp, err := c.ExternalClusterAPITriggerResumeCluster(ctx, clusterId, body)
+func (c *ClientWithResponses) ExternalClusterAPITriggerResumeClusterWithResponse(ctx context.Context, clusterId string, params *ExternalClusterAPITriggerResumeClusterParams, body ExternalClusterAPITriggerResumeClusterJSONRequestBody) (*ExternalClusterAPITriggerResumeClusterResponse, error) {
+	rsp, err := c.ExternalClusterAPITriggerResumeCluster(ctx, clusterId, params, body)
 	if err != nil {
 		return nil, err
 	}
