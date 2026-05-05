@@ -251,8 +251,8 @@ func resourceNodeConfiguration() *schema.Resource {
 							Type:             schema.TypeInt,
 							Optional:         true,
 							Default:          2,
-							ValidateDiagFunc: validation.ToDiagFunc(validation.IntAtLeast(2)),
-							Description:      "Allow configure the IMDSv2 hop limit, the default is 2",
+							ValidateDiagFunc: validation.ToDiagFunc(validation.IntAtLeast(1)),
+							Description:      "Allow configure the IMDSv2 hop limit, the default is 2. Setting to 1 disables access to most pods except pods running on host network.",
 						},
 						"volume_kms_key_arn": {
 							Type:             schema.TypeString,
