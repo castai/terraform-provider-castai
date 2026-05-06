@@ -797,6 +797,12 @@ const (
 	WorkloadoptimizationV1GetHPAV2MigrationEligibilityResponseMigrationStatusUNSPECIFIED WorkloadoptimizationV1GetHPAV2MigrationEligibilityResponseMigrationStatus = "UNSPECIFIED"
 )
 
+// Defines values for WorkloadoptimizationV1HPAConverterType.
+const (
+	AVERAGEVALUEFROMORIGINALREQUESTS WorkloadoptimizationV1HPAConverterType = "AVERAGE_VALUE_FROM_ORIGINAL_REQUESTS"
+	HPACONVERTERTYPEUNSPECIFIED      WorkloadoptimizationV1HPAConverterType = "HPA_CONVERTER_TYPE_UNSPECIFIED"
+)
+
 // Defines values for WorkloadoptimizationV1HPALegacyUnsupportedReasonType.
 const (
 	HPALEGACYUNSUPPORTEDREASONHASNATIVEHPA        WorkloadoptimizationV1HPALegacyUnsupportedReasonType = "HPA_LEGACY_UNSUPPORTED_REASON_HAS_NATIVE_HPA"
@@ -9212,6 +9218,19 @@ type WorkloadoptimizationV1HPAConfigUpdate struct {
 	UseNative *bool `json:"useNative"`
 }
 
+// WorkloadoptimizationV1HPAConverterType HPAConverterType defines the strategy for converting HPA.
+//
+//   - AVERAGE_VALUE_FROM_ORIGINAL_REQUESTS: Converts HPA utilization (%) targets to AverageValue using workload container requests.
+type WorkloadoptimizationV1HPAConverterType string
+
+// WorkloadoptimizationV1HPAConverters defines model for workloadoptimization.v1.HPAConverters.
+type WorkloadoptimizationV1HPAConverters struct {
+	// Type HPAConverterType defines the strategy for converting HPA.
+	//
+	//  - AVERAGE_VALUE_FROM_ORIGINAL_REQUESTS: Converts HPA utilization (%) targets to AverageValue using workload container requests.
+	Type WorkloadoptimizationV1HPAConverterType `json:"type"`
+}
+
 // WorkloadoptimizationV1HPALegacyConfig HPALegacyConfig holds the resolved configuration for legacy CAST AI HPA.
 type WorkloadoptimizationV1HPALegacyConfig struct {
 	// ManagementOption Defines possible options for workload management.
@@ -9910,7 +9929,11 @@ type WorkloadoptimizationV1RecommendationPolicies struct {
 	Cpu                WorkloadoptimizationV1ResourcePolicies          `json:"cpu"`
 	Downscaling        *WorkloadoptimizationV1DownscalingSettings      `json:"downscaling,omitempty"`
 	ExcludedContainers *[]string                                       `json:"excludedContainers,omitempty"`
-	Jvm                *WorkloadoptimizationV1JVMSettings              `json:"jvm,omitempty"`
+
+	// HpaConverters Configuration for converting existing HPAs when VPA is the sole optimization.
+	// If HPA management is enabled, it takes precedence over this setting.
+	HpaConverters *[]WorkloadoptimizationV1HPAConverters `json:"hpaConverters,omitempty"`
+	Jvm           *WorkloadoptimizationV1JVMSettings     `json:"jvm,omitempty"`
 
 	// ManagementOption Defines possible options for workload management.
 	// READ_ONLY - workload watched (metrics collected), but no actions may be performed by CAST AI.
@@ -10538,6 +10561,10 @@ type WorkloadoptimizationV1VPAConfig struct {
 	Downscaling        *WorkloadoptimizationV1DownscalingSettings `json:"downscaling,omitempty"`
 	ExcludedContainers *[]string                                  `json:"excludedContainers,omitempty"`
 
+	// HpaConverters Configuration for converting existing HPAs when VPA is the sole optimization.
+	// If HPA management is enabled, it takes precedence over this setting.
+	HpaConverters *[]WorkloadoptimizationV1HPAConverters `json:"hpaConverters,omitempty"`
+
 	// Jvm JVMRuntimeConfiguration defines set of settings that enables and configures for JVM optimization.
 	Jvm *WorkloadoptimizationV1JVMRuntimeConfiguration `json:"jvm,omitempty"`
 
@@ -10589,6 +10616,10 @@ type WorkloadoptimizationV1VerticalOverrides struct {
 
 	// ExcludedContainers Containers to exclude from optimization.
 	ExcludedContainers *[]string `json:"excludedContainers,omitempty"`
+
+	// HpaConverters Configuration for converting existing HPAs when VPA is the sole optimization.
+	// If HPA management is enabled, it takes precedence over this setting.
+	HpaConverters *[]WorkloadoptimizationV1HPAConverters `json:"hpaConverters,omitempty"`
 
 	// Jvm JVMRuntimeConfiguration defines set of settings that enables and configures for JVM optimization.
 	Jvm *WorkloadoptimizationV1JVMRuntimeConfiguration `json:"jvm,omitempty"`

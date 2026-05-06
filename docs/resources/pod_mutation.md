@@ -368,7 +368,7 @@ Optional:
 
 Required:
 
-- `matchers` (Block List, Min: 1) (see [below for nested schema](#nestedblock--filter_v2--pod--exclude_labels_filter--matchers))
+- `matchers` (Block Set, Min: 1) (see [below for nested schema](#nestedblock--filter_v2--pod--exclude_labels_filter--matchers))
 - `operator` (String) Logical operator to combine label matchers: AND or OR.
 
 <a id="nestedblock--filter_v2--pod--exclude_labels_filter--matchers"></a>
@@ -407,7 +407,7 @@ Required:
 
 Required:
 
-- `matchers` (Block List, Min: 1) (see [below for nested schema](#nestedblock--filter_v2--pod--labels_filter--matchers))
+- `matchers` (Block Set, Min: 1) (see [below for nested schema](#nestedblock--filter_v2--pod--labels_filter--matchers))
 - `operator` (String) Logical operator to combine label matchers: AND or OR.
 
 <a id="nestedblock--filter_v2--pod--labels_filter--matchers"></a>
@@ -447,12 +447,12 @@ Required:
 
 Optional:
 
-- `exclude_kinds` (Block List) (see [below for nested schema](#nestedblock--filter_v2--workload--exclude_kinds))
-- `exclude_names` (Block List) (see [below for nested schema](#nestedblock--filter_v2--workload--exclude_names))
-- `exclude_namespaces` (Block List) (see [below for nested schema](#nestedblock--filter_v2--workload--exclude_namespaces))
-- `kinds` (Block List) (see [below for nested schema](#nestedblock--filter_v2--workload--kinds))
-- `names` (Block List) (see [below for nested schema](#nestedblock--filter_v2--workload--names))
-- `namespaces` (Block List) (see [below for nested schema](#nestedblock--filter_v2--workload--namespaces))
+- `exclude_kinds` (Block Set) (see [below for nested schema](#nestedblock--filter_v2--workload--exclude_kinds))
+- `exclude_names` (Block Set) (see [below for nested schema](#nestedblock--filter_v2--workload--exclude_names))
+- `exclude_namespaces` (Block Set) (see [below for nested schema](#nestedblock--filter_v2--workload--exclude_namespaces))
+- `kinds` (Block Set) (see [below for nested schema](#nestedblock--filter_v2--workload--kinds))
+- `names` (Block Set) (see [below for nested schema](#nestedblock--filter_v2--workload--names))
+- `namespaces` (Block Set) (see [below for nested schema](#nestedblock--filter_v2--workload--namespaces))
 
 <a id="nestedblock--filter_v2--workload--exclude_kinds"></a>
 ### Nested Schema for `filter_v2.workload.exclude_kinds`
