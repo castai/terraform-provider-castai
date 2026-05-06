@@ -900,6 +900,7 @@ const (
 	ERRORCUSTOMWORKLOADCONTAINERSMISMATCH WorkloadoptimizationV1RecommendationErrorType = "ERROR_CUSTOM_WORKLOAD_CONTAINERS_MISMATCH"
 	ERRORCUSTOMWORKLOADINVALIDNAME        WorkloadoptimizationV1RecommendationErrorType = "ERROR_CUSTOM_WORKLOAD_INVALID_NAME"
 	ERRORDEPLOYFAILED                     WorkloadoptimizationV1RecommendationErrorType = "ERROR_DEPLOY_FAILED"
+	ERRORHPASTATUSUNHEALTHY               WorkloadoptimizationV1RecommendationErrorType = "ERROR_HPA_STATUS_UNHEALTHY"
 	ERRORIMMEDIATEAPPLYBLOCKED            WorkloadoptimizationV1RecommendationErrorType = "ERROR_IMMEDIATE_APPLY_BLOCKED"
 	ERRORRECOMMENDATIONGENERATION         WorkloadoptimizationV1RecommendationErrorType = "ERROR_RECOMMENDATION_GENERATION"
 	ERRORUNKNOWN                          WorkloadoptimizationV1RecommendationErrorType = "ERROR_UNKNOWN"
@@ -9894,12 +9895,14 @@ type WorkloadoptimizationV1RecommendationError struct {
 	// Type RecommendationErrorType explains why the recommendation has failed to apply.
 	//
 	//  - ERROR_IMMEDIATE_APPLY_BLOCKED: Workload-autoscaler has blocked immediate applies due to too many consecutive failed attempts (circuit breaker).
+	//  - ERROR_HPA_STATUS_UNHEALTHY: The HPA recommendation status propagated from the in-cluster state.
 	Type WorkloadoptimizationV1RecommendationErrorType `json:"type"`
 }
 
 // WorkloadoptimizationV1RecommendationErrorType RecommendationErrorType explains why the recommendation has failed to apply.
 //
 //   - ERROR_IMMEDIATE_APPLY_BLOCKED: Workload-autoscaler has blocked immediate applies due to too many consecutive failed attempts (circuit breaker).
+//   - ERROR_HPA_STATUS_UNHEALTHY: The HPA recommendation status propagated from the in-cluster state.
 type WorkloadoptimizationV1RecommendationErrorType string
 
 // WorkloadoptimizationV1RecommendationEvent defines model for workloadoptimization.v1.RecommendationEvent.
