@@ -123,6 +123,7 @@ func TestAccGKE_ResourceWorkloadScalingPolicy(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "predictive_scaling.0.cpu.0.enabled", "true"),
 					// Requires workload-autoscaler from v0.35.3
 					resource.TestCheckResourceAttr(resourceName, "rollout_behavior.0.type", "NO_DISRUPTION"),
+					resource.TestCheckResourceAttr(resourceName, "rollout_behavior.0.delay_seconds", "60"),
 					resource.TestCheckResourceAttr(resourceName, "jvm.0.memory.0.optimization", "true"),
 					resource.TestCheckResourceAttr(resourceName, "anomaly_detection.0.cpu_pressure.0.cpu_stall_threshold_percentage", "50"),
 					resource.TestCheckResourceAttr(resourceName, "anomaly_detection.0.cpu_pressure.0.min_pressured_pod_percentage", "30"),
@@ -352,7 +353,8 @@ func scalingPolicyConfigUpdated(clusterName, projectID, name string) string {
 			}
 		}
 		rollout_behavior {
-			type = "NO_DISRUPTION"
+			type          = "NO_DISRUPTION"
+			delay_seconds = 60
 		}
 		cpu {
 			function 		= "QUANTILE"
@@ -754,6 +756,24 @@ func Test_toRolloutBehavior(t *testing.T) {
 				PreferOneByOne: lo.ToPtr(false),
 			},
 		},
+		"should return rollout behavior settings with delay_seconds": {
+			args: map[string]any{
+				FieldRolloutBehaviorType:         FieldRolloutBehaviorNoDisruptionType,
+				FieldRolloutBehaviorDelaySeconds: 60,
+			},
+			exp: &sdk.WorkloadoptimizationV1RolloutBehaviorSettings{
+				Type:         lo.ToPtr(sdk.NODISRUPTION),
+				DelaySeconds: lo.ToPtr(int32(60)),
+			},
+		},
+		"should return rollout behavior settings with only delay_seconds": {
+			args: map[string]any{
+				FieldRolloutBehaviorDelaySeconds: 60,
+			},
+			exp: &sdk.WorkloadoptimizationV1RolloutBehaviorSettings{
+				DelaySeconds: lo.ToPtr(int32(60)),
+			},
+		},
 		"should return nil on empty map": {
 			args: map[string]any{},
 			exp:  nil,
@@ -824,6 +844,28 @@ func Test_toRolloutBehaviorMap(t *testing.T) {
 			exp: []map[string]any{
 				{
 					FieldRolloutBehaviorPreferOneByOneType: false,
+				},
+			},
+		},
+		"should return rollout behavior map with delay_seconds": {
+			args: &sdk.WorkloadoptimizationV1RolloutBehaviorSettings{
+				Type:         lo.ToPtr(sdk.NODISRUPTION),
+				DelaySeconds: lo.ToPtr(int32(60)),
+			},
+			exp: []map[string]any{
+				{
+					FieldRolloutBehaviorType:         string(sdk.NODISRUPTION),
+					FieldRolloutBehaviorDelaySeconds: 60,
+				},
+			},
+		},
+		"should return rollout behavior map with only delay_seconds set": {
+			args: &sdk.WorkloadoptimizationV1RolloutBehaviorSettings{
+				DelaySeconds: lo.ToPtr(int32(30)),
+			},
+			exp: []map[string]any{
+				{
+					FieldRolloutBehaviorDelaySeconds: 30,
 				},
 			},
 		},

@@ -412,6 +412,7 @@ Required:
 
 Optional:
 
+- `delay_seconds` (Number) Number of seconds to delay before applying the recommendation rollout. Must be between 0 and 3600.
 - `prefer_one_by_one` (Boolean) Defines if pods should be restarted one by one to avoid service disruption.
 - `type` (String) Defines the rollout type to be used when applying recommendations.
 	- NO_DISRUPTION - pods are restarted without causing service disruption.
