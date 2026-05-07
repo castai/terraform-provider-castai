@@ -8977,16 +8977,17 @@ type WorkloadoptimizationV1FailedHookEvent struct {
 
 // WorkloadoptimizationV1GetAgentStatusResponse defines model for workloadoptimization.v1.GetAgentStatusResponse.
 type WorkloadoptimizationV1GetAgentStatusResponse struct {
-	CastAgentCurrentVersion          *string    `json:"castAgentCurrentVersion"`
-	ClusterId                        string     `json:"clusterId"`
-	CurrentVersion                   *string    `json:"currentVersion"`
-	HpaSupportedFromCastAgentVersion *string    `json:"hpaSupportedFromCastAgentVersion"`
-	InPlaceResizeEnabled             bool       `json:"inPlaceResizeEnabled"`
-	InstalledAt                      *time.Time `json:"installedAt"`
-	LatestVersion                    *string    `json:"latestVersion"`
-	MetricsExporterVersion           *string    `json:"metricsExporterVersion"`
-	NativeHpaSupportedFromVersion    *string    `json:"nativeHpaSupportedFromVersion"`
-	PsiMetricsSupported              bool       `json:"psiMetricsSupported"`
+	CastAgentCurrentVersion           *string    `json:"castAgentCurrentVersion"`
+	ClusterId                         string     `json:"clusterId"`
+	CurrentVersion                    *string    `json:"currentVersion"`
+	HpaConvertersSupportedFromVersion string     `json:"hpaConvertersSupportedFromVersion"`
+	HpaSupportedFromCastAgentVersion  *string    `json:"hpaSupportedFromCastAgentVersion"`
+	InPlaceResizeEnabled              bool       `json:"inPlaceResizeEnabled"`
+	InstalledAt                       *time.Time `json:"installedAt"`
+	LatestVersion                     *string    `json:"latestVersion"`
+	MetricsExporterVersion            *string    `json:"metricsExporterVersion"`
+	NativeHpaSupportedFromVersion     *string    `json:"nativeHpaSupportedFromVersion"`
+	PsiMetricsSupported               bool       `json:"psiMetricsSupported"`
 
 	// ResourceQuotasAffectingOptimization True if we detected at least one ResourceQuota with a hard CPU or memory limit,
 	// regardless of whether VPA is enabled or the quota is currently affecting workload optimization.

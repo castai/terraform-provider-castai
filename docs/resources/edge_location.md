@@ -64,6 +64,7 @@ resource "castai_edge_location" "aws_example" {
 - `control_plane_mode` (String) The mode of control plane inside edge location. Valid values: DEDICATED, SHARED.
 - `description` (String) Description of the edge location
 - `gcp` (Attributes) GCP configuration for the edge location (see [below for nested schema](#nestedatt--gcp))
+- `networking` (Attributes) Edge cluster networking configuration. (see [below for nested schema](#nestedatt--networking))
 - `oci` (Attributes) OCI configuration for the edge location (see [below for nested schema](#nestedatt--oci))
 - `zones` (Attributes List) List of availability zones for the edge location (see [below for nested schema](#nestedatt--zones))
 
@@ -117,6 +118,14 @@ Optional:
 - `instance_service_account` (String) GCP service account email to be attached to edge instances. It can be used to grant permissions to access other GCP resources.
 - `subnet_cidr` (String) VPC Subnet IPv4 CIDR block
 - `target_service_account_email` (String) Target service account email to be used for impersonation
+
+
+<a id="nestedatt--networking"></a>
+### Nested Schema for `networking`
+
+Optional:
+
+- `tunneled_cidrs` (List of String) List of destination CIDR blocks whose traffic should be routed through the main cluster instead of directly from the edge cluster.
 
 
 <a id="nestedatt--oci"></a>
