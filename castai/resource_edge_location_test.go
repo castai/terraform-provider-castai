@@ -134,6 +134,7 @@ func TestAccCloudAgnostic_ResourceEdgeLocationAWSImpersonation(t *testing.T) {
 					resource.TestCheckResourceAttrSet(resourceName, "aws.security_group_id"),
 					resource.TestCheckResourceAttrSet(resourceName, "id"),
 					resource.TestCheckResourceAttr(resourceName, "credentials_revision", "1"),
+					resource.TestCheckResourceAttr(resourceName, "networking.tunneled_cidrs.#", "0"),
 				),
 			},
 			{
@@ -159,6 +160,9 @@ func TestAccCloudAgnostic_ResourceEdgeLocationAWSImpersonation(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "zones.2.id", "us-east-1c"),
 					resource.TestCheckResourceAttr(resourceName, "zones.2.name", "us-east-1c"),
 					resource.TestCheckResourceAttr(resourceName, "aws.role_arn", "arn:aws:iam::123456789012:role/castai-omni-edge-updated"),
+					resource.TestCheckResourceAttr(resourceName, "networking.tunneled_cidrs.#", "2"),
+					resource.TestCheckResourceAttr(resourceName, "networking.tunneled_cidrs.0", "10.10.0.0/16"),
+					resource.TestCheckResourceAttr(resourceName, "networking.tunneled_cidrs.1", "192.168.0.0/24"),
 				),
 			},
 		},
@@ -235,18 +239,25 @@ func formatAWSZonesAndSubnets(zones []string) (zonesConfig string, subnetConfig 
 
 func testAccEdgeLocationAWSImpersonationConfig(rName, clusterName string) string {
 	return testAccEdgeLocationAWSImpersonationConfigWithParams(rName, clusterName, "Test edge location impersonation",
-		[]string{"us-east-1a", "us-east-1b"}, "arn:aws:iam::123456789012:role/castai-omni-edge")
+		[]string{"us-east-1a", "us-east-1b"}, "arn:aws:iam::123456789012:role/castai-omni-edge", nil)
 }
 
 func testAccEdgeLocationAWSImpersonationUpdated(rName, clusterName string) string {
 	return testAccEdgeLocationAWSImpersonationConfigWithParams(rName, clusterName, "Updated edge location impersonation",
-		[]string{"us-east-1a", "us-east-1b", "us-east-1c"}, "arn:aws:iam::123456789012:role/castai-omni-edge-updated")
+		[]string{"us-east-1a", "us-east-1b", "us-east-1c"}, "arn:aws:iam::123456789012:role/castai-omni-edge-updated",
+		[]string{"10.10.0.0/16", "192.168.0.0/24"})
 }
 
-func testAccEdgeLocationAWSImpersonationConfigWithParams(rName, clusterName, description string, zones []string, roleArn string) string {
+func testAccEdgeLocationAWSImpersonationConfigWithParams(rName, clusterName, description string, zones []string, roleArn string, tunneledCIDRs []string) string {
 	organizationID := testAccGetOrganizationID()
 
 	zonesConfig, subnetConfig := formatAWSZonesAndSubnets(zones)
+
+	quoted := make([]string, 0, len(tunneledCIDRs))
+	for _, c := range tunneledCIDRs {
+		quoted = append(quoted, fmt.Sprintf("%q", c))
+	}
+	tunneledCIDRsConfig := strings.Join(quoted, ", ")
 
 	return ConfigCompose(testOmniClusterConfig(clusterName), fmt.Sprintf(`
 resource "castai_edge_location" "test" {
@@ -257,6 +268,10 @@ resource "castai_edge_location" "test" {
   region          	 = "us-east-1"
   control_plane_mode = "SHARED"
 %[3]s
+
+  networking = {
+    tunneled_cidrs = [%[7]s]
+  }
 
   aws = {
     account_id               = "123456789012"
@@ -270,7 +285,7 @@ resource "castai_edge_location" "test" {
     }
   }
 }
-`, rName, description, zonesConfig, subnetConfig, organizationID, roleArn))
+`, rName, description, zonesConfig, subnetConfig, organizationID, roleArn, tunneledCIDRsConfig))
 }
 
 func testAccEdgeLocationGCPImpersonationConfig(rName, clusterName string) string {
