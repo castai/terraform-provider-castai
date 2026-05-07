@@ -19,7 +19,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	"github.com/samber/lo"
 
 	"github.com/castai/terraform-provider-castai/castai/sdk/omni"
@@ -816,11 +815,10 @@ func (r *edgeLocationResource) toEdgeClusterSpec(ctx context.Context, cp *contro
 			Ha: cp.Ha.ValueBoolPointer(),
 		}
 	}
-	
-	opts := basetypes.CollectionLengthOptions{UnhandledNullAsZero: true, UnhandledUnknownAsZero: true}
-	if net != nil && net.TunneledCIDRs.Length(opts) > 0 {
+
+	if net != nil {
 		var items []string
-		diags.Append(net.TunneledCIDRs.ElementsAs(ctx, &items, false)...)
+		diags.Append(net.TunneledCIDRs.ElementsAs(ctx, &items, true)...)
 		if diags.HasError() {
 			return nil, diags
 		}

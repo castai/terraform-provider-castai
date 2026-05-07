@@ -165,6 +165,12 @@ func TestAccCloudAgnostic_ResourceEdgeLocationAWSImpersonation(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "networking.tunneled_cidrs.1", "192.168.0.0/24"),
 				),
 			},
+			{
+				Config: testAccEdgeLocationAWSImpersonationConfig(rName, clusterName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "networking.tunneled_cidrs.#", "0"),
+				),
+			},
 		},
 	})
 }
