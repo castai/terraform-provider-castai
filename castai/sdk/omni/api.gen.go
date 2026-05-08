@@ -194,12 +194,23 @@ type EdgeClusterControlPlane struct {
 	Ha *bool `json:"ha,omitempty"`
 }
 
+// EdgeClusterNetworking EdgeClusterNetworking contains networking configuration options for the edge cluster.
+type EdgeClusterNetworking struct {
+	// TunneledCidrs A list of destination CIDR blocks whose traffic should be routed through the main cluster instead of directly from the
+	//  edge cluster. When specified, the edge cluster will forward packets destined to these CIDRs over the peering tunnel
+	//  to the main cluster, which then routes them on to their final destination.
+	TunneledCidrs *[]string `json:"tunneledCidrs,omitempty"`
+}
+
 // EdgeClusterSpec EdgeClusterSpec contains configuration overrides for the edge cluster.
 //
 //	Fields left unset will use system defaults.
 type EdgeClusterSpec struct {
 	// ControlPlane Control plane configuration overrides.
 	ControlPlane *EdgeClusterControlPlane `json:"controlPlane,omitempty"`
+
+	// Networking Networking configuration.
+	Networking *EdgeClusterNetworking `json:"networking,omitempty"`
 }
 
 // EdgeLocation Message to represent edge location.
@@ -225,7 +236,7 @@ type EdgeLocation struct {
 	// Description The description of the edge location.
 	Description *string `json:"description,omitempty"`
 
-	// EdgeClusterSpec Optional edge cluster spec overrides. Ignored during edge location update.
+	// EdgeClusterSpec Optional edge cluster spec overrides.
 	EdgeClusterSpec *EdgeClusterSpec `json:"edgeClusterSpec,omitempty"`
 
 	// Error If state if failed, this field will contain the error message.
@@ -277,6 +288,9 @@ type EdgeLocationUpdate struct {
 
 	// Description The description of the edge location.
 	Description *string `json:"description,omitempty"`
+
+	// EdgeClusterSpec Edge cluster spec configuration.
+	EdgeClusterSpec *EdgeClusterSpec `json:"edgeClusterSpec,omitempty"`
 
 	// Gcp Google Cloud specific parameters.
 	Gcp *GCPParam `json:"gcp,omitempty"`

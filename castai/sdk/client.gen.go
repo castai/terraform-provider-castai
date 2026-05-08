@@ -1037,6 +1037,9 @@ type ClientInterface interface {
 	// InventoryAPIListZones request
 	InventoryAPIListZones(ctx context.Context, params *InventoryAPIListZonesParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// WorkloadOptimizationAPIListClusterHPAs request
+	WorkloadOptimizationAPIListClusterHPAs(ctx context.Context, clusterId string, params *WorkloadOptimizationAPIListClusterHPAsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// WorkloadOptimizationAPIGetWorkloadCustomMetricsV1Beta request
 	WorkloadOptimizationAPIGetWorkloadCustomMetricsV1Beta(ctx context.Context, clusterId string, workloadId string, params *WorkloadOptimizationAPIGetWorkloadCustomMetricsV1BetaParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -5172,6 +5175,18 @@ func (c *Client) WorkloadOptimizationAPIGetInstallScript(ctx context.Context, pa
 
 func (c *Client) InventoryAPIListZones(ctx context.Context, params *InventoryAPIListZonesParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewInventoryAPIListZonesRequest(c.Server, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) WorkloadOptimizationAPIListClusterHPAs(ctx context.Context, clusterId string, params *WorkloadOptimizationAPIListClusterHPAsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewWorkloadOptimizationAPIListClusterHPAsRequest(c.Server, clusterId, params)
 	if err != nil {
 		return nil, err
 	}
@@ -21191,6 +21206,142 @@ func NewInventoryAPIListZonesRequest(server string, params *InventoryAPIListZone
 	return req, nil
 }
 
+// NewWorkloadOptimizationAPIListClusterHPAsRequest generates requests for WorkloadOptimizationAPIListClusterHPAs
+func NewWorkloadOptimizationAPIListClusterHPAsRequest(server string, clusterId string, params *WorkloadOptimizationAPIListClusterHPAsParams) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "clusterId", runtime.ParamLocationPath, clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1beta/workload-autoscaling/clusters/%s/hpas:analyze", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if params.WorkloadNames != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "workloadNames", runtime.ParamLocationQuery, *params.WorkloadNames); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.Namespaces != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "namespaces", runtime.ParamLocationQuery, *params.Namespaces); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.ScalingPolicyNames != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "scalingPolicyNames", runtime.ParamLocationQuery, *params.ScalingPolicyNames); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.Kinds != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "kinds", runtime.ParamLocationQuery, *params.Kinds); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.ManagementOptions != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "managementOptions", runtime.ParamLocationQuery, *params.ManagementOptions); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.IncludeConversion != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "includeConversion", runtime.ParamLocationQuery, *params.IncludeConversion); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
 // NewWorkloadOptimizationAPIGetWorkloadCustomMetricsV1BetaRequest generates requests for WorkloadOptimizationAPIGetWorkloadCustomMetricsV1Beta
 func NewWorkloadOptimizationAPIGetWorkloadCustomMetricsV1BetaRequest(server string, clusterId string, workloadId string, params *WorkloadOptimizationAPIGetWorkloadCustomMetricsV1BetaParams) (*http.Request, error) {
 	var err error
@@ -22559,6 +22710,9 @@ type ClientWithResponsesInterface interface {
 
 	// InventoryAPIListZones request
 	InventoryAPIListZonesWithResponse(ctx context.Context, params *InventoryAPIListZonesParams) (*InventoryAPIListZonesResponse, error)
+
+	// WorkloadOptimizationAPIListClusterHPAs request
+	WorkloadOptimizationAPIListClusterHPAsWithResponse(ctx context.Context, clusterId string, params *WorkloadOptimizationAPIListClusterHPAsParams) (*WorkloadOptimizationAPIListClusterHPAsResponse, error)
 
 	// WorkloadOptimizationAPIGetWorkloadCustomMetricsV1Beta request
 	WorkloadOptimizationAPIGetWorkloadCustomMetricsV1BetaWithResponse(ctx context.Context, clusterId string, workloadId string, params *WorkloadOptimizationAPIGetWorkloadCustomMetricsV1BetaParams) (*WorkloadOptimizationAPIGetWorkloadCustomMetricsV1BetaResponse, error)
@@ -30353,6 +30507,36 @@ func (r InventoryAPIListZonesResponse) GetBody() []byte {
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
+type WorkloadOptimizationAPIListClusterHPAsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *WorkloadoptimizationV1ListClusterHPAsResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r WorkloadOptimizationAPIListClusterHPAsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r WorkloadOptimizationAPIListClusterHPAsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r WorkloadOptimizationAPIListClusterHPAsResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
 type WorkloadOptimizationAPIGetWorkloadCustomMetricsV1BetaResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -33482,6 +33666,15 @@ func (c *ClientWithResponses) InventoryAPIListZonesWithResponse(ctx context.Cont
 		return nil, err
 	}
 	return ParseInventoryAPIListZonesResponse(rsp)
+}
+
+// WorkloadOptimizationAPIListClusterHPAsWithResponse request returning *WorkloadOptimizationAPIListClusterHPAsResponse
+func (c *ClientWithResponses) WorkloadOptimizationAPIListClusterHPAsWithResponse(ctx context.Context, clusterId string, params *WorkloadOptimizationAPIListClusterHPAsParams) (*WorkloadOptimizationAPIListClusterHPAsResponse, error) {
+	rsp, err := c.WorkloadOptimizationAPIListClusterHPAs(ctx, clusterId, params)
+	if err != nil {
+		return nil, err
+	}
+	return ParseWorkloadOptimizationAPIListClusterHPAsResponse(rsp)
 }
 
 // WorkloadOptimizationAPIGetWorkloadCustomMetricsV1BetaWithResponse request returning *WorkloadOptimizationAPIGetWorkloadCustomMetricsV1BetaResponse
@@ -40221,6 +40414,32 @@ func ParseInventoryAPIListZonesResponse(rsp *http.Response) (*InventoryAPIListZo
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest CastaiInventoryV1beta1ListZonesResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseWorkloadOptimizationAPIListClusterHPAsResponse parses an HTTP response from a WorkloadOptimizationAPIListClusterHPAsWithResponse call
+func ParseWorkloadOptimizationAPIListClusterHPAsResponse(rsp *http.Response) (*WorkloadOptimizationAPIListClusterHPAsResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &WorkloadOptimizationAPIListClusterHPAsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest WorkloadoptimizationV1ListClusterHPAsResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
