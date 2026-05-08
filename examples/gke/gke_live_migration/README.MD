@@ -28,6 +28,13 @@ tofu destroy
 
 Please refer to this guide if you run into any issues https://docs.cast.ai/docs/terraform-troubleshooting
 
+# CLM Configuration
+
+CLM is enabled by having:
+1. A dedicated `live` node configuration in `castai.tf` using a COS or Ubuntu image with the appropriate init script (`init_cos.sh` or `init_ubuntu.sh`) to prepare nodes for live migration.
+2. A `live_tmpl` node template with `clm_enabled = true` and `should_taint = true` that uses the `live` node configuration. The taint ensures only workloads that tolerate the live-migration taint will be scheduled on CLM-enabled nodes.
+3. The `default_by_castai` template has `clm_enabled = true` for general cluster nodes.
+
 # Notes
 
 - Make sure to rebalance the cluster after it is fully onboarded, we replace the original image with a new image we know that contains a new version of containerd and is compatible with live.

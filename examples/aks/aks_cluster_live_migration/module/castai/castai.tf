@@ -1,39 +1,35 @@
-# Configure Data sources and providers required for CAST AI connection.
-data "aws_caller_identity" "current" {}
-
-module "castai-eks-cluster" {
-  source  = "castai/eks-cluster/castai"
-  version = "~> 14.1"
+module "castai-aks-cluster" {
+  source  = "castai/aks/castai"
+  version = "~> 10.3"
 
   api_url                = var.castai_api_url
   castai_api_token       = var.castai_api_token
   grpc_url               = var.castai_grpc_url
   wait_for_cluster_ready = true
 
-  aws_account_id     = data.aws_caller_identity.current.account_id
-  aws_cluster_region = var.cluster_region
-  aws_cluster_name   = var.cluster_name
+  aks_cluster_name    = var.cluster_name
+  aks_cluster_region  = var.cluster_region
+  node_resource_group = var.node_resource_group
+  resource_group      = var.resource_group
 
-  aws_assume_role_arn        = var.castai-eks-role-iam_role_arn
   delete_nodes_on_disconnect = var.delete_nodes_on_disconnect
+
+  subscription_id = var.subscription_id
+  tenant_id       = var.tenant_id
 
   default_node_configuration_name = "default"
 
   node_configurations = {
     default = {
-      subnets              = var.subnets
-      tags                 = var.tags
-      security_groups      = var.security_groups
-      instance_profile_arn = var.castai-eks-role-iam_instance_profile_arn
+      disk_cpu_ratio = 25
+      subnets        = [var.subnet_id]
+      tags           = var.tags
     }
 
     live = {
-      subnets              = var.subnets
-      instance_profile_arn = var.castai-eks-role-iam_instance_profile_arn
-      security_groups      = var.security_groups
-
-      container_runtime = "containerd"
-      eks_image_family  = "al2023"
+      disk_cpu_ratio = 25
+      subnets        = [var.subnet_id]
+      tags           = var.tags
     }
   }
 
@@ -52,9 +48,6 @@ module "castai-eks-cluster" {
 
         enable_spot_diversity                       = false
         spot_diversity_price_increase_limit_percent = 20
-
-        spot_interruption_predictions_enabled = true
-        spot_interruption_predictions_type    = "aws-rebalance-recommendations"
       }
     }
 
@@ -65,12 +58,9 @@ module "castai-eks-cluster" {
       clm_enabled        = true
 
       constraints = {
-        on_demand          = true
-        spot               = false
-        use_spot_fallbacks = false
-
         instance_families = {
-          enabled = ["m6i", "m5", "m5a", "c6i", "c5", "c5a"]
+          exclude = []
+          include = ["standard_dsv2", "standard_dsv3", "standard_dsv4", "standard_dsv5", "standard_ev3", "standard_ev4"]
         }
       }
     }

@@ -8,7 +8,8 @@ variable "cluster_region" {
 }
 
 variable "live_helm_version" {
-  type = string
+  type    = string
+  default = "0.91.0"
 }
 
 variable "tags" {

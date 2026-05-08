@@ -803,7 +803,7 @@ func resourceNodeTemplate() *schema.Resource {
 				Type:        schema.TypeBool,
 				Optional:    true,
 				Default:     false,
-				Description: "Marks whether CLM should be enabled for nodes created from this template.",
+				Description: "Marks whether Container Live Migration (CLM) should be enabled for nodes created from this template. Supported on EKS, GKE, and AKS clusters. CLM-enabled nodes participate in live workload migration during rebalancing, scale-down, and node lifecycle events.",
 			},
 			FieldNodeTemplateEdgeLocationIDs: {
 				Type:     schema.TypeList,

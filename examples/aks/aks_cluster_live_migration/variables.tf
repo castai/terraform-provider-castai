@@ -1,18 +1,17 @@
-# EKS module variables.
 variable "cluster_name" {
   type        = string
-  description = "EKS cluster name in AWS account."
+  description = "Name of the AKS cluster, resources will be created for."
 }
 
 variable "cluster_region" {
   type        = string
-  description = "AWS Region in which EKS cluster and supporting resources will be created."
+  description = "Region of the AKS cluster, resources will be created for."
 }
 
 variable "cluster_version" {
   type        = string
-  description = "EKS cluster version."
-  default     = "1.34"
+  description = "AKS cluster version."
+  default     = "1.32"
 }
 
 variable "castai_api_url" {
@@ -21,7 +20,6 @@ variable "castai_api_url" {
   default     = "https://api.cast.ai"
 }
 
-# Variables required for connecting EKS cluster to CAST AI.
 variable "castai_api_token" {
   type        = string
   description = "CAST AI API token created in console.cast.ai API Access keys section"
@@ -45,13 +43,19 @@ variable "tags" {
   default     = {}
 }
 
+variable "subscription_id" {
+  type        = string
+  description = "Azure subscription ID"
+}
+
 variable "enable_castai" {
+  type    = bool
   default = true
 }
 
 variable "install_helm_live" {
   type        = bool
-  description = "Optional parameter, if set to true - the 'castai-live' Helm chart will be installed on the cluster. Helm chart must be installed to enable live migration functionality, the option exists only for developers."
+  description = "Optional parameter, if set to true - the 'castai-live' Helm chart will be installed on the cluster. Helm chart must be installed to enable live migration functionality."
   default     = true
 }
 
