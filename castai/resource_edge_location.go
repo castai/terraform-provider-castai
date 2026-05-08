@@ -15,7 +15,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
@@ -258,11 +257,7 @@ func (r *edgeLocationResource) Schema(_ context.Context, _ resource.SchemaReques
 			},
 			"control_plane": schema.SingleNestedAttribute{
 				Optional:    true,
-				Computed:    true,
 				Description: "Control plane configuration. Only valid when control_plane_mode is SHARED.",
-				PlanModifiers: []planmodifier.Object{
-					objectplanmodifier.UseStateForUnknown(),
-				},
 				Attributes: map[string]schema.Attribute{
 					"ha": schema.BoolAttribute{
 						Optional:    true,
@@ -597,7 +592,9 @@ func (r *edgeLocationResource) Read(ctx context.Context, req resource.ReadReques
 		state.ControlPlaneMode = types.StringValue(string(*edgeLocation.ControlPlaneMode))
 	}
 	if edgeLocation.EdgeClusterSpec != nil {
-		if edgeLocation.EdgeClusterSpec.ControlPlane != nil {
+		// Only sync control_plane from API if it was already managed in state.
+		// Otherwise, we'd cause perpetual drift for users who never set the block.
+		if state.ControlPlane != nil && edgeLocation.EdgeClusterSpec.ControlPlane != nil {
 			state.ControlPlane = &controlPlaneModel{
 				Ha: types.BoolPointerValue(edgeLocation.EdgeClusterSpec.ControlPlane.Ha),
 			}
