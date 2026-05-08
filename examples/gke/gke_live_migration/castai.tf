@@ -45,10 +45,18 @@ module "castai-gke-cluster" {
   gke_credentials            = module.castai-gke-iam.private_key
   delete_nodes_on_disconnect = true
 
-  default_node_configuration = module.castai-gke-cluster.castai_node_configurations["default"]
+  default_node_configuration_name = "default"
 
   node_configurations = {
     default = {
+      disk_cpu_ratio = 25
+      subnets        = [module.vpc.subnets_ids[0]]
+      # https://cloud.google.com/container-optimized-os/docs/release-notes/m121
+      image       = "projects/cos-cloud/global/images/cos-121-18867-90-59"
+      init_script = base64encode(file(local.init_script))
+    }
+
+    live = {
       disk_cpu_ratio = 25
       subnets        = [module.vpc.subnets_ids[0]]
       # https://cloud.google.com/container-optimized-os/docs/release-notes/m121
@@ -59,11 +67,11 @@ module "castai-gke-cluster" {
 
   node_templates = {
     default_by_castai = {
-      name             = "default-by-castai"
-      configuration_id = module.castai-gke-cluster.castai_node_configurations["default"]
-      is_default       = true
-      is_enabled       = true
-      should_taint     = false
+      name               = "default-by-castai"
+      configuration_name = "default"
+      is_default         = true
+      is_enabled         = true
+      should_taint       = false
 
       constraints = {
         on_demand          = true
@@ -72,6 +80,21 @@ module "castai-gke-cluster" {
 
         enable_spot_diversity                       = false
         spot_diversity_price_increase_limit_percent = 20
+      }
+    }
+
+    live_tmpl = {
+      configuration_name = "live"
+      is_enabled         = true
+      should_taint       = true
+      clm_enabled        = true
+
+      constraints = {
+        on_demand = true
+        spot      = true
+        instance_families = {
+          enabled = ["n2", "n2d", "c2", "c2d"]
+        }
       }
     }
   }
