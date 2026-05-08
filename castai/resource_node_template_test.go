@@ -596,10 +596,6 @@ func TestNodeTemplateResourceCreate_customNodeTemplate(t *testing.T) {
 		    "minCpu": 10,
 		    "maxCpu": 10000,
 		    "architectures": ["amd64", "arm64"],
-		    "instanceFamilies": {
-		      "include": ["m6i", "m5"],
-		      "exclude": []
-		    },
 		    "resourceLimits": {
 		  	"cpuLimitEnabled": true,
 		  	"cpuLimitMaxCores": 20
@@ -842,10 +838,7 @@ func TestAccEKS_ResourceNodeTemplate_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.use_spot_fallbacks", "true"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.spot", "true"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.on_demand", "true"),
-					resource.TestCheckResourceAttr(resourceName, "constraints.0.instance_families.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "constraints.0.instance_families.0.include.#", "2"),
-					resource.TestCheckResourceAttr(resourceName, "constraints.0.instance_families.0.include.0", "m6i"),
-					resource.TestCheckResourceAttr(resourceName, "constraints.0.instance_families.0.include.1", "m5"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.instance_families.#", "0"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.gpu.0.manufacturers.#", "0"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.gpu.0.include_names.#", "0"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.gpu.0.exclude_names.#", "0"),
@@ -1146,10 +1139,6 @@ func testNodeTemplateUpdated(rName, clusterName string) string {
 				customer_specific = "enabled"
 				azs = ["eu-central-1a", "eu-central-1b", "eu-central-1c"]
 				bare_metal = false
-
-				instance_families {
-					include = ["m6i", "m5"]
-				}
 
 				custom_priority {
 					instance_families = ["a", "b"]
