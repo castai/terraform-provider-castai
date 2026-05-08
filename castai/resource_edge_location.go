@@ -13,7 +13,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
@@ -59,8 +61,22 @@ type controlPlaneModel struct {
 	Ha types.Bool `tfsdk:"ha"`
 }
 
+func (m *controlPlaneModel) Equal(other *controlPlaneModel) bool {
+	if m == nil || other == nil {
+		return m == other
+	}
+	return m.Ha.Equal(other.Ha)
+}
+
 type networkingModel struct {
 	TunneledCIDRs types.List `tfsdk:"tunneled_cidrs"`
+}
+
+func (m *networkingModel) Equal(other *networkingModel) bool {
+	if m == nil || other == nil {
+		return m == other
+	}
+	return m.TunneledCIDRs.Equal(other.TunneledCIDRs)
 }
 
 type zoneModel struct {
@@ -242,11 +258,19 @@ func (r *edgeLocationResource) Schema(_ context.Context, _ resource.SchemaReques
 			},
 			"control_plane": schema.SingleNestedAttribute{
 				Optional:    true,
+				Computed:    true,
 				Description: "Control plane configuration. Only valid when control_plane_mode is SHARED.",
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseStateForUnknown(),
+				},
 				Attributes: map[string]schema.Attribute{
 					"ha": schema.BoolAttribute{
-						Required:    true,
+						Optional:    true,
+						Computed:    true,
 						Description: "Whether to use HA mode for control plane. If not set, default is HA.",
+						PlanModifiers: []planmodifier.Bool{
+							boolplanmodifier.UseStateForUnknown(),
+						},
 					},
 				},
 			},
@@ -645,7 +669,7 @@ func (r *edgeLocationResource) Update(ctx context.Context, req resource.UpdateRe
 		mc    ModelWithCredentials
 	)
 
-	updateReq.EdgeClusterSpec, diags = r.toEdgeClusterSpec(ctx, plan.ControlPlane, plan.Networking)
+	updateReq.EdgeClusterSpec, diags = r.edgeClusterSpecUpdate(ctx, plan, state)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -801,6 +825,41 @@ func (r *edgeLocationResource) ImportState(ctx context.Context, req resource.Imp
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("organization_id"), ids[0])...)
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("cluster_id"), ids[1])...)
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("id"), ids[2])...)
+}
+
+// edgeClusterSpecUpdate builds an EdgeClusterSpec containing only the sub-blocks that
+// changed between plan and state. Removed blocks are reset to API defaults.
+// Returns nil when nothing changed so the field is omitted from the PATCH request.
+func (r *edgeLocationResource) edgeClusterSpecUpdate(ctx context.Context, plan, state edgeLocationModel) (*omni.EdgeClusterSpec, diag.Diagnostics) {
+	var (
+		diags      diag.Diagnostics
+		cpChanged  = !plan.ControlPlane.Equal(state.ControlPlane)
+		netChanged = !plan.Networking.Equal(state.Networking)
+	)
+
+	if !cpChanged && !netChanged {
+		return nil, diags
+	}
+
+	spec := &omni.EdgeClusterSpec{}
+	if cpChanged {
+		spec.ControlPlane = &omni.EdgeClusterControlPlane{Ha: lo.ToPtr(true)}
+		if plan.ControlPlane != nil {
+			spec.ControlPlane.Ha = plan.ControlPlane.Ha.ValueBoolPointer()
+		}
+	}
+	if netChanged {
+		spec.Networking = &omni.EdgeClusterNetworking{TunneledCidrs: &[]string{}}
+		if plan.Networking != nil {
+			var items []string
+			diags.Append(plan.Networking.TunneledCIDRs.ElementsAs(ctx, &items, true)...)
+			if diags.HasError() {
+				return nil, diags
+			}
+			spec.Networking.TunneledCidrs = &items
+		}
+	}
+	return spec, diags
 }
 
 func (r *edgeLocationResource) toEdgeClusterSpec(ctx context.Context, cp *controlPlaneModel, net *networkingModel) (*omni.EdgeClusterSpec, diag.Diagnostics) {

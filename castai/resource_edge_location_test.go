@@ -134,7 +134,7 @@ func TestAccCloudAgnostic_ResourceEdgeLocationAWSImpersonation(t *testing.T) {
 					resource.TestCheckResourceAttrSet(resourceName, "aws.security_group_id"),
 					resource.TestCheckResourceAttrSet(resourceName, "id"),
 					resource.TestCheckResourceAttr(resourceName, "credentials_revision", "1"),
-					resource.TestCheckResourceAttr(resourceName, "networking.tunneled_cidrs.#", "0"),
+					resource.TestCheckNoResourceAttr(resourceName, "networking"),
 				),
 			},
 			{
@@ -168,7 +168,7 @@ func TestAccCloudAgnostic_ResourceEdgeLocationAWSImpersonation(t *testing.T) {
 			{
 				Config: testAccEdgeLocationAWSImpersonationConfig(rName, clusterName),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceName, "networking.tunneled_cidrs.#", "0"),
+					resource.TestCheckNoResourceAttr(resourceName, "networking"),
 				),
 			},
 		},
@@ -259,11 +259,17 @@ func testAccEdgeLocationAWSImpersonationConfigWithParams(rName, clusterName, des
 
 	zonesConfig, subnetConfig := formatAWSZonesAndSubnets(zones)
 
-	quoted := make([]string, 0, len(tunneledCIDRs))
-	for _, c := range tunneledCIDRs {
-		quoted = append(quoted, fmt.Sprintf("%q", c))
+	networkingBlock := ""
+	if tunneledCIDRs != nil {
+		quoted := make([]string, 0, len(tunneledCIDRs))
+		for _, c := range tunneledCIDRs {
+			quoted = append(quoted, fmt.Sprintf("%q", c))
+		}
+		networkingBlock = fmt.Sprintf(`
+  networking = {
+    tunneled_cidrs = [%s]
+  }`, strings.Join(quoted, ", "))
 	}
-	tunneledCIDRsConfig := strings.Join(quoted, ", ")
 
 	return ConfigCompose(testOmniClusterConfig(clusterName), fmt.Sprintf(`
 resource "castai_edge_location" "test" {
@@ -274,10 +280,7 @@ resource "castai_edge_location" "test" {
   region          	 = "us-east-1"
   control_plane_mode = "SHARED"
 %[3]s
-
-  networking = {
-    tunneled_cidrs = [%[7]s]
-  }
+%[7]s
 
   aws = {
     account_id               = "123456789012"
@@ -291,7 +294,7 @@ resource "castai_edge_location" "test" {
     }
   }
 }
-`, rName, description, zonesConfig, subnetConfig, organizationID, roleArn, tunneledCIDRsConfig))
+`, rName, description, zonesConfig, subnetConfig, organizationID, roleArn, networkingBlock))
 }
 
 func testAccEdgeLocationGCPImpersonationConfig(rName, clusterName string) string {

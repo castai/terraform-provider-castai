@@ -97,7 +97,7 @@ Optional:
 <a id="nestedatt--control_plane"></a>
 ### Nested Schema for `control_plane`
 
-Required:
+Optional:
 
 - `ha` (Boolean) Whether to use HA mode for control plane. If not set, default is HA.
 
