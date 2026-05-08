@@ -58,7 +58,7 @@ func TestWorkloadCustomMetricsDataSource_CreateWithPresets(t *testing.T) {
 		Id:               dsID,
 		ClusterId:        clusterID,
 		Name:             "my-prometheus",
-		Type:             sdk.PROMETHEUS,
+		Type:             sdk.WorkloadoptimizationV1CustomMetricsDataSourceTypePROMETHEUS,
 		Status:           sdk.WorkloadoptimizationV1CustomMetricsDataSourceStatusCONNECTING,
 		KubeResourceName: "my-prometheus",
 		ManagedByCast:    true,
@@ -157,7 +157,7 @@ func TestWorkloadCustomMetricsDataSource_CreateWithManualMetrics(t *testing.T) {
 		Id:               dsID,
 		ClusterId:        clusterID,
 		Name:             "custom-prom",
-		Type:             sdk.PROMETHEUS,
+		Type:             sdk.WorkloadoptimizationV1CustomMetricsDataSourceTypePROMETHEUS,
 		Status:           sdk.WorkloadoptimizationV1CustomMetricsDataSourceStatusCONNECTING,
 		KubeResourceName: "custom-prom",
 		ManagedByCast:    true,
@@ -324,7 +324,7 @@ func TestWorkloadCustomMetricsDataSource_Update(t *testing.T) {
 		Id:               dsID,
 		ClusterId:        clusterID,
 		Name:             "updated-name",
-		Type:             sdk.PROMETHEUS,
+		Type:             sdk.WorkloadoptimizationV1CustomMetricsDataSourceTypePROMETHEUS,
 		Status:           sdk.WorkloadoptimizationV1CustomMetricsDataSourceStatusCONNECTED,
 		KubeResourceName: "my-prometheus",
 		ManagedByCast:    true,
@@ -715,7 +715,7 @@ func TestWorkloadCustomMetricsDataSource_ImportReadWithManualMetrics(t *testing.
 				Id:               dsID,
 				ClusterId:        clusterID,
 				Name:             "custom-prom",
-				Type:             sdk.PROMETHEUS,
+				Type:             sdk.WorkloadoptimizationV1CustomMetricsDataSourceTypePROMETHEUS,
 				Status:           sdk.WorkloadoptimizationV1CustomMetricsDataSourceStatusCONNECTED,
 				KubeResourceName: "custom-prom",
 				ManagedByCast:    true,
@@ -771,4 +771,3 @@ func TestWorkloadCustomMetricsDataSource_ImportReadWithManualMetrics(t *testing.
 	r.Equal("sum(rate(http_requests_total[5m])) by (pod)", metricsByName["http_requests_total"])
 	r.Equal("avg(queue_depth) by (pod)", metricsByName["queue_depth"])
 }
-
