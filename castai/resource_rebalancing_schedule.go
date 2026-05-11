@@ -150,7 +150,7 @@ func resourceRebalancingSchedule() *schema.Resource {
 									},
 								},
 							},
-							Description: "Advanced configuration for aggressive rebalancing mode. Only takes effect when `aggressive_mode = false` (or unset); while the `aggressive_mode` is `true`, these values are ignored by the backend.",
+							Description: "Advanced configuration for the aggressive rebalancing mode. This is the recommended way to configure aggressive rebalancing. Please keep the `aggressive_mode` parameter unset or set it `aggressive_mode=false` before using this config option. When the legacy `aggressive_mode` is set to `true`, it takes precedence over this option.",
 						},
 						"execution_conditions": {
 							Type:     schema.TypeList,
