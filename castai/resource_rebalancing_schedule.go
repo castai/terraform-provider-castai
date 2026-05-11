@@ -120,7 +120,7 @@ func resourceRebalancingSchedule() *schema.Resource {
 						"aggressive_mode": {
 							Type:        schema.TypeBool,
 							Optional:    true,
-							Description: "When enabled rebalancing will also consider problematic pods (pods without controller, job pods, pods with removal-disabled annotation) as not-problematic.",
+							Description: "When enabled, rebalancing considers all problematic pods (pods without controller, job pods, pods with removal-disabled annotation) as not-problematic — equivalent to enabling every option in `aggressive_mode_config`.",
 						},
 						"aggressive_mode_config": {
 							Type:     schema.TypeList,
@@ -150,7 +150,7 @@ func resourceRebalancingSchedule() *schema.Resource {
 									},
 								},
 							},
-							Description: "Advanced configuration for aggressive rebalancing mode.",
+							Description: "Advanced configuration for aggressive rebalancing mode. Only takes effect when `aggressive_mode = false` (or unset); while the `aggressive_mode` is `true`, these values are ignored by the backend.",
 						},
 						"execution_conditions": {
 							Type:     schema.TypeList,
