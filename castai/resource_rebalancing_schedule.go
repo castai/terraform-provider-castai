@@ -282,7 +282,7 @@ func warnIfAggressiveModeShadowsConfig(d *schema.ResourceData) diag.Diagnostics 
 	return diag.Diagnostics{{
 		Severity:      diag.Warning,
 		Summary:       "aggressive_mode_config is ignored while aggressive_mode = true",
-		Detail:        "The legacy `aggressive_mode` overrides `aggressive_mode_config`, so the granular settings will not be applied and Terraform will report a perpetual diff. Set `aggressive_mode = false` to use `aggressive_mode_config`, or remove the `aggressive_mode_config` block.",
+		Detail:        "The legacy `aggressive_mode` overrides `aggressive_mode_config`, so the granular settings will not be applied and Terraform will report a perpetual diff. Set `aggressive_mode=false` to use `aggressive_mode_config`, or remove the `aggressive_mode_config` block.",
 		AttributePath: cty.GetAttrPath("launch_configuration").IndexInt(0).GetAttr("aggressive_mode_config"),
 	}}
 }
