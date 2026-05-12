@@ -74,7 +74,7 @@ resource "castai_rebalancing_schedule" "spots" {
 
 Optional:
 
-- `aggressive_mode` (Boolean) When enabled, rebalancing considers all problematic pods (pods without controller, job pods, pods with removal-disabled annotation) as not-problematic — equivalent to enabling every option in `aggressive_mode_config`.
+- `aggressive_mode` (Boolean) When enabled, rebalancing considers all problematic pods (pods without controller, job pods, pods with removal-disabled annotation) as not-problematic.
 - `aggressive_mode_config` (Block List, Max: 1) Advanced configuration for the aggressive rebalancing mode. This is the recommended way to configure aggressive rebalancing. Please keep the `aggressive_mode` parameter unset or set it `aggressive_mode=false` before using this config option. When the legacy `aggressive_mode` is set to `true`, it takes precedence over this option. (see [below for nested schema](#nestedblock--launch_configuration--aggressive_mode_config))
 - `execution_conditions` (Block List, Max: 1) (see [below for nested schema](#nestedblock--launch_configuration--execution_conditions))
 - `keep_drain_timeout_nodes` (Boolean) Defines whether the nodes that failed to get drained until a predefined timeout, will be kept with a rebalancing.cast.ai/status=drain-failed annotation instead of forcefully drained.
