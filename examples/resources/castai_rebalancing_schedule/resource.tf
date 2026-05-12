@@ -12,6 +12,12 @@ resource "castai_rebalancing_schedule" "spots" {
     num_targeted_nodes       = 3
     rebalancing_min_nodes    = 2
     keep_drain_timeout_nodes = false
+    aggressive_mode_config {
+      ignore_local_persistent_volumes        = false
+      ignore_problem_job_pods                = false
+      ignore_problem_pods_without_controller = true
+      ignore_problem_removal_disabled_pods   = false
+    }
     selector = jsonencode({
       nodeSelectorTerms = [{
         matchExpressions = [
