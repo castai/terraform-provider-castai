@@ -33,6 +33,73 @@ resource "aws_eks_access_entry" "castai" {
   type          = "EC2_LINUX"
 }
 
+# Pod Identity associations for in-cluster CAST AI workloads that need AWS API
+# access (ec2:DescribeInstances, eks:DescribeCluster). Without these,
+# castai-agent's AWS SDK falls back to the MNG node instance profile, which
+# lacks ec2:DescribeInstances and fails during cluster registration.
+#
+# We can't reuse the castai_eks_role_iam instance profile role here — its trust
+# policy only allows ec2.amazonaws.com (it's an EC2 instance role for nodes that
+# CAST AI provisions). Pod Identity requires pods.eks.amazonaws.com as the trust
+# principal, so we create a dedicated role for in-cluster workloads.
+data "aws_iam_policy_document" "castai_workload_assume" {
+  statement {
+    effect = "Allow"
+    principals {
+      type        = "Service"
+      identifiers = ["pods.eks.amazonaws.com"]
+    }
+    actions = [
+      "sts:AssumeRole",
+      "sts:TagSession",
+    ]
+  }
+}
+
+resource "aws_iam_role" "castai_workload" {
+  name               = "${local.name}-castai-workload"
+  description        = "Used by in-cluster CAST AI workloads via EKS Pod Identity"
+  assume_role_policy = data.aws_iam_policy_document.castai_workload_assume.json
+  tags               = local.tags
+}
+
+resource "aws_iam_role_policy_attachment" "castai_workload_ec2_read" {
+  role       = aws_iam_role.castai_workload.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ReadOnlyAccess"
+}
+
+resource "aws_iam_role_policy" "castai_workload_eks_describe" {
+  name = "EKSDescribeCluster"
+  role = aws_iam_role.castai_workload.name
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect   = "Allow"
+      Action   = ["eks:DescribeCluster"]
+      Resource = "*"
+    }]
+  })
+}
+
+locals {
+  castai_pod_identity_service_accounts = [
+    "castai-agent",
+    "castai-cluster-controller",
+    "castai-spot-handler",
+  ]
+}
+
+resource "aws_eks_pod_identity_association" "castai" {
+  for_each = toset(local.castai_pod_identity_service_accounts)
+
+  cluster_name    = module.eks.cluster_name
+  namespace       = "castai-agent"
+  service_account = each.value
+  role_arn        = aws_iam_role.castai_workload.arn
+
+  depends_on = [module.eks]
+}
+
 # CAST AI umbrella chart with kent.enabled=true.
 #
 # The umbrella bundles castai-agent, castai-cluster-controller, castai-kentroller,
@@ -51,6 +118,11 @@ resource "helm_release" "castai" {
   repository       = "https://castai.github.io/helm-charts"
   chart            = "castai"
   version          = "0.34.13"
+
+  # Nine subcharts + image pulls + Karpenter-provisioned nodes joining ~5-7 min
+  # total on first install; the default 300s helm timeout hits exactly at the
+  # boundary and returns context-deadline-exceeded while pods are still rolling.
+  timeout = 600
 
   values = [yamlencode({
     kent = {
@@ -73,6 +145,7 @@ resource "helm_release" "castai" {
     castai_eks_clusterid.this,
     module.castai_eks_role_iam,
     aws_eks_access_entry.castai,
+    aws_eks_pod_identity_association.castai,
   ]
 }
 

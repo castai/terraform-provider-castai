@@ -15,6 +15,13 @@ backend, and reconciles `RebalancePlan` CRDs into Karpenter `NodeClaim`s.
 - **Karpenter 1.7.x** + one default `EC2NodeClass` and one default `NodePool`
   (instance categories `c`/`m`/`r`, generation > 1, nitro, amd64; `WhenEmpty`
   consolidation after 30s).
+- A dedicated **`<cluster_name>-castai-workload` IAM role** with
+  `AmazonEC2ReadOnlyAccess` + `eks:DescribeCluster`, and **EKS Pod Identity
+  associations** binding it to `castai-agent`, `castai-cluster-controller`,
+  and `castai-spot-handler` ServiceAccounts so those in-cluster workloads can
+  call AWS APIs during cluster registration. (The `castai/eks-role-iam/castai`
+  module's instance profile role can't be reused here — its trust policy is
+  `ec2.amazonaws.com`, but Pod Identity needs `pods.eks.amazonaws.com`.)
 - **CAST AI umbrella chart** with `kent.enabled=true`, which installs the
   Kent subchart bundle:
   - `castai-agent`
@@ -57,26 +64,87 @@ to install.
 
 ## Verify
 
-| Check | Command |
-|---|---|
-| Karpenter running | `kubectl -n karpenter get pods` |
-| Karpenter CRs applied | `kubectl get nodepools.karpenter.sh,ec2nodeclasses.karpenter.k8s.aws` |
-| Kentroller running | `kubectl -n castai-agent get pods \| grep kentroller` |
-| Stream connected | `kubectl -n castai-agent logs deploy/castai-kentroller \| grep -i 'stream'` |
-| Cluster visible in CAST AI | https://console.cast.ai → your cluster, Kent indicator on |
+| Check                      | Command                                                                              |
+|----------------------------|--------------------------------------------------------------------------------------|
+| Karpenter running          | `kubectl -n karpenter get pods`                                                      |
+| Karpenter CRs applied      | `kubectl get nodepools.karpenter.sh,ec2nodeclasses.karpenter.k8s.aws`                |
+| All CAST AI pods Running   | `kubectl -n castai-agent get pods`                                                   |
+| Cluster registered         | `kubectl -n castai-agent get cm castai-agent-metadata -o jsonpath='{.data.CLUSTER_ID}'` |
+| Stream connected           | `kubectl -n castai-agent logs deploy/castai-kentroller \| grep -E 'stream connected\|stream registered'` |
+| Cluster visible in CAST AI | https://console.cast.ai → your cluster, Kent indicator on                            |
+
+A working stream looks like (from a fresh apply):
+
+```
+msg="getStream: stream registered confirmation received, stream is ready" cluster_id=<uuid>
+msg="streaming messages..." cluster_id=<uuid>
+msg="stream connected, syncing all schedules to Kent" cluster_id=<uuid>
+```
+
+No `PermissionDenied` errors should appear in kentroller logs.
+
+## Troubleshooting
+
+### `castai-agent` in `CrashLoopBackOff` with `DescribeInstances` errors
+
+Symptom: kentroller/cluster-controller pods show `CreateContainerConfigError` with
+`couldn't find key CLUSTER_ID in ConfigMap castai-agent/castai-agent-metadata`, and
+castai-agent logs show:
+
+```
+registering cluster: building register cluster request: getting cluster name:
+describing instance_id=i-...: operation error EC2: DescribeInstances, ... context canceled
+```
+
+Cause: castai-agent needs `ec2:DescribeInstances` to register the cluster. Without
+a Pod Identity association, its AWS SDK falls back to the MNG node instance
+profile, which doesn't have that permission. This example creates a dedicated
+`<cluster_name>-castai-workload` role with `AmazonEC2ReadOnlyAccess` +
+`eks:DescribeCluster` and binds it to the `castai-agent`, `castai-cluster-controller`,
+and `castai-spot-handler` ServiceAccounts via `aws_eks_pod_identity_association.castai`
+in `castai.tf` — if you removed that block (or its role / policy attachments), re-add it.
+
+### `helm_release.castai` fails with `context deadline exceeded`
+
+Symptom: `terraform apply` exits non-zero with
+`Error: context deadline exceeded`, even though `kubectl -n castai-agent get pods`
+shows pods are still rolling.
+
+Cause: nine subcharts + image pulls + Karpenter-provisioned nodes coming up can
+take 5-7 min on first install, and helm's default timeout is 5 min. This example
+sets `timeout = 600` on `helm_release.castai`. If you still hit it, bump higher
+or re-run `terraform apply` — the second pass typically converges once images
+are cached on nodes.
+
+### `OCI Registry Login Failed: ... keychain ... (-25299)` on macOS
+
+Symptom: `terraform apply` fails during the `helm_release.karpenter` step with:
+
+```
+Error: OCI Registry Login Failed: The specified item already exists in the keychain. (-25299)
+```
+
+Cause: the helm provider v3 caches an expired ECR public auth token in the macOS
+keychain. Clear it:
+
+```sh
+security delete-internet-password -s public.ecr.aws
+```
+
+Then re-run `terraform apply`.
 
 ## Variables
 
-| Name | Type | Default | Description |
-|---|---|---|---|
-| `cluster_name` | string | — | EKS cluster name. |
-| `cluster_region` | string | — | AWS region. |
-| `cluster_version` | string | `1.34` | EKS Kubernetes version. |
-| `tags` | map(string) | `{}` | Tags applied to AWS resources. |
-| `castai_api_token` | string | — | **Sensitive.** CAST AI org API token. Stored in `terraform.tfstate` (matches every other example in this repo). |
-| `castai_api_url` | string | `https://api.cast.ai` | CAST AI API URL. |
-| `castai_grpc_url` | string | `grpc.cast.ai:443` | CAST AI gRPC URL — Kentroller's `StreamActions` target. |
-| `delete_nodes_on_disconnect` | bool | `true` | If true, CAST AI-provisioned nodes are deleted on disconnect. Recommended `false` for production. |
+| Name                         | Type        | Default               | Description                                                                                                     |
+|------------------------------|-------------|-----------------------|-----------------------------------------------------------------------------------------------------------------|
+| `cluster_name`               | string      | —                     | EKS cluster name.                                                                                               |
+| `cluster_region`             | string      | —                     | AWS region.                                                                                                     |
+| `cluster_version`            | string      | `1.35`                | EKS Kubernetes version.                                                                                         |
+| `tags`                       | map(string) | `{}`                  | Tags applied to AWS resources.                                                                                  |
+| `castai_api_token`           | string      | —                     | **Sensitive.** CAST AI org API token. Stored in `terraform.tfstate` (matches every other example in this repo). |
+| `castai_api_url`             | string      | `https://api.cast.ai` | CAST AI API URL.                                                                                                |
+| `castai_grpc_url`            | string      | `grpc.cast.ai:443`    | CAST AI gRPC URL — Kentroller's `StreamActions` target.                                                         |
+| `delete_nodes_on_disconnect` | bool        | `true`                | If true, CAST AI-provisioned nodes are deleted on disconnect. Recommended `false` for production.               |
 
 ## Destroy
 
