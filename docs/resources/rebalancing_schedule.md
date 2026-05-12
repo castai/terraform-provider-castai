@@ -27,6 +27,12 @@ resource "castai_rebalancing_schedule" "spots" {
     num_targeted_nodes       = 3
     rebalancing_min_nodes    = 2
     keep_drain_timeout_nodes = false
+    aggressive_mode_config {
+      ignore_local_persistent_volumes        = false
+      ignore_problem_job_pods                = false
+      ignore_problem_pods_without_controller = true
+      ignore_problem_removal_disabled_pods   = false
+    }
     selector = jsonencode({
       nodeSelectorTerms = [{
         matchExpressions = [
@@ -69,7 +75,7 @@ resource "castai_rebalancing_schedule" "spots" {
 Optional:
 
 - `aggressive_mode` (Boolean) When enabled, rebalancing considers all problematic pods (pods without controller, job pods, pods with removal-disabled annotation) as not-problematic — equivalent to enabling every option in `aggressive_mode_config`.
-- `aggressive_mode_config` (Block List, Max: 1) Advanced configuration for aggressive rebalancing mode. Only takes effect when `aggressive_mode = false` (or unset); while the `aggressive_mode` is `true`, these values are ignored by the backend. (see [below for nested schema](#nestedblock--launch_configuration--aggressive_mode_config))
+- `aggressive_mode_config` (Block List, Max: 1) Advanced configuration for the aggressive rebalancing mode. This is the recommended way to configure aggressive rebalancing. Please keep the `aggressive_mode` parameter unset or set it `aggressive_mode=false` before using this config option. When the legacy `aggressive_mode` is set to `true`, it takes precedence over this option. (see [below for nested schema](#nestedblock--launch_configuration--aggressive_mode_config))
 - `execution_conditions` (Block List, Max: 1) (see [below for nested schema](#nestedblock--launch_configuration--execution_conditions))
 - `keep_drain_timeout_nodes` (Boolean) Defines whether the nodes that failed to get drained until a predefined timeout, will be kept with a rebalancing.cast.ai/status=drain-failed annotation instead of forcefully drained.
 - `node_ttl_seconds` (Number) Specifies amount of time since node creation before the node is allowed to be considered for automated rebalancing.
