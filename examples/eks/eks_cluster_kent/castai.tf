@@ -127,6 +127,22 @@ resource "helm_release" "castai" {
   values = [yamlencode({
     kent = {
       enabled = true
+      # The castai-workload-autoscaler pre-delete hook strips finalizers from
+      # Recommendation CRs at uninstall. Its Job's pod ships without
+      # tolerations or nodeSelector, so it can't schedule onto the
+      # karpenter.sh/controller-tainted MNG nodes. During `terraform destroy`,
+      # helm_release.karpenter releases ahead of helm_release.castai (wait=false
+      # on the karpenter release returns to TF instantly), then
+      # module.karpenter strips the karpenter node IAM role. Karpenter-spawned
+      # nodes lose kubelet auth and go NotReady, leaving no node the hook pod
+      # can run on, and the helm uninstall fails with DeadlineExceeded.
+      # Disabling the hook leaves Recommendation CRs with finalizers, but the
+      # whole namespace is being deleted right after, so the leak is benign.
+      "castai-workload-autoscaler" = {
+        preDeleteHook = {
+          enabled = false
+        }
+      }
     }
     global = {
       castai = {
