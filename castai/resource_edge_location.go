@@ -47,6 +47,7 @@ type edgeLocationModel struct {
 	Region           types.String       `tfsdk:"region"`
 	ControlPlaneMode types.String       `tfsdk:"control_plane_mode"`
 	ControlPlane     *controlPlaneModel `tfsdk:"control_plane"`
+	Networking       *networkingModel   `tfsdk:"networking"`
 	Zones            []zoneModel        `tfsdk:"zones"`
 	AWS              *awsModel          `tfsdk:"aws"`
 	GCP              *gcpModel          `tfsdk:"gcp"`
@@ -57,6 +58,24 @@ type edgeLocationModel struct {
 
 type controlPlaneModel struct {
 	Ha types.Bool `tfsdk:"ha"`
+}
+
+func (m *controlPlaneModel) Equal(other *controlPlaneModel) bool {
+	if m == nil || other == nil {
+		return m == other
+	}
+	return m.Ha.Equal(other.Ha)
+}
+
+type networkingModel struct {
+	TunneledCIDRs types.List `tfsdk:"tunneled_cidrs"`
+}
+
+func (m *networkingModel) Equal(other *networkingModel) bool {
+	if m == nil || other == nil {
+		return m == other
+	}
+	return m.TunneledCIDRs.Equal(other.TunneledCIDRs)
 }
 
 type zoneModel struct {
@@ -241,11 +260,23 @@ func (r *edgeLocationResource) Schema(_ context.Context, _ resource.SchemaReques
 				Description: "Control plane configuration. Only valid when control_plane_mode is SHARED.",
 				Attributes: map[string]schema.Attribute{
 					"ha": schema.BoolAttribute{
-						Required:    true,
+						Optional:    true,
+						Computed:    true,
 						Description: "Whether to use HA mode for control plane. If not set, default is HA.",
 						PlanModifiers: []planmodifier.Bool{
-							boolplanmodifier.RequiresReplace(),
+							boolplanmodifier.UseStateForUnknown(),
 						},
+					},
+				},
+			},
+			"networking": schema.SingleNestedAttribute{
+				Optional:    true,
+				Description: "Edge cluster networking configuration.",
+				Attributes: map[string]schema.Attribute{
+					"tunneled_cidrs": schema.ListAttribute{
+						Optional:    true,
+						ElementType: types.StringType,
+						Description: "List of destination CIDR blocks whose traffic should be routed through the main cluster instead of directly from the edge cluster.",
 					},
 				},
 			},
@@ -469,12 +500,10 @@ func (r *edgeLocationResource) Create(ctx context.Context, req resource.CreateRe
 		createReq.Description = lo.ToPtr(plan.Description.ValueString())
 	}
 
-	if plan.ControlPlane != nil {
-		createReq.EdgeClusterSpec = &omni.EdgeClusterSpec{
-			ControlPlane: &omni.EdgeClusterControlPlane{
-				Ha: plan.ControlPlane.Ha.ValueBoolPointer(),
-			},
-		}
+	createReq.EdgeClusterSpec, diags = r.toEdgeClusterSpec(ctx, plan.ControlPlane, plan.Networking)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
 	}
 
 	// Map cloud provider specific configurations.
@@ -562,9 +591,18 @@ func (r *edgeLocationResource) Read(ctx context.Context, req resource.ReadReques
 	if edgeLocation.ControlPlaneMode != nil {
 		state.ControlPlaneMode = types.StringValue(string(*edgeLocation.ControlPlaneMode))
 	}
-	if edgeLocation.EdgeClusterSpec != nil && edgeLocation.EdgeClusterSpec.ControlPlane != nil {
-		state.ControlPlane = &controlPlaneModel{
-			Ha: types.BoolPointerValue(edgeLocation.EdgeClusterSpec.ControlPlane.Ha),
+	if edgeLocation.EdgeClusterSpec != nil {
+		// Only sync control_plane from API if it was already managed in state.
+		// Otherwise, we'd cause perpetual drift for users who never set the block.
+		if state.ControlPlane != nil && edgeLocation.EdgeClusterSpec.ControlPlane != nil {
+			state.ControlPlane = &controlPlaneModel{
+				Ha: types.BoolPointerValue(edgeLocation.EdgeClusterSpec.ControlPlane.Ha),
+			}
+		}
+		if edgeLocation.EdgeClusterSpec.Networking != nil && edgeLocation.EdgeClusterSpec.Networking.TunneledCidrs != nil {
+			cidrs, d := types.ListValueFrom(ctx, types.StringType, *edgeLocation.EdgeClusterSpec.Networking.TunneledCidrs)
+			resp.Diagnostics.Append(d...)
+			state.Networking = &networkingModel{TunneledCIDRs: cidrs}
 		}
 	}
 
@@ -627,6 +665,14 @@ func (r *edgeLocationResource) Update(ctx context.Context, req resource.UpdateRe
 		diags diag.Diagnostics
 		mc    ModelWithCredentials
 	)
+
+	updateReq.EdgeClusterSpec, diags = r.edgeClusterSpecUpdate(ctx, plan, state)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	// Include cloud provider config if it or credentials has changed.
 	switch {
 	case plan.AWS != nil && (!plan.AWS.Equal(state.AWS) || credentialsChanged):
 		updateReq.Aws, diags = r.toAWS(ctx, plan.AWS, config.AWS)
@@ -776,6 +822,67 @@ func (r *edgeLocationResource) ImportState(ctx context.Context, req resource.Imp
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("organization_id"), ids[0])...)
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("cluster_id"), ids[1])...)
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("id"), ids[2])...)
+}
+
+// edgeClusterSpecUpdate builds an EdgeClusterSpec containing only the sub-blocks that
+// changed between plan and state. Removed blocks are reset to API defaults.
+// Returns nil when nothing changed so the field is omitted from the PATCH request.
+func (r *edgeLocationResource) edgeClusterSpecUpdate(ctx context.Context, plan, state edgeLocationModel) (*omni.EdgeClusterSpec, diag.Diagnostics) {
+	var (
+		diags      diag.Diagnostics
+		cpChanged  = !plan.ControlPlane.Equal(state.ControlPlane)
+		netChanged = !plan.Networking.Equal(state.Networking)
+	)
+
+	if !cpChanged && !netChanged {
+		return nil, diags
+	}
+
+	spec := &omni.EdgeClusterSpec{}
+	if cpChanged {
+		spec.ControlPlane = &omni.EdgeClusterControlPlane{Ha: lo.ToPtr(true)}
+		if plan.ControlPlane != nil {
+			spec.ControlPlane.Ha = plan.ControlPlane.Ha.ValueBoolPointer()
+		}
+	}
+	if netChanged {
+		spec.Networking = &omni.EdgeClusterNetworking{TunneledCidrs: &[]string{}}
+		if plan.Networking != nil {
+			var items []string
+			diags.Append(plan.Networking.TunneledCIDRs.ElementsAs(ctx, &items, true)...)
+			if diags.HasError() {
+				return nil, diags
+			}
+			spec.Networking.TunneledCidrs = &items
+		}
+	}
+	return spec, diags
+}
+
+func (r *edgeLocationResource) toEdgeClusterSpec(ctx context.Context, cp *controlPlaneModel, net *networkingModel) (*omni.EdgeClusterSpec, diag.Diagnostics) {
+	var diags diag.Diagnostics
+	if cp == nil && net == nil {
+		return nil, diags
+	}
+
+	spec := &omni.EdgeClusterSpec{}
+	if cp != nil {
+		spec.ControlPlane = &omni.EdgeClusterControlPlane{
+			Ha: cp.Ha.ValueBoolPointer(),
+		}
+	}
+
+	if net != nil {
+		var items []string
+		diags.Append(net.TunneledCIDRs.ElementsAs(ctx, &items, true)...)
+		if diags.HasError() {
+			return nil, diags
+		}
+		spec.Networking = &omni.EdgeClusterNetworking{
+			TunneledCidrs: &items,
+		}
+	}
+	return spec, diags
 }
 
 func (r *edgeLocationResource) toZones(zones []zoneModel) []omni.Zone {

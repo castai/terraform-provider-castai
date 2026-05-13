@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -120,7 +121,7 @@ func resourceRebalancingSchedule() *schema.Resource {
 						"aggressive_mode": {
 							Type:        schema.TypeBool,
 							Optional:    true,
-							Description: "When enabled rebalancing will also consider problematic pods (pods without controller, job pods, pods with removal-disabled annotation) as not-problematic.",
+							Description: "When enabled, rebalancing considers all problematic pods (pods without controller, job pods, pods with removal-disabled annotation) as not-problematic.",
 						},
 						"aggressive_mode_config": {
 							Type:     schema.TypeList,
@@ -150,7 +151,7 @@ func resourceRebalancingSchedule() *schema.Resource {
 									},
 								},
 							},
-							Description: "Advanced configuration for aggressive rebalancing mode.",
+							Description: "Advanced configuration for the aggressive rebalancing mode. This is the recommended way to configure aggressive rebalancing. Please keep the `aggressive_mode` parameter unset or set it `aggressive_mode=false` before using this config option. When the legacy `aggressive_mode` is set to `true`, it takes precedence over this option.",
 						},
 						"execution_conditions": {
 							Type:     schema.TypeList,
@@ -206,6 +207,8 @@ func resourceRebalancingScheduleCreate(ctx context.Context, d *schema.ResourceDa
 		return diag.FromErr(err)
 	}
 
+	diags := warnIfAggressiveModeShadowsConfig(d)
+
 	req := sdk.ScheduledRebalancingAPICreateRebalancingScheduleJSONRequestBody{
 		Name:                schedule.Name,
 		Schedule:            schedule.Schedule,
@@ -215,12 +218,12 @@ func resourceRebalancingScheduleCreate(ctx context.Context, d *schema.ResourceDa
 
 	resp, err := client.ScheduledRebalancingAPICreateRebalancingScheduleWithResponse(ctx, req)
 	if checkErr := sdk.CheckOKResponse(resp, err); checkErr != nil {
-		return diag.FromErr(checkErr)
+		return append(diags, diag.FromErr(checkErr)...)
 	}
 
 	d.SetId(*resp.JSON200.Id)
 
-	return resourceRebalancingScheduleRead(ctx, d, meta)
+	return append(diags, resourceRebalancingScheduleRead(ctx, d, meta)...)
 }
 
 func resourceRebalancingScheduleRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
@@ -248,6 +251,8 @@ func resourceRebalancingScheduleUpdate(ctx context.Context, d *schema.ResourceDa
 		return diag.FromErr(err)
 	}
 
+	diags := warnIfAggressiveModeShadowsConfig(d)
+
 	req := sdk.ScheduledRebalancingAPIUpdateRebalancingScheduleJSONRequestBody{
 		Name:                lo.ToPtr(schedule.Name),
 		Schedule:            &schedule.Schedule,
@@ -259,9 +264,27 @@ func resourceRebalancingScheduleUpdate(ctx context.Context, d *schema.ResourceDa
 		Id: lo.ToPtr(d.Id()),
 	}, req)
 	if checkErr := sdk.CheckOKResponse(resp, err); checkErr != nil {
-		return diag.FromErr(checkErr)
+		return append(diags, diag.FromErr(checkErr)...)
 	}
-	return resourceRebalancingScheduleRead(ctx, d, meta)
+	return append(diags, resourceRebalancingScheduleRead(ctx, d, meta)...)
+}
+
+func warnIfAggressiveModeShadowsConfig(d *schema.ResourceData) diag.Diagnostics {
+	launchCfg := toSection(d, "launch_configuration")
+	if launchCfg == nil {
+		return nil
+	}
+	aggressive, _ := launchCfg["aggressive_mode"].(bool)
+	modeCfg, _ := launchCfg["aggressive_mode_config"].([]any)
+	if !aggressive || len(modeCfg) == 0 {
+		return nil
+	}
+	return diag.Diagnostics{{
+		Severity:      diag.Warning,
+		Summary:       "aggressive_mode_config is ignored while aggressive_mode = true",
+		Detail:        "The legacy `aggressive_mode` overrides `aggressive_mode_config`, so the granular settings will not be applied and Terraform will report a perpetual diff. Set `aggressive_mode=false` to use `aggressive_mode_config`, or remove the `aggressive_mode_config` block.",
+		AttributePath: cty.GetAttrPath("launch_configuration").IndexInt(0).GetAttr("aggressive_mode_config"),
+	}}
 }
 
 func resourceRebalancingScheduleDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {

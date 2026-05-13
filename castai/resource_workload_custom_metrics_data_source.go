@@ -290,7 +290,7 @@ func expandWorkloadCustomMetricsDataSourceCreate(d *schema.ResourceData) (sdk.Wo
 
 	return sdk.WorkloadOptimizationAPICreateCustomMetricsDataSourceJSONRequestBody{
 		Name: name,
-		Type: sdk.PROMETHEUS,
+		Type: sdk.WorkloadoptimizationV1CustomMetricsDataSourceTypePROMETHEUS,
 		Data: sdk.WorkloadoptimizationV1CustomMetricsDataSourceInput{
 			Prometheus: prometheusInput,
 		},

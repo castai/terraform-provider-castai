@@ -706,6 +706,17 @@ const (
 	WorkloadoptimizationV1ApplyTypeUNKNOWN   WorkloadoptimizationV1ApplyType = "UNKNOWN"
 )
 
+// Defines values for WorkloadoptimizationV1ConversionResultStatus.
+const (
+	ALREADYAVERAGE              WorkloadoptimizationV1ConversionResultStatus = "ALREADY_AVERAGE"
+	CONVERSIONSTATUSUNSPECIFIED WorkloadoptimizationV1ConversionResultStatus = "CONVERSION_STATUS_UNSPECIFIED"
+	CONVERTED                   WorkloadoptimizationV1ConversionResultStatus = "CONVERTED"
+	MISSINGREQUESTS             WorkloadoptimizationV1ConversionResultStatus = "MISSING_REQUESTS"
+	NOMETRICS                   WorkloadoptimizationV1ConversionResultStatus = "NO_METRICS"
+	NONCONVERTIBLE              WorkloadoptimizationV1ConversionResultStatus = "NON_CONVERTIBLE"
+	REQUESTSTOOSMALL            WorkloadoptimizationV1ConversionResultStatus = "REQUESTS_TOO_SMALL"
+)
+
 // Defines values for WorkloadoptimizationV1CustomMetricUnit.
 const (
 	WorkloadoptimizationV1CustomMetricUnitBYTES                       WorkloadoptimizationV1CustomMetricUnit = "BYTES"
@@ -750,9 +761,9 @@ const (
 
 // Defines values for WorkloadoptimizationV1CustomMetricsDataSourceType.
 const (
-	NODEWORKLOAD    WorkloadoptimizationV1CustomMetricsDataSourceType = "NODE_WORKLOAD"
-	PROMETHEUS      WorkloadoptimizationV1CustomMetricsDataSourceType = "PROMETHEUS"
-	TYPEUNSPECIFIED WorkloadoptimizationV1CustomMetricsDataSourceType = "TYPE_UNSPECIFIED"
+	WorkloadoptimizationV1CustomMetricsDataSourceTypeNODEWORKLOAD    WorkloadoptimizationV1CustomMetricsDataSourceType = "NODE_WORKLOAD"
+	WorkloadoptimizationV1CustomMetricsDataSourceTypePROMETHEUS      WorkloadoptimizationV1CustomMetricsDataSourceType = "PROMETHEUS"
+	WorkloadoptimizationV1CustomMetricsDataSourceTypeTYPEUNSPECIFIED WorkloadoptimizationV1CustomMetricsDataSourceType = "TYPE_UNSPECIFIED"
 )
 
 // Defines values for WorkloadoptimizationV1EventType.
@@ -799,8 +810,8 @@ const (
 
 // Defines values for WorkloadoptimizationV1HPAConverterType.
 const (
-	AVERAGEVALUEFROMORIGINALREQUESTS WorkloadoptimizationV1HPAConverterType = "AVERAGE_VALUE_FROM_ORIGINAL_REQUESTS"
-	HPACONVERTERTYPEUNSPECIFIED      WorkloadoptimizationV1HPAConverterType = "HPA_CONVERTER_TYPE_UNSPECIFIED"
+	WorkloadoptimizationV1HPAConverterTypeAVERAGEVALUEFROMORIGINALREQUESTS WorkloadoptimizationV1HPAConverterType = "AVERAGE_VALUE_FROM_ORIGINAL_REQUESTS"
+	WorkloadoptimizationV1HPAConverterTypeHPACONVERTERTYPEUNSPECIFIED      WorkloadoptimizationV1HPAConverterType = "HPA_CONVERTER_TYPE_UNSPECIFIED"
 )
 
 // Defines values for WorkloadoptimizationV1HPALegacyUnsupportedReasonType.
@@ -812,6 +823,20 @@ const (
 	HPALEGACYUNSUPPORTEDREASONWORKLOADTYPE        WorkloadoptimizationV1HPALegacyUnsupportedReasonType = "HPA_LEGACY_UNSUPPORTED_REASON_WORKLOAD_TYPE"
 )
 
+// Defines values for WorkloadoptimizationV1HPAManagementMode.
+const (
+	MODEMANAGED     WorkloadoptimizationV1HPAManagementMode = "MODE_MANAGED"
+	MODEUNMANAGED   WorkloadoptimizationV1HPAManagementMode = "MODE_UNMANAGED"
+	MODEUNSPECIFIED WorkloadoptimizationV1HPAManagementMode = "MODE_UNSPECIFIED"
+)
+
+// Defines values for WorkloadoptimizationV1HPAManagementSource.
+const (
+	SOURCESCALINGPOLICY WorkloadoptimizationV1HPAManagementSource = "SOURCE_SCALING_POLICY"
+	SOURCEUNSPECIFIED   WorkloadoptimizationV1HPAManagementSource = "SOURCE_UNSPECIFIED"
+	SOURCEVPACONVERTER  WorkloadoptimizationV1HPAManagementSource = "SOURCE_VPA_CONVERTER"
+)
+
 // Defines values for WorkloadoptimizationV1HPAMode.
 const (
 	HPAMODELEGACY      WorkloadoptimizationV1HPAMode = "HPA_MODE_LEGACY"
@@ -820,6 +845,15 @@ const (
 	HPAMODETAKEOVER    WorkloadoptimizationV1HPAMode = "HPA_MODE_TAKEOVER"
 	HPAMODEUNSPECIFIED WorkloadoptimizationV1HPAMode = "HPA_MODE_UNSPECIFIED"
 	HPAMODEV2          WorkloadoptimizationV1HPAMode = "HPA_MODE_V2"
+)
+
+// Defines values for WorkloadoptimizationV1HPAOwnerType.
+const (
+	WorkloadoptimizationV1HPAOwnerTypeTYPECASTAI      WorkloadoptimizationV1HPAOwnerType = "TYPE_CASTAI"
+	WorkloadoptimizationV1HPAOwnerTypeTYPEKEDA        WorkloadoptimizationV1HPAOwnerType = "TYPE_KEDA"
+	WorkloadoptimizationV1HPAOwnerTypeTYPEOTHER       WorkloadoptimizationV1HPAOwnerType = "TYPE_OTHER"
+	WorkloadoptimizationV1HPAOwnerTypeTYPESTANDALONE  WorkloadoptimizationV1HPAOwnerType = "TYPE_STANDALONE"
+	WorkloadoptimizationV1HPAOwnerTypeTYPEUNSPECIFIED WorkloadoptimizationV1HPAOwnerType = "TYPE_UNSPECIFIED"
 )
 
 // Defines values for WorkloadoptimizationV1HPAScalingPolicyType.
@@ -1364,9 +1398,9 @@ const (
 
 // Defines values for WorkloadOptimizationAPIGetWorkloadFiltersParamsManagementOptions.
 const (
-	MANAGED   WorkloadOptimizationAPIGetWorkloadFiltersParamsManagementOptions = "MANAGED"
-	READONLY  WorkloadOptimizationAPIGetWorkloadFiltersParamsManagementOptions = "READ_ONLY"
-	UNDEFINED WorkloadOptimizationAPIGetWorkloadFiltersParamsManagementOptions = "UNDEFINED"
+	WorkloadOptimizationAPIGetWorkloadFiltersParamsManagementOptionsMANAGED   WorkloadOptimizationAPIGetWorkloadFiltersParamsManagementOptions = "MANAGED"
+	WorkloadOptimizationAPIGetWorkloadFiltersParamsManagementOptionsREADONLY  WorkloadOptimizationAPIGetWorkloadFiltersParamsManagementOptions = "READ_ONLY"
+	WorkloadOptimizationAPIGetWorkloadFiltersParamsManagementOptionsUNDEFINED WorkloadOptimizationAPIGetWorkloadFiltersParamsManagementOptions = "UNDEFINED"
 )
 
 // Defines values for WorkloadOptimizationAPIGetInstallCmdParamsCmePresets.
@@ -1387,6 +1421,19 @@ const (
 	WorkloadOptimizationAPIGetInstallScriptParamsCmePresetsMICROMETER    WorkloadOptimizationAPIGetInstallScriptParamsCmePresets = "MICROMETER"
 	WorkloadOptimizationAPIGetInstallScriptParamsCmePresetsOTELJAVAAGENT WorkloadOptimizationAPIGetInstallScriptParamsCmePresets = "OTEL_JAVA_AGENT"
 	WorkloadOptimizationAPIGetInstallScriptParamsCmePresetsSDKPROMETHEUS WorkloadOptimizationAPIGetInstallScriptParamsCmePresets = "SDK_PROMETHEUS"
+)
+
+// Defines values for WorkloadOptimizationAPIListClusterHPAsParamsManagementOptions.
+const (
+	WorkloadOptimizationAPIListClusterHPAsParamsManagementOptionsMANAGED   WorkloadOptimizationAPIListClusterHPAsParamsManagementOptions = "MANAGED"
+	WorkloadOptimizationAPIListClusterHPAsParamsManagementOptionsREADONLY  WorkloadOptimizationAPIListClusterHPAsParamsManagementOptions = "READ_ONLY"
+	WorkloadOptimizationAPIListClusterHPAsParamsManagementOptionsUNDEFINED WorkloadOptimizationAPIListClusterHPAsParamsManagementOptions = "UNDEFINED"
+)
+
+// Defines values for WorkloadOptimizationAPIListClusterHPAsParamsIncludeConversion.
+const (
+	WorkloadOptimizationAPIListClusterHPAsParamsIncludeConversionAVERAGEVALUEFROMORIGINALREQUESTS WorkloadOptimizationAPIListClusterHPAsParamsIncludeConversion = "AVERAGE_VALUE_FROM_ORIGINAL_REQUESTS"
+	WorkloadOptimizationAPIListClusterHPAsParamsIncludeConversionHPACONVERTERTYPEUNSPECIFIED      WorkloadOptimizationAPIListClusterHPAsParamsIncludeConversion = "HPA_CONVERTER_TYPE_UNSPECIFIED"
 )
 
 // Defines values for WorkloadOptimizationAPIGetAggregatedWorkloadCustomMetricsV1BetaParamsAggregationType.
@@ -8554,6 +8601,25 @@ type WorkloadoptimizationV1CPUPressureSettings struct {
 	MinPressuredPodPercentage float64 `json:"minPressuredPodPercentage"`
 }
 
+// WorkloadoptimizationV1ClusterHPA defines model for workloadoptimization.v1.ClusterHPA.
+type WorkloadoptimizationV1ClusterHPA struct {
+	// Conversion ConversionResult captures the outcome of running an HPA converter.
+	Conversion *WorkloadoptimizationV1ConversionResult `json:"conversion,omitempty"`
+	InCluster  WorkloadoptimizationV1HPASpec           `json:"inCluster"`
+
+	// Management HPAManagement describes the CAST control-plane relationship to this HPA.
+	// source is meaningful only when mode == MODE_MANAGED.
+	Management WorkloadoptimizationV1HPAManagement `json:"management"`
+	Name       string                              `json:"name"`
+	Namespace  string                              `json:"namespace"`
+	Original   WorkloadoptimizationV1HPASpec       `json:"original"`
+
+	// Owner HPAOwner describes who owns the HPA Kubernetes object (from OwnerReferences).
+	// Independent of CAST management.
+	Owner    WorkloadoptimizationV1HPAOwner          `json:"owner"`
+	Workload WorkloadoptimizationV1HPAWorkloadTarget `json:"workload"`
+}
+
 // WorkloadoptimizationV1ConfidenceSettings defines model for workloadoptimization.v1.ConfidenceSettings.
 type WorkloadoptimizationV1ConfidenceSettings struct {
 	// Threshold Defines the confidence threshold that's enough to automatically optimize a given workload vertically. Value must be [0:1].
@@ -8697,6 +8763,39 @@ type WorkloadoptimizationV1ContainerThresholds struct {
 	Cpu    *WorkloadoptimizationV1ResourceThreshold `json:"cpu,omitempty"`
 	Memory *WorkloadoptimizationV1ResourceThreshold `json:"memory,omitempty"`
 }
+
+// WorkloadoptimizationV1ConversionResult ConversionResult captures the outcome of running an HPA converter.
+type WorkloadoptimizationV1ConversionResult struct {
+	Converted *WorkloadoptimizationV1HPASpec `json:"converted,omitempty"`
+
+	// ConverterType HPAConverterType defines the strategy for converting HPA.
+	//
+	//  - AVERAGE_VALUE_FROM_ORIGINAL_REQUESTS: Converts HPA utilization (%) targets to AverageValue using workload container requests.
+	ConverterType WorkloadoptimizationV1HPAConverterType `json:"converterType"`
+
+	// ErrorMessage Human-readable detail when status is not CONVERTED.
+	ErrorMessage *string `json:"errorMessage"`
+
+	// Status Status reports the outcome of running an HPA converter on a single HPA.
+	//
+	//  - CONVERTED: Converter succeeded; `converted` is populated.
+	//  - NON_CONVERTIBLE: HPA uses metrics not handled by this converter (external/object/pods).
+	//  - MISSING_REQUESTS: Workload has no CPU/memory requests required for the conversion.
+	//  - REQUESTS_TOO_SMALL: Conversion would round to zero.
+	//  - ALREADY_AVERAGE: HPA already targets AverageValue.
+	//  - NO_METRICS: HPA has no metrics to convert.
+	Status WorkloadoptimizationV1ConversionResultStatus `json:"status"`
+}
+
+// WorkloadoptimizationV1ConversionResultStatus Status reports the outcome of running an HPA converter on a single HPA.
+//
+//   - CONVERTED: Converter succeeded; `converted` is populated.
+//   - NON_CONVERTIBLE: HPA uses metrics not handled by this converter (external/object/pods).
+//   - MISSING_REQUESTS: Workload has no CPU/memory requests required for the conversion.
+//   - REQUESTS_TOO_SMALL: Conversion would round to zero.
+//   - ALREADY_AVERAGE: HPA already targets AverageValue.
+//   - NO_METRICS: HPA has no metrics to convert.
+type WorkloadoptimizationV1ConversionResultStatus string
 
 // WorkloadoptimizationV1Costs defines model for workloadoptimization.v1.Costs.
 type WorkloadoptimizationV1Costs struct {
@@ -8977,16 +9076,17 @@ type WorkloadoptimizationV1FailedHookEvent struct {
 
 // WorkloadoptimizationV1GetAgentStatusResponse defines model for workloadoptimization.v1.GetAgentStatusResponse.
 type WorkloadoptimizationV1GetAgentStatusResponse struct {
-	CastAgentCurrentVersion          *string    `json:"castAgentCurrentVersion"`
-	ClusterId                        string     `json:"clusterId"`
-	CurrentVersion                   *string    `json:"currentVersion"`
-	HpaSupportedFromCastAgentVersion *string    `json:"hpaSupportedFromCastAgentVersion"`
-	InPlaceResizeEnabled             bool       `json:"inPlaceResizeEnabled"`
-	InstalledAt                      *time.Time `json:"installedAt"`
-	LatestVersion                    *string    `json:"latestVersion"`
-	MetricsExporterVersion           *string    `json:"metricsExporterVersion"`
-	NativeHpaSupportedFromVersion    *string    `json:"nativeHpaSupportedFromVersion"`
-	PsiMetricsSupported              bool       `json:"psiMetricsSupported"`
+	CastAgentCurrentVersion           *string    `json:"castAgentCurrentVersion"`
+	ClusterId                         string     `json:"clusterId"`
+	CurrentVersion                    *string    `json:"currentVersion"`
+	HpaConvertersSupportedFromVersion string     `json:"hpaConvertersSupportedFromVersion"`
+	HpaSupportedFromCastAgentVersion  *string    `json:"hpaSupportedFromCastAgentVersion"`
+	InPlaceResizeEnabled              bool       `json:"inPlaceResizeEnabled"`
+	InstalledAt                       *time.Time `json:"installedAt"`
+	LatestVersion                     *string    `json:"latestVersion"`
+	MetricsExporterVersion            *string    `json:"metricsExporterVersion"`
+	NativeHpaSupportedFromVersion     *string    `json:"nativeHpaSupportedFromVersion"`
+	PsiMetricsSupported               bool       `json:"psiMetricsSupported"`
 
 	// ResourceQuotasAffectingOptimization True if we detected at least one ResourceQuota with a hard CPU or memory limit,
 	// regardless of whether VPA is enabled or the quota is currently affecting workload optimization.
@@ -9268,6 +9368,34 @@ type WorkloadoptimizationV1HPALegacyUnsupportedReason struct {
 //   - HPA_LEGACY_UNSUPPORTED_REASON_ROLLOUT_WORKLOAD_REF: Rollout workload is configured using workloadRef.
 type WorkloadoptimizationV1HPALegacyUnsupportedReasonType string
 
+// WorkloadoptimizationV1HPAManagement HPAManagement describes the CAST control-plane relationship to this HPA.
+// source is meaningful only when mode == MODE_MANAGED.
+type WorkloadoptimizationV1HPAManagement struct {
+	// Mode Mode describes whether CAST actively manages this HPA.
+	//
+	//  - MODE_UNMANAGED: CAST does not manage this HPA.
+	//  - MODE_MANAGED: CAST mutates / owns this HPA.
+	Mode WorkloadoptimizationV1HPAManagementMode `json:"mode"`
+
+	// Source Source identifies which CAST feature created or manages this HPA.
+	//
+	//  - SOURCE_VPA_CONVERTER: Managed via the VPA converter path (vertical-only policy with AverageValueFromOriginalRequests).
+	//  - SOURCE_SCALING_POLICY: Managed via horizontal autoscaling policy.
+	Source WorkloadoptimizationV1HPAManagementSource `json:"source"`
+}
+
+// WorkloadoptimizationV1HPAManagementMode Mode describes whether CAST actively manages this HPA.
+//
+//   - MODE_UNMANAGED: CAST does not manage this HPA.
+//   - MODE_MANAGED: CAST mutates / owns this HPA.
+type WorkloadoptimizationV1HPAManagementMode string
+
+// WorkloadoptimizationV1HPAManagementSource Source identifies which CAST feature created or manages this HPA.
+//
+//   - SOURCE_VPA_CONVERTER: Managed via the VPA converter path (vertical-only policy with AverageValueFromOriginalRequests).
+//   - SOURCE_SCALING_POLICY: Managed via horizontal autoscaling policy.
+type WorkloadoptimizationV1HPAManagementSource string
+
 // WorkloadoptimizationV1HPAMaxedOutEvent defines model for workloadoptimization.v1.HPAMaxedOutEvent.
 type WorkloadoptimizationV1HPAMaxedOutEvent struct {
 	DesiredReplicas int32 `json:"desiredReplicas"`
@@ -9282,6 +9410,30 @@ type WorkloadoptimizationV1HPAMaxedOutEvent struct {
 //   - HPA_MODE_TAKEOVER: HPA v2 is configured with ownership takeover.
 //   - HPA_MODE_NATIVE: Workload has an existing native HPA that is not managed by CAST AI.
 type WorkloadoptimizationV1HPAMode string
+
+// WorkloadoptimizationV1HPAOwner HPAOwner describes who owns the HPA Kubernetes object (from OwnerReferences).
+// Independent of CAST management.
+type WorkloadoptimizationV1HPAOwner struct {
+	ApiVersion *string `json:"apiVersion,omitempty"`
+	Kind       *string `json:"kind,omitempty"`
+	Name       *string `json:"name,omitempty"`
+
+	// Type Type classifies the controller that owns the HPA object.
+	//
+	//  - TYPE_STANDALONE: No owner reference present - plain Kubernetes HPA.
+	//  - TYPE_KEDA: Owned by a KEDA ScaledObject.
+	//  - TYPE_CASTAI: Owned by CAST AI (Recommendation CRD).
+	//  - TYPE_OTHER: Owned by some other third-party controller.
+	Type WorkloadoptimizationV1HPAOwnerType `json:"type"`
+}
+
+// WorkloadoptimizationV1HPAOwnerType Type classifies the controller that owns the HPA object.
+//
+//   - TYPE_STANDALONE: No owner reference present - plain Kubernetes HPA.
+//   - TYPE_KEDA: Owned by a KEDA ScaledObject.
+//   - TYPE_CASTAI: Owned by CAST AI (Recommendation CRD).
+//   - TYPE_OTHER: Owned by some other third-party controller.
+type WorkloadoptimizationV1HPAOwnerType string
 
 // WorkloadoptimizationV1HPAScalingPolicy HPAScalingPolicy is a single policy which must hold true for a specified past interval.
 type WorkloadoptimizationV1HPAScalingPolicy struct {
@@ -9373,6 +9525,17 @@ type WorkloadoptimizationV1HPAState struct {
 	V2UnsupportedReason *WorkloadoptimizationV1HPAUnsupportedReason `json:"v2UnsupportedReason,omitempty"`
 }
 
+// WorkloadoptimizationV1HPATargetWorkloadContainer HPATargetWorkloadContainer mirrors Container.
+type WorkloadoptimizationV1HPATargetWorkloadContainer struct {
+	Name              string                           `json:"name"`
+	OriginalResources *WorkloadoptimizationV1Resources `json:"originalResources,omitempty"`
+	Recommendation    *WorkloadoptimizationV1Resources `json:"recommendation,omitempty"`
+	Resources         *WorkloadoptimizationV1Resources `json:"resources,omitempty"`
+
+	// Runtime Defines the application runtime.
+	Runtime *WorkloadoptimizationV1Runtime `json:"runtime,omitempty"`
+}
+
 // WorkloadoptimizationV1HPAUnsupportedReason HPAUnsupportedReason contains categorized type and description for why HPA V2 is unsupported.
 type WorkloadoptimizationV1HPAUnsupportedReason struct {
 	// Description Description of why HPA V2 is unsupported.
@@ -9413,6 +9576,23 @@ type WorkloadoptimizationV1HPAV2Config struct {
 
 	// TakeOwnership Whether CAST AI takes ownership of the existing native HPA.
 	TakeOwnership bool `json:"takeOwnership"`
+}
+
+// WorkloadoptimizationV1HPAWorkloadTarget defines model for workloadoptimization.v1.HPAWorkloadTarget.
+type WorkloadoptimizationV1HPAWorkloadTarget struct {
+	Containers        []WorkloadoptimizationV1HPATargetWorkloadContainer `json:"containers"`
+	CreatedAt         time.Time                                          `json:"createdAt"`
+	Group             string                                             `json:"group"`
+	Id                string                                             `json:"id"`
+	IsCustom          bool                                               `json:"isCustom"`
+	Kind              string                                             `json:"kind"`
+	Name              string                                             `json:"name"`
+	Namespace         string                                             `json:"namespace"`
+	RunningPods       int32                                              `json:"runningPods"`
+	ScalingPolicyId   string                                             `json:"scalingPolicyId"`
+	ScalingPolicyName string                                             `json:"scalingPolicyName"`
+	UpdatedAt         time.Time                                          `json:"updatedAt"`
+	Version           string                                             `json:"version"`
 }
 
 // WorkloadoptimizationV1HeapCommited defines model for workloadoptimization.v1.HeapCommited.
@@ -9634,6 +9814,11 @@ type WorkloadoptimizationV1LimitRangeResource struct {
 
 	// Min The min amount of a resource. For memory - this is in MiB, for CPU - this is in cores.
 	Min *float64 `json:"min"`
+}
+
+// WorkloadoptimizationV1ListClusterHPAsResponse defines model for workloadoptimization.v1.ListClusterHPAsResponse.
+type WorkloadoptimizationV1ListClusterHPAsResponse struct {
+	Items []WorkloadoptimizationV1ClusterHPA `json:"items"`
 }
 
 // WorkloadoptimizationV1ListCustomMetricsDataSourcesResponse defines model for workloadoptimization.v1.ListCustomMetricsDataSourcesResponse.
@@ -12232,6 +12417,27 @@ type InventoryAPIListZonesParams struct {
 	PageSize  *int32  `form:"pageSize,omitempty" json:"pageSize,omitempty"`
 	PageToken *string `form:"pageToken,omitempty" json:"pageToken,omitempty"`
 }
+
+// WorkloadOptimizationAPIListClusterHPAsParams defines parameters for WorkloadOptimizationAPIListClusterHPAs.
+type WorkloadOptimizationAPIListClusterHPAsParams struct {
+	WorkloadNames      *[]string                                                        `form:"workloadNames,omitempty" json:"workloadNames,omitempty"`
+	Namespaces         *[]string                                                        `form:"namespaces,omitempty" json:"namespaces,omitempty"`
+	ScalingPolicyNames *[]string                                                        `form:"scalingPolicyNames,omitempty" json:"scalingPolicyNames,omitempty"`
+	Kinds              *[]string                                                        `form:"kinds,omitempty" json:"kinds,omitempty"`
+	ManagementOptions  *[]WorkloadOptimizationAPIListClusterHPAsParamsManagementOptions `form:"managementOptions,omitempty" json:"managementOptions,omitempty"`
+
+	// IncludeConversion Identifier of the HPA converter to apply to each returned HPA. When empty,
+	// no conversion is executed and the `conversion` field on each item is unset.
+	//
+	//  - AVERAGE_VALUE_FROM_ORIGINAL_REQUESTS: Converts HPA utilization (%) targets to AverageValue using workload container requests.
+	IncludeConversion *WorkloadOptimizationAPIListClusterHPAsParamsIncludeConversion `form:"includeConversion,omitempty" json:"includeConversion,omitempty"`
+}
+
+// WorkloadOptimizationAPIListClusterHPAsParamsManagementOptions defines parameters for WorkloadOptimizationAPIListClusterHPAs.
+type WorkloadOptimizationAPIListClusterHPAsParamsManagementOptions string
+
+// WorkloadOptimizationAPIListClusterHPAsParamsIncludeConversion defines parameters for WorkloadOptimizationAPIListClusterHPAs.
+type WorkloadOptimizationAPIListClusterHPAsParamsIncludeConversion string
 
 // WorkloadOptimizationAPIGetWorkloadCustomMetricsV1BetaParams defines parameters for WorkloadOptimizationAPIGetWorkloadCustomMetricsV1Beta.
 type WorkloadOptimizationAPIGetWorkloadCustomMetricsV1BetaParams struct {
