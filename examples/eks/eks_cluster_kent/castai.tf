@@ -127,19 +127,36 @@ resource "helm_release" "castai" {
   values = [yamlencode({
     kent = {
       enabled = true
-      # The castai-workload-autoscaler pre-delete hook strips finalizers from
-      # Recommendation CRs at uninstall. Its Job's pod ships without
-      # tolerations or nodeSelector, so it can't schedule onto the
-      # karpenter.sh/controller-tainted MNG nodes. During `terraform destroy`,
-      # helm_release.karpenter releases ahead of helm_release.castai (wait=false
-      # on the karpenter release returns to TF instantly), then
-      # module.karpenter strips the karpenter node IAM role. Karpenter-spawned
-      # nodes lose kubelet auth and go NotReady, leaving no node the hook pod
-      # can run on, and the helm uninstall fails with DeadlineExceeded.
-      # Disabling the hook leaves Recommendation CRs with finalizers, but the
-      # whole namespace is being deleted right after, so the leak is benign.
+      # Disable kent subchart pre-delete hooks that deadlock `tofu destroy`.
+      # Two distinct traps the umbrella ships, both surface only at uninstall:
+      #
+      # 1. No-tolerations trap — castai-workload-autoscaler.preDeleteHook
+      #    strips finalizers from Recommendation CRs at uninstall, but the
+      #    Job's pod ships without tolerations or nodeSelector. By the time
+      #    helm uninstall fires, helm_release.karpenter has already returned
+      #    (wait=false) and module.karpenter has stripped the karpenter node
+      #    IAM role, so Karpenter-spawned nodes are NotReady and the MNG nodes
+      #    carry karpenter.sh/controller taints — nowhere left to schedule.
+      #    Helm uninstall hangs at DeadlineExceeded. Leaked Recommendation CRs
+      #    are benign: the namespace is deleted right after.
+      #
+      # 2. No-egress trap — castai-live.castai-aws-vpc-cni ships a
+      #    `pre-delete` Job (patch-daemonset-remove) that pulls
+      #    ghcr.io/castai/live/kubectl to unpatch the aws-node DaemonSet.
+      #    By uninstall time, module.vpc has already destroyed the NAT
+      #    gateway, so the pod can't reach ghcr.io and image pull hangs until
+      #    the helm timeout. The aws-node patch is a no-op cleanup against a
+      #    cluster that's about to disappear anyway. We disable the whole
+      #    castai-aws-vpc-cni subchart here because we're running CLM dormant
+      #    (controller.replicaCount=0 upstream) — the CAST-forked CNI
+      #    DaemonSet isn't doing anything useful and just costs us a hook.
       "castai-workload-autoscaler" = {
         preDeleteHook = {
+          enabled = false
+        }
+      }
+      "castai-live" = {
+        "castai-aws-vpc-cni" = {
           enabled = false
         }
       }
@@ -162,6 +179,10 @@ resource "helm_release" "castai" {
     module.castai_eks_role_iam,
     aws_eks_access_entry.castai,
     aws_eks_pod_identity_association.castai,
+    # Forces destroy order: castai pods drain before the karpenter NodeClaim
+    # drain runs. Otherwise, draining NodeClaims first would evict castai pods
+    # mid-uninstall.
+    null_resource.karpenter_drain,
   ]
 }
 
