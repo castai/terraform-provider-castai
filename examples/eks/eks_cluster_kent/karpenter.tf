@@ -75,7 +75,15 @@ resource "helm_release" "karpenter" {
     }
   })]
 
-  lifecycle {
-    ignore_changes = [repository_password]
-  }
+  # No `lifecycle { ignore_changes = [repository_password] }`. The data source
+  # returns a 12h-TTL token; freezing it in state via ignore_changes means any
+  # re-apply >12h after the initial apply fails at OCI login with HTTP 403
+  # "Your authorization token has expired."
+  #
+  # Trade-off: every plan shows a 1-attribute diff on `repository_password` as
+  # the data source re-resolves. Applying that diff triggers a helm release
+  # revision bump (~7s, no-op upgrade), but the underlying Karpenter pods are
+  # not restarted because `version` is pinned and the rendered manifests are
+  # identical. Confirmed empirically: pod names and creationTimestamps survive
+  # re-apply.
 }
