@@ -1017,6 +1017,9 @@ type ClientInterface interface {
 	// WorkloadOptimizationAPIGetWorkloadNativeVpaSpec request
 	WorkloadOptimizationAPIGetWorkloadNativeVpaSpec(ctx context.Context, clusterId string, workloadId string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// WorkloadOptimizationAPIGetWorkloadRecommendationManifest request
+	WorkloadOptimizationAPIGetWorkloadRecommendationManifest(ctx context.Context, clusterId string, workloadId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// WorkloadOptimizationAPIGetWorkloadSpec request
 	WorkloadOptimizationAPIGetWorkloadSpec(ctx context.Context, clusterId string, workloadId string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -5091,6 +5094,18 @@ func (c *Client) WorkloadOptimizationAPIGetWorkload(ctx context.Context, cluster
 
 func (c *Client) WorkloadOptimizationAPIGetWorkloadNativeVpaSpec(ctx context.Context, clusterId string, workloadId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewWorkloadOptimizationAPIGetWorkloadNativeVpaSpecRequest(c.Server, clusterId, workloadId)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) WorkloadOptimizationAPIGetWorkloadRecommendationManifest(ctx context.Context, clusterId string, workloadId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewWorkloadOptimizationAPIGetWorkloadRecommendationManifestRequest(c.Server, clusterId, workloadId)
 	if err != nil {
 		return nil, err
 	}
@@ -20870,6 +20885,47 @@ func NewWorkloadOptimizationAPIGetWorkloadNativeVpaSpecRequest(server string, cl
 	return req, nil
 }
 
+// NewWorkloadOptimizationAPIGetWorkloadRecommendationManifestRequest generates requests for WorkloadOptimizationAPIGetWorkloadRecommendationManifest
+func NewWorkloadOptimizationAPIGetWorkloadRecommendationManifestRequest(server string, clusterId string, workloadId string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "clusterId", runtime.ParamLocationPath, clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "workloadId", runtime.ParamLocationPath, workloadId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/workload-autoscaling/clusters/%s/workloads/%s/recommendation-manifest", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
 // NewWorkloadOptimizationAPIGetWorkloadSpecRequest generates requests for WorkloadOptimizationAPIGetWorkloadSpec
 func NewWorkloadOptimizationAPIGetWorkloadSpecRequest(server string, clusterId string, workloadId string) (*http.Request, error) {
 	var err error
@@ -22690,6 +22746,9 @@ type ClientWithResponsesInterface interface {
 
 	// WorkloadOptimizationAPIGetWorkloadNativeVpaSpec request
 	WorkloadOptimizationAPIGetWorkloadNativeVpaSpecWithResponse(ctx context.Context, clusterId string, workloadId string) (*WorkloadOptimizationAPIGetWorkloadNativeVpaSpecResponse, error)
+
+	// WorkloadOptimizationAPIGetWorkloadRecommendationManifest request
+	WorkloadOptimizationAPIGetWorkloadRecommendationManifestWithResponse(ctx context.Context, clusterId string, workloadId string) (*WorkloadOptimizationAPIGetWorkloadRecommendationManifestResponse, error)
 
 	// WorkloadOptimizationAPIGetWorkloadSpec request
 	WorkloadOptimizationAPIGetWorkloadSpecWithResponse(ctx context.Context, clusterId string, workloadId string) (*WorkloadOptimizationAPIGetWorkloadSpecResponse, error)
@@ -30328,6 +30387,36 @@ func (r WorkloadOptimizationAPIGetWorkloadNativeVpaSpecResponse) GetBody() []byt
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
+type WorkloadOptimizationAPIGetWorkloadRecommendationManifestResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *WorkloadoptimizationV1GetWorkloadRecommendationManifestResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r WorkloadOptimizationAPIGetWorkloadRecommendationManifestResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r WorkloadOptimizationAPIGetWorkloadRecommendationManifestResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r WorkloadOptimizationAPIGetWorkloadRecommendationManifestResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
 type WorkloadOptimizationAPIGetWorkloadSpecResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -33604,6 +33693,15 @@ func (c *ClientWithResponses) WorkloadOptimizationAPIGetWorkloadNativeVpaSpecWit
 		return nil, err
 	}
 	return ParseWorkloadOptimizationAPIGetWorkloadNativeVpaSpecResponse(rsp)
+}
+
+// WorkloadOptimizationAPIGetWorkloadRecommendationManifestWithResponse request returning *WorkloadOptimizationAPIGetWorkloadRecommendationManifestResponse
+func (c *ClientWithResponses) WorkloadOptimizationAPIGetWorkloadRecommendationManifestWithResponse(ctx context.Context, clusterId string, workloadId string) (*WorkloadOptimizationAPIGetWorkloadRecommendationManifestResponse, error) {
+	rsp, err := c.WorkloadOptimizationAPIGetWorkloadRecommendationManifest(ctx, clusterId, workloadId)
+	if err != nil {
+		return nil, err
+	}
+	return ParseWorkloadOptimizationAPIGetWorkloadRecommendationManifestResponse(rsp)
 }
 
 // WorkloadOptimizationAPIGetWorkloadSpecWithResponse request returning *WorkloadOptimizationAPIGetWorkloadSpecResponse
@@ -40268,6 +40366,32 @@ func ParseWorkloadOptimizationAPIGetWorkloadNativeVpaSpecResponse(rsp *http.Resp
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest WorkloadoptimizationV1GetWorkloadNativeVpaSpecResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseWorkloadOptimizationAPIGetWorkloadRecommendationManifestResponse parses an HTTP response from a WorkloadOptimizationAPIGetWorkloadRecommendationManifestWithResponse call
+func ParseWorkloadOptimizationAPIGetWorkloadRecommendationManifestResponse(rsp *http.Response) (*WorkloadOptimizationAPIGetWorkloadRecommendationManifestResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &WorkloadOptimizationAPIGetWorkloadRecommendationManifestResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest WorkloadoptimizationV1GetWorkloadRecommendationManifestResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
