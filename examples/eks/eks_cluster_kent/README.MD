@@ -15,13 +15,11 @@ backend, and reconciles `RebalancePlan` CRDs into Karpenter `NodeClaim`s.
 - **Karpenter 1.7.x** + one default `EC2NodeClass` and one default `NodePool`
   (instance categories `c`/`m`/`r`, generation > 1, nitro, amd64; `WhenEmpty`
   consolidation after 30s).
-- A dedicated **`<cluster_name>-castai-workload` IAM role** with
-  `AmazonEC2ReadOnlyAccess` + `eks:DescribeCluster`, and **EKS Pod Identity
-  associations** binding it to `castai-agent`, `castai-cluster-controller`,
-  and `castai-spot-handler` ServiceAccounts so those in-cluster workloads can
-  call AWS APIs during cluster registration. (The `castai/eks-role-iam/castai`
-  module's instance profile role can't be reused here — its trust policy is
-  `ec2.amazonaws.com`, but Pod Identity needs `pods.eks.amazonaws.com`.)
+- A dedicated **`<cluster_name>-castai-workload` IAM role** with a narrow
+  inline policy (`ec2:Describe*` for inventory, `pricing:GetProducts`,
+  `eks:DescribeCluster`), and **EKS Pod Identity associations** binding it
+  to the `castai-agent` and `castai-cluster-controller` ServiceAccounts so
+  those in-cluster workloads can call AWS APIs during cluster registration.
 - **CAST AI umbrella chart** with `kent.enabled=true`, which installs the
   Kent subchart bundle:
   - `castai-agent`
@@ -99,10 +97,11 @@ describing instance_id=i-...: operation error EC2: DescribeInstances, ... contex
 Cause: castai-agent needs `ec2:DescribeInstances` to register the cluster. Without
 a Pod Identity association, its AWS SDK falls back to the MNG node instance
 profile, which doesn't have that permission. This example creates a dedicated
-`<cluster_name>-castai-workload` role with `AmazonEC2ReadOnlyAccess` +
-`eks:DescribeCluster` and binds it to the `castai-agent`, `castai-cluster-controller`,
-and `castai-spot-handler` ServiceAccounts via `aws_eks_pod_identity_association.castai`
-in `castai.tf` — if you removed that block (or its role / policy attachments), re-add it.
+`<cluster_name>-castai-workload` role with a narrow inline policy
+(`ec2:Describe*` for inventory, `pricing:GetProducts`, `eks:DescribeCluster`) and
+binds it to the `castai-agent` and `castai-cluster-controller` ServiceAccounts
+via `aws_eks_pod_identity_association.castai` in `castai.tf` — if you removed
+that block (or its role / policy attachments), re-add it.
 
 ### `helm_release.castai` fails with `context deadline exceeded`
 
@@ -144,7 +143,6 @@ Then re-run `terraform apply`.
 | `castai_api_token`           | string      | —                     | **Sensitive.** CAST AI org API token. Stored in `terraform.tfstate` (matches every other example in this repo). |
 | `castai_api_url`             | string      | `https://api.cast.ai` | CAST AI API URL.                                                                                                |
 | `castai_grpc_url`            | string      | `grpc.cast.ai:443`    | CAST AI gRPC URL — Kentroller's `StreamActions` target.                                                         |
-| `delete_nodes_on_disconnect` | bool        | `true`                | If true, CAST AI-provisioned nodes are deleted on disconnect. Recommended `false` for production.               |
 
 ## Destroy
 

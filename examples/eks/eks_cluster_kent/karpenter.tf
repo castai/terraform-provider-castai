@@ -48,7 +48,15 @@ resource "helm_release" "karpenter" {
   repository_password = data.aws_ecrpublic_authorization_token.token.password
   chart               = "karpenter"
   version             = local.karpenter_chart_version
-  wait                = false
+
+  # CRDs are part of the chart manifests and are POSTed to the API server
+  # before helm returns regardless of `wait`. `wait` only governs *readiness*
+  # of Deployments/Pods, which kubectl_manifest doesn't need (the gavinbunney
+  # provider retries on transient `no matches for kind` during discovery).
+  # Skipping the readiness wait keeps apply snappy and — more importantly —
+  # makes destroy order predictable: see the pre-delete-hook comment in
+  # castai.tf for why a fast-returning karpenter uninstall matters there.
+  wait = false
 
   values = [yamlencode({
     nodeSelector = {

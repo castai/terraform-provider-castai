@@ -1,7 +1,6 @@
 cluster_name   = ""
 cluster_region = ""
 
-castai_api_token           = "" # sensitive
-castai_api_url             = "https://api.cast.ai"
-castai_grpc_url            = "grpc.cast.ai:443"
-delete_nodes_on_disconnect = true
+castai_api_token = "" # sensitive
+castai_api_url   = "https://api.cast.ai"
+castai_grpc_url  = "grpc.cast.ai:443"

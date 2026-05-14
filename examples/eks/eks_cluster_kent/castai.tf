@@ -1,47 +1,25 @@
 data "aws_caller_identity" "current" {}
 
+# Registers the cluster with CAST AI so `tofu destroy` cleanly de-registers it.
+# The agent would also self-register on first connect, but having TF own the
+# registration means destroy removes the cluster record from CAST AI rather
+# than leaving it orphaned in the console.
+#
+# We deliberately do NOT create castai_eks_user_arn / module.castai_eks_role_iam
+# here — those provision a cross-account IAM role for CAST AI's backend to call
+# AWS on the customer's behalf (the legacy provisioning path). With Kent,
+# Kentroller delegates node provisioning to Karpenter inside the cluster, so
+# no backend-side AWS calls happen and the cross-account role is unused.
 resource "castai_eks_clusterid" "this" {
   account_id   = data.aws_caller_identity.current.account_id
   region       = var.cluster_region
   cluster_name = module.eks.cluster_name
 }
 
-resource "castai_eks_user_arn" "this" {
-  cluster_id = castai_eks_clusterid.this.id
-}
-
-module "castai_eks_role_iam" {
-  source  = "castai/eks-role-iam/castai"
-  version = "~> 2.0"
-
-  aws_account_id     = data.aws_caller_identity.current.account_id
-  aws_cluster_region = var.cluster_region
-  aws_cluster_name   = module.eks.cluster_name
-  aws_cluster_vpc_id = module.vpc.vpc_id
-
-  castai_user_arn = castai_eks_user_arn.this.arn
-
-  create_iam_resources_per_cluster = true
-}
-
-# EKS v21 module defaults to authentication_mode = API_AND_CONFIG_MAP, so the
-# CAST AI instance-profile-role principal needs an EKS access entry to be able
-# to join nodes to the cluster.
-resource "aws_eks_access_entry" "castai" {
-  cluster_name  = module.eks.cluster_name
-  principal_arn = module.castai_eks_role_iam.instance_profile_role_arn
-  type          = "EC2_LINUX"
-}
-
 # Pod Identity associations for in-cluster CAST AI workloads that need AWS API
-# access (ec2:DescribeInstances, eks:DescribeCluster). Without these,
-# castai-agent's AWS SDK falls back to the MNG node instance profile, which
-# lacks ec2:DescribeInstances and fails during cluster registration.
-#
-# We can't reuse the castai_eks_role_iam instance profile role here — its trust
-# policy only allows ec2.amazonaws.com (it's an EC2 instance role for nodes that
-# CAST AI provisions). Pod Identity requires pods.eks.amazonaws.com as the trust
-# principal, so we create a dedicated role for in-cluster workloads.
+# access. Without these, castai-agent's AWS SDK falls back to the MNG node
+# instance profile, which lacks the needed permissions and fails during
+# cluster registration.
 data "aws_iam_policy_document" "castai_workload_assume" {
   statement {
     effect = "Allow"
@@ -63,21 +41,41 @@ resource "aws_iam_role" "castai_workload" {
   tags               = local.tags
 }
 
-resource "aws_iam_role_policy_attachment" "castai_workload_ec2_read" {
-  role       = aws_iam_role.castai_workload.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ReadOnlyAccess"
-}
-
-resource "aws_iam_role_policy" "castai_workload_eks_describe" {
-  name = "EKSDescribeCluster"
+# Minimal permission set. The broad AmazonEC2ReadOnlyAccess managed policy was
+# replaced with this inline policy after PR review — only the actions actually
+# exercised by castai-agent and castai-cluster-controller in the Kent flow.
+#
+# - ec2:DescribeInstances: agent enriches node info during cluster registration;
+#   without it, registration fails with "describing instance_id=i-...:
+#   DescribeInstances ... context canceled".
+# - ec2:DescribeAvailabilityZones / DescribeInstanceTypes /
+#   DescribeInstanceTypeOfferings / DescribeSpotPriceHistory + pricing:GetProducts:
+#   direct-inventory feature (AZ / instance-type / spot-price discovery).
+# - eks:DescribeCluster: cluster-controller health checks.
+resource "aws_iam_role_policy" "castai_workload" {
+  name = "castai-workload"
   role = aws_iam_role.castai_workload.name
   policy = jsonencode({
     Version = "2012-10-17"
-    Statement = [{
-      Effect   = "Allow"
-      Action   = ["eks:DescribeCluster"]
-      Resource = "*"
-    }]
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "ec2:DescribeInstances",
+          "ec2:DescribeAvailabilityZones",
+          "ec2:DescribeInstanceTypes",
+          "ec2:DescribeInstanceTypeOfferings",
+          "ec2:DescribeSpotPriceHistory",
+          "pricing:GetProducts",
+        ]
+        Resource = "*"
+      },
+      {
+        Effect   = "Allow"
+        Action   = ["eks:DescribeCluster"]
+        Resource = module.eks.cluster_arn
+      },
+    ]
   })
 }
 
@@ -85,7 +83,6 @@ locals {
   castai_pod_identity_service_accounts = [
     "castai-agent",
     "castai-cluster-controller",
-    "castai-spot-handler",
   ]
 }
 
@@ -176,8 +173,6 @@ resource "helm_release" "castai" {
     kubectl_manifest.karpenter_default_nodepool,
     kubectl_manifest.karpenter_default_nodeclass,
     castai_eks_clusterid.this,
-    module.castai_eks_role_iam,
-    aws_eks_access_entry.castai,
     aws_eks_pod_identity_association.castai,
     # Forces destroy order: castai pods drain before the karpenter NodeClaim
     # drain runs. Otherwise, draining NodeClaims first would evict castai pods
