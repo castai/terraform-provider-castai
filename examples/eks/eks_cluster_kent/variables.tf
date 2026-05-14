@@ -37,9 +37,3 @@ variable "castai_grpc_url" {
   description = "CAST AI gRPC URL (used by castai-agent and castai-kentroller for the StreamActions connection)."
   default     = "grpc.cast.ai:443"
 }
-
-variable "delete_nodes_on_disconnect" {
-  type        = bool
-  description = "If true, CAST AI-provisioned nodes are deleted from the cloud on cluster disconnect. For production use, recommended to set to false."
-  default     = true
-}
