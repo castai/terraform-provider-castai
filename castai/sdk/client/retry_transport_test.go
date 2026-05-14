@@ -1,9 +1,13 @@
 package client
 
 import (
+	"context"
+	"errors"
 	"io"
+	"net"
 	"net/http"
 	"strings"
+	"syscall"
 	"testing"
 	"time"
 )
@@ -26,6 +30,33 @@ func (m *mockRoundTripper) RoundTrip(_ *http.Request) (*http.Response, error) {
 	m.index++
 	return resp, nil
 }
+
+type mockErrRoundTripper struct {
+	errors []error
+	index  int
+	calls  int
+}
+
+func (m *mockErrRoundTripper) RoundTrip(_ *http.Request) (*http.Response, error) {
+	m.calls++
+	if m.index >= len(m.errors) {
+		return &http.Response{
+			StatusCode: http.StatusOK,
+			Body:       io.NopCloser(strings.NewReader("")),
+		}, nil
+	}
+	err := m.errors[m.index]
+	m.index++
+	return nil, err
+}
+
+type timeoutError struct {
+	msg string
+}
+
+func (e *timeoutError) Error() string   { return e.msg }
+func (e *timeoutError) Temporary() bool { return false }
+func (e *timeoutError) Timeout() bool   { return true }
 
 func makeResp(status int, body string) *http.Response {
 	return &http.Response{
@@ -261,6 +292,144 @@ func TestRetryTransport_ResendsBodyOnRetryWithoutGetBody(t *testing.T) {
 	}
 }
 
+func TestRetryTransport_RetriesOnNetworkError(t *testing.T) {
+	mock := &mockErrRoundTripper{
+		errors: []error{
+			&timeoutError{msg: "connection refused"},
+			&timeoutError{msg: "connection refused"},
+		},
+	}
+	rt := NewRetryTransport(mock, fastConfig())
+
+	req, _ := http.NewRequest(http.MethodGet, "http://example.com", nil)
+	resp, err := rt.RoundTrip(req)
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if resp.StatusCode != 200 {
+		t.Fatalf("expected 200, got %d", resp.StatusCode)
+	}
+	if mock.calls != 3 {
+		t.Fatalf("expected 3 calls (2 errors + 1 success), got %d", mock.calls)
+	}
+}
+
+func TestRetryTransport_ExhaustsRetriesOnNetworkError(t *testing.T) {
+	cfg := fastConfig()
+	// maxRetries=3 means 3 retries after the first attempt = 4 total
+	errs := make([]error, int(cfg.MaxRetries)+2)
+	for i := range errs {
+		errs[i] = &timeoutError{msg: "connection refused"}
+	}
+	mock := &mockErrRoundTripper{errors: errs}
+	rt := NewRetryTransport(mock, cfg)
+
+	req, _ := http.NewRequest(http.MethodGet, "http://example.com", nil)
+	_, err := rt.RoundTrip(req)
+
+	if err == nil {
+		t.Fatal("expected error got nil")
+	}
+	expectedCalls := int(cfg.MaxRetries) + 1
+	if mock.calls != expectedCalls {
+		t.Fatalf("expected %d calls, got %d", expectedCalls, mock.calls)
+	}
+}
+
+func TestRetryTransport_NoRetryOnNonTransientError(t *testing.T) {
+	mock := &mockErrRoundTripper{
+		errors: []error{errors.New("permanent failure")},
+	}
+	rt := NewRetryTransport(mock, fastConfig())
+
+	req, _ := http.NewRequest(http.MethodGet, "http://example.com", nil)
+	_, err := rt.RoundTrip(req)
+
+	if err == nil {
+		t.Fatal("expected error got nil")
+	}
+	if mock.calls != 1 {
+		t.Fatalf("expected 1 call (no retries for non-transient error), got %d", mock.calls)
+	}
+}
+
+func TestRetryTransport_ContextCancellationNotRetried(t *testing.T) {
+	mock := &mockErrRoundTripper{
+		errors: []error{context.Canceled},
+	}
+	rt := NewRetryTransport(mock, fastConfig())
+
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+	req, _ := http.NewRequestWithContext(ctx, http.MethodGet, "http://example.com", nil)
+	_, err := rt.RoundTrip(req)
+
+	if err != context.Canceled {
+		t.Fatalf("expected context.Canceled got %v", err)
+	}
+	if mock.calls != 1 {
+		t.Fatalf("expected 1 call, got %d", mock.calls)
+	}
+}
+
+func TestRetryTransport_NoRetryOnTLSError(t *testing.T) {
+	// TLS errors are not retryable (not temporary)
+	mock := &mockErrRoundTripper{
+		errors: []error{&net.OpError{Op: "remote error", Err: errors.New("tls: bad certificate")}},
+	}
+	rt := NewRetryTransport(mock, fastConfig())
+
+	req, _ := http.NewRequest(http.MethodGet, "http://example.com", nil)
+	_, err := rt.RoundTrip(req)
+
+	if err == nil {
+		t.Fatal("expected error got nil")
+	}
+	if mock.calls != 1 {
+		t.Fatalf("expected 1 call (no retries for TLS error), got %d", mock.calls)
+	}
+}
+
+func TestRetryTransport_SyscallErrorRetry(t *testing.T) {
+	mock := &mockErrRoundTripper{
+		errors: []error{
+			syscall.Errno(syscall.ECONNREFUSED),
+			syscall.Errno(syscall.ECONNRESET),
+		},
+	}
+	rt := NewRetryTransport(mock, fastConfig())
+
+	req, _ := http.NewRequest(http.MethodGet, "http://example.com", nil)
+	resp, err := rt.RoundTrip(req)
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if resp.StatusCode != 200 {
+		t.Fatalf("expected 200, got %d", resp.StatusCode)
+	}
+	if mock.calls != 3 {
+		t.Fatalf("expected 3 calls, got %d", mock.calls)
+	}
+}
+
+func TestRetryTransport_CloseIdleConnectionsDelegates(t *testing.T) {
+	mock := &mockClosableTransport{}
+	rt := NewRetryTransport(mock, fastConfig())
+
+	type closeIdler interface{ CloseIdleConnections() }
+	if tr, ok := rt.(closeIdler); ok {
+		tr.CloseIdleConnections()
+	} else {
+		t.Fatal("retryTransport does not implement CloseIdleConnections")
+	}
+
+	if !mock.closeCalled {
+		t.Fatal("expected CloseIdleConnections to be called on wrapped transport")
+	}
+}
+
 func TestParseRetryAfter(t *testing.T) {
 	tests := []struct {
 		input    string
@@ -280,6 +449,23 @@ func TestParseRetryAfter(t *testing.T) {
 	}
 }
 
+func TestParseRetryAfter_HTTPDate(t *testing.T) {
+	// Use a date in the future
+	future := time.Now().UTC().Add(5 * time.Second)
+	got := parseRetryAfter(future.Format(http.TimeFormat))
+	// Allow 1 second tolerance due to parsing overhead
+	if got < 4*time.Second || got > 6*time.Second {
+		t.Errorf("parseRetryAfter(date) = %v, want ~5s", got)
+	}
+
+	// Past date should return 0
+	past := time.Now().UTC().Add(-5 * time.Second)
+	got = parseRetryAfter(past.Format(http.TimeFormat))
+	if got != 0 {
+		t.Errorf("parseRetryAfter(past date) = %v, want 0", got)
+	}
+}
+
 type capturingTransport struct {
 	wrapped http.RoundTripper
 	capture *[]string
@@ -288,9 +474,18 @@ type capturingTransport struct {
 func (c *capturingTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 	if req.Body != nil {
 		b, _ := io.ReadAll(req.Body)
-		req.Body.Close()
+		_ = req.Body.Close()
 		*c.capture = append(*c.capture, string(b))
 		req.Body = io.NopCloser(strings.NewReader(string(b)))
 	}
 	return c.wrapped.RoundTrip(req)
+}
+
+type mockClosableTransport struct {
+	mockRoundTripper
+	closeCalled bool
+}
+
+func (m *mockClosableTransport) CloseIdleConnections() {
+	m.closeCalled = true
 }
