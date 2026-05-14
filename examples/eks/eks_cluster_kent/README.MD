@@ -38,14 +38,6 @@ backend, and reconciles `RebalancePlan` CRDs into Karpenter `NodeClaim`s.
   `exec` blocks for cluster auth)
 - A CAST AI organization API token (console.cast.ai → Settings → API access)
 
-### Important — KENT-435 token-permission requirement
-
-Your CAST AI environment must include the KENT-435 token-permission fix
-(kubecast MR !44713). If your token was issued **before** that change rolled
-out to your environment, regenerate it after the upgrade — older tokens are
-missing the `StreamActions`, `AwsDataProxy`, and `SpotInterruptionPredictor`
-policies, and Kentroller will fail to connect with `PermissionDenied`.
-
 ## Usage
 
 ```sh
