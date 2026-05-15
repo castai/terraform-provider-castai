@@ -9190,6 +9190,18 @@ type WorkloadoptimizationV1GetWorkloadNativeVpaSpecResponse struct {
 	OrganizationId string                  `json:"organizationId"`
 }
 
+// WorkloadoptimizationV1GetWorkloadRecommendationManifestResponse defines model for workloadoptimization.v1.GetWorkloadRecommendationManifestResponse.
+type WorkloadoptimizationV1GetWorkloadRecommendationManifestResponse struct {
+	ClusterId string `json:"clusterId"`
+	Id        string `json:"id"`
+	Name      string `json:"name"`
+	Namespace string `json:"namespace"`
+
+	// Object Unstructured view of the Recommendation CR (autoscaling.cast.ai/v1, kind=Recommendation).
+	Object         map[string]interface{} `json:"object"`
+	OrganizationId string                 `json:"organizationId"`
+}
+
 // WorkloadoptimizationV1GetWorkloadResponse defines model for workloadoptimization.v1.GetWorkloadResponse.
 type WorkloadoptimizationV1GetWorkloadResponse struct {
 	Metrics *WorkloadoptimizationV1WorkloadMetrics `json:"metrics,omitempty"`

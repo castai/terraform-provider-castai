@@ -53,6 +53,7 @@ const (
 	FieldRolloutBehavior                           = "rollout_behavior"
 	FieldRolloutBehaviorType                       = "type"
 	FieldRolloutBehaviorNoDisruptionType           = "NO_DISRUPTION"
+	FieldRolloutBehaviorUnspecifiedType            = "UNSPECIFIED"
 	FieldRolloutBehaviorPreferOneByOneType         = "prefer_one_by_one"
 	FieldRolloutBehaviorDelaySeconds               = "delay_seconds"
 	FieldJVM                                       = "jvm"
@@ -317,9 +318,11 @@ It can be either:
 						FieldRolloutBehaviorType: {
 							Type:     schema.TypeString,
 							Optional: true,
+							Default:  FieldRolloutBehaviorUnspecifiedType,
 							Description: `Defines the rollout type to be used when applying recommendations.
-	- NO_DISRUPTION - pods are restarted without causing service disruption.`,
-							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{FieldRolloutBehaviorNoDisruptionType}, false)),
+	- NO_DISRUPTION - pods are restarted without causing service disruption.
+	- UNSPECIFIED - rollout type is not specified.`,
+							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{FieldRolloutBehaviorNoDisruptionType, FieldRolloutBehaviorUnspecifiedType}, false)),
 						},
 						FieldRolloutBehaviorPreferOneByOneType: {
 							Type:        schema.TypeBool,

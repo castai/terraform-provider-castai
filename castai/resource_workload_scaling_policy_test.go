@@ -720,6 +720,14 @@ func Test_toRolloutBehavior(t *testing.T) {
 				Type: lo.ToPtr(sdk.NODISRUPTION),
 			},
 		},
+		"should return rollout behavior settings with UNSPECIFIED type": {
+			args: map[string]any{
+				FieldRolloutBehaviorType: FieldRolloutBehaviorUnspecifiedType,
+			},
+			exp: &sdk.WorkloadoptimizationV1RolloutBehaviorSettings{
+				Type: lo.ToPtr(sdk.UNSPECIFIED),
+			},
+		},
 		"should return rollout behavior settings with prefer_one_by_one": {
 			args: map[string]any{
 				FieldRolloutBehaviorType:               FieldRolloutBehaviorNoDisruptionType,
