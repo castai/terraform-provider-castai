@@ -11,7 +11,7 @@ SDK_SPECS := \
 	patching_engine:PodMutationsAPI:https://$(API_HOST)/spec/patching-engine/openapi.yaml
 
 OMNI_SDK_SPECS := \
-	omni:EdgeLocationsAPI,ClustersAPI:https://$(API_HOST)/spec/omni/openapi.yaml
+	omni:EdgeLocationsAPI,ClustersAPI,EdgeConfigurationsAPI:https://$(API_HOST)/spec/omni/openapi.yaml
 
 default: build
 
