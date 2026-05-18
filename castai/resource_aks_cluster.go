@@ -35,7 +35,6 @@ func resourceAKSCluster() *schema.Resource {
 		CreateContext: resourceCastaiAKSClusterCreate,
 		UpdateContext: resourceCastaiAKSClusterUpdate,
 		DeleteContext: resourceCastaiClusterDelete,
-		CustomizeDiff: clusterTokenDiff,
 		Description:   "AKS cluster resource allows connecting an existing AKS cluster to CAST AI.",
 
 		Timeouts: &schema.ResourceTimeout{
