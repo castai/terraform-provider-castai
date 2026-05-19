@@ -491,8 +491,6 @@ func (r *edgeConfigurationResource) edgeConfigurationUpdateToSDK(plan edgeConfig
 		Name: lo.ToPtr(plan.Name.ValueString()),
 	}
 
-	updateReq.Default = lo.ToPtr(false)
-
 	if !plan.UserDataBase64.IsNull() {
 		updateReq.UserDataBase64 = lo.ToPtr(plan.UserDataBase64.ValueString())
 	}
