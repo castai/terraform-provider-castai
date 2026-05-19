@@ -8639,15 +8639,6 @@ type WorkloadoptimizationV1ConfigurationChangedV2 struct {
 	WorkloadConfig      WorkloadoptimizationV1WorkloadConfigV2    `json:"workloadConfig"`
 }
 
-// WorkloadoptimizationV1Constraints defines model for workloadoptimization.v1.Constraints.
-type WorkloadoptimizationV1Constraints struct {
-	// Max Defines the maximum value. For memory - this is in MiB, for CPU - this is in cores.
-	Max *float64 `json:"max"`
-
-	// Min Defines the minimum value. For memory - this is in MiB, for CPU - this is in cores.
-	Min *float64 `json:"min"`
-}
-
 // WorkloadoptimizationV1ConstraintsV2 ConstraintsV2 defines min/max bounds for the recommendation.
 // Each bound can be configured as a fixed constant value or as a percentage
 // of the original pod-spec request.
@@ -8730,13 +8721,22 @@ type WorkloadoptimizationV1ContainerConstraints struct {
 // WorkloadoptimizationV1ContainerConstraintsV2 defines model for workloadoptimization.v1.ContainerConstraintsV2.
 type WorkloadoptimizationV1ContainerConstraintsV2 struct {
 	// ContainerName Defines the container name for which the constraints are for.
-	ContainerName string                             `json:"containerName"`
-	Cpu           *WorkloadoptimizationV1Constraints `json:"cpu,omitempty"`
-	Memory        *WorkloadoptimizationV1Constraints `json:"memory,omitempty"`
+	ContainerName string `json:"containerName"`
+
+	// Cpu ContainerConstraintsV3 defines min and max resource constraints for container recommendations.
+	Cpu *WorkloadoptimizationV1ContainerConstraintsV3 `json:"cpu,omitempty"`
+
+	// Memory ContainerConstraintsV3 defines min and max resource constraints for container recommendations.
+	Memory *WorkloadoptimizationV1ContainerConstraintsV3 `json:"memory,omitempty"`
 }
 
 // WorkloadoptimizationV1ContainerConstraintsV3 ContainerConstraintsV3 defines min and max resource constraints for container recommendations.
 type WorkloadoptimizationV1ContainerConstraintsV3 struct {
+	// Constraints ConstraintsV2 defines min/max bounds for the recommendation.
+	// Each bound can be configured as a fixed constant value or as a percentage
+	// of the original pod-spec request.
+	Constraints *WorkloadoptimizationV1ConstraintsV2 `json:"constraints,omitempty"`
+
 	// Max Max values for the recommendation. For memory - this is in MiB, for CPU - this is in cores.
 	Max *float64 `json:"max"`
 
@@ -10329,6 +10329,11 @@ type WorkloadoptimizationV1ResourceConfigOverrides struct {
 	// Args The arguments for the function - i.e. for a quantile, this should be a [0, 1] float.
 	Args *[]string `json:"args,omitempty"`
 
+	// Constraints ConstraintsV2 defines min/max bounds for the recommendation.
+	// Each bound can be configured as a fixed constant value or as a percentage
+	// of the original pod-spec request.
+	Constraints *WorkloadoptimizationV1ConstraintsV2 `json:"constraints,omitempty"`
+
 	// Function The function which to use when calculating the resource recommendation.
 	// QUANTILE - the quantile function.
 	// MAX - the max function.
@@ -10360,6 +10365,11 @@ type WorkloadoptimizationV1ResourceConfigOverridesFunction string
 
 // WorkloadoptimizationV1ResourceConfigUpdate defines model for workloadoptimization.v1.ResourceConfigUpdate.
 type WorkloadoptimizationV1ResourceConfigUpdate struct {
+	// Constraints ConstraintsV2 defines min/max bounds for the recommendation.
+	// Each bound can be configured as a fixed constant value or as a percentage
+	// of the original pod-spec request.
+	Constraints *WorkloadoptimizationV1ConstraintsV2 `json:"constraints,omitempty"`
+
 	// Max Max values for the recommendation. For memory - this is in MiB, for CPU - this is in cores.
 	// If not set, there will be no upper bound for the recommendation (default behaviour).
 	Max *float64 `json:"max"`
@@ -10997,7 +11007,11 @@ type WorkloadoptimizationV1WorkloadRecommendation struct {
 
 // WorkloadoptimizationV1WorkloadResourceConfigUpdate defines model for workloadoptimization.v1.WorkloadResourceConfigUpdate.
 type WorkloadoptimizationV1WorkloadResourceConfigUpdate struct {
-	Limit *WorkloadoptimizationV1ResourceLimitStrategy `json:"limit,omitempty"`
+	// Constraints ConstraintsV2 defines min/max bounds for the recommendation.
+	// Each bound can be configured as a fixed constant value or as a percentage
+	// of the original pod-spec request.
+	Constraints *WorkloadoptimizationV1ConstraintsV2         `json:"constraints,omitempty"`
+	Limit       *WorkloadoptimizationV1ResourceLimitStrategy `json:"limit,omitempty"`
 
 	// LookBackPeriodSeconds Period of time over which the resource recommendation is calculated (default value is 24 hours).
 	LookBackPeriodSeconds *int32 `json:"lookBackPeriodSeconds"`

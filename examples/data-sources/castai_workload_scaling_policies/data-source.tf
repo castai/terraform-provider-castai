@@ -7,9 +7,9 @@ data "castai_workload_scaling_policies" "cluster" {
 # policies list is also available for custom filtering with for expressions.
 
 # Define managed policies as normal resources.
-resource "castai_workload_scaling_policy" "htz_balanced" {
+resource "castai_workload_scaling_policy" "my_policy" {
   cluster_id        = castai_gke_cluster.cluster.id
-  name              = "htz-balanced"
+  name              = "my-policy"
   apply_type        = "IMMEDIATE"
   management_option = "MANAGED"
   cpu {
@@ -28,7 +28,7 @@ resource "castai_workload_scaling_policy" "htz_balanced" {
 resource "castai_workload_scaling_policy_order" "custom" {
   cluster_id = castai_gke_cluster.cluster.id
   policy_ids = [
-    castai_workload_scaling_policy.htz_balanced.id,                             # managed — reference directly
+    castai_workload_scaling_policy.my_policy.id,                                # managed — reference directly
     data.castai_workload_scaling_policies.cluster.policies_by_name["readonly"], # auto-generated castware policy
   ]
 }
