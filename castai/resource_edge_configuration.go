@@ -68,33 +68,6 @@ type customConfigurationModel struct {
 	Custom types.Map `tfsdk:"custom"`
 }
 
-func (m *gcpConfigurationModel) Equal(other *gcpConfigurationModel) bool {
-	if m == nil || other == nil {
-		return m == other
-	}
-	return m.ImageID.Equal(other.ImageID) &&
-		m.BootDiskSizeGiB.Equal(other.BootDiskSizeGiB) &&
-		m.Labels.Equal(other.Labels)
-}
-
-func (m *awsConfigurationModel) Equal(other *awsConfigurationModel) bool {
-	if m == nil || other == nil {
-		return m == other
-	}
-	return m.ImageID.Equal(other.ImageID) &&
-		m.BootDiskSizeGiB.Equal(other.BootDiskSizeGiB) &&
-		m.Tags.Equal(other.Tags)
-}
-
-func (m *ociConfigurationModel) Equal(other *ociConfigurationModel) bool {
-	if m == nil || other == nil {
-		return m == other
-	}
-	return m.ImageID.Equal(other.ImageID) &&
-		m.BootDiskSizeGiB.Equal(other.BootDiskSizeGiB) &&
-		m.Tags.Equal(other.Tags)
-}
-
 func newEdgeConfigurationResource() resource.Resource {
 	return &edgeConfigurationResource{}
 }
