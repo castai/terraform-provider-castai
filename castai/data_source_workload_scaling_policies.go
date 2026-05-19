@@ -23,6 +23,12 @@ func dataSourceWorkloadScalingPolicies() *schema.Resource {
 				Description:      "CAST AI cluster id.",
 				ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
 			},
+			"policies_by_name": {
+				Type:        schema.TypeMap,
+				Computed:    true,
+				Description: "Map of policy name to policy ID. Useful for referencing a policy by name without a for expression.",
+				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
 			"policies": {
 				Type:        schema.TypeList,
 				Computed:    true,
@@ -72,6 +78,7 @@ func dataSourceWorkloadScalingPoliciesRead(ctx context.Context, d *schema.Resour
 	}
 
 	policies := make([]map[string]any, 0, len(list.JSON200.Items))
+	byName := make(map[string]string, len(list.JSON200.Items))
 	for _, p := range list.JSON200.Items {
 		policies = append(policies, map[string]any{
 			"id":          p.Id,
@@ -80,11 +87,15 @@ func dataSourceWorkloadScalingPoliciesRead(ctx context.Context, d *schema.Resour
 			"is_readonly": p.IsReadonly,
 			"is_castware": p.IsCastware,
 		})
+		byName[p.Name] = p.Id
 	}
 
 	d.SetId(clusterID)
 	if err := d.Set("policies", policies); err != nil {
 		return diag.FromErr(fmt.Errorf("setting policies: %w", err))
+	}
+	if err := d.Set("policies_by_name", byName); err != nil {
+		return diag.FromErr(fmt.Errorf("setting policies_by_name: %w", err))
 	}
 
 	return nil

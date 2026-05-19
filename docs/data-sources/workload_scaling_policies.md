@@ -18,10 +18,8 @@ data "castai_workload_scaling_policies" "cluster" {
   cluster_id = castai_gke_cluster.cluster.id
 }
 
-# Build a name -> ID map for easy lookup.
-locals {
-  policy_by_name = { for p in data.castai_workload_scaling_policies.cluster.policies : p.name => p.id }
-}
+# policies_by_name provides a name -> ID map directly — no locals needed.
+# policies list is also available for custom filtering with for expressions.
 
 # Define managed policies as normal resources.
 resource "castai_workload_scaling_policy" "htz_balanced" {
@@ -45,8 +43,8 @@ resource "castai_workload_scaling_policy" "htz_balanced" {
 resource "castai_workload_scaling_policy_order" "custom" {
   cluster_id = castai_gke_cluster.cluster.id
   policy_ids = [
-    castai_workload_scaling_policy.htz_balanced.id, # managed — reference directly
-    local.policy_by_name["readonly"],               # auto-generated castware policy
+    castai_workload_scaling_policy.htz_balanced.id,                             # managed — reference directly
+    data.castai_workload_scaling_policies.cluster.policies_by_name["readonly"], # auto-generated castware policy
   ]
 }
 ```
@@ -62,6 +60,7 @@ resource "castai_workload_scaling_policy_order" "custom" {
 
 - `id` (String) The ID of this resource.
 - `policies` (List of Object) List of all scaling policies in the cluster. (see [below for nested schema](#nestedatt--policies))
+- `policies_by_name` (Map of String) Map of policy name to policy ID. Useful for referencing a policy by name without a for expression.
 
 <a id="nestedatt--policies"></a>
 ### Nested Schema for `policies`

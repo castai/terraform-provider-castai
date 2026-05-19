@@ -101,4 +101,9 @@ func TestDataSourceWorkloadScalingPoliciesRead(t *testing.T) {
 
 	r.Equal("policy-3-id", data.Get("policies.2.id"))
 	r.Equal("custom", data.Get("policies.2.name"))
+
+	byName := data.Get("policies_by_name").(map[string]any)
+	r.Equal("policy-1-id", byName["readonly"])
+	r.Equal("policy-2-id", byName["balanced"])
+	r.Equal("policy-3-id", byName["custom"])
 }
