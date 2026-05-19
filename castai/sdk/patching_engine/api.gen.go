@@ -520,12 +520,24 @@ type PodMutationSpotType string
 
 // PodMutatorStatus PodMutatorStatus represents the status of the pod mutator in the cluster.
 type PodMutatorStatus struct {
+	// Enforcement Enforcement feature status of the pod mutator.
+	Enforcement *PodMutatorStatusEnforcement `json:"enforcement,omitempty"`
+
 	// Status Status of the pod mutator
 	Status *PodMutatorStatusStatus `json:"status,omitempty"`
 }
 
 // PodMutatorStatusStatus Status of the pod mutator
 type PodMutatorStatusStatus string
+
+// PodMutatorStatusEnforcement Enforcement represents the enforcement feature status of the pod mutator.
+type PodMutatorStatusEnforcement struct {
+	// Enabled Indicates if enforcement is enabled in the pod-mutator deployment.
+	Enabled *bool `json:"enabled,omitempty"`
+
+	// Supported Indicates if enforcement is supported by the installed pod-mutator version.
+	Supported *bool `json:"supported,omitempty"`
+}
 
 // PreviewMatchedWorkloadsRequest PreviewMatchedWorkloadsRequest represents a request to simulate which workloads would be matched for a specific pod mutation filters.
 type PreviewMatchedWorkloadsRequest struct {
