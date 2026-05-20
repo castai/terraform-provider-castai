@@ -156,6 +156,14 @@ func (r *edgeConfigurationDefaultResource) Create(ctx context.Context, req resou
 		return
 	}
 
+	if apiResp.JSON200 == nil {
+		resp.Diagnostics.AddError(
+			"Failed to set edge configuration as default",
+			"API response body is empty",
+		)
+		return
+	}
+
 	// Set the ID as a composite key
 	plan.ID = types.StringValue(fmt.Sprintf("%s/%s/%s/%s", organizationID, clusterID, edgeLocationID, configurationID))
 
@@ -203,6 +211,14 @@ func (r *edgeConfigurationDefaultResource) Read(ctx context.Context, req resourc
 		resp.Diagnostics.AddError(
 			"Failed to read edge configuration",
 			fmt.Sprintf("unexpected status code: %d, body: %s", apiResp.StatusCode(), string(apiResp.Body)),
+		)
+		return
+	}
+
+	if apiResp.JSON200 == nil {
+		resp.Diagnostics.AddError(
+			"Failed to read edge configuration",
+			"API response body is empty",
 		)
 		return
 	}

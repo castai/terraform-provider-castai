@@ -265,6 +265,14 @@ func (r *edgeConfigurationResource) Create(ctx context.Context, req resource.Cre
 		return
 	}
 
+	if apiResp.JSON200 == nil {
+		resp.Diagnostics.AddError(
+			"Failed to create edge configuration",
+			"API response body is empty",
+		)
+		return
+	}
+
 	state := r.edgeConfigurationToTFModel(ctx, apiResp.JSON200, plan.OrganizationID, plan.ClusterID)
 	state.EdgeLocationID = plan.EdgeLocationID
 
@@ -311,6 +319,14 @@ func (r *edgeConfigurationResource) Read(ctx context.Context, req resource.ReadR
 		return
 	}
 
+	if apiResp.JSON200 == nil {
+		resp.Diagnostics.AddError(
+			"Failed to read edge configuration",
+			"API response body is empty",
+		)
+		return
+	}
+
 	state = r.edgeConfigurationToTFModel(ctx, apiResp.JSON200, state.OrganizationID, state.ClusterID)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, state)...)
@@ -353,6 +369,14 @@ func (r *edgeConfigurationResource) Update(ctx context.Context, req resource.Upd
 		resp.Diagnostics.AddError(
 			"Failed to update edge configuration",
 			fmt.Sprintf("unexpected status code: %d, body: %s", apiResp.StatusCode(), string(apiResp.Body)),
+		)
+		return
+	}
+
+	if apiResp.JSON200 == nil {
+		resp.Diagnostics.AddError(
+			"Failed to update edge configuration",
+			"API response body is empty",
 		)
 		return
 	}
