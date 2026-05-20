@@ -222,53 +222,9 @@ func (r *edgeConfigurationDefaultResource) Read(ctx context.Context, req resourc
 }
 
 func (r *edgeConfigurationDefaultResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var plan edgeConfigurationDefaultModel
-	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	client := r.client.omniAPI
-	organizationID := r.getOrganizationID(plan.OrganizationID)
-	clusterID := plan.ClusterID.ValueString()
-	edgeLocationID := plan.EdgeLocationID.ValueString()
-	configurationID := plan.ConfigurationID.ValueString()
-
-	tflog.Info(ctx, "Updating edge configuration default",
-		map[string]interface{}{
-			"organization_id":  organizationID,
-			"cluster_id":       clusterID,
-			"edge_location_id": edgeLocationID,
-			"configuration_id": configurationID,
-		},
-	)
-
-	// Update the configuration to set it as default
-	updateReq := omni.EdgeConfigurationUpdate{
-		Default: lo.ToPtr(true),
-	}
-
-	apiResp, err := client.EdgeConfigurationsAPIUpdateEdgeConfigurationWithResponse(ctx, organizationID, clusterID, edgeLocationID, configurationID, nil, updateReq)
-	if err != nil {
-		resp.Diagnostics.AddError("Failed to set edge configuration as default", err.Error())
-		return
-	}
-
-	if apiResp.StatusCode() != http.StatusOK {
-		resp.Diagnostics.AddError(
-			"Failed to set edge configuration as default",
-			fmt.Sprintf("unexpected status code: %d, body: %s", apiResp.StatusCode(), string(apiResp.Body)),
-		)
-		return
-	}
-
-	plan.ID = types.StringValue(fmt.Sprintf("%s/%s/%s/%s", organizationID, clusterID, edgeLocationID, configurationID))
-
-	// Set computed fields from the configuration we just made default
-	plan.Name = types.StringValue(apiResp.JSON200.Name)
-	plan.CloudProvider = r.getCloudProviderType(apiResp.JSON200)
-
-	resp.Diagnostics.Append(resp.State.Set(ctx, plan)...)
+	// This method is never called because all attributes have RequiresReplace plan modifier.
+	// The resource is always destroyed and recreated instead of being updated.
+	// Keeping this method to satisfy the resource.Resource interface.
 }
 
 func (r *edgeConfigurationDefaultResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
