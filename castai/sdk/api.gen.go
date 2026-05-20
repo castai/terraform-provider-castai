@@ -3938,6 +3938,9 @@ type CastaiUsersV1beta1UserOrganization struct {
 	// Id id of the organization.
 	Id *string `json:"id,omitempty"`
 
+	// Internal Whether the organization is internal.
+	Internal *bool `json:"internal,omitempty"`
+
 	// Name name of the organization.
 	Name string `json:"name"`
 
