@@ -545,6 +545,9 @@ resource "castai_aks_cluster" "test" {
   client_secret   = %[5]q
   node_resource_group = "%[1]s-ng"
 
+  timeouts {
+    delete = "30m"
+  }
 }
 
 `, clusterName, subscriptionID, tenantID, clientID, clientSecret)
@@ -566,6 +569,10 @@ resource "castai_aks_cluster" "test" {
   client_id           = %[5]q
   federation_id       = %[2]q
   node_resource_group = "%[3]s-ng"
+
+  timeouts {
+    delete = "30m"
+  }
 }
 `, subscriptionID, federationID, clusterName, tenantID, clientID)
 }
