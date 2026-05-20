@@ -264,16 +264,12 @@ func (r *edgeConfigurationResource) Create(ctx context.Context, req resource.Cre
 
 	createReq := omni.EdgeConfiguration{
 		Name:           plan.Name.ValueString(),
-		EdgeLocationId: lo.ToPtr(plan.EdgeLocationID.ValueString()),
 		Default:        lo.ToPtr(false),
+		UserDataBase64: lo.ToPtr(plan.UserDataBase64.ValueString()),
 		Gcp:            gcpConfig,
 		Aws:            awsConfig,
 		Oci:            ociConfig,
 		Custom:         customConfig,
-	}
-
-	if !plan.UserDataBase64.IsNull() {
-		createReq.UserDataBase64 = lo.ToPtr(plan.UserDataBase64.ValueString())
 	}
 
 	apiResp, err := client.EdgeConfigurationsAPICreateEdgeConfigurationWithResponse(ctx, organizationID, clusterID, edgeLocationID, createReq)
@@ -396,15 +392,12 @@ func (r *edgeConfigurationResource) Update(ctx context.Context, req resource.Upd
 	}
 
 	updateReq := omni.EdgeConfigurationUpdate{
-		Name:   lo.ToPtr(plan.Name.ValueString()),
-		Gcp:    gcpConfig,
-		Aws:    awsConfig,
-		Oci:    ociConfig,
-		Custom: customConfig,
-	}
-
-	if !plan.UserDataBase64.IsNull() {
-		updateReq.UserDataBase64 = lo.ToPtr(plan.UserDataBase64.ValueString())
+		Name:           lo.ToPtr(plan.Name.ValueString()),
+		UserDataBase64: lo.ToPtr(plan.UserDataBase64.ValueString()),
+		Gcp:            gcpConfig,
+		Aws:            awsConfig,
+		Oci:            ociConfig,
+		Custom:         customConfig,
 	}
 
 	apiResp, err := client.EdgeConfigurationsAPIUpdateEdgeConfigurationWithResponse(ctx, organizationID, clusterID, edgeLocationID, plan.ID.ValueString(), nil, updateReq)
