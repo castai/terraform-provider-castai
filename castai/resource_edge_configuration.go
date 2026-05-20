@@ -245,10 +245,35 @@ func (r *edgeConfigurationResource) Create(ctx context.Context, req resource.Cre
 		},
 	)
 
-	createReq, d := r.edgeConfigurationToSDK(ctx, plan)
+	// Build the create request
+	gcpConfig, d := r.toGCPConfiguration(ctx, plan.GCP)
 	resp.Diagnostics.Append(d...)
+
+	awsConfig, d := r.toAWSConfiguration(ctx, plan.AWS)
+	resp.Diagnostics.Append(d...)
+
+	ociConfig, d := r.toOCIConfiguration(ctx, plan.OCI)
+	resp.Diagnostics.Append(d...)
+
+	customConfig, d := r.toCustomConfiguration(ctx, plan.Custom)
+	resp.Diagnostics.Append(d...)
+
 	if resp.Diagnostics.HasError() {
 		return
+	}
+
+	createReq := omni.EdgeConfiguration{
+		Name:           plan.Name.ValueString(),
+		EdgeLocationId: lo.ToPtr(plan.EdgeLocationID.ValueString()),
+		Default:        lo.ToPtr(false),
+		Gcp:            gcpConfig,
+		Aws:            awsConfig,
+		Oci:            ociConfig,
+		Custom:         customConfig,
+	}
+
+	if !plan.UserDataBase64.IsNull() {
+		createReq.UserDataBase64 = lo.ToPtr(plan.UserDataBase64.ValueString())
 	}
 
 	apiResp, err := client.EdgeConfigurationsAPICreateEdgeConfigurationWithResponse(ctx, organizationID, clusterID, edgeLocationID, createReq)
@@ -353,10 +378,33 @@ func (r *edgeConfigurationResource) Update(ctx context.Context, req resource.Upd
 		},
 	)
 
-	updateReq, d := r.edgeConfigurationUpdateToSDK(ctx, plan)
+	// Build the update request
+	gcpConfig, d := r.toGCPConfiguration(ctx, plan.GCP)
 	resp.Diagnostics.Append(d...)
+
+	awsConfig, d := r.toAWSConfiguration(ctx, plan.AWS)
+	resp.Diagnostics.Append(d...)
+
+	ociConfig, d := r.toOCIConfiguration(ctx, plan.OCI)
+	resp.Diagnostics.Append(d...)
+
+	customConfig, d := r.toCustomConfiguration(ctx, plan.Custom)
+	resp.Diagnostics.Append(d...)
+
 	if resp.Diagnostics.HasError() {
 		return
+	}
+
+	updateReq := omni.EdgeConfigurationUpdate{
+		Name:   lo.ToPtr(plan.Name.ValueString()),
+		Gcp:    gcpConfig,
+		Aws:    awsConfig,
+		Oci:    ociConfig,
+		Custom: customConfig,
+	}
+
+	if !plan.UserDataBase64.IsNull() {
+		updateReq.UserDataBase64 = lo.ToPtr(plan.UserDataBase64.ValueString())
 	}
 
 	apiResp, err := client.EdgeConfigurationsAPIUpdateEdgeConfigurationWithResponse(ctx, organizationID, clusterID, edgeLocationID, plan.ID.ValueString(), nil, updateReq)
@@ -472,69 +520,6 @@ func (r *edgeConfigurationResource) edgeConfigurationToTFModel(ctx context.Conte
 	}
 
 	return state
-}
-
-func (r *edgeConfigurationResource) edgeConfigurationToSDK(ctx context.Context, plan edgeConfigurationModel) (omni.EdgeConfigurationsAPICreateEdgeConfigurationJSONRequestBody, diag.Diagnostics) {
-	var diags diag.Diagnostics
-
-	gcpConfig, d := r.toGCPConfiguration(ctx, plan.GCP)
-	diags.Append(d...)
-
-	awsConfig, d := r.toAWSConfiguration(ctx, plan.AWS)
-	diags.Append(d...)
-
-	ociConfig, d := r.toOCIConfiguration(ctx, plan.OCI)
-	diags.Append(d...)
-
-	customConfig, d := r.toCustomConfiguration(ctx, plan.Custom)
-	diags.Append(d...)
-
-	createReq := omni.EdgeConfiguration{
-		Name:           plan.Name.ValueString(),
-		EdgeLocationId: lo.ToPtr(plan.EdgeLocationID.ValueString()),
-		// TODO: verify
-		Default: lo.ToPtr(false),
-		Gcp:     gcpConfig,
-		Aws:     awsConfig,
-		Oci:     ociConfig,
-		Custom:  customConfig,
-	}
-
-	if !plan.UserDataBase64.IsNull() {
-		createReq.UserDataBase64 = lo.ToPtr(plan.UserDataBase64.ValueString())
-	}
-
-	return createReq, diags
-}
-
-func (r *edgeConfigurationResource) edgeConfigurationUpdateToSDK(ctx context.Context, plan edgeConfigurationModel) (omni.EdgeConfigurationsAPIUpdateEdgeConfigurationJSONRequestBody, diag.Diagnostics) {
-	var diags diag.Diagnostics
-
-	gcpConfig, d := r.toGCPConfiguration(ctx, plan.GCP)
-	diags.Append(d...)
-
-	awsConfig, d := r.toAWSConfiguration(ctx, plan.AWS)
-	diags.Append(d...)
-
-	ociConfig, d := r.toOCIConfiguration(ctx, plan.OCI)
-	diags.Append(d...)
-
-	customConfig, d := r.toCustomConfiguration(ctx, plan.Custom)
-	diags.Append(d...)
-
-	updateReq := omni.EdgeConfigurationUpdate{
-		Name:   lo.ToPtr(plan.Name.ValueString()),
-		Gcp:    gcpConfig,
-		Aws:    awsConfig,
-		Oci:    ociConfig,
-		Custom: customConfig,
-	}
-
-	if !plan.UserDataBase64.IsNull() {
-		updateReq.UserDataBase64 = lo.ToPtr(plan.UserDataBase64.ValueString())
-	}
-
-	return updateReq, diags
 }
 
 func (r *edgeConfigurationResource) toGCPConfiguration(ctx context.Context, plan *gcpConfigurationModel) (*omni.GCPConfiguration, diag.Diagnostics) {
