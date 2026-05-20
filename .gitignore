@@ -11,6 +11,7 @@ terraform-provider-castai
 examples/**/.terraform/
 examples/**/terraform.d/
 examples/**/crash.log
+examples/**/.terraformrc
 examples/**/*.tfstate
 examples/**/*.tfstate.lock.info
 examples/**/*.tfstate.backup

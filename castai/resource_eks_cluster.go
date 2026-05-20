@@ -27,7 +27,6 @@ func resourceEKSCluster() *schema.Resource {
 		UpdateContext: resourceCastaiEKSClusterUpdate,
 		DeleteContext: resourceCastaiClusterDelete,
 		Description:   "EKS cluster resource allows connecting an existing EKS cluster to CAST AI.",
-		CustomizeDiff: clusterTokenDiff,
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(5 * time.Minute),

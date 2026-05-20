@@ -28,7 +28,6 @@ func resourceGKEClusterId() *schema.Resource {
 		ReadContext:   resourceCastaiGKEClusterIdRead,
 		UpdateContext: resourceCastaiGKEClusterIdUpdate,
 		DeleteContext: resourceCastaiGKEClusterIdDelete,
-		CustomizeDiff: clusterTokenDiff,
 		Description:   "GKE cluster resource allows connecting an existing GKE cluster to CAST AI.",
 
 		Timeouts: &schema.ResourceTimeout{
