@@ -306,9 +306,9 @@ func (r *edgeConfigurationResource) Read(ctx context.Context, req resource.ReadR
 		return
 	}
 
-	plan := r.edgeConfigurationToTFModel(apiResp.JSON200, state.OrganizationID, state.ClusterID)
+	state = r.edgeConfigurationToTFModel(apiResp.JSON200, state.OrganizationID, state.ClusterID)
 
-	resp.Diagnostics.Append(resp.State.Set(ctx, plan)...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, state)...)
 }
 
 func (r *edgeConfigurationResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
@@ -378,14 +378,6 @@ func (r *edgeConfigurationResource) Delete(ctx context.Context, req resource.Del
 
 	apiResp, err := client.EdgeConfigurationsAPIDeleteEdgeConfigurationWithResponse(ctx, organizationID, clusterID, edgeLocationID, configurationID)
 
-	tflog.Info(ctx, "Edge configuration delete response",
-		map[string]interface{}{
-			"status_code": apiResp.StatusCode(),
-			"body":        string(apiResp.Body),
-			"error":       err,
-		},
-	)
-
 	if err != nil {
 		resp.Diagnostics.AddError("Failed to delete edge configuration", err.Error())
 		return
@@ -431,8 +423,8 @@ func (r *edgeConfigurationResource) getOrganizationID(organizationID types.Strin
 	return r.client.organizationID
 }
 
-func (r *edgeConfigurationResource) edgeConfigurationToTFModel(config *omni.EdgeConfiguration, organizationID types.String, clusterID types.String) *edgeConfigurationModel {
-	state := &edgeConfigurationModel{
+func (r *edgeConfigurationResource) edgeConfigurationToTFModel(config *omni.EdgeConfiguration, organizationID types.String, clusterID types.String) edgeConfigurationModel {
+	state := edgeConfigurationModel{
 		ID:             types.StringValue(lo.FromPtr(config.Id)),
 		OrganizationID: organizationID,
 		ClusterID:      clusterID,
@@ -440,19 +432,10 @@ func (r *edgeConfigurationResource) edgeConfigurationToTFModel(config *omni.Edge
 		EdgeLocationID: types.StringValue(lo.FromPtr(config.EdgeLocationId)),
 		Default:        types.BoolValue(lo.FromPtr(config.Default)),
 		UserDataBase64: types.StringValue(lo.FromPtr(config.UserDataBase64)),
-	}
-
-	if config.Gcp != nil {
-		state.GCP = r.toGCPConfigurationModel(config.Gcp)
-	}
-	if config.Aws != nil {
-		state.AWS = r.toAWSConfigurationModel(config.Aws)
-	}
-	if config.Oci != nil {
-		state.OCI = r.toOCIConfigurationModel(config.Oci)
-	}
-	if config.Custom != nil {
-		state.Custom = r.toCustomConfigurationModel(config.Custom)
+		GCP:            r.toGCPConfigurationModel(config.Gcp),
+		AWS:            r.toAWSConfigurationModel(config.Aws),
+		OCI:            r.toOCIConfigurationModel(config.Oci),
+		Custom:         r.toCustomConfigurationModel(config.Custom),
 	}
 
 	return state
@@ -462,25 +445,16 @@ func (r *edgeConfigurationResource) edgeConfigurationToSDK(plan edgeConfiguratio
 	createReq := omni.EdgeConfiguration{
 		Name:           plan.Name.ValueString(),
 		EdgeLocationId: lo.ToPtr(plan.EdgeLocationID.ValueString()),
+		// TODO: verify
+		Default: lo.ToPtr(false),
+		Gcp:     r.toGCPConfiguration(plan.GCP),
+		Aws:     r.toAWSConfiguration(plan.AWS),
+		Oci:     r.toOCIConfiguration(plan.OCI),
+		Custom:  r.toCustomConfiguration(plan.Custom),
 	}
-
-	createReq.Default = lo.ToPtr(false)
 
 	if !plan.UserDataBase64.IsNull() {
 		createReq.UserDataBase64 = lo.ToPtr(plan.UserDataBase64.ValueString())
-	}
-
-	if plan.GCP != nil {
-		createReq.Gcp = r.toGCPConfiguration(plan.GCP)
-	}
-	if plan.AWS != nil {
-		createReq.Aws = r.toAWSConfiguration(plan.AWS)
-	}
-	if plan.OCI != nil {
-		createReq.Oci = r.toOCIConfiguration(plan.OCI)
-	}
-	if plan.Custom != nil {
-		createReq.Custom = r.toCustomConfiguration(plan.Custom)
 	}
 
 	return createReq
@@ -488,24 +462,15 @@ func (r *edgeConfigurationResource) edgeConfigurationToSDK(plan edgeConfiguratio
 
 func (r *edgeConfigurationResource) edgeConfigurationUpdateToSDK(plan edgeConfigurationModel) omni.EdgeConfigurationsAPIUpdateEdgeConfigurationJSONRequestBody {
 	updateReq := omni.EdgeConfigurationUpdate{
-		Name: lo.ToPtr(plan.Name.ValueString()),
+		Name:   lo.ToPtr(plan.Name.ValueString()),
+		Gcp:    r.toGCPConfiguration(plan.GCP),
+		Aws:    r.toAWSConfiguration(plan.AWS),
+		Oci:    r.toOCIConfiguration(plan.OCI),
+		Custom: r.toCustomConfiguration(plan.Custom),
 	}
 
 	if !plan.UserDataBase64.IsNull() {
 		updateReq.UserDataBase64 = lo.ToPtr(plan.UserDataBase64.ValueString())
-	}
-
-	if plan.GCP != nil {
-		updateReq.Gcp = r.toGCPConfiguration(plan.GCP)
-	}
-	if plan.AWS != nil {
-		updateReq.Aws = r.toAWSConfiguration(plan.AWS)
-	}
-	if plan.OCI != nil {
-		updateReq.Oci = r.toOCIConfiguration(plan.OCI)
-	}
-	if plan.Custom != nil {
-		updateReq.Custom = r.toCustomConfiguration(plan.Custom)
 	}
 
 	return updateReq
