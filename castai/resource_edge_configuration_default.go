@@ -53,7 +53,7 @@ func (r *edgeConfigurationDefaultResource) Schema(_ context.Context, _ resource.
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Computed:    true,
-				Description: "Terraform resource ID (combination of organization_id, cluster_id, edge_location_id, and configuration_id)",
+				Description: "Terraform resource ID (the configuration_id)",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
@@ -164,8 +164,8 @@ func (r *edgeConfigurationDefaultResource) Create(ctx context.Context, req resou
 		return
 	}
 
-	// Set the ID as a composite key
-	plan.ID = types.StringValue(fmt.Sprintf("%s/%s/%s/%s", organizationID, clusterID, edgeLocationID, configurationID))
+	// Set the ID as just the configuration_id
+	plan.ID = types.StringValue(configurationID)
 
 	// Set computed fields from the configuration we just made default
 	plan.Name = types.StringValue(apiResp.JSON200.Name)
@@ -266,7 +266,7 @@ func (r *edgeConfigurationDefaultResource) ImportState(ctx context.Context, req 
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("cluster_id"), ids[1])...)
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("edge_location_id"), ids[2])...)
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("configuration_id"), ids[3])...)
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("id"), req.ID)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("id"), ids[3])...)
 }
 
 func (r *edgeConfigurationDefaultResource) getCloudProviderType(config *omni.EdgeConfiguration) types.String {
