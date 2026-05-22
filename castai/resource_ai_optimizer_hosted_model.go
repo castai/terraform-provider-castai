@@ -53,9 +53,10 @@ const (
 var hibernationConditionSchema = &schema.Resource{
 	Schema: map[string]*schema.Schema{
 		fieldAIHostedModelConditionDuration: {
-			Type:        schema.TypeString,
-			Required:    true,
-			Description: "Time period for the condition evaluation.",
+			Type:             schema.TypeString,
+			Required:         true,
+			DiffSuppressFunc: diffSuppressDuration,
+			Description:      "Time period for the condition evaluation.",
 		},
 		fieldAIHostedModelConditionReqCount: {
 			Type:        schema.TypeInt,

@@ -8,6 +8,7 @@ import (
 	"math"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -17,6 +18,18 @@ import (
 	"github.com/castai/terraform-provider-castai/castai/sdk"
 	"github.com/castai/terraform-provider-castai/castai/types"
 )
+
+// diffSuppressDuration suppresses diffs between two duration strings that represent
+// the same duration (e.g. "1m" and "60s"). When either value cannot be parsed as a
+// duration it falls back to plain string equality.
+func diffSuppressDuration(k, oldValue, newValue string, d *schema.ResourceData) bool {
+	oldDuration, oldErr := time.ParseDuration(oldValue)
+	newDuration, newErr := time.ParseDuration(newValue)
+	if oldErr != nil || newErr != nil {
+		return oldValue == newValue
+	}
+	return oldDuration == newDuration
+}
 
 func toPtr[S any](src S) *S {
 	return &src

@@ -468,10 +468,11 @@ func resourceAutoscaler() *schema.Resource {
 													Description: "enable/disable scoped mode. By default, Evictor targets all nodes in the cluster. This mode will constrain it to just the nodes which were created by CAST AI.",
 												},
 												FieldEvictorCycleInterval: {
-													Type:        schema.TypeString,
-													Optional:    true,
-													Default:     "1m",
-													Description: "configure the interval duration between Evictor operations. This property can be used to lower or raise the frequency of the Evictor's find-and-drain operations.",
+													Type:             schema.TypeString,
+													Optional:         true,
+													Default:          "1m",
+													DiffSuppressFunc: diffSuppressDuration,
+													Description:      "configure the interval duration between Evictor operations. This property can be used to lower or raise the frequency of the Evictor's find-and-drain operations.",
 												},
 												FieldEvictorNodeGracePeriodMinutes: {
 													Type:        schema.TypeInt,
@@ -480,10 +481,11 @@ func resourceAutoscaler() *schema.Resource {
 													Description: "configure the node grace period which controls the duration which must pass after a node has been created before Evictor starts considering that node.",
 												},
 												FieldEvictorPodEvictionFailureBackOffInterval: {
-													Type:        schema.TypeString,
-													Optional:    true,
-													Default:     "5s",
-													Description: "configure the pod eviction failure back off interval. If pod eviction fails then Evictor will attempt to evict it again after the amount of time specified here.",
+													Type:             schema.TypeString,
+													Optional:         true,
+													Default:          "5s",
+													DiffSuppressFunc: diffSuppressDuration,
+													Description:      "configure the pod eviction failure back off interval. If pod eviction fails then Evictor will attempt to evict it again after the amount of time specified here.",
 												},
 												FieldEvictorIgnorePodDisruptionBudgets: {
 													Type:        schema.TypeBool,
