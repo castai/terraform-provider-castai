@@ -55,17 +55,18 @@ resource "castai_edge_location" "aws_example" {
 - `cluster_id` (String) CAST AI cluster ID
 - `name` (String) Name of the edge location. Must be unique and relatively short as it's used for creating service accounts.
 - `organization_id` (String) CAST AI organization ID
-- `region` (String) The region where the edge location is deployed
 
 ### Optional
 
 - `aws` (Attributes) AWS configuration for the edge location (see [below for nested schema](#nestedatt--aws))
 - `control_plane` (Attributes) Control plane configuration. Only valid when control_plane_mode is SHARED. (see [below for nested schema](#nestedatt--control_plane))
 - `control_plane_mode` (String) The mode of control plane inside edge location. Valid values: DEDICATED, SHARED.
+- `custom` (Attributes) Custom cloud provider configuration for the edge location (see [below for nested schema](#nestedatt--custom))
 - `description` (String) Description of the edge location
 - `gcp` (Attributes) GCP configuration for the edge location (see [below for nested schema](#nestedatt--gcp))
 - `networking` (Attributes) Edge cluster networking configuration. (see [below for nested schema](#nestedatt--networking))
 - `oci` (Attributes) OCI configuration for the edge location (see [below for nested schema](#nestedatt--oci))
+- `region` (String) The region where the edge location is deployed. Required for AWS, GCP and OCI providers.
 - `zones` (Attributes List) List of availability zones for the edge location (see [below for nested schema](#nestedatt--zones))
 
 ### Read-Only
@@ -100,6 +101,10 @@ Optional:
 Optional:
 
 - `ha` (Boolean) Whether to use HA mode for control plane. If not set, default is HA.
+
+
+<a id="nestedatt--custom"></a>
+### Nested Schema for `custom`
 
 
 <a id="nestedatt--gcp"></a>

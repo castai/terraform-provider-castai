@@ -9077,6 +9077,14 @@ type WorkloadoptimizationV1FailedHookEvent struct {
 	Time    time.Time `json:"time"`
 }
 
+// WorkloadoptimizationV1GPUSettings defines model for workloadoptimization.v1.GPUSettings.
+type WorkloadoptimizationV1GPUSettings struct {
+	// ManagementOption Defines possible options for workload management.
+	// READ_ONLY - workload watched (metrics collected), but no actions may be performed by CAST AI.
+	// MANAGED - workload watched (metrics collected), CAST AI may perform actions on the workload.
+	ManagementOption WorkloadoptimizationV1ManagementOption `json:"managementOption"`
+}
+
 // WorkloadoptimizationV1GetAgentStatusResponse defines model for workloadoptimization.v1.GetAgentStatusResponse.
 type WorkloadoptimizationV1GetAgentStatusResponse struct {
 	CastAgentCurrentVersion           *string    `json:"castAgentCurrentVersion"`
@@ -10132,6 +10140,7 @@ type WorkloadoptimizationV1RecommendationPolicies struct {
 	Cpu                WorkloadoptimizationV1ResourcePolicies          `json:"cpu"`
 	Downscaling        *WorkloadoptimizationV1DownscalingSettings      `json:"downscaling,omitempty"`
 	ExcludedContainers *[]string                                       `json:"excludedContainers,omitempty"`
+	Gpu                *WorkloadoptimizationV1GPUSettings              `json:"gpu,omitempty"`
 
 	// HpaConverters Configuration for converting existing HPAs when VPA is the sole optimization.
 	// If HPA management is enabled, it takes precedence over this setting.

@@ -7,7 +7,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-framework-validators/resourcevalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -52,6 +51,7 @@ type edgeLocationModel struct {
 	AWS              *awsModel          `tfsdk:"aws"`
 	GCP              *gcpModel          `tfsdk:"gcp"`
 	OCI              *ociModel          `tfsdk:"oci"`
+	Custom           *customModel       `tfsdk:"custom"`
 	// Computed revision number incremented each time credentials have changed.
 	CredentialsRevision types.Int64 `tfsdk:"credentials_revision"`
 }
@@ -121,6 +121,19 @@ type ociModel struct {
 	SecurityGroupID    types.String `tfsdk:"security_group_id"`
 }
 
+type customModel struct{}
+
+func (m customModel) credentials() types.String {
+	return types.StringNull()
+}
+
+func (m *customModel) Equal(other *customModel) bool {
+	if m == nil || other == nil {
+		return m == other
+	}
+	return true
+}
+
 func (m awsModel) credentials() types.String {
 	if m.AccessKeyIDWO.IsNull() && m.SecretAccessKeyWO.IsNull() {
 		return types.StringNull()
@@ -186,13 +199,56 @@ func newEdgeLocationResource() resource.Resource {
 	return &edgeLocationResource{}
 }
 
+type edgeLocationConfigValidator struct{}
+
+func (v edgeLocationConfigValidator) Description(_ context.Context) string {
+	return "Validates edge location configuration"
+}
+
+func (v edgeLocationConfigValidator) MarkdownDescription(_ context.Context) string {
+	return "Validates that exactly one cloud provider is specified and that region is provided for non-custom providers"
+}
+
+func (v edgeLocationConfigValidator) ValidateResource(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
+	var config edgeLocationModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	// Check exactly one provider is set.
+	providerCount := 0
+	if config.AWS != nil {
+		providerCount++
+	}
+	if config.GCP != nil {
+		providerCount++
+	}
+	if config.OCI != nil {
+		providerCount++
+	}
+	if config.Custom != nil {
+		providerCount++
+	}
+	if providerCount != 1 {
+		resp.Diagnostics.AddError(
+			"Invalid Configuration",
+			fmt.Sprintf("Exactly one of 'aws', 'gcp', 'oci', or 'custom' must be specified, got %d", providerCount),
+		)
+	}
+
+	// Region is required for non-custom providers.
+	if config.Custom == nil && config.Region.IsNull() {
+		resp.Diagnostics.AddError(
+			"Missing Required Argument",
+			"The argument 'region' is required when 'aws', 'gcp', or 'oci' is specified.",
+		)
+	}
+}
+
 func (r *edgeLocationResource) ConfigValidators(_ context.Context) []resource.ConfigValidator {
 	return []resource.ConfigValidator{
-		resourcevalidator.ExactlyOneOf(
-			path.MatchRoot("aws"),
-			path.MatchRoot("gcp"),
-			path.MatchRoot("oci"),
-		),
+		edgeLocationConfigValidator{},
 	}
 }
 
@@ -237,8 +293,8 @@ func (r *edgeLocationResource) Schema(_ context.Context, _ resource.SchemaReques
 				Description: "Description of the edge location",
 			},
 			"region": schema.StringAttribute{
-				Required:    true,
-				Description: "The region where the edge location is deployed",
+				Optional:    true,
+				Description: "The region where the edge location is deployed. Required for AWS, GCP and OCI providers.",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
 				},
@@ -453,6 +509,11 @@ func (r *edgeLocationResource) Schema(_ context.Context, _ resource.SchemaReques
 					},
 				},
 			},
+			"custom": schema.SingleNestedAttribute{
+				Optional:    true,
+				Description: "Custom cloud provider configuration for the edge location",
+				Attributes:  map[string]schema.Attribute{},
+			},
 		},
 	}
 }
@@ -520,6 +581,10 @@ func (r *edgeLocationResource) Create(ctx context.Context, req resource.CreateRe
 		createReq.Oci = r.toOCI(plan.OCI, config.OCI)
 		mc = config.OCI
 	}
+	if plan.Custom != nil {
+		createReq.Custom = r.toCustom(plan.Custom, config.Custom)
+		mc = config.Custom
+	}
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -580,8 +645,12 @@ func (r *edgeLocationResource) Read(ctx context.Context, req resource.ReadReques
 
 	edgeLocation := apiResp.JSON200
 
-	if edgeLocation.Region != nil {
+	// For custom edge locations, region may be null or empty from the API.
+	// Always sync region to avoid perpetual diff when user didn't provide one.
+	if edgeLocation.Region != nil && *edgeLocation.Region != "" {
 		state.Region = types.StringValue(*edgeLocation.Region)
+	} else {
+		state.Region = types.StringNull()
 	}
 	state.Name = types.StringValue(edgeLocation.Name)
 	state.Description = types.StringNull()
@@ -599,7 +668,9 @@ func (r *edgeLocationResource) Read(ctx context.Context, req resource.ReadReques
 				Ha: types.BoolPointerValue(edgeLocation.EdgeClusterSpec.ControlPlane.Ha),
 			}
 		}
-		if edgeLocation.EdgeClusterSpec.Networking != nil && edgeLocation.EdgeClusterSpec.Networking.TunneledCidrs != nil {
+		// Only sync networking from API if it was already managed in state.
+		// Otherwise, we'd cause perpetual drift for users who never set the block.
+		if state.Networking != nil && edgeLocation.EdgeClusterSpec.Networking != nil && edgeLocation.EdgeClusterSpec.Networking.TunneledCidrs != nil {
 			cidrs, d := types.ListValueFrom(ctx, types.StringType, *edgeLocation.EdgeClusterSpec.Networking.TunneledCidrs)
 			resp.Diagnostics.Append(d...)
 			state.Networking = &networkingModel{TunneledCIDRs: cidrs}
@@ -610,6 +681,15 @@ func (r *edgeLocationResource) Read(ctx context.Context, req resource.ReadReques
 		state.Zones = r.toZoneModel(edgeLocation.Zones)
 	}
 
+	// Reset all provider blocks before populating from the API response.
+	// This ensures that if a user switches providers (e.g. aws -> custom),
+	// the old provider block is cleared and does not break the exactly-one-of
+	// invariant or interfere with future provider switches.
+	state.AWS = nil
+	state.GCP = nil
+	state.OCI = nil
+	state.Custom = nil
+
 	var diags diag.Diagnostics
 	if edgeLocation.Aws != nil {
 		state.AWS, diags = r.toAWSModel(ctx, edgeLocation.Aws)
@@ -619,6 +699,9 @@ func (r *edgeLocationResource) Read(ctx context.Context, req resource.ReadReques
 	}
 	if edgeLocation.Oci != nil {
 		state.OCI = r.toOCIModel(edgeLocation.Oci)
+	}
+	if edgeLocation.Custom != nil {
+		state.Custom = r.toCustomModel(edgeLocation.Custom)
 	}
 
 	resp.Diagnostics.Append(diags...)
@@ -683,6 +766,9 @@ func (r *edgeLocationResource) Update(ctx context.Context, req resource.UpdateRe
 	case plan.OCI != nil && (!plan.OCI.Equal(state.OCI) || credentialsChanged):
 		updateReq.Oci = r.toOCI(plan.OCI, config.OCI)
 		mc = config.OCI
+	case plan.Custom != nil && (!plan.Custom.Equal(state.Custom) || credentialsChanged):
+		updateReq.Custom = r.toCustom(plan.Custom, config.Custom)
+		mc = config.Custom
 	}
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -790,6 +876,8 @@ func (r *edgeLocationResource) ModifyPlan(ctx context.Context, req resource.Modi
 		mc = config.GCP
 	case config.OCI != nil:
 		mc = config.OCI
+	case config.Custom != nil:
+		mc = config.Custom
 	}
 
 	// Skip credentials comparison when no credentials are provided (e.g. impersonation flow)
@@ -1134,6 +1222,17 @@ func (r *edgeLocationResource) toOCIModel(config *omni.OCIParam) *ociModel {
 	}
 
 	return oci
+}
+
+func (r *edgeLocationResource) toCustom(plan, config *customModel) *omni.CustomProviderParam {
+	_ = plan
+	_ = config
+	out := omni.CustomProviderParam{}
+	return &out
+}
+
+func (r *edgeLocationResource) toCustomModel(_ *omni.CustomProviderParam) *customModel {
+	return &customModel{}
 }
 
 func (r *edgeLocationResource) woCredentialsStore(private store.PrivateState) *store.WriteOnlyStore {
