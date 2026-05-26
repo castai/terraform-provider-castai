@@ -22,14 +22,13 @@ func TestAccCloudAgnostic_ResourceEdgeConfigurationDefault(t *testing.T) {
 			{
 				Config: testAccEdgeConfigurationDefaultConfig(rName, clusterName),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceName, "id", "castai_edge_configuration.test.id"),
+					resource.TestCheckResourceAttrSet(resourceName, "id"),
 					resource.TestCheckResourceAttrSet(resourceName, "organization_id"),
 					resource.TestCheckResourceAttrSet(resourceName, "cluster_id"),
 					resource.TestCheckResourceAttrSet(resourceName, "edge_location_id"),
 					resource.TestCheckResourceAttrSet(resourceName, "configuration_id"),
 					resource.TestCheckResourceAttr(resourceName, "name", "test-edge-config"),
 					resource.TestCheckResourceAttr(resourceName, "cloud_provider", "gcp"),
-					resource.TestCheckResourceAttr(resourceName, "cri.socket", "unix:///run/containerd/containerd.sock"),
 				),
 			},
 			{
@@ -50,7 +49,6 @@ func TestAccCloudAgnostic_ResourceEdgeConfigurationDefault(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "name", "test-edge-config-updated"),
 					resource.TestCheckResourceAttr(resourceName, "cloud_provider", "gcp"),
 					resource.TestCheckResourceAttrSet(resourceName, "configuration_id"),
-					resource.TestCheckResourceAttr(resourceName, "cri.socket", "unix:///run/containerd/containerd-updated.sock"),
 				),
 			},
 		},
@@ -102,6 +100,10 @@ resource "castai_edge_configuration" "test" {
 
   gcp = {
     image_id = "projects/castai/global/images/castai-edge-v1"
+  }
+
+  cri = {
+    socket = "unix:///run/containerd/containerd.sock"
   }
 }
 

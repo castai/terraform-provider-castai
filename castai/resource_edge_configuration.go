@@ -464,8 +464,16 @@ func (r *edgeConfigurationResource) Delete(ctx context.Context, req resource.Del
 	edgeLocationID := state.EdgeLocationID.ValueString()
 	configurationID := state.ID.ValueString()
 
-	if state.Default.ValueBool() {
+	// Fetch current config from API to check if it's the default.
+	// State may be stale if another resource (e.g. edge_configuration_default)
+	// changed the default flag after this resource was created.
+	getResp, err := client.EdgeConfigurationsAPIGetEdgeConfigurationWithResponse(ctx, organizationID, clusterID, edgeLocationID, configurationID, nil)
+	if err == nil && getResp.StatusCode() == http.StatusOK && getResp.JSON200 != nil && getResp.JSON200.Default != nil && *getResp.JSON200.Default {
 		tflog.Info(ctx, "Skipping deletion of default edge configuration")
+		return
+	}
+	if err == nil && getResp.StatusCode() == http.StatusNotFound {
+		tflog.Info(ctx, "Edge configuration not found, treating as deleted")
 		return
 	}
 
