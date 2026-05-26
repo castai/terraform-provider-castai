@@ -181,7 +181,7 @@ func TestAccCloudAgnostic_ResourceEdgeLocationAWSImpersonation(t *testing.T) {
 func TestAccCloudAgnostic_ResourceEdgeLocationGCPImpersonation(t *testing.T) {
 	rName := fmt.Sprintf("%v-edge-loc-%v", ResourcePrefix, acctest.RandString(8))
 	resourceName := "castai_edge_location.test"
-	clusterName := "omni-tf-acc-gcp"
+	clusterName := "omni-tf-acc-el-gcp"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
