@@ -20,6 +20,7 @@ import (
 	"github.com/samber/lo"
 
 	"github.com/castai/terraform-provider-castai/castai/sdk/omni"
+	"github.com/google/uuid"
 )
 
 var (
@@ -474,20 +475,66 @@ func (r *edgeConfigurationResource) Delete(ctx context.Context, req resource.Del
 }
 
 func (r *edgeConfigurationResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	// Import format: organization_id/cluster_id/edge_location_id/id
+	// Import format: organization_id/cluster_id/edge_location_id/{configuration id | name}
 	ids := strings.Split(req.ID, "/")
 	if len(ids) != 4 || ids[0] == "" || ids[1] == "" || ids[2] == "" || ids[3] == "" {
 		resp.Diagnostics.AddError(
 			"Invalid import ID format",
-			fmt.Sprintf("expected: organization_id/cluster_id/edge_location_id/id, got: %q", req.ID),
+			fmt.Sprintf("expected: organization_id/cluster_id/edge_location_id/{configuration id | name}, got: %q", req.ID),
 		)
 		return
 	}
 
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("organization_id"), ids[0])...)
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("cluster_id"), ids[1])...)
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("edge_location_id"), ids[2])...)
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("id"), ids[3])...)
+	organizationID := ids[0]
+	clusterID := ids[1]
+	edgeLocationID := ids[2]
+	configIDOrName := ids[3]
+
+	// Check if the last part is a valid UUID - if so, use it directly
+	if _, err := uuid.Parse(configIDOrName); err == nil {
+		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("organization_id"), organizationID)...)
+		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("cluster_id"), clusterID)...)
+		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("edge_location_id"), edgeLocationID)...)
+		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("id"), configIDOrName)...)
+		return
+	}
+
+	// Not a UUID - look up by name
+	client := r.client.omniAPI
+	params := &omni.EdgeConfigurationsAPIListEdgeConfigurationsParams{EdgeLocationId: &edgeLocationID}
+	apiResp, err := client.EdgeConfigurationsAPIListEdgeConfigurationsWithResponse(ctx, organizationID, clusterID, params)
+	if err != nil {
+		resp.Diagnostics.AddError("Failed to list edge configurations", err.Error())
+		return
+	}
+
+	if apiResp.StatusCode() != http.StatusOK {
+		resp.Diagnostics.AddError(
+			"Failed to list edge configurations",
+			fmt.Sprintf("unexpected status code: %d, body: %s", apiResp.StatusCode(), string(apiResp.Body)),
+		)
+		return
+	}
+
+	if apiResp.JSON200 == nil || apiResp.JSON200.Items == nil {
+		resp.Diagnostics.AddError("Failed to list edge configurations", "response body is empty")
+		return
+	}
+
+	for _, cfg := range *apiResp.JSON200.Items {
+		if cfg.Name == configIDOrName {
+			resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("organization_id"), organizationID)...)
+			resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("cluster_id"), clusterID)...)
+			resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("edge_location_id"), edgeLocationID)...)
+			resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("id"), lo.FromPtr(cfg.Id))...)
+			return
+		}
+	}
+
+	resp.Diagnostics.AddError(
+		"Failed to find edge configuration",
+		fmt.Sprintf("no edge configuration found with name %q in edge location %q", configIDOrName, edgeLocationID),
+	)
 }
 
 func (r *edgeConfigurationResource) getOrganizationID(organizationID types.String) string {
@@ -505,7 +552,7 @@ func (r *edgeConfigurationResource) edgeConfigurationToTFModel(ctx context.Conte
 		Name:           types.StringValue(config.Name),
 		EdgeLocationID: types.StringValue(lo.FromPtr(config.EdgeLocationId)),
 		Default:        types.BoolValue(lo.FromPtr(config.Default)),
-		UserDataBase64: types.StringValue(lo.FromPtr(config.UserDataBase64)),
+		UserDataBase64: normalizeStringPtr(config.UserDataBase64),
 		GCP:            r.toGCPConfigurationModel(ctx, config.Gcp),
 		AWS:            r.toAWSConfigurationModel(ctx, config.Aws),
 		OCI:            r.toOCIConfigurationModel(ctx, config.Oci),
@@ -554,7 +601,7 @@ func (r *edgeConfigurationResource) toGCPConfigurationModel(ctx context.Context,
 		BootDiskSizeGiB: types.Int64Null(),
 	}
 
-	if config.ImageId != nil {
+	if config.ImageId != nil && *config.ImageId != "" {
 		model.ImageID = types.StringValue(*config.ImageId)
 	}
 
@@ -562,7 +609,7 @@ func (r *edgeConfigurationResource) toGCPConfigurationModel(ctx context.Context,
 		model.BootDiskSizeGiB = types.Int64Value(int64(*config.BootDiskSizeGib))
 	}
 
-	if config.Labels != nil {
+	if config.Labels != nil && len(*config.Labels) > 0 {
 		labels, diags := types.MapValueFrom(ctx, types.StringType, *config.Labels)
 		if diags.HasError() {
 			return model
@@ -612,7 +659,7 @@ func (r *edgeConfigurationResource) toAWSConfigurationModel(ctx context.Context,
 		BootDiskSizeGiB: types.Int64Null(),
 	}
 
-	if config.ImageId != nil {
+	if config.ImageId != nil && *config.ImageId != "" {
 		model.ImageID = types.StringValue(*config.ImageId)
 	}
 
@@ -620,7 +667,7 @@ func (r *edgeConfigurationResource) toAWSConfigurationModel(ctx context.Context,
 		model.BootDiskSizeGiB = types.Int64Value(int64(*config.BootDiskSizeGib))
 	}
 
-	if config.Tags != nil {
+	if config.Tags != nil && len(*config.Tags) > 0 {
 		tags, diags := types.MapValueFrom(ctx, types.StringType, *config.Tags)
 		if diags.HasError() {
 			return model
@@ -670,7 +717,7 @@ func (r *edgeConfigurationResource) toOCIConfigurationModel(ctx context.Context,
 		BootDiskSizeGiB: types.Int64Null(),
 	}
 
-	if config.ImageId != nil {
+	if config.ImageId != nil && *config.ImageId != "" {
 		model.ImageID = types.StringValue(*config.ImageId)
 	}
 
@@ -678,7 +725,7 @@ func (r *edgeConfigurationResource) toOCIConfigurationModel(ctx context.Context,
 		model.BootDiskSizeGiB = types.Int64Value(int64(*config.BootDiskSizeGib))
 	}
 
-	if config.Tags != nil {
+	if config.Tags != nil && len(*config.Tags) > 0 {
 		tags, diags := types.MapValueFrom(ctx, types.StringType, *config.Tags)
 		if diags.HasError() {
 			return model
@@ -714,6 +761,12 @@ func (r *edgeConfigurationResource) toCustomConfigurationModel(ctx context.Conte
 		return nil
 	}
 
+	if len(*config) == 0 {
+		return &customConfigurationModel{
+			Custom: types.MapNull(types.StringType),
+		}
+	}
+
 	custom, diags := types.MapValueFrom(ctx, types.StringType, *config)
 	if diags.HasError() {
 		return &customConfigurationModel{
@@ -724,4 +777,11 @@ func (r *edgeConfigurationResource) toCustomConfigurationModel(ctx context.Conte
 	return &customConfigurationModel{
 		Custom: custom,
 	}
+}
+
+func normalizeStringPtr(s *string) types.String {
+	if s == nil || *s == "" {
+		return types.StringNull()
+	}
+	return types.StringValue(*s)
 }
