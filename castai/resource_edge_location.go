@@ -52,6 +52,7 @@ type edgeLocationModel struct {
 	AWS              *awsModel          `tfsdk:"aws"`
 	GCP              *gcpModel          `tfsdk:"gcp"`
 	OCI              *ociModel          `tfsdk:"oci"`
+	Custom           *customModel       `tfsdk:"custom"`
 	// Computed revision number incremented each time credentials have changed.
 	CredentialsRevision types.Int64 `tfsdk:"credentials_revision"`
 }
@@ -121,6 +122,19 @@ type ociModel struct {
 	SecurityGroupID    types.String `tfsdk:"security_group_id"`
 }
 
+type customModel struct{}
+
+func (m customModel) credentials() types.String {
+	return types.StringNull()
+}
+
+func (m *customModel) Equal(other *customModel) bool {
+	if m == nil || other == nil {
+		return m == other
+	}
+	return true
+}
+
 func (m awsModel) credentials() types.String {
 	if m.AccessKeyIDWO.IsNull() && m.SecretAccessKeyWO.IsNull() {
 		return types.StringNull()
@@ -186,13 +200,40 @@ func newEdgeLocationResource() resource.Resource {
 	return &edgeLocationResource{}
 }
 
+type edgeLocationRegionValidator struct{}
+
+func (v edgeLocationRegionValidator) Description(_ context.Context) string {
+	return "Validates that region is provided when a non-custom cloud provider is specified"
+}
+
+func (v edgeLocationRegionValidator) MarkdownDescription(_ context.Context) string {
+	return "Validates that `region` is required when `aws`, `gcp`, or `oci` is specified, and not required for `custom`"
+}
+
+func (v edgeLocationRegionValidator) ValidateResource(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
+	var config edgeLocationModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	if config.Custom == nil && config.Region.IsNull() {
+		resp.Diagnostics.AddError(
+			"Missing Required Argument",
+			"The argument 'region' is required when 'aws', 'gcp', or 'oci' is specified.",
+		)
+	}
+}
+
 func (r *edgeLocationResource) ConfigValidators(_ context.Context) []resource.ConfigValidator {
 	return []resource.ConfigValidator{
 		resourcevalidator.ExactlyOneOf(
 			path.MatchRoot("aws"),
 			path.MatchRoot("gcp"),
 			path.MatchRoot("oci"),
+			path.MatchRoot("custom"),
 		),
+		edgeLocationRegionValidator{},
 	}
 }
 
@@ -237,8 +278,8 @@ func (r *edgeLocationResource) Schema(_ context.Context, _ resource.SchemaReques
 				Description: "Description of the edge location",
 			},
 			"region": schema.StringAttribute{
-				Required:    true,
-				Description: "The region where the edge location is deployed",
+				Optional:    true,
+				Description: "The region where the edge location is deployed. Required for AWS, GCP and OCI providers.",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
 				},
@@ -453,6 +494,11 @@ func (r *edgeLocationResource) Schema(_ context.Context, _ resource.SchemaReques
 					},
 				},
 			},
+			"custom": schema.SingleNestedAttribute{
+				Optional:    true,
+				Description: "Custom cloud provider configuration for the edge location",
+				Attributes:  map[string]schema.Attribute{},
+			},
 		},
 	}
 }
@@ -520,6 +566,9 @@ func (r *edgeLocationResource) Create(ctx context.Context, req resource.CreateRe
 		createReq.Oci = r.toOCI(plan.OCI, config.OCI)
 		mc = config.OCI
 	}
+	if plan.Custom != nil {
+		createReq.Custom = r.toCustom(plan.Custom, config.Custom)
+	}
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -580,8 +629,12 @@ func (r *edgeLocationResource) Read(ctx context.Context, req resource.ReadReques
 
 	edgeLocation := apiResp.JSON200
 
-	if edgeLocation.Region != nil {
+	// For custom edge locations, region may be null or empty from the API.
+	// Always sync region to avoid perpetual diff when user didn't provide one.
+	if edgeLocation.Region != nil && *edgeLocation.Region != "" {
 		state.Region = types.StringValue(*edgeLocation.Region)
+	} else {
+		state.Region = types.StringNull()
 	}
 	state.Name = types.StringValue(edgeLocation.Name)
 	state.Description = types.StringNull()
@@ -599,7 +652,9 @@ func (r *edgeLocationResource) Read(ctx context.Context, req resource.ReadReques
 				Ha: types.BoolPointerValue(edgeLocation.EdgeClusterSpec.ControlPlane.Ha),
 			}
 		}
-		if edgeLocation.EdgeClusterSpec.Networking != nil && edgeLocation.EdgeClusterSpec.Networking.TunneledCidrs != nil {
+		// Only sync networking from API if it was already managed in state.
+		// Otherwise, we'd cause perpetual drift for users who never set the block.
+		if state.Networking != nil && edgeLocation.EdgeClusterSpec.Networking != nil && edgeLocation.EdgeClusterSpec.Networking.TunneledCidrs != nil {
 			cidrs, d := types.ListValueFrom(ctx, types.StringType, *edgeLocation.EdgeClusterSpec.Networking.TunneledCidrs)
 			resp.Diagnostics.Append(d...)
 			state.Networking = &networkingModel{TunneledCIDRs: cidrs}
@@ -619,6 +674,9 @@ func (r *edgeLocationResource) Read(ctx context.Context, req resource.ReadReques
 	}
 	if edgeLocation.Oci != nil {
 		state.OCI = r.toOCIModel(edgeLocation.Oci)
+	}
+	if edgeLocation.Custom != nil {
+		state.Custom = r.toCustomModel(edgeLocation.Custom)
 	}
 
 	resp.Diagnostics.Append(diags...)
@@ -683,6 +741,8 @@ func (r *edgeLocationResource) Update(ctx context.Context, req resource.UpdateRe
 	case plan.OCI != nil && (!plan.OCI.Equal(state.OCI) || credentialsChanged):
 		updateReq.Oci = r.toOCI(plan.OCI, config.OCI)
 		mc = config.OCI
+	case plan.Custom != nil && (!plan.Custom.Equal(state.Custom)):
+		updateReq.Custom = r.toCustom(plan.Custom, config.Custom)
 	}
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -790,6 +850,7 @@ func (r *edgeLocationResource) ModifyPlan(ctx context.Context, req resource.Modi
 		mc = config.GCP
 	case config.OCI != nil:
 		mc = config.OCI
+
 	}
 
 	// Skip credentials comparison when no credentials are provided (e.g. impersonation flow)
@@ -1134,6 +1195,17 @@ func (r *edgeLocationResource) toOCIModel(config *omni.OCIParam) *ociModel {
 	}
 
 	return oci
+}
+
+func (r *edgeLocationResource) toCustom(plan, config *customModel) *omni.CustomProviderParam {
+	_ = plan
+	_ = config
+	out := omni.CustomProviderParam{}
+	return &out
+}
+
+func (r *edgeLocationResource) toCustomModel(_ *omni.CustomProviderParam) *customModel {
+	return &customModel{}
 }
 
 func (r *edgeLocationResource) woCredentialsStore(private store.PrivateState) *store.WriteOnlyStore {

@@ -9,7 +9,7 @@ import (
 )
 
 func TestAccCloudAgnostic_DataSourceOmniCluster(t *testing.T) {
-	clusterName := "omni-tf-acc-gcp"
+	clusterName := "omni-tf-acc-ds"
 	dataSourceName := "data.castai_omni_cluster.test"
 	resourceName := "castai_omni_cluster.test"
 

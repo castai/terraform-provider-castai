@@ -181,7 +181,7 @@ func TestAccCloudAgnostic_ResourceEdgeLocationAWSImpersonation(t *testing.T) {
 func TestAccCloudAgnostic_ResourceEdgeLocationGCPImpersonation(t *testing.T) {
 	rName := fmt.Sprintf("%v-edge-loc-%v", ResourcePrefix, acctest.RandString(8))
 	resourceName := "castai_edge_location.test"
-	clusterName := "omni-tf-acc-gcp"
+	clusterName := "omni-tf-acc-el-gcp"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
@@ -382,6 +382,123 @@ resource "castai_edge_location" "test" {
   }
 }
 `, rName, description, zonesConfig, networkTagsConfig, organizationID, targetSA))
+}
+
+func TestAccCloudAgnostic_ResourceEdgeLocationCustom(t *testing.T) {
+	rName := fmt.Sprintf("%v-edge-loc-%v", ResourcePrefix, acctest.RandString(8))
+	resourceName := "castai_edge_location.test"
+	clusterName := "omni-tf-acc-custom"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		CheckDestroy:             testAccCheckEdgeLocationDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccEdgeLocationCustomConfig(rName, clusterName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "name", rName),
+					resource.TestCheckResourceAttr(resourceName, "description", "Test custom edge location"),
+					resource.TestCheckNoResourceAttr(resourceName, "region"),
+					resource.TestCheckResourceAttr(resourceName, "zones.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "zones.0.id", "zone-1"),
+					resource.TestCheckResourceAttr(resourceName, "zones.0.name", "zone-1"),
+					resource.TestCheckResourceAttrSet(resourceName, "id"),
+					resource.TestCheckResourceAttr(resourceName, "credentials_revision", "1"),
+				),
+			},
+			{
+				ResourceName: resourceName,
+				ImportStateIdFunc: func(s *terraform.State) (string, error) {
+					organizationID := testAccGetOrganizationID()
+					clusterID := s.RootModule().Resources["castai_omni_cluster.test"].Primary.ID
+					edgeLocationID := s.RootModule().Resources[resourceName].Primary.ID
+					return fmt.Sprintf("%v/%v/%v", organizationID, clusterID, edgeLocationID), nil
+				},
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccEdgeLocationCustomWithRegion(rName, clusterName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "description", "Custom edge location with region"),
+					resource.TestCheckResourceAttr(resourceName, "region", "us-west-1"),
+					resource.TestCheckResourceAttr(resourceName, "zones.#", "1"),
+				),
+			},
+			{
+				Config: testAccEdgeLocationCustomUpdated(rName, clusterName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "description", "Updated custom edge location"),
+					resource.TestCheckResourceAttr(resourceName, "zones.#", "2"),
+				),
+			},
+		},
+	})
+}
+
+func testAccEdgeLocationCustomConfig(rName, clusterName string) string {
+	organizationID := testAccGetOrganizationID()
+
+	return ConfigCompose(testOmniClusterConfig(clusterName), fmt.Sprintf(`
+resource "castai_edge_location" "test" {
+  organization_id = %[3]q
+  cluster_id      = castai_omni_cluster.test.id
+  name            = %[1]q
+  description     = "Test custom edge location"
+  control_plane_mode = "SHARED"
+  zones = [{
+    id   = "zone-1"
+    name = "zone-1"
+  }]
+
+  custom = {}
+}
+`, rName, clusterName, organizationID))
+}
+
+func testAccEdgeLocationCustomWithRegion(rName, clusterName string) string {
+	organizationID := testAccGetOrganizationID()
+
+	return ConfigCompose(testOmniClusterConfig(clusterName), fmt.Sprintf(`
+resource "castai_edge_location" "test" {
+  organization_id = %[3]q
+  cluster_id      = castai_omni_cluster.test.id
+  name            = %[1]q
+  description     = "Custom edge location with region"
+  region          = "us-west-1"
+  control_plane_mode = "SHARED"
+  zones = [{
+    id   = "zone-1"
+    name = "zone-1"
+  }]
+
+  custom = {}
+}
+`, rName, clusterName, organizationID))
+}
+
+func testAccEdgeLocationCustomUpdated(rName, clusterName string) string {
+	organizationID := testAccGetOrganizationID()
+
+	return ConfigCompose(testOmniClusterConfig(clusterName), fmt.Sprintf(`
+resource "castai_edge_location" "test" {
+  organization_id = %[3]q
+  cluster_id      = castai_omni_cluster.test.id
+  name            = %[1]q
+  description     = "Updated custom edge location"
+  control_plane_mode = "SHARED"
+  zones = [{
+    id   = "zone-1"
+    name = "zone-1"
+  }, {
+    id   = "zone-2"
+    name = "zone-2"
+  }]
+
+  custom = {}
+}
+`, rName, clusterName, organizationID))
 }
 
 func testAccCheckEdgeLocationDestroy(s *terraform.State) error {

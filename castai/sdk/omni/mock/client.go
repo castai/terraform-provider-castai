@@ -415,6 +415,46 @@ func (mr *MockClientInterfaceMockRecorder) EdgeLocationsAPIOffboardEdgeLocationS
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EdgeLocationsAPIOffboardEdgeLocationScript", reflect.TypeOf((*MockClientInterface)(nil).EdgeLocationsAPIOffboardEdgeLocationScript), varargs...)
 }
 
+// EdgeLocationsAPIOnboardEdgeInitd mocks base method.
+func (m *MockClientInterface) EdgeLocationsAPIOnboardEdgeInitd(ctx context.Context, organizationId, clusterId, id string, body omni.EdgeLocationsAPIOnboardEdgeInitdJSONRequestBody, reqEditors ...omni.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId, clusterId, id, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "EdgeLocationsAPIOnboardEdgeInitd", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// EdgeLocationsAPIOnboardEdgeInitd indicates an expected call of EdgeLocationsAPIOnboardEdgeInitd.
+func (mr *MockClientInterfaceMockRecorder) EdgeLocationsAPIOnboardEdgeInitd(ctx, organizationId, clusterId, id, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId, clusterId, id, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EdgeLocationsAPIOnboardEdgeInitd", reflect.TypeOf((*MockClientInterface)(nil).EdgeLocationsAPIOnboardEdgeInitd), varargs...)
+}
+
+// EdgeLocationsAPIOnboardEdgeInitdWithBody mocks base method.
+func (m *MockClientInterface) EdgeLocationsAPIOnboardEdgeInitdWithBody(ctx context.Context, organizationId, clusterId, id, contentType string, body io.Reader, reqEditors ...omni.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId, clusterId, id, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "EdgeLocationsAPIOnboardEdgeInitdWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// EdgeLocationsAPIOnboardEdgeInitdWithBody indicates an expected call of EdgeLocationsAPIOnboardEdgeInitdWithBody.
+func (mr *MockClientInterfaceMockRecorder) EdgeLocationsAPIOnboardEdgeInitdWithBody(ctx, organizationId, clusterId, id, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId, clusterId, id, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EdgeLocationsAPIOnboardEdgeInitdWithBody", reflect.TypeOf((*MockClientInterface)(nil).EdgeLocationsAPIOnboardEdgeInitdWithBody), varargs...)
+}
+
 // EdgeLocationsAPIOnboardEdgeLocation mocks base method.
 func (m *MockClientInterface) EdgeLocationsAPIOnboardEdgeLocation(ctx context.Context, organizationId, clusterId, id string, reqEditors ...omni.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
@@ -1111,6 +1151,76 @@ func (m *MockClientWithResponsesInterface) EdgeLocationsAPIOffboardEdgeLocationW
 func (mr *MockClientWithResponsesInterfaceMockRecorder) EdgeLocationsAPIOffboardEdgeLocationWithResponse(ctx, organizationId, clusterId, id interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EdgeLocationsAPIOffboardEdgeLocationWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).EdgeLocationsAPIOffboardEdgeLocationWithResponse), ctx, organizationId, clusterId, id)
+}
+
+// EdgeLocationsAPIOnboardEdgeInitd mocks base method.
+func (m *MockClientWithResponsesInterface) EdgeLocationsAPIOnboardEdgeInitd(ctx context.Context, organizationId, clusterId, id string, body omni.EdgeLocationsAPIOnboardEdgeInitdJSONRequestBody, reqEditors ...omni.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId, clusterId, id, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "EdgeLocationsAPIOnboardEdgeInitd", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// EdgeLocationsAPIOnboardEdgeInitd indicates an expected call of EdgeLocationsAPIOnboardEdgeInitd.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) EdgeLocationsAPIOnboardEdgeInitd(ctx, organizationId, clusterId, id, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId, clusterId, id, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EdgeLocationsAPIOnboardEdgeInitd", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).EdgeLocationsAPIOnboardEdgeInitd), varargs...)
+}
+
+// EdgeLocationsAPIOnboardEdgeInitdWithBody mocks base method.
+func (m *MockClientWithResponsesInterface) EdgeLocationsAPIOnboardEdgeInitdWithBody(ctx context.Context, organizationId, clusterId, id, contentType string, body io.Reader, reqEditors ...omni.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId, clusterId, id, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "EdgeLocationsAPIOnboardEdgeInitdWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// EdgeLocationsAPIOnboardEdgeInitdWithBody indicates an expected call of EdgeLocationsAPIOnboardEdgeInitdWithBody.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) EdgeLocationsAPIOnboardEdgeInitdWithBody(ctx, organizationId, clusterId, id, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId, clusterId, id, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EdgeLocationsAPIOnboardEdgeInitdWithBody", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).EdgeLocationsAPIOnboardEdgeInitdWithBody), varargs...)
+}
+
+// EdgeLocationsAPIOnboardEdgeInitdWithBodyWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) EdgeLocationsAPIOnboardEdgeInitdWithBodyWithResponse(ctx context.Context, organizationId, clusterId, id, contentType string, body io.Reader) (*omni.EdgeLocationsAPIOnboardEdgeInitdResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "EdgeLocationsAPIOnboardEdgeInitdWithBodyWithResponse", ctx, organizationId, clusterId, id, contentType, body)
+	ret0, _ := ret[0].(*omni.EdgeLocationsAPIOnboardEdgeInitdResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// EdgeLocationsAPIOnboardEdgeInitdWithBodyWithResponse indicates an expected call of EdgeLocationsAPIOnboardEdgeInitdWithBodyWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) EdgeLocationsAPIOnboardEdgeInitdWithBodyWithResponse(ctx, organizationId, clusterId, id, contentType, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EdgeLocationsAPIOnboardEdgeInitdWithBodyWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).EdgeLocationsAPIOnboardEdgeInitdWithBodyWithResponse), ctx, organizationId, clusterId, id, contentType, body)
+}
+
+// EdgeLocationsAPIOnboardEdgeInitdWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) EdgeLocationsAPIOnboardEdgeInitdWithResponse(ctx context.Context, organizationId, clusterId, id string, body omni.EdgeLocationsAPIOnboardEdgeInitdJSONRequestBody) (*omni.EdgeLocationsAPIOnboardEdgeInitdResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "EdgeLocationsAPIOnboardEdgeInitdWithResponse", ctx, organizationId, clusterId, id, body)
+	ret0, _ := ret[0].(*omni.EdgeLocationsAPIOnboardEdgeInitdResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// EdgeLocationsAPIOnboardEdgeInitdWithResponse indicates an expected call of EdgeLocationsAPIOnboardEdgeInitdWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) EdgeLocationsAPIOnboardEdgeInitdWithResponse(ctx, organizationId, clusterId, id, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EdgeLocationsAPIOnboardEdgeInitdWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).EdgeLocationsAPIOnboardEdgeInitdWithResponse), ctx, organizationId, clusterId, id, body)
 }
 
 // EdgeLocationsAPIOnboardEdgeLocation mocks base method.

@@ -32,6 +32,21 @@ const (
 	ClusterStateWARNING          ClusterState = "WARNING"
 )
 
+// Defines values for EdgeClusterCNIOverlay.
+const (
+	OVERLAYFULL        EdgeClusterCNIOverlay = "OVERLAY_FULL"
+	OVERLAYOFF         EdgeClusterCNIOverlay = "OVERLAY_OFF"
+	OVERLAYSUBNET      EdgeClusterCNIOverlay = "OVERLAY_SUBNET"
+	OVERLAYUNSPECIFIED EdgeClusterCNIOverlay = "OVERLAY_UNSPECIFIED"
+)
+
+// Defines values for EdgeClusterCNIOverlayEncap.
+const (
+	OVERLAYENCAPFOU         EdgeClusterCNIOverlayEncap = "OVERLAY_ENCAP_FOU"
+	OVERLAYENCAPIPIP        EdgeClusterCNIOverlayEncap = "OVERLAY_ENCAP_IPIP"
+	OVERLAYENCAPUNSPECIFIED EdgeClusterCNIOverlayEncap = "OVERLAY_ENCAP_UNSPECIFIED"
+)
+
 // Defines values for EdgeLocationControlPlaneMode.
 const (
 	CONTROLPLANEMODEUNSPECIFIED EdgeLocationControlPlaneMode = "CONTROL_PLANE_MODE_UNSPECIFIED"
@@ -48,6 +63,14 @@ const (
 	EdgeLocationStatePENDINGONBOARDING EdgeLocationState = "PENDING_ONBOARDING"
 	EdgeLocationStateREADY             EdgeLocationState = "READY"
 	EdgeLocationStateSTATEUNSPECIFIED  EdgeLocationState = "STATE_UNSPECIFIED"
+)
+
+// Defines values for KubernetesTaintEffect.
+const (
+	NOEXECUTE              KubernetesTaintEffect = "NO_EXECUTE"
+	NOSCHEDULE             KubernetesTaintEffect = "NO_SCHEDULE"
+	PREFERNOSCHEDULE       KubernetesTaintEffect = "PREFER_NO_SCHEDULE"
+	TAINTEFFECTUNSPECIFIED KubernetesTaintEffect = "TAINT_EFFECT_UNSPECIFIED"
 )
 
 // Defines values for ObjectStatusPhase.
@@ -188,6 +211,21 @@ type Condition struct {
 // CustomProviderParam Custom cloud provider params.
 type CustomProviderParam = map[string]interface{}
 
+// EdgeClusterCNI EdgeClusterCNI contains CNI (kube-router) configuration for the edge cluster.
+type EdgeClusterCNI struct {
+	// Overlay Overlay mode for kube-router pod-to-pod traffic.
+	Overlay *EdgeClusterCNIOverlay `json:"overlay,omitempty"`
+
+	// OverlayEncap Encapsulation protocol used by the overlay.
+	OverlayEncap *EdgeClusterCNIOverlayEncap `json:"overlayEncap,omitempty"`
+}
+
+// EdgeClusterCNIOverlay Overlay mode for kube-router pod-to-pod traffic.
+type EdgeClusterCNIOverlay string
+
+// EdgeClusterCNIOverlayEncap Encapsulation protocol used by the overlay.
+type EdgeClusterCNIOverlayEncap string
+
 // EdgeClusterControlPlane EdgeClusterControlPlane contains control plane configuration overrides for the edge cluster.
 type EdgeClusterControlPlane struct {
 	// Ha Switch from HA mode to single control plane and etcd replica. If not set default is HA.
@@ -196,6 +234,9 @@ type EdgeClusterControlPlane struct {
 
 // EdgeClusterNetworking EdgeClusterNetworking contains networking configuration options for the edge cluster.
 type EdgeClusterNetworking struct {
+	// Cni CNI configuration for the edge cluster.
+	Cni *EdgeClusterCNI `json:"cni,omitempty"`
+
 	// TunneledCidrs A list of destination CIDR blocks whose traffic should be routed through the main cluster instead of directly from the
 	//  edge cluster. When specified, the edge cluster will forward packets destined to these CIDRs over the peering tunnel
 	//  to the main cluster, which then routes them on to their final destination.
@@ -211,6 +252,18 @@ type EdgeClusterSpec struct {
 
 	// Networking Networking configuration.
 	Networking *EdgeClusterNetworking `json:"networking,omitempty"`
+}
+
+// EdgeInitdOnboardingConfig Configuration for the OnboardEdgeInitd request.
+type EdgeInitdOnboardingConfig struct {
+	// GpuConfig GPU configuration for the edge node (INITD_GPU_CONFIG).
+	GpuConfig *GPUConfig `json:"gpuConfig,omitempty"`
+
+	// KubernetesLabels Kubernetes labels to set on the edge node (INITD_KUBERNETES_LABELS).
+	KubernetesLabels *map[string]string `json:"kubernetesLabels,omitempty"`
+
+	// KubernetesTaints Kubernetes taints to set on the edge node (INITD_KUBERNETES_TAINTS).
+	KubernetesTaints *[]KubernetesTaint `json:"kubernetesTaints,omitempty"`
 }
 
 // EdgeLocation Message to represent edge location.
@@ -345,12 +398,65 @@ type GCPParamGCPNetworking struct {
 	Tags []string `json:"tags"`
 }
 
+// GPUConfig GPUConfig describes instance GPU configuration.
+//
+//	Use for:
+//	* Creating GCP N1 with customer quantity and type of GPUs attached.
+//	Eg.: n1-standard-2 with 8 x NVIDIA Tesla K80
+type GPUConfig struct {
+	// Count Number of GPUs.
+	Count *uint32 `json:"count,omitempty"`
+
+	// Mig MIG configuration for the GPU.
+	Mig *GPUConfigMigConfig `json:"mig,omitempty"`
+
+	// TimeSharing TimeSharing configuration for the GPU.
+	TimeSharing *GPUConfigTimeSharing `json:"timeSharing,omitempty"`
+
+	// Type Accelerator type, eg nvidia-tesla-t4.
+	Type *string `json:"type,omitempty"`
+}
+
+// GPUConfigMigConfig Message to describe MIG configuration for the GPU.
+type GPUConfigMigConfig struct {
+	// MemoryGb MemoryGB is the amount of GPU memory in GB.
+	MemoryGb *uint32 `json:"memoryGb,omitempty"`
+
+	// PartitionSizes PartitionSizes is the sizes of the MIG partitions.
+	PartitionSizes *[]string `json:"partitionSizes,omitempty"`
+}
+
+// GPUConfigTimeSharing Message to describe time sharing configuration for the GPU.
+type GPUConfigTimeSharing struct {
+	// Replicas Replicas specifies the number of time-sliced GPU replicas to make available for
+	//  shared access to GPUs of the specified resource type.
+	Replicas *int32 `json:"replicas,omitempty"`
+}
+
 // GoogleProtobufAny Contains an arbitrary serialized message along with a @type that describes the type of the serialized message.
 type GoogleProtobufAny struct {
 	// Type The type of the serialized message.
 	Type                 *string                `json:"@type,omitempty"`
 	AdditionalProperties map[string]interface{} `json:"-"`
 }
+
+// KubernetesTaint Represents a Kubernetes taint to be applied to a node.
+type KubernetesTaint struct {
+	// AddTime The time at which the taint was added.
+	AddTime *time.Time `json:"addTime,omitempty"`
+
+	// Effect The taint effect.
+	Effect KubernetesTaintEffect `json:"effect"`
+
+	// Key The taint key.
+	Key string `json:"key"`
+
+	// Value The taint value.
+	Value *string `json:"value,omitempty"`
+}
+
+// KubernetesTaintEffect The taint effect.
+type KubernetesTaintEffect string
 
 // ListClustersResponse Message of the response to list clusters.
 type ListClustersResponse struct {
@@ -442,6 +548,12 @@ type OffboardEdgeLocationResponse struct {
 // OnboardClusterResponse Message of the response to onboard cluster.
 type OnboardClusterResponse struct {
 	// Script The script to be executed to onboard the cluster.
+	Script *string `json:"script,omitempty"`
+}
+
+// OnboardEdgeInitdResponse Message of the response to edge initd onboarding.
+type OnboardEdgeInitdResponse struct {
+	// Script A script snippet that downloads and executes the edge initd script.
 	Script *string `json:"script,omitempty"`
 }
 
@@ -584,6 +696,9 @@ type EdgeLocationsAPICreateEdgeLocationJSONRequestBody = EdgeLocation
 
 // EdgeLocationsAPIUpdateEdgeLocationJSONRequestBody defines body for EdgeLocationsAPIUpdateEdgeLocation for application/json ContentType.
 type EdgeLocationsAPIUpdateEdgeLocationJSONRequestBody = EdgeLocationUpdate
+
+// EdgeLocationsAPIOnboardEdgeInitdJSONRequestBody defines body for EdgeLocationsAPIOnboardEdgeInitd for application/json ContentType.
+type EdgeLocationsAPIOnboardEdgeInitdJSONRequestBody = EdgeInitdOnboardingConfig
 
 // ClustersAPIRegisterClusterJSONRequestBody defines body for ClustersAPIRegisterCluster for application/json ContentType.
 type ClustersAPIRegisterClusterJSONRequestBody = RegisteredCluster

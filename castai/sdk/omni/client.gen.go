@@ -124,6 +124,11 @@ type ClientInterface interface {
 	// EdgeLocationsAPIOnboardEdgeLocation request
 	EdgeLocationsAPIOnboardEdgeLocation(ctx context.Context, organizationId string, clusterId string, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// EdgeLocationsAPIOnboardEdgeInitdWithBody request with any body
+	EdgeLocationsAPIOnboardEdgeInitdWithBody(ctx context.Context, organizationId string, clusterId string, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	EdgeLocationsAPIOnboardEdgeInitd(ctx context.Context, organizationId string, clusterId string, id string, body EdgeLocationsAPIOnboardEdgeInitdJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// EdgeLocationsAPIOnboardEdgeLocationScript request
 	EdgeLocationsAPIOnboardEdgeLocationScript(ctx context.Context, organizationId string, clusterId string, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -284,6 +289,30 @@ func (c *Client) EdgeLocationsAPIOffboardEdgeLocationScript(ctx context.Context,
 
 func (c *Client) EdgeLocationsAPIOnboardEdgeLocation(ctx context.Context, organizationId string, clusterId string, id string, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewEdgeLocationsAPIOnboardEdgeLocationRequest(c.Server, organizationId, clusterId, id)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) EdgeLocationsAPIOnboardEdgeInitdWithBody(ctx context.Context, organizationId string, clusterId string, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewEdgeLocationsAPIOnboardEdgeInitdRequestWithBody(c.Server, organizationId, clusterId, id, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) EdgeLocationsAPIOnboardEdgeInitd(ctx context.Context, organizationId string, clusterId string, id string, body EdgeLocationsAPIOnboardEdgeInitdJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewEdgeLocationsAPIOnboardEdgeInitdRequest(c.Server, organizationId, clusterId, id, body)
 	if err != nil {
 		return nil, err
 	}
@@ -994,6 +1023,67 @@ func NewEdgeLocationsAPIOnboardEdgeLocationRequest(server string, organizationId
 	return req, nil
 }
 
+// NewEdgeLocationsAPIOnboardEdgeInitdRequest calls the generic EdgeLocationsAPIOnboardEdgeInitd builder with application/json body
+func NewEdgeLocationsAPIOnboardEdgeInitdRequest(server string, organizationId string, clusterId string, id string, body EdgeLocationsAPIOnboardEdgeInitdJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewEdgeLocationsAPIOnboardEdgeInitdRequestWithBody(server, organizationId, clusterId, id, "application/json", bodyReader)
+}
+
+// NewEdgeLocationsAPIOnboardEdgeInitdRequestWithBody generates requests for EdgeLocationsAPIOnboardEdgeInitd with any type of body
+func NewEdgeLocationsAPIOnboardEdgeInitdRequestWithBody(server string, organizationId string, clusterId string, id string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "organizationId", runtime.ParamLocationPath, organizationId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "clusterId", runtime.ParamLocationPath, clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam2 string
+
+	pathParam2, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/omni-provisioner/v1beta/organizations/%s/clusters/%s/edge-locations/%s:onboardEdgeInitd", pathParam0, pathParam1, pathParam2)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
 // NewEdgeLocationsAPIOnboardEdgeLocationScriptRequest generates requests for EdgeLocationsAPIOnboardEdgeLocationScript
 func NewEdgeLocationsAPIOnboardEdgeLocationScriptRequest(server string, organizationId string, clusterId string, id string) (*http.Request, error) {
 	var err error
@@ -1414,6 +1504,11 @@ type ClientWithResponsesInterface interface {
 	// EdgeLocationsAPIOnboardEdgeLocation request
 	EdgeLocationsAPIOnboardEdgeLocationWithResponse(ctx context.Context, organizationId string, clusterId string, id string) (*EdgeLocationsAPIOnboardEdgeLocationResponse, error)
 
+	// EdgeLocationsAPIOnboardEdgeInitd request  with any body
+	EdgeLocationsAPIOnboardEdgeInitdWithBodyWithResponse(ctx context.Context, organizationId string, clusterId string, id string, contentType string, body io.Reader) (*EdgeLocationsAPIOnboardEdgeInitdResponse, error)
+
+	EdgeLocationsAPIOnboardEdgeInitdWithResponse(ctx context.Context, organizationId string, clusterId string, id string, body EdgeLocationsAPIOnboardEdgeInitdJSONRequestBody) (*EdgeLocationsAPIOnboardEdgeInitdResponse, error)
+
 	// EdgeLocationsAPIOnboardEdgeLocationScript request
 	EdgeLocationsAPIOnboardEdgeLocationScriptWithResponse(ctx context.Context, organizationId string, clusterId string, id string) (*EdgeLocationsAPIOnboardEdgeLocationScriptResponse, error)
 
@@ -1756,6 +1851,37 @@ func (r EdgeLocationsAPIOnboardEdgeLocationResponse) GetBody() []byte {
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
+type EdgeLocationsAPIOnboardEdgeInitdResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *OnboardEdgeInitdResponse
+	JSONDefault  *Status
+}
+
+// Status returns HTTPResponse.Status
+func (r EdgeLocationsAPIOnboardEdgeInitdResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r EdgeLocationsAPIOnboardEdgeInitdResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r EdgeLocationsAPIOnboardEdgeInitdResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
 type EdgeLocationsAPIOnboardEdgeLocationScriptResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -2074,6 +2200,23 @@ func (c *ClientWithResponses) EdgeLocationsAPIOnboardEdgeLocationWithResponse(ct
 		return nil, err
 	}
 	return ParseEdgeLocationsAPIOnboardEdgeLocationResponse(rsp)
+}
+
+// EdgeLocationsAPIOnboardEdgeInitdWithBodyWithResponse request with arbitrary body returning *EdgeLocationsAPIOnboardEdgeInitdResponse
+func (c *ClientWithResponses) EdgeLocationsAPIOnboardEdgeInitdWithBodyWithResponse(ctx context.Context, organizationId string, clusterId string, id string, contentType string, body io.Reader) (*EdgeLocationsAPIOnboardEdgeInitdResponse, error) {
+	rsp, err := c.EdgeLocationsAPIOnboardEdgeInitdWithBody(ctx, organizationId, clusterId, id, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseEdgeLocationsAPIOnboardEdgeInitdResponse(rsp)
+}
+
+func (c *ClientWithResponses) EdgeLocationsAPIOnboardEdgeInitdWithResponse(ctx context.Context, organizationId string, clusterId string, id string, body EdgeLocationsAPIOnboardEdgeInitdJSONRequestBody) (*EdgeLocationsAPIOnboardEdgeInitdResponse, error) {
+	rsp, err := c.EdgeLocationsAPIOnboardEdgeInitd(ctx, organizationId, clusterId, id, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseEdgeLocationsAPIOnboardEdgeInitdResponse(rsp)
 }
 
 // EdgeLocationsAPIOnboardEdgeLocationScriptWithResponse request returning *EdgeLocationsAPIOnboardEdgeLocationScriptResponse
@@ -2447,6 +2590,39 @@ func ParseEdgeLocationsAPIOnboardEdgeLocationResponse(rsp *http.Response) (*Edge
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest OnboardEdgeLocationResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
+		var dest Status
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSONDefault = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseEdgeLocationsAPIOnboardEdgeInitdResponse parses an HTTP response from a EdgeLocationsAPIOnboardEdgeInitdWithResponse call
+func ParseEdgeLocationsAPIOnboardEdgeInitdResponse(rsp *http.Response) (*EdgeLocationsAPIOnboardEdgeInitdResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &EdgeLocationsAPIOnboardEdgeInitdResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest OnboardEdgeInitdResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
