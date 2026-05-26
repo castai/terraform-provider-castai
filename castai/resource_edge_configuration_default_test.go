@@ -10,7 +10,7 @@ import (
 )
 
 func TestAccCloudAgnostic_ResourceEdgeConfigurationDefault(t *testing.T) {
-	rName := fmt.Sprintf("%v-edge-config-%v", ResourcePrefix, acctest.RandString(8))
+	rName := fmt.Sprintf("%v-edgecfg-%v", ResourcePrefix, acctest.RandString(8))
 	clusterName := "omni-tf-acc-gcp"
 	resourceName := "castai_edge_configuration_default.test"
 
@@ -59,7 +59,6 @@ func testAccEdgeConfigurationDefaultConfig(rName, clusterName string) string {
 	organizationID := testAccGetOrganizationID()
 
 	return ConfigCompose(
-		testOmniClusterConfig(clusterName),
 		testAccEdgeLocationGCPImpersonationConfig(rName, clusterName),
 		fmt.Sprintf(`
 resource "castai_edge_configuration" "test" {
@@ -87,7 +86,6 @@ func testAccEdgeConfigurationDefaultUpdated(rName, clusterName string) string {
 	organizationID := testAccGetOrganizationID()
 
 	return ConfigCompose(
-		testOmniClusterConfig(clusterName),
 		testAccEdgeLocationGCPImpersonationConfig(rName, clusterName),
 		fmt.Sprintf(`
 resource "castai_edge_configuration" "test" {

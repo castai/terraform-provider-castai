@@ -13,7 +13,7 @@ import (
 )
 
 func TestAccCloudAgnostic_ResourceEdgeConfigurationGCP(t *testing.T) {
-	rName := fmt.Sprintf("%v-edge-config-%v", ResourcePrefix, acctest.RandString(8))
+	rName := fmt.Sprintf("%v-edgecfg-%v", ResourcePrefix, acctest.RandString(8))
 	clusterName := "omni-tf-acc-gcp"
 	resourceName := "castai_edge_configuration.test"
 
@@ -67,7 +67,7 @@ func TestAccCloudAgnostic_ResourceEdgeConfigurationGCP(t *testing.T) {
 }
 
 func TestAccCloudAgnostic_ResourceEdgeConfigurationAWS(t *testing.T) {
-	rName := fmt.Sprintf("%v-edge-config-%v", ResourcePrefix, acctest.RandString(8))
+	rName := fmt.Sprintf("%v-edgecfg-%v", ResourcePrefix, acctest.RandString(8))
 	clusterName := "omni-tf-acc-aws"
 	resourceName := "castai_edge_configuration.test"
 
@@ -121,7 +121,7 @@ func TestAccCloudAgnostic_ResourceEdgeConfigurationAWS(t *testing.T) {
 }
 
 func TestAccCloudAgnostic_ResourceEdgeConfigurationOCI(t *testing.T) {
-	rName := fmt.Sprintf("%v-edge-config-%v", ResourcePrefix, acctest.RandString(8))
+	rName := fmt.Sprintf("%v-edgecfg-%v", ResourcePrefix, acctest.RandString(8))
 	clusterName := "test-oci-cluster"
 	resourceName := "castai_edge_configuration.test"
 
@@ -175,7 +175,7 @@ func TestAccCloudAgnostic_ResourceEdgeConfigurationOCI(t *testing.T) {
 }
 
 func TestAccCloudAgnostic_ResourceEdgeConfigurationCustom(t *testing.T) {
-	rName := fmt.Sprintf("%v-edge-config-%v", ResourcePrefix, acctest.RandString(8))
+	rName := fmt.Sprintf("%v-edgecfg-%v", ResourcePrefix, acctest.RandString(8))
 	clusterName := "omni-tf-acc-gcp"
 	resourceName := "castai_edge_configuration.test"
 
