@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/resourcevalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -199,45 +200,23 @@ func newEdgeLocationResource() resource.Resource {
 	return &edgeLocationResource{}
 }
 
-type edgeLocationConfigValidator struct{}
+type edgeLocationRegionValidator struct{}
 
-func (v edgeLocationConfigValidator) Description(_ context.Context) string {
-	return "Validates edge location configuration"
+func (v edgeLocationRegionValidator) Description(_ context.Context) string {
+	return "Validates that region is provided when a non-custom cloud provider is specified"
 }
 
-func (v edgeLocationConfigValidator) MarkdownDescription(_ context.Context) string {
-	return "Validates that exactly one cloud provider is specified and that region is provided for non-custom providers"
+func (v edgeLocationRegionValidator) MarkdownDescription(_ context.Context) string {
+	return "Validates that `region` is required when `aws`, `gcp`, or `oci` is specified, and not required for `custom`"
 }
 
-func (v edgeLocationConfigValidator) ValidateResource(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
+func (v edgeLocationRegionValidator) ValidateResource(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
 	var config edgeLocationModel
 	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	// Check exactly one provider is set.
-	providerCount := 0
-	if config.AWS != nil {
-		providerCount++
-	}
-	if config.GCP != nil {
-		providerCount++
-	}
-	if config.OCI != nil {
-		providerCount++
-	}
-	if config.Custom != nil {
-		providerCount++
-	}
-	if providerCount != 1 {
-		resp.Diagnostics.AddError(
-			"Invalid Configuration",
-			fmt.Sprintf("Exactly one of 'aws', 'gcp', 'oci', or 'custom' must be specified, got %d", providerCount),
-		)
-	}
-
-	// Region is required for non-custom providers.
 	if config.Custom == nil && config.Region.IsNull() {
 		resp.Diagnostics.AddError(
 			"Missing Required Argument",
@@ -248,7 +227,13 @@ func (v edgeLocationConfigValidator) ValidateResource(ctx context.Context, req r
 
 func (r *edgeLocationResource) ConfigValidators(_ context.Context) []resource.ConfigValidator {
 	return []resource.ConfigValidator{
-		edgeLocationConfigValidator{},
+		resourcevalidator.ExactlyOneOf(
+			path.MatchRoot("aws"),
+			path.MatchRoot("gcp"),
+			path.MatchRoot("oci"),
+			path.MatchRoot("custom"),
+		),
+		edgeLocationRegionValidator{},
 	}
 }
 
@@ -583,7 +568,6 @@ func (r *edgeLocationResource) Create(ctx context.Context, req resource.CreateRe
 	}
 	if plan.Custom != nil {
 		createReq.Custom = r.toCustom(plan.Custom, config.Custom)
-		mc = config.Custom
 	}
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -766,9 +750,8 @@ func (r *edgeLocationResource) Update(ctx context.Context, req resource.UpdateRe
 	case plan.OCI != nil && (!plan.OCI.Equal(state.OCI) || credentialsChanged):
 		updateReq.Oci = r.toOCI(plan.OCI, config.OCI)
 		mc = config.OCI
-	case plan.Custom != nil && (!plan.Custom.Equal(state.Custom) || credentialsChanged):
+	case plan.Custom != nil && (!plan.Custom.Equal(state.Custom)):
 		updateReq.Custom = r.toCustom(plan.Custom, config.Custom)
-		mc = config.Custom
 	}
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -876,8 +859,7 @@ func (r *edgeLocationResource) ModifyPlan(ctx context.Context, req resource.Modi
 		mc = config.GCP
 	case config.OCI != nil:
 		mc = config.OCI
-	case config.Custom != nil:
-		mc = config.Custom
+
 	}
 
 	// Skip credentials comparison when no credentials are provided (e.g. impersonation flow)
