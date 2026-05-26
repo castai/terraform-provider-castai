@@ -441,6 +441,11 @@ func (r *edgeConfigurationResource) Delete(ctx context.Context, req resource.Del
 	edgeLocationID := state.EdgeLocationID.ValueString()
 	configurationID := state.ID.ValueString()
 
+	if state.Default.ValueBool() {
+		tflog.Info(ctx, "Skipping deletion of default edge configuration")
+		return
+	}
+
 	tflog.Info(ctx, "Deleting edge configuration - state values",
 		map[string]interface{}{
 			"state_organization_id":    state.OrganizationID.ValueString(),
