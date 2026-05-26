@@ -46,6 +46,7 @@ type edgeConfigurationModel struct {
 	AWS            *awsConfigurationModel    `tfsdk:"aws"`
 	OCI            *ociConfigurationModel    `tfsdk:"oci"`
 	Custom         *customConfigurationModel `tfsdk:"custom"`
+	CRI            *criConfigurationModel    `tfsdk:"cri"`
 }
 
 type gcpConfigurationModel struct {
@@ -68,6 +69,10 @@ type ociConfigurationModel struct {
 
 type customConfigurationModel struct {
 	Custom types.Map `tfsdk:"custom"`
+}
+
+type criConfigurationModel struct {
+	Socket types.String `tfsdk:"socket"`
 }
 
 func newEdgeConfigurationResource() resource.Resource {
@@ -205,6 +210,16 @@ func (r *edgeConfigurationResource) Schema(_ context.Context, _ resource.SchemaR
 					},
 				},
 			},
+			"cri": schema.SingleNestedAttribute{
+				Optional:    true,
+				Description: "CRI (Container Runtime Interface) configuration for the edge node. Set this when you want kubelet to connect to a container runtime you have set up explicitly on the node. Currently only containerd is officially supported.",
+				Attributes: map[string]schema.Attribute{
+					"socket": schema.StringAttribute{
+						Optional:    true,
+						Description: "Path to an existing CRI socket. Example: unix:///run/containerd/containerd.sock",
+					},
+				},
+			},
 		},
 	}
 }
@@ -259,6 +274,9 @@ func (r *edgeConfigurationResource) Create(ctx context.Context, req resource.Cre
 	customConfig, d := r.toCustomConfiguration(ctx, plan.Custom)
 	resp.Diagnostics.Append(d...)
 
+	criConfig, d := r.toCRIConfiguration(ctx, plan.CRI)
+	resp.Diagnostics.Append(d...)
+
 	if resp.Diagnostics.HasError() {
 		return
 	}
@@ -271,6 +289,7 @@ func (r *edgeConfigurationResource) Create(ctx context.Context, req resource.Cre
 		Aws:            awsConfig,
 		Oci:            ociConfig,
 		Custom:         customConfig,
+		Cri:            criConfig,
 	}
 
 	apiResp, err := client.EdgeConfigurationsAPICreateEdgeConfigurationWithResponse(ctx, organizationID, clusterID, edgeLocationID, createReq)
@@ -388,6 +407,9 @@ func (r *edgeConfigurationResource) Update(ctx context.Context, req resource.Upd
 	customConfig, d := r.toCustomConfiguration(ctx, plan.Custom)
 	resp.Diagnostics.Append(d...)
 
+	criConfig, d := r.toCRIConfiguration(ctx, plan.CRI)
+	resp.Diagnostics.Append(d...)
+
 	if resp.Diagnostics.HasError() {
 		return
 	}
@@ -399,6 +421,7 @@ func (r *edgeConfigurationResource) Update(ctx context.Context, req resource.Upd
 		Aws:            awsConfig,
 		Oci:            ociConfig,
 		Custom:         customConfig,
+		Cri:            criConfig,
 	}
 
 	apiResp, err := client.EdgeConfigurationsAPIUpdateEdgeConfigurationWithResponse(ctx, organizationID, clusterID, edgeLocationID, plan.ID.ValueString(), nil, updateReq)
@@ -562,6 +585,7 @@ func (r *edgeConfigurationResource) edgeConfigurationToTFModel(ctx context.Conte
 		AWS:            r.toAWSConfigurationModel(ctx, config.Aws),
 		OCI:            r.toOCIConfigurationModel(ctx, config.Oci),
 		Custom:         r.toCustomConfigurationModel(ctx, config.Custom),
+		CRI:            r.toCRIConfigurationModel(ctx, config.Cri),
 	}
 
 	return state
@@ -782,6 +806,38 @@ func (r *edgeConfigurationResource) toCustomConfigurationModel(ctx context.Conte
 	return &customConfigurationModel{
 		Custom: custom,
 	}
+}
+
+func (r *edgeConfigurationResource) toCRIConfiguration(_ context.Context, plan *criConfigurationModel) (*omni.EdgeConfigurationCRIConfiguration, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	if plan == nil {
+		return nil, diags
+	}
+
+	config := &omni.EdgeConfigurationCRIConfiguration{}
+
+	if !plan.Socket.IsNull() {
+		config.Socket = lo.ToPtr(plan.Socket.ValueString())
+	}
+
+	return config, diags
+}
+
+func (r *edgeConfigurationResource) toCRIConfigurationModel(_ context.Context, config *omni.EdgeConfigurationCRIConfiguration) *criConfigurationModel {
+	if config == nil {
+		return nil
+	}
+
+	model := &criConfigurationModel{
+		Socket: types.StringNull(),
+	}
+
+	if config.Socket != nil && *config.Socket != "" {
+		model.Socket = types.StringValue(*config.Socket)
+	}
+
+	return model
 }
 
 func normalizeStringPtr(s *string) types.String {

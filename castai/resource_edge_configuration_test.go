@@ -36,6 +36,7 @@ func TestAccCloudAgnostic_ResourceEdgeConfigurationGCP(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "gcp.labels.key2", "value2"),
 					resource.TestCheckResourceAttr(resourceName, "gcp.boot_disk_size_gib", "100"),
 					resource.TestCheckResourceAttr(resourceName, "user_data_base64", "I2Nsb3VkLWNvbmZpZwojIFVzZXIgZGF0YQ=="),
+					resource.TestCheckResourceAttr(resourceName, "cri.socket", "unix:///run/containerd/containerd.sock"),
 				),
 			},
 			{
@@ -60,6 +61,7 @@ func TestAccCloudAgnostic_ResourceEdgeConfigurationGCP(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "gcp.labels.newkey", "newvalue"),
 					resource.TestCheckResourceAttr(resourceName, "gcp.boot_disk_size_gib", "200"),
 					resource.TestCheckResourceAttr(resourceName, "user_data_base64", "I2Nsb3VkLWNvbmZpZy11cGRhdGVkCg=="),
+					resource.TestCheckResourceAttr(resourceName, "cri.socket", "unix:///run/containerd/containerd-updated.sock"),
 				),
 			},
 		},
@@ -90,6 +92,7 @@ func TestAccCloudAgnostic_ResourceEdgeConfigurationAWS(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "aws.tags.key2", "value2"),
 					resource.TestCheckResourceAttr(resourceName, "aws.boot_disk_size_gib", "100"),
 					resource.TestCheckResourceAttr(resourceName, "user_data_base64", "I2Nsb3VkLWNvbmZpZwojIFVzZXIgZGF0YQ=="),
+					resource.TestCheckResourceAttr(resourceName, "cri.socket", "unix:///run/containerd/containerd.sock"),
 				),
 			},
 			{
@@ -114,6 +117,7 @@ func TestAccCloudAgnostic_ResourceEdgeConfigurationAWS(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "aws.tags.newkey", "newvalue"),
 					resource.TestCheckResourceAttr(resourceName, "aws.boot_disk_size_gib", "200"),
 					resource.TestCheckResourceAttr(resourceName, "user_data_base64", "I2Nsb3VkLWNvbmZpZy11cGRhdGVkCg=="),
+					resource.TestCheckResourceAttr(resourceName, "cri.socket", "unix:///run/containerd/containerd-updated.sock"),
 				),
 			},
 		},
@@ -144,6 +148,7 @@ func TestAccCloudAgnostic_ResourceEdgeConfigurationOCI(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "oci.tags.key2", "value2"),
 					resource.TestCheckResourceAttr(resourceName, "oci.boot_disk_size_gib", "100"),
 					resource.TestCheckResourceAttr(resourceName, "user_data_base64", "I2Nsb3VkLWNvbmZpZwojIFVzZXIgZGF0YQ=="),
+					resource.TestCheckResourceAttr(resourceName, "cri.socket", "unix:///run/containerd/containerd.sock"),
 				),
 			},
 			{
@@ -168,6 +173,7 @@ func TestAccCloudAgnostic_ResourceEdgeConfigurationOCI(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "oci.tags.newkey", "newvalue"),
 					resource.TestCheckResourceAttr(resourceName, "oci.boot_disk_size_gib", "200"),
 					resource.TestCheckResourceAttr(resourceName, "user_data_base64", "I2Nsb3VkLWNvbmZpZy11cGRhdGVkCg=="),
+					resource.TestCheckResourceAttr(resourceName, "cri.socket", "unix:///run/containerd/containerd-updated.sock"),
 				),
 			},
 		},
@@ -196,6 +202,7 @@ func TestAccCloudAgnostic_ResourceEdgeConfigurationCustom(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "custom.custom.key1", "value1"),
 					resource.TestCheckResourceAttr(resourceName, "custom.custom.key2", "value2"),
 					resource.TestCheckNoResourceAttr(resourceName, "user_data_base64"),
+					resource.TestCheckResourceAttr(resourceName, "cri.socket", "unix:///run/containerd/containerd.sock"),
 				),
 			},
 			{
@@ -217,6 +224,7 @@ func TestAccCloudAgnostic_ResourceEdgeConfigurationCustom(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "custom.custom.key1", "updated-value1"),
 					resource.TestCheckResourceAttr(resourceName, "custom.custom.key2", "updated-value2"),
 					resource.TestCheckResourceAttr(resourceName, "custom.custom.newkey", "newvalue"),
+					resource.TestCheckResourceAttr(resourceName, "cri.socket", "unix:///run/containerd/containerd-updated.sock"),
 				),
 			},
 		},
@@ -235,6 +243,10 @@ resource "castai_edge_configuration" "test" {
   edge_location_id = castai_edge_location.test.id
   name             = %[2]q
   user_data_base64 = "I2Nsb3VkLWNvbmZpZwojIFVzZXIgZGF0YQ=="
+
+  cri = {
+    socket = "unix:///run/containerd/containerd.sock"
+  }
 
   gcp = {
     image_id          = "projects/castai/global/images/castai-edge-v1"
@@ -261,6 +273,10 @@ resource "castai_edge_configuration" "test" {
   edge_location_id = castai_edge_location.test.id
   name             = "%[2]s-updated"
   user_data_base64 = "I2Nsb3VkLWNvbmZpZy11cGRhdGVkCg=="
+
+  cri = {
+    socket = "unix:///run/containerd/containerd-updated.sock"
+  }
 
   gcp = {
     image_id          = "projects/castai/global/images/castai-edge-v2"
@@ -289,6 +305,10 @@ resource "castai_edge_configuration" "test" {
   name             = %[2]q
   user_data_base64 = "I2Nsb3VkLWNvbmZpZwojIFVzZXIgZGF0YQ=="
 
+  cri = {
+    socket = "unix:///run/containerd/containerd.sock"
+  }
+
   aws = {
     image_id          = "ami-0abcdef1234567890"
     boot_disk_size_gib = 100
@@ -314,6 +334,10 @@ resource "castai_edge_configuration" "test" {
   edge_location_id = castai_edge_location.test.id
   name             = "%[2]s-updated"
   user_data_base64 = "I2Nsb3VkLWNvbmZpZy11cGRhdGVkCg=="
+
+  cri = {
+    socket = "unix:///run/containerd/containerd-updated.sock"
+  }
 
   aws = {
     image_id          = "ami-0updated1234567890"
@@ -342,6 +366,10 @@ resource "castai_edge_configuration" "test" {
   name             = %[2]q
   user_data_base64 = "I2Nsb3VkLWNvbmZpZwojIFVzZXIgZGF0YQ=="
 
+  cri = {
+    socket = "unix:///run/containerd/containerd.sock"
+  }
+
   oci = {
     image_id          = "ocid1.image.oc1.phx.example"
     boot_disk_size_gib = 100
@@ -367,6 +395,10 @@ resource "castai_edge_configuration" "test" {
   edge_location_id = castai_edge_location.test.id
   name             = "%[2]s-updated"
   user_data_base64 = "I2Nsb3VkLWNvbmZpZy11cGRhdGVkCg=="
+
+  cri = {
+    socket = "unix:///run/containerd/containerd-updated.sock"
+  }
 
   oci = {
     image_id          = "ocid1.image.oc1.phx.updated"
@@ -394,6 +426,10 @@ resource "castai_edge_configuration" "test" {
   edge_location_id = castai_edge_location.test.id
   name             = %[2]q
 
+  cri = {
+    socket = "unix:///run/containerd/containerd.sock"
+  }
+
   custom = {
     custom = {
       key1 = "value1"
@@ -416,6 +452,10 @@ resource "castai_edge_configuration" "test" {
   cluster_id       = castai_omni_cluster.test.id
   edge_location_id = castai_edge_location.test.id
   name             = "%[2]s-updated"
+
+  cri = {
+    socket = "unix:///run/containerd/containerd-updated.sock"
+  }
 
   custom = {
     custom = {

@@ -38,6 +38,7 @@ type edgeConfigurationSingleDataModel struct {
 	Gcp            *gcpConfigurationModel `tfsdk:"gcp"`
 	Oci            *ociConfigurationModel `tfsdk:"oci"`
 	Custom         types.Map              `tfsdk:"custom"`
+	CRI            *criConfigurationModel `tfsdk:"cri"`
 }
 
 // findEdgeConfigurationByName searches for an edge configuration by name in the list response.
@@ -158,6 +159,16 @@ func (d *edgeConfigurationDataSource) Schema(_ context.Context, _ datasource.Sch
 				Description: "Custom cloud specific configuration tags",
 				ElementType: types.StringType,
 			},
+			"cri": schema.SingleNestedAttribute{
+				Computed:    true,
+				Description: "CRI (Container Runtime Interface) configuration",
+				Attributes: map[string]schema.Attribute{
+					"socket": schema.StringAttribute{
+						Computed:    true,
+						Description: "Path to an existing CRI socket",
+					},
+				},
+			},
 		},
 	}
 }
@@ -264,6 +275,13 @@ func (d *edgeConfigurationDataSource) Read(ctx context.Context, req datasource.R
 			ImageID:         types.StringPointerValue(config.Oci.ImageId),
 			BootDiskSizeGiB: int32ToInt64(config.Oci.BootDiskSizeGib),
 			Tags:            stringMapToTF(config.Oci.Tags),
+		}
+	}
+
+	// CRI configuration
+	if config.Cri != nil {
+		data.CRI = &criConfigurationModel{
+			Socket: types.StringPointerValue(config.Cri.Socket),
 		}
 	}
 
