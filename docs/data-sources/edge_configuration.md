@@ -25,6 +25,7 @@ Retrieve information about a CAST AI edge configuration
 ### Read-Only
 
 - `aws` (Attributes) AWS specific configuration (see [below for nested schema](#nestedatt--aws))
+- `cri` (Attributes) CRI (Container Runtime Interface) configuration (see [below for nested schema](#nestedatt--cri))
 - `custom` (Map of String) Custom cloud specific configuration tags
 - `default` (Boolean) Whether this is the default configuration
 - `gcp` (Attributes) GCP specific configuration (see [below for nested schema](#nestedatt--gcp))
@@ -40,6 +41,14 @@ Read-Only:
 - `boot_disk_size_gib` (Number) Boot disk size in GiB
 - `image_id` (String) AWS AMI ID or name filter for edge creation
 - `tags` (Map of String) Instance/VM tags
+
+
+<a id="nestedatt--cri"></a>
+### Nested Schema for `cri`
+
+Read-Only:
+
+- `socket` (String) Path to an existing CRI socket
 
 
 <a id="nestedatt--gcp"></a>

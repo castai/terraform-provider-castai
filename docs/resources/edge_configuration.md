@@ -25,6 +25,7 @@ Manage CAST AI Edge Configuration for edge computing deployments
 ### Optional
 
 - `aws` (Attributes) AWS specific configuration (see [below for nested schema](#nestedatt--aws))
+- `cri` (Attributes) CRI (Container Runtime Interface) configuration for the edge node. Set this when you want kubelet to connect to a container runtime you have set up explicitly on the node. Currently only containerd is officially supported. (see [below for nested schema](#nestedatt--cri))
 - `custom` (Attributes) Custom cloud specific configuration (see [below for nested schema](#nestedatt--custom))
 - `gcp` (Attributes) GCP specific configuration (see [below for nested schema](#nestedatt--gcp))
 - `oci` (Attributes) OCI specific configuration (see [below for nested schema](#nestedatt--oci))
@@ -43,6 +44,14 @@ Optional:
 - `boot_disk_size_gib` (Number) Boot disk size in GiB
 - `image_id` (String) ImageID to be used for edge creation. It can be an AMI ID (for example 'ami-0abcdef1234567890') or a name filter (for example 'al2023-ami-ecs-hvm-*')
 - `tags` (Map of String) Instance/VM tags
+
+
+<a id="nestedatt--cri"></a>
+### Nested Schema for `cri`
+
+Optional:
+
+- `socket` (String) Path to an existing CRI socket. Example: unix:///run/containerd/containerd.sock
 
 
 <a id="nestedatt--custom"></a>
