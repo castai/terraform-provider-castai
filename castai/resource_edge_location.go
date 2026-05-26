@@ -665,15 +665,6 @@ func (r *edgeLocationResource) Read(ctx context.Context, req resource.ReadReques
 		state.Zones = r.toZoneModel(edgeLocation.Zones)
 	}
 
-	// Reset all provider blocks before populating from the API response.
-	// This ensures that if a user switches providers (e.g. aws -> custom),
-	// the old provider block is cleared and does not break the exactly-one-of
-	// invariant or interfere with future provider switches.
-	state.AWS = nil
-	state.GCP = nil
-	state.OCI = nil
-	state.Custom = nil
-
 	var diags diag.Diagnostics
 	if edgeLocation.Aws != nil {
 		state.AWS, diags = r.toAWSModel(ctx, edgeLocation.Aws)
