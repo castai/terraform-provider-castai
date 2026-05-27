@@ -6,7 +6,6 @@ import (
 	"net/http"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
-	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
@@ -247,16 +246,25 @@ func (d *edgeConfigurationDataSource) Read(ctx context.Context, req datasource.R
 	if config.Default != nil {
 		data.Default = types.BoolValue(*config.Default)
 	}
-	if config.UserDataBase64 != nil {
-		data.UserDataBase64 = types.StringValue(*config.UserDataBase64)
-	}
+	data.UserDataBase64 = normalizeStringPtr(config.UserDataBase64)
 
 	// AWS configuration
 	if config.Aws != nil {
 		data.Aws = &awsConfigurationModel{
 			ImageID:         types.StringPointerValue(config.Aws.ImageId),
-			BootDiskSizeGiB: int32ToInt64(config.Aws.BootDiskSizeGib),
-			Tags:            stringMapToTF(config.Aws.Tags),
+			BootDiskSizeGiB: types.Int64Null(),
+			Tags:            types.MapNull(types.StringType),
+		}
+		if config.Aws.BootDiskSizeGib != nil {
+			data.Aws.BootDiskSizeGiB = types.Int64Value(int64(*config.Aws.BootDiskSizeGib))
+		}
+		if config.Aws.Tags != nil && len(*config.Aws.Tags) > 0 {
+			tags, diags := types.MapValueFrom(ctx, types.StringType, *config.Aws.Tags)
+			if !diags.HasError() {
+				data.Aws.Tags = tags
+			} else {
+				resp.Diagnostics.Append(diags...)
+			}
 		}
 	}
 
@@ -264,8 +272,19 @@ func (d *edgeConfigurationDataSource) Read(ctx context.Context, req datasource.R
 	if config.Gcp != nil {
 		data.Gcp = &gcpConfigurationModel{
 			ImageID:         types.StringPointerValue(config.Gcp.ImageId),
-			BootDiskSizeGiB: int32ToInt64(config.Gcp.BootDiskSizeGib),
-			Labels:          stringMapToTF(config.Gcp.Labels),
+			BootDiskSizeGiB: types.Int64Null(),
+			Labels:          types.MapNull(types.StringType),
+		}
+		if config.Gcp.BootDiskSizeGib != nil {
+			data.Gcp.BootDiskSizeGiB = types.Int64Value(int64(*config.Gcp.BootDiskSizeGib))
+		}
+		if config.Gcp.Labels != nil && len(*config.Gcp.Labels) > 0 {
+			labels, diags := types.MapValueFrom(ctx, types.StringType, *config.Gcp.Labels)
+			if !diags.HasError() {
+				data.Gcp.Labels = labels
+			} else {
+				resp.Diagnostics.Append(diags...)
+			}
 		}
 	}
 
@@ -273,8 +292,19 @@ func (d *edgeConfigurationDataSource) Read(ctx context.Context, req datasource.R
 	if config.Oci != nil {
 		data.Oci = &ociConfigurationModel{
 			ImageID:         types.StringPointerValue(config.Oci.ImageId),
-			BootDiskSizeGiB: int32ToInt64(config.Oci.BootDiskSizeGib),
-			Tags:            stringMapToTF(config.Oci.Tags),
+			BootDiskSizeGiB: types.Int64Null(),
+			Tags:            types.MapNull(types.StringType),
+		}
+		if config.Oci.BootDiskSizeGib != nil {
+			data.Oci.BootDiskSizeGiB = types.Int64Value(int64(*config.Oci.BootDiskSizeGib))
+		}
+		if config.Oci.Tags != nil && len(*config.Oci.Tags) > 0 {
+			tags, diags := types.MapValueFrom(ctx, types.StringType, *config.Oci.Tags)
+			if !diags.HasError() {
+				data.Oci.Tags = tags
+			} else {
+				resp.Diagnostics.Append(diags...)
+			}
 		}
 	}
 
@@ -286,65 +316,16 @@ func (d *edgeConfigurationDataSource) Read(ctx context.Context, req datasource.R
 	}
 
 	// Custom configuration
-	if config.Custom != nil {
-		data.Custom = customConfigToTF(config.Custom)
+	if config.Custom != nil && len(*config.Custom) > 0 {
+		custom, diags := types.MapValueFrom(ctx, types.StringType, *config.Custom)
+		if !diags.HasError() {
+			data.Custom = custom
+		} else {
+			resp.Diagnostics.Append(diags...)
+		}
 	} else {
 		data.Custom = types.MapNull(types.StringType)
 	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
-}
-
-// int32ToInt64 converts *int32 to types.Int64
-func int32ToInt64(v *int32) types.Int64 {
-	if v == nil {
-		return types.Int64Null()
-	}
-	return types.Int64Value(int64(*v))
-}
-
-// stringMapToTF converts map[string]string to types.Map
-func stringMapToTF(m *map[string]string) types.Map {
-	if m == nil {
-		return types.MapNull(types.StringType)
-	}
-
-	elements := make(map[string]attr.Value, len(*m))
-	for k, v := range *m {
-		elements[k] = types.StringValue(v)
-	}
-
-	result, diags := types.MapValue(types.StringType, elements)
-	if diags.HasError() {
-		return types.MapNull(types.StringType)
-	}
-	return result
-}
-
-// customConfigToTF converts map[string]interface{} to types.Map
-func customConfigToTF(m *omni.CustomCloudConfiguration) types.Map {
-	if m == nil || *m == nil {
-		return types.MapNull(types.StringType)
-	}
-
-	if len(*m) == 0 {
-		return types.MapValueMust(types.StringType, map[string]attr.Value{})
-	}
-
-	elements := make(map[string]attr.Value, len(*m))
-	for k, v := range *m {
-		if strVal, ok := v.(string); ok {
-			elements[k] = types.StringValue(strVal)
-		} else if v == nil {
-			elements[k] = types.StringNull()
-		} else {
-			elements[k] = types.StringValue(fmt.Sprintf("%v", v))
-		}
-	}
-
-	result, diags := types.MapValue(types.StringType, elements)
-	if diags.HasError() {
-		return types.MapNull(types.StringType)
-	}
-	return result
 }
