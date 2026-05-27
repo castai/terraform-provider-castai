@@ -790,7 +790,7 @@ func (r *edgeConfigurationResource) toCustomConfiguration(ctx context.Context, p
 		return nil, diags
 	}
 
-	// Convert to map[string]interface{} for the SDK
+	// Convert to map[string]interface{} for the SDK and preserving string type
 	result := make(map[string]interface{}, len(custom))
 	for k, v := range custom {
 		result[k] = v
