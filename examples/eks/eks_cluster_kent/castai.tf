@@ -114,7 +114,7 @@ resource "helm_release" "castai" {
   create_namespace = true
   repository       = "https://castai.github.io/helm-charts"
   chart            = "castai"
-  version          = "0.34.13"
+  version          = "0.36.7"
 
   # Nine subcharts + image pulls + Karpenter-provisioned nodes joining ~5-7 min
   # total on first install; the default 300s helm timeout hits exactly at the

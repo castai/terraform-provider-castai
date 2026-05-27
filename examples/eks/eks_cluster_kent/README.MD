@@ -10,8 +10,7 @@ backend, and reconciles `RebalancePlan` CRDs into Karpenter `NodeClaim`s.
 - A **managed node group** dedicated to the Karpenter controller — tainted
   `karpenter.sh/controller=true:NoSchedule` and labeled
   `karpenter.sh/controller=true`. CoreDNS tolerates this taint so it can run
-  before Karpenter exists (avoids bootstrap deadlock). The MNG launch template
-  sets `httpPutResponseHopLimit = 2` for CAST AI compatibility.
+  before Karpenter exists (avoids bootstrap deadlock).
 - **Karpenter 1.7.x** + one default `EC2NodeClass` and one default `NodePool`
   (instance categories `c`/`m`/`r`, generation > 1, nitro, amd64; `WhenEmpty`
   consolidation after 30s).
