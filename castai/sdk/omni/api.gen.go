@@ -84,6 +84,19 @@ const (
 	UNKNOWN          ObjectStatusPhase = "UNKNOWN"
 )
 
+// AWSConfiguration AWS specific parameters present in edge configuration.
+type AWSConfiguration struct {
+	// BootDiskSizeGib Boot disk size.
+	BootDiskSizeGib *int32 `json:"bootDiskSizeGib,omitempty"`
+
+	// ImageId ImageID to be used for edge creation.
+	//  It can be an AMI ID (for example 'ami-0abcdef1234567890') or a name filter (for example 'al2023-ami-ecs-hvm-*').
+	ImageId *string `json:"imageId,omitempty"`
+
+	// Tags Instance/VM tags.
+	Tags *map[string]string `json:"tags,omitempty"`
+}
+
 // AWSParam Message to represents AWS specific parameters.
 type AWSParam struct {
 	// AccountId The ID of the AWS account.
@@ -208,6 +221,9 @@ type Condition struct {
 	Type *string `json:"type,omitempty"`
 }
 
+// CustomCloudConfiguration Custom cloud specific parameters present in edge configuration.
+type CustomCloudConfiguration = map[string]interface{}
+
 // CustomProviderParam Custom cloud provider params.
 type CustomProviderParam = map[string]interface{}
 
@@ -252,6 +268,151 @@ type EdgeClusterSpec struct {
 
 	// Networking Networking configuration.
 	Networking *EdgeClusterNetworking `json:"networking,omitempty"`
+}
+
+// EdgeConfiguration Message to represent edge configurations.
+type EdgeConfiguration struct {
+	// Aws AWS specific configuration.
+	Aws *AWSConfiguration `json:"aws,omitempty"`
+
+	// CreateTime The creation timestamp.
+	CreateTime *time.Time `json:"createTime,omitempty"`
+
+	// Cri CRI configuration for the edge node.
+	Cri *EdgeConfigurationCRIConfiguration `json:"cri,omitempty"`
+
+	// Custom Custom cloud specific configuration.
+	Custom *CustomCloudConfiguration `json:"custom,omitempty"`
+
+	// Default Whether node configuration is the default one.
+	Default *bool `json:"default,omitempty"`
+
+	// DeleteTime The deletion timestamp.
+	DeleteTime *time.Time `json:"deleteTime,omitempty"`
+
+	// EdgeCount The number of edges using this configuration.
+	EdgeCount *int32 `json:"edgeCount,omitempty"`
+
+	// EdgeLocationId The ID of the Edge Location configuration belongs to.
+	EdgeLocationId *string `json:"edgeLocationId,omitempty"`
+
+	// Gcp GCP specific configuration.
+	Gcp *GCPConfiguration `json:"gcp,omitempty"`
+
+	// Id The ID of the edge configuration.
+	Id *string `json:"id,omitempty"`
+
+	// Name The name of the edge configuration.
+	Name string `json:"name"`
+
+	// Oci OCI specific configuration.
+	Oci *OCIConfiguration `json:"oci,omitempty"`
+
+	// UpdateTime The last update timestamp.
+	UpdateTime *time.Time `json:"updateTime,omitempty"`
+
+	// UserDataBase64 Base64 encoded user data to run on the edge as part of bootstrap. The payload
+	//  must start with either `#cloud-config` (cloud-init YAML) or `#!` (shell
+	//  script with a shebang). On environments that support cloud-init both options are supported.
+	//
+	//  For `#cloud-config`, cloud-init's default merge behavior can be
+	//  customized inside the user-provided `#cloud-config` via the `merge_how`
+	//
+	//  Example overriding the default merge strategy:
+	//
+	//      #cloud-config
+	//      merge_how:
+	//       - name: list
+	//         settings: [prepend]
+	//       - name: dict
+	//         settings: [no_replace, recurse_list]
+	//      bootcmd:
+	//        - echo "configuring boot"
+	//      runcmd:
+	//        - echo "running user script"
+	//
+	//  Omni's internal `#cloud-config` part looks roughly like:
+	//
+	//      #cloud-config
+	//      cloud_final_modules:
+	//      - [scripts-user, always]
+	//      runcmd:
+	//      - 'until curl --fail -H "Authorization: Token <token>" -sSL "<api>/.../edges/<id>:getCloudInitScript" -o /tmp/omni-cloud-init.sh; do sleep 5; done'
+	//      - '<env> /bin/bash /tmp/omni-cloud-init.sh'
+	//
+	//  For shebang (`#!`) user data, the script is executed as-is before Omni's internal bootstrap script runs.
+	UserDataBase64 *string `json:"userDataBase64,omitempty"`
+
+	// Version The version of the edge configuration.
+	Version *int32 `json:"version,omitempty"`
+}
+
+// EdgeConfigurationUpdate Message to represent edge configuration update.
+type EdgeConfigurationUpdate struct {
+	// Aws AWS specific configuration.
+	Aws *AWSConfiguration `json:"aws,omitempty"`
+
+	// Cri CRI configuration for the edge node.
+	Cri *EdgeConfigurationCRIConfiguration `json:"cri,omitempty"`
+
+	// Custom Custom cloud specific configuration.
+	Custom *CustomCloudConfiguration `json:"custom,omitempty"`
+
+	// Default Whether node configuration is the default one. When set, must be true.
+	Default *bool `json:"default,omitempty"`
+
+	// Gcp GCP specific configuration.
+	Gcp *GCPConfiguration `json:"gcp,omitempty"`
+
+	// Name The name of the edge configuration.
+	Name *string `json:"name,omitempty"`
+
+	// Oci OCI specific configuration.
+	Oci *OCIConfiguration `json:"oci,omitempty"`
+
+	// UserDataBase64 Base64 encoded user data to run on the edge as part of bootstrap. The payload
+	//  must start with either `#cloud-config` (cloud-init YAML) or `#!` (shell
+	//  script with a shebang). On environments that support cloud-init both options are supported.
+	//
+	//  For `#cloud-config`, cloud-init's default merge behavior can be
+	//  customized inside the user-provided `#cloud-config` via the `merge_how`
+	//
+	//  Example overriding the default merge strategy:
+	//
+	//      #cloud-config
+	//      merge_how:
+	//       - name: list
+	//         settings: [prepend]
+	//       - name: dict
+	//         settings: [no_replace, recurse_list]
+	//      bootcmd:
+	//        - echo "configuring boot"
+	//      runcmd:
+	//        - echo "running user script"
+	//
+	//  Omni's internal `#cloud-config` part looks roughly like:
+	//
+	//      #cloud-config
+	//      cloud_final_modules:
+	//      - [scripts-user, always]
+	//      runcmd:
+	//      - 'until curl --fail -H "Authorization: Token <token>" -sSL "<api>/.../edges/<id>:getCloudInitScript" -o /tmp/omni-cloud-init.sh; do sleep 5; done'
+	//      - '<env> /bin/bash /tmp/omni-cloud-init.sh'
+	//
+	//  For shebang (`#!`) user data, the script is executed as-is before Omni's internal bootstrap script runs.
+	UserDataBase64 *string `json:"userDataBase64,omitempty"`
+}
+
+// EdgeConfigurationCRIConfiguration Container Runtime Interface configuration for the edge node.
+type EdgeConfigurationCRIConfiguration struct {
+	// Socket Path to an existing CRI socket. Set this when you want kubelet to
+	//  connect to a container runtime you have set up explicitly on the node
+	//  (e.g. a custom containerd build, a different version, or a non-default
+	//  runtime). When set, you are responsible for installing, configuring, and
+	//  running the runtime behind this socket before the node joins.
+	//  Currently only containerd is officially supported.
+	//  Example: "unix:///run/containerd/containerd.sock`"
+	Socket *string `json:"socket,omitempty"`
 }
 
 // EdgeInitdOnboardingConfig Configuration for the OnboardEdgeInitd request.
@@ -353,6 +514,19 @@ type EdgeLocationUpdate struct {
 
 	// Zones The zones of edge location.
 	Zones *[]Zone `json:"zones,omitempty"`
+}
+
+// GCPConfiguration GCP specific parameters present in edge configuration.
+type GCPConfiguration struct {
+	// BootDiskSizeGib Boot disk size in GiB.
+	BootDiskSizeGib *int32 `json:"bootDiskSizeGib,omitempty"`
+
+	// ImageId Exact image ID (for example 'projects/castai-public-339919/global/images/ubuntu-2404-lts-amd64-cuda') or image
+	//  family (for example `projects/ubuntu-os-cloud/global/images/family/ubuntu-2404-lts-amd64`) to be used for edge creation.
+	ImageId *string `json:"imageId,omitempty"`
+
+	// Labels Instance/VM labels.
+	Labels *map[string]string `json:"labels,omitempty"`
 }
 
 // GCPParam Message to represents Google Cloud specific parameters.
@@ -470,6 +644,18 @@ type ListClustersResponse struct {
 	TotalCount *int32 `json:"totalCount,omitempty"`
 }
 
+// ListEdgeConfigurationsResponse Message of the response to list edge configurations.
+type ListEdgeConfigurationsResponse struct {
+	// Items The list of edge configurations.
+	Items *[]EdgeConfiguration `json:"items,omitempty"`
+
+	// NextPageCursor The pagination cursor to retrieve the next page of edge configurations.
+	NextPageCursor *string `json:"nextPageCursor,omitempty"`
+
+	// TotalCount The total number of items.
+	TotalCount *int32 `json:"totalCount,omitempty"`
+}
+
 // ListEdgeLocationsResponse Message of the response to list edge locations.
 type ListEdgeLocationsResponse struct {
 	// Items The list of edge locations.
@@ -480,6 +666,19 @@ type ListEdgeLocationsResponse struct {
 
 	// TotalCount The total number of items.
 	TotalCount *int32 `json:"totalCount,omitempty"`
+}
+
+// OCIConfiguration OCI specific parameters present in edge configuration.
+type OCIConfiguration struct {
+	// BootDiskSizeGib Boot disk size.
+	BootDiskSizeGib *int32 `json:"bootDiskSizeGib,omitempty"`
+
+	// ImageId ImageID to be used for edge creation.
+	//  It can be an AMI ID (for example 'ami-0abcdef1234567890') or a name filter (for example 'al2023-ami-ecs-hvm-*').
+	ImageId *string `json:"imageId,omitempty"`
+
+	// Tags Instance/VM tags.
+	Tags *map[string]string `json:"tags,omitempty"`
 }
 
 // OCIParam Message that represents OCI location specific parameters.
@@ -669,6 +868,19 @@ type ClustersAPIListClustersParams struct {
 	IncludeEdgeLocations *bool `form:"includeEdgeLocations,omitempty" json:"includeEdgeLocations,omitempty"`
 }
 
+// EdgeConfigurationsAPIListEdgeConfigurationsParams defines parameters for EdgeConfigurationsAPIListEdgeConfigurations.
+type EdgeConfigurationsAPIListEdgeConfigurationsParams struct {
+	// EdgeLocationId The ID of the Edge Location configuration belongs to.
+	EdgeLocationId *string `form:"edgeLocationId,omitempty" json:"edgeLocationId,omitempty"`
+
+	// PageLimit Defines the number of items that should be returned
+	PageLimit *string `form:"page.limit,omitempty" json:"page.limit,omitempty"`
+
+	// PageCursor Cursor that defines token indicating where to start the next page.
+	//  Empty value indicates to start from beginning of the dataset.
+	PageCursor *string `form:"page.cursor,omitempty" json:"page.cursor,omitempty"`
+}
+
 // EdgeLocationsAPIListEdgeLocationsParams defines parameters for EdgeLocationsAPIListEdgeLocations.
 type EdgeLocationsAPIListEdgeLocationsParams struct {
 	// PageLimit Defines the number of items that should be returned
@@ -677,6 +889,18 @@ type EdgeLocationsAPIListEdgeLocationsParams struct {
 	// PageCursor Cursor that defines token indicating where to start the next page.
 	//  Empty value indicates to start from beginning of the dataset.
 	PageCursor *string `form:"page.cursor,omitempty" json:"page.cursor,omitempty"`
+}
+
+// EdgeConfigurationsAPIGetEdgeConfigurationParams defines parameters for EdgeConfigurationsAPIGetEdgeConfiguration.
+type EdgeConfigurationsAPIGetEdgeConfigurationParams struct {
+	// Version The version of the edge configuration to be provided.
+	Version *int32 `form:"version,omitempty" json:"version,omitempty"`
+}
+
+// EdgeConfigurationsAPIUpdateEdgeConfigurationParams defines parameters for EdgeConfigurationsAPIUpdateEdgeConfiguration.
+type EdgeConfigurationsAPIUpdateEdgeConfigurationParams struct {
+	// UpdateMask The list of fields to be updated.
+	UpdateMask *string `form:"updateMask,omitempty" json:"updateMask,omitempty"`
 }
 
 // EdgeLocationsAPIUpdateEdgeLocationParams defines parameters for EdgeLocationsAPIUpdateEdgeLocation.
@@ -693,6 +917,12 @@ type ClustersAPIGetClusterParams struct {
 
 // EdgeLocationsAPICreateEdgeLocationJSONRequestBody defines body for EdgeLocationsAPICreateEdgeLocation for application/json ContentType.
 type EdgeLocationsAPICreateEdgeLocationJSONRequestBody = EdgeLocation
+
+// EdgeConfigurationsAPICreateEdgeConfigurationJSONRequestBody defines body for EdgeConfigurationsAPICreateEdgeConfiguration for application/json ContentType.
+type EdgeConfigurationsAPICreateEdgeConfigurationJSONRequestBody = EdgeConfiguration
+
+// EdgeConfigurationsAPIUpdateEdgeConfigurationJSONRequestBody defines body for EdgeConfigurationsAPIUpdateEdgeConfiguration for application/json ContentType.
+type EdgeConfigurationsAPIUpdateEdgeConfigurationJSONRequestBody = EdgeConfigurationUpdate
 
 // EdgeLocationsAPIUpdateEdgeLocationJSONRequestBody defines body for EdgeLocationsAPIUpdateEdgeLocation for application/json ContentType.
 type EdgeLocationsAPIUpdateEdgeLocationJSONRequestBody = EdgeLocationUpdate
