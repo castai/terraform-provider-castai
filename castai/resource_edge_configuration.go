@@ -820,7 +820,10 @@ func (r *edgeConfigurationResource) toCRIConfiguration(_ context.Context, plan *
 	var diags diag.Diagnostics
 
 	if plan == nil {
-		return nil, diags
+		// Return an empty struct (not nil) so the request JSON includes
+		// cri: {} instead of omitting the field. This tells the API to
+		// explicitly clear any existing CRI configuration.
+		return &omni.EdgeConfigurationCRIConfiguration{}, diags
 	}
 
 	config := &omni.EdgeConfigurationCRIConfiguration{}
@@ -837,15 +840,15 @@ func (r *edgeConfigurationResource) toCRIConfigurationModel(_ context.Context, c
 		return nil
 	}
 
-	model := &criConfigurationModel{
-		Socket: types.StringNull(),
+	// Normalize: a CRI object with no socket is semantically equivalent
+	// to no CRI configuration at all.
+	if config.Socket == nil || *config.Socket == "" {
+		return nil
 	}
 
-	if config.Socket != nil && *config.Socket != "" {
-		model.Socket = types.StringValue(*config.Socket)
+	return &criConfigurationModel{
+		Socket: types.StringValue(*config.Socket),
 	}
-
-	return model
 }
 
 func normalizeStringPtr(s *string) types.String {
