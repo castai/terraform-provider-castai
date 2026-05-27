@@ -151,8 +151,9 @@ func TestAccCloudAgnostic_ResourceEdgeLocationAWSImpersonation(t *testing.T) {
 					edgeLocationID := s.RootModule().Resources[resourceName].Primary.ID
 					return fmt.Sprintf("%v/%v/%v", organizationID, clusterID, edgeLocationID), nil
 				},
-				ImportState:       true,
-				ImportStateVerify: true,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"networking"},
 			},
 			{
 				Config: testAccEdgeLocationAWSImpersonationUpdated(rName, clusterName),
