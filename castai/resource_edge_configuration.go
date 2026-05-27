@@ -840,8 +840,7 @@ func (r *edgeConfigurationResource) toCRIConfigurationModel(_ context.Context, c
 		return nil
 	}
 
-	// Normalize: a CRI object with no socket is semantically equivalent
-	// to no CRI configuration at all.
+	// Normalize: a CRI object with no socket is semantically equivalent to no CRI configuration at all.
 	if config.Socket == nil || *config.Socket == "" {
 		return nil
 	}
