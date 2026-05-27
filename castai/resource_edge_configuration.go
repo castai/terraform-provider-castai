@@ -784,13 +784,19 @@ func (r *edgeConfigurationResource) toCustomConfiguration(ctx context.Context, p
 		return nil, diags
 	}
 
-	custom := make(map[string]interface{})
+	custom := make(map[string]string)
 	diags.Append(plan.Custom.ElementsAs(ctx, &custom, false)...)
 	if diags.HasError() {
 		return nil, diags
 	}
 
-	return &custom, diags
+	// Convert to map[string]interface{} for the SDK
+	result := make(map[string]interface{}, len(custom))
+	for k, v := range custom {
+		result[k] = v
+	}
+
+	return &result, diags
 }
 
 func (r *edgeConfigurationResource) toCustomConfigurationModel(ctx context.Context, config *omni.CustomCloudConfiguration) *customConfigurationModel {
@@ -804,7 +810,18 @@ func (r *edgeConfigurationResource) toCustomConfigurationModel(ctx context.Conte
 		}
 	}
 
-	custom, diags := types.MapValueFrom(ctx, types.StringType, *config)
+	stringMap := make(map[string]string, len(*config))
+	for k, v := range *config {
+		if strVal, ok := v.(string); ok {
+			stringMap[k] = strVal
+		} else if v == nil {
+			stringMap[k] = ""
+		} else {
+			stringMap[k] = fmt.Sprintf("%v", v)
+		}
+	}
+
+	custom, diags := types.MapValueFrom(ctx, types.StringType, stringMap)
 	if diags.HasError() {
 		return &customConfigurationModel{
 			Custom: types.MapNull(types.StringType),

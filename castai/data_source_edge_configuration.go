@@ -298,7 +298,17 @@ func (d *edgeConfigurationDataSource) Read(ctx context.Context, req datasource.R
 	}
 
 	if config.Custom != nil && len(*config.Custom) > 0 {
-		data.Custom, diags = types.MapValueFrom(ctx, types.StringType, *config.Custom)
+		stringMap := make(map[string]string, len(*config.Custom))
+		for k, v := range *config.Custom {
+			if strVal, ok := v.(string); ok {
+				stringMap[k] = strVal
+			} else if v == nil {
+				stringMap[k] = ""
+			} else {
+				stringMap[k] = fmt.Sprintf("%v", v)
+			}
+		}
+		data.Custom, diags = types.MapValueFrom(ctx, types.StringType, stringMap)
 	} else {
 		data.Custom = types.MapNull(types.StringType)
 	}
