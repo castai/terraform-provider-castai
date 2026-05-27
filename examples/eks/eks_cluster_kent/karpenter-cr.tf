@@ -77,10 +77,10 @@ resource "null_resource" "karpenter_drain" {
         echo "Force-terminating leaked Karpenter instances: $IDS"
         aws ec2 terminate-instances \
           --region "${self.triggers.region}" \
-          --instance-ids ${IDS} >/dev/null
+          --instance-ids $IDS >/dev/null
         aws ec2 wait instance-terminated \
           --region "${self.triggers.region}" \
-          --instance-ids ${IDS}
+          --instance-ids $IDS
       fi
     EOT
   }
