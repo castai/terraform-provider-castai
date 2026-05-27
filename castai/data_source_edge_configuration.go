@@ -279,12 +279,7 @@ func (d *edgeConfigurationDataSource) Read(ctx context.Context, req datasource.R
 			data.Gcp.BootDiskSizeGiB = types.Int64Value(int64(*config.Gcp.BootDiskSizeGib))
 		}
 		if config.Gcp.Labels != nil && len(*config.Gcp.Labels) > 0 {
-			labels, diags := types.MapValueFrom(ctx, types.StringType, *config.Gcp.Labels)
-			if !diags.HasError() {
-				data.Gcp.Labels = labels
-			} else {
-				resp.Diagnostics.Append(diags...)
-			}
+			data.Gcp.Labels, diags = types.MapValueFrom(ctx, types.StringType, *config.Gcp.Labels)
 		}
 	}
 
