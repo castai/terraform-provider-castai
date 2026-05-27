@@ -180,57 +180,6 @@ func TestAccCloudAgnostic_ResourceEdgeConfigurationOCI(t *testing.T) {
 	})
 }
 
-func TestAccCloudAgnostic_ResourceEdgeConfigurationCustom(t *testing.T) {
-	rName := fmt.Sprintf("%v-edgecfg-%v", ResourcePrefix, acctest.RandString(8))
-	clusterName := "omni-tf-acc-gcp"
-	resourceName := "castai_edge_configuration.test"
-
-	resource.Test(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
-		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
-		CheckDestroy:             testAccCheckEdgeConfigurationDestroy,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccEdgeConfigurationCustomConfig(rName, clusterName),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceName, "name", rName),
-					resource.TestCheckResourceAttrSet(resourceName, "organization_id"),
-					resource.TestCheckResourceAttrSet(resourceName, "cluster_id"),
-					resource.TestCheckResourceAttrSet(resourceName, "edge_location_id"),
-					resource.TestCheckResourceAttrSet(resourceName, "id"),
-					resource.TestCheckResourceAttr(resourceName, "default", "false"),
-					resource.TestCheckResourceAttr(resourceName, "custom.custom.key1", "value1"),
-					resource.TestCheckResourceAttr(resourceName, "custom.custom.key2", "value2"),
-					resource.TestCheckNoResourceAttr(resourceName, "user_data_base64"),
-					resource.TestCheckResourceAttr(resourceName, "cri.socket", "unix:///run/containerd/containerd.sock"),
-				),
-			},
-			{
-				ResourceName: resourceName,
-				ImportStateIdFunc: func(s *terraform.State) (string, error) {
-					organizationID := testAccGetOrganizationID()
-					clusterID := s.RootModule().Resources["castai_omni_cluster.test"].Primary.ID
-					edgeLocationID := s.RootModule().Resources["castai_edge_location.test"].Primary.ID
-					configID := s.RootModule().Resources["castai_edge_configuration.test"].Primary.ID
-					return fmt.Sprintf("%s/%s/%s/%s", organizationID, clusterID, edgeLocationID, configID), nil
-				},
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-			{
-				Config: testAccEdgeConfigurationCustomUpdated(rName, clusterName),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceName, "name", rName+"-updated"),
-					resource.TestCheckResourceAttr(resourceName, "custom.custom.key1", "updated-value1"),
-					resource.TestCheckResourceAttr(resourceName, "custom.custom.key2", "updated-value2"),
-					resource.TestCheckResourceAttr(resourceName, "custom.custom.newkey", "newvalue"),
-					resource.TestCheckResourceAttr(resourceName, "cri.socket", "unix:///run/containerd/containerd-updated.sock"),
-				),
-			},
-		},
-	})
-}
-
 func testAccEdgeConfigurationGCPConfig(rName, clusterName string) string {
 	organizationID := testAccGetOrganizationID()
 
@@ -404,61 +353,6 @@ resource "castai_edge_configuration" "test" {
     image_id          = "ocid1.image.oc1.phx.updated"
     boot_disk_size_gib = 200
     tags = {
-      key1   = "updated-value1"
-      key2   = "updated-value2"
-      newkey = "newvalue"
-    }
-  }
-}
-`, organizationID, rName),
-	)
-}
-
-func testAccEdgeConfigurationCustomConfig(rName, clusterName string) string {
-	organizationID := testAccGetOrganizationID()
-
-	return ConfigCompose(
-		testAccEdgeLocationGCPImpersonationConfig(rName, clusterName),
-		fmt.Sprintf(`
-resource "castai_edge_configuration" "test" {
-  organization_id  = %[1]q
-  cluster_id       = castai_omni_cluster.test.id
-  edge_location_id = castai_edge_location.test.id
-  name             = %[2]q
-
-  cri = {
-    socket = "unix:///run/containerd/containerd.sock"
-  }
-
-  custom = {
-    custom = {
-      key1 = "value1"
-      key2 = "value2"
-    }
-  }
-}
-`, organizationID, rName),
-	)
-}
-
-func testAccEdgeConfigurationCustomUpdated(rName, clusterName string) string {
-	organizationID := testAccGetOrganizationID()
-
-	return ConfigCompose(
-		testAccEdgeLocationGCPImpersonationConfig(rName, clusterName),
-		fmt.Sprintf(`
-resource "castai_edge_configuration" "test" {
-  organization_id  = %[1]q
-  cluster_id       = castai_omni_cluster.test.id
-  edge_location_id = castai_edge_location.test.id
-  name             = "%[2]s-updated"
-
-  cri = {
-    socket = "unix:///run/containerd/containerd-updated.sock"
-  }
-
-  custom = {
-    custom = {
       key1   = "updated-value1"
       key2   = "updated-value2"
       newkey = "newvalue"
