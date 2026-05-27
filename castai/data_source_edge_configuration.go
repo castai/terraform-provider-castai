@@ -5,13 +5,13 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/castai/terraform-provider-castai/castai/sdk/omni"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-
-	"github.com/castai/terraform-provider-castai/castai/sdk/omni"
 )
 
 var (
@@ -248,7 +248,13 @@ func (d *edgeConfigurationDataSource) Read(ctx context.Context, req datasource.R
 	}
 	data.UserDataBase64 = normalizeStringPtr(config.UserDataBase64)
 
-	// AWS configuration
+	if config.Cri != nil {
+		data.CRI = &criConfigurationModel{
+			Socket: types.StringPointerValue(config.Cri.Socket),
+		}
+	}
+
+	var diags diag.Diagnostics
 	if config.Aws != nil {
 		data.Aws = &awsConfigurationModel{
 			ImageID:         types.StringPointerValue(config.Aws.ImageId),
@@ -259,16 +265,10 @@ func (d *edgeConfigurationDataSource) Read(ctx context.Context, req datasource.R
 			data.Aws.BootDiskSizeGiB = types.Int64Value(int64(*config.Aws.BootDiskSizeGib))
 		}
 		if config.Aws.Tags != nil && len(*config.Aws.Tags) > 0 {
-			tags, diags := types.MapValueFrom(ctx, types.StringType, *config.Aws.Tags)
-			if !diags.HasError() {
-				data.Aws.Tags = tags
-			} else {
-				resp.Diagnostics.Append(diags...)
-			}
+			data.Aws.Tags, diags = types.MapValueFrom(ctx, types.StringType, *config.Aws.Tags)
 		}
 	}
 
-	// GCP configuration
 	if config.Gcp != nil {
 		data.Gcp = &gcpConfigurationModel{
 			ImageID:         types.StringPointerValue(config.Gcp.ImageId),
@@ -283,7 +283,6 @@ func (d *edgeConfigurationDataSource) Read(ctx context.Context, req datasource.R
 		}
 	}
 
-	// OCI configuration
 	if config.Oci != nil {
 		data.Oci = &ociConfigurationModel{
 			ImageID:         types.StringPointerValue(config.Oci.ImageId),
@@ -294,32 +293,19 @@ func (d *edgeConfigurationDataSource) Read(ctx context.Context, req datasource.R
 			data.Oci.BootDiskSizeGiB = types.Int64Value(int64(*config.Oci.BootDiskSizeGib))
 		}
 		if config.Oci.Tags != nil && len(*config.Oci.Tags) > 0 {
-			tags, diags := types.MapValueFrom(ctx, types.StringType, *config.Oci.Tags)
-			if !diags.HasError() {
-				data.Oci.Tags = tags
-			} else {
-				resp.Diagnostics.Append(diags...)
-			}
+			data.Oci.Tags, diags = types.MapValueFrom(ctx, types.StringType, *config.Oci.Tags)
 		}
 	}
 
-	// CRI configuration
-	if config.Cri != nil {
-		data.CRI = &criConfigurationModel{
-			Socket: types.StringPointerValue(config.Cri.Socket),
-		}
-	}
-
-	// Custom configuration
 	if config.Custom != nil && len(*config.Custom) > 0 {
-		custom, diags := types.MapValueFrom(ctx, types.StringType, *config.Custom)
-		if !diags.HasError() {
-			data.Custom = custom
-		} else {
-			resp.Diagnostics.Append(diags...)
-		}
+		data.Custom, diags = types.MapValueFrom(ctx, types.StringType, *config.Custom)
 	} else {
 		data.Custom = types.MapNull(types.StringType)
+	}
+
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
 	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
