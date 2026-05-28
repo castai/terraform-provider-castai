@@ -9,6 +9,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/resourcevalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -20,6 +21,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	"github.com/samber/lo"
 
 	"github.com/castai/terraform-provider-castai/castai/sdk/omni"
@@ -39,20 +41,20 @@ type edgeLocationResource struct {
 }
 
 type edgeLocationModel struct {
-	ID               types.String       `tfsdk:"id"`
-	OrganizationID   types.String       `tfsdk:"organization_id"`
-	ClusterID        types.String       `tfsdk:"cluster_id"`
-	Name             types.String       `tfsdk:"name"`
-	Description      types.String       `tfsdk:"description"`
-	Region           types.String       `tfsdk:"region"`
-	ControlPlaneMode types.String       `tfsdk:"control_plane_mode"`
-	ControlPlane     *controlPlaneModel `tfsdk:"control_plane"`
-	Networking       *networkingModel   `tfsdk:"networking"`
-	Zones            []zoneModel        `tfsdk:"zones"`
-	AWS              *awsModel          `tfsdk:"aws"`
-	GCP              *gcpModel          `tfsdk:"gcp"`
-	OCI              *ociModel          `tfsdk:"oci"`
-	Custom           *customModel       `tfsdk:"custom"`
+	ID               types.String `tfsdk:"id"`
+	OrganizationID   types.String `tfsdk:"organization_id"`
+	ClusterID        types.String `tfsdk:"cluster_id"`
+	Name             types.String `tfsdk:"name"`
+	Description      types.String `tfsdk:"description"`
+	Region           types.String `tfsdk:"region"`
+	ControlPlaneMode types.String `tfsdk:"control_plane_mode"`
+	ControlPlane     types.Object `tfsdk:"control_plane"`
+	Networking       types.Object `tfsdk:"networking"`
+	Zones            types.List   `tfsdk:"zones"`
+	AWS              *awsModel    `tfsdk:"aws"`
+	GCP              *gcpModel    `tfsdk:"gcp"`
+	OCI              *ociModel    `tfsdk:"oci"`
+	Custom           *customModel `tfsdk:"custom"`
 	// Computed revision number incremented each time credentials have changed.
 	CredentialsRevision types.Int64 `tfsdk:"credentials_revision"`
 }
@@ -82,6 +84,65 @@ func (m *networkingModel) Equal(other *networkingModel) bool {
 type zoneModel struct {
 	ID   types.String `tfsdk:"id"`
 	Name types.String `tfsdk:"name"`
+}
+
+var zoneModelAttrTypes = map[string]attr.Type{
+	"id":   types.StringType,
+	"name": types.StringType,
+}
+
+var networkingAttrTypes = map[string]attr.Type{
+	"tunneled_cidrs": types.ListType{ElemType: types.StringType},
+}
+
+var controlPlaneAttrTypes = map[string]attr.Type{
+	"ha": types.BoolType,
+}
+
+func networkingFromObject(ctx context.Context, obj types.Object) (*networkingModel, diag.Diagnostics) {
+	var diags diag.Diagnostics
+	if obj.IsNull() || obj.IsUnknown() {
+		return nil, diags
+	}
+	var m networkingModel
+	diags = obj.As(ctx, &m, basetypes.ObjectAsOptions{})
+	if diags.HasError() {
+		return nil, diags
+	}
+	return &m, diags
+}
+
+func networkingToObject(ctx context.Context, m *networkingModel) (types.Object, diag.Diagnostics) {
+	var diags diag.Diagnostics
+	if m == nil {
+		return types.ObjectNull(networkingAttrTypes), diags
+	}
+	obj, d := types.ObjectValueFrom(ctx, networkingAttrTypes, m)
+	diags.Append(d...)
+	return obj, diags
+}
+
+func controlPlaneFromObject(ctx context.Context, obj types.Object) (*controlPlaneModel, diag.Diagnostics) {
+	var diags diag.Diagnostics
+	if obj.IsNull() || obj.IsUnknown() {
+		return nil, diags
+	}
+	var m controlPlaneModel
+	diags = obj.As(ctx, &m, basetypes.ObjectAsOptions{})
+	if diags.HasError() {
+		return nil, diags
+	}
+	return &m, diags
+}
+
+func controlPlaneToObject(ctx context.Context, m *controlPlaneModel) (types.Object, diag.Diagnostics) {
+	var diags diag.Diagnostics
+	if m == nil {
+		return types.ObjectNull(controlPlaneAttrTypes), diags
+	}
+	obj, d := types.ObjectValueFrom(ctx, controlPlaneAttrTypes, m)
+	diags.Append(d...)
+	return obj, diags
 }
 
 type awsModel struct {
@@ -535,10 +596,16 @@ func (r *edgeLocationResource) Create(ctx context.Context, req resource.CreateRe
 	organizationID := plan.OrganizationID.ValueString()
 	clusterID := plan.ClusterID.ValueString()
 
+	zones, diags := r.toZones(ctx, plan.Zones)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	createReq := omni.EdgeLocationsAPICreateEdgeLocationJSONRequestBody{
 		Name:             plan.Name.ValueString(),
 		Region:           plan.Region.ValueStringPointer(),
-		Zones:            lo.ToPtr(r.toZones(plan.Zones)),
+		Zones:            lo.ToPtr(zones),
 		ControlPlaneMode: lo.ToPtr(omni.EdgeLocationControlPlaneMode(plan.ControlPlaneMode.ValueString())),
 	}
 
@@ -546,7 +613,17 @@ func (r *edgeLocationResource) Create(ctx context.Context, req resource.CreateRe
 		createReq.Description = lo.ToPtr(plan.Description.ValueString())
 	}
 
-	createReq.EdgeClusterSpec, diags = r.toEdgeClusterSpec(ctx, plan.ControlPlane, plan.Networking)
+	planNet, diags := networkingFromObject(ctx, plan.Networking)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	planCP, diags := controlPlaneFromObject(ctx, plan.ControlPlane)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	createReq.EdgeClusterSpec, diags = r.toEdgeClusterSpec(ctx, planCP, planNet)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -647,22 +724,30 @@ func (r *edgeLocationResource) Read(ctx context.Context, req resource.ReadReques
 	if edgeLocation.EdgeClusterSpec != nil {
 		// Only sync control_plane from API if it was already managed in state.
 		// Otherwise, we'd cause perpetual drift for users who never set the block.
-		if state.ControlPlane != nil && edgeLocation.EdgeClusterSpec.ControlPlane != nil {
-			state.ControlPlane = &controlPlaneModel{
+		if !state.ControlPlane.IsNull() && edgeLocation.EdgeClusterSpec.ControlPlane != nil {
+			var d diag.Diagnostics
+			state.ControlPlane, d = controlPlaneToObject(ctx, &controlPlaneModel{
 				Ha: types.BoolPointerValue(edgeLocation.EdgeClusterSpec.ControlPlane.Ha),
-			}
+			})
+			resp.Diagnostics.Append(d...)
 		}
 		// Only sync networking from API if it was already managed in state.
 		// Otherwise, we'd cause perpetual drift for users who never set the block.
-		if state.Networking != nil && edgeLocation.EdgeClusterSpec.Networking != nil && edgeLocation.EdgeClusterSpec.Networking.TunneledCidrs != nil {
+		if !state.Networking.IsNull() && edgeLocation.EdgeClusterSpec.Networking != nil && edgeLocation.EdgeClusterSpec.Networking.TunneledCidrs != nil {
 			cidrs, d := types.ListValueFrom(ctx, types.StringType, *edgeLocation.EdgeClusterSpec.Networking.TunneledCidrs)
 			resp.Diagnostics.Append(d...)
-			state.Networking = &networkingModel{TunneledCIDRs: cidrs}
+			state.Networking, d = networkingToObject(ctx, &networkingModel{TunneledCIDRs: cidrs})
+			resp.Diagnostics.Append(d...)
 		}
 	}
 
 	if edgeLocation.Zones != nil {
-		state.Zones = r.toZoneModel(edgeLocation.Zones)
+		var d diag.Diagnostics
+		state.Zones, d = r.toZoneModel(ctx, edgeLocation.Zones)
+		resp.Diagnostics.Append(d...)
+		if resp.Diagnostics.HasError() {
+			return
+		}
 	}
 
 	var diags diag.Diagnostics
@@ -711,8 +796,13 @@ func (r *edgeLocationResource) Update(ctx context.Context, req resource.UpdateRe
 		updateReq.Description = toPtr(plan.Description.ValueString())
 	}
 
-	if len(plan.Zones) > 0 {
-		updateReq.Zones = toPtr(r.toZones(plan.Zones))
+	if !plan.Zones.IsNull() && !plan.Zones.IsUnknown() {
+		zones, diags := r.toZones(ctx, plan.Zones)
+		resp.Diagnostics.Append(diags...)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+		updateReq.Zones = toPtr(zones)
 	}
 
 	// Check if credentials have changed by comparing credentials revision
@@ -902,15 +992,25 @@ func (r *edgeLocationResource) edgeClusterSpecUpdate(ctx context.Context, plan, 
 	spec := &omni.EdgeClusterSpec{}
 	if cpChanged {
 		spec.ControlPlane = &omni.EdgeClusterControlPlane{Ha: lo.ToPtr(true)}
-		if plan.ControlPlane != nil {
-			spec.ControlPlane.Ha = plan.ControlPlane.Ha.ValueBoolPointer()
+		if !plan.ControlPlane.IsNull() {
+			planCP, d := controlPlaneFromObject(ctx, plan.ControlPlane)
+			diags.Append(d...)
+			if diags.HasError() {
+				return nil, diags
+			}
+			spec.ControlPlane.Ha = planCP.Ha.ValueBoolPointer()
 		}
 	}
 	if netChanged {
 		spec.Networking = &omni.EdgeClusterNetworking{TunneledCidrs: &[]string{}}
-		if plan.Networking != nil {
+		if !plan.Networking.IsNull() {
+			planNet, d := networkingFromObject(ctx, plan.Networking)
+			diags.Append(d...)
+			if diags.HasError() {
+				return nil, diags
+			}
 			var items []string
-			diags.Append(plan.Networking.TunneledCIDRs.ElementsAs(ctx, &items, true)...)
+			diags.Append(planNet.TunneledCIDRs.ElementsAs(ctx, &items, true)...)
 			if diags.HasError() {
 				return nil, diags
 			}
@@ -946,25 +1046,33 @@ func (r *edgeLocationResource) toEdgeClusterSpec(ctx context.Context, cp *contro
 	return spec, diags
 }
 
-func (r *edgeLocationResource) toZones(zones []zoneModel) []omni.Zone {
-	if len(zones) == 0 {
-		return nil
+func (r *edgeLocationResource) toZones(ctx context.Context, zones types.List) ([]omni.Zone, diag.Diagnostics) {
+	var diags diag.Diagnostics
+	if zones.IsNull() || zones.IsUnknown() {
+		return nil, diags
 	}
 
-	out := make([]omni.Zone, 0, len(zones))
-	for _, z := range zones {
+	var zoneModels []zoneModel
+	diags.Append(zones.ElementsAs(ctx, &zoneModels, false)...)
+	if diags.HasError() || len(zoneModels) == 0 {
+		return nil, diags
+	}
+
+	out := make([]omni.Zone, 0, len(zoneModels))
+	for _, z := range zoneModels {
 		zone := omni.Zone{
 			Id:   lo.ToPtr(z.ID.ValueString()),
 			Name: lo.ToPtr(z.Name.ValueString()),
 		}
 		out = append(out, zone)
 	}
-	return out
+	return out, diags
 }
 
-func (r *edgeLocationResource) toZoneModel(zones *[]omni.Zone) []zoneModel {
+func (r *edgeLocationResource) toZoneModel(ctx context.Context, zones *[]omni.Zone) (types.List, diag.Diagnostics) {
+	var diags diag.Diagnostics
 	if zones == nil || len(*zones) == 0 {
-		return nil
+		return types.ListNull(types.ObjectType{AttrTypes: zoneModelAttrTypes}), diags
 	}
 	out := make([]zoneModel, 0, len(*zones))
 	for _, zone := range *zones {
@@ -973,7 +1081,9 @@ func (r *edgeLocationResource) toZoneModel(zones *[]omni.Zone) []zoneModel {
 			Name: types.StringValue(lo.FromPtr(zone.Name)),
 		})
 	}
-	return out
+	list, d := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: zoneModelAttrTypes}, out)
+	diags.Append(d...)
+	return list, diags
 }
 
 func (r *edgeLocationResource) toAWS(ctx context.Context, plan, config *awsModel) (*omni.AWSParam, diag.Diagnostics) {

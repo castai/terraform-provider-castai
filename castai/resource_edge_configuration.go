@@ -8,6 +8,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/resourcevalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -16,6 +17,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/samber/lo"
 
@@ -42,11 +44,11 @@ type edgeConfigurationModel struct {
 	Name           types.String              `tfsdk:"name"`
 	Default        types.Bool                `tfsdk:"default"`
 	UserDataBase64 types.String              `tfsdk:"user_data_base64"`
+	CRI            types.Object              `tfsdk:"cri"`
 	GCP            *gcpConfigurationModel    `tfsdk:"gcp"`
 	AWS            *awsConfigurationModel    `tfsdk:"aws"`
 	OCI            *ociConfigurationModel    `tfsdk:"oci"`
 	Custom         *customConfigurationModel `tfsdk:"custom"`
-	CRI            *criConfigurationModel    `tfsdk:"cri"`
 }
 
 type gcpConfigurationModel struct {
@@ -73,6 +75,33 @@ type customConfigurationModel struct {
 
 type criConfigurationModel struct {
 	Socket types.String `tfsdk:"socket"`
+}
+
+var criAttrTypes = map[string]attr.Type{
+	"socket": types.StringType,
+}
+
+func criFromObject(ctx context.Context, obj types.Object) (*criConfigurationModel, diag.Diagnostics) {
+	var diags diag.Diagnostics
+	if obj.IsNull() || obj.IsUnknown() {
+		return nil, diags
+	}
+	var m criConfigurationModel
+	diags = obj.As(ctx, &m, basetypes.ObjectAsOptions{})
+	if diags.HasError() {
+		return nil, diags
+	}
+	return &m, diags
+}
+
+func criToObject(ctx context.Context, m *criConfigurationModel) (types.Object, diag.Diagnostics) {
+	var diags diag.Diagnostics
+	if m == nil {
+		return types.ObjectNull(criAttrTypes), diags
+	}
+	obj, d := types.ObjectValueFrom(ctx, criAttrTypes, m)
+	diags.Append(d...)
+	return obj, diags
 }
 
 func newEdgeConfigurationResource() resource.Resource {
@@ -274,7 +303,13 @@ func (r *edgeConfigurationResource) Create(ctx context.Context, req resource.Cre
 	customConfig, d := r.toCustomConfiguration(ctx, plan.Custom)
 	resp.Diagnostics.Append(d...)
 
-	criConfig, d := r.toCRIConfiguration(ctx, plan.CRI)
+	planCRI, d := criFromObject(ctx, plan.CRI)
+	resp.Diagnostics.Append(d...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	criConfig, d := r.toCRIConfiguration(ctx, planCRI)
 	resp.Diagnostics.Append(d...)
 
 	if resp.Diagnostics.HasError() {
@@ -314,10 +349,12 @@ func (r *edgeConfigurationResource) Create(ctx context.Context, req resource.Cre
 		return
 	}
 
-	state := r.edgeConfigurationToTFModel(ctx, apiResp.JSON200, plan.OrganizationID, plan.ClusterID)
-	state.EdgeLocationID = plan.EdgeLocationID
+	var diags diag.Diagnostics
+	tfModel := r.edgeConfigurationToTFModel(ctx, apiResp.JSON200, plan.OrganizationID, plan.ClusterID, &diags)
+	tfModel.EdgeLocationID = plan.EdgeLocationID
+	resp.Diagnostics.Append(diags...)
 
-	resp.Diagnostics.Append(resp.State.Set(ctx, state)...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, tfModel)...)
 }
 
 func (r *edgeConfigurationResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -368,9 +405,11 @@ func (r *edgeConfigurationResource) Read(ctx context.Context, req resource.ReadR
 		return
 	}
 
-	state = r.edgeConfigurationToTFModel(ctx, apiResp.JSON200, state.OrganizationID, state.ClusterID)
+	var diags diag.Diagnostics
+	tfModel := r.edgeConfigurationToTFModel(ctx, apiResp.JSON200, state.OrganizationID, state.ClusterID, &diags)
+	resp.Diagnostics.Append(diags...)
 
-	resp.Diagnostics.Append(resp.State.Set(ctx, state)...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, tfModel)...)
 }
 
 func (r *edgeConfigurationResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
@@ -407,7 +446,13 @@ func (r *edgeConfigurationResource) Update(ctx context.Context, req resource.Upd
 	customConfig, d := r.toCustomConfiguration(ctx, plan.Custom)
 	resp.Diagnostics.Append(d...)
 
-	criConfig, d := r.toCRIConfiguration(ctx, plan.CRI)
+	planCRI, d := criFromObject(ctx, plan.CRI)
+	resp.Diagnostics.Append(d...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	criConfig, d := r.toCRIConfiguration(ctx, planCRI)
 	resp.Diagnostics.Append(d...)
 
 	if resp.Diagnostics.HasError() {
@@ -446,9 +491,11 @@ func (r *edgeConfigurationResource) Update(ctx context.Context, req resource.Upd
 		return
 	}
 
-	state := r.edgeConfigurationToTFModel(ctx, apiResp.JSON200, plan.OrganizationID, plan.ClusterID)
+	var diags diag.Diagnostics
+	tfModel := r.edgeConfigurationToTFModel(ctx, apiResp.JSON200, plan.OrganizationID, plan.ClusterID, &diags)
+	resp.Diagnostics.Append(diags...)
 
-	resp.Diagnostics.Append(resp.State.Set(ctx, state)...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, tfModel)...)
 }
 
 func (r *edgeConfigurationResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -579,7 +626,7 @@ func (r *edgeConfigurationResource) getOrganizationID(organizationID types.Strin
 	return r.client.organizationID
 }
 
-func (r *edgeConfigurationResource) edgeConfigurationToTFModel(ctx context.Context, config *omni.EdgeConfiguration, organizationID types.String, clusterID types.String) edgeConfigurationModel {
+func (r *edgeConfigurationResource) edgeConfigurationToTFModel(ctx context.Context, config *omni.EdgeConfiguration, organizationID types.String, clusterID types.String, diags *diag.Diagnostics) edgeConfigurationModel {
 	state := edgeConfigurationModel{
 		ID:             types.StringValue(lo.FromPtr(config.Id)),
 		OrganizationID: organizationID,
@@ -592,8 +639,10 @@ func (r *edgeConfigurationResource) edgeConfigurationToTFModel(ctx context.Conte
 		AWS:            r.toAWSConfigurationModel(ctx, config.Aws),
 		OCI:            r.toOCIConfigurationModel(ctx, config.Oci),
 		Custom:         r.toCustomConfigurationModel(ctx, config.Custom),
-		CRI:            r.toCRIConfigurationModel(ctx, config.Cri),
 	}
+
+	m := r.toCRIConfigurationModel(ctx, config.Cri)
+	state.CRI, *diags = criToObject(ctx, m)
 
 	return state
 }
