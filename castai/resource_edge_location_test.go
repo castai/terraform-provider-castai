@@ -36,6 +36,7 @@ func TestAccCloudAgnostic_ResourceEdgeLocationOCI(t *testing.T) {
 					resource.TestCheckResourceAttrSet(resourceName, "oci.subnet_id"),
 					resource.TestCheckResourceAttrSet(resourceName, "id"),
 					resource.TestCheckResourceAttr(resourceName, "credentials_revision", "1"),
+					resource.TestCheckResourceAttr(resourceName, "networking.tunneled_cidrs.#", "0"),
 				),
 			},
 			{
@@ -101,6 +102,10 @@ resource "castai_edge_location" "test" {
     subnet_id         = "ocid1.subnet.oc1.phx.example"
     security_group_id = "ocid1.networksecuritygroup.oc1.phx.example"
   }
+
+  networking = {
+    tunneled_cidrs = []
+  }
 }
 `, rName, description, organizationID, ociCredentials))
 }
@@ -134,7 +139,7 @@ func TestAccCloudAgnostic_ResourceEdgeLocationAWSImpersonation(t *testing.T) {
 					resource.TestCheckResourceAttrSet(resourceName, "aws.security_group_id"),
 					resource.TestCheckResourceAttrSet(resourceName, "id"),
 					resource.TestCheckResourceAttr(resourceName, "credentials_revision", "1"),
-					resource.TestCheckNoResourceAttr(resourceName, "networking"),
+					resource.TestCheckResourceAttr(resourceName, "networking.tunneled_cidrs.#", "0"),
 					resource.TestCheckNoResourceAttr(resourceName, "control_plane"),
 				),
 			},
@@ -146,8 +151,9 @@ func TestAccCloudAgnostic_ResourceEdgeLocationAWSImpersonation(t *testing.T) {
 					edgeLocationID := s.RootModule().Resources[resourceName].Primary.ID
 					return fmt.Sprintf("%v/%v/%v", organizationID, clusterID, edgeLocationID), nil
 				},
-				ImportState:       true,
-				ImportStateVerify: true,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"networking"},
 			},
 			{
 				Config: testAccEdgeLocationAWSImpersonationUpdated(rName, clusterName),
@@ -170,7 +176,7 @@ func TestAccCloudAgnostic_ResourceEdgeLocationAWSImpersonation(t *testing.T) {
 			{
 				Config: testAccEdgeLocationAWSImpersonationConfig(rName, clusterName),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckNoResourceAttr(resourceName, "networking"),
+					resource.TestCheckResourceAttr(resourceName, "networking.tunneled_cidrs.#", "0"),
 					resource.TestCheckNoResourceAttr(resourceName, "control_plane"),
 				),
 			},
@@ -204,6 +210,7 @@ func TestAccCloudAgnostic_ResourceEdgeLocationGCPImpersonation(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "gcp.subnet_cidr", "10.0.0.0/20"),
 					resource.TestCheckResourceAttrSet(resourceName, "id"),
 					resource.TestCheckResourceAttr(resourceName, "credentials_revision", "1"),
+					resource.TestCheckResourceAttr(resourceName, "networking.tunneled_cidrs.#", "0"),
 				),
 			},
 			{
@@ -263,7 +270,10 @@ func testAccEdgeLocationAWSImpersonationConfigWithParams(rName, clusterName, des
 
 	zonesConfig, subnetConfig := formatAWSZonesAndSubnets(zones)
 
-	networkingBlock := ""
+	networkingBlock := `
+  networking = {
+    tunneled_cidrs = []
+  }`
 	if tunneledCIDRs != nil {
 		quoted := make([]string, 0, len(tunneledCIDRs))
 		for _, c := range tunneledCIDRs {
@@ -370,6 +380,10 @@ resource "castai_edge_location" "test" {
   region          	 = "us-central1"
   control_plane_mode = "SHARED"
 %[3]s
+
+  networking = {
+    tunneled_cidrs = []
+  }
 
   gcp = {
     project_id                   = "test-project-123456"

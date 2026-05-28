@@ -255,6 +255,146 @@ func (mr *MockClientInterfaceMockRecorder) ClustersAPIReportStatusWithBody(ctx, 
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ClustersAPIReportStatusWithBody", reflect.TypeOf((*MockClientInterface)(nil).ClustersAPIReportStatusWithBody), varargs...)
 }
 
+// EdgeConfigurationsAPICreateEdgeConfiguration mocks base method.
+func (m *MockClientInterface) EdgeConfigurationsAPICreateEdgeConfiguration(ctx context.Context, organizationId, clusterId, edgeLocationId string, body omni.EdgeConfigurationsAPICreateEdgeConfigurationJSONRequestBody, reqEditors ...omni.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId, clusterId, edgeLocationId, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "EdgeConfigurationsAPICreateEdgeConfiguration", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// EdgeConfigurationsAPICreateEdgeConfiguration indicates an expected call of EdgeConfigurationsAPICreateEdgeConfiguration.
+func (mr *MockClientInterfaceMockRecorder) EdgeConfigurationsAPICreateEdgeConfiguration(ctx, organizationId, clusterId, edgeLocationId, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId, clusterId, edgeLocationId, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EdgeConfigurationsAPICreateEdgeConfiguration", reflect.TypeOf((*MockClientInterface)(nil).EdgeConfigurationsAPICreateEdgeConfiguration), varargs...)
+}
+
+// EdgeConfigurationsAPICreateEdgeConfigurationWithBody mocks base method.
+func (m *MockClientInterface) EdgeConfigurationsAPICreateEdgeConfigurationWithBody(ctx context.Context, organizationId, clusterId, edgeLocationId, contentType string, body io.Reader, reqEditors ...omni.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId, clusterId, edgeLocationId, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "EdgeConfigurationsAPICreateEdgeConfigurationWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// EdgeConfigurationsAPICreateEdgeConfigurationWithBody indicates an expected call of EdgeConfigurationsAPICreateEdgeConfigurationWithBody.
+func (mr *MockClientInterfaceMockRecorder) EdgeConfigurationsAPICreateEdgeConfigurationWithBody(ctx, organizationId, clusterId, edgeLocationId, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId, clusterId, edgeLocationId, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EdgeConfigurationsAPICreateEdgeConfigurationWithBody", reflect.TypeOf((*MockClientInterface)(nil).EdgeConfigurationsAPICreateEdgeConfigurationWithBody), varargs...)
+}
+
+// EdgeConfigurationsAPIDeleteEdgeConfiguration mocks base method.
+func (m *MockClientInterface) EdgeConfigurationsAPIDeleteEdgeConfiguration(ctx context.Context, organizationId, clusterId, edgeLocationId, id string, reqEditors ...omni.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId, clusterId, edgeLocationId, id}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "EdgeConfigurationsAPIDeleteEdgeConfiguration", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// EdgeConfigurationsAPIDeleteEdgeConfiguration indicates an expected call of EdgeConfigurationsAPIDeleteEdgeConfiguration.
+func (mr *MockClientInterfaceMockRecorder) EdgeConfigurationsAPIDeleteEdgeConfiguration(ctx, organizationId, clusterId, edgeLocationId, id interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId, clusterId, edgeLocationId, id}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EdgeConfigurationsAPIDeleteEdgeConfiguration", reflect.TypeOf((*MockClientInterface)(nil).EdgeConfigurationsAPIDeleteEdgeConfiguration), varargs...)
+}
+
+// EdgeConfigurationsAPIGetEdgeConfiguration mocks base method.
+func (m *MockClientInterface) EdgeConfigurationsAPIGetEdgeConfiguration(ctx context.Context, organizationId, clusterId, edgeLocationId, id string, params *omni.EdgeConfigurationsAPIGetEdgeConfigurationParams, reqEditors ...omni.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId, clusterId, edgeLocationId, id, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "EdgeConfigurationsAPIGetEdgeConfiguration", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// EdgeConfigurationsAPIGetEdgeConfiguration indicates an expected call of EdgeConfigurationsAPIGetEdgeConfiguration.
+func (mr *MockClientInterfaceMockRecorder) EdgeConfigurationsAPIGetEdgeConfiguration(ctx, organizationId, clusterId, edgeLocationId, id, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId, clusterId, edgeLocationId, id, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EdgeConfigurationsAPIGetEdgeConfiguration", reflect.TypeOf((*MockClientInterface)(nil).EdgeConfigurationsAPIGetEdgeConfiguration), varargs...)
+}
+
+// EdgeConfigurationsAPIListEdgeConfigurations mocks base method.
+func (m *MockClientInterface) EdgeConfigurationsAPIListEdgeConfigurations(ctx context.Context, organizationId, clusterId string, params *omni.EdgeConfigurationsAPIListEdgeConfigurationsParams, reqEditors ...omni.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId, clusterId, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "EdgeConfigurationsAPIListEdgeConfigurations", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// EdgeConfigurationsAPIListEdgeConfigurations indicates an expected call of EdgeConfigurationsAPIListEdgeConfigurations.
+func (mr *MockClientInterfaceMockRecorder) EdgeConfigurationsAPIListEdgeConfigurations(ctx, organizationId, clusterId, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId, clusterId, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EdgeConfigurationsAPIListEdgeConfigurations", reflect.TypeOf((*MockClientInterface)(nil).EdgeConfigurationsAPIListEdgeConfigurations), varargs...)
+}
+
+// EdgeConfigurationsAPIUpdateEdgeConfiguration mocks base method.
+func (m *MockClientInterface) EdgeConfigurationsAPIUpdateEdgeConfiguration(ctx context.Context, organizationId, clusterId, edgeLocationId, id string, params *omni.EdgeConfigurationsAPIUpdateEdgeConfigurationParams, body omni.EdgeConfigurationsAPIUpdateEdgeConfigurationJSONRequestBody, reqEditors ...omni.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId, clusterId, edgeLocationId, id, params, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "EdgeConfigurationsAPIUpdateEdgeConfiguration", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// EdgeConfigurationsAPIUpdateEdgeConfiguration indicates an expected call of EdgeConfigurationsAPIUpdateEdgeConfiguration.
+func (mr *MockClientInterfaceMockRecorder) EdgeConfigurationsAPIUpdateEdgeConfiguration(ctx, organizationId, clusterId, edgeLocationId, id, params, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId, clusterId, edgeLocationId, id, params, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EdgeConfigurationsAPIUpdateEdgeConfiguration", reflect.TypeOf((*MockClientInterface)(nil).EdgeConfigurationsAPIUpdateEdgeConfiguration), varargs...)
+}
+
+// EdgeConfigurationsAPIUpdateEdgeConfigurationWithBody mocks base method.
+func (m *MockClientInterface) EdgeConfigurationsAPIUpdateEdgeConfigurationWithBody(ctx context.Context, organizationId, clusterId, edgeLocationId, id string, params *omni.EdgeConfigurationsAPIUpdateEdgeConfigurationParams, contentType string, body io.Reader, reqEditors ...omni.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId, clusterId, edgeLocationId, id, params, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "EdgeConfigurationsAPIUpdateEdgeConfigurationWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// EdgeConfigurationsAPIUpdateEdgeConfigurationWithBody indicates an expected call of EdgeConfigurationsAPIUpdateEdgeConfigurationWithBody.
+func (mr *MockClientInterfaceMockRecorder) EdgeConfigurationsAPIUpdateEdgeConfigurationWithBody(ctx, organizationId, clusterId, edgeLocationId, id, params, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId, clusterId, edgeLocationId, id, params, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EdgeConfigurationsAPIUpdateEdgeConfigurationWithBody", reflect.TypeOf((*MockClientInterface)(nil).EdgeConfigurationsAPIUpdateEdgeConfigurationWithBody), varargs...)
+}
+
 // EdgeLocationsAPICreateEdgeLocation mocks base method.
 func (m *MockClientInterface) EdgeLocationsAPICreateEdgeLocation(ctx context.Context, organizationId, clusterId string, body omni.EdgeLocationsAPICreateEdgeLocationJSONRequestBody, reqEditors ...omni.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
@@ -871,6 +1011,251 @@ func (m *MockClientWithResponsesInterface) ClustersAPIReportStatusWithResponse(c
 func (mr *MockClientWithResponsesInterfaceMockRecorder) ClustersAPIReportStatusWithResponse(ctx, organizationId, id, body interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ClustersAPIReportStatusWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ClustersAPIReportStatusWithResponse), ctx, organizationId, id, body)
+}
+
+// EdgeConfigurationsAPICreateEdgeConfiguration mocks base method.
+func (m *MockClientWithResponsesInterface) EdgeConfigurationsAPICreateEdgeConfiguration(ctx context.Context, organizationId, clusterId, edgeLocationId string, body omni.EdgeConfigurationsAPICreateEdgeConfigurationJSONRequestBody, reqEditors ...omni.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId, clusterId, edgeLocationId, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "EdgeConfigurationsAPICreateEdgeConfiguration", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// EdgeConfigurationsAPICreateEdgeConfiguration indicates an expected call of EdgeConfigurationsAPICreateEdgeConfiguration.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) EdgeConfigurationsAPICreateEdgeConfiguration(ctx, organizationId, clusterId, edgeLocationId, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId, clusterId, edgeLocationId, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EdgeConfigurationsAPICreateEdgeConfiguration", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).EdgeConfigurationsAPICreateEdgeConfiguration), varargs...)
+}
+
+// EdgeConfigurationsAPICreateEdgeConfigurationWithBody mocks base method.
+func (m *MockClientWithResponsesInterface) EdgeConfigurationsAPICreateEdgeConfigurationWithBody(ctx context.Context, organizationId, clusterId, edgeLocationId, contentType string, body io.Reader, reqEditors ...omni.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId, clusterId, edgeLocationId, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "EdgeConfigurationsAPICreateEdgeConfigurationWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// EdgeConfigurationsAPICreateEdgeConfigurationWithBody indicates an expected call of EdgeConfigurationsAPICreateEdgeConfigurationWithBody.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) EdgeConfigurationsAPICreateEdgeConfigurationWithBody(ctx, organizationId, clusterId, edgeLocationId, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId, clusterId, edgeLocationId, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EdgeConfigurationsAPICreateEdgeConfigurationWithBody", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).EdgeConfigurationsAPICreateEdgeConfigurationWithBody), varargs...)
+}
+
+// EdgeConfigurationsAPICreateEdgeConfigurationWithBodyWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) EdgeConfigurationsAPICreateEdgeConfigurationWithBodyWithResponse(ctx context.Context, organizationId, clusterId, edgeLocationId, contentType string, body io.Reader) (*omni.EdgeConfigurationsAPICreateEdgeConfigurationResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "EdgeConfigurationsAPICreateEdgeConfigurationWithBodyWithResponse", ctx, organizationId, clusterId, edgeLocationId, contentType, body)
+	ret0, _ := ret[0].(*omni.EdgeConfigurationsAPICreateEdgeConfigurationResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// EdgeConfigurationsAPICreateEdgeConfigurationWithBodyWithResponse indicates an expected call of EdgeConfigurationsAPICreateEdgeConfigurationWithBodyWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) EdgeConfigurationsAPICreateEdgeConfigurationWithBodyWithResponse(ctx, organizationId, clusterId, edgeLocationId, contentType, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EdgeConfigurationsAPICreateEdgeConfigurationWithBodyWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).EdgeConfigurationsAPICreateEdgeConfigurationWithBodyWithResponse), ctx, organizationId, clusterId, edgeLocationId, contentType, body)
+}
+
+// EdgeConfigurationsAPICreateEdgeConfigurationWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) EdgeConfigurationsAPICreateEdgeConfigurationWithResponse(ctx context.Context, organizationId, clusterId, edgeLocationId string, body omni.EdgeConfigurationsAPICreateEdgeConfigurationJSONRequestBody) (*omni.EdgeConfigurationsAPICreateEdgeConfigurationResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "EdgeConfigurationsAPICreateEdgeConfigurationWithResponse", ctx, organizationId, clusterId, edgeLocationId, body)
+	ret0, _ := ret[0].(*omni.EdgeConfigurationsAPICreateEdgeConfigurationResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// EdgeConfigurationsAPICreateEdgeConfigurationWithResponse indicates an expected call of EdgeConfigurationsAPICreateEdgeConfigurationWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) EdgeConfigurationsAPICreateEdgeConfigurationWithResponse(ctx, organizationId, clusterId, edgeLocationId, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EdgeConfigurationsAPICreateEdgeConfigurationWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).EdgeConfigurationsAPICreateEdgeConfigurationWithResponse), ctx, organizationId, clusterId, edgeLocationId, body)
+}
+
+// EdgeConfigurationsAPIDeleteEdgeConfiguration mocks base method.
+func (m *MockClientWithResponsesInterface) EdgeConfigurationsAPIDeleteEdgeConfiguration(ctx context.Context, organizationId, clusterId, edgeLocationId, id string, reqEditors ...omni.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId, clusterId, edgeLocationId, id}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "EdgeConfigurationsAPIDeleteEdgeConfiguration", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// EdgeConfigurationsAPIDeleteEdgeConfiguration indicates an expected call of EdgeConfigurationsAPIDeleteEdgeConfiguration.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) EdgeConfigurationsAPIDeleteEdgeConfiguration(ctx, organizationId, clusterId, edgeLocationId, id interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId, clusterId, edgeLocationId, id}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EdgeConfigurationsAPIDeleteEdgeConfiguration", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).EdgeConfigurationsAPIDeleteEdgeConfiguration), varargs...)
+}
+
+// EdgeConfigurationsAPIDeleteEdgeConfigurationWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) EdgeConfigurationsAPIDeleteEdgeConfigurationWithResponse(ctx context.Context, organizationId, clusterId, edgeLocationId, id string) (*omni.EdgeConfigurationsAPIDeleteEdgeConfigurationResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "EdgeConfigurationsAPIDeleteEdgeConfigurationWithResponse", ctx, organizationId, clusterId, edgeLocationId, id)
+	ret0, _ := ret[0].(*omni.EdgeConfigurationsAPIDeleteEdgeConfigurationResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// EdgeConfigurationsAPIDeleteEdgeConfigurationWithResponse indicates an expected call of EdgeConfigurationsAPIDeleteEdgeConfigurationWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) EdgeConfigurationsAPIDeleteEdgeConfigurationWithResponse(ctx, organizationId, clusterId, edgeLocationId, id interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EdgeConfigurationsAPIDeleteEdgeConfigurationWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).EdgeConfigurationsAPIDeleteEdgeConfigurationWithResponse), ctx, organizationId, clusterId, edgeLocationId, id)
+}
+
+// EdgeConfigurationsAPIGetEdgeConfiguration mocks base method.
+func (m *MockClientWithResponsesInterface) EdgeConfigurationsAPIGetEdgeConfiguration(ctx context.Context, organizationId, clusterId, edgeLocationId, id string, params *omni.EdgeConfigurationsAPIGetEdgeConfigurationParams, reqEditors ...omni.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId, clusterId, edgeLocationId, id, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "EdgeConfigurationsAPIGetEdgeConfiguration", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// EdgeConfigurationsAPIGetEdgeConfiguration indicates an expected call of EdgeConfigurationsAPIGetEdgeConfiguration.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) EdgeConfigurationsAPIGetEdgeConfiguration(ctx, organizationId, clusterId, edgeLocationId, id, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId, clusterId, edgeLocationId, id, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EdgeConfigurationsAPIGetEdgeConfiguration", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).EdgeConfigurationsAPIGetEdgeConfiguration), varargs...)
+}
+
+// EdgeConfigurationsAPIGetEdgeConfigurationWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) EdgeConfigurationsAPIGetEdgeConfigurationWithResponse(ctx context.Context, organizationId, clusterId, edgeLocationId, id string, params *omni.EdgeConfigurationsAPIGetEdgeConfigurationParams) (*omni.EdgeConfigurationsAPIGetEdgeConfigurationResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "EdgeConfigurationsAPIGetEdgeConfigurationWithResponse", ctx, organizationId, clusterId, edgeLocationId, id, params)
+	ret0, _ := ret[0].(*omni.EdgeConfigurationsAPIGetEdgeConfigurationResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// EdgeConfigurationsAPIGetEdgeConfigurationWithResponse indicates an expected call of EdgeConfigurationsAPIGetEdgeConfigurationWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) EdgeConfigurationsAPIGetEdgeConfigurationWithResponse(ctx, organizationId, clusterId, edgeLocationId, id, params interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EdgeConfigurationsAPIGetEdgeConfigurationWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).EdgeConfigurationsAPIGetEdgeConfigurationWithResponse), ctx, organizationId, clusterId, edgeLocationId, id, params)
+}
+
+// EdgeConfigurationsAPIListEdgeConfigurations mocks base method.
+func (m *MockClientWithResponsesInterface) EdgeConfigurationsAPIListEdgeConfigurations(ctx context.Context, organizationId, clusterId string, params *omni.EdgeConfigurationsAPIListEdgeConfigurationsParams, reqEditors ...omni.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId, clusterId, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "EdgeConfigurationsAPIListEdgeConfigurations", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// EdgeConfigurationsAPIListEdgeConfigurations indicates an expected call of EdgeConfigurationsAPIListEdgeConfigurations.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) EdgeConfigurationsAPIListEdgeConfigurations(ctx, organizationId, clusterId, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId, clusterId, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EdgeConfigurationsAPIListEdgeConfigurations", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).EdgeConfigurationsAPIListEdgeConfigurations), varargs...)
+}
+
+// EdgeConfigurationsAPIListEdgeConfigurationsWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) EdgeConfigurationsAPIListEdgeConfigurationsWithResponse(ctx context.Context, organizationId, clusterId string, params *omni.EdgeConfigurationsAPIListEdgeConfigurationsParams) (*omni.EdgeConfigurationsAPIListEdgeConfigurationsResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "EdgeConfigurationsAPIListEdgeConfigurationsWithResponse", ctx, organizationId, clusterId, params)
+	ret0, _ := ret[0].(*omni.EdgeConfigurationsAPIListEdgeConfigurationsResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// EdgeConfigurationsAPIListEdgeConfigurationsWithResponse indicates an expected call of EdgeConfigurationsAPIListEdgeConfigurationsWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) EdgeConfigurationsAPIListEdgeConfigurationsWithResponse(ctx, organizationId, clusterId, params interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EdgeConfigurationsAPIListEdgeConfigurationsWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).EdgeConfigurationsAPIListEdgeConfigurationsWithResponse), ctx, organizationId, clusterId, params)
+}
+
+// EdgeConfigurationsAPIUpdateEdgeConfiguration mocks base method.
+func (m *MockClientWithResponsesInterface) EdgeConfigurationsAPIUpdateEdgeConfiguration(ctx context.Context, organizationId, clusterId, edgeLocationId, id string, params *omni.EdgeConfigurationsAPIUpdateEdgeConfigurationParams, body omni.EdgeConfigurationsAPIUpdateEdgeConfigurationJSONRequestBody, reqEditors ...omni.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId, clusterId, edgeLocationId, id, params, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "EdgeConfigurationsAPIUpdateEdgeConfiguration", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// EdgeConfigurationsAPIUpdateEdgeConfiguration indicates an expected call of EdgeConfigurationsAPIUpdateEdgeConfiguration.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) EdgeConfigurationsAPIUpdateEdgeConfiguration(ctx, organizationId, clusterId, edgeLocationId, id, params, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId, clusterId, edgeLocationId, id, params, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EdgeConfigurationsAPIUpdateEdgeConfiguration", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).EdgeConfigurationsAPIUpdateEdgeConfiguration), varargs...)
+}
+
+// EdgeConfigurationsAPIUpdateEdgeConfigurationWithBody mocks base method.
+func (m *MockClientWithResponsesInterface) EdgeConfigurationsAPIUpdateEdgeConfigurationWithBody(ctx context.Context, organizationId, clusterId, edgeLocationId, id string, params *omni.EdgeConfigurationsAPIUpdateEdgeConfigurationParams, contentType string, body io.Reader, reqEditors ...omni.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId, clusterId, edgeLocationId, id, params, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "EdgeConfigurationsAPIUpdateEdgeConfigurationWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// EdgeConfigurationsAPIUpdateEdgeConfigurationWithBody indicates an expected call of EdgeConfigurationsAPIUpdateEdgeConfigurationWithBody.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) EdgeConfigurationsAPIUpdateEdgeConfigurationWithBody(ctx, organizationId, clusterId, edgeLocationId, id, params, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId, clusterId, edgeLocationId, id, params, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EdgeConfigurationsAPIUpdateEdgeConfigurationWithBody", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).EdgeConfigurationsAPIUpdateEdgeConfigurationWithBody), varargs...)
+}
+
+// EdgeConfigurationsAPIUpdateEdgeConfigurationWithBodyWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) EdgeConfigurationsAPIUpdateEdgeConfigurationWithBodyWithResponse(ctx context.Context, organizationId, clusterId, edgeLocationId, id string, params *omni.EdgeConfigurationsAPIUpdateEdgeConfigurationParams, contentType string, body io.Reader) (*omni.EdgeConfigurationsAPIUpdateEdgeConfigurationResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "EdgeConfigurationsAPIUpdateEdgeConfigurationWithBodyWithResponse", ctx, organizationId, clusterId, edgeLocationId, id, params, contentType, body)
+	ret0, _ := ret[0].(*omni.EdgeConfigurationsAPIUpdateEdgeConfigurationResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// EdgeConfigurationsAPIUpdateEdgeConfigurationWithBodyWithResponse indicates an expected call of EdgeConfigurationsAPIUpdateEdgeConfigurationWithBodyWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) EdgeConfigurationsAPIUpdateEdgeConfigurationWithBodyWithResponse(ctx, organizationId, clusterId, edgeLocationId, id, params, contentType, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EdgeConfigurationsAPIUpdateEdgeConfigurationWithBodyWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).EdgeConfigurationsAPIUpdateEdgeConfigurationWithBodyWithResponse), ctx, organizationId, clusterId, edgeLocationId, id, params, contentType, body)
+}
+
+// EdgeConfigurationsAPIUpdateEdgeConfigurationWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) EdgeConfigurationsAPIUpdateEdgeConfigurationWithResponse(ctx context.Context, organizationId, clusterId, edgeLocationId, id string, params *omni.EdgeConfigurationsAPIUpdateEdgeConfigurationParams, body omni.EdgeConfigurationsAPIUpdateEdgeConfigurationJSONRequestBody) (*omni.EdgeConfigurationsAPIUpdateEdgeConfigurationResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "EdgeConfigurationsAPIUpdateEdgeConfigurationWithResponse", ctx, organizationId, clusterId, edgeLocationId, id, params, body)
+	ret0, _ := ret[0].(*omni.EdgeConfigurationsAPIUpdateEdgeConfigurationResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// EdgeConfigurationsAPIUpdateEdgeConfigurationWithResponse indicates an expected call of EdgeConfigurationsAPIUpdateEdgeConfigurationWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) EdgeConfigurationsAPIUpdateEdgeConfigurationWithResponse(ctx, organizationId, clusterId, edgeLocationId, id, params, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EdgeConfigurationsAPIUpdateEdgeConfigurationWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).EdgeConfigurationsAPIUpdateEdgeConfigurationWithResponse), ctx, organizationId, clusterId, edgeLocationId, id, params, body)
 }
 
 // EdgeLocationsAPICreateEdgeLocation mocks base method.

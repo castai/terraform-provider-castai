@@ -93,6 +93,9 @@ type ClientInterface interface {
 	// ClustersAPIListClusters request
 	ClustersAPIListClusters(ctx context.Context, organizationId string, params *ClustersAPIListClustersParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// EdgeConfigurationsAPIListEdgeConfigurations request
+	EdgeConfigurationsAPIListEdgeConfigurations(ctx context.Context, organizationId string, clusterId string, params *EdgeConfigurationsAPIListEdgeConfigurationsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// EdgeLocationsAPIListEdgeLocations request
 	EdgeLocationsAPIListEdgeLocations(ctx context.Context, organizationId string, clusterId string, params *EdgeLocationsAPIListEdgeLocationsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -100,6 +103,22 @@ type ClientInterface interface {
 	EdgeLocationsAPICreateEdgeLocationWithBody(ctx context.Context, organizationId string, clusterId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	EdgeLocationsAPICreateEdgeLocation(ctx context.Context, organizationId string, clusterId string, body EdgeLocationsAPICreateEdgeLocationJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// EdgeConfigurationsAPICreateEdgeConfigurationWithBody request with any body
+	EdgeConfigurationsAPICreateEdgeConfigurationWithBody(ctx context.Context, organizationId string, clusterId string, edgeLocationId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	EdgeConfigurationsAPICreateEdgeConfiguration(ctx context.Context, organizationId string, clusterId string, edgeLocationId string, body EdgeConfigurationsAPICreateEdgeConfigurationJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// EdgeConfigurationsAPIDeleteEdgeConfiguration request
+	EdgeConfigurationsAPIDeleteEdgeConfiguration(ctx context.Context, organizationId string, clusterId string, edgeLocationId string, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// EdgeConfigurationsAPIGetEdgeConfiguration request
+	EdgeConfigurationsAPIGetEdgeConfiguration(ctx context.Context, organizationId string, clusterId string, edgeLocationId string, id string, params *EdgeConfigurationsAPIGetEdgeConfigurationParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// EdgeConfigurationsAPIUpdateEdgeConfigurationWithBody request with any body
+	EdgeConfigurationsAPIUpdateEdgeConfigurationWithBody(ctx context.Context, organizationId string, clusterId string, edgeLocationId string, id string, params *EdgeConfigurationsAPIUpdateEdgeConfigurationParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	EdgeConfigurationsAPIUpdateEdgeConfiguration(ctx context.Context, organizationId string, clusterId string, edgeLocationId string, id string, params *EdgeConfigurationsAPIUpdateEdgeConfigurationParams, body EdgeConfigurationsAPIUpdateEdgeConfigurationJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// EdgeLocationsAPIDeleteEdgeLocation request
 	EdgeLocationsAPIDeleteEdgeLocation(ctx context.Context, organizationId string, clusterId string, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -167,6 +186,18 @@ func (c *Client) ClustersAPIListClusters(ctx context.Context, organizationId str
 	return c.Client.Do(req)
 }
 
+func (c *Client) EdgeConfigurationsAPIListEdgeConfigurations(ctx context.Context, organizationId string, clusterId string, params *EdgeConfigurationsAPIListEdgeConfigurationsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewEdgeConfigurationsAPIListEdgeConfigurationsRequest(c.Server, organizationId, clusterId, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
 func (c *Client) EdgeLocationsAPIListEdgeLocations(ctx context.Context, organizationId string, clusterId string, params *EdgeLocationsAPIListEdgeLocationsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewEdgeLocationsAPIListEdgeLocationsRequest(c.Server, organizationId, clusterId, params)
 	if err != nil {
@@ -193,6 +224,78 @@ func (c *Client) EdgeLocationsAPICreateEdgeLocationWithBody(ctx context.Context,
 
 func (c *Client) EdgeLocationsAPICreateEdgeLocation(ctx context.Context, organizationId string, clusterId string, body EdgeLocationsAPICreateEdgeLocationJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewEdgeLocationsAPICreateEdgeLocationRequest(c.Server, organizationId, clusterId, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) EdgeConfigurationsAPICreateEdgeConfigurationWithBody(ctx context.Context, organizationId string, clusterId string, edgeLocationId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewEdgeConfigurationsAPICreateEdgeConfigurationRequestWithBody(c.Server, organizationId, clusterId, edgeLocationId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) EdgeConfigurationsAPICreateEdgeConfiguration(ctx context.Context, organizationId string, clusterId string, edgeLocationId string, body EdgeConfigurationsAPICreateEdgeConfigurationJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewEdgeConfigurationsAPICreateEdgeConfigurationRequest(c.Server, organizationId, clusterId, edgeLocationId, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) EdgeConfigurationsAPIDeleteEdgeConfiguration(ctx context.Context, organizationId string, clusterId string, edgeLocationId string, id string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewEdgeConfigurationsAPIDeleteEdgeConfigurationRequest(c.Server, organizationId, clusterId, edgeLocationId, id)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) EdgeConfigurationsAPIGetEdgeConfiguration(ctx context.Context, organizationId string, clusterId string, edgeLocationId string, id string, params *EdgeConfigurationsAPIGetEdgeConfigurationParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewEdgeConfigurationsAPIGetEdgeConfigurationRequest(c.Server, organizationId, clusterId, edgeLocationId, id, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) EdgeConfigurationsAPIUpdateEdgeConfigurationWithBody(ctx context.Context, organizationId string, clusterId string, edgeLocationId string, id string, params *EdgeConfigurationsAPIUpdateEdgeConfigurationParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewEdgeConfigurationsAPIUpdateEdgeConfigurationRequestWithBody(c.Server, organizationId, clusterId, edgeLocationId, id, params, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) EdgeConfigurationsAPIUpdateEdgeConfiguration(ctx context.Context, organizationId string, clusterId string, edgeLocationId string, id string, params *EdgeConfigurationsAPIUpdateEdgeConfigurationParams, body EdgeConfigurationsAPIUpdateEdgeConfigurationJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewEdgeConfigurationsAPIUpdateEdgeConfigurationRequest(c.Server, organizationId, clusterId, edgeLocationId, id, params, body)
 	if err != nil {
 		return nil, err
 	}
@@ -519,6 +622,101 @@ func NewClustersAPIListClustersRequest(server string, organizationId string, par
 	return req, nil
 }
 
+// NewEdgeConfigurationsAPIListEdgeConfigurationsRequest generates requests for EdgeConfigurationsAPIListEdgeConfigurations
+func NewEdgeConfigurationsAPIListEdgeConfigurationsRequest(server string, organizationId string, clusterId string, params *EdgeConfigurationsAPIListEdgeConfigurationsParams) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "organizationId", runtime.ParamLocationPath, organizationId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "clusterId", runtime.ParamLocationPath, clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/omni-provisioner/v1beta/organizations/%s/clusters/%s/edge-configurations", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if params.EdgeLocationId != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "edgeLocationId", runtime.ParamLocationQuery, *params.EdgeLocationId); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.PageLimit != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "page.limit", runtime.ParamLocationQuery, *params.PageLimit); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.PageCursor != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "page.cursor", runtime.ParamLocationQuery, *params.PageCursor); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
 // NewEdgeLocationsAPIListEdgeLocationsRequest generates requests for EdgeLocationsAPIListEdgeLocations
 func NewEdgeLocationsAPIListEdgeLocationsRequest(server string, organizationId string, clusterId string, params *EdgeLocationsAPIListEdgeLocationsParams) (*http.Request, error) {
 	var err error
@@ -643,6 +841,289 @@ func NewEdgeLocationsAPICreateEdgeLocationRequestWithBody(server string, organiz
 	}
 
 	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewEdgeConfigurationsAPICreateEdgeConfigurationRequest calls the generic EdgeConfigurationsAPICreateEdgeConfiguration builder with application/json body
+func NewEdgeConfigurationsAPICreateEdgeConfigurationRequest(server string, organizationId string, clusterId string, edgeLocationId string, body EdgeConfigurationsAPICreateEdgeConfigurationJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewEdgeConfigurationsAPICreateEdgeConfigurationRequestWithBody(server, organizationId, clusterId, edgeLocationId, "application/json", bodyReader)
+}
+
+// NewEdgeConfigurationsAPICreateEdgeConfigurationRequestWithBody generates requests for EdgeConfigurationsAPICreateEdgeConfiguration with any type of body
+func NewEdgeConfigurationsAPICreateEdgeConfigurationRequestWithBody(server string, organizationId string, clusterId string, edgeLocationId string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "organizationId", runtime.ParamLocationPath, organizationId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "clusterId", runtime.ParamLocationPath, clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam2 string
+
+	pathParam2, err = runtime.StyleParamWithLocation("simple", false, "edgeLocationId", runtime.ParamLocationPath, edgeLocationId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/omni-provisioner/v1beta/organizations/%s/clusters/%s/edge-locations/%s/configurations", pathParam0, pathParam1, pathParam2)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewEdgeConfigurationsAPIDeleteEdgeConfigurationRequest generates requests for EdgeConfigurationsAPIDeleteEdgeConfiguration
+func NewEdgeConfigurationsAPIDeleteEdgeConfigurationRequest(server string, organizationId string, clusterId string, edgeLocationId string, id string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "organizationId", runtime.ParamLocationPath, organizationId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "clusterId", runtime.ParamLocationPath, clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam2 string
+
+	pathParam2, err = runtime.StyleParamWithLocation("simple", false, "edgeLocationId", runtime.ParamLocationPath, edgeLocationId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam3 string
+
+	pathParam3, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/omni-provisioner/v1beta/organizations/%s/clusters/%s/edge-locations/%s/configurations/%s", pathParam0, pathParam1, pathParam2, pathParam3)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("DELETE", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewEdgeConfigurationsAPIGetEdgeConfigurationRequest generates requests for EdgeConfigurationsAPIGetEdgeConfiguration
+func NewEdgeConfigurationsAPIGetEdgeConfigurationRequest(server string, organizationId string, clusterId string, edgeLocationId string, id string, params *EdgeConfigurationsAPIGetEdgeConfigurationParams) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "organizationId", runtime.ParamLocationPath, organizationId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "clusterId", runtime.ParamLocationPath, clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam2 string
+
+	pathParam2, err = runtime.StyleParamWithLocation("simple", false, "edgeLocationId", runtime.ParamLocationPath, edgeLocationId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam3 string
+
+	pathParam3, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/omni-provisioner/v1beta/organizations/%s/clusters/%s/edge-locations/%s/configurations/%s", pathParam0, pathParam1, pathParam2, pathParam3)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if params.Version != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "version", runtime.ParamLocationQuery, *params.Version); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewEdgeConfigurationsAPIUpdateEdgeConfigurationRequest calls the generic EdgeConfigurationsAPIUpdateEdgeConfiguration builder with application/json body
+func NewEdgeConfigurationsAPIUpdateEdgeConfigurationRequest(server string, organizationId string, clusterId string, edgeLocationId string, id string, params *EdgeConfigurationsAPIUpdateEdgeConfigurationParams, body EdgeConfigurationsAPIUpdateEdgeConfigurationJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewEdgeConfigurationsAPIUpdateEdgeConfigurationRequestWithBody(server, organizationId, clusterId, edgeLocationId, id, params, "application/json", bodyReader)
+}
+
+// NewEdgeConfigurationsAPIUpdateEdgeConfigurationRequestWithBody generates requests for EdgeConfigurationsAPIUpdateEdgeConfiguration with any type of body
+func NewEdgeConfigurationsAPIUpdateEdgeConfigurationRequestWithBody(server string, organizationId string, clusterId string, edgeLocationId string, id string, params *EdgeConfigurationsAPIUpdateEdgeConfigurationParams, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "organizationId", runtime.ParamLocationPath, organizationId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "clusterId", runtime.ParamLocationPath, clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam2 string
+
+	pathParam2, err = runtime.StyleParamWithLocation("simple", false, "edgeLocationId", runtime.ParamLocationPath, edgeLocationId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam3 string
+
+	pathParam3, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/omni-provisioner/v1beta/organizations/%s/clusters/%s/edge-locations/%s/configurations/%s", pathParam0, pathParam1, pathParam2, pathParam3)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if params.UpdateMask != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "updateMask", runtime.ParamLocationQuery, *params.UpdateMask); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
+	}
+
+	req, err := http.NewRequest("PATCH", queryURL.String(), body)
 	if err != nil {
 		return nil, err
 	}
@@ -1473,6 +1954,9 @@ type ClientWithResponsesInterface interface {
 	// ClustersAPIListClusters request
 	ClustersAPIListClustersWithResponse(ctx context.Context, organizationId string, params *ClustersAPIListClustersParams) (*ClustersAPIListClustersResponse, error)
 
+	// EdgeConfigurationsAPIListEdgeConfigurations request
+	EdgeConfigurationsAPIListEdgeConfigurationsWithResponse(ctx context.Context, organizationId string, clusterId string, params *EdgeConfigurationsAPIListEdgeConfigurationsParams) (*EdgeConfigurationsAPIListEdgeConfigurationsResponse, error)
+
 	// EdgeLocationsAPIListEdgeLocations request
 	EdgeLocationsAPIListEdgeLocationsWithResponse(ctx context.Context, organizationId string, clusterId string, params *EdgeLocationsAPIListEdgeLocationsParams) (*EdgeLocationsAPIListEdgeLocationsResponse, error)
 
@@ -1480,6 +1964,22 @@ type ClientWithResponsesInterface interface {
 	EdgeLocationsAPICreateEdgeLocationWithBodyWithResponse(ctx context.Context, organizationId string, clusterId string, contentType string, body io.Reader) (*EdgeLocationsAPICreateEdgeLocationResponse, error)
 
 	EdgeLocationsAPICreateEdgeLocationWithResponse(ctx context.Context, organizationId string, clusterId string, body EdgeLocationsAPICreateEdgeLocationJSONRequestBody) (*EdgeLocationsAPICreateEdgeLocationResponse, error)
+
+	// EdgeConfigurationsAPICreateEdgeConfiguration request  with any body
+	EdgeConfigurationsAPICreateEdgeConfigurationWithBodyWithResponse(ctx context.Context, organizationId string, clusterId string, edgeLocationId string, contentType string, body io.Reader) (*EdgeConfigurationsAPICreateEdgeConfigurationResponse, error)
+
+	EdgeConfigurationsAPICreateEdgeConfigurationWithResponse(ctx context.Context, organizationId string, clusterId string, edgeLocationId string, body EdgeConfigurationsAPICreateEdgeConfigurationJSONRequestBody) (*EdgeConfigurationsAPICreateEdgeConfigurationResponse, error)
+
+	// EdgeConfigurationsAPIDeleteEdgeConfiguration request
+	EdgeConfigurationsAPIDeleteEdgeConfigurationWithResponse(ctx context.Context, organizationId string, clusterId string, edgeLocationId string, id string) (*EdgeConfigurationsAPIDeleteEdgeConfigurationResponse, error)
+
+	// EdgeConfigurationsAPIGetEdgeConfiguration request
+	EdgeConfigurationsAPIGetEdgeConfigurationWithResponse(ctx context.Context, organizationId string, clusterId string, edgeLocationId string, id string, params *EdgeConfigurationsAPIGetEdgeConfigurationParams) (*EdgeConfigurationsAPIGetEdgeConfigurationResponse, error)
+
+	// EdgeConfigurationsAPIUpdateEdgeConfiguration request  with any body
+	EdgeConfigurationsAPIUpdateEdgeConfigurationWithBodyWithResponse(ctx context.Context, organizationId string, clusterId string, edgeLocationId string, id string, params *EdgeConfigurationsAPIUpdateEdgeConfigurationParams, contentType string, body io.Reader) (*EdgeConfigurationsAPIUpdateEdgeConfigurationResponse, error)
+
+	EdgeConfigurationsAPIUpdateEdgeConfigurationWithResponse(ctx context.Context, organizationId string, clusterId string, edgeLocationId string, id string, params *EdgeConfigurationsAPIUpdateEdgeConfigurationParams, body EdgeConfigurationsAPIUpdateEdgeConfigurationJSONRequestBody) (*EdgeConfigurationsAPIUpdateEdgeConfigurationResponse, error)
 
 	// EdgeLocationsAPIDeleteEdgeLocation request
 	EdgeLocationsAPIDeleteEdgeLocationWithResponse(ctx context.Context, organizationId string, clusterId string, id string) (*EdgeLocationsAPIDeleteEdgeLocationResponse, error)
@@ -1575,6 +2075,37 @@ func (r ClustersAPIListClustersResponse) GetBody() []byte {
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
+type EdgeConfigurationsAPIListEdgeConfigurationsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *ListEdgeConfigurationsResponse
+	JSONDefault  *Status
+}
+
+// Status returns HTTPResponse.Status
+func (r EdgeConfigurationsAPIListEdgeConfigurationsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r EdgeConfigurationsAPIListEdgeConfigurationsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r EdgeConfigurationsAPIListEdgeConfigurationsResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
 type EdgeLocationsAPIListEdgeLocationsResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -1632,6 +2163,129 @@ func (r EdgeLocationsAPICreateEdgeLocationResponse) StatusCode() int {
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
 func (r EdgeLocationsAPICreateEdgeLocationResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type EdgeConfigurationsAPICreateEdgeConfigurationResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *EdgeConfiguration
+	JSONDefault  *Status
+}
+
+// Status returns HTTPResponse.Status
+func (r EdgeConfigurationsAPICreateEdgeConfigurationResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r EdgeConfigurationsAPICreateEdgeConfigurationResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r EdgeConfigurationsAPICreateEdgeConfigurationResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type EdgeConfigurationsAPIDeleteEdgeConfigurationResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSONDefault  *Status
+}
+
+// Status returns HTTPResponse.Status
+func (r EdgeConfigurationsAPIDeleteEdgeConfigurationResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r EdgeConfigurationsAPIDeleteEdgeConfigurationResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r EdgeConfigurationsAPIDeleteEdgeConfigurationResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type EdgeConfigurationsAPIGetEdgeConfigurationResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *EdgeConfiguration
+	JSONDefault  *Status
+}
+
+// Status returns HTTPResponse.Status
+func (r EdgeConfigurationsAPIGetEdgeConfigurationResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r EdgeConfigurationsAPIGetEdgeConfigurationResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r EdgeConfigurationsAPIGetEdgeConfigurationResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type EdgeConfigurationsAPIUpdateEdgeConfigurationResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *EdgeConfiguration
+	JSONDefault  *Status
+}
+
+// Status returns HTTPResponse.Status
+func (r EdgeConfigurationsAPIUpdateEdgeConfigurationResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r EdgeConfigurationsAPIUpdateEdgeConfigurationResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r EdgeConfigurationsAPIUpdateEdgeConfigurationResponse) GetBody() []byte {
 	return r.Body
 }
 
@@ -2105,6 +2759,15 @@ func (c *ClientWithResponses) ClustersAPIListClustersWithResponse(ctx context.Co
 	return ParseClustersAPIListClustersResponse(rsp)
 }
 
+// EdgeConfigurationsAPIListEdgeConfigurationsWithResponse request returning *EdgeConfigurationsAPIListEdgeConfigurationsResponse
+func (c *ClientWithResponses) EdgeConfigurationsAPIListEdgeConfigurationsWithResponse(ctx context.Context, organizationId string, clusterId string, params *EdgeConfigurationsAPIListEdgeConfigurationsParams) (*EdgeConfigurationsAPIListEdgeConfigurationsResponse, error) {
+	rsp, err := c.EdgeConfigurationsAPIListEdgeConfigurations(ctx, organizationId, clusterId, params)
+	if err != nil {
+		return nil, err
+	}
+	return ParseEdgeConfigurationsAPIListEdgeConfigurationsResponse(rsp)
+}
+
 // EdgeLocationsAPIListEdgeLocationsWithResponse request returning *EdgeLocationsAPIListEdgeLocationsResponse
 func (c *ClientWithResponses) EdgeLocationsAPIListEdgeLocationsWithResponse(ctx context.Context, organizationId string, clusterId string, params *EdgeLocationsAPIListEdgeLocationsParams) (*EdgeLocationsAPIListEdgeLocationsResponse, error) {
 	rsp, err := c.EdgeLocationsAPIListEdgeLocations(ctx, organizationId, clusterId, params)
@@ -2129,6 +2792,58 @@ func (c *ClientWithResponses) EdgeLocationsAPICreateEdgeLocationWithResponse(ctx
 		return nil, err
 	}
 	return ParseEdgeLocationsAPICreateEdgeLocationResponse(rsp)
+}
+
+// EdgeConfigurationsAPICreateEdgeConfigurationWithBodyWithResponse request with arbitrary body returning *EdgeConfigurationsAPICreateEdgeConfigurationResponse
+func (c *ClientWithResponses) EdgeConfigurationsAPICreateEdgeConfigurationWithBodyWithResponse(ctx context.Context, organizationId string, clusterId string, edgeLocationId string, contentType string, body io.Reader) (*EdgeConfigurationsAPICreateEdgeConfigurationResponse, error) {
+	rsp, err := c.EdgeConfigurationsAPICreateEdgeConfigurationWithBody(ctx, organizationId, clusterId, edgeLocationId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseEdgeConfigurationsAPICreateEdgeConfigurationResponse(rsp)
+}
+
+func (c *ClientWithResponses) EdgeConfigurationsAPICreateEdgeConfigurationWithResponse(ctx context.Context, organizationId string, clusterId string, edgeLocationId string, body EdgeConfigurationsAPICreateEdgeConfigurationJSONRequestBody) (*EdgeConfigurationsAPICreateEdgeConfigurationResponse, error) {
+	rsp, err := c.EdgeConfigurationsAPICreateEdgeConfiguration(ctx, organizationId, clusterId, edgeLocationId, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseEdgeConfigurationsAPICreateEdgeConfigurationResponse(rsp)
+}
+
+// EdgeConfigurationsAPIDeleteEdgeConfigurationWithResponse request returning *EdgeConfigurationsAPIDeleteEdgeConfigurationResponse
+func (c *ClientWithResponses) EdgeConfigurationsAPIDeleteEdgeConfigurationWithResponse(ctx context.Context, organizationId string, clusterId string, edgeLocationId string, id string) (*EdgeConfigurationsAPIDeleteEdgeConfigurationResponse, error) {
+	rsp, err := c.EdgeConfigurationsAPIDeleteEdgeConfiguration(ctx, organizationId, clusterId, edgeLocationId, id)
+	if err != nil {
+		return nil, err
+	}
+	return ParseEdgeConfigurationsAPIDeleteEdgeConfigurationResponse(rsp)
+}
+
+// EdgeConfigurationsAPIGetEdgeConfigurationWithResponse request returning *EdgeConfigurationsAPIGetEdgeConfigurationResponse
+func (c *ClientWithResponses) EdgeConfigurationsAPIGetEdgeConfigurationWithResponse(ctx context.Context, organizationId string, clusterId string, edgeLocationId string, id string, params *EdgeConfigurationsAPIGetEdgeConfigurationParams) (*EdgeConfigurationsAPIGetEdgeConfigurationResponse, error) {
+	rsp, err := c.EdgeConfigurationsAPIGetEdgeConfiguration(ctx, organizationId, clusterId, edgeLocationId, id, params)
+	if err != nil {
+		return nil, err
+	}
+	return ParseEdgeConfigurationsAPIGetEdgeConfigurationResponse(rsp)
+}
+
+// EdgeConfigurationsAPIUpdateEdgeConfigurationWithBodyWithResponse request with arbitrary body returning *EdgeConfigurationsAPIUpdateEdgeConfigurationResponse
+func (c *ClientWithResponses) EdgeConfigurationsAPIUpdateEdgeConfigurationWithBodyWithResponse(ctx context.Context, organizationId string, clusterId string, edgeLocationId string, id string, params *EdgeConfigurationsAPIUpdateEdgeConfigurationParams, contentType string, body io.Reader) (*EdgeConfigurationsAPIUpdateEdgeConfigurationResponse, error) {
+	rsp, err := c.EdgeConfigurationsAPIUpdateEdgeConfigurationWithBody(ctx, organizationId, clusterId, edgeLocationId, id, params, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseEdgeConfigurationsAPIUpdateEdgeConfigurationResponse(rsp)
+}
+
+func (c *ClientWithResponses) EdgeConfigurationsAPIUpdateEdgeConfigurationWithResponse(ctx context.Context, organizationId string, clusterId string, edgeLocationId string, id string, params *EdgeConfigurationsAPIUpdateEdgeConfigurationParams, body EdgeConfigurationsAPIUpdateEdgeConfigurationJSONRequestBody) (*EdgeConfigurationsAPIUpdateEdgeConfigurationResponse, error) {
+	rsp, err := c.EdgeConfigurationsAPIUpdateEdgeConfiguration(ctx, organizationId, clusterId, edgeLocationId, id, params, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseEdgeConfigurationsAPIUpdateEdgeConfigurationResponse(rsp)
 }
 
 // EdgeLocationsAPIDeleteEdgeLocationWithResponse request returning *EdgeLocationsAPIDeleteEdgeLocationResponse
@@ -2331,6 +3046,39 @@ func ParseClustersAPIListClustersResponse(rsp *http.Response) (*ClustersAPIListC
 	return response, nil
 }
 
+// ParseEdgeConfigurationsAPIListEdgeConfigurationsResponse parses an HTTP response from a EdgeConfigurationsAPIListEdgeConfigurationsWithResponse call
+func ParseEdgeConfigurationsAPIListEdgeConfigurationsResponse(rsp *http.Response) (*EdgeConfigurationsAPIListEdgeConfigurationsResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &EdgeConfigurationsAPIListEdgeConfigurationsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest ListEdgeConfigurationsResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
+		var dest Status
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSONDefault = &dest
+
+	}
+
+	return response, nil
+}
+
 // ParseEdgeLocationsAPIListEdgeLocationsResponse parses an HTTP response from a EdgeLocationsAPIListEdgeLocationsWithResponse call
 func ParseEdgeLocationsAPIListEdgeLocationsResponse(rsp *http.Response) (*EdgeLocationsAPIListEdgeLocationsResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
@@ -2380,6 +3128,131 @@ func ParseEdgeLocationsAPICreateEdgeLocationResponse(rsp *http.Response) (*EdgeL
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest EdgeLocation
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
+		var dest Status
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSONDefault = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseEdgeConfigurationsAPICreateEdgeConfigurationResponse parses an HTTP response from a EdgeConfigurationsAPICreateEdgeConfigurationWithResponse call
+func ParseEdgeConfigurationsAPICreateEdgeConfigurationResponse(rsp *http.Response) (*EdgeConfigurationsAPICreateEdgeConfigurationResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &EdgeConfigurationsAPICreateEdgeConfigurationResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest EdgeConfiguration
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
+		var dest Status
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSONDefault = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseEdgeConfigurationsAPIDeleteEdgeConfigurationResponse parses an HTTP response from a EdgeConfigurationsAPIDeleteEdgeConfigurationWithResponse call
+func ParseEdgeConfigurationsAPIDeleteEdgeConfigurationResponse(rsp *http.Response) (*EdgeConfigurationsAPIDeleteEdgeConfigurationResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &EdgeConfigurationsAPIDeleteEdgeConfigurationResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
+		var dest Status
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSONDefault = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseEdgeConfigurationsAPIGetEdgeConfigurationResponse parses an HTTP response from a EdgeConfigurationsAPIGetEdgeConfigurationWithResponse call
+func ParseEdgeConfigurationsAPIGetEdgeConfigurationResponse(rsp *http.Response) (*EdgeConfigurationsAPIGetEdgeConfigurationResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &EdgeConfigurationsAPIGetEdgeConfigurationResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest EdgeConfiguration
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
+		var dest Status
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSONDefault = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseEdgeConfigurationsAPIUpdateEdgeConfigurationResponse parses an HTTP response from a EdgeConfigurationsAPIUpdateEdgeConfigurationWithResponse call
+func ParseEdgeConfigurationsAPIUpdateEdgeConfigurationResponse(rsp *http.Response) (*EdgeConfigurationsAPIUpdateEdgeConfigurationResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &EdgeConfigurationsAPIUpdateEdgeConfigurationResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest EdgeConfiguration
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
