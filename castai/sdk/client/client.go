@@ -9,8 +9,12 @@ import (
 )
 
 func GetHttpClient(apiToken, userAgent string) (*http.Client, []func(ctx context.Context, req *http.Request) error) {
+	transport := NewRetryTransport(
+		logging.NewSubsystemLoggingHTTPTransport("CAST.AI", http.DefaultTransport),
+		DefaultRetryTransportConfig(),
+	)
 	client := &http.Client{
-		Transport: logging.NewSubsystemLoggingHTTPTransport("CAST.AI", http.DefaultTransport),
+		Transport: transport,
 		Timeout:   1 * time.Minute,
 	}
 	requestEditors := []func(ctx context.Context, req *http.Request) error{
