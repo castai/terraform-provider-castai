@@ -1276,11 +1276,10 @@ func Test_toWorkloadScalingPoliciesMap(t *testing.T) {
 			},
 			expected: []map[string]any{
 				{
-					"function": sdk.WorkloadoptimizationV1ResourcePoliciesFunctionQUANTILE,
-					"args":     []string{"0.9"},
-					"overhead": 0.1,
-					"min":      (*float64)(nil),
-					"max":      (*float64)(nil),
+					"function":    sdk.WorkloadoptimizationV1ResourcePoliciesFunctionQUANTILE,
+					"args":        []string{"0.9"},
+					"overhead":    0.1,
+					FieldConstraints: []map[string]any{},
 					"limit": []map[string]any{
 						{
 							FieldLimitStrategyType:                sdk.WorkloadoptimizationV1ResourceLimitStrategyTypeMULTIPLIER,
@@ -1303,11 +1302,10 @@ func Test_toWorkloadScalingPoliciesMap(t *testing.T) {
 			},
 			expected: []map[string]any{
 				{
-					"function": sdk.WorkloadoptimizationV1ResourcePoliciesFunctionMAX,
-					"args":     []string(nil),
-					"overhead": 0.15,
-					"min":      (*float64)(nil),
-					"max":      (*float64)(nil),
+					"function":     sdk.WorkloadoptimizationV1ResourcePoliciesFunctionMAX,
+					"args":         []string(nil),
+					"overhead":     0.15,
+					FieldConstraints: []map[string]any{},
 					"limit": []map[string]any{
 						{
 							FieldLimitStrategyType:                sdk.WorkloadoptimizationV1ResourceLimitStrategyTypeNOLIMIT,
@@ -1330,11 +1328,10 @@ func Test_toWorkloadScalingPoliciesMap(t *testing.T) {
 			},
 			expected: []map[string]any{
 				{
-					"function": sdk.WorkloadoptimizationV1ResourcePoliciesFunctionQUANTILE,
-					"args":     []string{"0.95"},
-					"overhead": 0.2,
-					"min":      (*float64)(nil),
-					"max":      (*float64)(nil),
+					"function":     sdk.WorkloadoptimizationV1ResourcePoliciesFunctionQUANTILE,
+					"args":         []string{"0.95"},
+					"overhead":     0.2,
+					FieldConstraints: []map[string]any{},
 					"limit": []map[string]any{
 						{
 							FieldLimitStrategyType:                sdk.WorkloadoptimizationV1ResourceLimitStrategyTypeKEEPLIMITS,
@@ -1358,11 +1355,10 @@ func Test_toWorkloadScalingPoliciesMap(t *testing.T) {
 			},
 			expected: []map[string]any{
 				{
-					"function": sdk.WorkloadoptimizationV1ResourcePoliciesFunctionQUANTILE,
-					"args":     []string{"0.5"},
-					"overhead": 0.05,
-					"min":      (*float64)(nil),
-					"max":      (*float64)(nil),
+					"function":     sdk.WorkloadoptimizationV1ResourcePoliciesFunctionQUANTILE,
+					"args":         []string{"0.5"},
+					"overhead":     0.05,
+					FieldConstraints: []map[string]any{},
 					"limit": []map[string]any{
 						{
 							FieldLimitStrategyType:                sdk.WorkloadoptimizationV1ResourceLimitStrategyTypeMULTIPLIER,
@@ -1387,11 +1383,10 @@ func Test_toWorkloadScalingPoliciesMap(t *testing.T) {
 			},
 			expected: []map[string]any{
 				{
-					"function": sdk.WorkloadoptimizationV1ResourcePoliciesFunctionMAX,
-					"args":     []string(nil),
-					"overhead": 0.3,
-					"min":      (*float64)(nil),
-					"max":      (*float64)(nil),
+					"function":     sdk.WorkloadoptimizationV1ResourcePoliciesFunctionMAX,
+					"args":         []string(nil),
+					"overhead":     0.3,
+					FieldConstraints: []map[string]any{},
 					"limit": []map[string]any{
 						{
 							FieldLimitStrategyType:                sdk.WorkloadoptimizationV1ResourceLimitStrategyTypeMULTIPLIER,
@@ -1416,11 +1411,10 @@ func Test_toWorkloadScalingPoliciesMap(t *testing.T) {
 			},
 			expected: []map[string]any{
 				{
-					"function": sdk.WorkloadoptimizationV1ResourcePoliciesFunctionQUANTILE,
-					"args":     []string{"0.8"},
-					"overhead": 0.12,
-					"min":      (*float64)(nil),
-					"max":      (*float64)(nil),
+					"function":     sdk.WorkloadoptimizationV1ResourcePoliciesFunctionQUANTILE,
+					"args":         []string{"0.8"},
+					"overhead":     0.12,
+					FieldConstraints: []map[string]any{},
 					"limit": []map[string]any{
 						{
 							FieldLimitStrategyType:       sdk.WorkloadoptimizationV1ResourceLimitStrategyTypeMULTIPLIER,
@@ -1439,11 +1433,10 @@ func Test_toWorkloadScalingPoliciesMap(t *testing.T) {
 			},
 			expected: []map[string]any{
 				{
-					"function": sdk.WorkloadoptimizationV1ResourcePoliciesFunctionMAX,
-					"args":     []string(nil),
-					"overhead": 0.1,
-					"min":      (*float64)(nil),
-					"max":      (*float64)(nil),
+					"function":     sdk.WorkloadoptimizationV1ResourcePoliciesFunctionMAX,
+					"args":         []string(nil),
+					"overhead":     0.1,
+					FieldConstraints: []map[string]any{},
 				},
 			},
 		},
@@ -1452,8 +1445,460 @@ func Test_toWorkloadScalingPoliciesMap(t *testing.T) {
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
 			r := require.New(t)
-			result := toWorkloadScalingPoliciesMap(tt.previousCfg, tt.policies)
+			result := toWorkloadScalingPoliciesMap(tt.previousCfg, true, tt.policies)
 			r.Equal(tt.expected, result)
 		})
 	}
+}
+
+func Test_toWorkloadScalingPolicies_constraints(t *testing.T) {
+	tests := map[string]struct {
+		args        map[string]interface{}
+		errMsg      string
+		expectNilMinMax bool
+	}{
+		"should return error when both constant and percentage are set": {
+			args: map[string]interface{}{
+				"constraints": []interface{}{
+					map[string]interface{}{
+						"min": []interface{}{
+							map[string]interface{}{
+								"constant":               0.5,
+								"percentage_of_original": 150.0,
+							},
+						},
+					},
+				},
+			},
+			errMsg: `field "cpu": field "constraints": field "min": field "min": cannot specify both "constant" and "percentage_of_original"`,
+		},
+		"should return error when neither constant nor percentage is set": {
+			args: map[string]interface{}{
+				"constraints": []interface{}{
+					map[string]interface{}{
+						"max": []interface{}{
+							map[string]interface{}{},
+						},
+					},
+				},
+			},
+			errMsg: `field "cpu": field "constraints": field "max": field "max": strategy block is empty`,
+		},
+		"should return constraints with constant min": {
+			args: map[string]interface{}{
+				"constraints": []interface{}{
+					map[string]interface{}{
+						"min": []interface{}{
+							map[string]interface{}{
+								"constant": 0.1,
+							},
+						},
+					},
+				},
+			},
+			expectNilMinMax: true,
+		},
+		"should return constraints with percentage max": {
+			args: map[string]interface{}{
+				"constraints": []interface{}{
+					map[string]interface{}{
+						"max": []interface{}{
+							map[string]interface{}{
+								"percentage_of_original": 200.0,
+							},
+						},
+					},
+				},
+			},
+			expectNilMinMax: true,
+		},
+		"should return constraints with both min and max using same strategy type": {
+			args: map[string]interface{}{
+				"constraints": []interface{}{
+					map[string]interface{}{
+						"min": []interface{}{
+							map[string]interface{}{
+								"percentage_of_original": 50.0,
+							},
+						},
+						"max": []interface{}{
+							map[string]interface{}{
+								"percentage_of_original": 150.0,
+							},
+						},
+					},
+				},
+			},
+			expectNilMinMax: true,
+		},
+		"should return error when min and max use different strategy types": {
+			args: map[string]interface{}{
+				"constraints": []interface{}{
+					map[string]interface{}{
+						"min": []interface{}{
+							map[string]interface{}{
+								"constant": 0.1,
+							},
+						},
+						"max": []interface{}{
+							map[string]interface{}{
+								"percentage_of_original": 200.0,
+							},
+						},
+					},
+				},
+			},
+			errMsg: `field "cpu": field "constraints": min and max must use the same strategy type ("constant" or "percentage_of_original")`,
+		},
+		"should return error when constant is zero": {
+			args: map[string]interface{}{
+				"constraints": []interface{}{
+					map[string]interface{}{
+						"min": []interface{}{
+							map[string]interface{}{
+								"constant": 0.0,
+							},
+						},
+					},
+				},
+			},
+			errMsg: `field "cpu": field "constraints": field "min": field "min": must specify either "constant" or "percentage_of_original"`,
+		},
+	}
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			got, err := toWorkloadScalingPolicies("cpu", tt.args)
+			if tt.errMsg == "" {
+				require.NoError(t, err)
+				if tt.expectNilMinMax {
+					require.Nil(t, got.Min, "expected Min to be nil when constraints is set")
+					require.Nil(t, got.Max, "expected Max to be nil when constraints is set")
+				}
+			} else {
+				require.EqualError(t, err, tt.errMsg)
+			}
+		})
+	}
+}
+
+func Test_toWorkloadScalingPoliciesMap_constraints(t *testing.T) {
+	tests := map[string]struct {
+		previousCfg      map[string]any
+		configUsesLegacy bool
+		policies         sdk.WorkloadoptimizationV1ResourcePolicies
+		expected         []map[string]any
+	}{
+		// Scenario 6 from plan: import case with empty previousCfg - constraints should be preserved
+		"should preserve constraints on import (empty previousCfg, no legacy min/max)": {
+			previousCfg: map[string]any{},
+			policies: sdk.WorkloadoptimizationV1ResourcePolicies{
+				Function: sdk.WorkloadoptimizationV1ResourcePoliciesFunctionMAX,
+				Constraints: &sdk.WorkloadoptimizationV1ConstraintsV2{
+					Min: &sdk.WorkloadoptimizationV1ConstraintsV2Strategy{
+						Constant: &sdk.WorkloadoptimizationV1ConstraintsV2Constant{Value: 0.1},
+					},
+				},
+			},
+			expected: []map[string]any{
+				{
+					"function": sdk.WorkloadoptimizationV1ResourcePoliciesFunctionMAX,
+					"args":     []string(nil),
+					"overhead": 0.0,
+					"constraints": []map[string]any{
+						{
+							"min": []map[string]any{
+								{
+									FieldConstraintsConstant: 0.1,
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		"should map constraints with percentage max": {
+			previousCfg: map[string]any{},
+			policies: sdk.WorkloadoptimizationV1ResourcePolicies{
+				Function: sdk.WorkloadoptimizationV1ResourcePoliciesFunctionMAX,
+				Constraints: &sdk.WorkloadoptimizationV1ConstraintsV2{
+					Max: &sdk.WorkloadoptimizationV1ConstraintsV2Strategy{
+						PercentageOfOriginal: &sdk.WorkloadoptimizationV1ConstraintsV2PercentageOfOriginal{Value: 150.0},
+					},
+				},
+			},
+			expected: []map[string]any{
+				{
+					"function": sdk.WorkloadoptimizationV1ResourcePoliciesFunctionMAX,
+					"args":     []string(nil),
+					"overhead": 0.0,
+					"constraints": []map[string]any{
+						{
+							"max": []map[string]any{
+								{
+									FieldConstraintsPercentageOfOriginal: 150.0,
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		// Scenario 1 from plan: API returns constraints → state always has constraints block, no legacy min/max
+		"should map constant min from API to constraints": {
+			previousCfg: map[string]any{
+				"min": float64(0.1),
+			},
+			policies: sdk.WorkloadoptimizationV1ResourcePolicies{
+				Function: sdk.WorkloadoptimizationV1ResourcePoliciesFunctionMAX,
+				Constraints: &sdk.WorkloadoptimizationV1ConstraintsV2{
+					Min: &sdk.WorkloadoptimizationV1ConstraintsV2Strategy{
+						Constant: &sdk.WorkloadoptimizationV1ConstraintsV2Constant{Value: 0.1},
+					},
+				},
+			},
+			expected: []map[string]any{
+				{
+					"function": sdk.WorkloadoptimizationV1ResourcePoliciesFunctionMAX,
+					"args":     []string(nil),
+					"overhead": 0.0,
+					"constraints": []map[string]any{
+						{
+							"min": []map[string]any{
+								{
+									FieldConstraintsConstant: 0.1,
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		// Scenario 2 from plan: API returns constraints → state always has constraints block, no legacy min/max
+		"should map constant max from API to constraints": {
+			previousCfg: map[string]any{
+				"max": float64(100.0),
+			},
+			policies: sdk.WorkloadoptimizationV1ResourcePolicies{
+				Function: sdk.WorkloadoptimizationV1ResourcePoliciesFunctionMAX,
+				Constraints: &sdk.WorkloadoptimizationV1ConstraintsV2{
+					Max: &sdk.WorkloadoptimizationV1ConstraintsV2Strategy{
+						Constant: &sdk.WorkloadoptimizationV1ConstraintsV2Constant{Value: 100.0},
+					},
+				},
+			},
+			expected: []map[string]any{
+				{
+					"function": sdk.WorkloadoptimizationV1ResourcePoliciesFunctionMAX,
+					"args":     []string(nil),
+					"overhead": 0.0,
+					"constraints": []map[string]any{
+						{
+							"max": []map[string]any{
+								{
+									FieldConstraintsConstant: 100.0,
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		// Scenario 3 from plan: API returns constant min+max → state has constraints block
+		"should map constant min and max from API to constraints": {
+			previousCfg: map[string]any{
+				"min": float64(18.0),
+				"max": float64(100.0),
+			},
+			policies: sdk.WorkloadoptimizationV1ResourcePolicies{
+				Function: sdk.WorkloadoptimizationV1ResourcePoliciesFunctionMAX,
+				Constraints: &sdk.WorkloadoptimizationV1ConstraintsV2{
+					Min: &sdk.WorkloadoptimizationV1ConstraintsV2Strategy{
+						Constant: &sdk.WorkloadoptimizationV1ConstraintsV2Constant{Value: 18.0},
+					},
+					Max: &sdk.WorkloadoptimizationV1ConstraintsV2Strategy{
+						Constant: &sdk.WorkloadoptimizationV1ConstraintsV2Constant{Value: 100.0},
+					},
+				},
+			},
+			expected: []map[string]any{
+				{
+					"function": sdk.WorkloadoptimizationV1ResourcePoliciesFunctionMAX,
+					"args":     []string(nil),
+					"overhead": 0.0,
+					"constraints": []map[string]any{
+						{
+							"min": []map[string]any{
+								{
+									FieldConstraintsConstant: 18.0,
+								},
+							},
+							"max": []map[string]any{
+								{
+									FieldConstraintsConstant: 100.0,
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		// Scenario 4: API returns percentage constraint → state has constraints block
+		"should map percentage constraint from API to constraints": {
+			previousCfg: map[string]any{
+				"min": float64(18.0),
+			},
+			policies: sdk.WorkloadoptimizationV1ResourcePolicies{
+				Function: sdk.WorkloadoptimizationV1ResourcePoliciesFunctionMAX,
+				Constraints: &sdk.WorkloadoptimizationV1ConstraintsV2{
+					Min: &sdk.WorkloadoptimizationV1ConstraintsV2Strategy{
+						PercentageOfOriginal: &sdk.WorkloadoptimizationV1ConstraintsV2PercentageOfOriginal{Value: 50.0},
+					},
+				},
+			},
+			expected: []map[string]any{
+				{
+					"function": sdk.WorkloadoptimizationV1ResourcePoliciesFunctionMAX,
+					"args":     []string(nil),
+					"overhead": 0.0,
+					"constraints": []map[string]any{
+						{
+							"min": []map[string]any{
+								{
+									FieldConstraintsPercentageOfOriginal: 50.0,
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		// Scenario 5 from plan: API returns constant min, previousCfg has constraints block - preserve constraints
+		"should preserve constraints when previousCfg uses constraints": {
+			previousCfg: map[string]any{
+				FieldConstraints: []any{
+					map[string]any{
+						"min": []any{
+							map[string]any{
+								FieldConstraintsConstant: 0.1,
+							},
+						},
+					},
+				},
+			},
+			policies: sdk.WorkloadoptimizationV1ResourcePolicies{
+				Function: sdk.WorkloadoptimizationV1ResourcePoliciesFunctionMAX,
+				Constraints: &sdk.WorkloadoptimizationV1ConstraintsV2{
+					Min: &sdk.WorkloadoptimizationV1ConstraintsV2Strategy{
+						Constant: &sdk.WorkloadoptimizationV1ConstraintsV2Constant{Value: 0.1},
+					},
+				},
+			},
+			expected: []map[string]any{
+				{
+					"function": sdk.WorkloadoptimizationV1ResourcePoliciesFunctionMAX,
+					"args":     []string(nil),
+					"overhead": 0.0,
+					"constraints": []map[string]any{
+						{
+							"min": []map[string]any{
+								{
+									FieldConstraintsConstant: 0.1,
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		// Scenario: both min and max where min is constant but max is percentage (mixed - can't fully translate)
+		// Since previousCfg is empty (no legacy min/max), we preserve constraints as-is
+		"should preserve constraints when previousCfg is empty (import case) even with mixed strategies": {
+			previousCfg: map[string]any{},
+			policies: sdk.WorkloadoptimizationV1ResourcePolicies{
+				Function: sdk.WorkloadoptimizationV1ResourcePoliciesFunctionMAX,
+				Constraints: &sdk.WorkloadoptimizationV1ConstraintsV2{
+					Min: &sdk.WorkloadoptimizationV1ConstraintsV2Strategy{
+						Constant: &sdk.WorkloadoptimizationV1ConstraintsV2Constant{Value: 0.1},
+					},
+					Max: &sdk.WorkloadoptimizationV1ConstraintsV2Strategy{
+						PercentageOfOriginal: &sdk.WorkloadoptimizationV1ConstraintsV2PercentageOfOriginal{Value: 200.0},
+					},
+				},
+			},
+			expected: []map[string]any{
+				{
+					"function": sdk.WorkloadoptimizationV1ResourcePoliciesFunctionMAX,
+					"args":     []string(nil),
+					"overhead": 0.0,
+					"constraints": []map[string]any{
+						{
+							"min": []map[string]any{
+								{
+									FieldConstraintsConstant: 0.1,
+								},
+							},
+							"max": []map[string]any{
+								{
+									FieldConstraintsPercentageOfOriginal: 200.0,
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		"should not include constraints when nil": {
+			previousCfg: map[string]any{},
+			policies: sdk.WorkloadoptimizationV1ResourcePolicies{
+				Function:    sdk.WorkloadoptimizationV1ResourcePoliciesFunctionMAX,
+				Constraints: nil,
+			},
+			expected: []map[string]any{
+				{
+					"function": sdk.WorkloadoptimizationV1ResourcePoliciesFunctionMAX,
+					"args":     []string(nil),
+					"overhead": 0.0,
+				},
+			},
+		},
+	}
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			r := require.New(t)
+			result := toWorkloadScalingPoliciesMap(tt.previousCfg, tt.configUsesLegacy, tt.policies)
+			r.Equal(tt.expected, result)
+		})
+	}
+}
+
+// Test_toWorkloadScalingPoliciesMap_user_config_legacy_empty_state specifically covers the bug scenario:
+// - user config has legacy min/max (userConfigHasLegacy = true)
+// - previous state is empty (e.g., import, first read after create)
+// - API returns constraints
+// In this case, we should translate API constraints back to legacy min, NOT store constraints.
+func Test_toWorkloadScalingPoliciesMap_user_config_legacy_empty_state(t *testing.T) {
+	r := require.New(t)
+	// This scenario (user HCL has legacy min but state has no legacy) now works via diff suppression.
+	// Read always writes constraints; diff suppression hides the legacy min diff when constraints present.
+	result := toWorkloadScalingPoliciesMap(
+		map[string]any{},
+		true,
+		sdk.WorkloadoptimizationV1ResourcePolicies{
+			Function: sdk.WorkloadoptimizationV1ResourcePoliciesFunctionMAX,
+			Constraints: &sdk.WorkloadoptimizationV1ConstraintsV2{
+				Min: &sdk.WorkloadoptimizationV1ConstraintsV2Strategy{
+					Constant: &sdk.WorkloadoptimizationV1ConstraintsV2Constant{Value: 0.1},
+				},
+			},
+		},
+	)
+	r.Equal([]map[string]any{
+		{
+			"function":     sdk.WorkloadoptimizationV1ResourcePoliciesFunctionMAX,
+			"args":         []string(nil),
+			"overhead":     0.0,
+			"min":          float64(0.1),
+			FieldConstraints: []map[string]any{},
+		},
+	}, result)
 }
