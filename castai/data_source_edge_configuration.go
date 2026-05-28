@@ -37,7 +37,7 @@ type edgeConfigurationSingleDataModel struct {
 	Gcp            *gcpConfigurationModel `tfsdk:"gcp"`
 	Oci            *ociConfigurationModel `tfsdk:"oci"`
 	Custom         types.Map              `tfsdk:"custom"`
-	CRI            *criConfigurationModel `tfsdk:"cri"`
+	CRI            types.Object           `tfsdk:"cri"`
 }
 
 // findEdgeConfigurationByName searches for an edge configuration by name in the list response.
@@ -248,13 +248,16 @@ func (d *edgeConfigurationDataSource) Read(ctx context.Context, req datasource.R
 	}
 	data.UserDataBase64 = normalizeStringPtr(config.UserDataBase64)
 
+	var diags diag.Diagnostics
+	var criModel *criConfigurationModel
 	if config.Cri != nil {
-		data.CRI = &criConfigurationModel{
+		criModel = &criConfigurationModel{
 			Socket: types.StringPointerValue(config.Cri.Socket),
 		}
 	}
+	data.CRI, diags = criToObject(ctx, criModel)
+	resp.Diagnostics.Append(diags...)
 
-	var diags diag.Diagnostics
 	if config.Aws != nil {
 		data.Aws = &awsConfigurationModel{
 			ImageID:         types.StringPointerValue(config.Aws.ImageId),
