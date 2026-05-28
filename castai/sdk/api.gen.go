@@ -11690,6 +11690,9 @@ type ExternalClusterAPIGetConnectAndEnableCASTAICmdParams struct {
 
 	// UseUmbrella Whether to use umbrella Helm chart for onboarding.
 	UseUmbrella *bool `form:"useUmbrella,omitempty" json:"useUmbrella,omitempty"`
+
+	// UseCastctl Whether to use castctl to connect a cluster.
+	UseCastctl *bool `form:"useCastctl,omitempty" json:"useCastctl,omitempty"`
 }
 
 // ExternalClusterAPIGetCredentialsScriptParams defines parameters for ExternalClusterAPIGetCredentialsScript.
