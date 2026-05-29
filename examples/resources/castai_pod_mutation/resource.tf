@@ -302,39 +302,3 @@ resource "castai_pod_mutation" "multi_pool_distribution" {
     }
   }
 }
-
-# Pod mutation with eviction enforcement — non-conforming pods will be evicted
-# and rescheduled onto compliant nodes.
-resource "castai_pod_mutation" "enforce_with_eviction" {
-  cluster_id = castai_eks_cluster.example.id
-  name       = "enforce-spot-with-eviction"
-  enabled    = true
-
-  filter_v2 {
-    workload {
-      namespaces {
-        type  = "EXACT"
-        value = "production"
-      }
-      kinds {
-        type  = "EXACT"
-        value = "Deployment"
-      }
-    }
-  }
-
-  spot_config {
-    spot_mode               = "USE_ONLY_SPOT"
-    distribution_percentage = 100
-  }
-
-  tolerations {
-    key      = "scheduling.cast.ai/spot"
-    operator = "Exists"
-    effect   = "NoSchedule"
-  }
-
-  pod_eviction {
-    enabled = true
-  }
-}

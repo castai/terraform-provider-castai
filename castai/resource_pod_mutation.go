@@ -24,7 +24,6 @@ const (
 	FieldPodMutationClusterID                      = "cluster_id"
 	FieldPodMutationName                           = "name"
 	FieldPodMutationEnabled                        = "enabled"
-	FieldPodMutationPodEviction                    = "pod_eviction"
 	FieldPodMutationFilterV2                       = "filter_v2"
 	FieldPodMutationFilterWorkload                 = "workload"
 	FieldPodMutationFilterPod                      = "pod"
@@ -464,21 +463,6 @@ func resourcePodMutation() *schema.Resource {
 			Computed:    true,
 			Description: "Source of the pod mutation (API or CUSTOM_RESOURCE).",
 		},
-		FieldPodMutationPodEviction: {
-			Type:        schema.TypeList,
-			Optional:    true,
-			MaxItems:    1,
-			Description: "Eviction settings for enforcement of pod mutations.",
-			Elem: &schema.Resource{
-				Schema: map[string]*schema.Schema{
-					"enabled": {
-						Type:        schema.TypeBool,
-						Required:    true,
-						Description: "Whether non-conforming pods are eligible for eviction.",
-					},
-				},
-			},
-		},
 	}
 
 	// Add shared mutation config fields to the top-level schema
@@ -779,15 +763,6 @@ func stateToPodMutation(d *schema.ResourceData) patching_engine.PodMutation {
 	groups := stateToDistributionGroups(d.Get(FieldPodMutationDistributionGroups).([]interface{}))
 	if len(groups) > 0 {
 		mutation.DistributionGroups = &groups
-	}
-
-	// Pod eviction
-	if evictionList, ok := d.Get(FieldPodMutationPodEviction).([]interface{}); ok && len(evictionList) > 0 && evictionList[0] != nil {
-		em := evictionList[0].(map[string]interface{})
-		enabled := em["enabled"].(bool)
-		mutation.PodEviction = &patching_engine.PodEviction{
-			Enabled: &enabled,
-		}
 	}
 
 	return mutation
@@ -1298,20 +1273,6 @@ func podMutationToState(mutation *patching_engine.PodMutation, d *schema.Resourc
 
 	if mutation.Source != nil {
 		if err := d.Set(FieldPodMutationSource, string(*mutation.Source)); err != nil {
-			return diag.FromErr(err)
-		}
-	}
-
-	// Pod eviction — normalize API default (Enabled=false) to empty list to avoid perpetual diff
-	if mutation.PodEviction != nil && mutation.PodEviction.Enabled != nil && *mutation.PodEviction.Enabled {
-		evictionMap := map[string]interface{}{
-			"enabled": lo.FromPtr(mutation.PodEviction.Enabled),
-		}
-		if err := d.Set(FieldPodMutationPodEviction, []map[string]interface{}{evictionMap}); err != nil {
-			return diag.FromErr(err)
-		}
-	} else {
-		if err := d.Set(FieldPodMutationPodEviction, []map[string]interface{}{}); err != nil {
 			return diag.FromErr(err)
 		}
 	}
