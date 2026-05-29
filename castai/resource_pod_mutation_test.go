@@ -1042,7 +1042,7 @@ func TestFlattenObjectFilterV2(t *testing.T) {
 	t.Run("pod only", func(t *testing.T) {
 		r := require.New(t)
 
-		op := patching_engine.AND
+		op := patching_engine.ObjectFilterV2LabelsFilterOperatorAND
 		filter := &patching_engine.ObjectFilterV2{
 			Labels: &patching_engine.ObjectFilterV2LabelsFilter{
 				Operator: &op,
@@ -1072,7 +1072,7 @@ func TestFlattenObjectFilterV2(t *testing.T) {
 	t.Run("workload and pod combined", func(t *testing.T) {
 		r := require.New(t)
 
-		op := patching_engine.OR
+		op := patching_engine.ObjectFilterV2LabelsFilterOperatorOR
 		filter := &patching_engine.ObjectFilterV2{
 			Names: &[]patching_engine.ObjectFilterV2Matcher{
 				{Type: lo.ToPtr(patching_engine.EXACT), Value: lo.ToPtr("my-deploy")},
@@ -1185,7 +1185,7 @@ func TestStateToObjectFilterV2(t *testing.T) {
 		r.Nil(filter.Namespaces)
 		r.Nil(filter.Kinds)
 		r.NotNil(filter.Labels)
-		r.Equal(patching_engine.AND, lo.FromPtr(filter.Labels.Operator))
+		r.Equal(patching_engine.ObjectFilterV2LabelsFilterOperatorAND, lo.FromPtr(filter.Labels.Operator))
 		r.Len(*filter.Labels.Matchers, 1)
 		r.Equal("app", lo.FromPtr((*filter.Labels.Matchers)[0].Key.Value))
 		r.Equal("web", lo.FromPtr((*filter.Labels.Matchers)[0].Value.Value))
@@ -1266,7 +1266,7 @@ func TestStateToObjectFilterV2(t *testing.T) {
 
 		r.Nil(filter.Labels)
 		r.NotNil(filter.ExcludeLabels)
-		r.Equal(patching_engine.OR, lo.FromPtr(filter.ExcludeLabels.Operator))
+		r.Equal(patching_engine.ObjectFilterV2LabelsFilterOperatorOR, lo.FromPtr(filter.ExcludeLabels.Operator))
 		r.Len(*filter.ExcludeLabels.Matchers, 1)
 		r.Equal("env", lo.FromPtr((*filter.ExcludeLabels.Matchers)[0].Key.Value))
 		r.Equal("dev", lo.FromPtr((*filter.ExcludeLabels.Matchers)[0].Value.Value))
@@ -1279,7 +1279,7 @@ func TestFlattenObjectFilterV2_MatcherValues(t *testing.T) {
 	t.Run("labels_filter matcher key and value are preserved", func(t *testing.T) {
 		r := require.New(t)
 
-		op := patching_engine.AND
+		op := patching_engine.ObjectFilterV2LabelsFilterOperatorAND
 		filter := &patching_engine.ObjectFilterV2{
 			Labels: &patching_engine.ObjectFilterV2LabelsFilter{
 				Operator: &op,
@@ -1310,7 +1310,7 @@ func TestFlattenObjectFilterV2_MatcherValues(t *testing.T) {
 	t.Run("exclude_labels matcher content is preserved", func(t *testing.T) {
 		r := require.New(t)
 
-		op := patching_engine.OR
+		op := patching_engine.ObjectFilterV2LabelsFilterOperatorOR
 		filter := &patching_engine.ObjectFilterV2{
 			ExcludeLabels: &patching_engine.ObjectFilterV2LabelsFilter{
 				Operator: &op,

@@ -87,8 +87,8 @@ var matcherTypeValues = []string{
 }
 
 var labelsFilterOperatorValues = []string{
-	string(patching_engine.AND),
-	string(patching_engine.OR),
+	string(patching_engine.ObjectFilterV2LabelsFilterOperatorAND),
+	string(patching_engine.ObjectFilterV2LabelsFilterOperatorOR),
 }
 
 var matcherSchema = &schema.Resource{
