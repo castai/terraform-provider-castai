@@ -4081,6 +4081,9 @@ type CostreportV1beta1GetAllocationGroupCostSummariesResponseSummary struct {
 	// RequestedStorageGibHours Total requested storage GiB hours for the given time period.
 	RequestedStorageGibHours *string `json:"requestedStorageGibHours,omitempty"`
 
+	// RequestedTpuHours Total requested TPU chip hours for the given time period.
+	RequestedTpuHours *string `json:"requestedTpuHours,omitempty"`
+
 	// TotalCostOnDemand Total cost of on-demand instances for the given time period.
 	TotalCostOnDemand *string `json:"totalCostOnDemand,omitempty"`
 
@@ -4089,7 +4092,13 @@ type CostreportV1beta1GetAllocationGroupCostSummariesResponseSummary struct {
 
 	// TotalCostSpotFallback Total cost of spot-fallback instances for the given time period.
 	TotalCostSpotFallback *string `json:"totalCostSpotFallback,omitempty"`
-	WorkloadCount         *string `json:"workloadCount,omitempty"`
+
+	// TpuCost Total TPU cost of on-demand instances for the given time period.
+	TpuCost *string `json:"tpuCost,omitempty"`
+
+	// TpuCount Average number of TPU chips for the given time period.
+	TpuCount      *string `json:"tpuCount,omitempty"`
+	WorkloadCount *string `json:"workloadCount,omitempty"`
 }
 
 // CostreportV1beta1GetAllocationGroupCostTimedSummariesResponse defines model for costreport.v1beta1.GetAllocationGroupCostTimedSummariesResponse.
@@ -4144,6 +4153,9 @@ type CostreportV1beta1GetAllocationGroupCostTimedSummariesResponseSummary struct
 	// RequestedStorageGibHours Total requested storage GiB hours for the given time period.
 	RequestedStorageGibHours *string `json:"requestedStorageGibHours,omitempty"`
 
+	// RequestedTpuHours Total requested TPU chip hours for the given time period.
+	RequestedTpuHours *string `json:"requestedTpuHours,omitempty"`
+
 	// Timestamp Timestamp of entry.
 	Timestamp *time.Time `json:"timestamp,omitempty"`
 
@@ -4155,7 +4167,13 @@ type CostreportV1beta1GetAllocationGroupCostTimedSummariesResponseSummary struct
 
 	// TotalCostSpotFallback Total cost of spot-fallback instances for the given time period.
 	TotalCostSpotFallback *string `json:"totalCostSpotFallback,omitempty"`
-	WorkloadCount         *string `json:"workloadCount,omitempty"`
+
+	// TpuCost Total TPU cost of on-demand instances for the given time period.
+	TpuCost *string `json:"tpuCost,omitempty"`
+
+	// TpuCount Average number of TPU chips for the given time period.
+	TpuCount      *string `json:"tpuCount,omitempty"`
+	WorkloadCount *string `json:"workloadCount,omitempty"`
 }
 
 // CostreportV1beta1GetAllocationGroupEfficiencySummaryResponse defines model for costreport.v1beta1.GetAllocationGroupEfficiencySummaryResponse.
@@ -4301,6 +4319,12 @@ type CostreportV1beta1GetAllocationGroupWorkloadCostsResponseWorkloadItem struct
 	// TotalCostSpotFallback Total cost of spot-fallback instances for the given time period.
 	TotalCostSpotFallback *string `json:"totalCostSpotFallback,omitempty"`
 	TotalPodCount         *string `json:"totalPodCount,omitempty"`
+
+	// TpuCost Total TPU cost of on-demand instances for the given time period.
+	TpuCost *string `json:"tpuCost,omitempty"`
+
+	// TpuCount Average number of TPU chips for the given time period.
+	TpuCount *string `json:"tpuCount,omitempty"`
 
 	// WorkloadName Name of the workload.
 	WorkloadName *string `json:"workloadName,omitempty"`
@@ -11690,6 +11714,9 @@ type ExternalClusterAPIGetConnectAndEnableCASTAICmdParams struct {
 
 	// UseUmbrella Whether to use umbrella Helm chart for onboarding.
 	UseUmbrella *bool `form:"useUmbrella,omitempty" json:"useUmbrella,omitempty"`
+
+	// UseCastctl Whether to use castctl to connect a cluster.
+	UseCastctl *bool `form:"useCastctl,omitempty" json:"useCastctl,omitempty"`
 }
 
 // ExternalClusterAPIGetCredentialsScriptParams defines parameters for ExternalClusterAPIGetCredentialsScript.
