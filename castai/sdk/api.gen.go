@@ -3071,6 +3071,15 @@ type CastaiRbacV1beta1GroupSubject struct {
 // CastaiRbacV1beta1Kind Kind represents the type of the member.
 type CastaiRbacV1beta1Kind string
 
+// CastaiRbacV1beta1ListPermissionGroupsResponse ListPermissionGroupsResponse is the response message for listing available permission groups.
+type CastaiRbacV1beta1ListPermissionGroupsResponse struct {
+	// NextPage Page defines how many and which fields should be returned.
+	NextPage *CastaiPaginationV1beta1Page `json:"nextPage,omitempty"`
+
+	// PermissionGroups List of available permission groups for the calling user in the organization.
+	PermissionGroups *[]CastaiRbacV1beta1PermissionGroup `json:"permissionGroups,omitempty"`
+}
+
 // CastaiRbacV1beta1ListRoleBindingsResponse defines model for castai.rbac.v1beta1.ListRoleBindingsResponse.
 type CastaiRbacV1beta1ListRoleBindingsResponse struct {
 	// NextPage Page defines how many and which fields should be returned.
@@ -3109,6 +3118,15 @@ type CastaiRbacV1beta1Member struct {
 type CastaiRbacV1beta1OrganizationScope struct {
 	// Id ID is the unique identifier of the organization.
 	Id string `json:"id"`
+}
+
+// CastaiRbacV1beta1PermissionGroup PermissionGroup represents a named group of permissions.
+type CastaiRbacV1beta1PermissionGroup struct {
+	// Name Name of the permission group.
+	Name *string `json:"name,omitempty"`
+
+	// Permissions List of permissions in this group.
+	Permissions *[]CastaiRbacV1beta1Permissions `json:"permissions,omitempty"`
 }
 
 // CastaiRbacV1beta1Permissions defines model for castai.rbac.v1beta1.Permissions.
@@ -11118,6 +11136,15 @@ type WorkloadoptimizationV1WorkloadsSummaryMetrics struct {
 	MemoryRequestGibs         float64   `json:"memoryRequestGibs"`
 	MemoryUsageGibs           float64   `json:"memoryUsageGibs"`
 	Timestamp                 time.Time `json:"timestamp"`
+}
+
+// RbacServiceAPIListPermissionGroupsParams defines parameters for RbacServiceAPIListPermissionGroups.
+type RbacServiceAPIListPermissionGroupsParams struct {
+	PageLimit *string `form:"page.limit,omitempty" json:"page.limit,omitempty"`
+
+	// PageCursor Cursor that defines token indicating where to start the next page.
+	// Empty value indicates to start from beginning of the dataset.
+	PageCursor *string `form:"page.cursor,omitempty" json:"page.cursor,omitempty"`
 }
 
 // CommitmentsAPIGetCommitmentUsageHistoryParams defines parameters for CommitmentsAPIGetCommitmentUsageHistory.
