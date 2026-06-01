@@ -89,7 +89,6 @@ func TestPodMutation_ReadContext(t *testing.T) {
 			},
 			SpotType:                   lo.ToPtr(patching_engine.PodMutationSpotTypeOPTIONALSPOT),
 			SpotDistributionPercentage: lo.ToPtr(int32(80)),
-			Source:                     lo.ToPtr(patching_engine.API),
 			ObjectFilterV2: &patching_engine.ObjectFilterV2{
 				Namespaces: &[]patching_engine.ObjectFilterV2Matcher{
 					{Type: lo.ToPtr(patching_engine.EXACT), Value: lo.ToPtr("default")},
@@ -105,6 +104,10 @@ func TestPodMutation_ReadContext(t *testing.T) {
 					Value:    lo.ToPtr("spot"),
 					Effect:   lo.ToPtr("NoSchedule"),
 				},
+			},
+			Source: lo.ToPtr(patching_engine.API),
+			PodEviction: &patching_engine.PodEviction{
+				Enabled: lo.ToPtr(true),
 			},
 		}
 
@@ -169,6 +172,12 @@ func TestPodMutation_ReadContext(t *testing.T) {
 		r.Equal("Equal", data.Get("tolerations.0.operator"))
 		r.Equal("spot", data.Get("tolerations.0.value"))
 		r.Equal("NoSchedule", data.Get("tolerations.0.effect"))
+
+		// Verify pod_eviction is populated because API returned Enabled=true
+		evictionList := data.Get(FieldPodMutationPodEviction).([]interface{})
+		r.Len(evictionList, 1)
+		evictionMap := evictionList[0].(map[string]interface{})
+		r.Equal(true, evictionMap["enabled"])
 	})
 
 	t.Run("when API returns 500 then return error", func(t *testing.T) {
@@ -849,6 +858,159 @@ func TestStateToDistributionGroups(t *testing.T) {
 	})
 }
 
+func TestPodMutationToState_PodEvictionNormalization(t *testing.T) {
+	t.Parallel()
+
+	t.Run("API returns PodEviction{Enabled: false} — state normalized to empty list", func(t *testing.T) {
+		r := require.New(t)
+
+		mockClient := mock_patching_engine.NewMockClientInterface(gomock.NewController(t))
+		ctx := context.Background()
+		provider := &ProviderConfig{
+			patchingEngineClient: &patching_engine.ClientWithResponses{
+				ClientInterface: mockClient,
+			},
+		}
+
+		mutation := patching_engine.PodMutation{
+			Id:             lo.ToPtr(testMutationID),
+			Name:           lo.ToPtr("no-eviction"),
+			Enabled:        lo.ToPtr(true),
+			ClusterId:      lo.ToPtr(testClusterID),
+			OrganizationId: lo.ToPtr(testOrgID),
+			Source:         lo.ToPtr(patching_engine.API),
+			ObjectFilterV2: &patching_engine.ObjectFilterV2{
+				Namespaces: &[]patching_engine.ObjectFilterV2Matcher{
+					{Type: lo.ToPtr(patching_engine.EXACT), Value: lo.ToPtr("default")},
+				},
+			},
+			PodEviction: &patching_engine.PodEviction{
+				Enabled: lo.ToPtr(false),
+			},
+		}
+
+		respBody, _ := json.Marshal(mutation)
+		mockClient.EXPECT().
+			PodMutationsAPIGetPodMutation(gomock.Any(), testOrgID, testClusterID, testMutationID).
+			Return(&http.Response{
+				StatusCode: http.StatusOK,
+				Body:       io.NopCloser(bytes.NewReader(respBody)),
+				Header:     map[string][]string{"Content-Type": {"application/json"}},
+			}, nil)
+
+		stateValue := cty.ObjectVal(map[string]cty.Value{
+			"organization_id": cty.StringVal(testOrgID),
+			"cluster_id":      cty.StringVal(testClusterID),
+			"name":            cty.StringVal("no-eviction"),
+			"enabled":         cty.BoolVal(true),
+		})
+		state := terraform.NewInstanceStateShimmedFromValue(stateValue, 0)
+		state.ID = testMutationID
+
+		resource := resourcePodMutation()
+		data := resource.Data(state)
+
+		result := resource.ReadContext(ctx, data, provider)
+		r.Nil(result)
+
+		evictionList := data.Get(FieldPodMutationPodEviction).([]interface{})
+		r.Len(evictionList, 0, "PodEviction{Enabled:false} must normalize to empty list to avoid perpetual diff")
+	})
+}
+
+func TestStateToPodMutation_PodEviction(t *testing.T) {
+	t.Parallel()
+
+	t.Run("pod_eviction enabled=true produces PodEviction struct", func(t *testing.T) {
+		r := require.New(t)
+
+		res := resourcePodMutation()
+		d := res.Data(nil)
+		r.NoError(d.Set(FieldPodMutationClusterID, testClusterID))
+		r.NoError(d.Set(FieldPodMutationName, "eviction-mutation"))
+		r.NoError(d.Set(FieldPodMutationEnabled, true))
+		r.NoError(d.Set(FieldPodMutationFilterV2, []interface{}{
+			map[string]interface{}{
+				FieldPodMutationFilterWorkload: []interface{}{
+					map[string]interface{}{
+						FieldPodMutationFilterNamespaces: matcherSet(
+							map[string]interface{}{FieldPodMutationMatcherType: "EXACT", FieldPodMutationMatcherValue: "default"},
+						),
+					},
+				},
+				FieldPodMutationFilterPod: []interface{}{},
+			},
+		}))
+		r.NoError(d.Set(FieldPodMutationPodEviction, []interface{}{
+			map[string]interface{}{"enabled": true},
+		}))
+
+		mutation := stateToPodMutation(d)
+
+		r.NotNil(mutation.PodEviction)
+		r.NotNil(mutation.PodEviction.Enabled)
+		r.True(*mutation.PodEviction.Enabled)
+	})
+
+	t.Run("no pod_eviction block produces nil PodEviction", func(t *testing.T) {
+		r := require.New(t)
+
+		res := resourcePodMutation()
+		d := res.Data(nil)
+		r.NoError(d.Set(FieldPodMutationClusterID, testClusterID))
+		r.NoError(d.Set(FieldPodMutationName, "no-eviction-mutation"))
+		r.NoError(d.Set(FieldPodMutationEnabled, true))
+		r.NoError(d.Set(FieldPodMutationFilterV2, []interface{}{
+			map[string]interface{}{
+				FieldPodMutationFilterWorkload: []interface{}{
+					map[string]interface{}{
+						FieldPodMutationFilterNamespaces: matcherSet(
+							map[string]interface{}{FieldPodMutationMatcherType: "EXACT", FieldPodMutationMatcherValue: "default"},
+						),
+					},
+				},
+				FieldPodMutationFilterPod: []interface{}{},
+			},
+		}))
+		// pod_eviction not set at all
+
+		mutation := stateToPodMutation(d)
+
+		r.Nil(mutation.PodEviction)
+	})
+
+	t.Run("pod_eviction enabled=false produces PodEviction struct with Enabled=false", func(t *testing.T) {
+		r := require.New(t)
+
+		res := resourcePodMutation()
+		d := res.Data(nil)
+		r.NoError(d.Set(FieldPodMutationClusterID, testClusterID))
+		r.NoError(d.Set(FieldPodMutationName, "eviction-disabled-mutation"))
+		r.NoError(d.Set(FieldPodMutationEnabled, true))
+		r.NoError(d.Set(FieldPodMutationFilterV2, []interface{}{
+			map[string]interface{}{
+				FieldPodMutationFilterWorkload: []interface{}{
+					map[string]interface{}{
+						FieldPodMutationFilterNamespaces: matcherSet(
+							map[string]interface{}{FieldPodMutationMatcherType: "EXACT", FieldPodMutationMatcherValue: "default"},
+						),
+					},
+				},
+				FieldPodMutationFilterPod: []interface{}{},
+			},
+		}))
+		r.NoError(d.Set(FieldPodMutationPodEviction, []interface{}{
+			map[string]interface{}{"enabled": false},
+		}))
+
+		mutation := stateToPodMutation(d)
+
+		r.NotNil(mutation.PodEviction)
+		r.NotNil(mutation.PodEviction.Enabled)
+		r.False(*mutation.PodEviction.Enabled)
+	})
+}
+
 func TestFlattenObjectFilterV2(t *testing.T) {
 	t.Parallel()
 
@@ -880,7 +1042,7 @@ func TestFlattenObjectFilterV2(t *testing.T) {
 	t.Run("pod only", func(t *testing.T) {
 		r := require.New(t)
 
-		op := patching_engine.AND
+		op := patching_engine.ObjectFilterV2LabelsFilterOperatorAND
 		filter := &patching_engine.ObjectFilterV2{
 			Labels: &patching_engine.ObjectFilterV2LabelsFilter{
 				Operator: &op,
@@ -910,7 +1072,7 @@ func TestFlattenObjectFilterV2(t *testing.T) {
 	t.Run("workload and pod combined", func(t *testing.T) {
 		r := require.New(t)
 
-		op := patching_engine.OR
+		op := patching_engine.ObjectFilterV2LabelsFilterOperatorOR
 		filter := &patching_engine.ObjectFilterV2{
 			Names: &[]patching_engine.ObjectFilterV2Matcher{
 				{Type: lo.ToPtr(patching_engine.EXACT), Value: lo.ToPtr("my-deploy")},
@@ -1023,7 +1185,7 @@ func TestStateToObjectFilterV2(t *testing.T) {
 		r.Nil(filter.Namespaces)
 		r.Nil(filter.Kinds)
 		r.NotNil(filter.Labels)
-		r.Equal(patching_engine.AND, lo.FromPtr(filter.Labels.Operator))
+		r.Equal(patching_engine.ObjectFilterV2LabelsFilterOperatorAND, lo.FromPtr(filter.Labels.Operator))
 		r.Len(*filter.Labels.Matchers, 1)
 		r.Equal("app", lo.FromPtr((*filter.Labels.Matchers)[0].Key.Value))
 		r.Equal("web", lo.FromPtr((*filter.Labels.Matchers)[0].Value.Value))
@@ -1104,7 +1266,7 @@ func TestStateToObjectFilterV2(t *testing.T) {
 
 		r.Nil(filter.Labels)
 		r.NotNil(filter.ExcludeLabels)
-		r.Equal(patching_engine.OR, lo.FromPtr(filter.ExcludeLabels.Operator))
+		r.Equal(patching_engine.ObjectFilterV2LabelsFilterOperatorOR, lo.FromPtr(filter.ExcludeLabels.Operator))
 		r.Len(*filter.ExcludeLabels.Matchers, 1)
 		r.Equal("env", lo.FromPtr((*filter.ExcludeLabels.Matchers)[0].Key.Value))
 		r.Equal("dev", lo.FromPtr((*filter.ExcludeLabels.Matchers)[0].Value.Value))
@@ -1117,7 +1279,7 @@ func TestFlattenObjectFilterV2_MatcherValues(t *testing.T) {
 	t.Run("labels_filter matcher key and value are preserved", func(t *testing.T) {
 		r := require.New(t)
 
-		op := patching_engine.AND
+		op := patching_engine.ObjectFilterV2LabelsFilterOperatorAND
 		filter := &patching_engine.ObjectFilterV2{
 			Labels: &patching_engine.ObjectFilterV2LabelsFilter{
 				Operator: &op,
@@ -1148,7 +1310,7 @@ func TestFlattenObjectFilterV2_MatcherValues(t *testing.T) {
 	t.Run("exclude_labels matcher content is preserved", func(t *testing.T) {
 		r := require.New(t)
 
-		op := patching_engine.OR
+		op := patching_engine.ObjectFilterV2LabelsFilterOperatorOR
 		filter := &patching_engine.ObjectFilterV2{
 			ExcludeLabels: &patching_engine.ObjectFilterV2LabelsFilter{
 				Operator: &op,
