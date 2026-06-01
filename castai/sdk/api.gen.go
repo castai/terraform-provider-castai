@@ -3071,6 +3071,15 @@ type CastaiRbacV1beta1GroupSubject struct {
 // CastaiRbacV1beta1Kind Kind represents the type of the member.
 type CastaiRbacV1beta1Kind string
 
+// CastaiRbacV1beta1ListPermissionGroupsResponse ListPermissionGroupsResponse is the response message for listing available permission groups.
+type CastaiRbacV1beta1ListPermissionGroupsResponse struct {
+	// NextPage Page defines how many and which fields should be returned.
+	NextPage *CastaiPaginationV1beta1Page `json:"nextPage,omitempty"`
+
+	// PermissionGroups List of available permission groups for the calling user in the organization.
+	PermissionGroups *[]CastaiRbacV1beta1PermissionGroup `json:"permissionGroups,omitempty"`
+}
+
 // CastaiRbacV1beta1ListRoleBindingsResponse defines model for castai.rbac.v1beta1.ListRoleBindingsResponse.
 type CastaiRbacV1beta1ListRoleBindingsResponse struct {
 	// NextPage Page defines how many and which fields should be returned.
@@ -3109,6 +3118,15 @@ type CastaiRbacV1beta1Member struct {
 type CastaiRbacV1beta1OrganizationScope struct {
 	// Id ID is the unique identifier of the organization.
 	Id string `json:"id"`
+}
+
+// CastaiRbacV1beta1PermissionGroup PermissionGroup represents a named group of permissions.
+type CastaiRbacV1beta1PermissionGroup struct {
+	// Name Name of the permission group.
+	Name *string `json:"name,omitempty"`
+
+	// Permissions List of permissions in this group.
+	Permissions *[]CastaiRbacV1beta1Permissions `json:"permissions,omitempty"`
 }
 
 // CastaiRbacV1beta1Permissions defines model for castai.rbac.v1beta1.Permissions.
@@ -4081,6 +4099,9 @@ type CostreportV1beta1GetAllocationGroupCostSummariesResponseSummary struct {
 	// RequestedStorageGibHours Total requested storage GiB hours for the given time period.
 	RequestedStorageGibHours *string `json:"requestedStorageGibHours,omitempty"`
 
+	// RequestedTpuHours Total requested TPU chip hours for the given time period.
+	RequestedTpuHours *string `json:"requestedTpuHours,omitempty"`
+
 	// TotalCostOnDemand Total cost of on-demand instances for the given time period.
 	TotalCostOnDemand *string `json:"totalCostOnDemand,omitempty"`
 
@@ -4089,7 +4110,13 @@ type CostreportV1beta1GetAllocationGroupCostSummariesResponseSummary struct {
 
 	// TotalCostSpotFallback Total cost of spot-fallback instances for the given time period.
 	TotalCostSpotFallback *string `json:"totalCostSpotFallback,omitempty"`
-	WorkloadCount         *string `json:"workloadCount,omitempty"`
+
+	// TpuCost Total TPU cost of on-demand instances for the given time period.
+	TpuCost *string `json:"tpuCost,omitempty"`
+
+	// TpuCount Average number of TPU chips for the given time period.
+	TpuCount      *string `json:"tpuCount,omitempty"`
+	WorkloadCount *string `json:"workloadCount,omitempty"`
 }
 
 // CostreportV1beta1GetAllocationGroupCostTimedSummariesResponse defines model for costreport.v1beta1.GetAllocationGroupCostTimedSummariesResponse.
@@ -4144,6 +4171,9 @@ type CostreportV1beta1GetAllocationGroupCostTimedSummariesResponseSummary struct
 	// RequestedStorageGibHours Total requested storage GiB hours for the given time period.
 	RequestedStorageGibHours *string `json:"requestedStorageGibHours,omitempty"`
 
+	// RequestedTpuHours Total requested TPU chip hours for the given time period.
+	RequestedTpuHours *string `json:"requestedTpuHours,omitempty"`
+
 	// Timestamp Timestamp of entry.
 	Timestamp *time.Time `json:"timestamp,omitempty"`
 
@@ -4155,7 +4185,13 @@ type CostreportV1beta1GetAllocationGroupCostTimedSummariesResponseSummary struct
 
 	// TotalCostSpotFallback Total cost of spot-fallback instances for the given time period.
 	TotalCostSpotFallback *string `json:"totalCostSpotFallback,omitempty"`
-	WorkloadCount         *string `json:"workloadCount,omitempty"`
+
+	// TpuCost Total TPU cost of on-demand instances for the given time period.
+	TpuCost *string `json:"tpuCost,omitempty"`
+
+	// TpuCount Average number of TPU chips for the given time period.
+	TpuCount      *string `json:"tpuCount,omitempty"`
+	WorkloadCount *string `json:"workloadCount,omitempty"`
 }
 
 // CostreportV1beta1GetAllocationGroupEfficiencySummaryResponse defines model for costreport.v1beta1.GetAllocationGroupEfficiencySummaryResponse.
@@ -4301,6 +4337,12 @@ type CostreportV1beta1GetAllocationGroupWorkloadCostsResponseWorkloadItem struct
 	// TotalCostSpotFallback Total cost of spot-fallback instances for the given time period.
 	TotalCostSpotFallback *string `json:"totalCostSpotFallback,omitempty"`
 	TotalPodCount         *string `json:"totalPodCount,omitempty"`
+
+	// TpuCost Total TPU cost of on-demand instances for the given time period.
+	TpuCost *string `json:"tpuCost,omitempty"`
+
+	// TpuCount Average number of TPU chips for the given time period.
+	TpuCount *string `json:"tpuCount,omitempty"`
 
 	// WorkloadName Name of the workload.
 	WorkloadName *string `json:"workloadName,omitempty"`
@@ -11096,6 +11138,15 @@ type WorkloadoptimizationV1WorkloadsSummaryMetrics struct {
 	Timestamp                 time.Time `json:"timestamp"`
 }
 
+// RbacServiceAPIListPermissionGroupsParams defines parameters for RbacServiceAPIListPermissionGroups.
+type RbacServiceAPIListPermissionGroupsParams struct {
+	PageLimit *string `form:"page.limit,omitempty" json:"page.limit,omitempty"`
+
+	// PageCursor Cursor that defines token indicating where to start the next page.
+	// Empty value indicates to start from beginning of the dataset.
+	PageCursor *string `form:"page.cursor,omitempty" json:"page.cursor,omitempty"`
+}
+
 // CommitmentsAPIGetCommitmentUsageHistoryParams defines parameters for CommitmentsAPIGetCommitmentUsageHistory.
 type CommitmentsAPIGetCommitmentUsageHistoryParams struct {
 	StartTime           time.Time                                                        `form:"startTime" json:"startTime"`
@@ -11690,6 +11741,9 @@ type ExternalClusterAPIGetConnectAndEnableCASTAICmdParams struct {
 
 	// UseUmbrella Whether to use umbrella Helm chart for onboarding.
 	UseUmbrella *bool `form:"useUmbrella,omitempty" json:"useUmbrella,omitempty"`
+
+	// UseCastctl Whether to use castctl to connect a cluster.
+	UseCastctl *bool `form:"useCastctl,omitempty" json:"useCastctl,omitempty"`
 }
 
 // ExternalClusterAPIGetCredentialsScriptParams defines parameters for ExternalClusterAPIGetCredentialsScript.

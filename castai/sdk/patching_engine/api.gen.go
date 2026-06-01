@@ -38,9 +38,9 @@ const (
 
 // Defines values for ObjectFilterV2LabelsFilterOperator.
 const (
-	AND                       ObjectFilterV2LabelsFilterOperator = "AND"
-	FILTEROPERATORUNSPECIFIED ObjectFilterV2LabelsFilterOperator = "FILTER_OPERATOR_UNSPECIFIED"
-	OR                        ObjectFilterV2LabelsFilterOperator = "OR"
+	ObjectFilterV2LabelsFilterOperatorAND                       ObjectFilterV2LabelsFilterOperator = "AND"
+	ObjectFilterV2LabelsFilterOperatorFILTEROPERATORUNSPECIFIED ObjectFilterV2LabelsFilterOperator = "FILTER_OPERATOR_UNSPECIFIED"
+	ObjectFilterV2LabelsFilterOperatorOR                        ObjectFilterV2LabelsFilterOperator = "OR"
 )
 
 // Defines values for ObjectFilterV2MatcherType.
@@ -48,6 +48,13 @@ const (
 	EXACT           ObjectFilterV2MatcherType = "EXACT"
 	REGEX           ObjectFilterV2MatcherType = "REGEX"
 	TYPEUNSPECIFIED ObjectFilterV2MatcherType = "TYPE_UNSPECIFIED"
+)
+
+// Defines values for ObjectFilterV2TolerationsFilterOperator.
+const (
+	ObjectFilterV2TolerationsFilterOperatorAND                       ObjectFilterV2TolerationsFilterOperator = "AND"
+	ObjectFilterV2TolerationsFilterOperatorFILTEROPERATORUNSPECIFIED ObjectFilterV2TolerationsFilterOperator = "FILTER_OPERATOR_UNSPECIFIED"
+	ObjectFilterV2TolerationsFilterOperatorOR                        ObjectFilterV2TolerationsFilterOperator = "OR"
 )
 
 // Defines values for PodMutationSource.
@@ -363,6 +370,9 @@ type ObjectFilterV2 struct {
 
 	// Namespaces Namespaces of the objects that the pod mutation should apply to. Empty means all namespaces.
 	Namespaces *[]ObjectFilterV2Matcher `json:"namespaces,omitempty"`
+
+	// Tolerations Tolerations filter that the pod mutation should apply to.
+	Tolerations *ObjectFilterV2TolerationsFilter `json:"tolerations,omitempty"`
 }
 
 // ObjectFilterV2LabelMatcher LabelMatcher defines a key-value pair for label matching.
@@ -397,6 +407,30 @@ type ObjectFilterV2Matcher struct {
 
 // ObjectFilterV2MatcherType Type of the matcher.
 type ObjectFilterV2MatcherType string
+
+// ObjectFilterV2TolerationMatcher TolerationMatcher defines a key-value-operator triple for toleration matching.
+type ObjectFilterV2TolerationMatcher struct {
+	// Key Key matcher.
+	Key *ObjectFilterV2Matcher `json:"key,omitempty"`
+
+	// Operator Operator matcher.
+	Operator *ObjectFilterV2Matcher `json:"operator,omitempty"`
+
+	// Value Value matcher.
+	Value *ObjectFilterV2Matcher `json:"value,omitempty"`
+}
+
+// ObjectFilterV2TolerationsFilter TolerationsFilter defines a set of toleration matchers combined with a logical operator.
+type ObjectFilterV2TolerationsFilter struct {
+	// Matchers List of toleration matchers.
+	Matchers *[]ObjectFilterV2TolerationMatcher `json:"matchers,omitempty"`
+
+	// Operator Operator to combine the toleration matchers.
+	Operator *ObjectFilterV2TolerationsFilterOperator `json:"operator,omitempty"`
+}
+
+// ObjectFilterV2TolerationsFilterOperator Operator to combine the toleration matchers.
+type ObjectFilterV2TolerationsFilterOperator string
 
 // ObjectFilterLabelValue LabelValue represents a label and its value.
 type ObjectFilterLabelValue struct {

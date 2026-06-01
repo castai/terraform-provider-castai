@@ -90,6 +90,9 @@ func WithRequestEditorFn(fn RequestEditorFn) ClientOption {
 
 // The interface specification for the client above.
 type ClientInterface interface {
+	// RbacServiceAPIListPermissionGroups request
+	RbacServiceAPIListPermissionGroups(ctx context.Context, organizationId string, params *RbacServiceAPIListPermissionGroupsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// CommitmentsAPIBatchDeleteCommitmentsWithBody request with any body
 	CommitmentsAPIBatchDeleteCommitmentsWithBody(ctx context.Context, organizationId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -1058,6 +1061,18 @@ type ClientInterface interface {
 	WorkloadOptimizationAPIUpdateWorkloadV2WithBody(ctx context.Context, clusterId string, workloadId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	WorkloadOptimizationAPIUpdateWorkloadV2(ctx context.Context, clusterId string, workloadId string, body WorkloadOptimizationAPIUpdateWorkloadV2JSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+}
+
+func (c *Client) RbacServiceAPIListPermissionGroups(ctx context.Context, organizationId string, params *RbacServiceAPIListPermissionGroupsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewRbacServiceAPIListPermissionGroupsRequest(c.Server, organizationId, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
 }
 
 func (c *Client) CommitmentsAPIBatchDeleteCommitmentsWithBody(ctx context.Context, organizationId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
@@ -5282,6 +5297,78 @@ func (c *Client) WorkloadOptimizationAPIUpdateWorkloadV2(ctx context.Context, cl
 		return nil, err
 	}
 	return c.Client.Do(req)
+}
+
+// NewRbacServiceAPIListPermissionGroupsRequest generates requests for RbacServiceAPIListPermissionGroups
+func NewRbacServiceAPIListPermissionGroupsRequest(server string, organizationId string, params *RbacServiceAPIListPermissionGroupsParams) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "organizationId", runtime.ParamLocationPath, organizationId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/organization-management/v1/organizations/%s/permission-groups", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if params.PageLimit != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "page.limit", runtime.ParamLocationQuery, *params.PageLimit); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.PageCursor != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "page.cursor", runtime.ParamLocationQuery, *params.PageCursor); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
 }
 
 // NewCommitmentsAPIBatchDeleteCommitmentsRequest calls the generic CommitmentsAPIBatchDeleteCommitments builder with application/json body
@@ -11509,6 +11596,22 @@ func NewExternalClusterAPIGetConnectAndEnableCASTAICmdRequest(server string, par
 		if params.UseUmbrella != nil {
 
 			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "useUmbrella", runtime.ParamLocationQuery, *params.UseUmbrella); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.UseCastctl != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "useCastctl", runtime.ParamLocationQuery, *params.UseCastctl); err != nil {
 				return nil, err
 			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
 				return nil, err
@@ -21820,6 +21923,9 @@ func WithBaseURL(baseURL string) ClientOption {
 // ClientWithResponsesInterface is the interface specification for the client with responses above.
 type ClientWithResponsesInterface interface {
 	ClientInterface
+	// RbacServiceAPIListPermissionGroups request
+	RbacServiceAPIListPermissionGroupsWithResponse(ctx context.Context, organizationId string, params *RbacServiceAPIListPermissionGroupsParams) (*RbacServiceAPIListPermissionGroupsResponse, error)
+
 	// CommitmentsAPIBatchDeleteCommitments request  with any body
 	CommitmentsAPIBatchDeleteCommitmentsWithBodyWithResponse(ctx context.Context, organizationId string, contentType string, body io.Reader) (*CommitmentsAPIBatchDeleteCommitmentsResponse, error)
 
@@ -22795,6 +22901,36 @@ type Response interface {
 	Status() string
 	StatusCode() int
 	GetBody() []byte
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type RbacServiceAPIListPermissionGroupsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *CastaiRbacV1beta1ListPermissionGroupsResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r RbacServiceAPIListPermissionGroupsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r RbacServiceAPIListPermissionGroupsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r RbacServiceAPIListPermissionGroupsResponse) GetBody() []byte {
+	return r.Body
 }
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
@@ -30746,6 +30882,15 @@ func (r WorkloadOptimizationAPIUpdateWorkloadV2Response) GetBody() []byte {
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
+// RbacServiceAPIListPermissionGroupsWithResponse request returning *RbacServiceAPIListPermissionGroupsResponse
+func (c *ClientWithResponses) RbacServiceAPIListPermissionGroupsWithResponse(ctx context.Context, organizationId string, params *RbacServiceAPIListPermissionGroupsParams) (*RbacServiceAPIListPermissionGroupsResponse, error) {
+	rsp, err := c.RbacServiceAPIListPermissionGroups(ctx, organizationId, params)
+	if err != nil {
+		return nil, err
+	}
+	return ParseRbacServiceAPIListPermissionGroupsResponse(rsp)
+}
+
 // CommitmentsAPIBatchDeleteCommitmentsWithBodyWithResponse request with arbitrary body returning *CommitmentsAPIBatchDeleteCommitmentsResponse
 func (c *ClientWithResponses) CommitmentsAPIBatchDeleteCommitmentsWithBodyWithResponse(ctx context.Context, organizationId string, contentType string, body io.Reader) (*CommitmentsAPIBatchDeleteCommitmentsResponse, error) {
 	rsp, err := c.CommitmentsAPIBatchDeleteCommitmentsWithBody(ctx, organizationId, contentType, body)
@@ -33825,6 +33970,32 @@ func (c *ClientWithResponses) WorkloadOptimizationAPIUpdateWorkloadV2WithRespons
 		return nil, err
 	}
 	return ParseWorkloadOptimizationAPIUpdateWorkloadV2Response(rsp)
+}
+
+// ParseRbacServiceAPIListPermissionGroupsResponse parses an HTTP response from a RbacServiceAPIListPermissionGroupsWithResponse call
+func ParseRbacServiceAPIListPermissionGroupsResponse(rsp *http.Response) (*RbacServiceAPIListPermissionGroupsResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &RbacServiceAPIListPermissionGroupsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest CastaiRbacV1beta1ListPermissionGroupsResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
 }
 
 // ParseCommitmentsAPIBatchDeleteCommitmentsResponse parses an HTTP response from a CommitmentsAPIBatchDeleteCommitmentsWithResponse call

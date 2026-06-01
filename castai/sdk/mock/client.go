@@ -3995,6 +3995,26 @@ func (mr *MockClientInterfaceMockRecorder) RbacServiceAPIGetRoleBinding(ctx, org
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RbacServiceAPIGetRoleBinding", reflect.TypeOf((*MockClientInterface)(nil).RbacServiceAPIGetRoleBinding), varargs...)
 }
 
+// RbacServiceAPIListPermissionGroups mocks base method.
+func (m *MockClientInterface) RbacServiceAPIListPermissionGroups(ctx context.Context, organizationId string, params *sdk.RbacServiceAPIListPermissionGroupsParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RbacServiceAPIListPermissionGroups", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RbacServiceAPIListPermissionGroups indicates an expected call of RbacServiceAPIListPermissionGroups.
+func (mr *MockClientInterfaceMockRecorder) RbacServiceAPIListPermissionGroups(ctx, organizationId, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RbacServiceAPIListPermissionGroups", reflect.TypeOf((*MockClientInterface)(nil).RbacServiceAPIListPermissionGroups), varargs...)
+}
+
 // RbacServiceAPIListRoleBindings mocks base method.
 func (m *MockClientInterface) RbacServiceAPIListRoleBindings(ctx context.Context, organizationId string, params *sdk.RbacServiceAPIListRoleBindingsParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
@@ -13996,6 +14016,41 @@ func (m *MockClientWithResponsesInterface) RbacServiceAPIGetRoleBindingWithRespo
 func (mr *MockClientWithResponsesInterfaceMockRecorder) RbacServiceAPIGetRoleBindingWithResponse(ctx, organizationId, id interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RbacServiceAPIGetRoleBindingWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RbacServiceAPIGetRoleBindingWithResponse), ctx, organizationId, id)
+}
+
+// RbacServiceAPIListPermissionGroups mocks base method.
+func (m *MockClientWithResponsesInterface) RbacServiceAPIListPermissionGroups(ctx context.Context, organizationId string, params *sdk.RbacServiceAPIListPermissionGroupsParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RbacServiceAPIListPermissionGroups", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RbacServiceAPIListPermissionGroups indicates an expected call of RbacServiceAPIListPermissionGroups.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RbacServiceAPIListPermissionGroups(ctx, organizationId, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RbacServiceAPIListPermissionGroups", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RbacServiceAPIListPermissionGroups), varargs...)
+}
+
+// RbacServiceAPIListPermissionGroupsWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) RbacServiceAPIListPermissionGroupsWithResponse(ctx context.Context, organizationId string, params *sdk.RbacServiceAPIListPermissionGroupsParams) (*sdk.RbacServiceAPIListPermissionGroupsResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RbacServiceAPIListPermissionGroupsWithResponse", ctx, organizationId, params)
+	ret0, _ := ret[0].(*sdk.RbacServiceAPIListPermissionGroupsResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RbacServiceAPIListPermissionGroupsWithResponse indicates an expected call of RbacServiceAPIListPermissionGroupsWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RbacServiceAPIListPermissionGroupsWithResponse(ctx, organizationId, params interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RbacServiceAPIListPermissionGroupsWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RbacServiceAPIListPermissionGroupsWithResponse), ctx, organizationId, params)
 }
 
 // RbacServiceAPIListRoleBindings mocks base method.
