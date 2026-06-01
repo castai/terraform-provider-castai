@@ -1113,6 +1113,52 @@ func TestFlattenObjectFilterV2(t *testing.T) {
 		_, hasPod := m[FieldPodMutationFilterPod]
 		r.False(hasPod)
 	})
+
+	t.Run("tolerations filter", func(t *testing.T) {
+		r := require.New(t)
+
+		op := patching_engine.ObjectFilterV2TolerationsFilterOperatorAND
+		filter := &patching_engine.ObjectFilterV2{
+			Tolerations: &patching_engine.ObjectFilterV2TolerationsFilter{
+				Operator: &op,
+				Matchers: &[]patching_engine.ObjectFilterV2TolerationMatcher{
+					{
+						Key: &patching_engine.ObjectFilterV2Matcher{Type: lo.ToPtr(patching_engine.EXACT), Value: lo.ToPtr("dedicated")},
+						Value: &patching_engine.ObjectFilterV2Matcher{Type: lo.ToPtr(patching_engine.EXACT), Value: lo.ToPtr("spot")},
+						Operator: &patching_engine.ObjectFilterV2Matcher{Type: lo.ToPtr(patching_engine.EXACT), Value: lo.ToPtr("Equal")},
+					},
+				},
+			},
+		}
+
+		result := flattenObjectFilterV2(filter)
+		r.Len(result, 1)
+		m := result[0]
+
+		_, hasWorkload := m[FieldPodMutationFilterWorkload]
+		r.False(hasWorkload)
+
+		pod := m[FieldPodMutationFilterPod].([]map[string]interface{})
+		r.Len(pod, 1)
+		tf := pod[0][FieldPodMutationFilterTolerationsFilter].([]map[string]interface{})
+		r.Len(tf, 1)
+		r.Equal("AND", tf[0][FieldPodMutationTolerationsFilterOperator])
+
+		matchers := tf[0][FieldPodMutationTolerationsFilterMatchers].([]map[string]interface{})
+		r.Len(matchers, 1)
+
+		key := matchers[0][FieldPodMutationTolerationMatcherKey].([]map[string]interface{})
+		r.Equal("EXACT", key[0][FieldPodMutationMatcherType])
+		r.Equal("dedicated", key[0][FieldPodMutationMatcherValue])
+
+		val := matchers[0][FieldPodMutationTolerationMatcherValue].([]map[string]interface{})
+		r.Equal("EXACT", val[0][FieldPodMutationMatcherType])
+		r.Equal("spot", val[0][FieldPodMutationMatcherValue])
+
+		tolOp := matchers[0][FieldPodMutationTolerationMatcherOperator].([]map[string]interface{})
+		r.Equal("EXACT", tolOp[0][FieldPodMutationMatcherType])
+		r.Equal("Equal", tolOp[0][FieldPodMutationMatcherValue])
+	})
 }
 
 func TestStateToObjectFilterV2(t *testing.T) {
@@ -1271,6 +1317,49 @@ func TestStateToObjectFilterV2(t *testing.T) {
 		r.Equal("env", lo.FromPtr((*filter.ExcludeLabels.Matchers)[0].Key.Value))
 		r.Equal("dev", lo.FromPtr((*filter.ExcludeLabels.Matchers)[0].Value.Value))
 	})
+
+	t.Run("pod tolerations", func(t *testing.T) {
+		r := require.New(t)
+
+		state := map[string]interface{}{
+			FieldPodMutationFilterWorkload: []interface{}{},
+			FieldPodMutationFilterPod: []interface{}{
+				map[string]interface{}{
+					FieldPodMutationFilterLabelsFilter:    []interface{}{},
+					FieldPodMutationFilterExcludeLabels:   []interface{}{},
+					FieldPodMutationFilterTolerationsFilter: []interface{}{
+						map[string]interface{}{
+							FieldPodMutationTolerationsFilterOperator: "AND",
+							FieldPodMutationTolerationsFilterMatchers: tolerationMatcherSet(
+								map[string]interface{}{
+									FieldPodMutationTolerationMatcherKey: []interface{}{
+										map[string]interface{}{FieldPodMutationMatcherType: "EXACT", FieldPodMutationMatcherValue: "dedicated"},
+									},
+									FieldPodMutationTolerationMatcherValue: []interface{}{
+										map[string]interface{}{FieldPodMutationMatcherType: "EXACT", FieldPodMutationMatcherValue: "spot"},
+									},
+									FieldPodMutationTolerationMatcherOperator: []interface{}{
+										map[string]interface{}{FieldPodMutationMatcherType: "EXACT", FieldPodMutationMatcherValue: "Equal"},
+									},
+								},
+							),
+						},
+					},
+				},
+			},
+		}
+
+		filter := stateToObjectFilterV2(state)
+
+		r.Nil(filter.Labels)
+		r.Nil(filter.ExcludeLabels)
+		r.NotNil(filter.Tolerations)
+		r.Equal(patching_engine.ObjectFilterV2TolerationsFilterOperatorAND, lo.FromPtr(filter.Tolerations.Operator))
+		r.Len(*filter.Tolerations.Matchers, 1)
+		r.Equal("dedicated", lo.FromPtr((*filter.Tolerations.Matchers)[0].Key.Value))
+		r.Equal("spot", lo.FromPtr((*filter.Tolerations.Matchers)[0].Value.Value))
+		r.Equal("Equal", lo.FromPtr((*filter.Tolerations.Matchers)[0].Operator.Value))
+	})
 }
 
 func TestFlattenObjectFilterV2_MatcherValues(t *testing.T) {
@@ -1368,6 +1457,41 @@ func TestFlattenObjectFilterV2_MatcherValues(t *testing.T) {
 		r.Len(exNames, 1)
 		r.Equal("^skip-.*", exNames[0][FieldPodMutationMatcherValue])
 		r.Equal("REGEX", exNames[0][FieldPodMutationMatcherType])
+	})
+
+	t.Run("tolerations_filter matcher content is preserved", func(t *testing.T) {
+		r := require.New(t)
+
+		op := patching_engine.ObjectFilterV2TolerationsFilterOperatorAND
+		filter := &patching_engine.ObjectFilterV2{
+			Tolerations: &patching_engine.ObjectFilterV2TolerationsFilter{
+				Operator: &op,
+				Matchers: &[]patching_engine.ObjectFilterV2TolerationMatcher{
+					{
+						Key:      &patching_engine.ObjectFilterV2Matcher{Type: lo.ToPtr(patching_engine.EXACT), Value: lo.ToPtr("dedicated")},
+						Value:    &patching_engine.ObjectFilterV2Matcher{Type: lo.ToPtr(patching_engine.EXACT), Value: lo.ToPtr("spot")},
+						Operator: &patching_engine.ObjectFilterV2Matcher{Type: lo.ToPtr(patching_engine.EXACT), Value: lo.ToPtr("Equal")},
+					},
+				},
+			},
+		}
+
+		result := flattenObjectFilterV2(filter)
+		pod := result[0][FieldPodMutationFilterPod].([]map[string]interface{})
+		tf := pod[0][FieldPodMutationFilterTolerationsFilter].([]map[string]interface{})
+		r.Equal("AND", tf[0][FieldPodMutationTolerationsFilterOperator])
+
+		matchers := tf[0][FieldPodMutationTolerationsFilterMatchers].([]map[string]interface{})
+		r.Len(matchers, 1)
+
+		key := matchers[0][FieldPodMutationTolerationMatcherKey].([]map[string]interface{})
+		r.Equal("dedicated", key[0][FieldPodMutationMatcherValue])
+
+		val := matchers[0][FieldPodMutationTolerationMatcherValue].([]map[string]interface{})
+		r.Equal("spot", val[0][FieldPodMutationMatcherValue])
+
+		tolOp := matchers[0][FieldPodMutationTolerationMatcherOperator].([]map[string]interface{})
+		r.Equal("Equal", tolOp[0][FieldPodMutationMatcherValue])
 	})
 }
 
@@ -2045,4 +2169,12 @@ func labelMatcherSet(items ...map[string]interface{}) *schema.Set {
 		raw = append(raw, it)
 	}
 	return schema.NewSet(schema.HashResource(labelMatcherElemSchema), raw)
+}
+
+func tolerationMatcherSet(items ...map[string]interface{}) *schema.Set {
+	raw := make([]interface{}, 0, len(items))
+	for _, it := range items {
+		raw = append(raw, it)
+	}
+	return schema.NewSet(schema.HashResource(tolerationMatcherSchema), raw)
 }
