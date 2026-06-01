@@ -1032,46 +1032,49 @@ func stateToLabelsFilter(m map[string]interface{}) *patching_engine.ObjectFilter
 		Operator: &op,
 	}
 
-	if set, ok := m[FieldPodMutationLabelsFilterMatchers].(*schema.Set); ok && set != nil {
-		matchersList := set.List()
-		matchers := make([]patching_engine.ObjectFilterV2LabelMatcher, 0, len(matchersList))
-		for _, item := range matchersList {
-			if item == nil {
-				continue
-			}
-			lm := item.(map[string]interface{})
-			labelMatcher := patching_engine.ObjectFilterV2LabelMatcher{}
-
-			if keyList, ok := lm[FieldPodMutationLabelMatcherKey]; ok {
-				kl := keyList.([]interface{})
-				if len(kl) > 0 && kl[0] != nil {
-					km := kl[0].(map[string]interface{})
-					keyType := patching_engine.ObjectFilterV2MatcherType(km[FieldPodMutationMatcherType].(string))
-					keyValue := km[FieldPodMutationMatcherValue].(string)
-					labelMatcher.Key = &patching_engine.ObjectFilterV2Matcher{
-						Type:  &keyType,
-						Value: &keyValue,
-					}
-				}
-			}
-
-			if valList, ok := lm[FieldPodMutationLabelMatcherValue]; ok {
-				vl := valList.([]interface{})
-				if len(vl) > 0 && vl[0] != nil {
-					vm := vl[0].(map[string]interface{})
-					valType := patching_engine.ObjectFilterV2MatcherType(vm[FieldPodMutationMatcherType].(string))
-					valValue := vm[FieldPodMutationMatcherValue].(string)
-					labelMatcher.Value = &patching_engine.ObjectFilterV2Matcher{
-						Type:  &valType,
-						Value: &valValue,
-					}
-				}
-			}
-
-			matchers = append(matchers, labelMatcher)
-		}
-		filter.Matchers = &matchers
+	set, ok := m[FieldPodMutationLabelsFilterMatchers].(*schema.Set)
+	if !ok || set == nil {
+		return filter
 	}
+
+	matchersList := set.List()
+	matchers := make([]patching_engine.ObjectFilterV2LabelMatcher, 0, len(matchersList))
+	for _, item := range matchersList {
+		if item == nil {
+			continue
+		}
+		lm := item.(map[string]interface{})
+		labelMatcher := patching_engine.ObjectFilterV2LabelMatcher{}
+
+		if keyList, ok := lm[FieldPodMutationLabelMatcherKey]; ok {
+			kl := keyList.([]interface{})
+			if len(kl) > 0 && kl[0] != nil {
+				km := kl[0].(map[string]interface{})
+				keyType := patching_engine.ObjectFilterV2MatcherType(km[FieldPodMutationMatcherType].(string))
+				keyValue := km[FieldPodMutationMatcherValue].(string)
+				labelMatcher.Key = &patching_engine.ObjectFilterV2Matcher{
+					Type:  &keyType,
+					Value: &keyValue,
+				}
+			}
+		}
+
+		if valList, ok := lm[FieldPodMutationLabelMatcherValue]; ok {
+			vl := valList.([]interface{})
+			if len(vl) > 0 && vl[0] != nil {
+				vm := vl[0].(map[string]interface{})
+				valType := patching_engine.ObjectFilterV2MatcherType(vm[FieldPodMutationMatcherType].(string))
+				valValue := vm[FieldPodMutationMatcherValue].(string)
+				labelMatcher.Value = &patching_engine.ObjectFilterV2Matcher{
+					Type:  &valType,
+					Value: &valValue,
+				}
+			}
+		}
+
+		matchers = append(matchers, labelMatcher)
+	}
+	filter.Matchers = &matchers
 
 	return filter
 }
@@ -1082,59 +1085,62 @@ func stateToTolerationsFilter(m map[string]interface{}) *patching_engine.ObjectF
 		Operator: &op,
 	}
 
-	if set, ok := m[FieldPodMutationTolerationsFilterMatchers].(*schema.Set); ok && set != nil {
-		matchersList := set.List()
-		matchers := make([]patching_engine.ObjectFilterV2TolerationMatcher, 0, len(matchersList))
-		for _, item := range matchersList {
-			if item == nil {
-				continue
-			}
-			tm := item.(map[string]interface{})
-			tolerationMatcher := patching_engine.ObjectFilterV2TolerationMatcher{}
-
-			if keyList, ok := tm[FieldPodMutationTolerationMatcherKey]; ok {
-				kl := keyList.([]interface{})
-				if len(kl) > 0 && kl[0] != nil {
-					km := kl[0].(map[string]interface{})
-					keyType := patching_engine.ObjectFilterV2MatcherType(km[FieldPodMutationMatcherType].(string))
-					keyValue := km[FieldPodMutationMatcherValue].(string)
-					tolerationMatcher.Key = &patching_engine.ObjectFilterV2Matcher{
-						Type:  &keyType,
-						Value: &keyValue,
-					}
-				}
-			}
-
-			if valList, ok := tm[FieldPodMutationTolerationMatcherValue]; ok {
-				vl := valList.([]interface{})
-				if len(vl) > 0 && vl[0] != nil {
-					vm := vl[0].(map[string]interface{})
-					valType := patching_engine.ObjectFilterV2MatcherType(vm[FieldPodMutationMatcherType].(string))
-					valValue := vm[FieldPodMutationMatcherValue].(string)
-					tolerationMatcher.Value = &patching_engine.ObjectFilterV2Matcher{
-						Type:  &valType,
-						Value: &valValue,
-					}
-				}
-			}
-
-			if opList, ok := tm[FieldPodMutationTolerationMatcherOperator]; ok {
-				ol := opList.([]interface{})
-				if len(ol) > 0 && ol[0] != nil {
-					om := ol[0].(map[string]interface{})
-					opType := patching_engine.ObjectFilterV2MatcherType(om[FieldPodMutationMatcherType].(string))
-					opValue := om[FieldPodMutationMatcherValue].(string)
-					tolerationMatcher.Operator = &patching_engine.ObjectFilterV2Matcher{
-						Type:  &opType,
-						Value: &opValue,
-					}
-				}
-			}
-
-			matchers = append(matchers, tolerationMatcher)
-		}
-		filter.Matchers = &matchers
+	set, ok := m[FieldPodMutationTolerationsFilterMatchers].(*schema.Set)
+	if !ok || set == nil {
+		return filter
 	}
+
+	matchersList := set.List()
+	matchers := make([]patching_engine.ObjectFilterV2TolerationMatcher, 0, len(matchersList))
+	for _, item := range matchersList {
+		if item == nil {
+			continue
+		}
+		tm := item.(map[string]interface{})
+		tolerationMatcher := patching_engine.ObjectFilterV2TolerationMatcher{}
+
+		if keyList, ok := tm[FieldPodMutationTolerationMatcherKey]; ok {
+			kl := keyList.([]interface{})
+			if len(kl) > 0 && kl[0] != nil {
+				km := kl[0].(map[string]interface{})
+				keyType := patching_engine.ObjectFilterV2MatcherType(km[FieldPodMutationMatcherType].(string))
+				keyValue := km[FieldPodMutationMatcherValue].(string)
+				tolerationMatcher.Key = &patching_engine.ObjectFilterV2Matcher{
+					Type:  &keyType,
+					Value: &keyValue,
+				}
+			}
+		}
+
+		if valList, ok := tm[FieldPodMutationTolerationMatcherValue]; ok {
+			vl := valList.([]interface{})
+			if len(vl) > 0 && vl[0] != nil {
+				vm := vl[0].(map[string]interface{})
+				valType := patching_engine.ObjectFilterV2MatcherType(vm[FieldPodMutationMatcherType].(string))
+				valValue := vm[FieldPodMutationMatcherValue].(string)
+				tolerationMatcher.Value = &patching_engine.ObjectFilterV2Matcher{
+					Type:  &valType,
+					Value: &valValue,
+				}
+			}
+		}
+
+		if opList, ok := tm[FieldPodMutationTolerationMatcherOperator]; ok {
+			ol := opList.([]interface{})
+			if len(ol) > 0 && ol[0] != nil {
+				om := ol[0].(map[string]interface{})
+				opType := patching_engine.ObjectFilterV2MatcherType(om[FieldPodMutationMatcherType].(string))
+				opValue := om[FieldPodMutationMatcherValue].(string)
+				tolerationMatcher.Operator = &patching_engine.ObjectFilterV2Matcher{
+					Type:  &opType,
+					Value: &opValue,
+				}
+			}
+		}
+
+		matchers = append(matchers, tolerationMatcher)
+	}
+	filter.Matchers = &matchers
 
 	return filter
 }
