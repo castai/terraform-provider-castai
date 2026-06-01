@@ -317,18 +317,9 @@ func (r *edgeConfigurationResource) Create(ctx context.Context, req resource.Cre
 	state := r.edgeConfigurationToTFModel(ctx, apiResp.JSON200, plan.OrganizationID, plan.ClusterID)
 	state.EdgeLocationID = plan.EdgeLocationID
 
-	// Normalize CRI state to prevent spurious diffs when the API returns
-	// a non-nil CRI object with an empty string socket.
-	if state.CRI != nil && state.CRI.Socket.ValueString() == "" {
-		state.CRI.Socket = types.StringNull()
-	}
+	r.normalizeCRIState(&state, plan.CRI)
 
-	// if the entire cri block was removed; match by returning nil.
-	if plan.CRI == nil {
-		state.CRI = nil
-	}
-
-	resp.Diagnostics.Append(resp.State.Set(ctx, state)...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
 }
 
 func (r *edgeConfigurationResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -459,18 +450,9 @@ func (r *edgeConfigurationResource) Update(ctx context.Context, req resource.Upd
 
 	state := r.edgeConfigurationToTFModel(ctx, apiResp.JSON200, plan.OrganizationID, plan.ClusterID)
 
-	// Normalize CRI state to prevent spurious diffs when the API returns
-	// a non-nil CRI object with an empty string socket.
-	if state.CRI != nil && state.CRI.Socket.ValueString() == "" {
-		state.CRI.Socket = types.StringNull()
-	}
+	r.normalizeCRIState(&state, plan.CRI)
 
-	// if the entire cri block was removed; match by returning nil.
-	if plan.CRI == nil {
-		state.CRI = nil
-	}
-
-	resp.Diagnostics.Append(resp.State.Set(ctx, state)...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
 }
 
 func (r *edgeConfigurationResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -851,6 +833,19 @@ func (r *edgeConfigurationResource) toCustomConfigurationModel(ctx context.Conte
 
 	return &customConfigurationModel{
 		Custom: custom,
+	}
+}
+
+func (r *edgeConfigurationResource) normalizeCRIState(state *edgeConfigurationModel, planCRI *criConfigurationModel) {
+	// Normalize CRI state to prevent spurious diffs when the API returns
+	// a non-nil CRI object with an empty string socket.
+	if state.CRI != nil && state.CRI.Socket.ValueString() == "" {
+		state.CRI.Socket = types.StringNull()
+	}
+
+	// If the entire cri block was removed; match by returning nil.
+	if planCRI == nil {
+		state.CRI = nil
 	}
 }
 
