@@ -317,6 +317,17 @@ func (r *edgeConfigurationResource) Create(ctx context.Context, req resource.Cre
 	state := r.edgeConfigurationToTFModel(ctx, apiResp.JSON200, plan.OrganizationID, plan.ClusterID)
 	state.EdgeLocationID = plan.EdgeLocationID
 
+	// Normalize CRI state to prevent spurious diffs when the API returns
+	// a non-nil CRI object with an empty string socket.
+	if state.CRI != nil && state.CRI.Socket.ValueString() == "" {
+		state.CRI.Socket = types.StringNull()
+	}
+
+	// if the entire cri block was removed; match by returning nil.
+	if plan.CRI == nil {
+		state.CRI = nil
+	}
+
 	resp.Diagnostics.Append(resp.State.Set(ctx, state)...)
 }
 
@@ -447,6 +458,17 @@ func (r *edgeConfigurationResource) Update(ctx context.Context, req resource.Upd
 	}
 
 	state := r.edgeConfigurationToTFModel(ctx, apiResp.JSON200, plan.OrganizationID, plan.ClusterID)
+
+	// Normalize CRI state to prevent spurious diffs when the API returns
+	// a non-nil CRI object with an empty string socket.
+	if state.CRI != nil && state.CRI.Socket.ValueString() == "" {
+		state.CRI.Socket = types.StringNull()
+	}
+
+	// if the entire cri block was removed; match by returning nil.
+	if plan.CRI == nil {
+		state.CRI = nil
+	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, state)...)
 }
@@ -856,14 +878,15 @@ func (r *edgeConfigurationResource) toCRIConfigurationModel(_ context.Context, c
 		return nil
 	}
 
-	// Normalize: a CRI object with no socket is semantically equivalent to no CRI configuration at all.
-	if config.Socket == nil || *config.Socket == "" {
-		return nil
+	model := &criConfigurationModel{
+		Socket: types.StringNull(),
 	}
 
-	return &criConfigurationModel{
-		Socket: types.StringValue(*config.Socket),
+	if config.Socket != nil {
+		model.Socket = types.StringValue(*config.Socket)
 	}
+
+	return model
 }
 
 func normalizeStringPtr(s *string) types.String {
