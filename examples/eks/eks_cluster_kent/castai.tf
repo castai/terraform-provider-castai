@@ -11,10 +11,9 @@ data "aws_caller_identity" "current" {}
 # Kentroller delegates node provisioning to Karpenter inside the cluster, so
 # no backend-side AWS calls happen and the cross-account role is unused.
 resource "castai_eks_cluster" "this" {
-  account_id                 = data.aws_caller_identity.current.account_id
-  region                     = var.cluster_region
-  name                       = module.eks.cluster_name
-  delete_nodes_on_disconnect = var.delete_nodes_on_disconnect
+  account_id = data.aws_caller_identity.current.account_id
+  region     = var.cluster_region
+  name       = module.eks.cluster_name
 }
 
 # Pod Identity role for Kentroller AWS inventory and pricing lookups. The AWS

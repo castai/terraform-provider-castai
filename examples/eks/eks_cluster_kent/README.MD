@@ -134,7 +134,6 @@ Then re-run `terraform apply`.
 | `castai_api_token`           | string      | —                     | **Sensitive.** CAST AI org API token used by the Terraform provider. Stored in `terraform.tfstate` (matches every other example in this repo). |
 | `castai_api_url`             | string      | `https://api.cast.ai` | CAST AI API URL.                                                                                                |
 | `castai_grpc_url`            | string      | `grpc.cast.ai:443`    | CAST AI gRPC URL — Kentroller's `StreamActions` target.                                                         |
-| `delete_nodes_on_disconnect` | bool        | `false`               | If true, CAST AI-created nodes are deleted during cluster disconnect.                                            |
 
 ## Destroy
 
