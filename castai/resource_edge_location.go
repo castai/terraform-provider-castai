@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/objectvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/resourcevalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -200,31 +201,6 @@ func newEdgeLocationResource() resource.Resource {
 	return &edgeLocationResource{}
 }
 
-type edgeLocationRegionValidator struct{}
-
-func (v edgeLocationRegionValidator) Description(_ context.Context) string {
-	return "Validates that region is provided when a non-custom cloud provider is specified"
-}
-
-func (v edgeLocationRegionValidator) MarkdownDescription(_ context.Context) string {
-	return "Validates that `region` is required when `aws`, `gcp`, or `oci` is specified, and not required for `custom`"
-}
-
-func (v edgeLocationRegionValidator) ValidateResource(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
-	var config edgeLocationModel
-	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	if config.Custom == nil && config.Region.IsNull() {
-		resp.Diagnostics.AddError(
-			"Missing Required Argument",
-			"The argument 'region' is required when 'aws', 'gcp', or 'oci' is specified.",
-		)
-	}
-}
-
 func (r *edgeLocationResource) ConfigValidators(_ context.Context) []resource.ConfigValidator {
 	return []resource.ConfigValidator{
 		resourcevalidator.ExactlyOneOf(
@@ -233,7 +209,6 @@ func (r *edgeLocationResource) ConfigValidators(_ context.Context) []resource.Co
 			path.MatchRoot("oci"),
 			path.MatchRoot("custom"),
 		),
-		edgeLocationRegionValidator{},
 	}
 }
 
@@ -347,6 +322,9 @@ func (r *edgeLocationResource) Schema(_ context.Context, _ resource.SchemaReques
 			"aws": schema.SingleNestedAttribute{
 				Optional:    true,
 				Description: "AWS configuration for the edge location",
+				Validators: []validator.Object{
+					objectvalidator.AlsoRequires(path.MatchRoot("region")),
+				},
 				Attributes: map[string]schema.Attribute{
 					"account_id": schema.StringAttribute{
 						Required:    true,
@@ -403,6 +381,9 @@ func (r *edgeLocationResource) Schema(_ context.Context, _ resource.SchemaReques
 			"gcp": schema.SingleNestedAttribute{
 				Optional:    true,
 				Description: "GCP configuration for the edge location",
+				Validators: []validator.Object{
+					objectvalidator.AlsoRequires(path.MatchRoot("region")),
+				},
 				Attributes: map[string]schema.Attribute{
 					"project_id": schema.StringAttribute{
 						Required:    true,
@@ -447,6 +428,9 @@ func (r *edgeLocationResource) Schema(_ context.Context, _ resource.SchemaReques
 			"oci": schema.SingleNestedAttribute{
 				Optional:    true,
 				Description: "OCI configuration for the edge location",
+				Validators: []validator.Object{
+					objectvalidator.AlsoRequires(path.MatchRoot("region")),
+				},
 				Attributes: map[string]schema.Attribute{
 					"tenancy_id": schema.StringAttribute{
 						Required:    true,
