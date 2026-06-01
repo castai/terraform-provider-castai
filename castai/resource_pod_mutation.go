@@ -73,7 +73,18 @@ const (
 	FieldPodMutationLabelMatcherKey                = "key"
 	FieldPodMutationLabelMatcherValue              = "value"
 	FieldPodMutationValues                         = "values"
+	FieldPodMutationFilterTolerationsFilter        = "tolerations_filter"
+	FieldPodMutationTolerationsFilterOperator      = "operator"
+	FieldPodMutationTolerationsFilterMatchers      = "matchers"
+	FieldPodMutationTolerationMatcherKey           = "key"
+	FieldPodMutationTolerationMatcherValue         = "value"
+	FieldPodMutationTolerationMatcherOperator      = "operator"
 )
+
+var tolerationsFilterOperatorValues = []string{
+	string(patching_engine.ObjectFilterV2TolerationsFilterOperatorAND),
+	string(patching_engine.ObjectFilterV2TolerationsFilterOperatorOR),
+}
 
 var spotModeValues = []string{
 	string(patching_engine.PodMutationSpotTypeOPTIONALSPOT),
@@ -120,6 +131,46 @@ var labelMatcherElemSchema = &schema.Resource{
 			Optional: true,
 			MaxItems: 1,
 			Elem:     matcherSchema,
+		},
+	},
+}
+
+var tolerationMatcherSchema = &schema.Resource{
+	Schema: map[string]*schema.Schema{
+		FieldPodMutationTolerationMatcherKey: {
+			Type:     schema.TypeList,
+			Required: true,
+			MaxItems: 1,
+			Elem:     matcherSchema,
+		},
+		FieldPodMutationTolerationMatcherValue: {
+			Type:     schema.TypeList,
+			Optional: true,
+			MaxItems: 1,
+			Elem:     matcherSchema,
+		},
+		FieldPodMutationTolerationMatcherOperator: {
+			Type:     schema.TypeList,
+			Optional: true,
+			MaxItems: 1,
+			Elem:     matcherSchema,
+		},
+	},
+}
+
+var tolerationsFilterSchema = &schema.Resource{
+	Schema: map[string]*schema.Schema{
+		FieldPodMutationTolerationsFilterOperator: {
+			Type:             schema.TypeString,
+			Required:         true,
+			ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice(tolerationsFilterOperatorValues, false)),
+			Description:      "Logical operator to combine toleration matchers: AND or OR.",
+		},
+		FieldPodMutationTolerationsFilterMatchers: {
+			Type:     schema.TypeSet,
+			Required: true,
+			Set:      schema.HashResource(tolerationMatcherSchema),
+			Elem:     tolerationMatcherSchema,
 		},
 	},
 }
@@ -423,6 +474,13 @@ func resourcePodMutation() *schema.Resource {
 									MaxItems: 1,
 									Elem:     labelsFilterSchema,
 								},
+								FieldPodMutationFilterTolerationsFilter: {
+									Type:        schema.TypeList,
+									Optional:    true,
+									MaxItems:    1,
+									Description: "Tolerations filter for matching pods by their tolerations.",
+									Elem:        tolerationsFilterSchema,
+								},
 							},
 						},
 					},
@@ -524,6 +582,7 @@ func validatePodMutationFilter(filterV2 []interface{}) error {
 	podFields := []string{
 		FieldPodMutationFilterLabelsFilter,
 		FieldPodMutationFilterExcludeLabels,
+		FieldPodMutationFilterTolerationsFilter,
 	}
 
 	if wl, ok := fm[FieldPodMutationFilterWorkload].([]interface{}); ok && len(wl) > 0 && wl[0] != nil {
@@ -934,6 +993,12 @@ func stateToObjectFilterV2(m map[string]interface{}) *patching_engine.ObjectFilt
 					filter.ExcludeLabels = stateToLabelsFilter(filterList[0].(map[string]interface{}))
 				}
 			}
+			if v, ok := pm[FieldPodMutationFilterTolerationsFilter]; ok {
+				filterList := v.([]interface{})
+				if len(filterList) > 0 && filterList[0] != nil {
+					filter.Tolerations = stateToTolerationsFilter(filterList[0].(map[string]interface{}))
+				}
+			}
 		}
 	}
 
@@ -1004,6 +1069,69 @@ func stateToLabelsFilter(m map[string]interface{}) *patching_engine.ObjectFilter
 			}
 
 			matchers = append(matchers, labelMatcher)
+		}
+		filter.Matchers = &matchers
+	}
+
+	return filter
+}
+
+func stateToTolerationsFilter(m map[string]interface{}) *patching_engine.ObjectFilterV2TolerationsFilter {
+	op := patching_engine.ObjectFilterV2TolerationsFilterOperator(m[FieldPodMutationTolerationsFilterOperator].(string))
+	filter := &patching_engine.ObjectFilterV2TolerationsFilter{
+		Operator: &op,
+	}
+
+	if set, ok := m[FieldPodMutationTolerationsFilterMatchers].(*schema.Set); ok && set != nil {
+		matchersList := set.List()
+		matchers := make([]patching_engine.ObjectFilterV2TolerationMatcher, 0, len(matchersList))
+		for _, item := range matchersList {
+			if item == nil {
+				continue
+			}
+			tm := item.(map[string]interface{})
+			tolerationMatcher := patching_engine.ObjectFilterV2TolerationMatcher{}
+
+			if keyList, ok := tm[FieldPodMutationTolerationMatcherKey]; ok {
+				kl := keyList.([]interface{})
+				if len(kl) > 0 && kl[0] != nil {
+					km := kl[0].(map[string]interface{})
+					keyType := patching_engine.ObjectFilterV2MatcherType(km[FieldPodMutationMatcherType].(string))
+					keyValue := km[FieldPodMutationMatcherValue].(string)
+					tolerationMatcher.Key = &patching_engine.ObjectFilterV2Matcher{
+						Type:  &keyType,
+						Value: &keyValue,
+					}
+				}
+			}
+
+			if valList, ok := tm[FieldPodMutationTolerationMatcherValue]; ok {
+				vl := valList.([]interface{})
+				if len(vl) > 0 && vl[0] != nil {
+					vm := vl[0].(map[string]interface{})
+					valType := patching_engine.ObjectFilterV2MatcherType(vm[FieldPodMutationMatcherType].(string))
+					valValue := vm[FieldPodMutationMatcherValue].(string)
+					tolerationMatcher.Value = &patching_engine.ObjectFilterV2Matcher{
+						Type:  &valType,
+						Value: &valValue,
+					}
+				}
+			}
+
+			if opList, ok := tm[FieldPodMutationTolerationMatcherOperator]; ok {
+				ol := opList.([]interface{})
+				if len(ol) > 0 && ol[0] != nil {
+					om := ol[0].(map[string]interface{})
+					opType := patching_engine.ObjectFilterV2MatcherType(om[FieldPodMutationMatcherType].(string))
+					opValue := om[FieldPodMutationMatcherValue].(string)
+					tolerationMatcher.Operator = &patching_engine.ObjectFilterV2Matcher{
+						Type:  &opType,
+						Value: &opValue,
+					}
+				}
+			}
+
+			matchers = append(matchers, tolerationMatcher)
 		}
 		filter.Matchers = &matchers
 	}
@@ -1364,6 +1492,10 @@ func flattenObjectFilterV2(filter *patching_engine.ObjectFilterV2) []map[string]
 		pm[FieldPodMutationFilterExcludeLabels] = flattenLabelsFilter(filter.ExcludeLabels)
 		hasPod = true
 	}
+	if filter.Tolerations != nil {
+		pm[FieldPodMutationFilterTolerationsFilter] = flattenTolerationsFilter(filter.Tolerations)
+		hasPod = true
+	}
 	if hasPod {
 		m[FieldPodMutationFilterPod] = []map[string]interface{}{pm}
 	}
@@ -1410,6 +1542,47 @@ func flattenLabelsFilter(filter *patching_engine.ObjectFilterV2LabelsFilter) []m
 			matchersList = append(matchersList, entry)
 		}
 		m[FieldPodMutationLabelsFilterMatchers] = matchersList
+	}
+
+	return []map[string]interface{}{m}
+}
+
+func flattenTolerationsFilter(filter *patching_engine.ObjectFilterV2TolerationsFilter) []map[string]interface{} {
+	m := map[string]interface{}{
+		FieldPodMutationTolerationsFilterOperator: string(lo.FromPtr(filter.Operator)),
+	}
+
+	if filter.Matchers != nil {
+		matchersList := make([]map[string]interface{}, 0, len(*filter.Matchers))
+		for _, tm := range *filter.Matchers {
+			entry := map[string]interface{}{}
+			if tm.Key != nil {
+				entry[FieldPodMutationTolerationMatcherKey] = []map[string]interface{}{
+					{
+						FieldPodMutationMatcherType:  string(lo.FromPtr(tm.Key.Type)),
+						FieldPodMutationMatcherValue: lo.FromPtr(tm.Key.Value),
+					},
+				}
+			}
+			if tm.Value != nil {
+				entry[FieldPodMutationTolerationMatcherValue] = []map[string]interface{}{
+					{
+						FieldPodMutationMatcherType:  string(lo.FromPtr(tm.Value.Type)),
+						FieldPodMutationMatcherValue: lo.FromPtr(tm.Value.Value),
+					},
+				}
+			}
+			if tm.Operator != nil {
+				entry[FieldPodMutationTolerationMatcherOperator] = []map[string]interface{}{
+					{
+						FieldPodMutationMatcherType:  string(lo.FromPtr(tm.Operator.Type)),
+						FieldPodMutationMatcherValue: lo.FromPtr(tm.Operator.Value),
+					},
+				}
+			}
+			matchersList = append(matchersList, entry)
+		}
+		m[FieldPodMutationTolerationsFilterMatchers] = matchersList
 	}
 
 	return []map[string]interface{}{m}
