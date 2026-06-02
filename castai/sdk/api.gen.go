@@ -8372,10 +8372,9 @@ type ScheduledrebalancingV1DrainFailureConfig struct {
 
 // ScheduledrebalancingV1ExecutionConditions Defines the conditions which must be met in order to fully execute the plan.
 type ScheduledrebalancingV1ExecutionConditions struct {
-	// AchievedSavingsPercentage Identifies the minimum percentage of predicted savings that should be achieved.
+	// AchievedSavingsPercentage Identifies the minimum percentage of cost savings relative to the original (blue) cost that should be achieved.
 	// The rebalancing plan will not proceed after creating the nodes if the achieved savings percentage
-	// is not achieved.
-	// This field's value will not be considered if the initially predicted savings are negative.
+	// is not achieved. This field's value will not be considered if the initially predicted savings are negative.
 	AchievedSavingsPercentage *int32 `json:"achievedSavingsPercentage,omitempty"`
 	Enabled                   *bool  `json:"enabled,omitempty"`
 }
@@ -9119,6 +9118,61 @@ type WorkloadoptimizationV1FailedHookEvent struct {
 	Time    time.Time `json:"time"`
 }
 
+// WorkloadoptimizationV1GPUDeviceMetadata defines model for workloadoptimization.v1.GPUDeviceMetadata.
+type WorkloadoptimizationV1GPUDeviceMetadata struct {
+	// Count Number of devices of this type used by the workload in the queried range.
+	Count *int32 `json:"count,omitempty"`
+
+	// MemoryTotalMib Total framebuffer (VRAM) capacity in MiB for this device type.
+	MemoryTotalMib *float64 `json:"memoryTotalMib,omitempty"`
+
+	// ModelName GPU product name, e.g. "NVIDIA A100-SXM4-40GB".
+	ModelName *string `json:"modelName,omitempty"`
+}
+
+// WorkloadoptimizationV1GPUMetrics defines model for workloadoptimization.v1.GPUMetrics.
+type WorkloadoptimizationV1GPUMetrics struct {
+	// DeviceCount Effective GPU device count, accounting for cross-workload sharing (fractional).
+	DeviceCount *float64 `json:"deviceCount,omitempty"`
+
+	// GpuUtilization Average SM active utilization as a fraction (0.0–1.0).
+	GpuUtilization *float64 `json:"gpuUtilization,omitempty"`
+
+	// MemoryTotalMib Max GPU memory total (capacity) in MiB across devices in this bucket.
+	MemoryTotalMib *float64 `json:"memoryTotalMib,omitempty"`
+
+	// MemoryUsedMib Average GPU memory used in MiB.
+	MemoryUsedMib *float64 `json:"memoryUsedMib,omitempty"`
+
+	// OriginalDeviceCount Original requested GPU device count before optimization.
+	OriginalDeviceCount *float64 `json:"originalDeviceCount"`
+
+	// OriginalGpuUtilization Original requested GPU utilization before optimization, as a fraction (0.0–1.0).
+	OriginalGpuUtilization *float64 `json:"originalGpuUtilization"`
+
+	// OriginalMemoryUsedMib Original requested GPU memory used in MiB before optimization.
+	OriginalMemoryUsedMib *float64 `json:"originalMemoryUsedMib"`
+
+	// RecDeviceCount Recommended effective GPU device count (rec_gpu_utilization * device_count).
+	RecDeviceCount *float64 `json:"recDeviceCount"`
+
+	// RecGpuUtilization Recommended GPU compute utilization (from sm_active), as a fraction (0.0–1.0).
+	RecGpuUtilization *float64 `json:"recGpuUtilization"`
+
+	// RecMemoryUsedMib Recommended GPU memory usage in MiB (from max_used_memory_bytes, capped at 1 GiB minimum).
+	RecMemoryUsedMib *float64 `json:"recMemoryUsedMib"`
+
+	// RequestDeviceCount Current requested GPU device count after optimization.
+	RequestDeviceCount *float64 `json:"requestDeviceCount"`
+
+	// RequestGpuUtilization Current requested GPU utilization after optimization, as a fraction (0.0–1.0).
+	RequestGpuUtilization *float64 `json:"requestGpuUtilization"`
+
+	// RequestMemoryUsedMib Current requested GPU memory used in MiB after optimization.
+	RequestMemoryUsedMib *float64   `json:"requestMemoryUsedMib"`
+	Timestamp            *time.Time `json:"timestamp,omitempty"`
+}
+
 // WorkloadoptimizationV1GPUSettings defines model for workloadoptimization.v1.GPUSettings.
 type WorkloadoptimizationV1GPUSettings struct {
 	// ManagementOption Defines possible options for workload management.
@@ -9233,6 +9287,16 @@ type WorkloadoptimizationV1GetWorkloadFiltersResponse struct {
 	ScalingPolicyNames []string                                       `json:"scalingPolicyNames"`
 	WorkloadIds        []string                                       `json:"workloadIds"`
 	WorkloadNames      []string                                       `json:"workloadNames"`
+}
+
+// WorkloadoptimizationV1GetWorkloadGPUMetricsResponse defines model for workloadoptimization.v1.GetWorkloadGPUMetricsResponse.
+type WorkloadoptimizationV1GetWorkloadGPUMetricsResponse struct {
+	// GpuDevices Metadata about GPU device types used by this workload.
+	GpuDevices *[]WorkloadoptimizationV1GPUDeviceMetadata `json:"gpuDevices,omitempty"`
+	Items      *[]WorkloadoptimizationV1GPUMetrics        `json:"items,omitempty"`
+
+	// RecGpuDevices Recommended GPU device types (empty until GPU device recommendations are implemented).
+	RecGpuDevices *[]WorkloadoptimizationV1GPUDeviceMetadata `json:"recGpuDevices,omitempty"`
 }
 
 // WorkloadoptimizationV1GetWorkloadNativeVpaSpecResponse defines model for workloadoptimization.v1.GetWorkloadNativeVpaSpecResponse.
@@ -12483,6 +12547,12 @@ type WorkloadOptimizationAPIGetWorkloadParams struct {
 	IncludeCosts   *bool      `form:"includeCosts,omitempty" json:"includeCosts,omitempty"`
 	FromTime       *time.Time `form:"fromTime,omitempty" json:"fromTime,omitempty"`
 	ToTime         *time.Time `form:"toTime,omitempty" json:"toTime,omitempty"`
+}
+
+// WorkloadOptimizationAPIGetWorkloadGPUMetricsParams defines parameters for WorkloadOptimizationAPIGetWorkloadGPUMetrics.
+type WorkloadOptimizationAPIGetWorkloadGPUMetricsParams struct {
+	From *time.Time `form:"from,omitempty" json:"from,omitempty"`
+	To   *time.Time `form:"to,omitempty" json:"to,omitempty"`
 }
 
 // WorkloadOptimizationAPIGetInstallCmdParams defines parameters for WorkloadOptimizationAPIGetInstallCmd.
