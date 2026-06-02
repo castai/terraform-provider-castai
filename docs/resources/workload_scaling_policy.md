@@ -155,8 +155,8 @@ Optional:
 - `limit` (Block List, Max: 1) Resource limit settings (see [below for nested schema](#nestedblock--cpu--limit))
 - `look_back_period_seconds` (Number) The look back period in seconds for the recommendation.
 - `management_option` (String) Disables management for a single resource when set to `READ_ONLY`. The resource will use its original workload template requests and limits. Supported value: `READ_ONLY`. Minimum required workload-autoscaler version: `v0.23.1`.
-- `max` (Number) Max values for the recommendation, applies to every container. For memory - this is in MiB, for CPU - this is in cores.
-- `min` (Number) Min values for the recommendation, applies to every container. For memory - this is in MiB, for CPU - this is in cores.
+- `max` (Number, Deprecated) Max values for the recommendation, applies to every container. For memory - this is in MiB, for CPU - this is in cores. Use `constraints` block instead.
+- `min` (Number, Deprecated) Min values for the recommendation, applies to every container. For memory - this is in MiB, for CPU - this is in cores. Use `constraints` block instead.
 - `overhead` (Number) Overhead for the recommendation, e.g. `0.1` will result in 10% higher recommendation
 
 <a id="nestedblock--cpu--apply_threshold_strategy"></a>
@@ -178,6 +178,31 @@ Optional:
 	It must be defined for the CUSTOM_ADAPTIVE strategy.
 - `numerator` (Number) The numerator affects vertical stretch of function used in adaptive threshold - smaller number will create smaller threshold.It must be defined for the CUSTOM_ADAPTIVE strategy.
 - `percentage` (Number) Percentage of a how much difference should there be between the current pod requests and the new recommendation. It must be defined for the PERCENTAGE strategy.
+
+
+<a id="nestedblock--cpu--constraints"></a>
+### Nested Schema for `cpu.constraints`
+
+Optional:
+
+- `max` (Block List, Max: 1) Maximum bound for the recommendation. (see [below for nested schema](#nestedblock--cpu--constraints--max))
+- `min` (Block List, Max: 1) Minimum bound for the recommendation. (see [below for nested schema](#nestedblock--cpu--constraints--min))
+
+<a id="nestedblock--cpu--constraints--max"></a>
+### Nested Schema for `cpu.constraints.max`
+
+Optional:
+
+- `constant` (Number) Fixed bound value. For memory - MiB, for CPU - cores.
+- `percentage_of_original` (Number) Bound as a percentage of the original pod-spec request.
+
+<a id="nestedblock--cpu--constraints--min"></a>
+### Nested Schema for `cpu.constraints.min`
+
+Optional:
+
+- `constant` (Number) Fixed bound value. For memory - MiB, for CPU - cores.
+- `percentage_of_original` (Number) Bound as a percentage of the original pod-spec request.
 
 
 <a id="nestedblock--cpu--limit"></a>
@@ -207,12 +232,13 @@ Optional:
 - `apply_threshold` (Number, Deprecated) The threshold of when to apply the recommendation. Recommendation will be applied when diff of current requests and new recommendation is greater than set value
 - `apply_threshold_strategy` (Block List, Max: 1) Resource apply threshold strategy settings. The default strategy is `PERCENTAGE` with percentage value set to 0.1. (see [below for nested schema](#nestedblock--memory--apply_threshold_strategy))
 - `args` (List of String) The arguments for the function - i.e. for `QUANTILE` this should be a [0, 1] float. `MAX` doesn't accept any args
+- `constraints` (Block List, Max: 1) Defines min/max bounds for the recommendation using constraint strategies. Mutually exclusive with `min` and `max`. (see [below for nested schema](#nestedblock--memory--constraints))
 - `function` (String) The function used to calculate the resource recommendation. Supported values: `QUANTILE`, `MAX`
 - `limit` (Block List, Max: 1) Resource limit settings (see [below for nested schema](#nestedblock--memory--limit))
 - `look_back_period_seconds` (Number) The look back period in seconds for the recommendation.
 - `management_option` (String) Disables management for a single resource when set to `READ_ONLY`. The resource will use its original workload template requests and limits. Supported value: `READ_ONLY`. Minimum required workload-autoscaler version: `v0.23.1`.
-- `max` (Number) Max values for the recommendation, applies to every container. For memory - this is in MiB, for CPU - this is in cores.
-- `min` (Number) Min values for the recommendation, applies to every container. For memory - this is in MiB, for CPU - this is in cores.
+- `max` (Number, Deprecated) Max values for the recommendation, applies to every container. For memory - this is in MiB, for CPU - this is in cores. Use `constraints` block instead.
+- `min` (Number, Deprecated) Min values for the recommendation, applies to every container. For memory - this is in MiB, for CPU - this is in cores. Use `constraints` block instead.
 - `overhead` (Number) Overhead for the recommendation, e.g. `0.1` will result in 10% higher recommendation
 
 <a id="nestedblock--memory--apply_threshold_strategy"></a>
@@ -252,6 +278,31 @@ Optional:
 - `multiplier` (Number) Multiplier used to calculate the resource limit. It must be defined for the MULTIPLIER strategy.
 - `only_if_original_exist` (Boolean) Apply the strategy only when the original resource has limits defined.
 - `only_if_original_lower` (Boolean) Use the original resource limits if they are higher than recommended values.
+
+
+<a id="nestedblock--memory--constraints"></a>
+### Nested Schema for `memory.constraints`
+
+Optional:
+
+- `max` (Block List, Max: 1) Maximum bound for the recommendation. (see [below for nested schema](#nestedblock--memory--constraints--max))
+- `min` (Block List, Max: 1) Minimum bound for the recommendation. (see [below for nested schema](#nestedblock--memory--constraints--min))
+
+<a id="nestedblock--memory--constraints--max"></a>
+### Nested Schema for `memory.constraints.max`
+
+Optional:
+
+- `constant` (Number) Fixed bound value. For memory - MiB, for CPU - cores.
+- `percentage_of_original` (Number) Bound as a percentage of the original pod-spec request.
+
+<a id="nestedblock--memory--constraints--min"></a>
+### Nested Schema for `memory.constraints.min`
+
+Optional:
+
+- `constant` (Number) Fixed bound value. For memory - MiB, for CPU - cores.
+- `percentage_of_original` (Number) Bound as a percentage of the original pod-spec request.
 
 
 

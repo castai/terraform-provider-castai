@@ -76,6 +76,7 @@ const (
 	FieldAnomalyDetectionCpuPressure               = "cpu_pressure"
 	FieldCpuStallThresholdPercentage               = "cpu_stall_threshold_percentage"
 	FieldMinPressuredPodPercentage                 = "min_pressured_pod_percentage"
+	FieldConstraints                               = "constraints"
 )
 
 const (
@@ -516,17 +517,32 @@ func workloadScalingPolicyResourceSchema(resource, function string, overhead, mi
 				Description:      "The look back period in seconds for the recommendation.",
 				ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(3*60*60, 7*24*60*60)),
 			},
+			FieldConstraints: {
+				Type:        schema.TypeList,
+				Optional:    true,
+				MaxItems:    1,
+				Description: "Defines min/max bounds for the recommendation using constraint strategies.",
+				Elem:        workloadScalingPolicyResourceConstraintsSchema(),
+			},
 			"min": {
 				Type:             schema.TypeFloat,
 				Default:          minRecommended,
 				Optional:         true,
 				Description:      "Min values for the recommendation, applies to every container. For memory - this is in MiB, for CPU - this is in cores.",
 				ValidateDiagFunc: validation.ToDiagFunc(validation.FloatAtLeast(minRecommended)),
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					return suppressMinMaxDiffWhenConstraintsPresent(resource, k, old, new, d)
+				},
+				Deprecated: "Use constraints { min { constant = X } } instead",
 			},
 			"max": {
 				Type:        schema.TypeFloat,
 				Optional:    true,
 				Description: "Max values for the recommendation, applies to every container. For memory - this is in MiB, for CPU - this is in cores.",
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					return suppressMinMaxDiffWhenConstraintsPresent(resource, k, old, new, d)
+				},
+				Deprecated: "Use constraints { max { constant = X } } instead",
 			},
 			FieldLimitStrategy: {
 				Type:        schema.TypeList,
@@ -575,6 +591,43 @@ func workloadScalingPolicyResourceLimitSchema() *schema.Resource {
 				Type:        schema.TypeBool,
 				Optional:    true,
 				Description: "Use the original resource limits if they are higher than recommended values.",
+			},
+		},
+	}
+}
+
+func workloadScalingPolicyResourceConstraintsSchema() *schema.Resource {
+	return &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			"min": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Computed: true,
+				MaxItems: 1,
+				Elem:     workloadScalingPolicyResourceConstraintStrategySchema(),
+			},
+			"max": {
+				Type:     schema.TypeList,
+				Optional: true,
+				MaxItems: 1,
+				Elem:     workloadScalingPolicyResourceConstraintStrategySchema(),
+			},
+		},
+	}
+}
+
+func workloadScalingPolicyResourceConstraintStrategySchema() *schema.Resource {
+	return &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			"constant": {
+				Type:        schema.TypeFloat,
+				Optional:    true,
+				Description: "Fixed bound value. For memory - MiB, for CPU - cores.",
+			},
+			"percentage_of_original": {
+				Type:        schema.TypeFloat,
+				Optional:    true,
+				Description: "Bound as a percentage of the original pod-spec request.",
 			},
 		},
 	}
@@ -664,7 +717,7 @@ func resourceWorkloadScalingPolicyCreate(ctx context.Context, d *schema.Resource
 	}
 
 	if v, ok := d.GetOk("cpu"); ok {
-		cpu, err := toWorkloadScalingPolicies("cpu", v.([]any)[0].(map[string]any))
+		cpu, err := toWorkloadScalingPolicies("cpu", d, v.([]any)[0].(map[string]any))
 		if err != nil {
 			return diag.FromErr(err)
 		}
@@ -672,7 +725,7 @@ func resourceWorkloadScalingPolicyCreate(ctx context.Context, d *schema.Resource
 	}
 
 	if v, ok := d.GetOk("memory"); ok {
-		memory, err := toWorkloadScalingPolicies("memory", v.([]any)[0].(map[string]any))
+		memory, err := toWorkloadScalingPolicies("memory", d, v.([]any)[0].(map[string]any))
 		if err != nil {
 			return diag.FromErr(err)
 		}
@@ -890,11 +943,11 @@ func updateScalingPolicy(ctx context.Context, d *schema.ResourceData, meta any) 
 
 	client := meta.(*ProviderConfig).api
 	clusterID := d.Get(FieldClusterID).(string)
-	cpu, err := toWorkloadScalingPolicies("cpu", d.Get("cpu").([]any)[0].(map[string]any))
+	cpu, err := toWorkloadScalingPolicies("cpu", d, d.Get("cpu").([]any)[0].(map[string]any))
 	if err != nil {
 		return nil, err
 	}
-	memory, err := toWorkloadScalingPolicies("memory", d.Get("memory").([]any)[0].(map[string]any))
+	memory, err := toWorkloadScalingPolicies("memory", d, d.Get("memory").([]any)[0].(map[string]any))
 	if err != nil {
 		return nil, err
 	}
@@ -977,15 +1030,42 @@ func resourceWorkloadScalingPolicyDelete(ctx context.Context, d *schema.Resource
 
 func resourceWorkloadScalingPolicyDiff(_ context.Context, d *schema.ResourceDiff, _ any) error {
 	// Since tf doesn't support cross field validation, doing it here.
-	_, err := toWorkloadScalingPolicies("cpu", d.Get("cpu").([]any)[0].(map[string]any))
-	if err != nil {
-		return err
-	}
-	_, err = toWorkloadScalingPolicies("memory", d.Get("memory").([]any)[0].(map[string]any))
-	if err != nil {
-		return err
+	for _, resource := range []string{"cpu", "memory"} {
+		hasConstraints := configHasResourceField(d, resource, FieldConstraints)
+		hasMin := configHasResourceField(d, resource, "min")
+		hasMax := configHasResourceField(d, resource, "max")
+		if hasConstraints && (hasMin || hasMax) {
+			return fmt.Errorf("%s: constraints and min/max are mutually exclusive", resource)
+		}
+		_, err := toWorkloadScalingPolicies(resource, nil, d.Get(resource).([]any)[0].(map[string]any))
+		if err != nil {
+			return err
+		}
 	}
 	return nil
+}
+
+func configHasResourceField(d *schema.ResourceDiff, resource, field string) bool {
+	rawConfig := d.GetRawConfig()
+	if rawConfig.IsNull() || !rawConfig.Type().IsObjectType() {
+		return false
+	}
+	resourceCty := rawConfig.GetAttr(resource)
+	if resourceCty.IsNull() || len(resourceCty.AsValueSlice()) == 0 {
+		return false
+	}
+	resourceMap := resourceCty.AsValueSlice()[0]
+	val := resourceMap.GetAttr(field)
+	if val.IsNull() {
+		return false
+	}
+	// Empty collections mean the field is absent; only count non-empty ones.
+	if val.Type().IsCollectionType() || val.Type().IsTupleType() {
+		if val.LengthInt() == 0 {
+			return false
+		}
+	}
+	return true
 }
 
 func workloadScalingPolicyImporter(ctx context.Context, d *schema.ResourceData, meta any) ([]*schema.ResourceData, error) {
@@ -1015,7 +1095,22 @@ func workloadScalingPolicyImporter(ctx context.Context, d *schema.ResourceData, 
 	return []*schema.ResourceData{d}, nil
 }
 
-func toWorkloadScalingPolicies(resource string, obj map[string]any) (sdk.WorkloadoptimizationV1ResourcePolicies, error) {
+func defaultResourceMinConstraint(resource string) *sdk.WorkloadoptimizationV1ConstraintsV2Strategy {
+	var value float64
+	switch resource {
+	case "cpu":
+		value = 0.01
+	case "memory":
+		value = 10
+	default:
+		return nil
+	}
+	return &sdk.WorkloadoptimizationV1ConstraintsV2Strategy{
+		Constant: &sdk.WorkloadoptimizationV1ConstraintsV2Constant{Value: value},
+	}
+}
+
+func toWorkloadScalingPolicies(resource string, d *schema.ResourceData, obj map[string]any) (sdk.WorkloadoptimizationV1ResourcePolicies, error) {
 	var err error
 	out := sdk.WorkloadoptimizationV1ResourcePolicies{}
 
@@ -1039,12 +1134,65 @@ func toWorkloadScalingPolicies(resource string, obj map[string]any) (sdk.Workloa
 	if v, ok := obj["look_back_period_seconds"].(int); ok && v > 0 {
 		out.LookBackPeriodSeconds = lo.ToPtr(int32(v))
 	}
-	if v, ok := obj["min"].(float64); ok {
-		out.Min = lo.ToPtr(v)
+
+	// Parse constraints if present
+	if v, ok := obj[FieldConstraints].([]any); ok && len(v) > 0 {
+		out.Constraints, err = toWorkloadConstraints(v[0].(map[string]any))
+		if err != nil {
+			return out, fmt.Errorf("field %q: field constraints: %w", resource, err)
+		}
 	}
-	if v, ok := obj["max"].(float64); ok && v > 0 {
-		out.Max = lo.ToPtr(v)
+
+	// Only fall back to legacy min/max when constraints is NOT configured
+	if out.Constraints == nil {
+		if v, ok := obj["min"].(float64); ok {
+			out.Min = lo.ToPtr(v)
+		}
+		if v, ok := obj["max"].(float64); ok && v > 0 {
+			out.Max = lo.ToPtr(v)
+		}
+	} else {
+		// Clear constraint fields the user did not explicitly set, otherwise
+		// stale state values (e.g. old constant min) leak into the request.
+		if d != nil {
+			raw := d.GetRawConfig()
+			if !raw.IsNull() {
+				resourceList := raw.GetAttr(resource)
+				if !resourceList.IsNull() {
+					if resourceList.Type().IsCollectionType() || resourceList.Type().IsTupleType() {
+						if resourceElems := resourceList.AsValueSlice(); len(resourceElems) > 0 {
+							constraintsRaw := resourceElems[0].GetAttr("constraints")
+							if !constraintsRaw.IsNull() && (constraintsRaw.Type().IsCollectionType() || constraintsRaw.Type().IsTupleType()) {
+								if constraintElems := constraintsRaw.AsValueSlice(); len(constraintElems) > 0 {
+									constraintMap := constraintElems[0]
+									minRaw := constraintMap.GetAttr("min")
+									isMinAbsent := minRaw.IsNull() || (!minRaw.Type().IsCollectionType() && !minRaw.Type().IsTupleType()) || len(minRaw.AsValueSlice()) == 0
+									if isMinAbsent {
+										out.Constraints.Min = nil
+									}
+									maxRaw := constraintMap.GetAttr("max")
+									isMaxAbsent := maxRaw.IsNull() || (!maxRaw.Type().IsCollectionType() && !maxRaw.Type().IsTupleType()) || len(maxRaw.AsValueSlice()) == 0
+									if isMaxAbsent {
+										out.Constraints.Max = nil
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+
+		// Backend fills in legacy min when constraints.min is absent and max is
+		// constant. Only inject a default min constraints constant when max is
+		// also a constant (mixing constant and percentage is rejected).
+		if out.Constraints.Min == nil &&
+			out.Constraints.Max != nil &&
+			out.Constraints.Max.Constant != nil {
+			out.Constraints.Min = defaultResourceMinConstraint(resource)
+		}
 	}
+
 	if v, ok := obj[FieldLimitStrategy].([]any); ok && len(v) > 0 {
 		out.Limit, err = toWorkloadResourceLimit(v[0].(map[string]any))
 		if err != nil {
@@ -1061,6 +1209,46 @@ func toWorkloadScalingPolicies(resource string, obj map[string]any) (sdk.Workloa
 	}
 
 	return out, err
+}
+
+func toWorkloadConstraints(obj map[string]any) (*sdk.WorkloadoptimizationV1ConstraintsV2, error) {
+	if len(obj) == 0 {
+		return nil, nil
+	}
+	out := &sdk.WorkloadoptimizationV1ConstraintsV2{}
+	if v, ok := obj["min"].([]any); ok && len(v) > 0 {
+		strategy, err := toConstraintStrategy(v[0].(map[string]any))
+		if err != nil {
+			return nil, fmt.Errorf("min: %w", err)
+		}
+		out.Min = strategy
+	}
+	if v, ok := obj["max"].([]any); ok && len(v) > 0 {
+		strategy, err := toConstraintStrategy(v[0].(map[string]any))
+		if err != nil {
+			return nil, fmt.Errorf("max: %w", err)
+		}
+		out.Max = strategy
+	}
+	return out, nil
+}
+
+func toConstraintStrategy(obj map[string]any) (*sdk.WorkloadoptimizationV1ConstraintsV2Strategy, error) {
+	out := &sdk.WorkloadoptimizationV1ConstraintsV2Strategy{}
+	hasConstant := false
+	hasPct := false
+	if v, ok := obj["constant"].(float64); ok && v > 0 {
+		out.Constant = &sdk.WorkloadoptimizationV1ConstraintsV2Constant{Value: v}
+		hasConstant = true
+	}
+	if v, ok := obj["percentage_of_original"].(float64); ok && v > 0 {
+		out.PercentageOfOriginal = &sdk.WorkloadoptimizationV1ConstraintsV2PercentageOfOriginal{Value: v}
+		hasPct = true
+	}
+	if hasConstant && hasPct {
+		return nil, fmt.Errorf("only one of constant or percentage_of_original may be set")
+	}
+	return out, nil
 }
 
 func resolveApplyThresholdStrategy(obj map[string]any) (*sdk.WorkloadoptimizationV1ApplyThresholdStrategy, error) {
@@ -1161,6 +1349,28 @@ func suppressThresholdStrategyDefaultValueDiff(resource, oldValue, newValue stri
 	return oldValue == newValue
 }
 
+func suppressMinMaxDiffWhenConstraintsPresent(resource, k, oldValue, newValue string, d *schema.ResourceData) bool {
+	raw := d.GetRawConfig()
+	if raw.IsNull() {
+		return false
+	}
+
+	resourceList := raw.GetAttr(resource)
+	if resourceList.IsNull() {
+		return false
+	}
+	resourceElems := resourceList.AsValueSlice()
+	if len(resourceElems) == 0 {
+		return false
+	}
+
+	constraintsVal := resourceElems[0].GetAttr("constraints")
+	if constraintsVal.IsNull() {
+		return false
+	}
+	return len(constraintsVal.AsValueSlice()) > 0
+}
+
 func suppressConfidenceThresholdDefaultValueDiff(resource, oldValue, newValue string, d *schema.ResourceData) bool {
 	if isEmpty(newValue) {
 		confidenceThreshold := d.Get(fmt.Sprintf("%s.0.%s", resource, FieldConfidenceThreshold))
@@ -1231,6 +1441,17 @@ func toWorkloadResourceLimit(obj map[string]any) (*sdk.WorkloadoptimizationV1Res
 	}
 }
 
+func hasResourceField(obj map[string]any, field string) bool {
+	v, ok := obj[field]
+	if !ok || v == nil {
+		return false
+	}
+	if arr, ok := v.([]any); ok && len(arr) == 0 {
+		return false
+	}
+	return true
+}
+
 func toWorkloadResourcePercentageThresholdStrategy(percentage float64) *sdk.WorkloadoptimizationV1ApplyThresholdStrategy {
 	return &sdk.WorkloadoptimizationV1ApplyThresholdStrategy{
 		PercentageThreshold: &sdk.WorkloadoptimizationV1ApplyThresholdStrategyPercentageThreshold{
@@ -1260,8 +1481,22 @@ func toWorkloadScalingPoliciesMap(previousCfg map[string]any, p sdk.Workloadopti
 		"function": p.Function,
 		"args":     p.Args,
 		"overhead": p.Overhead,
-		"min":      p.Min,
-		"max":      p.Max,
+	}
+
+	hasConstraints := hasResourceField(previousCfg, "constraints")
+	hasMin := hasResourceField(previousCfg, "min")
+	hasMax := hasResourceField(previousCfg, "max")
+	hasLegacy := hasMin || hasMax
+
+	if p.Constraints != nil && (hasConstraints || !hasLegacy) {
+		m["constraints"] = constraintsToMap(p.Constraints)
+		m["min"] = (*float64)(nil)
+		m["max"] = (*float64)(nil)
+	}
+
+	if _, constraintsWritten := m["constraints"]; !constraintsWritten {
+		m["min"] = p.Min
+		m["max"] = p.Max
 	}
 
 	if p.LookBackPeriodSeconds != nil {
@@ -1290,6 +1525,31 @@ func toWorkloadScalingPoliciesMap(previousCfg map[string]any, p sdk.Workloadopti
 		m["management_option"] = string(*p.ManagementOption)
 	}
 
+	return []map[string]any{m}
+}
+
+func constraintsToMap(c *sdk.WorkloadoptimizationV1ConstraintsV2) []map[string]any {
+	m := map[string]any{}
+	if c.Min != nil {
+		strategy := map[string]any{}
+		if c.Min.Constant != nil {
+			strategy["constant"] = c.Min.Constant.Value
+		}
+		if c.Min.PercentageOfOriginal != nil {
+			strategy["percentage_of_original"] = c.Min.PercentageOfOriginal.Value
+		}
+		m["min"] = []map[string]any{strategy}
+	}
+	if c.Max != nil {
+		strategy := map[string]any{}
+		if c.Max.Constant != nil {
+			strategy["constant"] = c.Max.Constant.Value
+		}
+		if c.Max.PercentageOfOriginal != nil {
+			strategy["percentage_of_original"] = c.Max.PercentageOfOriginal.Value
+		}
+		m["max"] = []map[string]any{strategy}
+	}
 	return []map[string]any{m}
 }
 
