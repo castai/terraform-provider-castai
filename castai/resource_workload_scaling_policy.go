@@ -19,6 +19,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
+	"github.com/hashicorp/go-cty/cty"
+
 	"github.com/castai/terraform-provider-castai/castai/sdk"
 )
 
@@ -629,6 +631,7 @@ func workloadScalingPolicyResourceConstraintStrategySchema() *schema.Resource {
 				Type:        schema.TypeFloat,
 				Optional:    true,
 				Description: "Fixed bound value. For memory - MiB, for CPU - cores.",
+				ValidateDiagFunc: validation.ToDiagFunc(validation.FloatAtLeast(0)),
 				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 					return suppressDefaultMinValue(k, old, new, d)
 				},
@@ -637,6 +640,7 @@ func workloadScalingPolicyResourceConstraintStrategySchema() *schema.Resource {
 				Type:        schema.TypeFloat,
 				Optional:    true,
 				Description: "Bound as a percentage of the original pod-spec request.",
+				ValidateDiagFunc: validation.ToDiagFunc(validation.FloatAtLeast(0)),
 			},
 		},
 	}
@@ -1058,85 +1062,33 @@ func resourceWorkloadScalingPolicyDiff(_ context.Context, d *schema.ResourceDiff
 	return nil
 }
 
-func configHasResourceField(d *schema.ResourceDiff, resource, field string) bool {
-	rawConfig := d.GetRawConfig()
-	if rawConfig.IsNull() || !rawConfig.Type().IsObjectType() {
-		return false
-	}
-	if rawConfig.Type().IsObjectType() && !rawConfig.Type().HasAttribute(resource) {
-		return false
-	}
-	resourceCty := rawConfig.GetAttr(resource)
-	if resourceCty.IsNull() || len(resourceCty.AsValueSlice()) == 0 {
-		return false
-	}
-	resourceMap := resourceCty.AsValueSlice()[0]
-	if resourceMap.Type().IsObjectType() && !resourceMap.Type().HasAttribute(field) {
-		return false
-	}
-	val := resourceMap.GetAttr(field)
-	if val.IsNull() {
-		return false
-	}
-	// Empty collections mean the field is absent; only count non-empty ones.
-	if val.Type().IsCollectionType() || val.Type().IsTupleType() {
-		if val.LengthInt() == 0 {
+// rawConfigHasField walks a path of nested attributes in a Terraform raw config.
+func rawConfigHasField(rawConfig cty.Value, path ...string) bool {
+	v := rawConfig
+	for _, attr := range path {
+		// Fail fast if value is not an object or attribute is not present.
+		if v.IsNull() || !v.Type().IsObjectType() || !v.Type().HasAttribute(attr) {
 			return false
+		}
+		v = v.GetAttr(attr)
+		if v.IsNull() {
+			return false
+		}
+		// Terraform SDK v2 represents nested blocks as cty lists.
+		// Extract the first element so the next iteration works on the inner object.
+		if v.Type().IsCollectionType() || v.Type().IsTupleType() {
+			elems := v.AsValueSlice()
+			if len(elems) == 0 {
+				return false
+			}
+			v = elems[0]
 		}
 	}
 	return true
 }
 
-func configHasMin(d *schema.ResourceData, resource string) bool {
-	if d == nil {
-		return false
-	}
-	rc := d.GetRawConfig()
-	if rc.IsNull() {
-		return false
-	}
-	if rc.Type().IsObjectType() && !rc.Type().HasAttribute(resource) {
-		return false
-	}
-	resourceVal := rc.GetAttr(resource)
-	if resourceVal.IsNull() {
-		return false
-	}
-	if resourceVal.Type().IsCollectionType() || resourceVal.Type().IsTupleType() {
-		elems := resourceVal.AsValueSlice()
-		if len(elems) == 0 {
-			return false
-		}
-		resourceVal = elems[0]
-	}
-	if !resourceVal.Type().IsObjectType() || !resourceVal.Type().HasAttribute("constraints") {
-		return false
-	}
-	constraintsVal := resourceVal.GetAttr("constraints")
-	if constraintsVal.IsNull() {
-		return false
-	}
-	if constraintsVal.Type().IsCollectionType() || constraintsVal.Type().IsTupleType() {
-		elems := constraintsVal.AsValueSlice()
-		if len(elems) == 0 {
-			return false
-		}
-		constraintsVal = elems[0]
-	}
-	if !constraintsVal.Type().IsObjectType() {
-		return false
-	}
-	if !constraintsVal.Type().IsObjectType() || !constraintsVal.Type().HasAttribute("min") {
-		return false
-	}
-	fieldVal := constraintsVal.GetAttr("min")
-	if fieldVal.IsNull() {
-		return false
-	}
-	if fieldVal.Type().IsCollectionType() || fieldVal.Type().IsTupleType() {
-		return len(fieldVal.AsValueSlice()) > 0
-	}
-	return !fieldVal.IsNull()
+func configHasResourceField(d *schema.ResourceDiff, resource, field string) bool {
+	return rawConfigHasField(d.GetRawConfig(), resource, field)
 }
 
 func workloadScalingPolicyImporter(ctx context.Context, d *schema.ResourceData, meta any) ([]*schema.ResourceData, error) {
@@ -1199,6 +1151,14 @@ func toWorkloadScalingPolicies(resource string, obj map[string]any) (sdk.Workloa
 		}
 	}
 
+	// Validate constraints.min.constant against resource-specific minimums
+	if out.Constraints != nil && out.Constraints.Min != nil && out.Constraints.Min.Constant != nil {
+		minVal := out.Constraints.Min.Constant.Value
+		if minRecommended, ok := defaultMinConstraintValue(resource); ok && minVal < minRecommended {
+			return out, fmt.Errorf("field %q: constraints.min.constant value %v is below the recommended minimum %v", resource, minVal, minRecommended)
+		}
+	}
+
 	// Only fall back to legacy min/max when constraints are NOT configured
 	if out.Constraints == nil {
 		if v, ok := obj["min"].(float64); ok {
@@ -1228,7 +1188,7 @@ func toWorkloadScalingPolicies(resource string, obj map[string]any) (sdk.Workloa
 }
 
 func toWorkloadConstraints(obj map[string]any) (*sdk.WorkloadoptimizationV1ConstraintsV2, error) {
-	if obj == nil || len(obj) == 0 {
+	if len(obj) == 0 {
 		return nil, nil
 	}
 	out := &sdk.WorkloadoptimizationV1ConstraintsV2{}
@@ -1261,6 +1221,10 @@ func toConstraintStrategy(obj map[string]any) (*sdk.WorkloadoptimizationV1Constr
 	out := &sdk.WorkloadoptimizationV1ConstraintsV2Strategy{}
 	hasConstant := false
 	hasPct := false
+	// v > 0 is intentional: Terraform SDK v2 zero-fills missing TypeFloat fields
+	// in nested blocks. Without this guard a config like `min { constant = 1 }`
+	// would also see percentage_of_original = 0 in the parsed map, causing the
+	// "only one may be set" validation to fire falsely.
 	if v, ok := obj["constant"].(float64); ok && v > 0 {
 		out.Constant = &sdk.WorkloadoptimizationV1ConstraintsV2Constant{Value: v}
 		hasConstant = true
@@ -1452,7 +1416,7 @@ func suppressConstraintMinCount(k, old, _ string, d *schema.ResourceData) bool {
 	resource := parts[0]
 
 	// Do not suppress if min is configured explicitly in the config
-	if configHasMin(d, resource) {
+	if d != nil && rawConfigHasField(d.GetRawConfig(), resource, "constraints", "min") {
 		return false
 	}
 
@@ -1486,7 +1450,7 @@ func suppressDefaultMinValue(k, old, _ string, d *schema.ResourceData) bool {
 	parts := strings.Split(k, ".")
 	resource := parts[0]
 
-	if configHasMin(d, resource) {
+	if d != nil && rawConfigHasField(d.GetRawConfig(), resource, "constraints", "min") {
 		return false
 	}
 

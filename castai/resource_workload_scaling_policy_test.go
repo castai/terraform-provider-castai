@@ -8,17 +8,14 @@ import (
 	"io"
 	"net/http"
 	"os"
-	"reflect"
 	"testing"
 	"time"
-	"unsafe"
 
 	"github.com/golang/mock/gomock"
 	"github.com/hashicorp/go-cty/cty"
 	hcty "github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	sdkterraform "github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
@@ -885,6 +882,117 @@ func Test_toWorkloadScalingPolicies(t *testing.T) {
 			r.Equal(tt.exp.Constraints, got.Constraints)
 			r.Equal(tt.exp.Min, got.Min)
 			r.Equal(tt.exp.Max, got.Max)
+		})
+	}
+}
+
+func Test_toWorkloadConstraints_validation(t *testing.T) {
+	tests := map[string]struct {
+		resource string
+		args     map[string]any
+		expErr   string
+	}{
+		"should return error when cpu min.constant is below minimum of 0.01": {
+			resource: "cpu",
+			args: map[string]any{
+				"function": "MAX",
+				"constraints": []any{
+					map[string]any{
+						"min": []any{
+							map[string]any{
+								"constant": 0.005,
+							},
+						},
+					},
+				},
+			},
+			expErr: `field "cpu": constraints.min.constant value 0.005 is below the recommended minimum 0.01`,
+		},
+		"should succeed when cpu min.constant equals minimum of 0.01": {
+			resource: "cpu",
+			args: map[string]any{
+				"function": "MAX",
+				"constraints": []any{
+					map[string]any{
+						"min": []any{
+							map[string]any{
+								"constant": 0.01,
+							},
+						},
+					},
+				},
+			},
+		},
+		"should return error when memory min.constant is below minimum of 10": {
+			resource: "memory",
+			args: map[string]any{
+				"function": "MAX",
+				"constraints": []any{
+					map[string]any{
+						"min": []any{
+							map[string]any{
+								"constant": 5.0,
+							},
+						},
+					},
+				},
+			},
+			expErr: `field "memory": constraints.min.constant value 5 is below the recommended minimum 10`,
+		},
+		"should succeed when memory min.constant equals minimum of 10": {
+			resource: "memory",
+			args: map[string]any{
+				"function": "MAX",
+				"constraints": []any{
+					map[string]any{
+						"min": []any{
+							map[string]any{
+								"constant": 10.0,
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			r := require.New(t)
+			_, err := toWorkloadScalingPolicies(tt.resource, tt.args)
+			if tt.expErr != "" {
+				r.EqualError(err, tt.expErr)
+				return
+			}
+			r.NoError(err)
+		})
+	}
+}
+
+func Test_toConstraintStrategy_acceptsZero(t *testing.T) {
+	tests := map[string]struct {
+		args   map[string]any
+		exp    *sdk.WorkloadoptimizationV1ConstraintsV2Strategy
+		expErr string
+	}{
+		"should accept constant = 0 without error": {
+			args: map[string]any{
+				"constant": 0.0,
+			},
+			exp: &sdk.WorkloadoptimizationV1ConstraintsV2Strategy{
+				Constant: &sdk.WorkloadoptimizationV1ConstraintsV2Constant{Value: 0.0},
+			},
+		},
+	}
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			r := require.New(t)
+			got, err := toConstraintStrategy(tt.args)
+			if tt.expErr != "" {
+				r.EqualError(err, tt.expErr)
+				return
+			}
+			r.NoError(err)
+			r.Equal(tt.exp, got)
 		})
 	}
 }
@@ -1870,108 +1978,156 @@ func Test_toWorkloadScalingPoliciesMap(t *testing.T) {
 	}
 }
 
-func Test_configHasResourceField(t *testing.T) {
-	newResourceDiff := func(raw hcty.Value) *schema.ResourceDiff {
-		rd := &schema.ResourceDiff{}
-		diff := &sdkterraform.InstanceDiff{RawConfig: raw}
-		rv := reflect.ValueOf(rd).Elem()
-		field := rv.FieldByName("diff")
-		reflect.NewAt(field.Type(), unsafe.Pointer(field.UnsafeAddr())).Elem().Set(reflect.ValueOf(diff))
-		return rd
-	}
+func Test_rawConfigHasField(t *testing.T) {
+	// Build test data objects once
+	objWithOnlyMemory := hcty.ObjectVal(map[string]hcty.Value{
+		"memory": hcty.ListVal([]hcty.Value{
+			hcty.ObjectVal(map[string]hcty.Value{
+				"function": hcty.StringVal("MAX"),
+			}),
+		}),
+	})
+
+	objWithEmptyCPUList := hcty.ObjectVal(map[string]hcty.Value{
+		"cpu": hcty.ListValEmpty(hcty.EmptyObject),
+	})
+
+	objWithEmptyConstraints := hcty.ObjectVal(map[string]hcty.Value{
+		"cpu": hcty.ListVal([]hcty.Value{
+			hcty.ObjectVal(map[string]hcty.Value{
+				"constraints": hcty.ListValEmpty(hcty.EmptyObject),
+			}),
+		}),
+	})
+
+	objWithCPUConstraints := hcty.ObjectVal(map[string]hcty.Value{
+		"cpu": hcty.ListVal([]hcty.Value{
+			hcty.ObjectVal(map[string]hcty.Value{
+				"constraints": hcty.ListVal([]hcty.Value{
+					hcty.ObjectVal(map[string]hcty.Value{
+						"max": hcty.ListVal([]hcty.Value{
+							hcty.ObjectVal(map[string]hcty.Value{"constant": hcty.NumberFloatVal(15)}),
+						}),
+					}),
+				}),
+			}),
+		}),
+	})
+
+	objWithLegacyMin := hcty.ObjectVal(map[string]hcty.Value{
+		"cpu": hcty.ListVal([]hcty.Value{
+			hcty.ObjectVal(map[string]hcty.Value{
+				"min": hcty.NumberFloatVal(0.5),
+			}),
+		}),
+	})
+
+	objWithNullMin := hcty.ObjectVal(map[string]hcty.Value{
+		"cpu": hcty.ListVal([]hcty.Value{
+			hcty.ObjectVal(map[string]hcty.Value{
+				"min": hcty.NilVal,
+			}),
+		}),
+	})
+
+	objWithConstraintsMin := hcty.ObjectVal(map[string]hcty.Value{
+		"cpu": hcty.ListVal([]hcty.Value{
+			hcty.ObjectVal(map[string]hcty.Value{
+				"constraints": hcty.ListVal([]hcty.Value{
+					hcty.ObjectVal(map[string]hcty.Value{
+						"min": hcty.ListVal([]hcty.Value{
+							hcty.ObjectVal(map[string]hcty.Value{
+								"constant": hcty.NumberFloatVal(0.1),
+							}),
+						}),
+					}),
+				}),
+			}),
+		}),
+	})
+
+	objWithConstraintsNoMin := hcty.ObjectVal(map[string]hcty.Value{
+		"cpu": hcty.ListVal([]hcty.Value{
+			hcty.ObjectVal(map[string]hcty.Value{
+				"constraints": hcty.ListVal([]hcty.Value{
+					hcty.ObjectVal(map[string]hcty.Value{
+						"max": hcty.ListVal([]hcty.Value{
+							hcty.ObjectVal(map[string]hcty.Value{
+								"constant": hcty.NumberFloatVal(15),
+							}),
+						}),
+					}),
+				}),
+			}),
+		}),
+	})
 
 	tests := []struct {
-		name     string
-		raw      hcty.Value
-		resource string
-		field    string
-		want     bool
+		name       string
+		rawConfig  hcty.Value
+		path       []string
+		want       bool
 	}{
 		{
-			name:     "should return false when config is null",
-			raw:      hcty.NilVal,
-			resource: "cpu",
-			field:    "constraints",
-			want:     false,
+			name:      "should return false when raw config is null",
+			rawConfig: hcty.NilVal,
+			path:      []string{"cpu", "constraints"},
+			want:      false,
 		},
 		{
-			name:     "should return false when resource list is empty",
-			raw:      hcty.ObjectVal(map[string]hcty.Value{"cpu": hcty.ListValEmpty(hcty.EmptyObject)}),
-			resource: "cpu",
-			field:    "constraints",
-			want:     false,
+			name:      "should return false when resource is absent",
+			rawConfig: objWithOnlyMemory,
+			path:      []string{"cpu", "constraints"},
+			want:      false,
 		},
 		{
-			name: "should return true when constraints block is present",
-			raw: hcty.ObjectVal(map[string]hcty.Value{
-				"cpu": hcty.ListVal([]hcty.Value{
-					hcty.ObjectVal(map[string]hcty.Value{
-						"constraints": hcty.ListVal([]hcty.Value{
-							hcty.ObjectVal(map[string]hcty.Value{
-								"max": hcty.ListVal([]hcty.Value{
-									hcty.ObjectVal(map[string]hcty.Value{"constant": hcty.NumberFloatVal(15)}),
-								}),
-							}),
-						}),
-					}),
-				}),
-			}),
-			resource: "cpu",
-			field:    "constraints",
-			want:     true,
+			name:      "should return false when resource list is empty",
+			rawConfig: objWithEmptyCPUList,
+			path:      []string{"cpu", "constraints"},
+			want:      false,
 		},
 		{
-			name: "should return false when constraints list is empty",
-			raw: hcty.ObjectVal(map[string]hcty.Value{
-				"cpu": hcty.ListVal([]hcty.Value{
-					hcty.ObjectVal(map[string]hcty.Value{
-						"constraints": hcty.ListValEmpty(hcty.EmptyObject),
-					}),
-				}),
-			}),
-			resource: "cpu",
-			field:    "constraints",
-			want:     false,
+			name:      "should return true when constraints block is present",
+			rawConfig: objWithCPUConstraints,
+			path:      []string{"cpu", "constraints"},
+			want:      true,
 		},
 		{
-			name: "should return true when legacy min is present",
-			raw: hcty.ObjectVal(map[string]hcty.Value{
-				"cpu": hcty.ListVal([]hcty.Value{
-					hcty.ObjectVal(map[string]hcty.Value{
-						"min": hcty.NumberFloatVal(0.5),
-					}),
-				}),
-			}),
-			resource: "cpu",
-			field:    "min",
-			want:     true,
+			name:      "should return false when constraints list is empty",
+			rawConfig: objWithEmptyConstraints,
+			path:      []string{"cpu", "constraints"},
+			want:      false,
 		},
 		{
-			name: "should return false when resource name does not exist in config",
-			raw: hcty.ObjectVal(map[string]hcty.Value{
-				"cpu": hcty.ListVal([]hcty.Value{
-					hcty.ObjectVal(map[string]hcty.Value{
-						"constraints": hcty.ListVal([]hcty.Value{
-							hcty.ObjectVal(map[string]hcty.Value{
-								"max": hcty.ListVal([]hcty.Value{
-									hcty.ObjectVal(map[string]hcty.Value{"constant": hcty.NumberFloatVal(15)}),
-								}),
-							}),
-						}),
-					}),
-				}),
-			}),
-			resource: "memory",
-			field:    "constraints",
-			want:     false,
+			name:      "should return true when legacy min is present",
+			rawConfig: objWithLegacyMin,
+			path:      []string{"cpu", "min"},
+			want:      true,
+		},
+		{
+			name:      "should return false when field is null",
+			rawConfig: objWithNullMin,
+			path:      []string{"cpu", "min"},
+			want:      false,
+		},
+		{
+			name:      "should return true when nested min in constraints is present",
+			rawConfig: objWithConstraintsMin,
+			path:      []string{"cpu", "constraints", "min"},
+			want:      true,
+		},
+		{
+			name:      "should return false when nested min in constraints is absent",
+			rawConfig: objWithConstraintsNoMin,
+			path:      []string{"cpu", "constraints", "min"},
+			want:      false,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			r := require.New(t)
-			rd := newResourceDiff(tt.raw)
-			r.Equal(tt.want, configHasResourceField(rd, tt.resource, tt.field))
+			r.Equal(tt.want, rawConfigHasField(tt.rawConfig, tt.path...))
 		})
 	}
 }
