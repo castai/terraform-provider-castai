@@ -50,8 +50,10 @@ func TestAccGKE_ResourceWorkloadScalingPolicy(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "cpu.0.apply_threshold_strategy.0.percentage", "0.6"),
 					resource.TestCheckResourceAttr(resourceName, "cpu.0.args.0", "0.86"),
 					resource.TestCheckResourceAttr(resourceName, "cpu.0.look_back_period_seconds", "86401"),
-					resource.TestCheckResourceAttr(resourceName, "cpu.0.min", "0.1"),
-					resource.TestCheckResourceAttr(resourceName, "cpu.0.max", "1"),
+					resource.TestCheckResourceAttr(resourceName, "cpu.0.constraints.0.min.0.constant", "0.1"),
+					resource.TestCheckResourceAttr(resourceName, "cpu.0.constraints.0.max.0.constant", "1"),
+					resource.TestCheckResourceAttr(resourceName, "cpu.0.min", "0"),
+					resource.TestCheckResourceAttr(resourceName, "cpu.0.max", "0"),
 					resource.TestCheckResourceAttr(resourceName, "cpu.0.limit.0.type", "MULTIPLIER"),
 					resource.TestCheckResourceAttr(resourceName, "cpu.0.limit.0.multiplier", "1.2"),
 					resource.TestCheckResourceAttr(resourceName, "memory.0.function", "MAX"),
@@ -61,7 +63,9 @@ func TestAccGKE_ResourceWorkloadScalingPolicy(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "memory.0.apply_threshold_strategy.0.denominator", "0.5"),
 					resource.TestCheckResourceAttr(resourceName, "memory.0.apply_threshold_strategy.0.exponent", "0.6"),
 					resource.TestCheckResourceAttr(resourceName, "memory.0.args.#", "0"),
-					resource.TestCheckResourceAttr(resourceName, "memory.0.min", "100"),
+					resource.TestCheckResourceAttr(resourceName, "memory.0.constraints.0.min.0.constant", "100"),
+					resource.TestCheckResourceAttr(resourceName, "memory.0.min", "0"),
+					resource.TestCheckResourceAttr(resourceName, "memory.0.max", "0"),
 					resource.TestCheckResourceAttr(resourceName, "memory.0.limit.0.type", "MULTIPLIER"),
 					resource.TestCheckResourceAttr(resourceName, "memory.0.limit.0.multiplier", "1.8"),
 					resource.TestCheckResourceAttr(resourceName, "memory.0.management_option", "READ_ONLY"),
@@ -100,15 +104,15 @@ func TestAccGKE_ResourceWorkloadScalingPolicy(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "cpu.0.apply_threshold", "0.1"),
 					resource.TestCheckResourceAttr(resourceName, "cpu.0.args.0", "0.9"),
 					resource.TestCheckResourceAttr(resourceName, "cpu.0.look_back_period_seconds", "86402"),
-					resource.TestCheckResourceAttr(resourceName, "cpu.0.min", "0.1"),
+					resource.TestCheckResourceAttr(resourceName, "cpu.0.constraints.0.min.0.constant", "0.1"),
 					resource.TestCheckResourceAttr(resourceName, "cpu.0.limit.0.type", "NO_LIMIT"),
 					resource.TestCheckResourceAttr(resourceName, "memory.0.function", "QUANTILE"),
 					resource.TestCheckResourceAttr(resourceName, "memory.0.overhead", "0.35"),
 					resource.TestCheckResourceAttr(resourceName, "memory.0.apply_threshold_strategy.0.type", "PERCENTAGE"),
 					resource.TestCheckResourceAttr(resourceName, "memory.0.apply_threshold_strategy.0.percentage", "0.2"),
 					resource.TestCheckResourceAttr(resourceName, "memory.0.args.0", "0.9"),
-					resource.TestCheckResourceAttr(resourceName, "memory.0.min", "100"),
-					resource.TestCheckResourceAttr(resourceName, "memory.0.max", "512"),
+					resource.TestCheckResourceAttr(resourceName, "memory.0.constraints.0.min.0.constant", "100"),
+					resource.TestCheckResourceAttr(resourceName, "memory.0.constraints.0.max.0.constant", "512"),
 					resource.TestCheckResourceAttr(resourceName, "memory.0.limit.0.type", "NO_LIMIT"),
 					resource.TestCheckResourceAttr(resourceName, "memory.0.management_option", "READ_ONLY"),
 					resource.TestCheckResourceAttr(resourceName, "startup.0.period_seconds", "123"),
@@ -127,6 +131,17 @@ func TestAccGKE_ResourceWorkloadScalingPolicy(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "jvm.0.memory.0.optimization", "true"),
 					resource.TestCheckResourceAttr(resourceName, "anomaly_detection.0.cpu_pressure.0.cpu_stall_threshold_percentage", "50"),
 					resource.TestCheckResourceAttr(resourceName, "anomaly_detection.0.cpu_pressure.0.min_pressured_pod_percentage", "30"),
+				),
+			},
+			// Final step: verify legacy fields still work by creating a new policy
+			{
+				Config: scalingPolicyConfigLegacy(clusterName, projectID, rName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("castai_workload_scaling_policy.legacy", "name", rName+"-legacy"),
+					resource.TestCheckResourceAttr("castai_workload_scaling_policy.legacy", "cpu.0.min", "0.01"),
+					resource.TestCheckResourceAttr("castai_workload_scaling_policy.legacy", "cpu.0.max", "1"),
+					resource.TestCheckResourceAttr("castai_workload_scaling_policy.legacy", "memory.0.min", "100"),
+					resource.TestCheckResourceAttr("castai_workload_scaling_policy.legacy", "memory.0.max", "512"),
 				),
 			},
 		},
@@ -287,9 +302,11 @@ func scalingPolicyConfig(clusterName, projectID, name string) string {
 			function 		= "QUANTILE"
 			overhead 		= 0.05
 			args 			= ["0.86"]
-            min             = 0.1
-            max             = 1
 			look_back_period_seconds = 86401
+			constraints {
+				min { constant = 0.1 }
+				max { constant = 1 }
+			}
 			limit {
 				type 		    = "MULTIPLIER"
 				multiplier 	= 1.2
@@ -308,7 +325,9 @@ func scalingPolicyConfig(clusterName, projectID, name string) string {
 				denominator = 0.5
                 exponent = 0.6
 			}
-            min             = 100
+			constraints {
+				min { constant = 100 }
+			}
 			limit {
 				type 		    = "MULTIPLIER"
 				multiplier 	= 1.8
@@ -362,7 +381,9 @@ func scalingPolicyConfigUpdated(clusterName, projectID, name string) string {
 			apply_threshold = 0.1
 			args 			= ["0.9"]
 			look_back_period_seconds = 86402
-            min             = 0.1
+			constraints {
+				min { constant = 0.1 }
+			}
 			limit {
 				type 		    = "NO_LIMIT"
 			}
@@ -375,8 +396,10 @@ func scalingPolicyConfigUpdated(clusterName, projectID, name string) string {
 				percentage = 0.2
 			}
 			args 			= ["0.9"]
-            min             = 100
-            max             = 512
+			constraints {
+				min { constant = 100 }
+				max { constant = 512 }
+			}
 			limit {
 				type 		    = "NO_LIMIT"
 			}
@@ -409,6 +432,38 @@ func scalingPolicyConfigUpdated(clusterName, projectID, name string) string {
 			}
 		}
 	}`, updatedName)
+
+	return ConfigCompose(clusterComponentsConfig(clusterName, projectID, name), cfg)
+}
+
+// scalingPolicyConfigLegacy creates a scaling policy using deprecated legacy min/max fields.
+// This verifies backward compatibility while constraints are the preferred approach.
+// Let min CPU value will be filled in with the default
+func scalingPolicyConfigLegacy(clusterName, projectID, name string) string {
+	legacyName := name + "-legacy"
+	cfg := fmt.Sprintf(`
+	resource "castai_workload_scaling_policy" "legacy" {
+		depends_on          = [helm_release.castai_workload_autoscaler]
+
+		name 				= %[1]q
+		cluster_id			= castai_gke_cluster.test.id
+		apply_type			= "IMMEDIATE"
+		management_option	= "MANAGED"
+		cpu {
+			function 		= "QUANTILE"
+			overhead 		= 0.15
+			args 			= ["0.9"]
+			look_back_period_seconds = 86402
+			max             = 1
+		}
+		memory {
+			function 		= "QUANTILE"
+			overhead 		= 0.35
+			args 			= ["0.9"]
+			min             = 100
+			max             = 512
+		}
+	}`, legacyName)
 
 	return ConfigCompose(clusterComponentsConfig(clusterName, projectID, name), cfg)
 }
