@@ -628,18 +628,18 @@ func workloadScalingPolicyResourceConstraintStrategySchema() *schema.Resource {
 	return &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"constant": {
-				Type:        schema.TypeFloat,
-				Optional:    true,
-				Description: "Fixed bound value. For memory - MiB, for CPU - cores.",
+				Type:             schema.TypeFloat,
+				Optional:         true,
+				Description:      "Fixed bound value. For memory - MiB, for CPU - cores.",
 				ValidateDiagFunc: validation.ToDiagFunc(validation.FloatAtLeast(0)),
 				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 					return suppressDefaultMinValue(k, old, new, d)
 				},
 			},
 			"percentage_of_original": {
-				Type:        schema.TypeFloat,
-				Optional:    true,
-				Description: "Bound as a percentage of the original pod-spec request.",
+				Type:             schema.TypeFloat,
+				Optional:         true,
+				Description:      "Bound as a percentage of the original pod-spec request.",
 				ValidateDiagFunc: validation.ToDiagFunc(validation.FloatAtLeast(0)),
 			},
 		},
@@ -1417,6 +1417,13 @@ func suppressConstraintMinCount(k, old, _ string, d *schema.ResourceData) bool {
 
 	// Do not suppress if min is configured explicitly in the config
 	if d != nil && rawConfigHasField(d.GetRawConfig(), resource, "constraints", "min") {
+		return false
+	}
+
+	// Do not suppress when max uses percentage strategy (API cannot auto-fill
+	// percentage-based min, so we must detect the min removal and send nil)
+	maxPctPath := fmt.Sprintf("%s.0.constraints.0.max.0.percentage_of_original", resource)
+	if _, ok := d.GetOk(maxPctPath); ok {
 		return false
 	}
 

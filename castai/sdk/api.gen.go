@@ -11883,6 +11883,10 @@ type ExternalClusterAPITriggerHibernateClusterParams struct {
 	//  - OPERATION_MODE_DEFAULT: Normal operation - executes the hibernate/resume.
 	//  - OPERATION_MODE_DRY_RUN: Dry-run mode - validates only without executing.
 	Mode *ExternalClusterAPITriggerHibernateClusterParamsMode `form:"mode,omitempty" json:"mode,omitempty"`
+
+	// StopControlPlane Stops the cluster control plane during hibernation. Currently only supported on AKS.
+	// When enabled, hibernate fails on non-retryable errors (e.g. insufficient permissions).
+	StopControlPlane *bool `form:"stopControlPlane,omitempty" json:"stopControlPlane,omitempty"`
 }
 
 // ExternalClusterAPITriggerHibernateClusterParamsMode defines parameters for ExternalClusterAPITriggerHibernateCluster.

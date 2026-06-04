@@ -13,7 +13,6 @@ import (
 
 	"github.com/golang/mock/gomock"
 	"github.com/hashicorp/go-cty/cty"
-	hcty "github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	sdkterraform "github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -974,13 +973,11 @@ func Test_toConstraintStrategy_acceptsZero(t *testing.T) {
 		exp    *sdk.WorkloadoptimizationV1ConstraintsV2Strategy
 		expErr string
 	}{
-		"should accept constant = 0 without error": {
+		"should reject constant = 0 (zero is treated as absent)": {
 			args: map[string]any{
 				"constant": 0.0,
 			},
-			exp: &sdk.WorkloadoptimizationV1ConstraintsV2Strategy{
-				Constant: &sdk.WorkloadoptimizationV1ConstraintsV2Constant{Value: 0.0},
-			},
+			expErr: "either constant or percentage_of_original must be set",
 		},
 	}
 	for name, tt := range tests {
@@ -1980,33 +1977,33 @@ func Test_toWorkloadScalingPoliciesMap(t *testing.T) {
 
 func Test_rawConfigHasField(t *testing.T) {
 	// Build test data objects once
-	objWithOnlyMemory := hcty.ObjectVal(map[string]hcty.Value{
-		"memory": hcty.ListVal([]hcty.Value{
-			hcty.ObjectVal(map[string]hcty.Value{
-				"function": hcty.StringVal("MAX"),
+	objWithOnlyMemory := cty.ObjectVal(map[string]cty.Value{
+		"memory": cty.ListVal([]cty.Value{
+			cty.ObjectVal(map[string]cty.Value{
+				"function": cty.StringVal("MAX"),
 			}),
 		}),
 	})
 
-	objWithEmptyCPUList := hcty.ObjectVal(map[string]hcty.Value{
-		"cpu": hcty.ListValEmpty(hcty.EmptyObject),
+	objWithEmptyCPUList := cty.ObjectVal(map[string]cty.Value{
+		"cpu": cty.ListValEmpty(cty.EmptyObject),
 	})
 
-	objWithEmptyConstraints := hcty.ObjectVal(map[string]hcty.Value{
-		"cpu": hcty.ListVal([]hcty.Value{
-			hcty.ObjectVal(map[string]hcty.Value{
-				"constraints": hcty.ListValEmpty(hcty.EmptyObject),
+	objWithEmptyConstraints := cty.ObjectVal(map[string]cty.Value{
+		"cpu": cty.ListVal([]cty.Value{
+			cty.ObjectVal(map[string]cty.Value{
+				"constraints": cty.ListValEmpty(cty.EmptyObject),
 			}),
 		}),
 	})
 
-	objWithCPUConstraints := hcty.ObjectVal(map[string]hcty.Value{
-		"cpu": hcty.ListVal([]hcty.Value{
-			hcty.ObjectVal(map[string]hcty.Value{
-				"constraints": hcty.ListVal([]hcty.Value{
-					hcty.ObjectVal(map[string]hcty.Value{
-						"max": hcty.ListVal([]hcty.Value{
-							hcty.ObjectVal(map[string]hcty.Value{"constant": hcty.NumberFloatVal(15)}),
+	objWithCPUConstraints := cty.ObjectVal(map[string]cty.Value{
+		"cpu": cty.ListVal([]cty.Value{
+			cty.ObjectVal(map[string]cty.Value{
+				"constraints": cty.ListVal([]cty.Value{
+					cty.ObjectVal(map[string]cty.Value{
+						"max": cty.ListVal([]cty.Value{
+							cty.ObjectVal(map[string]cty.Value{"constant": cty.NumberFloatVal(15)}),
 						}),
 					}),
 				}),
@@ -2014,30 +2011,30 @@ func Test_rawConfigHasField(t *testing.T) {
 		}),
 	})
 
-	objWithLegacyMin := hcty.ObjectVal(map[string]hcty.Value{
-		"cpu": hcty.ListVal([]hcty.Value{
-			hcty.ObjectVal(map[string]hcty.Value{
-				"min": hcty.NumberFloatVal(0.5),
+	objWithLegacyMin := cty.ObjectVal(map[string]cty.Value{
+		"cpu": cty.ListVal([]cty.Value{
+			cty.ObjectVal(map[string]cty.Value{
+				"min": cty.NumberFloatVal(0.5),
 			}),
 		}),
 	})
 
-	objWithNullMin := hcty.ObjectVal(map[string]hcty.Value{
-		"cpu": hcty.ListVal([]hcty.Value{
-			hcty.ObjectVal(map[string]hcty.Value{
-				"min": hcty.NilVal,
+	objWithNullMin := cty.ObjectVal(map[string]cty.Value{
+		"cpu": cty.ListVal([]cty.Value{
+			cty.ObjectVal(map[string]cty.Value{
+				"min": cty.NilVal,
 			}),
 		}),
 	})
 
-	objWithConstraintsMin := hcty.ObjectVal(map[string]hcty.Value{
-		"cpu": hcty.ListVal([]hcty.Value{
-			hcty.ObjectVal(map[string]hcty.Value{
-				"constraints": hcty.ListVal([]hcty.Value{
-					hcty.ObjectVal(map[string]hcty.Value{
-						"min": hcty.ListVal([]hcty.Value{
-							hcty.ObjectVal(map[string]hcty.Value{
-								"constant": hcty.NumberFloatVal(0.1),
+	objWithConstraintsMin := cty.ObjectVal(map[string]cty.Value{
+		"cpu": cty.ListVal([]cty.Value{
+			cty.ObjectVal(map[string]cty.Value{
+				"constraints": cty.ListVal([]cty.Value{
+					cty.ObjectVal(map[string]cty.Value{
+						"min": cty.ListVal([]cty.Value{
+							cty.ObjectVal(map[string]cty.Value{
+								"constant": cty.NumberFloatVal(0.1),
 							}),
 						}),
 					}),
@@ -2046,14 +2043,14 @@ func Test_rawConfigHasField(t *testing.T) {
 		}),
 	})
 
-	objWithConstraintsNoMin := hcty.ObjectVal(map[string]hcty.Value{
-		"cpu": hcty.ListVal([]hcty.Value{
-			hcty.ObjectVal(map[string]hcty.Value{
-				"constraints": hcty.ListVal([]hcty.Value{
-					hcty.ObjectVal(map[string]hcty.Value{
-						"max": hcty.ListVal([]hcty.Value{
-							hcty.ObjectVal(map[string]hcty.Value{
-								"constant": hcty.NumberFloatVal(15),
+	objWithConstraintsNoMin := cty.ObjectVal(map[string]cty.Value{
+		"cpu": cty.ListVal([]cty.Value{
+			cty.ObjectVal(map[string]cty.Value{
+				"constraints": cty.ListVal([]cty.Value{
+					cty.ObjectVal(map[string]cty.Value{
+						"max": cty.ListVal([]cty.Value{
+							cty.ObjectVal(map[string]cty.Value{
+								"constant": cty.NumberFloatVal(15),
 							}),
 						}),
 					}),
@@ -2063,14 +2060,14 @@ func Test_rawConfigHasField(t *testing.T) {
 	})
 
 	tests := []struct {
-		name       string
-		rawConfig  hcty.Value
-		path       []string
-		want       bool
+		name      string
+		rawConfig cty.Value
+		path      []string
+		want      bool
 	}{
 		{
 			name:      "should return false when raw config is null",
-			rawConfig: hcty.NilVal,
+			rawConfig: cty.NilVal,
 			path:      []string{"cpu", "constraints"},
 			want:      false,
 		},
