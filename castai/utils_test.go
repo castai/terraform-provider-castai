@@ -275,6 +275,96 @@ func Test_ExtractNestedValues(t *testing.T) {
 	}
 }
 
+func TestDiffSuppressDuration(t *testing.T) {
+	tests := []struct {
+		name     string
+		oldValue string
+		newValue string
+		want     bool
+	}{
+		{
+			name:     "equivalent durations same unit",
+			oldValue: "1m",
+			newValue: "1m",
+			want:     true,
+		},
+		{
+			name:     "equivalent durations different unit seconds to minutes",
+			oldValue: "60s",
+			newValue: "1m",
+			want:     true,
+		},
+		{
+			name:     "equivalent durations different unit minutes to hours",
+			oldValue: "60m",
+			newValue: "1h",
+			want:     true,
+		},
+		{
+			name:     "equivalent durations with nanoseconds",
+			oldValue: "1000000000ns",
+			newValue: "1s",
+			want:     true,
+		},
+		{
+			name:     "non-equivalent durations",
+			oldValue: "1m",
+			newValue: "2m",
+			want:     false,
+		},
+		{
+			name:     "non-equivalent durations different units",
+			oldValue: "1m",
+			newValue: "1h",
+			want:     false,
+		},
+		{
+			name:     "old value invalid falls back to string equality same",
+			oldValue: "not-a-duration",
+			newValue: "1m",
+			want:     false,
+		},
+		{
+			name:     "new value invalid falls back to string equality same",
+			oldValue: "1m",
+			newValue: "not-a-duration",
+			want:     false,
+		},
+		{
+			name:     "both values invalid string equality true",
+			oldValue: "not-a-duration",
+			newValue: "not-a-duration",
+			want:     true,
+		},
+		{
+			name:     "both values invalid string equality false",
+			oldValue: "not-a-duration",
+			newValue: "also-not",
+			want:     false,
+		},
+		{
+			name:     "empty strings equal",
+			oldValue: "",
+			newValue: "",
+			want:     true,
+		},
+		{
+			name:     "empty string and valid duration not equal",
+			oldValue: "",
+			newValue: "0s",
+			want:     false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			r := require.New(t)
+			got := diffSuppressDuration("test_key", tt.oldValue, tt.newValue, nil)
+			r.Equal(tt.want, got)
+		})
+	}
+}
+
 func testResource() *schema.Resource {
 	return &schema.Resource{
 		Description: "Terraform resource for testing",
