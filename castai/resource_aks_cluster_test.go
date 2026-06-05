@@ -419,8 +419,8 @@ func TestAccAKS_ResourceAKSCluster(t *testing.T) {
 	rName := fmt.Sprintf("%v-node-cfg-aks-%v", ResourcePrefix, acctest.RandString(8))
 	const (
 		clusterResourceName  = "castai_aks_cluster.test"
-		clusterName          = "terraform-tests-december-2025"
-		resourceGroupName    = "terraform-tests-december-2025"
+		clusterName          = "core-tf-acc-aks-2026-06-05"
+		resourceGroupName    = "core-tf-acc-aks-2026-06-05"
 		nodeConfResourceName = "castai_node_configuration.test"
 	)
 
