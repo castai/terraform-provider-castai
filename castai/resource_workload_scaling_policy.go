@@ -1347,7 +1347,7 @@ func suppressMinMaxDiffWhenConstraintsPresent(resource, k, oldValue, newValue st
 	}
 
 	resourceList := raw.GetAttr(resource)
-	if resourceList.IsNull() {
+	if resourceList.IsNull() || (!resourceList.Type().IsCollectionType() && !resourceList.Type().IsTupleType()) {
 		return false
 	}
 	resourceElems := resourceList.AsValueSlice()
@@ -1356,7 +1356,7 @@ func suppressMinMaxDiffWhenConstraintsPresent(resource, k, oldValue, newValue st
 	}
 
 	constraintsVal := resourceElems[0].GetAttr("constraints")
-	if constraintsVal.IsNull() {
+	if constraintsVal.IsNull() || (!constraintsVal.Type().IsCollectionType() && !constraintsVal.Type().IsTupleType()) {
 		return false
 	}
 	return len(constraintsVal.AsValueSlice()) > 0
@@ -1445,7 +1445,7 @@ func suppressConstraintMinCount(k, old, _ string, d *schema.ResourceData) bool {
 	}
 	fval, ok := val.(float64)
 	if !ok {
-		return true
+		return false
 	}
 	return fval == defaultVal
 }

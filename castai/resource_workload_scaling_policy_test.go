@@ -105,6 +105,8 @@ func TestAccGKE_ResourceWorkloadScalingPolicy(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "cpu.0.args.0", "0.9"),
 					resource.TestCheckResourceAttr(resourceName, "cpu.0.look_back_period_seconds", "86402"),
 					resource.TestCheckResourceAttr(resourceName, "cpu.0.constraints.0.min.0.constant", "0.1"),
+					resource.TestCheckResourceAttr(resourceName, "cpu.0.min", "0"),
+					resource.TestCheckResourceAttr(resourceName, "cpu.0.max", "0"),
 					resource.TestCheckResourceAttr(resourceName, "cpu.0.limit.0.type", "NO_LIMIT"),
 					resource.TestCheckResourceAttr(resourceName, "memory.0.function", "QUANTILE"),
 					resource.TestCheckResourceAttr(resourceName, "memory.0.overhead", "0.35"),
@@ -113,6 +115,8 @@ func TestAccGKE_ResourceWorkloadScalingPolicy(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "memory.0.args.0", "0.9"),
 					resource.TestCheckResourceAttr(resourceName, "memory.0.constraints.0.min.0.constant", "100"),
 					resource.TestCheckResourceAttr(resourceName, "memory.0.constraints.0.max.0.constant", "512"),
+					resource.TestCheckResourceAttr(resourceName, "memory.0.min", "0"),
+					resource.TestCheckResourceAttr(resourceName, "memory.0.max", "0"),
 					resource.TestCheckResourceAttr(resourceName, "memory.0.limit.0.type", "NO_LIMIT"),
 					resource.TestCheckResourceAttr(resourceName, "memory.0.management_option", "READ_ONLY"),
 					resource.TestCheckResourceAttr(resourceName, "startup.0.period_seconds", "123"),
@@ -140,8 +144,10 @@ func TestAccGKE_ResourceWorkloadScalingPolicy(t *testing.T) {
 					resource.TestCheckResourceAttr("castai_workload_scaling_policy.legacy", "name", rName+"-legacy"),
 					resource.TestCheckResourceAttr("castai_workload_scaling_policy.legacy", "cpu.0.min", "0.01"),
 					resource.TestCheckResourceAttr("castai_workload_scaling_policy.legacy", "cpu.0.max", "1"),
+					resource.TestCheckResourceAttr("castai_workload_scaling_policy.legacy", "cpu.0.constraints.#", "0"),
 					resource.TestCheckResourceAttr("castai_workload_scaling_policy.legacy", "memory.0.min", "100"),
 					resource.TestCheckResourceAttr("castai_workload_scaling_policy.legacy", "memory.0.max", "512"),
+					resource.TestCheckResourceAttr("castai_workload_scaling_policy.legacy", "memory.0.constraints.#", "0"),
 				),
 			},
 		},
@@ -735,7 +741,7 @@ func Test_toWorkloadScalingPolicies(t *testing.T) {
 		exp    sdk.WorkloadoptimizationV1ResourcePolicies
 		expErr string
 	}{
-		"should parse constraints with constant min only when only min field is set": {
+		"should parse constraints with constant min when only min is set": {
 			args: map[string]any{
 				"function": "MAX",
 				"constraints": []any{
@@ -757,7 +763,7 @@ func Test_toWorkloadScalingPolicies(t *testing.T) {
 				},
 			},
 		},
-		"should parse constraints with percentage max only when only max field is set": {
+		"should parse constraints with percentage max when only max is set": {
 			args: map[string]any{
 				"function": "MAX",
 				"constraints": []any{
@@ -779,7 +785,7 @@ func Test_toWorkloadScalingPolicies(t *testing.T) {
 				},
 			},
 		},
-		"should parse constraints with both constant min and percentage max when both fields are set": {
+		"should parse constraints with both constant min and percentage max when both are set": {
 			args: map[string]any{
 				"function": "MAX",
 				"constraints": []any{
@@ -809,7 +815,7 @@ func Test_toWorkloadScalingPolicies(t *testing.T) {
 				},
 			},
 		},
-		"should parse constraints with constant max only when only max field is set": {
+		"should parse constraints with constant max when only max is set": {
 			args: map[string]any{
 				"function": "MAX",
 				"constraints": []any{
@@ -829,9 +835,10 @@ func Test_toWorkloadScalingPolicies(t *testing.T) {
 						Constant: &sdk.WorkloadoptimizationV1ConstraintsV2Constant{Value: 4.0},
 					},
 				},
+				Min: nil,
 			},
 		},
-		"should return nil constraints when block is empty": {
+		"should return nil constraints when constraints block is empty": {
 			args: map[string]any{
 				"function": "MAX",
 				"constraints": []any{
@@ -860,31 +867,6 @@ func Test_toWorkloadScalingPolicies(t *testing.T) {
 			},
 			expErr: `field "cpu": field constraints: min: only one of constant or percentage_of_original may be set`,
 		},
-		"when constraints is set legacy min should be ignored": {
-			args: map[string]any{
-				"function": "MAX",
-				"min":      0.01, // default value that should be ignored
-				"constraints": []any{
-					map[string]any{
-						"min": []any{
-							map[string]any{
-								"constant": 0.5,
-							},
-						},
-					},
-				},
-			},
-			exp: sdk.WorkloadoptimizationV1ResourcePolicies{
-				Function: sdk.WorkloadoptimizationV1ResourcePoliciesFunctionMAX,
-				Constraints: &sdk.WorkloadoptimizationV1ConstraintsV2{
-					Min: &sdk.WorkloadoptimizationV1ConstraintsV2Strategy{
-						Constant: &sdk.WorkloadoptimizationV1ConstraintsV2Constant{Value: 0.5},
-					},
-				},
-				// Min should be nil because constraints takes precedence
-				Min: nil,
-			},
-		},
 		"when constraints is set legacy max should be ignored": {
 			args: map[string]any{
 				"function": "MAX",
@@ -910,7 +892,7 @@ func Test_toWorkloadScalingPolicies(t *testing.T) {
 				Max: nil,
 			},
 		},
-		"when constraints is NOT set legacy min/max work as before": {
+		"should use legacy min/max when constraints is not set": {
 			args: map[string]any{
 				"function": "MAX",
 				"min":      0.5,
@@ -946,7 +928,7 @@ func Test_toWorkloadConstraints_validation(t *testing.T) {
 		args     map[string]any
 		expErr   string
 	}{
-		"should return error when cpu min.constant is below minimum of 0.01": {
+		"should return error when cpu min.constant is below 0.01": {
 			resource: "cpu",
 			args: map[string]any{
 				"function": "MAX",
@@ -962,7 +944,7 @@ func Test_toWorkloadConstraints_validation(t *testing.T) {
 			},
 			expErr: `field "cpu": constraints.min.constant value 0.005 is below the recommended minimum 0.01`,
 		},
-		"should succeed when cpu min.constant equals minimum of 0.01": {
+		"should succeed when cpu min.constant equals 0.01": {
 			resource: "cpu",
 			args: map[string]any{
 				"function": "MAX",
@@ -977,7 +959,7 @@ func Test_toWorkloadConstraints_validation(t *testing.T) {
 				},
 			},
 		},
-		"should return error when memory min.constant is below minimum of 10": {
+		"should return error when memory min.constant is below 10": {
 			resource: "memory",
 			args: map[string]any{
 				"function": "MAX",
@@ -993,7 +975,7 @@ func Test_toWorkloadConstraints_validation(t *testing.T) {
 			},
 			expErr: `field "memory": constraints.min.constant value 5 is below the recommended minimum 10`,
 		},
-		"should succeed when memory min.constant equals minimum of 10": {
+		"should succeed when memory min.constant equals 10": {
 			resource: "memory",
 			args: map[string]any{
 				"function": "MAX",
