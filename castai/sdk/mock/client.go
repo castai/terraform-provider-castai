@@ -6615,6 +6615,26 @@ func (mr *MockClientInterfaceMockRecorder) WorkloadOptimizationAPIGetWorkloadFil
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIGetWorkloadFilters", reflect.TypeOf((*MockClientInterface)(nil).WorkloadOptimizationAPIGetWorkloadFilters), varargs...)
 }
 
+// WorkloadOptimizationAPIGetWorkloadGPUMetrics mocks base method.
+func (m *MockClientInterface) WorkloadOptimizationAPIGetWorkloadGPUMetrics(ctx context.Context, clusterId, workloadId string, params *sdk.WorkloadOptimizationAPIGetWorkloadGPUMetricsParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, workloadId, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "WorkloadOptimizationAPIGetWorkloadGPUMetrics", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// WorkloadOptimizationAPIGetWorkloadGPUMetrics indicates an expected call of WorkloadOptimizationAPIGetWorkloadGPUMetrics.
+func (mr *MockClientInterfaceMockRecorder) WorkloadOptimizationAPIGetWorkloadGPUMetrics(ctx, clusterId, workloadId, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, workloadId, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIGetWorkloadGPUMetrics", reflect.TypeOf((*MockClientInterface)(nil).WorkloadOptimizationAPIGetWorkloadGPUMetrics), varargs...)
+}
+
 // WorkloadOptimizationAPIGetWorkloadNativeVpaSpec mocks base method.
 func (m *MockClientInterface) WorkloadOptimizationAPIGetWorkloadNativeVpaSpec(ctx context.Context, clusterId, workloadId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
@@ -18586,6 +18606,41 @@ func (m *MockClientWithResponsesInterface) WorkloadOptimizationAPIGetWorkloadFil
 func (mr *MockClientWithResponsesInterfaceMockRecorder) WorkloadOptimizationAPIGetWorkloadFiltersWithResponse(ctx, clusterId, params interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIGetWorkloadFiltersWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).WorkloadOptimizationAPIGetWorkloadFiltersWithResponse), ctx, clusterId, params)
+}
+
+// WorkloadOptimizationAPIGetWorkloadGPUMetrics mocks base method.
+func (m *MockClientWithResponsesInterface) WorkloadOptimizationAPIGetWorkloadGPUMetrics(ctx context.Context, clusterId, workloadId string, params *sdk.WorkloadOptimizationAPIGetWorkloadGPUMetricsParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, workloadId, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "WorkloadOptimizationAPIGetWorkloadGPUMetrics", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// WorkloadOptimizationAPIGetWorkloadGPUMetrics indicates an expected call of WorkloadOptimizationAPIGetWorkloadGPUMetrics.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) WorkloadOptimizationAPIGetWorkloadGPUMetrics(ctx, clusterId, workloadId, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, workloadId, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIGetWorkloadGPUMetrics", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).WorkloadOptimizationAPIGetWorkloadGPUMetrics), varargs...)
+}
+
+// WorkloadOptimizationAPIGetWorkloadGPUMetricsWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) WorkloadOptimizationAPIGetWorkloadGPUMetricsWithResponse(ctx context.Context, clusterId, workloadId string, params *sdk.WorkloadOptimizationAPIGetWorkloadGPUMetricsParams) (*sdk.WorkloadOptimizationAPIGetWorkloadGPUMetricsResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "WorkloadOptimizationAPIGetWorkloadGPUMetricsWithResponse", ctx, clusterId, workloadId, params)
+	ret0, _ := ret[0].(*sdk.WorkloadOptimizationAPIGetWorkloadGPUMetricsResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// WorkloadOptimizationAPIGetWorkloadGPUMetricsWithResponse indicates an expected call of WorkloadOptimizationAPIGetWorkloadGPUMetricsWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) WorkloadOptimizationAPIGetWorkloadGPUMetricsWithResponse(ctx, clusterId, workloadId, params interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIGetWorkloadGPUMetricsWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).WorkloadOptimizationAPIGetWorkloadGPUMetricsWithResponse), ctx, clusterId, workloadId, params)
 }
 
 // WorkloadOptimizationAPIGetWorkloadNativeVpaSpec mocks base method.

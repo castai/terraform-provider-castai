@@ -37,6 +37,12 @@ type ClusterAssignments struct {
 	Items []ClusterAssignment `json:"items"`
 }
 
+// ComboMutationParams Parameters for combo mutation.
+type ComboMutationParams struct {
+	// Mutations Sub-mutations in this combo.
+	Mutations *[]Mutation `json:"mutations,omitempty"`
+}
+
 // GPUConfig GPUConfig describes instance GPU configuration.
 //
 //	Required while provisioning GCP N1 instance types with GPU.
@@ -131,6 +137,57 @@ type ListHibernationSchedulesResponse struct {
 	TotalCount *int32 `json:"totalCount,omitempty"`
 }
 
+// MaxPodsMutationParams Parameters for max pods mutation.
+type MaxPodsMutationParams struct {
+	// NewMaxPods New max pods value.
+	NewMaxPods *int32 `json:"newMaxPods,omitempty"`
+
+	// RemoveFormula Whether to remove the formula.
+	RemoveFormula *bool `json:"removeFormula,omitempty"`
+
+	// TemplateName Template name.
+	TemplateName *string `json:"templateName,omitempty"`
+}
+
+// MinCpuMutationParams Parameters for min CPU mutation.
+type MinCpuMutationParams struct {
+	// NewMinCpu New minimum CPU value.
+	NewMinCpu *int32 `json:"newMinCpu,omitempty"`
+
+	// TemplateName Template name.
+	TemplateName *string `json:"templateName,omitempty"`
+}
+
+// Mutation A single mutation applied to a rebalancing plan.
+type Mutation struct {
+	// AffectedSubjects Affected subjects (e.g. node names).
+	AffectedSubjects *[]string `json:"affectedSubjects,omitempty"`
+
+	// Category Mutation category.
+	Category *string `json:"category,omitempty"`
+
+	// Combo Combo mutation parameters.
+	Combo *ComboMutationParams `json:"combo,omitempty"`
+
+	// Description Mutation description.
+	Description *string `json:"description,omitempty"`
+
+	// Hash Stable fingerprint of the mutation's identity (name, category, subjects, params).
+	Hash *string `json:"hash,omitempty"`
+
+	// MaxPods Max pods mutation parameters.
+	MaxPods *MaxPodsMutationParams `json:"maxPods,omitempty"`
+
+	// MinCpu Min CPU mutation parameters.
+	MinCpu *MinCpuMutationParams `json:"minCpu,omitempty"`
+
+	// Name Mutation name.
+	Name *string `json:"name,omitempty"`
+
+	// RemoveTopology Remove topology mutation parameters.
+	RemoveTopology *RemoveTopologyMutationParams `json:"removeTopology,omitempty"`
+}
+
 // NodeAffinity NodeAffinity provides control over the assignment of individual nodes to dedicated host instances.
 type NodeAffinity struct {
 	// Affinity THe affinity rules required for choosing the group.
@@ -212,6 +269,15 @@ type RaidConfig struct {
 	// ChunkSizeKb Specify the RAID0 chunk size in kilobytes, this parameter affects the read/write in the disk array and must be tailored
 	//  for the type of data written by the workloads in the node. If not provided it will default to 64KB.
 	ChunkSizeKb *int32 `json:"chunkSizeKb,omitempty"`
+}
+
+// RemoveTopologyMutationParams Parameters for remove topology mutation.
+type RemoveTopologyMutationParams struct {
+	// OwnerKind Owner kind (e.g. Deployment, StatefulSet).
+	OwnerKind *string `json:"ownerKind,omitempty"`
+
+	// OwnerName Owner name (e.g. Deployment or StatefulSet name).
+	OwnerName *string `json:"ownerName,omitempty"`
 }
 
 // ResumeConfig Resume configuration
