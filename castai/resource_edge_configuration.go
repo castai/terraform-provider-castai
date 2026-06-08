@@ -317,8 +317,6 @@ func (r *edgeConfigurationResource) Create(ctx context.Context, req resource.Cre
 	state := r.edgeConfigurationToTFModel(ctx, apiResp.JSON200, plan.OrganizationID, plan.ClusterID)
 	state.EdgeLocationID = plan.EdgeLocationID
 
-	r.normalizeCRIState(&state, plan.CRI)
-
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
 }
 
@@ -382,6 +380,12 @@ func (r *edgeConfigurationResource) Update(ctx context.Context, req resource.Upd
 		return
 	}
 
+	var priorState edgeConfigurationModel
+	resp.Diagnostics.Append(req.State.Get(ctx, &priorState)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	client := r.client.omniAPI
 	organizationID := r.getOrganizationID(plan.OrganizationID)
 	clusterID := plan.ClusterID.ValueString()
@@ -426,7 +430,16 @@ func (r *edgeConfigurationResource) Update(ctx context.Context, req resource.Upd
 		Cri:            criConfig,
 	}
 
-	apiResp, err := client.EdgeConfigurationsAPIUpdateEdgeConfigurationWithResponse(ctx, organizationID, clusterID, edgeLocationID, plan.ID.ValueString(), nil, updateReq)
+	updateMask := r.computeUpdateMask(plan, priorState)
+	var params *omni.EdgeConfigurationsAPIUpdateEdgeConfigurationParams
+	if updateMask != "" {
+		params = &omni.EdgeConfigurationsAPIUpdateEdgeConfigurationParams{
+			UpdateMask: &updateMask,
+		}
+		tflog.Info(ctx, "Update mask for edge configuration", map[string]interface{}{"update_mask": updateMask})
+	}
+
+	apiResp, err := client.EdgeConfigurationsAPIUpdateEdgeConfigurationWithResponse(ctx, organizationID, clusterID, edgeLocationID, plan.ID.ValueString(), params, updateReq)
 	if err != nil {
 		resp.Diagnostics.AddError("Failed to update edge configuration", err.Error())
 		return
@@ -450,9 +463,84 @@ func (r *edgeConfigurationResource) Update(ctx context.Context, req resource.Upd
 
 	state := r.edgeConfigurationToTFModel(ctx, apiResp.JSON200, plan.OrganizationID, plan.ClusterID)
 
-	r.normalizeCRIState(&state, plan.CRI)
-
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
+}
+
+func (r *edgeConfigurationResource) computeUpdateMask(plan, state edgeConfigurationModel) string {
+	var mask []string
+
+	// Top-level fields
+	if !plan.Name.Equal(state.Name) {
+		mask = append(mask, "name")
+	}
+	if !plan.UserDataBase64.Equal(state.UserDataBase64) {
+		mask = append(mask, "user_data_base64")
+	}
+
+	// GCP config
+	if (plan.GCP == nil) != (state.GCP == nil) {
+		mask = append(mask, "gcp.image_id", "gcp.boot_disk_size_gib", "gcp.labels")
+	} else if plan.GCP != nil && state.GCP != nil {
+		if !plan.GCP.ImageID.Equal(state.GCP.ImageID) {
+			mask = append(mask, "gcp.image_id")
+		}
+		if !plan.GCP.BootDiskSizeGiB.Equal(state.GCP.BootDiskSizeGiB) {
+			mask = append(mask, "gcp.boot_disk_size_gib")
+		}
+		if !plan.GCP.Labels.Equal(state.GCP.Labels) {
+			mask = append(mask, "gcp.labels")
+		}
+	}
+
+	// AWS config
+	if (plan.AWS == nil) != (state.AWS == nil) {
+		mask = append(mask, "aws.image_id", "aws.boot_disk_size_gib", "aws.tags")
+	} else if plan.AWS != nil && state.AWS != nil {
+		if !plan.AWS.ImageID.Equal(state.AWS.ImageID) {
+			mask = append(mask, "aws.image_id")
+		}
+		if !plan.AWS.BootDiskSizeGiB.Equal(state.AWS.BootDiskSizeGiB) {
+			mask = append(mask, "aws.boot_disk_size_gib")
+		}
+		if !plan.AWS.Tags.Equal(state.AWS.Tags) {
+			mask = append(mask, "aws.tags")
+		}
+	}
+
+	// OCI config
+	if (plan.OCI == nil) != (state.OCI == nil) {
+		mask = append(mask, "oci.image_id", "oci.boot_disk_size_gib", "oci.tags")
+	} else if plan.OCI != nil && state.OCI != nil {
+		if !plan.OCI.ImageID.Equal(state.OCI.ImageID) {
+			mask = append(mask, "oci.image_id")
+		}
+		if !plan.OCI.BootDiskSizeGiB.Equal(state.OCI.BootDiskSizeGiB) {
+			mask = append(mask, "oci.boot_disk_size_gib")
+		}
+		if !plan.OCI.Tags.Equal(state.OCI.Tags) {
+			mask = append(mask, "oci.tags")
+		}
+	}
+
+	// Custom config
+	if (plan.Custom == nil) != (state.Custom == nil) {
+		mask = append(mask, "custom")
+	} else if plan.Custom != nil && state.Custom != nil {
+		if !plan.Custom.Custom.Equal(state.Custom.Custom) {
+			mask = append(mask, "custom")
+		}
+	}
+
+	// CRI config
+	if (plan.CRI == nil) != (state.CRI == nil) {
+		mask = append(mask, "cri.socket")
+	} else if plan.CRI != nil && state.CRI != nil {
+		if !plan.CRI.Socket.Equal(state.CRI.Socket) {
+			mask = append(mask, "cri.socket")
+		}
+	}
+
+	return strings.Join(mask, ",")
 }
 
 func (r *edgeConfigurationResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -611,7 +699,7 @@ func (r *edgeConfigurationResource) toGCPConfiguration(ctx context.Context, plan
 
 	config := &omni.GCPConfiguration{}
 
-	if !plan.ImageID.IsNull() {
+	if !plan.ImageID.IsNull() && plan.ImageID.ValueString() != "" {
 		config.ImageId = lo.ToPtr(plan.ImageID.ValueString())
 	}
 
@@ -836,19 +924,6 @@ func (r *edgeConfigurationResource) toCustomConfigurationModel(ctx context.Conte
 	}
 }
 
-func (r *edgeConfigurationResource) normalizeCRIState(state *edgeConfigurationModel, planCRI *criConfigurationModel) {
-	// Normalize CRI state to prevent spurious diffs when the API returns
-	// a non-nil CRI object with an empty string socket.
-	if state.CRI != nil && state.CRI.Socket.ValueString() == "" {
-		state.CRI.Socket = types.StringNull()
-	}
-
-	// If the entire cri block was removed; match by returning nil.
-	if planCRI == nil {
-		state.CRI = nil
-	}
-}
-
 func (r *edgeConfigurationResource) toCRIConfiguration(_ context.Context, plan *criConfigurationModel) (*omni.EdgeConfigurationCRIConfiguration, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
@@ -873,15 +948,16 @@ func (r *edgeConfigurationResource) toCRIConfigurationModel(_ context.Context, c
 		return nil
 	}
 
-	model := &criConfigurationModel{
-		Socket: types.StringNull(),
+	// Normalize: a CRI object with no socket is semantically equivalent to no CRI configuration at all.
+	if config.Socket == nil || *config.Socket == "" {
+		return &criConfigurationModel{
+			Socket: types.StringNull(),
+		}
 	}
 
-	if config.Socket != nil {
-		model.Socket = types.StringValue(*config.Socket)
+	return &criConfigurationModel{
+		Socket: types.StringValue(*config.Socket),
 	}
-
-	return model
 }
 
 func normalizeStringPtr(s *string) types.String {
