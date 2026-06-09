@@ -69,15 +69,28 @@ func (m *controlPlaneModel) Equal(other *controlPlaneModel) bool {
 	return m.Ha.Equal(other.Ha)
 }
 
+type cniModel struct {
+	Overlay      types.String `tfsdk:"overlay"`
+	OverlayEncap types.String `tfsdk:"overlay_encap"`
+}
+
+func (m *cniModel) Equal(other *cniModel) bool {
+	if m == nil || other == nil {
+		return m == other
+	}
+	return m.Overlay.Equal(other.Overlay) && m.OverlayEncap.Equal(other.OverlayEncap)
+}
+
 type networkingModel struct {
 	TunneledCIDRs types.List `tfsdk:"tunneled_cidrs"`
+	CNI           *cniModel  `tfsdk:"cni"`
 }
 
 func (m *networkingModel) Equal(other *networkingModel) bool {
 	if m == nil || other == nil {
 		return m == other
 	}
-	return m.TunneledCIDRs.Equal(other.TunneledCIDRs)
+	return m.TunneledCIDRs.Equal(other.TunneledCIDRs) && m.CNI.Equal(other.CNI)
 }
 
 type zoneModel struct {
@@ -293,6 +306,35 @@ func (r *edgeLocationResource) Schema(_ context.Context, _ resource.SchemaReques
 						Optional:    true,
 						ElementType: types.StringType,
 						Description: "List of destination CIDR blocks whose traffic should be routed through the main cluster instead of directly from the edge cluster.",
+					},
+					"cni": schema.SingleNestedAttribute{
+						Optional:    true,
+						Description: "CNI (kube-router) configuration for the edge cluster.",
+						Attributes: map[string]schema.Attribute{
+							"overlay": schema.StringAttribute{
+								Optional:    true,
+								Description: "Overlay mode for kube-router pod-to-pod traffic. Valid values: OVERLAY_UNSPECIFIED, OVERLAY_OFF, OVERLAY_SUBNET, OVERLAY_FULL.",
+								Validators: []validator.String{
+									stringvalidator.OneOf(
+										string(omni.OVERLAYUNSPECIFIED),
+										string(omni.OVERLAYOFF),
+										string(omni.OVERLAYSUBNET),
+										string(omni.OVERLAYFULL),
+									),
+								},
+							},
+							"overlay_encap": schema.StringAttribute{
+								Optional:    true,
+								Description: "Encapsulation protocol used by the overlay. Valid values: OVERLAY_ENCAP_UNSPECIFIED, OVERLAY_ENCAP_IPIP, OVERLAY_ENCAP_FOU.",
+								Validators: []validator.String{
+									stringvalidator.OneOf(
+										string(omni.OVERLAYENCAPUNSPECIFIED),
+										string(omni.OVERLAYENCAPIPIP),
+										string(omni.OVERLAYENCAPFOU),
+									),
+								},
+							},
+						},
 					},
 				},
 			},
@@ -638,10 +680,19 @@ func (r *edgeLocationResource) Read(ctx context.Context, req resource.ReadReques
 		}
 		// Only sync networking from API if it was already managed in state.
 		// Otherwise, we'd cause perpetual drift for users who never set the block.
-		if state.Networking != nil && edgeLocation.EdgeClusterSpec.Networking != nil && edgeLocation.EdgeClusterSpec.Networking.TunneledCidrs != nil {
-			cidrs, d := types.ListValueFrom(ctx, types.StringType, *edgeLocation.EdgeClusterSpec.Networking.TunneledCidrs)
-			resp.Diagnostics.Append(d...)
-			state.Networking = &networkingModel{TunneledCIDRs: cidrs}
+		if state.Networking != nil && edgeLocation.EdgeClusterSpec.Networking != nil {
+			apiNet := edgeLocation.EdgeClusterSpec.Networking
+			if apiNet.TunneledCidrs != nil {
+				cidrs, d := types.ListValueFrom(ctx, types.StringType, *apiNet.TunneledCidrs)
+				resp.Diagnostics.Append(d...)
+				state.Networking.TunneledCIDRs = cidrs
+			}
+			if state.Networking.CNI != nil && apiNet.Cni != nil {
+				state.Networking.CNI = &cniModel{
+					Overlay:      types.StringPointerValue((*string)(apiNet.Cni.Overlay)),
+					OverlayEncap: types.StringPointerValue((*string)(apiNet.Cni.OverlayEncap)),
+				}
+			}
 		}
 	}
 
@@ -899,9 +950,26 @@ func (r *edgeLocationResource) edgeClusterSpecUpdate(ctx context.Context, plan, 
 				return nil, diags
 			}
 			spec.Networking.TunneledCidrs = &items
+			if plan.Networking.CNI != nil {
+				spec.Networking.Cni = r.toCNI(plan.Networking.CNI)
+			}
 		}
 	}
 	return spec, diags
+}
+
+func (r *edgeLocationResource) toCNI(cni *cniModel) *omni.EdgeClusterCNI {
+	if cni == nil {
+		return nil
+	}
+	out := &omni.EdgeClusterCNI{}
+	if !cni.Overlay.IsNull() && !cni.Overlay.IsUnknown() {
+		out.Overlay = (*omni.EdgeClusterCNIOverlay)(cni.Overlay.ValueStringPointer())
+	}
+	if !cni.OverlayEncap.IsNull() && !cni.OverlayEncap.IsUnknown() {
+		out.OverlayEncap = (*omni.EdgeClusterCNIOverlayEncap)(cni.OverlayEncap.ValueStringPointer())
+	}
+	return out
 }
 
 func (r *edgeLocationResource) toEdgeClusterSpec(ctx context.Context, cp *controlPlaneModel, net *networkingModel) (*omni.EdgeClusterSpec, diag.Diagnostics) {
@@ -925,6 +993,9 @@ func (r *edgeLocationResource) toEdgeClusterSpec(ctx context.Context, cp *contro
 		}
 		spec.Networking = &omni.EdgeClusterNetworking{
 			TunneledCidrs: &items,
+		}
+		if net.CNI != nil {
+			spec.Networking.Cni = r.toCNI(net.CNI)
 		}
 	}
 	return spec, diags

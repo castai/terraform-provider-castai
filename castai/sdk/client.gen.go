@@ -11480,22 +11480,6 @@ func NewExternalClusterAPIGetConnectAndEnableCASTAICmdRequest(server string, par
 
 		}
 
-		if params.GcpSaImpersonate != nil {
-
-			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "gcpSaImpersonate", runtime.ParamLocationQuery, *params.GcpSaImpersonate); err != nil {
-				return nil, err
-			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
-				return nil, err
-			} else {
-				for k, v := range parsed {
-					for _, v2 := range v {
-						queryValues.Add(k, v2)
-					}
-				}
-			}
-
-		}
-
 		if params.InstallNetflowExporter != nil {
 
 			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "installNetflowExporter", runtime.ParamLocationQuery, *params.InstallNetflowExporter); err != nil {

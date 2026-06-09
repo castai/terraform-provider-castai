@@ -10086,10 +10086,13 @@ type WorkloadoptimizationV1NewWorkloadScalingPolicy struct {
 	// AssignmentRules AssignmentRules defines the ordered list of matching rules.
 	// The first matching rule is selected and assigned to workload.
 	// If none are matching then the default cluster policy is assigned.
-	AssignmentRules        *[]WorkloadoptimizationV1ScalingPolicyAssignmentRule `json:"assignmentRules,omitempty"`
-	HpaSettings            *WorkloadoptimizationV1ScalingPolicyHPASettings      `json:"hpaSettings,omitempty"`
-	Name                   string                                               `json:"name"`
-	RecommendationPolicies WorkloadoptimizationV1RecommendationPolicies         `json:"recommendationPolicies"`
+	AssignmentRules *[]WorkloadoptimizationV1ScalingPolicyAssignmentRule `json:"assignmentRules,omitempty"`
+	HpaSettings     *WorkloadoptimizationV1ScalingPolicyHPASettings      `json:"hpaSettings,omitempty"`
+
+	// IsOpsPilot Indicates that this scaling policy was created by OpsPilot and can be updated by it in subsequent runs.
+	IsOpsPilot             *bool                                        `json:"isOpsPilot,omitempty"`
+	Name                   string                                       `json:"name"`
+	RecommendationPolicies WorkloadoptimizationV1RecommendationPolicies `json:"recommendationPolicies"`
 }
 
 // WorkloadoptimizationV1OOMKillEvent defines model for workloadoptimization.v1.OOMKillEvent.
@@ -10861,10 +10864,13 @@ type WorkloadoptimizationV1UpdateWorkloadScalingPolicy struct {
 
 	// AssignmentRules AssignmentRules defines the ordered list of matching rules.
 	// BEWARE: If was defined on policy and not provided on update request, the assignment rules will be removed.
-	AssignmentRules        *[]WorkloadoptimizationV1ScalingPolicyAssignmentRule `json:"assignmentRules,omitempty"`
-	HpaSettings            *WorkloadoptimizationV1ScalingPolicyHPASettings      `json:"hpaSettings,omitempty"`
-	Name                   string                                               `json:"name"`
-	RecommendationPolicies WorkloadoptimizationV1RecommendationPolicies         `json:"recommendationPolicies"`
+	AssignmentRules *[]WorkloadoptimizationV1ScalingPolicyAssignmentRule `json:"assignmentRules,omitempty"`
+	HpaSettings     *WorkloadoptimizationV1ScalingPolicyHPASettings      `json:"hpaSettings,omitempty"`
+
+	// IsOpsPilot Indicates that this scaling policy was created by OpsPilot and can be updated by it in subsequent runs.
+	IsOpsPilot             *bool                                        `json:"isOpsPilot,omitempty"`
+	Name                   string                                       `json:"name"`
+	RecommendationPolicies WorkloadoptimizationV1RecommendationPolicies `json:"recommendationPolicies"`
 }
 
 // WorkloadoptimizationV1UpdateWorkloadV2 defines model for workloadoptimization.v1.UpdateWorkloadV2.
@@ -11163,8 +11169,11 @@ type WorkloadoptimizationV1WorkloadScalingPolicy struct {
 	Id                                  string                                               `json:"id"`
 
 	// IsCastware Indicates if policy is only for castware workloads. Such policy cannot be updated or assigned to non cast workloads.
-	IsCastware             bool                                         `json:"isCastware"`
-	IsDefault              bool                                         `json:"isDefault"`
+	IsCastware bool `json:"isCastware"`
+	IsDefault  bool `json:"isDefault"`
+
+	// IsOpsPilot Indicates that this scaling policy was created by OpsPilot and can be updated by it in subsequent runs.
+	IsOpsPilot             bool                                         `json:"isOpsPilot"`
 	IsReadonly             bool                                         `json:"isReadonly"`
 	Name                   string                                       `json:"name"`
 	OrganizationId         string                                       `json:"organizationId"`
@@ -11774,9 +11783,6 @@ type ExternalClusterAPIGetConnectAndEnableCASTAICmdParams struct {
 
 	// InstallAiOptimizerProxy Whether CAST AI AI-Optimizer Proxy should be installed.
 	InstallAiOptimizerProxy *bool `form:"installAiOptimizerProxy,omitempty" json:"installAiOptimizerProxy,omitempty"`
-
-	// GcpSaImpersonate Whether GCP SA Impersonate feature should be enabled.
-	GcpSaImpersonate *bool `form:"gcpSaImpersonate,omitempty" json:"gcpSaImpersonate,omitempty"`
 
 	// InstallNetflowExporter Whether Netflow network exporter should be installed.
 	InstallNetflowExporter *bool `form:"installNetflowExporter,omitempty" json:"installNetflowExporter,omitempty"`
