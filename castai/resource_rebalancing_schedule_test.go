@@ -5,10 +5,10 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
 
-func TestAccResourceRebalancingSchedule_basic(t *testing.T) {
+func TestAccCloudAgnostic_ResourceRebalancingSchedule_basic(t *testing.T) {
 	rName := fmt.Sprintf("%v-rebalancing-schedule-%v", ResourcePrefix, acctest.RandString(8))
 
 	resource.ParallelTest(t, resource.TestCase{

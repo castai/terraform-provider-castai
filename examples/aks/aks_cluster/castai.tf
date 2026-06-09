@@ -9,7 +9,7 @@ provider "castai" {
 }
 
 provider "helm" {
-  kubernetes {
+  kubernetes = {
     host                   = azurerm_kubernetes_cluster.this.kube_config.0.host
     client_certificate     = base64decode(azurerm_kubernetes_cluster.this.kube_config.0.client_certificate)
     client_key             = base64decode(azurerm_kubernetes_cluster.this.kube_config.0.client_key)
@@ -19,7 +19,8 @@ provider "helm" {
 
 # Configure AKS cluster connection to CAST AI using CAST AI aks-cluster module.
 module "castai-aks-cluster" {
-  source = "castai/aks/castai"
+  source  = "castai/aks/castai"
+  version = "~> 10.3"
 
   api_url                = var.castai_api_url
   castai_api_token       = var.castai_api_token

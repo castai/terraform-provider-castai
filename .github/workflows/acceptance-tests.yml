@@ -1,0 +1,73 @@
+name: Acceptance tests
+
+on:
+  pull_request:
+    branches: [ '*' ]
+
+jobs:
+  testacc:
+    # Repeat this for all clouds and cloud-agnostic
+    strategy:
+      matrix:
+        cloud: [ "eks", "gke", "aks", "cloud-agnostic" ]
+      fail-fast: false # Don't cancel other jobs if one fails
+    # Only one instance per cloud should run at the same time
+    concurrency:
+      group: testacc-${{ matrix.cloud }}
+    name: ${{ matrix.cloud }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v6
+
+      - name: Setup Go
+        uses: actions/setup-go@v6
+        with:
+          go-version: '1.25.5'
+
+      - name: Cache Go modules
+        uses: actions/cache@v5
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-build-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-build-
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v4
+        with:
+          terraform_version: '1.11.*'
+          terraform_wrapper: false
+
+      - name: Authenticate to GCP
+        uses: google-github-actions/auth@v3
+        with:
+          credentials_json: ${{ secrets.GOOGLE_TF_ACCEPTANCE_TEST_CREDENTIALS }}
+
+      - name: Get GKE credentials
+        uses: google-github-actions/get-gke-credentials@v3
+        with:
+          cluster_name: tf-core-acc-20230723
+          location: us-central1-c
+          project_id: ${{ secrets.GOOGLE_TF_ACCEPTANCE_PROJECT_ID }}
+
+      - name: Acceptance test
+        env:
+          CASTAI_API_TOKEN: ${{ secrets.CASTAI_DEV_MASTER_TOKEN }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_TF_ACCEPTANCE_TEST_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_TF_ACCEPTANCE_TEST_SECRET_KEY_ID }}
+          ARM_CLIENT_ID: ${{ secrets.AZURE_TF_ACCEPTANCE_TEST_ARM_CLIENT_ID_V2 }}
+          ARM_CLIENT_SECRET: ${{ secrets.AZURE_TF_ACCEPTANCE_TEST_ARM_CLIENT_SECRET_V2 }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_TF_ACCEPTANCE_TEST_ARM_SUBSCRIPTION_ID_V2 }}
+          ARM_TENANT_ID: ${{ secrets.AZURE_TF_ACCEPTANCE_TEST_ARM_TENANT_ID_V2 }}
+          GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_TF_ACCEPTANCE_TEST_CREDENTIALS }}
+          GOOGLE_PROJECT_ID: ${{ secrets.GOOGLE_TF_ACCEPTANCE_PROJECT_ID }}
+          SSO_CLIENT_ID: ${{ secrets.SSO_CLIENT_ID }}
+          SSO_CLIENT_SECRET: ${{ secrets.SSO_CLIENT_SECRET }}
+          SSO_DOMAIN: ${{ secrets.SSO_DOMAIN }}
+          ACCEPTANCE_TEST_ORGANIZATION_ID: ${{ vars.TF_ACCEPTANCE_TEST_ORGANIZATION_ID }}
+          AZURE_TF_ACCEPTANCE_TEST_FEDERATION_ID: ${{ secrets.AZURE_TF_ACCEPTANCE_TEST_FEDERATION_ID }}
+          AZURE_TF_ACCEPTANCE_TEST_FEDERATION_TENANT_ID: ${{ secrets.AZURE_TF_ACCEPTANCE_TEST_ARM_TENANT_ID_V2 }}
+          AZURE_TF_ACCEPTANCE_TEST_FEDERATION_CLIENT_ID: ${{ secrets.AZURE_TF_ACCEPTANCE_TEST_FEDERATION_CLIENT_ID }}
+        run: make testacc-${{ matrix.cloud }}
+

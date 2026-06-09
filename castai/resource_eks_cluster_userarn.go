@@ -12,12 +12,17 @@ import (
 	"github.com/castai/terraform-provider-castai/castai/sdk"
 )
 
+const (
+	EKSClusterUserARNFieldClusterID = "cluster_id"
+	EKSClusterUserARNFieldARN       = "arn"
+)
+
 func resourceEKSClusterUserARN() *schema.Resource {
 	return &schema.Resource{
 		ReadContext:   resourceEKSUserARNRead,
 		CreateContext: resourceEKSUserARNCreate,
 		DeleteContext: resourceEKSUserARNDelete,
-		Description: "Retrieve EKS Cluster User ARN",
+		Description:   "Retrieve EKS Cluster User ARN",
 		Schema: map[string]*schema.Schema{
 			EKSClusterUserARNFieldClusterID: {
 				Type:             schema.TypeString,

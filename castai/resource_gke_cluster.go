@@ -27,13 +27,12 @@ func resourceGKECluster() *schema.Resource {
 		ReadContext:   resourceCastaiGKEClusterRead,
 		UpdateContext: resourceCastaiGKEClusterUpdate,
 		DeleteContext: resourceCastaiGKEClusterDelete,
-		CustomizeDiff: clusterTokenDiff,
 		Description:   "GKE cluster resource allows connecting an existing GKE cluster to CAST AI.",
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(5 * time.Minute),
 			Update: schema.DefaultTimeout(1 * time.Minute),
-			Delete: schema.DefaultTimeout(6 * time.Minute), // Cluster action timeout is 5 minutes.
+			Delete: schema.DefaultTimeout(15 * time.Minute),
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -80,6 +79,11 @@ func resourceGKECluster() *schema.Resource {
 				Type:        schema.TypeBool,
 				Optional:    true,
 				Description: "Should CAST AI remove nodes managed by CAST.AI on disconnect",
+			},
+			FieldClusterOrganizationId: {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "CAST AI organization ID",
 			},
 		},
 	}
@@ -161,6 +165,9 @@ func resourceCastaiGKEClusterRead(ctx context.Context, data *schema.ResourceData
 
 	if err := data.Set(FieldClusterCredentialsId, toString(resp.JSON200.CredentialsId)); err != nil {
 		return diag.FromErr(fmt.Errorf("setting credentials id: %w", err))
+	}
+	if err := data.Set(FieldClusterOrganizationId, toString(resp.JSON200.OrganizationId)); err != nil {
+		return diag.FromErr(fmt.Errorf("setting organization id: %w", err))
 	}
 	if GKE := resp.JSON200.Gke; GKE != nil {
 		if err := data.Set(FieldGKEClusterProjectId, toString(GKE.ProjectId)); err != nil {

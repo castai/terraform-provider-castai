@@ -18,10 +18,10 @@ provider "castai" {
 }
 
 provider "helm" {
-  kubernetes {
+  kubernetes = {
     host                   = module.eks.cluster_endpoint
     cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority_data)
-    exec {
+    exec = {
       api_version = "client.authentication.k8s.io/v1beta1"
       command     = "aws"
       # This requires the awscli to be installed locally where Terraform is executed.
@@ -32,7 +32,8 @@ provider "helm" {
 
 # Create AWS IAM policies and a user to connect to CAST AI.
 module "castai-eks-role-iam" {
-  source = "castai/eks-role-iam/castai"
+  source  = "castai/eks-role-iam/castai"
+  version = "~> 2.0"
 
   aws_account_id     = data.aws_caller_identity.current.account_id
   aws_cluster_region = var.cluster_region
@@ -52,7 +53,8 @@ resource "castai_eks_clusterid" "cluster_id" {
 }
 
 module "castai-eks-cluster" {
-  source = "castai/eks-cluster/castai"
+  source  = "castai/eks-cluster/castai"
+  version = "~> 14.1"
 
   api_url                = var.castai_api_url
   castai_api_token       = var.castai_api_token
@@ -182,18 +184,6 @@ module "castai-eks-cluster" {
 
     unschedulable_pods = {
       enabled = true
-
-      headroom = {
-        enabled           = true
-        cpu_percentage    = 10
-        memory_percentage = 10
-      }
-
-      headroom_spot = {
-        enabled           = true
-        cpu_percentage    = 10
-        memory_percentage = 10
-      }
     }
 
     node_downscaler = {
@@ -225,43 +215,5 @@ module "castai-eks-cluster" {
 
   # depends_on helps Terraform with creating proper dependencies graph in case of resource creation and in this case destroy.
   # module "castai-eks-cluster" has to be destroyed before module "castai-eks-role-iam".
-  depends_on = [module.castai-eks-role-iam]
-}
-
-resource "castai_rebalancing_schedule" "spots" {
-  name = "rebalance spots at every 30th minute"
-  schedule {
-    cron = "*/30 * * * *"
-  }
-  trigger_conditions {
-    savings_percentage = 20
-  }
-  launch_configuration {
-    # only consider instances older than 5 minutes
-    node_ttl_seconds         = 300
-    num_targeted_nodes       = 3
-    rebalancing_min_nodes    = 2
-    keep_drain_timeout_nodes = false
-    selector = jsonencode({
-      nodeSelectorTerms = [{
-        matchExpressions = [
-          {
-            key      = "scheduling.cast.ai/spot"
-            operator = "Exists"
-          }
-        ]
-      }]
-    })
-    execution_conditions {
-      enabled                     = true
-      achieved_savings_percentage = 10
-    }
-  }
-}
-
-resource "castai_rebalancing_job" "spots" {
-  cluster_id              = castai_eks_clusterid.cluster_id.id
-  rebalancing_schedule_id = castai_rebalancing_schedule.spots.id
-  enabled                 = true
-  depends_on              = [module.castai-eks-cluster]
+  depends_on = [module.castai-eks-role-iam, module.vpc, module.eks]
 }

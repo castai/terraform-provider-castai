@@ -8,13 +8,17 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"strings"
 	"time"
 
 	jsonpatch "github.com/evanphx/json-patch"
+	"github.com/google/uuid"
+	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/mitchellh/mapstructure"
+	"k8s.io/apimachinery/pkg/util/wait"
 
 	"github.com/castai/terraform-provider-castai/castai/sdk"
 	"github.com/castai/terraform-provider-castai/castai/types"
@@ -71,7 +75,10 @@ func resourceAutoscaler() *schema.Resource {
 		UpdateContext: resourceCastaiAutoscalerUpdate,
 		DeleteContext: resourceCastaiAutoscalerDelete,
 		CustomizeDiff: resourceCastaiAutoscalerDiff,
-		Description:   "CAST AI autoscaler resource to manage autoscaler settings",
+		Importer: &schema.ResourceImporter{
+			StateContext: autoscalerStateImporter,
+		},
+		Description: "CAST AI autoscaler resource to manage autoscaler settings",
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(2 * time.Minute),
@@ -96,6 +103,7 @@ func resourceAutoscaler() *schema.Resource {
 				Type:        schema.TypeString,
 				Computed:    true,
 				Description: "computed value to store full policies configuration",
+				Deprecated:  "This field is deprecated and will be removed in the next major version. Use autoscaler_settings to configure and manage autoscaler policies.",
 			},
 			FieldAutoscalerSettings: {
 				Type:          schema.TypeList,
@@ -141,6 +149,7 @@ func resourceAutoscaler() *schema.Resource {
 										Optional:    true,
 										MaxItems:    1,
 										Description: "additional headroom based on cluster's total available capacity for on-demand nodes.",
+										Deprecated:  "`headroom` is deprecated. Please refer to the FAQ for guidance on cluster headroom: https://docs.cast.ai/docs/autoscaler-1#can-you-please-share-some-guidance-on-cluster-headroom-i-would-like-to-add-some-buffer-room-so-that-pods-have-a-place-to-run-when-nodes-go-down",
 										Elem: &schema.Resource{
 											Schema: map[string]*schema.Schema{
 												FieldCPUPercentage: {
@@ -171,6 +180,7 @@ func resourceAutoscaler() *schema.Resource {
 										Optional:    true,
 										MaxItems:    1,
 										Description: "additional headroom based on cluster's total available capacity for spot nodes.",
+										Deprecated:  "`headroom_spot` is deprecated. Please refer to the FAQ for guidance on cluster headroom: https://docs.cast.ai/docs/autoscaler-1#can-you-please-share-some-guidance-on-cluster-headroom-i-would-like-to-add-some-buffer-room-so-that-pods-have-a-place-to-run-when-nodes-go-down",
 										Elem: &schema.Resource{
 											Schema: map[string]*schema.Schema{
 												FieldCPUPercentage: {
@@ -201,6 +211,7 @@ func resourceAutoscaler() *schema.Resource {
 										Optional:    true,
 										MaxItems:    1,
 										Description: "defines the node constraints that will be applied when autoscaling with Unschedulable Pods policy.",
+										Deprecated:  "`node_constraints` under `unschedulable_pods` is deprecated. Use the `constraints` field in the default castai_node_template resource instead. The default node template has `is_default = true`.",
 										Elem: &schema.Resource{
 											Schema: map[string]*schema.Schema{
 												FieldMinCPUCores: {
@@ -256,7 +267,7 @@ func resourceAutoscaler() *schema.Resource {
 										Type:        schema.TypeBool,
 										Optional:    true,
 										Default:     false,
-										Deprecated:  "customInstancesEnabled is deprecated. Use custom_instances_enabled field the node template resource.",
+										Deprecated:  "`custom_instances_enabled` under `unschedulable_pods.node_constraints` is deprecated. Use the `custom_instances_enabled` field in the default castai_node_template resource instead. The default node template has `is_default = true`.",
 										Description: "enable/disable custom instances policy.",
 									},
 								},
@@ -307,24 +318,28 @@ func resourceAutoscaler() *schema.Resource {
 							Optional:    true,
 							MaxItems:    1,
 							Description: "policy defining whether autoscaler can use spot instances for provisioning additional workloads.",
+							Deprecated:  "`spot_instances` is deprecated. Configure spot instance settings using the `constraints` field in the default castai_node_template resource. The default node template has `is_default = true`.",
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									FieldEnabled: {
 										Type:        schema.TypeBool,
 										Optional:    true,
 										Default:     false,
+										Deprecated:  "`enabled` under `spot_instances` is deprecated. To enable spot instances, set `constraints.spot = true` in the default castai_node_template resource. The default node template has `is_default = true`.",
 										Description: "enable/disable spot instances policy.",
 									},
 									FieldMaxReclaimRate: {
 										Type:        schema.TypeInt,
 										Optional:    true,
 										Default:     0,
+										Deprecated:  "`max_reclaim_rate` under `spot_instances` is deprecated. This field has no direct equivalent in the castai_node_template resource, and setting it will have no effect.",
 										Description: "max allowed reclaim rate when choosing spot instance type. E.g. if the value is 10%, instance types having 10% or higher reclaim rate will not be considered. Set to zero to use all instance types regardless of reclaim rate.",
 									},
 									FieldSpotBackups: {
 										Type:        schema.TypeList,
 										Optional:    true,
 										MaxItems:    1,
+										Deprecated:  "`spot_backups` under `spot_instances` is deprecated. Configure spot backup behavior using `constraints.use_spot_fallbacks` and `constraints.fallback_restore_rate_seconds` in the default castai_node_template resource. The default node template has `is_default = true`.",
 										Description: "policy defining whether autoscaler can use spot backups instead of spot instances when spot instances are not available.",
 										Elem: &schema.Resource{
 											Schema: map[string]*schema.Schema{
@@ -348,12 +363,14 @@ func resourceAutoscaler() *schema.Resource {
 										Type:        schema.TypeBool,
 										Optional:    true,
 										Default:     false,
+										Deprecated:  "`spot_diversity_enabled` is deprecated. Use the `enable_spot_diversity` field within `castai_node_template.constraints` in the default castai_node_template resource. The default node template has `is_default = true`.",
 										Description: "enable/disable spot diversity policy. When enabled, autoscaler will try to balance between diverse and cost optimal instance types.",
 									},
 									FieldSpotDiversityPriceIncreaseLimit: {
 										Type:             schema.TypeInt,
 										Optional:         true,
 										Default:          20,
+										Deprecated:       "`spot_diversity_price_increase_limit` is deprecated. Use `spot_diversity_price_increase_limit_percent` within `castai_node_template.constraints` in the default castai_node_template resource. The default node template has `is_default = true`.",
 										Description:      "allowed node configuration price increase when diversifying instance types. E.g. if the value is 10%, then the overall price of diversified instance types can be 10% higher than the price of the optimal configuration.",
 										ValidateDiagFunc: validation.ToDiagFunc(validation.IntAtLeast(1)),
 									},
@@ -362,6 +379,7 @@ func resourceAutoscaler() *schema.Resource {
 										Optional:    true,
 										MaxItems:    1,
 										Description: "configure the handling of SPOT interruption predictions.",
+										Deprecated:  "`spot_interruption_predictions` is deprecated. Use the `spot_interruption_predictions_enabled` and `spot_interruption_predictions_type` fields in the default castai_node_template resource. The default node template has `is_default = true`.",
 										Elem: &schema.Resource{
 											Schema: map[string]*schema.Schema{
 												FieldEnabled: {
@@ -502,6 +520,210 @@ func resourceCastaiAutoscalerDelete(ctx context.Context, data *schema.ResourceDa
 	return nil
 }
 
+func autoscalerStateImporter(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	clusterID := d.Id()
+
+	// Validate cluster ID is a UUID
+	if _, err := uuid.Parse(clusterID); err != nil {
+		return nil, fmt.Errorf("expected cluster_id to be a valid UUID, got: %q", clusterID)
+	}
+
+	// Set the cluster_id field
+	if err := d.Set(FieldClusterId, clusterID); err != nil {
+		return nil, fmt.Errorf("setting cluster_id: %w", err)
+	}
+
+	// Fetch current policies from API
+	client := meta.(*ProviderConfig).api
+	currentPolicies, err := getCurrentPolicies(ctx, client, clusterID)
+	if err != nil {
+		return nil, fmt.Errorf("fetching autoscaler policies for cluster %s: %w", clusterID, err)
+	}
+
+	// Filter out volatile fields that change independently on API side
+	currentPolicies = filterVolatileFields(currentPolicies)
+
+	// Set the computed autoscaler_policies field
+	if err := d.Set(FieldAutoscalerPolicies, string(currentPolicies)); err != nil {
+		return nil, fmt.Errorf("setting autoscaler_policies: %w", err)
+	}
+
+	// Convert API response to autoscaler_settings structure
+	settings, err := flattenAutoscalerSettings(currentPolicies)
+	if err != nil {
+		return nil, fmt.Errorf("converting policies to autoscaler_settings: %w", err)
+	}
+
+	if settings != nil {
+		if err := d.Set(FieldAutoscalerSettings, settings); err != nil {
+			return nil, fmt.Errorf("setting autoscaler_settings: %w", err)
+		}
+	}
+
+	return []*schema.ResourceData{d}, nil
+}
+
+// flattenAutoscalerSettings converts API JSON response to autoscaler_settings Terraform structure.
+// It omits deprecated fields to encourage users to migrate to castai_node_template.
+func flattenAutoscalerSettings(policiesJSON []byte) ([]map[string]interface{}, error) {
+	var apiPolicy map[string]interface{}
+	if err := json.Unmarshal(policiesJSON, &apiPolicy); err != nil {
+		return nil, fmt.Errorf("unmarshaling policies JSON: %w", err)
+	}
+
+	settings := make(map[string]interface{})
+
+	// Top-level fields
+	if v, ok := apiPolicy["enabled"]; ok {
+		settings[FieldEnabled] = v
+	}
+	if v, ok := apiPolicy["isScopedMode"]; ok {
+		settings[FieldIsScopedMode] = v
+	}
+	if v, ok := apiPolicy["nodeTemplatesPartialMatchingEnabled"]; ok {
+		settings[FieldNodeTemplatesPartialMatchingEnabled] = v
+	}
+
+	// Unschedulable Pods (excluding deprecated fields: headroom, headroomSpot, nodeConstraints, customInstancesEnabled)
+	if unschedulablePods, ok := apiPolicy["unschedulablePods"].(map[string]interface{}); ok {
+		up := flattenUnschedulablePods(unschedulablePods)
+		if len(up) > 0 {
+			settings[FieldUnschedulablePods] = []interface{}{up}
+		}
+	}
+
+	// Cluster Limits
+	if clusterLimits, ok := apiPolicy["clusterLimits"].(map[string]interface{}); ok {
+		cl := flattenClusterLimits(clusterLimits)
+		if len(cl) > 0 {
+			settings[FieldClusterLimits] = []interface{}{cl}
+		}
+	}
+
+	// Node Downscaler (excluding spot_instances which is deprecated at top level)
+	if nodeDownscaler, ok := apiPolicy["nodeDownscaler"].(map[string]interface{}); ok {
+		nd := flattenNodeDownscaler(nodeDownscaler)
+		if len(nd) > 0 {
+			settings[FieldNodeDownscaler] = []interface{}{nd}
+		}
+	}
+
+	// Note: Omitting spotInstances entirely (deprecated)
+
+	return []map[string]interface{}{settings}, nil
+}
+
+// flattenUnschedulablePods converts the unschedulablePods API response to Terraform structure.
+// Deprecated fields (headroom, headroomSpot, nodeConstraints, customInstancesEnabled) are omitted.
+// podPinner is included if present in API response so users can track changes made via UI/API.
+func flattenUnschedulablePods(unschedulablePods map[string]interface{}) map[string]interface{} {
+	up := make(map[string]interface{})
+
+	if v, ok := unschedulablePods["enabled"]; ok {
+		up[FieldEnabled] = v
+	}
+
+	// Note: Omitting headroom, headroomSpot, nodeConstraints, customInstancesEnabled (deprecated)
+
+	if podPinner, ok := unschedulablePods["podPinner"].(map[string]interface{}); ok {
+		if enabled, ok := podPinner["enabled"].(bool); ok {
+			pp := map[string]interface{}{
+				FieldEnabled: enabled,
+			}
+			up[FieldPodPinner] = []interface{}{pp}
+		}
+	}
+
+	return up
+}
+
+// flattenClusterLimits converts the clusterLimits API response to Terraform structure.
+func flattenClusterLimits(clusterLimits map[string]interface{}) map[string]interface{} {
+	cl := make(map[string]interface{})
+
+	if v, ok := clusterLimits["enabled"]; ok {
+		cl[FieldEnabled] = v
+	}
+
+	if cpu, ok := clusterLimits["cpu"].(map[string]interface{}); ok {
+		cpuMap := make(map[string]interface{})
+		if v, ok := cpu["minCores"]; ok {
+			cpuMap[FieldMinCores] = v
+		}
+		if v, ok := cpu["maxCores"]; ok {
+			cpuMap[FieldMaxCores] = v
+		}
+		if len(cpuMap) > 0 {
+			cl[FieldCPU] = []interface{}{cpuMap}
+		}
+	}
+
+	return cl
+}
+
+// flattenNodeDownscaler converts the nodeDownscaler API response to Terraform structure.
+func flattenNodeDownscaler(nodeDownscaler map[string]interface{}) map[string]interface{} {
+	nd := make(map[string]interface{})
+
+	if v, ok := nodeDownscaler["enabled"]; ok {
+		nd[FieldEnabled] = v
+	}
+
+	if emptyNodes, ok := nodeDownscaler["emptyNodes"].(map[string]interface{}); ok {
+		en := make(map[string]interface{})
+		if v, ok := emptyNodes["enabled"]; ok {
+			en[FieldEnabled] = v
+		}
+		if v, ok := emptyNodes["delaySeconds"]; ok {
+			en[FieldDelaySeconds] = v
+		}
+		if len(en) > 0 {
+			nd[FieldEmptyNodes] = []interface{}{en}
+		}
+	}
+
+	if evictor, ok := nodeDownscaler["evictor"].(map[string]interface{}); ok {
+		ev := flattenEvictor(evictor)
+		if len(ev) > 0 {
+			nd[FieldEvictor] = []interface{}{ev}
+		}
+	}
+
+	return nd
+}
+
+// flattenEvictor converts the evictor API response to Terraform structure.
+func flattenEvictor(evictor map[string]interface{}) map[string]interface{} {
+	ev := make(map[string]interface{})
+
+	if v, ok := evictor["enabled"]; ok {
+		ev[FieldEnabled] = v
+	}
+	if v, ok := evictor["dryRun"]; ok {
+		ev[FieldEvictorDryRun] = v
+	}
+	if v, ok := evictor["aggressiveMode"]; ok {
+		ev[FieldEvictorAggressiveMode] = v
+	}
+	if v, ok := evictor["scopedMode"]; ok {
+		ev[FieldEvictorScopedMode] = v
+	}
+	if v, ok := evictor["cycleInterval"]; ok {
+		ev[FieldEvictorCycleInterval] = v
+	}
+	if v, ok := evictor["nodeGracePeriodMinutes"]; ok {
+		ev[FieldEvictorNodeGracePeriodMinutes] = v
+	}
+	if v, ok := evictor["podEvictionFailureBackOffInterval"]; ok {
+		ev[FieldEvictorPodEvictionFailureBackOffInterval] = v
+	}
+	if v, ok := evictor["ignorePodDisruptionBudgets"]; ok {
+		ev[FieldEvictorIgnorePodDisruptionBudgets] = v
+	}
+
+	return ev
+}
+
 func resourceCastaiAutoscalerDiff(ctx context.Context, d *schema.ResourceDiff, meta interface{}) error {
 	clusterId := getClusterId(d)
 	if clusterId == "" {
@@ -515,6 +737,9 @@ func resourceCastaiAutoscalerDiff(ctx context.Context, d *schema.ResourceDiff, m
 	if policies == nil {
 		return nil
 	}
+
+	// Filter out volatile fields that change independently on API side
+	policies = filterVolatileFields(policies)
 
 	return d.SetNew(FieldAutoscalerPolicies, string(policies))
 }
@@ -565,7 +790,7 @@ func getCurrentPolicies(ctx context.Context, client sdk.ClientWithResponsesInter
 	}
 
 	responseBytes, err := io.ReadAll(resp.Body)
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 	if err != nil {
 		return nil, fmt.Errorf("reading response body: %w", err)
 	}
@@ -582,23 +807,59 @@ func updateAutoscalerPolicies(ctx context.Context, data *schema.ResourceData, me
 		return nil
 	}
 
-	policies, err := getChangedPolicies(ctx, data, meta, clusterId)
-	if err != nil {
-		return err
+	// Define the update operation that will be executed with retry logic
+	updatePolicies := func() error {
+		policies, err := getChangedPolicies(ctx, data, meta, clusterId)
+		if err != nil {
+			return err
+		}
+
+		if policies == nil {
+			log.Printf("[DEBUG] changed policies json not calculated. Skipping autoscaler policies changes")
+			return nil
+		}
+
+		changedPoliciesJSON := string(policies)
+		if changedPoliciesJSON == "" {
+			log.Printf("[DEBUG] changed policies json not found. Skipping autoscaler policies changes")
+			return nil
+		}
+
+		return upsertPolicies(ctx, meta, clusterId, changedPoliciesJSON)
 	}
 
-	if policies == nil {
-		log.Printf("[DEBUG] changed policies json not calculated. Skipping autoscaler policies changes")
-		return nil
+	// Exponential backoff configuration
+	backoff := wait.Backoff{
+		Duration: 100 * time.Millisecond,
+		Factor:   2.0,
+		Jitter:   0.1,
+		Steps:    5,
+		Cap:      2 * time.Second,
 	}
 
-	changedPoliciesJSON := string(policies)
-	if changedPoliciesJSON == "" {
-		log.Printf("[DEBUG] changed policies json not found. Skipping autoscaler policies changes")
-		return nil
+	retryErr := wait.ExponentialBackoffWithContext(ctx, backoff, func(ctx context.Context) (done bool, err error) {
+		err = updatePolicies()
+		if err == nil {
+			return true, nil // Success - stop retrying
+		}
+
+		// Check if error is retryable
+		if !isNodeTemplateVersionConflict(err) {
+			return false, err // Non-retryable error - stop with error
+		}
+
+		log.Printf("[DEBUG] Retry failed with version conflict: %v", err)
+		return false, nil // Retryable error - continue retrying
+	})
+
+	if retryErr != nil {
+		if wait.Interrupted(retryErr) {
+			return fmt.Errorf("timeout waiting for autoscaler policy update after version conflicts: %w", retryErr)
+		}
+		return retryErr
 	}
 
-	return upsertPolicies(ctx, meta, clusterId, changedPoliciesJSON)
+	return nil
 }
 
 func upsertPolicies(ctx context.Context, meta interface{}, clusterId string, changedPoliciesJSON string) error {
@@ -610,6 +871,15 @@ func upsertPolicies(ctx context.Context, meta interface{}, clusterId string, cha
 	}
 
 	return nil
+}
+
+// isNodeTemplateVersionConflict checks if the error is due to version mismatch
+func isNodeTemplateVersionConflict(err error) bool {
+	if err == nil {
+		return false
+	}
+	errMsg := err.Error()
+	return strings.Contains(errMsg, "template has changed") || strings.Contains(errMsg, "refetch the policies")
 }
 
 func readAutoscalerPolicies(ctx context.Context, data *schema.ResourceData, meta interface{}) error {
@@ -627,6 +897,9 @@ func readAutoscalerPolicies(ctx context.Context, data *schema.ResourceData, meta
 	if err != nil {
 		return err
 	}
+
+	// Filter out volatile fields that change independently on API side
+	currentPolicies = filterVolatileFields(currentPolicies)
 
 	err = data.Set(FieldAutoscalerPolicies, string(currentPolicies))
 	if err != nil {
@@ -646,6 +919,43 @@ func getClusterId(data types.ResourceProvider) string {
 	return value.(string)
 }
 
+// filterVolatileFields removes API-computed fields that change independently and cause unnecessary drift.
+// This includes fields that are bidirectionally synced with node templates.
+func filterVolatileFields(policiesJSON []byte) []byte {
+	var policies map[string]interface{}
+	if err := json.Unmarshal(policiesJSON, &policies); err != nil {
+		return policiesJSON // return as-is if unmarshal fails
+	}
+
+	// Remove fields that change due to policy↔node template sync
+	delete(policies, "defaultNodeTemplateVersion")
+	delete(policies, "spotInstances") // synced with node template spot settings
+
+	// Remove nested deprecated fields that sync with node templates
+	if up, ok := policies["unschedulablePods"].(map[string]interface{}); ok {
+		delete(up, "nodeConstraints")        // synced with node template min/max CPU/RAM
+		delete(up, "customInstancesEnabled") // synced with node template
+
+		// Remove API-computed status fields that change based on cluster state
+		if podPinner, ok := up["podPinner"].(map[string]interface{}); ok {
+			delete(podPinner, "status")
+		}
+	}
+
+	// Remove API-computed status field from evictor
+	if nd, ok := policies["nodeDownscaler"].(map[string]interface{}); ok {
+		if evictor, ok := nd["evictor"].(map[string]interface{}); ok {
+			delete(evictor, "status")
+		}
+	}
+
+	filtered, err := json.Marshal(policies)
+	if err != nil {
+		return policiesJSON
+	}
+	return filtered
+}
+
 func getChangedPolicies(ctx context.Context, data types.ResourceProvider, meta interface{}, clusterId string) ([]byte, error) {
 	policyChangesJSON, isPoliciesJSONExist := data.GetOk(FieldAutoscalerPoliciesJSON)
 	_, isPoliciesSettingsExist := data.GetOk(FieldAutoscalerSettings)
@@ -657,6 +967,8 @@ func getChangedPolicies(ctx context.Context, data types.ResourceProvider, meta i
 		if err != nil {
 			return nil, fmt.Errorf("failed to deserialize policy definitions: %v", err)
 		}
+
+		adjustPolicyForDrift(data, policy)
 
 		data, err := json.Marshal(policy)
 		if err != nil {
@@ -728,6 +1040,51 @@ func createValidationError(field, value string) error {
 		"The configuration was migrated to default node template.\n\n"+
 		"See: https://github.com/castai/terraform-provider-castai#migrating-from-4xx-to-5xx\n\n"+
 		"Policy:\n%v", field, value)
+}
+
+// adjustPolicyForDrift removes values of certain fields which, if retained, might result in constant plan changes.
+// Changes to legacy autoscaler policies and default node template sync to one another, and if values of certain fields
+// are not equal, then they'll keep producing plan changes. Originally, some of these fields had default values
+// and their values are now stored in pre-existing states, so we cannot use the policies stored in state as-is. We null
+// those fields in case they are not specified in the configuration.
+func adjustPolicyForDrift(data types.ResourceProvider, policy *types.AutoscalerPolicy) {
+	if policy == nil {
+		return
+	}
+
+	// Handle deprecated spot_instances field
+	val, d := data.GetRawConfigAt(cty.GetAttrPath(FieldAutoscalerSettings).IndexInt(0).GetAttr(FieldSpotInstances))
+	if !d.HasError() && val.IsNull() {
+		policy.SpotInstances = nil
+	}
+
+	if policy.UnschedulablePods != nil {
+		unschedulablePodsPath := cty.GetAttrPath(FieldAutoscalerSettings).IndexInt(0).GetAttr(FieldUnschedulablePods).IndexInt(0)
+
+		// Handle custom_instances_enabled (deprecated)
+		val, d := data.GetRawConfigAt(unschedulablePodsPath.GetAttr(FieldCustomInstancesEnabled))
+		if !d.HasError() && val.IsNull() {
+			policy.UnschedulablePods.CustomInstances = nil
+		}
+
+		// Handle headroom (deprecated)
+		val, d = data.GetRawConfigAt(unschedulablePodsPath.GetAttr(FieldHeadroom))
+		if !d.HasError() && val.IsNull() {
+			policy.UnschedulablePods.Headroom = nil
+		}
+
+		// Handle headroom_spot (deprecated)
+		val, d = data.GetRawConfigAt(unschedulablePodsPath.GetAttr(FieldHeadroomSpot))
+		if !d.HasError() && val.IsNull() {
+			policy.UnschedulablePods.HeadroomSpot = nil
+		}
+
+		// Handle node_constraints (deprecated)
+		val, d = data.GetRawConfigAt(unschedulablePodsPath.GetAttr(FieldNodeConstraints))
+		if !d.HasError() && val.IsNull() {
+			policy.UnschedulablePods.NodeConstraints = nil
+		}
+	}
 }
 
 // toAutoscalerPolicy converts FieldAutoscalerSettings to types.AutoscalerPolicy for given data.

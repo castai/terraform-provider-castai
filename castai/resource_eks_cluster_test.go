@@ -83,6 +83,7 @@ account_id = 487609000000
 assume_role_arn = 
 credentials_id = 9b8d0456-177b-4a3d-b162-e68030d656aa
 name = eks-cluster
+organization_id = 2836f775-aaaa-eeee-bbbb-3d3c29512692
 region = eu-central-1
 Tainted = false
 `, data.State().String())

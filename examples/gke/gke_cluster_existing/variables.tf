@@ -3,14 +3,9 @@ variable "cluster_name" {
   description = "GKE cluster name in GCP project."
 }
 
-variable "cluster_region" {
+variable "cluster_location" {
   type        = string
-  description = "The region to create the cluster."
-}
-
-variable "cluster_zones" {
-  type        = list(string)
-  description = "The zones to create the cluster."
+  description = "Location of the cluster to be connected to CAST AI. Can be region or zone for zonal clusters"
 }
 
 variable "project_id" {
@@ -47,9 +42,4 @@ variable "tags" {
   type        = map(any)
   description = "Optional tags for new cluster nodes. This parameter applies only to new nodes - tags for old nodes are not reconciled."
   default     = {}
-}
-
-variable "subnets" {
-  type        = list(string)
-  description = "Cluster subnets"
 }

@@ -35,6 +35,9 @@ func checkResponse(response Response, err error, expectedStatus int) error {
 	if err != nil {
 		return err
 	}
+	if response == nil {
+		return nil
+	}
 
 	if response.StatusCode() != expectedStatus {
 		return fmt.Errorf("expected status code %d, received: status=%d body=%s", expectedStatus, response.StatusCode(), string(response.GetBody()))

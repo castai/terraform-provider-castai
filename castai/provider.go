@@ -10,27 +10,46 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/castai/terraform-provider-castai/castai/sdk"
+	"github.com/castai/terraform-provider-castai/castai/sdk/ai_optimizer"
+	"github.com/castai/terraform-provider-castai/castai/sdk/cluster_autoscaler"
+	"github.com/castai/terraform-provider-castai/castai/sdk/omni"
+	"github.com/castai/terraform-provider-castai/castai/sdk/organization_management"
+	"github.com/castai/terraform-provider-castai/castai/sdk/patching_engine"
 )
 
 type ProviderConfig struct {
-	api sdk.ClientWithResponsesInterface
+	api                          sdk.ClientWithResponsesInterface
+	clusterAutoscalerClient      cluster_autoscaler.ClientWithResponsesInterface
+	organizationManagementClient organization_management.ClientWithResponsesInterface
+	omniAPI                      *omni.ClientWithResponses
+	aiOptimizerClient            ai_optimizer.ClientWithResponsesInterface
+	patchingEngineClient         patching_engine.ClientWithResponsesInterface
+	organizationID               string
 }
 
 func Provider(version string) *schema.Provider {
 	p := &schema.Provider{
+		TerraformVersion: "1.11",
 		Schema: map[string]*schema.Schema{
 			"api_url": {
 				Type:             schema.TypeString,
-				Required:         true,
+				Optional:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.IsURLWithHTTPS),
 				DefaultFunc:      schema.EnvDefaultFunc("CASTAI_API_URL", "https://api.cast.ai"),
 				Description:      "CAST.AI API url.",
 			},
 			"api_token": {
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
+				Sensitive:   true,
 				DefaultFunc: schema.EnvDefaultFunc("CASTAI_API_TOKEN", nil),
 				Description: "The token used to connect to CAST AI API.",
+			},
+			"organization_id": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("CASTAI_ORGANIZATION_ID", nil),
+				Description: "CAST AI organization ID. Required when the API token has access to multiple organizations.",
 			},
 		},
 
@@ -54,19 +73,37 @@ func Provider(version string) *schema.Provider {
 			"castai_sso_connection":             resourceSSOConnection(),
 			"castai_service_account":            resourceServiceAccount(),
 			"castai_service_account_key":        resourceServiceAccountKey(),
-			"castai_workload_scaling_policy":    resourceWorkloadScalingPolicy(),
 			"castai_organization_group":         resourceOrganizationGroup(),
 			"castai_role_bindings":              resourceRoleBindings(),
+			"castai_hibernation_schedule":       resourceHibernationSchedule(),
+			"castai_security_runtime_rule":      resourceSecurityRuntimeRule(),
+			"castai_allocation_group":           resourceAllocationGroup(),
+			"castai_enterprise_group":           resourceEnterpriseGroup(),
+			"castai_enterprise_role_binding":    resourceEnterpriseRoleBinding(),
+			"castai_cache_group":                resourceCacheGroup(),
+			"castai_cache_configuration":        resourceCacheConfiguration(),
+			"castai_cache_rule":                 resourceCacheRule(),
+
+			"castai_workload_scaling_policy":             resourceWorkloadScalingPolicy(),
+			"castai_workload_scaling_policy_order":       resourceWorkloadScalingPolicyOrder(),
+			"castai_workload_custom_metrics_data_source": resourceWorkloadCustomMetricsDataSource(),
+
+			"castai_ai_optimizer_model_registry": resourceAIModelRegistry(),
+			"castai_ai_optimizer_model_specs":    resourceAIModelSpecs(),
+			"castai_ai_optimizer_hosted_model":   resourceAIHostedModel(),
+			"castai_pod_mutation":                resourcePodMutation(),
 		},
 
 		DataSourcesMap: map[string]*schema.Resource{
-			"castai_eks_settings":         dataSourceEKSSettings(),
-			"castai_gke_user_policies":    dataSourceGKEPolicies(),
-			"castai_organization":         dataSourceOrganization(),
-			"castai_rebalancing_schedule": dataSourceRebalancingSchedule(),
-
-			// TODO: remove in next major release
-			"castai_eks_user_arn": dataSourceEKSClusterUserARN(),
+			"castai_eks_settings":                  dataSourceEKSSettings(),
+			"castai_gke_user_policies":             dataSourceGKEPolicies(),
+			"castai_organization":                  dataSourceOrganization(),
+			"castai_rebalancing_schedule":          dataSourceRebalancingSchedule(),
+			"castai_hibernation_schedule":          dataSourceHibernationSchedule(),
+			"castai_workload_scaling_policies":     dataSourceWorkloadScalingPolicies(),
+			"castai_workload_scaling_policy_order": dataSourceWorkloadScalingPolicyOrder(),
+			"castai_cache_group":                   dataSourceCacheGroup(),
+			"castai_impersonation_service_account": dataSourceImpersonationServiceAccount(),
 		},
 
 		ConfigureContextFunc: providerConfigure(version),
@@ -79,6 +116,11 @@ func providerConfigure(version string) schema.ConfigureContextFunc {
 	return func(ctx context.Context, data *schema.ResourceData) (interface{}, diag.Diagnostics) {
 		apiURL := data.Get("api_url").(string)
 		apiToken := data.Get("api_token").(string)
+		organizationID := data.Get("organization_id").(string)
+
+		if apiToken == "" {
+			return nil, diag.Errorf("api_token must be set either in provider configuration or via CASTAI_API_TOKEN environment variable")
+		}
 
 		agent := fmt.Sprintf("castai-terraform-provider/%v", version)
 		if addUA := os.Getenv("CASTAI_ADDITIONAL_USER_AGENT"); addUA != "" {
@@ -90,6 +132,39 @@ func providerConfigure(version string) schema.ConfigureContextFunc {
 			return nil, diag.FromErr(err)
 		}
 
-		return &ProviderConfig{api: client}, nil
+		clusterAutoscalerClient, err := cluster_autoscaler.CreateClient(apiURL, apiToken, agent)
+		if err != nil {
+			return nil, diag.FromErr(err)
+		}
+
+		organizationManagementClient, err := organization_management.CreateClient(apiURL, apiToken, agent)
+		if err != nil {
+			return nil, diag.FromErr(err)
+		}
+
+		omniClient, err := omni.CreateClient(apiURL, apiToken, agent)
+		if err != nil {
+			return nil, diag.FromErr(err)
+		}
+
+		aiOptimizerClient, err := ai_optimizer.CreateClient(apiURL, apiToken, agent)
+		if err != nil {
+			return nil, diag.FromErr(err)
+		}
+
+		patchingEngineClient, err := patching_engine.CreateClient(apiURL, apiToken, agent)
+		if err != nil {
+			return nil, diag.FromErr(err)
+		}
+
+		return &ProviderConfig{
+			api:                          client,
+			clusterAutoscalerClient:      clusterAutoscalerClient,
+			organizationManagementClient: organizationManagementClient,
+			omniAPI:                      omniClient,
+			aiOptimizerClient:            aiOptimizerClient,
+			patchingEngineClient:         patchingEngineClient,
+			organizationID:               organizationID,
+		}, nil
 	}
 }

@@ -39,7 +39,7 @@ resource "castai_eks_cluster" "this" {
 
 ### Optional
 
-- `assume_role_arn` (String) AWS IAM role ARN that will be assumed by CAST AI user. This role should allow `sts:AssumeRole` action for CAST AI user that can be retrieved using `castai_eks_user_arn` data source
+- `assume_role_arn` (String) AWS IAM role ARN that will be assumed by CAST AI user. This role should allow `sts:AssumeRole` action for CAST AI user.
 - `delete_nodes_on_disconnect` (Boolean) Should CAST AI remove nodes managed by CAST AI on disconnect
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
@@ -48,6 +48,7 @@ resource "castai_eks_cluster" "this" {
 - `cluster_token` (String, Sensitive) computed value to store cluster token
 - `credentials_id` (String) CAST AI internal credentials ID
 - `id` (String) The ID of this resource.
+- `organization_id` (String) CAST AI organization ID
 
 <a id="nestedblock--timeouts"></a>
 ### Nested Schema for `timeouts`

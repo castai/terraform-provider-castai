@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"math"
 	"strconv"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -69,6 +70,10 @@ func toSection(d *schema.ResourceData, sectionName string) map[string]interface{
 	return sections[0].(map[string]interface{})
 }
 
+func toNestedSection(d *schema.ResourceData, parts ...string) map[string]interface{} {
+	return toSection(d, strings.Join(parts, "."))
+}
+
 func readOptionalValue[T any](d map[string]any, key string) *T {
 	val, ok := d[key]
 	if !ok {
@@ -76,6 +81,15 @@ func readOptionalValue[T any](d map[string]any, key string) *T {
 	}
 
 	return lo.ToPtr(val.(T))
+}
+
+func readOptionalValueOrDefault[T any](d map[string]any, key string, defaultValue T) T {
+	val, ok := d[key]
+	if !ok {
+		return defaultValue
+	}
+
+	return val.(T)
 }
 
 func readAndConvertOptionalValue[Storage any, T any](d map[string]any, key string, conversion func(v Storage) T) *T {
@@ -128,7 +142,12 @@ func normalizeJSON(bytes []byte) ([]byte, error) {
 }
 
 func getDefaultOrganizationId(ctx context.Context, meta any) (string, error) {
-	response, err := meta.(*ProviderConfig).api.UsersAPIListOrganizationsWithResponse(ctx)
+	cfg := meta.(*ProviderConfig)
+	if cfg.organizationID != "" {
+		return cfg.organizationID, nil
+	}
+
+	response, err := cfg.api.UsersAPIListOrganizationsWithResponse(ctx)
 	if checkErr := sdk.CheckOKResponse(response, err); checkErr != nil {
 		return "", fmt.Errorf("fetching organizations: %w", checkErr)
 	}
@@ -136,16 +155,18 @@ func getDefaultOrganizationId(ctx context.Context, meta any) (string, error) {
 		return "", fmt.Errorf("no organizations found")
 	}
 
-	// The first organization is the default one
 	id := response.JSON200.Organizations[0].Id
 	if id == nil {
 		return "", fmt.Errorf("organization id is nil")
 	}
+	cfg.organizationID = *id
 	return *id, nil
 }
 
 // checkFloatAttr is a helper function for Terraform acceptance tests to check float attributes with a precision of 3
 // decimal places. The attributes map is a map[string]string, so floats in there may be affected by the rounding errors.
+//
+//nolint:unused
 func checkFloatAttr(resource, path string, val float64) func(state *terraform.State) error {
 	return func(state *terraform.State) error {
 		res, ok := state.RootModule().Resources[resource]

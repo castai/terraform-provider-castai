@@ -1,0 +1,8 @@
+project_id       = "<place-holder>"
+cluster_name     = "<place-holder>"
+cluster_region   = "<place-holder>"
+cluster_zones    = ["<place-holder>", "<place-holder>"]
+castai_public_api_url   = "https://api.prod-master.cast.ai"
+castai_api_private_domain = "prod-master.cast.ai"
+castai_api_token = "<place-holder>"
+cast_api_service_attachment_uri = "<place-holder>"

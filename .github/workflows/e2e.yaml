@@ -22,20 +22,20 @@ jobs:
       E2E_GKE_WORKSPACE: ${{ secrets.GKE_WORKSPACE }}
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v6
       - name: Set up Go
-        uses: actions/setup-go@v4
+        uses: actions/setup-go@v6
         with:
-          go-version: 1.23.6
+          go-version: 1.25.5
 
       - name: Cache Go modules
-        uses: actions/cache@v3
+        uses: actions/cache@v5
         with:
           path: ~/go/pkg/mod
           key: ${{ runner.os }}-build-${{ hashFiles('**/go.sum') }}
           restore-keys: |
             ${{ runner.os }}-build-
-      - uses: hashicorp/setup-terraform@v2
+      - uses: hashicorp/setup-terraform@v4
         with:
           cli_config_credentials_token: ${{ secrets.TF_CLOUD_TOKEN }}
           cli_config_credentials_hostname: app.terraform.io

@@ -48,7 +48,7 @@ Note generated 'CASTAI_CLUSTER_ID' from outputs
 terraform output cluster_id  
 terraform output cluster_token
 
-Obtained values are needed for next step
+Obtained values are needed for next step. Note that cluster_token must be used within few hours after creation or it gets expired. It is recommended to install at least castai-agent to keep cluster_token active.
 
 ### Step 4: Deploy Helm chart of CAST Components
 Coponents: `castai-cluster-controller`,`castai-evictor`, `castai-spot-handler`, `castai-kvisor`, `castai-workload-autoscaler`, `castai-pod-pinner` \
@@ -104,7 +104,7 @@ helm upgrade -i castai-kvisor castai-helm/castai-kvisor -n castai-agent \
 
 ## Steps Overview
 
-1. Configure `tf.vars.example` file with required values. If AKS cluster is already managed by Terraform you could instead directly reference those resources.
+1. Configure `terraform.tfvars.example` file with required values. If AKS cluster is already managed by Terraform you could instead directly reference those resources.
 2. Run `terraform init`
 3. Run `terraform apply` and make a note of `cluster_id`  output values. At this stage you would see that your cluster is in `Connecting` state in CAST AI console
 4. Install CAST AI components using Helm. Use `cluster_id` and `api_key` values to configure Helm releases:

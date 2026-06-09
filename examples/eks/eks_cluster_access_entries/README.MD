@@ -10,8 +10,8 @@ Example configuration should be analysed in the following order:
 3. Create IAM and other CAST AI related resources to connect EKS cluster to CAST AI (In Phase 2)- `castai.tf`
 
 # Usage
-1. Rename `tf.vars.example` to `tf.vars`
-2. Update `tf.vars` file with your cluster name, cluster region and CAST AI API token
+1. Copy `terraform.tfvars.example` to `terraform.tfvars`
+2. Update `terraform.tfvars` file with your cluster name, cluster region and CAST AI API token
 
 | Variable | Description |
 | --- | --- |
@@ -26,11 +26,11 @@ terraform init
 ```
 4. Run Terraform apply:
 ```
-terraform apply -var-file=tf.vars
+terraform apply
 ```
 5. To destroy resources created by this example:
 ```
-terraform destroy -var-file=tf.vars
+terraform destroy
 ```
 
 > **Note**

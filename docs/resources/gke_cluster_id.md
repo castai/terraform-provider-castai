@@ -31,6 +31,7 @@ GKE cluster resource allows connecting an existing GKE cluster to CAST AI.
 
 - `cluster_token` (String, Sensitive) CAST.AI agent cluster token
 - `id` (String) The ID of this resource.
+- `organization_id` (String) CAST AI organization ID
 
 <a id="nestedblock--timeouts"></a>
 ### Nested Schema for `timeouts`

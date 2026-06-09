@@ -8,26 +8,35 @@ jobs:
   terraform_validation:
     strategy:
       matrix:
-        version: [1.0, 1.2, 1.3, 1.4, latest]
+        version: ["1.11", latest]
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4  # Updated to use Node.js 20
+        uses: actions/checkout@v6
 
       - name: Set up Terraform
-        uses: hashicorp/setup-terraform@v3  # Updated to use Node.js 20
+        uses: hashicorp/setup-terraform@v4
         with:
           terraform_version: ${{ matrix.version }}
 
       - name: Print tf version
         run: terraform version
 
+      - name: Setup Go
+        uses: actions/setup-go@v6
+        with:
+          go-version: '1.25.5'
+          cache: true
+
+      - name: Build binary
+        run: go build .
+
       - name: Validate Terraform examples
         id: validate_examples
         run: make validate-terraform-examples
       
-      - name: Ensure EKS module compatible
+      - name: Plan an EKS example
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_TF_ACCEPTANCE_TEST_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_TF_ACCEPTANCE_TEST_SECRET_KEY_ID }}
@@ -36,9 +45,9 @@ jobs:
           TF_VAR_castai_api_token: ${{ secrets.CASTAI_TOKEN }}
           TF_VAR_castai_api_url:  ${{ secrets.CASTAI_URL }}
         id: eks_plan_examples
-        run: cd examples/eks/eks_clusters && terraform plan 1> /dev/null
+        run: make plan-terraform-example EXAMPLE_DIR=examples/eks/eks_clusters
 
-      - name: Ensure GKE module compatible
+      - name: Plan a GKE example
         env:
           GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_TF_ACCEPTANCE_TEST_CREDENTIALS }}
           GOOGLE_PROJECT_ID: ${{ secrets.GOOGLE_TF_ACCEPTANCE_PROJECT_ID }}
@@ -47,18 +56,18 @@ jobs:
           TF_VAR_castai_api_token: ${{ secrets.CASTAI_TOKEN }}
           TF_VAR_castai_api_url:  ${{ secrets.CASTAI_URL }}
         id: gke_plan_examples
-        run: cd examples/gke/gke_castai_iam && terraform plan 1> /dev/null
+        run: make plan-terraform-example EXAMPLE_DIR=examples/gke/gke_castai_iam
 
-      - name: Ensure AKS module compatible
+      - name: Plan an AKS example
         env:
-          ARM_CLIENT_ID: ${{ secrets.AZURE_TF_ACCEPTANCE_TEST_ARM_CLIENT_ID }}
-          ARM_CLIENT_SECRET: ${{ secrets.AZURE_TF_ACCEPTANCE_TEST_ARM_CLIENT_SECRET }}
-          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_TF_ACCEPTANCE_TEST_ARM_SUBSCRIPTION_ID }}
-          ARM_TENANT_ID: ${{ secrets.AZURE_TF_ACCEPTANCE_TEST_ARM_TENANT_ID }}
+          ARM_CLIENT_ID: ${{ secrets.AZURE_TF_ACCEPTANCE_TEST_ARM_CLIENT_ID_V2 }}
+          ARM_CLIENT_SECRET: ${{ secrets.AZURE_TF_ACCEPTANCE_TEST_ARM_CLIENT_SECRET_V2 }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_TF_ACCEPTANCE_TEST_ARM_SUBSCRIPTION_ID_V2 }}
+          ARM_TENANT_ID: ${{ secrets.AZURE_TF_ACCEPTANCE_TEST_ARM_TENANT_ID_V2 }}
           TF_VAR_cluster_name: gh-aks
           TF_VAR_castai_api_token: ${{ secrets.CASTAI_TOKEN }}
           TF_VAR_castai_api_url:  ${{ secrets.CASTAI_URL }}
           TF_VAR_cluster_region: "germanywestcentral"
-          TF_VAR_subscription_id: ${{ secrets.AZURE_TF_ACCEPTANCE_TEST_ARM_SUBSCRIPTION_ID }}
+          TF_VAR_subscription_id: ${{ secrets.AZURE_TF_ACCEPTANCE_TEST_ARM_SUBSCRIPTION_ID_V2 }}
         id: aks_plan_examples
-        run: cd examples/aks/aks_cluster && terraform plan  1> /dev/null
+        run: make plan-terraform-example EXAMPLE_DIR=examples/aks/aks_cluster

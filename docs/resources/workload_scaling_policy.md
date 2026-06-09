@@ -20,6 +20,27 @@ resource "castai_workload_scaling_policy" "services" {
   cluster_id        = castai_gke_cluster.dev.id
   apply_type        = "IMMEDIATE"
   management_option = "MANAGED"
+  assignment_rules {
+    rules {
+      namespace {
+        names = ["default", "kube-system"]
+      }
+    }
+    rules {
+      workload {
+        gvk = ["Deployment", "StatefulSet"]
+        labels_expressions {
+          key      = "region"
+          operator = "NotIn"
+          values   = ["eu-west-1", "eu-west-2"]
+        }
+        labels_expressions {
+          key      = "helm.sh/chart"
+          operator = "Exists"
+        }
+      }
+    }
+  }
   cpu {
     function = "QUANTILE"
     overhead = 0.15
@@ -44,6 +65,11 @@ resource "castai_workload_scaling_policy" "services" {
     }
     management_option = "READ_ONLY"
   }
+  predictive_scaling {
+    cpu {
+      enabled = true
+    }
+  }
   startup {
     period_seconds = 240
   }
@@ -59,6 +85,21 @@ resource "castai_workload_scaling_policy" "services" {
   confidence {
     threshold = 0.9
   }
+  rollout_behavior {
+    type = "NO_DISRUPTION"
+  }
+  anomaly_detection {
+    cpu_pressure {
+      cpu_stall_threshold_percentage = 50
+      min_pressured_pod_percentage   = 30
+    }
+  }
+  jvm {
+    memory {
+      optimization = true
+    }
+  }
+  excluded_containers = ["container-1", "container-2"]
 }
 ```
 
@@ -80,10 +121,21 @@ resource "castai_workload_scaling_policy" "services" {
 
 ### Optional
 
+- `anomaly_detection` (Block List, Max: 1) Defines anomaly detection settings for the scaling policy. (see [below for nested schema](#nestedblock--anomaly_detection))
 - `anti_affinity` (Block List, Max: 1) (see [below for nested schema](#nestedblock--anti_affinity))
+- `assignment_rules` (Block List) Allows defining conditions for automatically assigning workloads to this scaling policy. (see [below for nested schema](#nestedblock--assignment_rules))
 - `confidence` (Block List, Max: 1) Defines the confidence settings for applying recommendations. (see [below for nested schema](#nestedblock--confidence))
 - `downscaling` (Block List, Max: 1) (see [below for nested schema](#nestedblock--downscaling))
+- `excluded_containers` (List of String) Defines containers to be excluded from receiving recommendations. The containers are matched by exact name.
+- `jvm` (Block List, Max: 1) JVM optimization settings. (see [below for nested schema](#nestedblock--jvm))
 - `memory_event` (Block List, Max: 1) (see [below for nested schema](#nestedblock--memory_event))
+- `predictive_scaling` (Block List, Max: 1) (see [below for nested schema](#nestedblock--predictive_scaling))
+- `rollout_behavior` (Block List, Max: 1) Defines the rollout behavior used when applying recommendations. Prerequisites:
+	- Applicable to Deployment resources that support running as multi-replica.
+	- Deployment is running with single replica (replica count = 1).
+	- Deployment's rollout strategy allows for downtime.
+	- Recommendation apply type is "immediate".
+	- Cluster has workload-autoscaler component version v0.35.3 or higher. (see [below for nested schema](#nestedblock--rollout_behavior))
 - `startup` (Block List, Max: 1) (see [below for nested schema](#nestedblock--startup))
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
@@ -99,12 +151,13 @@ Optional:
 - `apply_threshold` (Number, Deprecated) The threshold of when to apply the recommendation. Recommendation will be applied when diff of current requests and new recommendation is greater than set value
 - `apply_threshold_strategy` (Block List, Max: 1) Resource apply threshold strategy settings. The default strategy is `PERCENTAGE` with percentage value set to 0.1. (see [below for nested schema](#nestedblock--cpu--apply_threshold_strategy))
 - `args` (List of String) The arguments for the function - i.e. for `QUANTILE` this should be a [0, 1] float. `MAX` doesn't accept any args
+- `constraints` (Block List, Max: 1) Defines min/max bounds for the recommendation using constraint strategies. (see [below for nested schema](#nestedblock--cpu--constraints))
 - `function` (String) The function used to calculate the resource recommendation. Supported values: `QUANTILE`, `MAX`
 - `limit` (Block List, Max: 1) Resource limit settings (see [below for nested schema](#nestedblock--cpu--limit))
 - `look_back_period_seconds` (Number) The look back period in seconds for the recommendation.
 - `management_option` (String) Disables management for a single resource when set to `READ_ONLY`. The resource will use its original workload template requests and limits. Supported value: `READ_ONLY`. Minimum required workload-autoscaler version: `v0.23.1`.
-- `max` (Number) Max values for the recommendation, applies to every container. For memory - this is in MiB, for CPU - this is in cores.
-- `min` (Number) Min values for the recommendation, applies to every container. For memory - this is in MiB, for CPU - this is in cores.
+- `max` (Number, Deprecated) Max values for the recommendation, applies to every container. For memory - this is in MiB, for CPU - this is in cores.
+- `min` (Number, Deprecated) Min values for the recommendation, applies to every container. For memory - this is in MiB, for CPU - this is in cores.
 - `overhead` (Number) Overhead for the recommendation, e.g. `0.1` will result in 10% higher recommendation
 
 <a id="nestedblock--cpu--apply_threshold_strategy"></a>
@@ -128,6 +181,33 @@ Optional:
 - `percentage` (Number) Percentage of a how much difference should there be between the current pod requests and the new recommendation. It must be defined for the PERCENTAGE strategy.
 
 
+<a id="nestedblock--cpu--constraints"></a>
+### Nested Schema for `cpu.constraints`
+
+Optional:
+
+- `max` (Block List, Max: 1) (see [below for nested schema](#nestedblock--cpu--constraints--max))
+- `min` (Block List, Max: 1) (see [below for nested schema](#nestedblock--cpu--constraints--min))
+
+<a id="nestedblock--cpu--constraints--max"></a>
+### Nested Schema for `cpu.constraints.max`
+
+Optional:
+
+- `constant` (Number) Fixed bound value. For memory - MiB, for CPU - cores.
+- `percentage_of_original` (Number) Bound as a percentage of the original pod-spec request.
+
+
+<a id="nestedblock--cpu--constraints--min"></a>
+### Nested Schema for `cpu.constraints.min`
+
+Optional:
+
+- `constant` (Number) Fixed bound value. For memory - MiB, for CPU - cores.
+- `percentage_of_original` (Number) Bound as a percentage of the original pod-spec request.
+
+
+
 <a id="nestedblock--cpu--limit"></a>
 ### Nested Schema for `cpu.limit`
 
@@ -135,11 +215,15 @@ Required:
 
 - `type` (String) Defines limit strategy type.
 	- NO_LIMIT - removes the resource limit even if it was specified in the workload spec.
+	- KEEP_LIMITS - keep existing resource limits. While limits provide stability predictability, they may restrict workloads that need to temporarily burst beyond their allocation.
 	- MULTIPLIER - used to calculate the resource limit. The final value is determined by multiplying the resource request by the specified factor.
+	- MAINTAIN_RATIO - maintains the original ratio between requests and limits.
 
 Optional:
 
 - `multiplier` (Number) Multiplier used to calculate the resource limit. It must be defined for the MULTIPLIER strategy.
+- `only_if_original_exist` (Boolean) Apply the strategy only when the original resource has limits defined.
+- `only_if_original_lower` (Boolean) Use the original resource limits if they are higher than recommended values.
 
 
 
@@ -151,12 +235,13 @@ Optional:
 - `apply_threshold` (Number, Deprecated) The threshold of when to apply the recommendation. Recommendation will be applied when diff of current requests and new recommendation is greater than set value
 - `apply_threshold_strategy` (Block List, Max: 1) Resource apply threshold strategy settings. The default strategy is `PERCENTAGE` with percentage value set to 0.1. (see [below for nested schema](#nestedblock--memory--apply_threshold_strategy))
 - `args` (List of String) The arguments for the function - i.e. for `QUANTILE` this should be a [0, 1] float. `MAX` doesn't accept any args
+- `constraints` (Block List, Max: 1) Defines min/max bounds for the recommendation using constraint strategies. (see [below for nested schema](#nestedblock--memory--constraints))
 - `function` (String) The function used to calculate the resource recommendation. Supported values: `QUANTILE`, `MAX`
 - `limit` (Block List, Max: 1) Resource limit settings (see [below for nested schema](#nestedblock--memory--limit))
 - `look_back_period_seconds` (Number) The look back period in seconds for the recommendation.
 - `management_option` (String) Disables management for a single resource when set to `READ_ONLY`. The resource will use its original workload template requests and limits. Supported value: `READ_ONLY`. Minimum required workload-autoscaler version: `v0.23.1`.
-- `max` (Number) Max values for the recommendation, applies to every container. For memory - this is in MiB, for CPU - this is in cores.
-- `min` (Number) Min values for the recommendation, applies to every container. For memory - this is in MiB, for CPU - this is in cores.
+- `max` (Number, Deprecated) Max values for the recommendation, applies to every container. For memory - this is in MiB, for CPU - this is in cores.
+- `min` (Number, Deprecated) Min values for the recommendation, applies to every container. For memory - this is in MiB, for CPU - this is in cores.
 - `overhead` (Number) Overhead for the recommendation, e.g. `0.1` will result in 10% higher recommendation
 
 <a id="nestedblock--memory--apply_threshold_strategy"></a>
@@ -180,6 +265,33 @@ Optional:
 - `percentage` (Number) Percentage of a how much difference should there be between the current pod requests and the new recommendation. It must be defined for the PERCENTAGE strategy.
 
 
+<a id="nestedblock--memory--constraints"></a>
+### Nested Schema for `memory.constraints`
+
+Optional:
+
+- `max` (Block List, Max: 1) (see [below for nested schema](#nestedblock--memory--constraints--max))
+- `min` (Block List, Max: 1) (see [below for nested schema](#nestedblock--memory--constraints--min))
+
+<a id="nestedblock--memory--constraints--max"></a>
+### Nested Schema for `memory.constraints.max`
+
+Optional:
+
+- `constant` (Number) Fixed bound value. For memory - MiB, for CPU - cores.
+- `percentage_of_original` (Number) Bound as a percentage of the original pod-spec request.
+
+
+<a id="nestedblock--memory--constraints--min"></a>
+### Nested Schema for `memory.constraints.min`
+
+Optional:
+
+- `constant` (Number) Fixed bound value. For memory - MiB, for CPU - cores.
+- `percentage_of_original` (Number) Bound as a percentage of the original pod-spec request.
+
+
+
 <a id="nestedblock--memory--limit"></a>
 ### Nested Schema for `memory.limit`
 
@@ -187,11 +299,32 @@ Required:
 
 - `type` (String) Defines limit strategy type.
 	- NO_LIMIT - removes the resource limit even if it was specified in the workload spec.
+	- KEEP_LIMITS - keep existing resource limits. While limits provide stability predictability, they may restrict workloads that need to temporarily burst beyond their allocation.
 	- MULTIPLIER - used to calculate the resource limit. The final value is determined by multiplying the resource request by the specified factor.
+	- MAINTAIN_RATIO - maintains the original ratio between requests and limits.
 
 Optional:
 
 - `multiplier` (Number) Multiplier used to calculate the resource limit. It must be defined for the MULTIPLIER strategy.
+- `only_if_original_exist` (Boolean) Apply the strategy only when the original resource has limits defined.
+- `only_if_original_lower` (Boolean) Use the original resource limits if they are higher than recommended values.
+
+
+
+<a id="nestedblock--anomaly_detection"></a>
+### Nested Schema for `anomaly_detection`
+
+Optional:
+
+- `cpu_pressure` (Block List, Max: 1) Configures CPU pressure anomaly detection thresholds. (see [below for nested schema](#nestedblock--anomaly_detection--cpu_pressure))
+
+<a id="nestedblock--anomaly_detection--cpu_pressure"></a>
+### Nested Schema for `anomaly_detection.cpu_pressure`
+
+Required:
+
+- `cpu_stall_threshold_percentage` (Number) Percentage of time (0-100) that a pod must experience CPU pressure to be considered under pressure.
+- `min_pressured_pod_percentage` (Number) Percentage (0-100) of pods that must be experiencing pressure for the detector to trigger.
 
 
 
@@ -202,6 +335,71 @@ Optional:
 
 - `consider_anti_affinity` (Boolean) Defines if anti-affinity should be considered when scaling the workload.
 	If enabled, requiring host ports, or having anti-affinity on hostname will force all recommendations to be deferred.
+
+
+<a id="nestedblock--assignment_rules"></a>
+### Nested Schema for `assignment_rules`
+
+Required:
+
+- `rules` (Block List, Min: 1) (see [below for nested schema](#nestedblock--assignment_rules--rules))
+
+<a id="nestedblock--assignment_rules--rules"></a>
+### Nested Schema for `assignment_rules.rules`
+
+Optional:
+
+- `namespace` (Block List, Max: 1) Allows assigning a scaling policy based on the workload's namespace. (see [below for nested schema](#nestedblock--assignment_rules--rules--namespace))
+- `workload` (Block List, Max: 1) Allows assigning a scaling policy based on the workload's metadata. (see [below for nested schema](#nestedblock--assignment_rules--rules--workload))
+
+<a id="nestedblock--assignment_rules--rules--namespace"></a>
+### Nested Schema for `assignment_rules.rules.namespace`
+
+Optional:
+
+- `labels_expressions` (Block List) Defines matching by label selector requirements. (see [below for nested schema](#nestedblock--assignment_rules--rules--namespace--labels_expressions))
+- `names` (List of String) Defines matching by namespace names.
+
+<a id="nestedblock--assignment_rules--rules--namespace--labels_expressions"></a>
+### Nested Schema for `assignment_rules.rules.namespace.labels_expressions`
+
+Required:
+
+- `operator` (String) The operator to use for matching the label.
+
+Optional:
+
+- `key` (String) The label key to match. Required for all operators except `Regex` and `Contains`. If not specified, it will search through all labels.
+- `values` (List of String) A list of values to match against the label key. It is required for `In`, `NotIn`, `Regex`, and `Contains` operators.
+
+
+
+<a id="nestedblock--assignment_rules--rules--workload"></a>
+### Nested Schema for `assignment_rules.rules.workload`
+
+Optional:
+
+- `gvk` (List of String) Group, version, and kind for Kubernetes resources. Format: kind[.version][.group].
+It can be either:
+ - only kind, e.g. "Deployment"
+ - group and kind: e.g."Deployment.apps"
+ - group, version and kind: e.g."Deployment.v1.apps"
+- `labels_expressions` (Block List) Defines matching by label selector requirements. (see [below for nested schema](#nestedblock--assignment_rules--rules--workload--labels_expressions))
+
+<a id="nestedblock--assignment_rules--rules--workload--labels_expressions"></a>
+### Nested Schema for `assignment_rules.rules.workload.labels_expressions`
+
+Required:
+
+- `operator` (String) The operator to use for matching the label.
+
+Optional:
+
+- `key` (String) The label key to match. Required for all operators except `Regex` and `Contains`. If not specified, it will search through all labels.
+- `values` (List of String) A list of values to match against the label key. It is required for `In`, `NotIn`, `Regex`, and `Contains` operators.
+
+
+
 
 
 <a id="nestedblock--confidence"></a>
@@ -222,6 +420,23 @@ Optional:
 	- DEFERRED - pods are not restarted and recommendation values are applied during natural restarts only (new deployment, etc.)
 
 
+<a id="nestedblock--jvm"></a>
+### Nested Schema for `jvm`
+
+Optional:
+
+- `auto_instrument` (Boolean) When true, JMX exporter will be automatically injected into pods where JVM runtime is detected.
+- `memory` (Block List, Max: 1) JVM memory optimization settings. (see [below for nested schema](#nestedblock--jvm--memory))
+
+<a id="nestedblock--jvm--memory"></a>
+### Nested Schema for `jvm.memory`
+
+Optional:
+
+- `optimization` (Boolean) Defines whether JVM memory optimization is enabled. When enabled, JVM heap size will be adjusted based on JVM metrics, if available.
+
+
+
 <a id="nestedblock--memory_event"></a>
 ### Nested Schema for `memory_event`
 
@@ -230,6 +445,34 @@ Optional:
 - `apply_type` (String) Defines the apply type to be used when applying recommendation for memory related event.
 	- IMMEDIATE - pods are restarted immediately when new recommendation is generated.
 	- DEFERRED - pods are not restarted and recommendation values are applied during natural restarts only (new deployment, etc.)
+
+
+<a id="nestedblock--predictive_scaling"></a>
+### Nested Schema for `predictive_scaling`
+
+Optional:
+
+- `cpu` (Block List, Max: 1) Defines predictive scaling resource configuration. (see [below for nested schema](#nestedblock--predictive_scaling--cpu))
+
+<a id="nestedblock--predictive_scaling--cpu"></a>
+### Nested Schema for `predictive_scaling.cpu`
+
+Required:
+
+- `enabled` (Boolean) Defines if predictive scaling is enabled for resource.
+
+
+
+<a id="nestedblock--rollout_behavior"></a>
+### Nested Schema for `rollout_behavior`
+
+Optional:
+
+- `delay_seconds` (Number) Number of seconds to delay before applying the recommendation rollout. Must be between 0 and 3600.
+- `prefer_one_by_one` (Boolean) Defines if pods should be restarted one by one to avoid service disruption.
+- `type` (String) Defines the rollout type to be used when applying recommendations.
+	- NO_DISRUPTION - pods are restarted without causing service disruption.
+	- UNSPECIFIED - rollout type is not specified.
 
 
 <a id="nestedblock--startup"></a>
@@ -285,6 +528,7 @@ Using the `import` block is a simpler and more convenient way of importing resou
    cpu {
      look_back_period_seconds = 0
    }
+   ```
 
 4. Apply the import plan:
 

@@ -3,6 +3,27 @@ resource "castai_workload_scaling_policy" "services" {
   cluster_id        = castai_gke_cluster.dev.id
   apply_type        = "IMMEDIATE"
   management_option = "MANAGED"
+  assignment_rules {
+    rules {
+      namespace {
+        names = ["default", "kube-system"]
+      }
+    }
+    rules {
+      workload {
+        gvk = ["Deployment", "StatefulSet"]
+        labels_expressions {
+          key      = "region"
+          operator = "NotIn"
+          values   = ["eu-west-1", "eu-west-2"]
+        }
+        labels_expressions {
+          key      = "helm.sh/chart"
+          operator = "Exists"
+        }
+      }
+    }
+  }
   cpu {
     function = "QUANTILE"
     overhead = 0.15
@@ -27,6 +48,11 @@ resource "castai_workload_scaling_policy" "services" {
     }
     management_option = "READ_ONLY"
   }
+  predictive_scaling {
+    cpu {
+      enabled = true
+    }
+  }
   startup {
     period_seconds = 240
   }
@@ -42,4 +68,19 @@ resource "castai_workload_scaling_policy" "services" {
   confidence {
     threshold = 0.9
   }
+  rollout_behavior {
+    type = "NO_DISRUPTION"
+  }
+  anomaly_detection {
+    cpu_pressure {
+      cpu_stall_threshold_percentage = 50
+      min_pressured_pod_percentage   = 30
+    }
+  }
+  jvm {
+    memory {
+      optimization = true
+    }
+  }
+  excluded_containers = ["container-1", "container-2"]
 }

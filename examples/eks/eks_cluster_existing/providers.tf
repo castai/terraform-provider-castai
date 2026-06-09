@@ -4,6 +4,11 @@ provider "aws" {
   profile = var.profile
 }
 
+provider "aws" {
+  alias  = "eu_west_1"
+  region = "eu-west-1"
+}
+
 provider "castai" {
   api_url   = var.castai_api_url
   api_token = var.castai_api_token
@@ -21,10 +26,10 @@ provider "kubernetes" {
 }
 
 provider "helm" {
-  kubernetes {
+  kubernetes = {
     host                   = data.aws_eks_cluster.existing_cluster.endpoint
     cluster_ca_certificate = base64decode(data.aws_eks_cluster.existing_cluster.certificate_authority.0.data)
-    exec {
+    exec = {
       api_version = "client.authentication.k8s.io/v1beta1"
       command     = "aws"
       # This requires the awscli to be installed locally where Terraform is executed.

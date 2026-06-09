@@ -8,7 +8,7 @@ provider "castai" {
 }
 
 provider "helm" {
-  kubernetes {
+  kubernetes = {
     host                   = data.azurerm_kubernetes_cluster.this.kube_config.0.host
     client_certificate     = base64decode(data.azurerm_kubernetes_cluster.this.kube_config.0.client_certificate)
     client_key             = base64decode(data.azurerm_kubernetes_cluster.this.kube_config.0.client_key)
@@ -24,19 +24,23 @@ resource "helm_release" "castai_agent" {
   create_namespace = true
   cleanup_on_fail  = true
 
-  set {
-    name  = "provider"
-    value = "aks"
-  }
-  set_sensitive {
-    name  = "apiKey"
-    value = var.castai_api_token
-  }
+  set = [
+    {
+      name  = "provider"
+      value = "aks"
+    },
+    # Required until https://github.com/castai/helm-charts/issues/135 is fixed.
+    {
+      name  = "createNamespace"
+      value = "false"
+    },
+  ]
+  set_sensitive = [
+    {
+      name  = "apiKey"
+      value = var.castai_api_token
+    },
+  ]
 
-  # Required until https://github.com/castai/helm-charts/issues/135 is fixed.
-  set {
-    name  = "createNamespace"
-    value = "false"
-  }
 }
 

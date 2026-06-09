@@ -6,8 +6,8 @@ variable "cluster_name" {
 
 variable "cluster_version" {
   type        = string
-  description = "EKS cluster name version."
-  default     = "1.28"
+  description = "EKS cluster version."
+  default     = "1.34"
 }
 
 variable "cluster_region" {
@@ -42,5 +42,11 @@ variable "delete_nodes_on_disconnect" {
 variable "tags" {
   type        = map(any)
   description = "Optional tags for new cluster nodes. This parameter applies only to new nodes - tags for old nodes are not reconciled."
+  default     = {}
+}
+
+variable "additional_cluster_admin_arns" {
+  type        = map(string)
+  description = "Map of additional IAM user or role ARNs to be granted admin access to the EKS cluster."
   default     = {}
 }

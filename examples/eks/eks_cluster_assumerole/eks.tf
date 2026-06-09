@@ -1,14 +1,13 @@
 # 2. Create EKS cluster.
 module "eks" {
-  source       = "terraform-aws-modules/eks/aws"
-  version      = "19.4.2"
-  putin_khuylo = true
+  source  = "terraform-aws-modules/eks/aws"
+  version = "~> 21.0"
 
-  cluster_name                   = var.cluster_name
-  cluster_version                = var.cluster_version
-  cluster_endpoint_public_access = true
+  name                   = var.cluster_name
+  kubernetes_version     = var.cluster_version
+  endpoint_public_access = true
 
-  cluster_addons = {
+  addons = {
     coredns = {
       most_recent = true
     }
@@ -16,26 +15,15 @@ module "eks" {
       most_recent = true
     }
     vpc-cni = {
-      most_recent = true
+      most_recent    = true
+      before_compute = true
     }
   }
 
   vpc_id     = module.vpc.vpc_id
   subnet_ids = module.vpc.private_subnets
 
-  manage_aws_auth_configmap = true
-
-  aws_auth_roles = [
-    # Add the CAST AI IAM role which required for CAST AI nodes to join the cluster.
-    {
-      rolearn  = module.castai-eks-role-iam.instance_profile_role_arn
-      username = "system:node:{{EC2PrivateDNSName}}"
-      groups = [
-        "system:bootstrappers",
-        "system:nodes",
-      ]
-    },
-  ]
+  enable_cluster_creator_admin_permissions = true
 
   self_managed_node_groups = {
     node_group_1 = {
@@ -44,6 +32,12 @@ module "eks" {
       max_size      = 5
       min_size      = 2
       desired_size  = 2
+
+      metadata_options = {
+        http_endpoint               = "enabled"
+        http_tokens                 = "required"
+        http_put_response_hop_limit = 2
+      }
     }
   }
 
@@ -53,6 +47,12 @@ module "eks" {
       min_size     = 1
       max_size     = 10
       desired_size = 1
+
+      metadata_options = {
+        http_endpoint               = "enabled"
+        http_tokens                 = "required"
+        http_put_response_hop_limit = 2
+      }
 
       instance_types = ["t3.large"]
       capacity_type  = "SPOT"
@@ -77,4 +77,11 @@ resource "aws_security_group" "additional" {
       "10.0.0.0/8",
     ]
   }
+}
+
+# CAST AI access entry for nodes to join the cluster.
+resource "aws_eks_access_entry" "castai" {
+  cluster_name  = module.eks.cluster_name
+  principal_arn = module.castai-eks-role-iam.instance_profile_role_arn
+  type          = "EC2_LINUX"
 }

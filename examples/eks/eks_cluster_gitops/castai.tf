@@ -19,7 +19,8 @@ resource "castai_eks_user_arn" "castai_user_arn" {
 }
 
 module "castai-eks-role-iam" {
-  source = "castai/eks-role-iam/castai"
+  source  = "castai/eks-role-iam/castai"
+  version = "~> 2.0"
 
   aws_account_id     = data.aws_caller_identity.current.account_id
   aws_cluster_region = var.aws_cluster_region
@@ -38,7 +39,7 @@ locals {
 
 resource "aws_eks_access_entry" "access_entry" {
   count         = local.access_entry ? 1 : 0
-  cluster_name  = var.aws_cluster_name
+  cluster_name  = data.aws_eks_cluster.existing_cluster.name
   principal_arn = module.castai-eks-role-iam.instance_profile_role_arn
   type          = "EC2_LINUX"
 }
@@ -90,6 +91,27 @@ resource "castai_node_template" "default_by_castai" {
 
 }
 
+resource "castai_node_template" "example_capacity_reservation" {
+  cluster_id = castai_eks_cluster.my_castai_cluster.id
+
+  name             = "example_capacity_reservation"
+  is_default       = false
+  is_enabled       = true
+  configuration_id = castai_node_configuration.default.id
+  should_taint     = false
+
+  constraints {
+    on_demand = true
+
+    aws {
+      capacity_reservations {
+        id   = "cr-12345678901234567"
+        type = "ON_DEMAND_CAPACITY_RESERVATION"
+      }
+    }
+  }
+}
+
 resource "castai_node_template" "example_spot_template" {
   cluster_id = castai_eks_cluster.my_castai_cluster.id
 
@@ -123,7 +145,7 @@ resource "castai_node_template" "example_spot_template" {
     min_memory                                  = 4096
     max_memory                                  = 24576
     architectures                               = ["amd64"]
-    azs                                         = ["eu-central-1a", "eu-central-1b"]
+    azs                                         = var.azs
     customer_specific                           = "disabled"
 
     instance_families {

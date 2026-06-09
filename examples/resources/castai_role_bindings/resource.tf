@@ -8,7 +8,7 @@ resource "castai_role_bindings" "owner_test" {
   description     = "Owner access for whole organization."
 
   role_id = "3e1050c7-6593-4298-94bb-154637911d78" # Role "Owner"
-  scope {
+  scopes {
     kind        = "organization"
     resource_id = data.castai_organization.test.id
   }
@@ -38,9 +38,13 @@ resource "castai_role_bindings" "viewer_test" {
   description     = "Viewer access for on of the clusters."
 
   role_id = "6fc95bd7-6049-4735-80b0-ce5ccde71cb1" # Role "Viewer"
-  scope {
+  scopes {
     kind        = "cluster"
     resource_id = "7063d31c-897e-48ef-a322-bdfda6fdbcfb"
+  }
+  scopes {
+    kind        = "cluster"
+    resource_id = "9872e54f-1122-33ef-b456-cdef98765432"
   }
   subjects {
     subject {

@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/cenkalti/backoff/v4"
-	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -22,6 +21,7 @@ const (
 	FieldClusterCredentialsId    = "credentials_id"
 	FieldClusterID               = "cluster_id"
 	FieldClusterToken            = "cluster_token"
+	FieldClusterOrganizationId   = "organization_id"
 )
 
 func resourceCastaiClusterDelete(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -208,27 +208,13 @@ func resourceCastaiClusterUpdate(
 
 func createClusterToken(ctx context.Context, client sdk.ClientWithResponsesInterface, clusterID string) (string, error) {
 	resp, err := client.ExternalClusterAPICreateClusterTokenWithResponse(ctx, clusterID)
-	if err != nil {
-		return "", fmt.Errorf("creating cluster token: %w", err)
+	if checkErr := sdk.CheckOKResponse(resp, err); checkErr != nil {
+		return "", fmt.Errorf("creating cluster token: %w", checkErr)
+	}
+
+	if resp == nil || resp.JSON200 == nil || resp.JSON200.Token == nil {
+		return "", fmt.Errorf("response was empty when trying to create cluster token")
 	}
 
 	return *resp.JSON200.Token, nil
-}
-
-func clusterTokenDiff(_ context.Context, diff *schema.ResourceDiff, _ interface{}) error {
-	if diff.Id() == "" {
-		return nil
-	}
-	if diff.Get(FieldClusterToken).(string) != "" {
-		return nil
-	}
-
-	// During migration to the latest version, cluster resource might have empty token as it was introduced later on.
-	// If that's the case - we are forcing re-creation by providing random new value and setting "ForceNew" flag.
-	log.Print("[INFO] token not set, forcing re-create")
-	if err := diff.SetNew(FieldClusterToken, uuid.NewString()); err != nil {
-		return fmt.Errorf("setting cluster token: %w", err)
-	}
-
-	return diff.ForceNew(FieldClusterToken)
 }

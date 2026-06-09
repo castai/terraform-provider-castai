@@ -1,0 +1,28 @@
+# Required: Existing EKS cluster configuration.
+cluster_name   = ""
+cluster_region = ""
+profile        = "default" # default aws cli profile is used, override if needed.
+
+# Required: CAST AI API token from console.cast.ai.
+castai_api_token = ""
+# Required when the API token has access to multiple organizations.
+# castai_organization_id = ""
+
+# Optional: Enable AI Optimizer.
+enable_ai_optimizer = true
+
+# Optional: Install NVIDIA device plugin for GPU support.
+install_nvidia_device_plugin = true
+
+# Optional: Deploy predefined HuggingFace model.
+# When enabled, provide hf_token for accessing Hugging Face Hub models.
+deploy_predefined_model = false
+# hf_token = ""
+
+# Optional: Deploy custom model from S3.
+# When enabled, you must provide custom_model_registry_bucket. IAM credentials are created automatically.
+deploy_custom_model = false
+# custom_model_registry_bucket = "my-company-model-bucket"
+# custom_model_registry_region = "us-east-1"
+# custom_model_name     = "my-custom-model"
+# custom_base_model_spec_id  = "f659a272-3e8d-45dc-a44c-65dc663794d9" # Llama 3.1 8B Instruct vLLM configuration

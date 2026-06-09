@@ -14,16 +14,17 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	sdkterraform "github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/stretchr/testify/require"
 
 	"github.com/castai/terraform-provider-castai/castai/sdk"
 	mock_sdk "github.com/castai/terraform-provider-castai/castai/sdk/mock"
 )
 
-func TestAccResourceSSOConnection(t *testing.T) {
+func TestAccCloudAgnostic_ResourceSSOConnection(t *testing.T) {
 	rName := fmt.Sprintf("%v-sso-connection-%v", ResourcePrefix, acctest.RandString(8))
 	resourceName := "castai_sso_connection.test"
 
@@ -54,7 +55,7 @@ func TestSSOConnection_ReadContext(t *testing.T) {
 	t.Run("read azure ad connector", func(t *testing.T) {
 		t.Parallel()
 
-		readBody := `{"id":"fce35ba2-5c06-4078-8391-1ac8f7ba798b","name":"test_sso","createdAt":"2023-11-02T10:49:14.376757Z","updatedAt":"2023-11-02T10:49:14.450828Z","emailDomain":"test_email","additionalEmailDomains":[],"aad":{"adDomain":"test_connector","clientId":"test_client","clientSecret":"test_secret"}}`
+		readBody := `{"connection":{"id":"fce35ba2-5c06-4078-8391-1ac8f7ba798b","name":"test_sso","createdAt":"2023-11-02T10:49:14.376757Z","updatedAt":"2023-11-02T10:49:14.450828Z","emailDomain":"test_email","additionalEmailDomains":[],"aad":{"adDomain":"test_connector","clientId":"test_client","clientSecret":"test_secret"}}}`
 
 		mockClient := mock_sdk.NewMockClientInterface(gomock.NewController(t))
 
@@ -66,7 +67,7 @@ func TestSSOConnection_ReadContext(t *testing.T) {
 
 		resource := resourceSSOConnection()
 		data := resource.Data(
-			terraform.NewInstanceStateShimmedFromValue(cty.ObjectVal(map[string]cty.Value{
+			sdkterraform.NewInstanceStateShimmedFromValue(cty.ObjectVal(map[string]cty.Value{
 				"id": cty.StringVal(connectionID),
 			}), 0))
 
@@ -87,7 +88,7 @@ func TestSSOConnection_ReadContext(t *testing.T) {
 	t.Run("read azure ad connector with additional email domains", func(t *testing.T) {
 		t.Parallel()
 
-		readBody := `{"id":"fce35ba2-5c06-4078-8391-1ac8f7ba798b","name":"test_sso","createdAt":"2023-11-02T10:49:14.376757Z","updatedAt":"2023-11-02T10:49:14.450828Z","emailDomain":"test_email","additionalEmailDomains":["domain.com", "other.com"],"aad":{"adDomain":"test_connector","clientId":"test_client","clientSecret":"test_secret"}}`
+		readBody := `{"connection":{"id":"fce35ba2-5c06-4078-8391-1ac8f7ba798b","name":"test_sso","createdAt":"2023-11-02T10:49:14.376757Z","updatedAt":"2023-11-02T10:49:14.450828Z","emailDomain":"test_email","additionalEmailDomains":["domain.com", "other.com"],"aad":{"adDomain":"test_connector","clientId":"test_client","clientSecret":"test_secret"}}}`
 
 		mockClient := mock_sdk.NewMockClientInterface(gomock.NewController(t))
 
@@ -99,7 +100,7 @@ func TestSSOConnection_ReadContext(t *testing.T) {
 
 		resource := resourceSSOConnection()
 		data := resource.Data(
-			terraform.NewInstanceStateShimmedFromValue(cty.ObjectVal(map[string]cty.Value{
+			sdkterraform.NewInstanceStateShimmedFromValue(cty.ObjectVal(map[string]cty.Value{
 				"id": cty.StringVal(connectionID),
 			}), 0))
 
@@ -125,7 +126,7 @@ func TestSSOConnection_CreateADDConnector(t *testing.T) {
 
 		mockClient.EXPECT().
 			SSOAPICreateSSOConnection(gomock.Any(), gomock.Any()).
-			DoAndReturn(func(_ context.Context, body sdk.SSOAPICreateSSOConnectionJSONBody) (*http.Response, error) {
+			DoAndReturn(func(_ context.Context, body sdk.SSOAPICreateSSOConnectionJSONRequestBody) (*http.Response, error) {
 				got, err := json.Marshal(body)
 				r.NoError(err)
 
@@ -154,7 +155,7 @@ func TestSSOConnection_CreateADDConnector(t *testing.T) {
 			})
 
 		connectionID := "b6bfc074-a267-400f-b8f1-db0850c369b1"
-		readBody := io.NopCloser(bytes.NewReader([]byte(`{
+		readBody := io.NopCloser(bytes.NewReader([]byte(`{ "connection" :{
   "id": "b6bfc074-a267-400f-b8f1-db0850c369b1",
   "name": "test_sso",
   "createdAt": "2023-11-02T10:49:14.376757Z",
@@ -165,14 +166,14 @@ func TestSSOConnection_CreateADDConnector(t *testing.T) {
     "clientId": "test_client",
     "clientSecret": "test_secret"
   }
-}`)))
+}}`)))
 
 		mockClient.EXPECT().
 			SSOAPIGetSSOConnection(gomock.Any(), connectionID).
 			Return(&http.Response{StatusCode: 200, Body: readBody, Header: map[string][]string{"Content-Type": {"json"}}}, nil)
 
 		resource := resourceSSOConnection()
-		data := resource.Data(terraform.NewInstanceStateShimmedFromValue(cty.ObjectVal(map[string]cty.Value{
+		data := resource.Data(sdkterraform.NewInstanceStateShimmedFromValue(cty.ObjectVal(map[string]cty.Value{
 			FieldSSOConnectionName:        cty.StringVal("test_sso"),
 			FieldSSOConnectionEmailDomain: cty.StringVal("test_email"),
 			FieldSSOConnectionAAD: cty.ListVal([]cty.Value{
@@ -203,7 +204,7 @@ func TestSSOConnection_CreateADDConnector(t *testing.T) {
 
 		mockClient.EXPECT().
 			SSOAPICreateSSOConnection(gomock.Any(), gomock.Any()).
-			DoAndReturn(func(_ context.Context, body sdk.SSOAPICreateSSOConnectionJSONBody) (*http.Response, error) {
+			DoAndReturn(func(_ context.Context, body sdk.SSOAPICreateSSOConnectionJSONRequestBody) (*http.Response, error) {
 				got, err := json.Marshal(body)
 				r.NoError(err)
 
@@ -233,7 +234,7 @@ func TestSSOConnection_CreateADDConnector(t *testing.T) {
 			})
 
 		connectionID := "b6bfc074-a267-400f-b8f1-db0850c369b1"
-		readBody := io.NopCloser(bytes.NewReader([]byte(`{
+		readBody := io.NopCloser(bytes.NewReader([]byte(`{"connection":{
   "id": "b6bfc074-a267-400f-b8f1-db0850c369b1",
   "name": "test_sso",
   "createdAt": "2023-11-02T10:49:14.376757Z",
@@ -245,14 +246,14 @@ func TestSSOConnection_CreateADDConnector(t *testing.T) {
     "clientId": "test_client",
     "clientSecret": "test_secret"
   }
-}`)))
+}}`)))
 
 		mockClient.EXPECT().
 			SSOAPIGetSSOConnection(gomock.Any(), connectionID).
 			Return(&http.Response{StatusCode: 200, Body: readBody, Header: map[string][]string{"Content-Type": {"json"}}}, nil)
 
 		resource := resourceSSOConnection()
-		data := resource.Data(terraform.NewInstanceStateShimmedFromValue(cty.ObjectVal(map[string]cty.Value{
+		data := resource.Data(sdkterraform.NewInstanceStateShimmedFromValue(cty.ObjectVal(map[string]cty.Value{
 			FieldSSOConnectionName:                   cty.StringVal("test_sso"),
 			FieldSSOConnectionEmailDomain:            cty.StringVal("test_email"),
 			FieldSSOConnectionAdditionalEmailDomains: cty.ListVal([]cty.Value{cty.StringVal("test_domain1.com"), cty.StringVal("test_domain2.com")}),
@@ -285,7 +286,7 @@ func TestSSOConnection_CreateOktaConnector(t *testing.T) {
 
 	mockClient.EXPECT().
 		SSOAPICreateSSOConnection(gomock.Any(), gomock.Any()).
-		DoAndReturn(func(_ context.Context, body sdk.SSOAPICreateSSOConnectionJSONBody) (*http.Response, error) {
+		DoAndReturn(func(_ context.Context, body sdk.SSOAPICreateSSOConnectionJSONRequestBody) (*http.Response, error) {
 			got, err := json.Marshal(body)
 			r.NoError(err)
 
@@ -313,7 +314,7 @@ func TestSSOConnection_CreateOktaConnector(t *testing.T) {
 		})
 
 	connectionID := "b6bfc074-a267-400f-b8f1-db0850c369b1"
-	readBody := io.NopCloser(bytes.NewReader([]byte(`{
+	readBody := io.NopCloser(bytes.NewReader([]byte(`{"connection":{
   "id": "b6bfc074-a267-400f-b8f1-db0850c369b1",
   "name": "test_sso",
   "createdAt": "2023-11-02T10:49:14.376757Z",
@@ -324,14 +325,14 @@ func TestSSOConnection_CreateOktaConnector(t *testing.T) {
     "clientId": "test_client",
     "clientSecret": "test_secret"
   }
-}`)))
+}}`)))
 
 	mockClient.EXPECT().
 		SSOAPIGetSSOConnection(gomock.Any(), connectionID).
 		Return(&http.Response{StatusCode: 200, Body: readBody, Header: map[string][]string{"Content-Type": {"json"}}}, nil)
 
 	resource := resourceSSOConnection()
-	data := resource.Data(terraform.NewInstanceStateShimmedFromValue(cty.ObjectVal(map[string]cty.Value{
+	data := resource.Data(sdkterraform.NewInstanceStateShimmedFromValue(cty.ObjectVal(map[string]cty.Value{
 		FieldSSOConnectionName:        cty.StringVal("test_sso"),
 		FieldSSOConnectionEmailDomain: cty.StringVal("test_email"),
 		FieldSSOConnectionOkta: cty.ListVal([]cty.Value{
@@ -384,7 +385,7 @@ func TestSSOConnection_UpdateADDConnector(t *testing.T) {
 		}))
 
 		mockClient.EXPECT().SSOAPIUpdateSSOConnection(gomock.Any(), gomock.Any(), gomock.Any()).
-			DoAndReturn(func(_ context.Context, _ string, body sdk.SSOAPIUpdateSSOConnectionJSONBody) (*http.Response, error) {
+			DoAndReturn(func(_ context.Context, _ string, body sdk.SSOAPIUpdateSSOConnectionJSONRequestBody) (*http.Response, error) {
 				got, err := json.Marshal(body)
 				r.NoError(err)
 
@@ -420,7 +421,7 @@ func TestSSOConnection_UpdateADDConnector(t *testing.T) {
 				}, nil
 			}).Times(1)
 
-		readBody := io.NopCloser(bytes.NewReader([]byte(`{
+		readBody := io.NopCloser(bytes.NewReader([]byte(`{"connection":{
   "id": "b6bfc074-a267-400f-b8f1-db0850c369b1",
   "name": "updated_name",
   "createdAt": "2023-11-02T10:49:14.376757Z",
@@ -431,7 +432,7 @@ func TestSSOConnection_UpdateADDConnector(t *testing.T) {
     "clientId": "updated_client_id",
     "clientSecret": "updated_client_secret"
   }
-}`)))
+}}`)))
 		mockClient.EXPECT().
 			SSOAPIGetSSOConnection(gomock.Any(), connectionID).
 			Return(&http.Response{StatusCode: 200, Body: readBody, Header: map[string][]string{"Content-Type": {"json"}}}, nil)
@@ -472,7 +473,7 @@ func TestSSOConnection_UpdateADDConnector(t *testing.T) {
 		r.NoError(data.Set(FieldSSOConnectionAdditionalEmailDomains, []interface{}{"updated_domain_one", "updated_domain_two"}))
 
 		mockClient.EXPECT().SSOAPIUpdateSSOConnection(gomock.Any(), gomock.Any(), gomock.Any()).
-			DoAndReturn(func(_ context.Context, _ string, body sdk.SSOAPIUpdateSSOConnectionJSONBody) (*http.Response, error) {
+			DoAndReturn(func(_ context.Context, _ string, body sdk.SSOAPIUpdateSSOConnectionJSONRequestBody) (*http.Response, error) {
 				got, err := json.Marshal(body)
 				r.NoError(err)
 
@@ -510,7 +511,7 @@ func TestSSOConnection_UpdateADDConnector(t *testing.T) {
 				}, nil
 			}).Times(1)
 
-		readBody := io.NopCloser(bytes.NewReader([]byte(`{
+		readBody := io.NopCloser(bytes.NewReader([]byte(`{"connection":{
   "id": "b6bfc074-a267-400f-b8f1-db0850c369b1",
   "name": "updated_name",
   "createdAt": "2023-11-02T10:49:14.376757Z",
@@ -522,7 +523,7 @@ func TestSSOConnection_UpdateADDConnector(t *testing.T) {
     "clientId": "updated_client_id",
     "clientSecret": "updated_client_secret"
   }
-}`)))
+}}`)))
 		mockClient.EXPECT().
 			SSOAPIGetSSOConnection(gomock.Any(), connectionID).
 			Return(&http.Response{StatusCode: 200, Body: readBody, Header: map[string][]string{"Content-Type": {"json"}}}, nil)
@@ -564,7 +565,7 @@ func TestSSOConnection_UpdateOktaConnector(t *testing.T) {
 	}))
 
 	mockClient.EXPECT().SSOAPIUpdateSSOConnection(gomock.Any(), gomock.Any(), gomock.Any()).
-		DoAndReturn(func(_ context.Context, _ string, body sdk.SSOAPIUpdateSSOConnectionJSONBody) (*http.Response, error) {
+		DoAndReturn(func(_ context.Context, _ string, body sdk.SSOAPIUpdateSSOConnectionJSONRequestBody) (*http.Response, error) {
 			got, err := json.Marshal(body)
 			r.NoError(err)
 
@@ -600,7 +601,7 @@ func TestSSOConnection_UpdateOktaConnector(t *testing.T) {
 			}, nil
 		}).Times(1)
 
-	readBody := io.NopCloser(bytes.NewReader([]byte(`{
+	readBody := io.NopCloser(bytes.NewReader([]byte(`{"connection":{
   "id": "b6bfc074-a267-400f-b8f1-db0850c369b1",
   "name": "updated_name",
   "createdAt": "2023-11-02T10:49:14.376757Z",
@@ -611,7 +612,7 @@ func TestSSOConnection_UpdateOktaConnector(t *testing.T) {
     "clientId": "updated_client_id",
     "clientSecret": "updated_client_secret"
   }
-}`)))
+}}`)))
 	mockClient.EXPECT().
 		SSOAPIGetSSOConnection(gomock.Any(), connectionID).
 		Return(&http.Response{StatusCode: 200, Body: readBody, Header: map[string][]string{"Content-Type": {"json"}}}, nil)
@@ -637,7 +638,7 @@ func TestSSOConnection_DeleteContext(t *testing.T) {
 
 	resource := resourceSSOConnection()
 	data := resource.Data(
-		terraform.NewInstanceStateShimmedFromValue(
+		sdkterraform.NewInstanceStateShimmedFromValue(
 			cty.ObjectVal(map[string]cty.Value{
 				"id": cty.StringVal(connectionID),
 			}), 0),

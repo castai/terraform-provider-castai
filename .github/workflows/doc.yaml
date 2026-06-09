@@ -9,10 +9,10 @@ jobs:
     name: Check if SDK is up to date
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/setup-go@v4
+      - uses: actions/setup-go@v6
         with:
-          go-version: 1.23.6
-      - uses: actions/checkout@v4  # Updated to use Node.js 20
+          go-version: 1.25.5
+      - uses: actions/checkout@v6
       - name: Check SDK
         run: | 
           make generate-sdk
@@ -25,10 +25,10 @@ jobs:
     name: Check if documentation is up to date
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/setup-go@v4
+      - uses: actions/setup-go@v6
         with:
-          go-version: 1.23.6
-      - uses: actions/checkout@v4  # Updated to use Node.js 20
+          go-version: 1.25.5
+      - uses: actions/checkout@v6
       - name: Check Documentation
         run: | 
           make generate-docs

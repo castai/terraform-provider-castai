@@ -8,14 +8,15 @@ import (
 	"net/http"
 	"testing"
 
+	"github.com/golang/mock/gomock"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/samber/lo"
+	"github.com/stretchr/testify/require"
+
 	"github.com/castai/terraform-provider-castai/castai/reservations"
 	"github.com/castai/terraform-provider-castai/castai/sdk"
 	mock_sdk "github.com/castai/terraform-provider-castai/castai/sdk/mock"
-	"github.com/golang/mock/gomock"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/samber/lo"
-	"github.com/stretchr/testify/require"
 )
 
 func TestReservations_Azure_BasicReservationsCSV(t *testing.T) {

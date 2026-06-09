@@ -1,6 +1,9 @@
 .idea/
 .vscode/
 
+# Claude Code context file
+CLAUDE.md
+
 # built binary
 terraform-provider-castai
 
@@ -8,6 +11,7 @@ terraform-provider-castai
 examples/**/.terraform/
 examples/**/terraform.d/
 examples/**/crash.log
+examples/**/.terraformrc
 examples/**/*.tfstate
 examples/**/*.tfstate.lock.info
 examples/**/*.tfstate.backup
@@ -15,6 +19,7 @@ examples/**/.terraform.lock.hcl
 examples/**/*.tfvars
 examples/**/.kube/*
 examples/**/**/tf.vars
+examples/**/tfplan
 # terraform examples/localdev is meant for local development
 examples/localdev/*
 !examples/localdev/main.tf.sample
@@ -23,3 +28,6 @@ e2e/**/local.auto.tfvars
 .env
 terraform.tfstate
 .DS_Store
+.tofu.rc
+# dist dir created by goreleaser
+dist

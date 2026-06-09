@@ -1,11 +1,12 @@
 package reservations
 
 import (
+	"testing"
+	"time"
+
 	"github.com/castai/terraform-provider-castai/castai/sdk"
 	"github.com/samber/lo"
 	"github.com/stretchr/testify/require"
-	"testing"
-	"time"
 )
 
 func TestMapCsvRecordsToReservationResources(t *testing.T) {

@@ -14,7 +14,7 @@ provider "castai" {
 }
 
 provider "helm" {
-  kubernetes {
+  kubernetes = {
     host                   = data.azurerm_kubernetes_cluster.example.kube_config.0.host
     client_certificate     = base64decode(data.azurerm_kubernetes_cluster.example.kube_config.0.client_certificate)
     client_key             = base64decode(data.azurerm_kubernetes_cluster.example.kube_config.0.client_key)

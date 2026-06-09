@@ -8,14 +8,14 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
-func TestAccResourceNodeConfiguration_eks(t *testing.T) {
+func TestAccEKS_ResourceNodeConfiguration(t *testing.T) {
 	rName := fmt.Sprintf("%v-node-config-%v", ResourcePrefix, acctest.RandString(8))
 	resourceName := "castai_node_configuration.test"
-	clusterName := "core-tf-acc"
+	clusterName := "core-tf-acc-21-08-2025"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
@@ -46,7 +46,7 @@ func TestAccResourceNodeConfiguration_eks(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "eks.0.volume_throughput", "131"),
 					resource.TestCheckResourceAttr(resourceName, "eks.0.imds_v1", "true"),
 					resource.TestCheckResourceAttr(resourceName, "eks.0.imds_hop_limit", "3"),
-					resource.TestCheckResourceAttr(resourceName, "eks.0.volume_kms_key_arn", "arn:aws:kms:eu-central-1:012345:key/1d989ee1-59cd-4238-8018-79bae29d1109"),
+					resource.TestCheckResourceAttr(resourceName, "eks.0.volume_kms_key_arn", "arn:aws:kms:us-east-1:123456789012:key/1234abcd-12ab-34cd-56ef-1234567890ab"),
 					resource.TestCheckResourceAttr(resourceName, "eks.0.target_group.#", "1"),
 					resource.TestCheckResourceAttr(resourceName, "eks.0.max_pods_per_node_formula", "NUM_IP_PER_PREFIX-NUM_MAX_NET_INTERFACES"),
 					resource.TestCheckResourceAttr(resourceName, "eks.0.ips_per_prefix", "4"),
@@ -55,7 +55,8 @@ func TestAccResourceNodeConfiguration_eks(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "aks.#", "0"),
 					resource.TestCheckResourceAttr(resourceName, "kops.#", "0"),
 					resource.TestCheckResourceAttr(resourceName, "gke.#", "0"),
-          resource.TestCheckResourceAttr(resourceName, "eks.0.node_group_arn", "arn:aws:iam::000000000000:role/aws_node_group"),
+					resource.TestCheckResourceAttr(resourceName, "eks.0.node_group_arn", "arn:aws:iam::000000000000:role/aws_node_group"),
+					resource.TestCheckResourceAttr(resourceName, "eks.0.threads_per_cpu", "1"),
 				),
 			},
 			{
@@ -137,7 +138,7 @@ resource "castai_node_configuration" "test" {
 	  volume_type 		 = "gp3"
     volume_iops		     = 3100
 	  volume_throughput 	 = 131
-    volume_kms_key_arn   = "arn:aws:kms:eu-central-1:012345:key/1d989ee1-59cd-4238-8018-79bae29d1109"
+    volume_kms_key_arn   = "arn:aws:kms:us-east-1:123456789012:key/1234abcd-12ab-34cd-56ef-1234567890ab"
 	  imds_v1				 = true
 	  imds_hop_limit       = 3
     max_pods_per_node_formula = "NUM_IP_PER_PREFIX-NUM_MAX_NET_INTERFACES"
@@ -146,6 +147,7 @@ resource "castai_node_configuration" "test" {
 	  target_group {
 	    arn = "arn:aws:test"
     }
+		threads_per_cpu = 1
   }
 }
 
@@ -223,7 +225,7 @@ resource "aws_vpc" "test" {
 
 data "aws_subnets" "core" {
 	tags = {
-		Name = "*core-tf-acc-cluster/SubnetPublic*"
+		Name = "*core-tf-acc-21-08-2025-private*" # private subnet is the one with NAT gateway for internet access.
 	}
 }
 
@@ -261,6 +263,13 @@ resource "aws_iam_role" "test" {
       },
     ]
   })
+
+  # Ignoring because AWS changes the ARN to an internal ID whenever a role is recreated and it causes flakiness
+  # due to occasional drift
+  # https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_elements_principal.html#principal-roles
+  lifecycle {
+    ignore_changes = [assume_role_policy]
+  }
 }
 
 resource "aws_iam_role_policy_attachment" "test" {
@@ -310,7 +319,7 @@ func testAccCheckNodeConfigurationDestroy(s *terraform.State) error {
 		if response.StatusCode() == http.StatusNotFound {
 			return nil
 		}
-		if *response.JSON200.Default {
+		if response.JSON200.Default {
 			// Default node config can't be deleted.
 			return nil
 		}

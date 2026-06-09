@@ -8,7 +8,8 @@ resource "castai_gke_cluster" "this" {
 }
 
 module "castai-gke-iam" {
-  source = "castai/gke-iam/castai"
+  source  = "castai/gke-iam/castai"
+  version = "~> 0.5"
 
   project_id       = var.project_id
   gke_cluster_name = var.cluster_name
@@ -39,17 +40,18 @@ resource "castai_node_template" "default_by_castai" {
   constraints {
     on_demand = true
   }
+
+  custom_instances_enabled = false
 }
 
 resource "castai_node_template" "example_spot_template" {
   cluster_id = castai_gke_cluster.this.id
 
-  name                     = "example_spot_template"
-  is_default               = false
-  is_enabled               = true
-  configuration_id         = castai_node_configuration.default.id
-  should_taint             = true
-  custom_instances_enabled = false # custom_instances_enabled should be set to same value(true or false) at Node templates & unschedulable_pods policy for backward compatability
+  name             = "example_spot_template"
+  is_default       = false
+  is_enabled       = true
+  configuration_id = castai_node_configuration.default.id
+  should_taint     = true
 
   custom_labels = {
     type = "spot"

@@ -9,8 +9,9 @@ import (
 	"strings"
 	"time"
 
+	"slices"
+
 	"github.com/samber/lo"
-	"golang.org/x/exp/slices"
 
 	"github.com/castai/terraform-provider-castai/castai/reservations"
 	"github.com/castai/terraform-provider-castai/castai/sdk"
@@ -76,6 +77,7 @@ type (
 		AllowedUsage    *float64                           `mapstructure:"allowed_usage,omitempty"`
 		Assignments     []*commitmentAssignmentResource    `mapstructure:"assignments,omitempty"`
 		ScalingStrategy *string                            `mapstructure:"scaling_strategy,omitempty"`
+		AutoAssignment  *bool                              `mapstructure:"auto_assignment,omitempty"`
 	}
 	commitmentConfigMatcherResource struct {
 		Name   string  `mapstructure:"name"`
@@ -511,6 +513,7 @@ func mapCommitmentImportWithConfigToUpdateRequest(
 		Prioritization:  c.Commitment.Prioritization,
 		Status:          c.Commitment.Status,
 		ScalingStrategy: c.Commitment.ScalingStrategy,
+		AutoAssignment:  c.Commitment.AutoAssignment,
 	}
 	if c.Config != nil {
 		if c.Config.AllowedUsage != nil {
@@ -524,6 +527,9 @@ func mapCommitmentImportWithConfigToUpdateRequest(
 		}
 		if c.Config.ScalingStrategy != nil {
 			req.ScalingStrategy = (*sdk.CastaiInventoryV1beta1CommitmentScalingStrategy)(c.Config.ScalingStrategy)
+		}
+		if c.Config.AutoAssignment != nil {
+			req.AutoAssignment = c.Config.AutoAssignment
 		}
 	}
 	return req
@@ -588,20 +594,20 @@ func sortCommitmentResources[R commitmentResource](toSort, targetOrder []R) {
 		orderMap[value.getIDInCloud()] = index
 	}
 
-	slices.SortStableFunc(toSort, func(a, b R) bool {
+	slices.SortStableFunc(toSort, func(a, b R) int {
 		indexI, foundI := orderMap[a.getIDInCloud()]
 		indexJ, foundJ := orderMap[b.getIDInCloud()]
 
 		if !foundI && !foundJ {
-			return a.getIDInCloud() < b.getIDInCloud()
+			return strings.Compare(a.getIDInCloud(), b.getIDInCloud())
 		}
 		if !foundI {
-			return true
+			return -1
 		}
 		if !foundJ {
-			return false
+			return 1
 		}
-		return indexI < indexJ
+		return indexI - indexJ
 	})
 }
 

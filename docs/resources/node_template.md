@@ -33,25 +33,25 @@ resource "castai_node_template" "default_by_castai" {
   }
 
   constraints {
-    on_demand                                   = true
-    spot                                        = false
-    use_spot_fallbacks                          = true
-    fallback_restore_rate_seconds               = 300
-    enable_spot_diversity                       = true
-    spot_diversity_price_increase_limit_percent = 20
-    spot_interruption_predictions_enabled       = true
-    spot_interruption_predictions_type          = "aws-rebalance-recommendations"
-    compute_optimized_state                     = "disabled"
-    storage_optimized_state                     = "disabled"
-    is_gpu_only                                 = false
-    min_cpu                                     = 2
-    max_cpu                                     = 8
-    min_memory                                  = 4096
-    max_memory                                  = 16384
-    architectures                               = ["amd64"]
-    azs                                         = ["us-east-2a", "us-east-2b"]
-    burstable_instances                         = "disabled"
-    customer_specific                           = "disabled"
+    on_demand                                     = true
+    spot                                          = false
+    use_spot_fallbacks                            = true
+    fallback_restore_rate_seconds                 = 300
+    spot_reliability_enabled                      = true
+    spot_reliability_price_increase_limit_percent = 20
+    spot_interruption_predictions_enabled         = true
+    spot_interruption_predictions_type            = "aws-rebalance-recommendations"
+    compute_optimized_state                       = "disabled"
+    storage_optimized_state                       = "disabled"
+    is_gpu_only                                   = false
+    min_cpu                                       = 2
+    max_cpu                                       = 8
+    min_memory                                    = 4096
+    max_memory                                    = 16384
+    architectures                                 = ["amd64"]
+    azs                                           = ["us-east-2a", "us-east-2b"]
+    burstable_instances                           = "disabled"
+    customer_specific                             = "disabled"
 
     instance_families {
       include = ["c5"]
@@ -76,6 +76,7 @@ resource "castai_node_template" "default_by_castai" {
 
 ### Optional
 
+- `clm_enabled` (Boolean) Marks whether Container Live Migration (CLM) should be enabled for nodes created from this template. Supported on EKS, GKE, and AKS clusters. CLM-enabled nodes participate in live workload migration during rebalancing, scale-down, and node lifecycle events.
 - `cluster_id` (String) CAST AI cluster id.
 - `configuration_id` (String) CAST AI node configuration id to be used for node template.
 - `constraints` (Block List, Max: 1) (see [below for nested schema](#nestedblock--constraints))
@@ -83,8 +84,11 @@ resource "castai_node_template" "default_by_castai" {
 - `custom_instances_with_extended_memory_enabled` (Boolean) Marks whether custom instances with extended memory should be used when deciding which parts of inventory are available. Custom instances are only supported in GCP.
 - `custom_labels` (Map of String) Custom labels to be added to nodes created from this template.
 - `custom_taints` (Block List) Custom taints to be added to the nodes created from this template. `shouldTaint` has to be `true` in order to create/update the node template with custom taints. If `shouldTaint` is `true`, but no custom taints are provided, the nodes will be tainted with the default node template taint. (see [below for nested schema](#nestedblock--custom_taints))
+- `edge_location_ids` (List of String) List of edge location IDs to associate with this node template. Must be valid UUIDs referencing castai_edge_location resources.
+- `gpu` (Block List, Max: 1) GPU configuration. (see [below for nested schema](#nestedblock--gpu))
 - `is_default` (Boolean) Flag whether the node template is default.
 - `is_enabled` (Boolean) Flag whether the node template is enabled and considered for autoscaling.
+- `price_adjustment_configuration` (Block List, Max: 1) Configuration for adjusting instance type prices during autoscaling. Adjustments only affect placement decisions, not cost reporting. (see [below for nested schema](#nestedblock--price_adjustment_configuration))
 - `rebalancing_config_min_nodes` (Number) Minimum nodes that will be kept when rebalancing nodes using this node template.
 - `should_taint` (Boolean) Marks whether the templated nodes will have a taint.
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
@@ -100,7 +104,9 @@ Optional:
 
 - `architecture_priority` (List of String) Priority ordering of architectures, specifying no priority will pick cheapest. Allowed values: amd64, arm64.
 - `architectures` (List of String) List of acceptable instance CPU architectures, the default is amd64. Allowed values: amd64, arm64.
+- `aws` (Block List, Max: 1) AWS-specific constraints for the node template. (see [below for nested schema](#nestedblock--constraints--aws))
 - `azs` (List of String) The list of AZ names to consider for the node template, if empty or not set all AZs are considered.
+- `bare_metal` (String) Bare metal constraint, will only pick bare metal nodes if set to true. Will only pick non-bare metal nodes if false. Defaults to unspecified. Allowed values: true, false, unspecified.
 - `burstable_instances` (String) Will include burstable instances when enabled otherwise they will be excluded. Supported values: `enabled`, `disabled` or ``.
 - `compute_optimized` (Boolean) Compute optimized instance constraint (deprecated).
 - `compute_optimized_state` (String) Will only include compute optimized nodes when enabled and exclude compute optimized nodes when disabled. Empty value won't have effect on instances filter. Supported values: `enabled`, `disabled` or empty string.
@@ -129,9 +135,29 @@ Optional:
 - `spot_diversity_price_increase_limit_percent` (Number) Allowed node configuration price increase when diversifying instance types. E.g. if the value is 10%, then the overall price of diversified instance types can be 10% higher than the price of the optimal configuration.
 - `spot_interruption_predictions_enabled` (Boolean) Enable/disable spot interruption predictions.
 - `spot_interruption_predictions_type` (String) Spot interruption predictions type. Can be either "aws-rebalance-recommendations" or "interruption-predictions".
+- `spot_reliability_enabled` (Boolean) Enable/disable spot reliability. When enabled, autoscaler will create instances with highest reliability score within price increase threshold.
+- `spot_reliability_price_increase_limit_percent` (Number) Allowed node price increase when using spot reliability on ordering the instance types . E.g. if the value is 10%, then the overall price of instance types can be 10% higher than the price of the optimal configuration.
 - `storage_optimized` (Boolean) Storage optimized instance constraint (deprecated).
 - `storage_optimized_state` (String) Storage optimized instance constraint - will only pick storage optimized nodes if enabled and won't pick if disabled. Empty value will have no effect. Supported values: `enabled`, `disabled` or empty string.
 - `use_spot_fallbacks` (Boolean) Spot instance fallback constraint - when true, on-demand instances will be created, when spots are unavailable.
+
+<a id="nestedblock--constraints--aws"></a>
+### Nested Schema for `constraints.aws`
+
+Optional:
+
+- `capacity_reservations` (Block List) Capacity reservations that this template can use for provisioning. (see [below for nested schema](#nestedblock--constraints--aws--capacity_reservations))
+
+<a id="nestedblock--constraints--aws--capacity_reservations"></a>
+### Nested Schema for `constraints.aws.capacity_reservations`
+
+Optional:
+
+- `capacity_resource_group_arn` (String) Capacity resource group ARN for UltraServer capacity blocks.
+- `id` (String) AWS capacity reservation ID.
+- `type` (String) Type of capacity reservation. Allowed values: ON_DEMAND_CAPACITY_RESERVATION, CAPACITY_BLOCK.
+
+
 
 <a id="nestedblock--constraints--custom_priority"></a>
 ### Nested Schema for `constraints.custom_priority`
@@ -173,6 +199,7 @@ Required:
 Optional:
 
 - `exclude_names` (List of String) Names of the GPUs to exclude.
+- `fractional_gpus` (String) Will include fractional GPU instances when enabled otherwise they will be excluded. Supported values: `enabled`, `disabled` or ``.
 - `include_names` (List of String) Instance families to include when filtering (excludes all other families).
 - `manufacturers` (List of String) Manufacturers of the gpus to select - NVIDIA, AMD.
 - `max_count` (Number) Max GPU count for the instance type to have.
@@ -184,8 +211,8 @@ Optional:
 
 Optional:
 
-- `exclude` (List of String) Instance families to include when filtering (excludes all other families).
-- `include` (List of String) Instance families to exclude when filtering (includes all other families).
+- `exclude` (List of String) Instance families to exclude when filtering (includes all other families).
+- `include` (List of String) Instance families to include when filtering (excludes all other families).
 
 
 <a id="nestedblock--constraints--resource_limits"></a>
@@ -209,6 +236,35 @@ Optional:
 
 - `effect` (String) Effect of a taint to be added to nodes created from this template, the default is NoSchedule. Allowed values: NoSchedule, NoExecute.
 - `value` (String) Value of a taint to be added to nodes created from this template.
+
+
+<a id="nestedblock--gpu"></a>
+### Nested Schema for `gpu`
+
+Optional:
+
+- `default_shared_clients_per_gpu` (Number) Defines default number of shared clients per GPU.
+- `enable_time_sharing` (Boolean, Deprecated) Enable/disable GPU time-sharing. Deprecated: use sharing_strategy = "time-slicing" instead.
+- `sharing_configuration` (Block List) Defines GPU sharing configurations for GPU devices. (see [below for nested schema](#nestedblock--gpu--sharing_configuration))
+- `sharing_strategy` (String) GPU sharing strategy. Supported values: `time-slicing`, `mps`.
+- `user_managed_gpu_drivers` (Boolean) Enable/disable user-managed GPU drivers (for GKE clusters only).
+
+<a id="nestedblock--gpu--sharing_configuration"></a>
+### Nested Schema for `gpu.sharing_configuration`
+
+Required:
+
+- `gpu_name` (String) GPU name.
+- `shared_clients_per_gpu` (Number) Defines number of shared clients for specific GPU device.
+
+
+
+<a id="nestedblock--price_adjustment_configuration"></a>
+### Nested Schema for `price_adjustment_configuration`
+
+Optional:
+
+- `instance_type_adjustments` (Map of String) Map of instance type names to price adjustment multipliers (as strings). Example: {"r7a.xlarge": "1.0", "r7i.xlarge": "1.20"}
 
 
 <a id="nestedblock--timeouts"></a>

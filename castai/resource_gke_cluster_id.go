@@ -28,7 +28,6 @@ func resourceGKEClusterId() *schema.Resource {
 		ReadContext:   resourceCastaiGKEClusterIdRead,
 		UpdateContext: resourceCastaiGKEClusterIdUpdate,
 		DeleteContext: resourceCastaiGKEClusterIdDelete,
-		CustomizeDiff: clusterTokenDiff,
 		Description:   "GKE cluster resource allows connecting an existing GKE cluster to CAST AI.",
 
 		Timeouts: &schema.ResourceTimeout{
@@ -75,6 +74,11 @@ func resourceGKEClusterId() *schema.Resource {
 				Optional:    true,
 				Computed:    true,
 				Description: "Service account email in cast project",
+			},
+			FieldClusterOrganizationId: {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "CAST AI organization ID",
 			},
 		},
 	}
@@ -158,6 +162,9 @@ func resourceCastaiGKEClusterIdRead(ctx context.Context, data *schema.ResourceDa
 	if resp == nil {
 		data.SetId("")
 		return nil
+	}
+	if err := data.Set(FieldClusterOrganizationId, toString(resp.JSON200.OrganizationId)); err != nil {
+		return diag.FromErr(fmt.Errorf("setting organization id: %w", err))
 	}
 	if GKE := resp.JSON200.Gke; GKE != nil {
 		if err := data.Set(FieldGKEClusterProjectId, toString(GKE.ProjectId)); err != nil {

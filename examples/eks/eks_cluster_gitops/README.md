@@ -104,7 +104,7 @@ Note generated 'CASTAI_CLUSTER_ID' from outputs
 terraform output cluster_id  
 terraform output cluster_token
 
-Obtained values are needed for next step
+Obtained values are needed for next step. Note that cluster_token must be used within few hours after creation or it gets expired. It is recommended to install at least castai-agent to keep cluster_token active.
 
 ### Step 6: Deploy Helm chart of CAST Components
 Coponents: `castai-cluster-controller`,`castai-evictor`, `castai-spot-handler`, `castai-kvisor`, `castai-workload-autoscaler`, `castai-pod-pinner` \
@@ -161,7 +161,7 @@ helm upgrade -i castai-kvisor castai-helm/castai-kvisor -n castai-agent \
 ## Steps Overview
 
 1. If EKS auth mode is not API/API_CONFIGMAP - Update [aws-auth](https://docs.aws.amazon.com/eks/latest/userguide/add-user-role.html) configmap with instance profile used by CAST AI. This instance profile is used by CAST AI managed nodes to communicate with EKS control plane.  Example of entry can be found [here](https://github.com/castai/terraform-provider-castai/blob/157babd57b0977f499eb162e9bee27bee51d292a/examples/eks/eks_cluster_assumerole/eks.tf#L28-L38).
-2. Configure `tf.vars.example` file with required values. If EKS cluster is already managed by Terraform you could instead directly reference those resources.
+2. Configure `terraform.tfvars.example` file with required values. If EKS cluster is already managed by Terraform you could instead directly reference those resources.
 3. Run `terraform init`
 4. Run `terraform apply` and make a note of `cluster_id`  output values. At this stage you would see that your cluster is in `Connecting` state in CAST AI console
 5. Install CAST AI components using Helm. Use `cluster_id` and `api_key` values to configure Helm releases:

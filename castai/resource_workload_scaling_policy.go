@@ -2,6 +2,7 @@ package castai
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"regexp"
@@ -9,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cenkalti/backoff/v4"
 	"github.com/samber/lo"
 
 	"github.com/google/uuid"
@@ -17,7 +19,13 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
+	"github.com/hashicorp/go-cty/cty"
+
 	"github.com/castai/terraform-provider-castai/castai/sdk"
+)
+
+const (
+	createTimeout = 120 * time.Second
 )
 
 const (
@@ -29,13 +37,35 @@ const (
 	minNumeratorValue               = 0.0
 	maxExponentValue                = 1.
 	minExponentValue                = 0.
+	defaultApplyType                = "IMMEDIATE"
+
+	// CPU stall defaults
+	defaultCPUStallMinPressuredPodPct = 50.0
+	defaultCPUStallThresholdPct       = 10.0
+
+	// Default constraint min values
+	defaultCPUConstraintMin    = 0.01
+	defaultMemoryConstraintMin = 10
 )
 
 const (
 	FieldLimitStrategy                             = "limit"
 	FieldLimitStrategyType                         = "type"
 	FieldLimitStrategyMultiplier                   = "multiplier"
+	FieldLimitStrategyOnlyIfOriginalExist          = "only_if_original_exist"
+	FieldLimitStrategyOnlyIfOriginalLower          = "only_if_original_lower"
 	FieldConfidence                                = "confidence"
+	FieldExcludedContainers                        = "excluded_containers"
+	FieldRolloutBehavior                           = "rollout_behavior"
+	FieldRolloutBehaviorType                       = "type"
+	FieldRolloutBehaviorNoDisruptionType           = "NO_DISRUPTION"
+	FieldRolloutBehaviorUnspecifiedType            = "UNSPECIFIED"
+	FieldRolloutBehaviorPreferOneByOneType         = "prefer_one_by_one"
+	FieldRolloutBehaviorDelaySeconds               = "delay_seconds"
+	FieldJVM                                       = "jvm"
+	FieldPredictiveScaling                         = "predictive_scaling"
+	FieldMemoryEvent                               = "memory_event"
+	FieldApplyType                                 = "apply_type"
 	FieldConfidenceThreshold                       = "threshold"
 	DeprecatedFieldApplyThreshold                  = "apply_threshold"
 	FieldApplyThresholdStrategy                    = "apply_threshold_strategy"
@@ -47,6 +77,21 @@ const (
 	FieldApplyThresholdStrategyPercentageType      = "PERCENTAGE"
 	FieldApplyThresholdStrategyDefaultAdaptiveType = "DEFAULT_ADAPTIVE"
 	FieldApplyThresholdStrategyCustomAdaptiveType  = "CUSTOM_ADAPTIVE"
+	FieldAssignmentRules                           = "assignment_rules"
+	FieldAnomalyDetection                          = "anomaly_detection"
+	FieldAnomalyDetectionCpuPressure               = "cpu_pressure"
+	FieldCpuStallThresholdPercentage               = "cpu_stall_threshold_percentage"
+	FieldMinPressuredPodPercentage                 = "min_pressured_pod_percentage"
+	FieldConstraints                               = "constraints"
+)
+
+const (
+	K8sLabelInOperator           = "In"
+	K8sLabelNotInOperator        = "NotIn"
+	K8sLabelExistsOperator       = "Exists"
+	K8sLabelDoesNotExistOperator = "DoesNotExist"
+	K8sLabelContainsOperator     = "Contains"
+	K8sLabelRegexOperator        = "Regex"
 )
 
 var (
@@ -72,13 +117,69 @@ func resourceWorkloadScalingPolicy() *schema.Resource {
 				Description:      "CAST AI cluster id",
 				ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
 			},
+			FieldAssignmentRules: {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Description: "Allows defining conditions for automatically assigning workloads to this scaling policy.",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"rules": {
+							Type:     schema.TypeList,
+							Required: true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"namespace": {
+										Type:        schema.TypeList,
+										Optional:    true,
+										MaxItems:    1,
+										Description: "Allows assigning a scaling policy based on the workload's namespace.",
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"names": {
+													Type:        schema.TypeList,
+													Optional:    true,
+													Description: "Defines matching by namespace names.",
+													Elem:        &schema.Schema{Type: schema.TypeString},
+												},
+												"labels_expressions": k8sLabelExpressionsSchema(),
+											},
+										},
+									},
+									"workload": {
+										Type:        schema.TypeList,
+										Optional:    true,
+										MaxItems:    1,
+										Description: "Allows assigning a scaling policy based on the workload's metadata.",
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"gvk": {
+													Type:     schema.TypeList,
+													Optional: true,
+													Description: `Group, version, and kind for Kubernetes resources. Format: kind[.version][.group].
+It can be either:
+ - only kind, e.g. "Deployment"
+ - group and kind: e.g."Deployment.apps"
+ - group, version and kind: e.g."Deployment.v1.apps"`,
+
+													Elem: &schema.Schema{Type: schema.TypeString},
+												},
+												"labels_expressions": k8sLabelExpressionsSchema(),
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
 			"name": {
 				Type:             schema.TypeString,
 				Required:         true,
 				Description:      "Scaling policy name",
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringMatch(k8sNameRegex, "name must adhere to the format guidelines of Kubernetes labels/annotations")),
 			},
-			"apply_type": {
+			FieldApplyType: {
 				Type:     schema.TypeString,
 				Required: true,
 				Description: `Recommendation apply type.
@@ -105,6 +206,12 @@ func resourceWorkloadScalingPolicy() *schema.Resource {
 				Required: true,
 				MaxItems: 1,
 				Elem:     workloadScalingPolicyResourceSchema("memory", "MAX", 0.1, 10),
+			},
+			FieldExcludedContainers: {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Description: "Defines containers to be excluded from receiving recommendations. The containers are matched by exact name.",
+				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
 			"startup": {
 				Type:     schema.TypeList,
@@ -134,7 +241,7 @@ func resourceWorkloadScalingPolicy() *schema.Resource {
 						FieldConfidenceThreshold: {
 							Type:             schema.TypeFloat,
 							Optional:         true,
-							Default: 		  0.9,
+							Default:          0.9,
 							Description:      "Defines the confidence threshold for applying recommendations. The smaller number indicates that we require fewer metrics data points to apply recommendations - changing this value can cause applying less precise recommendations. Do not change the default unless you want to optimize with fewer data points (e.g., short-lived workloads).",
 							ValidateDiagFunc: validation.ToDiagFunc(validation.FloatBetween(0, 1)),
 						},
@@ -147,7 +254,7 @@ func resourceWorkloadScalingPolicy() *schema.Resource {
 				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"apply_type": {
+						FieldApplyType: {
 							Type:     schema.TypeString,
 							Optional: true,
 							Description: `Defines the apply type to be used when downscaling.
@@ -158,13 +265,16 @@ func resourceWorkloadScalingPolicy() *schema.Resource {
 					},
 				},
 			},
-			"memory_event": {
+			FieldMemoryEvent: {
 				Type:     schema.TypeList,
 				Optional: true,
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					return suppressMemoryEventApplyTypeDefaultValueDiff(old, new, d)
+				},
 				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"apply_type": {
+						FieldApplyType: {
 							Type:     schema.TypeString,
 							Optional: true,
 							Description: `Defines the apply type to be used when applying recommendation for memory related event.
@@ -190,12 +300,172 @@ func resourceWorkloadScalingPolicy() *schema.Resource {
 					},
 				},
 			},
+			FieldPredictiveScaling: {
+				Type:     schema.TypeList,
+				Optional: true,
+				MaxItems: 1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						FieldCPU: getPredictiveScalingResourceSchema(),
+					},
+				},
+			},
+			FieldRolloutBehavior: {
+				Type:     schema.TypeList,
+				Optional: true,
+				MaxItems: 1,
+				Description: `Defines the rollout behavior used when applying recommendations. Prerequisites:
+	- Applicable to Deployment resources that support running as multi-replica.
+	- Deployment is running with single replica (replica count = 1).
+	- Deployment's rollout strategy allows for downtime.
+	- Recommendation apply type is "immediate".
+	- Cluster has workload-autoscaler component version v0.35.3 or higher.`,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						FieldRolloutBehaviorType: {
+							Type:     schema.TypeString,
+							Optional: true,
+							Default:  FieldRolloutBehaviorUnspecifiedType,
+							Description: `Defines the rollout type to be used when applying recommendations.
+	- NO_DISRUPTION - pods are restarted without causing service disruption.
+	- UNSPECIFIED - rollout type is not specified.`,
+							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{FieldRolloutBehaviorNoDisruptionType, FieldRolloutBehaviorUnspecifiedType}, false)),
+						},
+						FieldRolloutBehaviorPreferOneByOneType: {
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Description: `Defines if pods should be restarted one by one to avoid service disruption.`,
+						},
+						FieldRolloutBehaviorDelaySeconds: {
+							Type:             schema.TypeInt,
+							Optional:         true,
+							Description:      "Number of seconds to delay before applying the recommendation rollout. Must be between 0 and 3600.",
+							ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(0, 3600)),
+						},
+					},
+				},
+			},
+			FieldJVM: {
+				Type:        schema.TypeList,
+				Optional:    true,
+				MaxItems:    1,
+				Description: "JVM optimization settings.",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"auto_instrument": {
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Description: "When true, JMX exporter will be automatically injected into pods where JVM runtime is detected.",
+						},
+						"memory": {
+							Type:        schema.TypeList,
+							Optional:    true,
+							MaxItems:    1,
+							Description: "JVM memory optimization settings.",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"optimization": {
+										Type:        schema.TypeBool,
+										Optional:    true,
+										Description: "Defines whether JVM memory optimization is enabled. When enabled, JVM heap size will be adjusted based on JVM metrics, if available.",
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			FieldAnomalyDetection: {
+				Type:        schema.TypeList,
+				Optional:    true,
+				MaxItems:    1,
+				Description: "Defines anomaly detection settings for the scaling policy.",
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					return suppressAnomalyDetectionDefaultValueDiff(old, new, d)
+				},
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						FieldAnomalyDetectionCpuPressure: {
+							Type:        schema.TypeList,
+							Optional:    true,
+							MaxItems:    1,
+							Description: "Configures CPU pressure anomaly detection thresholds.",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									FieldCpuStallThresholdPercentage: {
+										Type:             schema.TypeFloat,
+										Required:         true,
+										Description:      "Percentage of time (0-100) that a pod must experience CPU pressure to be considered under pressure.",
+										ValidateDiagFunc: validation.ToDiagFunc(validation.FloatBetween(0, 100)),
+									},
+									FieldMinPressuredPodPercentage: {
+										Type:             schema.TypeFloat,
+										Required:         true,
+										Description:      "Percentage (0-100) of pods that must be experiencing pressure for the detector to trigger.",
+										ValidateDiagFunc: validation.ToDiagFunc(validation.FloatBetween(0, 100)),
+									},
+								},
+							},
+						},
+					},
+				},
+			},
 		},
 		Timeouts: &schema.ResourceTimeout{
-			Create: schema.DefaultTimeout(15 * time.Second),
+			Create: schema.DefaultTimeout(createTimeout),
 			Read:   schema.DefaultTimeout(15 * time.Second),
 			Update: schema.DefaultTimeout(15 * time.Second),
 			Delete: schema.DefaultTimeout(15 * time.Second),
+		},
+	}
+}
+
+func getPredictiveScalingResourceSchema() *schema.Schema {
+	return &schema.Schema{
+		Type:        schema.TypeList,
+		Optional:    true,
+		MaxItems:    1,
+		Description: "Defines predictive scaling resource configuration.",
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				FieldEnabled: {
+					Type:        schema.TypeBool,
+					Required:    true,
+					Description: "Defines if predictive scaling is enabled for resource.",
+				},
+			},
+		},
+	}
+}
+
+func k8sLabelExpressionsSchema() *schema.Schema {
+	return &schema.Schema{
+		Type:        schema.TypeList,
+		Optional:    true,
+		Description: "Defines matching by label selector requirements.",
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"key": {
+					Type:        schema.TypeString,
+					Optional:    true,
+					Description: "The label key to match. Required for all operators except `Regex` and `Contains`. If not specified, it will search through all labels.",
+				},
+				"operator": {
+					Type:        schema.TypeString,
+					Required:    true,
+					Description: "The operator to use for matching the label.",
+					ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{
+						K8sLabelInOperator, K8sLabelNotInOperator, K8sLabelExistsOperator, K8sLabelDoesNotExistOperator,
+						K8sLabelRegexOperator, K8sLabelContainsOperator,
+					}, false)),
+				},
+				"values": {
+					Type:        schema.TypeList,
+					Optional:    true,
+					Description: "A list of values to match against the label key. It is required for `In`, `NotIn`, `Regex`, and `Contains` operators.",
+					Elem:        &schema.Schema{Type: schema.TypeString},
+				},
+			},
 		},
 	}
 }
@@ -251,7 +521,14 @@ func workloadScalingPolicyResourceSchema(resource, function string, overhead, mi
 				Type:             schema.TypeInt,
 				Optional:         true,
 				Description:      "The look back period in seconds for the recommendation.",
-				ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(24*60*60, 7*24*60*60)),
+				ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(3*60*60, 7*24*60*60)),
+			},
+			FieldConstraints: {
+				Type:        schema.TypeList,
+				Optional:    true,
+				MaxItems:    1,
+				Description: "Defines min/max bounds for the recommendation using constraint strategies.",
+				Elem:        workloadScalingPolicyResourceConstraintsSchema(),
 			},
 			"min": {
 				Type:             schema.TypeFloat,
@@ -259,11 +536,19 @@ func workloadScalingPolicyResourceSchema(resource, function string, overhead, mi
 				Optional:         true,
 				Description:      "Min values for the recommendation, applies to every container. For memory - this is in MiB, for CPU - this is in cores.",
 				ValidateDiagFunc: validation.ToDiagFunc(validation.FloatAtLeast(minRecommended)),
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					return suppressMinMaxDiffWhenConstraintsPresent(resource, k, old, new, d)
+				},
+				Deprecated: "Use constraints { min { constant = X } } instead",
 			},
 			"max": {
 				Type:        schema.TypeFloat,
 				Optional:    true,
 				Description: "Max values for the recommendation, applies to every container. For memory - this is in MiB, for CPU - this is in cores.",
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					return suppressMinMaxDiffWhenConstraintsPresent(resource, k, old, new, d)
+				},
+				Deprecated: "Use constraints { max { constant = X } } instead",
 			},
 			FieldLimitStrategy: {
 				Type:        schema.TypeList,
@@ -292,14 +577,70 @@ func workloadScalingPolicyResourceLimitSchema() *schema.Resource {
 				Required: true,
 				Description: fmt.Sprintf(`Defines limit strategy type.
 	- %s - removes the resource limit even if it was specified in the workload spec.
-	- %s - used to calculate the resource limit. The final value is determined by multiplying the resource request by the specified factor.`, sdk.NOLIMIT, sdk.MULTIPLIER),
-				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{string(sdk.MULTIPLIER), string(sdk.NOLIMIT)}, false)),
+	- %s - keep existing resource limits. While limits provide stability predictability, they may restrict workloads that need to temporarily burst beyond their allocation.
+	- %s - used to calculate the resource limit. The final value is determined by multiplying the resource request by the specified factor.
+	- %s - maintains the original ratio between requests and limits.`, sdk.WorkloadoptimizationV1ResourceLimitStrategyTypeNOLIMIT, sdk.WorkloadoptimizationV1ResourceLimitStrategyTypeKEEPLIMITS, sdk.WorkloadoptimizationV1ResourceLimitStrategyTypeMULTIPLIER, sdk.WorkloadoptimizationV1ResourceLimitStrategyTypeMAINTAINRATIO),
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{string(sdk.WorkloadoptimizationV1ResourceLimitStrategyTypeMULTIPLIER), string(sdk.WorkloadoptimizationV1ResourceLimitStrategyTypeKEEPLIMITS), string(sdk.WorkloadoptimizationV1ResourceLimitStrategyTypeNOLIMIT)}, false)),
 			},
 			FieldLimitStrategyMultiplier: {
 				Type:             schema.TypeFloat,
 				Optional:         true,
 				Description:      "Multiplier used to calculate the resource limit. It must be defined for the MULTIPLIER strategy.",
 				ValidateDiagFunc: validation.ToDiagFunc(validation.FloatAtLeast(minResourceMultiplierValue)),
+			},
+			FieldLimitStrategyOnlyIfOriginalExist: {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Apply the strategy only when the original resource has limits defined.",
+			},
+			FieldLimitStrategyOnlyIfOriginalLower: {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Use the original resource limits if they are higher than recommended values.",
+			},
+		},
+	}
+}
+
+func workloadScalingPolicyResourceConstraintsSchema() *schema.Resource {
+	return &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			"min": {
+				Type:     schema.TypeList,
+				Optional: true,
+				MaxItems: 1,
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					return suppressConstraintMinCount(k, old, new, d)
+				},
+				Elem: workloadScalingPolicyResourceConstraintStrategySchema(),
+			},
+			"max": {
+				Type:     schema.TypeList,
+				Optional: true,
+				MaxItems: 1,
+				Elem:     workloadScalingPolicyResourceConstraintStrategySchema(),
+			},
+		},
+	}
+}
+
+func workloadScalingPolicyResourceConstraintStrategySchema() *schema.Resource {
+	return &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			"constant": {
+				Type:             schema.TypeFloat,
+				Optional:         true,
+				Description:      "Fixed bound value. For memory - MiB, for CPU - cores.",
+				ValidateDiagFunc: validation.ToDiagFunc(validation.FloatAtLeast(0)),
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					return suppressDefaultMinValue(k, old, new, d)
+				},
+			},
+			"percentage_of_original": {
+				Type:             schema.TypeFloat,
+				Optional:         true,
+				Description:      "Bound as a percentage of the original pod-spec request.",
+				ValidateDiagFunc: validation.ToDiagFunc(validation.FloatAtLeast(0)),
 			},
 		},
 	}
@@ -382,7 +723,7 @@ func resourceWorkloadScalingPolicyCreate(ctx context.Context, d *schema.Resource
 	clusterID := d.Get(FieldClusterID).(string)
 	req := sdk.WorkloadOptimizationAPICreateWorkloadScalingPolicyJSONRequestBody{
 		Name:      d.Get("name").(string),
-		ApplyType: sdk.WorkloadoptimizationV1ApplyType(d.Get("apply_type").(string)),
+		ApplyType: sdk.WorkloadoptimizationV1ApplyType(d.Get(FieldApplyType).(string)),
 		RecommendationPolicies: sdk.WorkloadoptimizationV1RecommendationPolicies{
 			ManagementOption: sdk.WorkloadoptimizationV1ManagementOption(d.Get("management_option").(string)),
 		},
@@ -403,7 +744,7 @@ func resourceWorkloadScalingPolicyCreate(ctx context.Context, d *schema.Resource
 		}
 		req.RecommendationPolicies.Memory = memory
 	}
-	
+
 	req.RecommendationPolicies.Confidence = toConfidence(toSection(d, FieldConfidence))
 
 	req.RecommendationPolicies.Startup = toStartup(toSection(d, "startup"))
@@ -414,82 +755,165 @@ func resourceWorkloadScalingPolicyCreate(ctx context.Context, d *schema.Resource
 
 	req.RecommendationPolicies.AntiAffinity = toAntiAffinity(toSection(d, "anti_affinity"))
 
-	create, err := client.WorkloadOptimizationAPICreateWorkloadScalingPolicyWithResponse(ctx, clusterID, req)
+	req.RecommendationPolicies.PredictiveScaling = toPredictiveScaling(toSection(d, FieldPredictiveScaling))
+
+	req.RecommendationPolicies.RolloutBehavior = toRolloutBehavior(toSection(d, FieldRolloutBehavior))
+
+	req.RecommendationPolicies.Jvm = toJvm(toSection(d, FieldJVM))
+
+	req.RecommendationPolicies.AnomalyDetection = toAnomalyDetection(toSection(d, FieldAnomalyDetection))
+
+	req.RecommendationPolicies.ExcludedContainers = toExcludedContainers(d)
+
+	ar, err := toAssignmentRules(toSection(d, FieldAssignmentRules))
 	if err != nil {
 		return diag.FromErr(err)
 	}
+	req.AssignmentRules = ar
 
-	switch create.StatusCode() {
-	case http.StatusOK:
-		d.SetId(create.JSON200.Id)
-		return resourceWorkloadScalingPolicyRead(ctx, d, meta)
-	case http.StatusConflict:
-		policy, err := getWorkloadScalingPolicyByName(ctx, client, clusterID, req.Name)
-		if err != nil {
-			return diag.FromErr(err)
+	b := backoff.WithContext(backoff.NewExponentialBackOff(), ctx)
+	var lastErr error
+	if err := backoff.RetryNotify(func() error {
+		create, createErr := client.WorkloadOptimizationAPICreateWorkloadScalingPolicyWithResponse(ctx, clusterID, req)
+		if createErr != nil {
+			return createErr
 		}
-		if policy.IsDefault {
-			d.SetId(policy.Id)
-			return resourceWorkloadScalingPolicyUpdate(ctx, d, meta)
+
+		switch create.StatusCode() {
+		case http.StatusOK:
+			d.SetId(create.JSON200.Id)
+			return checkIfRetryable(fetchScalingPolicy(ctx, d, meta))
+		case http.StatusConflict:
+			policy, err := getWorkloadScalingPolicyByName(ctx, client, clusterID, req.Name)
+			if err != nil {
+				return err
+			}
+
+			if policy.IsDefault {
+				d.SetId(policy.Id)
+				return checkIfRetryable(updateScalingPolicy(ctx, d, meta))
+			}
+			return backoff.Permanent(fmt.Errorf("scaling policy with name %q already exists", req.Name))
+		default:
+			return checkIfRetryable(create, createErr)
 		}
-		return diag.Errorf("scaling policy with name %q already exists", req.Name)
-	default:
-		return diag.Errorf("expected status code %d, received: status=%d body=%s", http.StatusOK, create.StatusCode(), string(create.GetBody()))
+	}, b, func(err error, _ time.Duration) {
+		if !isInterrupt(err) {
+			tflog.Warn(ctx, "Error creating workload scaling policy", map[string]any{
+				"error": err,
+			})
+			lastErr = err
+		}
+	}); err != nil {
+		if isInterrupt(err) {
+			return diag.FromErr(lastErr)
+		}
+		return diag.FromErr(err)
 	}
+	return nil
+}
+
+func isInterrupt(err error) bool {
+	return errors.Is(err, context.DeadlineExceeded) || errors.Is(err, context.Canceled)
+}
+
+func checkIfRetryable(response sdk.Response, err error) error {
+	if err != nil {
+		return err
+	}
+
+	if response == nil || response.StatusCode() == http.StatusOK {
+		return nil
+	}
+
+	e := fmt.Errorf("expected status code 200, received: status=%d body=%s", response.StatusCode(), string(response.GetBody()))
+	if response.StatusCode() == http.StatusBadRequest ||
+		response.StatusCode() == http.StatusUnauthorized ||
+		response.StatusCode() == http.StatusForbidden {
+		return backoff.Permanent(e)
+	}
+
+	return e
 }
 
 func resourceWorkloadScalingPolicyRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
+	resp, err := fetchScalingPolicy(ctx, d, meta)
+	if err = sdk.CheckOKResponse(resp, err); err != nil {
+		return diag.FromErr(err)
+	}
+	return nil
+}
+
+func fetchScalingPolicy(ctx context.Context, d *schema.ResourceData, meta any) (sdk.Response, error) {
 	client := meta.(*ProviderConfig).api
 
 	clusterID := d.Get(FieldClusterID).(string)
 	resp, err := client.WorkloadOptimizationAPIGetWorkloadScalingPolicyWithResponse(ctx, clusterID, d.Id())
 	if err != nil {
-		return diag.FromErr(err)
+		return resp, err
 	}
 
 	if !d.IsNewResource() && resp.StatusCode() == http.StatusNotFound {
 		tflog.Warn(ctx, "Scaling policy not found, removing from state", map[string]any{"id": d.Id()})
 		d.SetId("")
-		return nil
+		return nil, nil
 	}
-	if err := sdk.CheckOKResponse(resp, err); err != nil {
-		return diag.FromErr(err)
+	if resp.StatusCode() != http.StatusOK {
+		return resp, nil
 	}
 
 	sp := resp.JSON200
 
 	if err := d.Set("name", sp.Name); err != nil {
-		return diag.FromErr(fmt.Errorf("setting name: %w", err))
+		return nil, fmt.Errorf("setting name: %w", err)
 	}
-	if err := d.Set("apply_type", sp.ApplyType); err != nil {
-		return diag.FromErr(fmt.Errorf("setting apply type: %w", err))
+	if err := d.Set(FieldApplyType, sp.ApplyType); err != nil {
+		return nil, fmt.Errorf("setting apply type: %w", err)
 	}
 	if err := d.Set("management_option", sp.RecommendationPolicies.ManagementOption); err != nil {
-		return diag.FromErr(fmt.Errorf("setting management option: %w", err))
+		return nil, fmt.Errorf("setting management option: %w", err)
 	}
 	if err := d.Set("cpu", toWorkloadScalingPoliciesMap(getResourceFrom(d, "cpu"), sp.RecommendationPolicies.Cpu)); err != nil {
-		return diag.FromErr(fmt.Errorf("setting cpu: %w", err))
+		return nil, fmt.Errorf("setting cpu: %w", err)
 	}
 	if err := d.Set("memory", toWorkloadScalingPoliciesMap(getResourceFrom(d, "memory"), sp.RecommendationPolicies.Memory)); err != nil {
-		return diag.FromErr(fmt.Errorf("setting memory: %w", err))
+		return nil, fmt.Errorf("setting memory: %w", err)
 	}
 	if err := d.Set("startup", toStartupMap(sp.RecommendationPolicies.Startup)); err != nil {
-		return diag.FromErr(fmt.Errorf("setting startup: %w", err))
+		return nil, fmt.Errorf("setting startup: %w", err)
+	}
+	if err := d.Set(FieldExcludedContainers, sp.RecommendationPolicies.ExcludedContainers); err != nil {
+		return nil, fmt.Errorf("setting excluded containers: %w", err)
 	}
 	if err := d.Set(FieldConfidence, toConfidenceMap(sp.RecommendationPolicies.Confidence)); err != nil {
-		return diag.FromErr(fmt.Errorf("setting confidence: %w", err))
+		return nil, fmt.Errorf("setting confidence: %w", err)
 	}
 	if err := d.Set("downscaling", toDownscalingMap(sp.RecommendationPolicies.Downscaling)); err != nil {
-		return diag.FromErr(fmt.Errorf("setting downscaling: %w", err))
+		return nil, fmt.Errorf("setting downscaling: %w", err)
 	}
 	if err := d.Set("memory_event", toMemoryEventMap(sp.RecommendationPolicies.MemoryEvent)); err != nil {
-		return diag.FromErr(fmt.Errorf("setting memory event: %w", err))
+		return nil, fmt.Errorf("setting memory event: %w", err)
 	}
 	if err := d.Set("anti_affinity", toAntiAffinityMap(sp.RecommendationPolicies.AntiAffinity)); err != nil {
-		return diag.FromErr(fmt.Errorf("setting anti-affinity: %w", err))
+		return nil, fmt.Errorf("setting anti-affinity: %w", err)
+	}
+	if err := d.Set(FieldPredictiveScaling, toPredictiveScalingMap(sp.RecommendationPolicies.PredictiveScaling)); err != nil {
+		return nil, fmt.Errorf("setting predictive scaling: %w", err)
+	}
+	if err := d.Set(FieldRolloutBehavior, toRolloutBehaviorMap(sp.RecommendationPolicies.RolloutBehavior)); err != nil {
+		return nil, fmt.Errorf("setting rollout behavior: %w", err)
+	}
+	if err := d.Set(FieldJVM, toJvmMap(sp.RecommendationPolicies.Jvm)); err != nil {
+		return nil, fmt.Errorf("setting jvm: %w", err)
+	}
+	if err := d.Set(FieldAnomalyDetection, toAnomalyDetectionMap(sp.RecommendationPolicies.AnomalyDetection)); err != nil {
+		return nil, fmt.Errorf("setting anomaly detection: %w", err)
+	}
+	if err := d.Set(FieldAssignmentRules, toAssignmentRulesMap(getResourceFrom(d, FieldAssignmentRules), sp.AssignmentRules)); err != nil {
+		return nil, fmt.Errorf("setting assignment rules: %w", err)
 	}
 
-	return nil
+	return nil, nil
 }
 
 func getResourceFrom(d *schema.ResourceData, resource string) map[string]any {
@@ -500,9 +924,17 @@ func getResourceFrom(d *schema.ResourceData, resource string) map[string]any {
 }
 
 func resourceWorkloadScalingPolicyUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
+	resp, err := updateScalingPolicy(ctx, d, meta)
+	if err = sdk.CheckOKResponse(resp, err); err != nil {
+		return diag.FromErr(err)
+	}
+	return nil
+}
+
+func updateScalingPolicy(ctx context.Context, d *schema.ResourceData, meta any) (sdk.Response, error) {
 	if !d.HasChanges(
 		"name",
-		"apply_type",
+		FieldApplyType,
 		"management_option",
 		"cpu",
 		"memory",
@@ -511,41 +943,68 @@ func resourceWorkloadScalingPolicyUpdate(ctx context.Context, d *schema.Resource
 		"memory_event",
 		"anti_affinity",
 		FieldConfidence,
+		FieldAssignmentRules,
+		FieldPredictiveScaling,
+		FieldRolloutBehavior,
+		FieldJVM,
+		FieldAnomalyDetection,
+		FieldExcludedContainers,
 	) {
 		tflog.Info(ctx, "scaling policy up to date")
-		return nil
+		return nil, nil
 	}
 
 	client := meta.(*ProviderConfig).api
 	clusterID := d.Get(FieldClusterID).(string)
 	cpu, err := toWorkloadScalingPolicies("cpu", d.Get("cpu").([]any)[0].(map[string]any))
 	if err != nil {
-		return diag.FromErr(err)
+		return nil, err
 	}
 	memory, err := toWorkloadScalingPolicies("memory", d.Get("memory").([]any)[0].(map[string]any))
 	if err != nil {
-		return diag.FromErr(err)
+		return nil, err
 	}
-	req := sdk.WorkloadOptimizationAPIUpdateWorkloadScalingPolicyJSONBody{
-		Name:      d.Get("name").(string),
-		ApplyType: sdk.WorkloadoptimizationV1ApplyType(d.Get("apply_type").(string)),
+	ar, err := toAssignmentRules(toSection(d, FieldAssignmentRules))
+	if err != nil {
+		return nil, err
+	}
+
+	req := sdk.WorkloadOptimizationAPIUpdateWorkloadScalingPolicyJSONRequestBody{
+		Name:            d.Get("name").(string),
+		ApplyType:       sdk.WorkloadoptimizationV1ApplyType(d.Get(FieldApplyType).(string)),
+		AssignmentRules: ar,
 		RecommendationPolicies: sdk.WorkloadoptimizationV1RecommendationPolicies{
-			ManagementOption: sdk.WorkloadoptimizationV1ManagementOption(d.Get("management_option").(string)),
-			Cpu:              cpu,
-			Memory:           memory,
-			Startup:          toStartup(toSection(d, "startup")),
-			Downscaling:      toDownscaling(toSection(d, "downscaling")),
-			MemoryEvent:      toMemoryEvent(toSection(d, "memory_event")),
-			AntiAffinity:     toAntiAffinity(toSection(d, "anti_affinity")),
-			Confidence: 	 toConfidence(toSection(d, FieldConfidence)),
+			ManagementOption:   sdk.WorkloadoptimizationV1ManagementOption(d.Get("management_option").(string)),
+			Cpu:                cpu,
+			Memory:             memory,
+			Startup:            toStartup(toSection(d, "startup")),
+			Downscaling:        toDownscaling(toSection(d, "downscaling")),
+			MemoryEvent:        toMemoryEvent(toSection(d, "memory_event")),
+			AntiAffinity:       toAntiAffinity(toSection(d, "anti_affinity")),
+			Confidence:         toConfidence(toSection(d, FieldConfidence)),
+			PredictiveScaling:  toPredictiveScaling(toSection(d, FieldPredictiveScaling)),
+			RolloutBehavior:    toRolloutBehavior(toSection(d, FieldRolloutBehavior)),
+			Jvm:                toJvm(toSection(d, FieldJVM)),
+			AnomalyDetection:   toAnomalyDetection(toSection(d, FieldAnomalyDetection)),
+			ExcludedContainers: toExcludedContainers(d),
 		},
 	}
 
 	resp, err := client.WorkloadOptimizationAPIUpdateWorkloadScalingPolicyWithResponse(ctx, clusterID, d.Id(), req)
-	if checkErr := sdk.CheckOKResponse(resp, err); checkErr != nil {
-		return diag.FromErr(checkErr)
+	if err != nil {
+		return resp, err
 	}
-	return resourceWorkloadScalingPolicyRead(ctx, d, meta)
+	if resp.StatusCode() != http.StatusOK {
+		return resp, err
+	}
+	return fetchScalingPolicy(ctx, d, meta)
+}
+
+func toExcludedContainers(d *schema.ResourceData) *[]string {
+	if v, ok := d.Get(FieldExcludedContainers).([]any); ok && len(v) > 0 {
+		return lo.ToPtr(toStringList(v))
+	}
+	return nil
 }
 
 func resourceWorkloadScalingPolicyDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
@@ -584,15 +1043,52 @@ func resourceWorkloadScalingPolicyDelete(ctx context.Context, d *schema.Resource
 
 func resourceWorkloadScalingPolicyDiff(_ context.Context, d *schema.ResourceDiff, _ any) error {
 	// Since tf doesn't support cross field validation, doing it here.
-	_, err := toWorkloadScalingPolicies("cpu", d.Get("cpu").([]any)[0].(map[string]any))
-	if err != nil {
-		return err
-	}
-	_, err = toWorkloadScalingPolicies("memory", d.Get("memory").([]any)[0].(map[string]any))
-	if err != nil {
-		return err
+	for _, resource := range []string{"cpu", "memory"} {
+		hasConstraints := configHasResourceField(d, resource, FieldConstraints)
+		hasMin := configHasResourceField(d, resource, "min")
+		hasMax := configHasResourceField(d, resource, "max")
+		if hasConstraints && (hasMin || hasMax) {
+			return fmt.Errorf("%s: constraints and min/max are mutually exclusive", resource)
+		}
+		list := d.Get(resource).([]any)
+		if len(list) == 0 {
+			continue
+		}
+		_, err := toWorkloadScalingPolicies(resource, list[0].(map[string]any))
+		if err != nil {
+			return err
+		}
 	}
 	return nil
+}
+
+// rawConfigHasField walks a path of nested attributes in a Terraform raw config.
+func rawConfigHasField(rawConfig cty.Value, path ...string) bool {
+	v := rawConfig
+	for _, attr := range path {
+		// Fail fast if value is not an object or attribute is not present.
+		if v.IsNull() || !v.Type().IsObjectType() || !v.Type().HasAttribute(attr) {
+			return false
+		}
+		v = v.GetAttr(attr)
+		if v.IsNull() {
+			return false
+		}
+		// Terraform SDK v2 represents nested blocks as cty lists.
+		// Extract the first element so the next iteration works on the inner object.
+		if v.Type().IsCollectionType() || v.Type().IsTupleType() {
+			elems := v.AsValueSlice()
+			if len(elems) == 0 {
+				return false
+			}
+			v = elems[0]
+		}
+	}
+	return true
+}
+
+func configHasResourceField(d *schema.ResourceDiff, resource, field string) bool {
+	return rawConfigHasField(d.GetRawConfig(), resource, field)
 }
 
 func workloadScalingPolicyImporter(ctx context.Context, d *schema.ResourceData, meta any) ([]*schema.ResourceData, error) {
@@ -646,12 +1142,33 @@ func toWorkloadScalingPolicies(resource string, obj map[string]any) (sdk.Workloa
 	if v, ok := obj["look_back_period_seconds"].(int); ok && v > 0 {
 		out.LookBackPeriodSeconds = lo.ToPtr(int32(v))
 	}
-	if v, ok := obj["min"].(float64); ok {
-		out.Min = lo.ToPtr(v)
+
+	// Parse constraints if present
+	if v, ok := obj[FieldConstraints].([]any); ok && len(v) > 0 {
+		out.Constraints, err = toWorkloadConstraints(v[0].(map[string]any))
+		if err != nil {
+			return out, fmt.Errorf("field %q: field constraints: %w", resource, err)
+		}
 	}
-	if v, ok := obj["max"].(float64); ok && v > 0 {
-		out.Max = lo.ToPtr(v)
+
+	// Validate constraints.min.constant against resource-specific minimums
+	if out.Constraints != nil && out.Constraints.Min != nil && out.Constraints.Min.Constant != nil {
+		minVal := out.Constraints.Min.Constant.Value
+		if minRecommended, ok := defaultMinConstraintValue(resource); ok && minVal < minRecommended {
+			return out, fmt.Errorf("field %q: constraints.min.constant value %v is below the recommended minimum %v", resource, minVal, minRecommended)
+		}
 	}
+
+	// Only fall back to legacy min/max when constraints are NOT configured
+	if out.Constraints == nil {
+		if v, ok := obj["min"].(float64); ok {
+			out.Min = lo.ToPtr(v)
+		}
+		if v, ok := obj["max"].(float64); ok && v > 0 {
+			out.Max = lo.ToPtr(v)
+		}
+	}
+
 	if v, ok := obj[FieldLimitStrategy].([]any); ok && len(v) > 0 {
 		out.Limit, err = toWorkloadResourceLimit(v[0].(map[string]any))
 		if err != nil {
@@ -668,6 +1185,61 @@ func toWorkloadScalingPolicies(resource string, obj map[string]any) (sdk.Workloa
 	}
 
 	return out, err
+}
+
+func toWorkloadConstraints(obj map[string]any) (*sdk.WorkloadoptimizationV1ConstraintsV2, error) {
+	if len(obj) == 0 {
+		return nil, nil
+	}
+	out := &sdk.WorkloadoptimizationV1ConstraintsV2{}
+	if v, ok := obj["min"].([]any); ok && len(v) > 0 {
+		m, ok := v[0].(map[string]any)
+		if !ok {
+			return nil, fmt.Errorf("min strategy must be a map[string]any")
+		}
+		strategy, err := toConstraintStrategy(m)
+		if err != nil {
+			return nil, fmt.Errorf("min: %w", err)
+		}
+		out.Min = strategy
+	}
+	if v, ok := obj["max"].([]any); ok && len(v) > 0 {
+		m, ok := v[0].(map[string]any)
+		if !ok {
+			return nil, fmt.Errorf("max strategy must be a map[string]any")
+		}
+		strategy, err := toConstraintStrategy(m)
+		if err != nil {
+			return nil, fmt.Errorf("max: %w", err)
+		}
+		out.Max = strategy
+	}
+	return out, nil
+}
+
+func toConstraintStrategy(obj map[string]any) (*sdk.WorkloadoptimizationV1ConstraintsV2Strategy, error) {
+	out := &sdk.WorkloadoptimizationV1ConstraintsV2Strategy{}
+	hasConstant := false
+	hasPct := false
+	// v > 0 is intentional: Terraform SDK v2 zero-fills missing TypeFloat fields
+	// in nested blocks. Without this guard a config like `min { constant = 1 }`
+	// would also see percentage_of_original = 0 in the parsed map, causing the
+	// "only one may be set" validation to fire falsely.
+	if v, ok := obj["constant"].(float64); ok && v > 0 {
+		out.Constant = &sdk.WorkloadoptimizationV1ConstraintsV2Constant{Value: v}
+		hasConstant = true
+	}
+	if v, ok := obj["percentage_of_original"].(float64); ok && v > 0 {
+		out.PercentageOfOriginal = &sdk.WorkloadoptimizationV1ConstraintsV2PercentageOfOriginal{Value: v}
+		hasPct = true
+	}
+	if hasConstant && hasPct {
+		return nil, fmt.Errorf("only one of constant or percentage_of_original may be set")
+	}
+	if !hasConstant && !hasPct {
+		return nil, fmt.Errorf("either constant or percentage_of_original must be set")
+	}
+	return out, nil
 }
 
 func resolveApplyThresholdStrategy(obj map[string]any) (*sdk.WorkloadoptimizationV1ApplyThresholdStrategy, error) {
@@ -758,9 +1330,8 @@ func mapApplyStrategyBasedOnPreviousConfig(
 // we will supress diff.
 func suppressThresholdStrategyDefaultValueDiff(resource, oldValue, newValue string, d *schema.ResourceData) bool {
 	resourcePath := fmt.Sprintf("%s.0", resource)
-	isApplyThresholdStrategyUnset := newValue == "0" || newValue == ""
 	isApplyThresholdUnset := d.Get(fmt.Sprintf("%s.%s", resourcePath, DeprecatedFieldApplyThreshold)) == 0.
-	if isApplyThresholdStrategyUnset && isApplyThresholdUnset {
+	if isEmpty(newValue) && isApplyThresholdUnset {
 		applyThresholdFromStrategy := d.Get(fmt.Sprintf("%s.%s.0.%s", resourcePath, FieldApplyThresholdStrategy, FieldApplyThresholdStrategyPercentage))
 		// Suppress diff if configuration saved from API equals to default
 		return applyThresholdFromStrategy == defaultApplyThresholdPercentage
@@ -769,15 +1340,137 @@ func suppressThresholdStrategyDefaultValueDiff(resource, oldValue, newValue stri
 	return oldValue == newValue
 }
 
+func suppressMinMaxDiffWhenConstraintsPresent(resource, k, oldValue, newValue string, d *schema.ResourceData) bool {
+	raw := d.GetRawConfig()
+	if raw.IsNull() {
+		return false
+	}
+
+	resourceList := raw.GetAttr(resource)
+	if resourceList.IsNull() || (!resourceList.Type().IsCollectionType() && !resourceList.Type().IsTupleType()) {
+		return false
+	}
+	resourceElems := resourceList.AsValueSlice()
+	if len(resourceElems) == 0 {
+		return false
+	}
+
+	constraintsVal := resourceElems[0].GetAttr("constraints")
+	if constraintsVal.IsNull() || (!constraintsVal.Type().IsCollectionType() && !constraintsVal.Type().IsTupleType()) {
+		return false
+	}
+	return len(constraintsVal.AsValueSlice()) > 0
+}
+
 func suppressConfidenceThresholdDefaultValueDiff(resource, oldValue, newValue string, d *schema.ResourceData) bool {
-	isConfidenceUnset := newValue == "0" || newValue == ""
-	if isConfidenceUnset {
+	if isEmpty(newValue) {
 		confidenceThreshold := d.Get(fmt.Sprintf("%s.0.%s", resource, FieldConfidenceThreshold))
 		// Suppress diff if configuration saved from API equals to default
 		return confidenceThreshold == defaultConfidenceThreshold
 	}
 
 	return oldValue == newValue
+}
+
+func suppressMemoryEventApplyTypeDefaultValueDiff(oldValue, newValue string, d *schema.ResourceData) bool {
+	if isEmpty(newValue) {
+		applyType := d.Get(fmt.Sprintf("%s.0.%s", FieldMemoryEvent, FieldApplyType))
+		// Suppress diff if apply type saved from API equals to default
+		return applyType == defaultApplyType
+	}
+
+	return oldValue == newValue
+}
+
+func suppressAnomalyDetectionDefaultValueDiff(oldValue, newValue string, d *schema.ResourceData) bool {
+	if isEmpty(newValue) {
+		cpuStallThreshold := d.Get(fmt.Sprintf("%s.0.%s.0.%s", FieldAnomalyDetection, FieldAnomalyDetectionCpuPressure, FieldCpuStallThresholdPercentage))
+		minPressuredPodPct := d.Get(fmt.Sprintf("%s.0.%s.0.%s", FieldAnomalyDetection, FieldAnomalyDetectionCpuPressure, FieldMinPressuredPodPercentage))
+		// Suppress diff if the API-returned values equal the defaults (meaning no explicit config is needed)
+		return cpuStallThreshold == defaultCPUStallThresholdPct && minPressuredPodPct == defaultCPUStallMinPressuredPodPct
+	}
+
+	return oldValue == newValue
+}
+
+func isEmpty(value string) bool {
+	return value == "" || value == "0"
+}
+
+func defaultMinConstraintValue(resource string) (float64, bool) {
+	switch resource {
+	case "cpu":
+		return defaultCPUConstraintMin, true
+	case "memory":
+		return defaultMemoryConstraintMin, true
+	default:
+		return 0, false
+	}
+}
+
+func suppressConstraintMinCount(k, old, _ string, d *schema.ResourceData) bool {
+	if !strings.HasSuffix(k, ".min.#") {
+		return false
+	}
+	parts := strings.Split(k, ".")
+	resource := parts[0]
+
+	// Do not suppress if min is configured explicitly in the config
+	if d != nil && rawConfigHasField(d.GetRawConfig(), resource, "constraints", "min") {
+		return false
+	}
+
+	// Do not suppress when max uses percentage strategy (API cannot auto-fill
+	// percentage-based min, so we must detect the min removal and send nil)
+	maxPctPath := fmt.Sprintf("%s.0.constraints.0.max.0.percentage_of_original", resource)
+	if _, ok := d.GetOk(maxPctPath); ok {
+		return false
+	}
+
+	defaultVal, ok := defaultMinConstraintValue(resource)
+	if !ok {
+		return false
+	}
+
+	// old == "1" means state had a min block; old == "0" means state had none.
+	// Only suppress when state had min (1→0) and config removes it.
+	if old != "1" {
+		return false
+	}
+
+	constPath := fmt.Sprintf("%s.0.constraints.0.min.0.constant", resource)
+	val, ok := d.GetOk(constPath)
+	if !ok {
+		return false
+	}
+	fval, ok := val.(float64)
+	if !ok {
+		return false
+	}
+	return fval == defaultVal
+}
+
+func suppressDefaultMinValue(k, old, _ string, d *schema.ResourceData) bool {
+	if !strings.Contains(k, ".min.") {
+		return false
+	}
+	parts := strings.Split(k, ".")
+	resource := parts[0]
+
+	if d != nil && rawConfigHasField(d.GetRawConfig(), resource, "constraints", "min") {
+		return false
+	}
+
+	defaultVal, ok := defaultMinConstraintValue(resource)
+	if !ok {
+		return false
+	}
+
+	oldVal, err := strconv.ParseFloat(old, 64)
+	if err != nil {
+		return false
+	}
+	return oldVal == defaultVal
 }
 
 func toWorkloadResourceLimit(obj map[string]any) (*sdk.WorkloadoptimizationV1ResourceLimitStrategy, error) {
@@ -791,14 +1484,20 @@ func toWorkloadResourceLimit(obj map[string]any) (*sdk.WorkloadoptimizationV1Res
 		return nil, err
 	}
 	out.Type = sdk.WorkloadoptimizationV1ResourceLimitStrategyType(*strategy)
+	if onlyIfOriginalLower, err := mustGetValue[bool](obj, FieldLimitStrategyOnlyIfOriginalLower); err == nil {
+		out.OnlyIfOriginalLower = onlyIfOriginalLower
+	}
+	if onlyIfOriginalExist, err := mustGetValue[bool](obj, FieldLimitStrategyOnlyIfOriginalExist); err == nil {
+		out.OnlyIfOriginalExist = onlyIfOriginalExist
+	}
 	switch out.Type {
-	case sdk.NOLIMIT:
+	case sdk.WorkloadoptimizationV1ResourceLimitStrategyTypeNOLIMIT, sdk.WorkloadoptimizationV1ResourceLimitStrategyTypeKEEPLIMITS, sdk.WorkloadoptimizationV1ResourceLimitStrategyTypeMAINTAINRATIO:
 		out.Multiplier, err = mustGetValue[float64](obj, FieldLimitStrategyMultiplier)
 		if err == nil {
-			return nil, fmt.Errorf(`%q limit type doesn't accept multiplier value`, sdk.NOLIMIT)
+			return nil, fmt.Errorf(`%q limit type doesn't accept multiplier value`, out.Type)
 		}
 		return out, nil
-	case sdk.MULTIPLIER:
+	case sdk.WorkloadoptimizationV1ResourceLimitStrategyTypeMULTIPLIER:
 		out.Multiplier, err = mustGetValue[float64](obj, FieldLimitStrategyMultiplier)
 		if err != nil {
 			return nil, err
@@ -807,6 +1506,17 @@ func toWorkloadResourceLimit(obj map[string]any) (*sdk.WorkloadoptimizationV1Res
 	default:
 		return nil, fmt.Errorf(`unknown limit type %q`, out.Type)
 	}
+}
+
+func hasResourceField(obj map[string]any, field string) bool {
+	v, ok := obj[field]
+	if !ok || v == nil {
+		return false
+	}
+	if arr, ok := v.([]any); ok && len(arr) == 0 {
+		return false
+	}
+	return true
 }
 
 func toWorkloadResourcePercentageThresholdStrategy(percentage float64) *sdk.WorkloadoptimizationV1ApplyThresholdStrategy {
@@ -838,8 +1548,22 @@ func toWorkloadScalingPoliciesMap(previousCfg map[string]any, p sdk.Workloadopti
 		"function": p.Function,
 		"args":     p.Args,
 		"overhead": p.Overhead,
-		"min":      p.Min,
-		"max":      p.Max,
+	}
+
+	hasConstraints := hasResourceField(previousCfg, "constraints")
+	hasMin := hasResourceField(previousCfg, "min")
+	hasMax := hasResourceField(previousCfg, "max")
+	hasLegacy := hasMin || hasMax
+
+	if p.Constraints != nil && (hasConstraints || !hasLegacy) {
+		m["constraints"] = constraintsToMap(p.Constraints)
+		m["min"] = (*float64)(nil)
+		m["max"] = (*float64)(nil)
+	}
+
+	if _, constraintsWritten := m["constraints"]; !constraintsWritten {
+		m["min"] = p.Min
+		m["max"] = p.Max
 	}
 
 	if p.LookBackPeriodSeconds != nil {
@@ -853,6 +1577,12 @@ func toWorkloadScalingPoliciesMap(previousCfg map[string]any, p sdk.Workloadopti
 		if p.Limit.Multiplier != nil {
 			limit[FieldLimitStrategyMultiplier] = *p.Limit.Multiplier
 		}
+		if p.Limit.OnlyIfOriginalLower != nil {
+			limit[FieldLimitStrategyOnlyIfOriginalLower] = *p.Limit.OnlyIfOriginalLower
+		}
+		if p.Limit.OnlyIfOriginalExist != nil {
+			limit[FieldLimitStrategyOnlyIfOriginalExist] = *p.Limit.OnlyIfOriginalExist
+		}
 		m[FieldLimitStrategy] = []map[string]any{limit}
 	}
 
@@ -862,6 +1592,31 @@ func toWorkloadScalingPoliciesMap(previousCfg map[string]any, p sdk.Workloadopti
 		m["management_option"] = string(*p.ManagementOption)
 	}
 
+	return []map[string]any{m}
+}
+
+func constraintsToMap(c *sdk.WorkloadoptimizationV1ConstraintsV2) []map[string]any {
+	m := map[string]any{}
+	if c.Min != nil {
+		strategy := map[string]any{}
+		if c.Min.Constant != nil {
+			strategy["constant"] = c.Min.Constant.Value
+		}
+		if c.Min.PercentageOfOriginal != nil {
+			strategy["percentage_of_original"] = c.Min.PercentageOfOriginal.Value
+		}
+		m["min"] = []map[string]any{strategy}
+	}
+	if c.Max != nil {
+		strategy := map[string]any{}
+		if c.Max.Constant != nil {
+			strategy["constant"] = c.Max.Constant.Value
+		}
+		if c.Max.PercentageOfOriginal != nil {
+			strategy["percentage_of_original"] = c.Max.PercentageOfOriginal.Value
+		}
+		m["max"] = []map[string]any{strategy}
+	}
 	return []map[string]any{m}
 }
 
@@ -956,7 +1711,7 @@ func toDownscaling(downscaling map[string]any) *sdk.WorkloadoptimizationV1Downsc
 
 	result := &sdk.WorkloadoptimizationV1DownscalingSettings{}
 
-	if v, ok := downscaling["apply_type"].(string); ok && v != "" {
+	if v, ok := downscaling[FieldApplyType].(string); ok && v != "" {
 		result.ApplyType = lo.ToPtr(sdk.WorkloadoptimizationV1ApplyType(v))
 	}
 
@@ -971,7 +1726,7 @@ func toDownscalingMap(s *sdk.WorkloadoptimizationV1DownscalingSettings) []map[st
 	m := map[string]any{}
 
 	if s.ApplyType != nil {
-		m["apply_type"] = string(*s.ApplyType)
+		m[FieldApplyType] = string(*s.ApplyType)
 	}
 
 	if len(m) == 0 {
@@ -988,7 +1743,7 @@ func toMemoryEvent(memoryEvent map[string]any) *sdk.WorkloadoptimizationV1Memory
 
 	result := &sdk.WorkloadoptimizationV1MemoryEventSettings{}
 
-	if v, ok := memoryEvent["apply_type"].(string); ok && v != "" {
+	if v, ok := memoryEvent[FieldApplyType].(string); ok && v != "" {
 		result.ApplyType = lo.ToPtr(sdk.WorkloadoptimizationV1ApplyType(v))
 	}
 
@@ -1003,7 +1758,7 @@ func toMemoryEventMap(s *sdk.WorkloadoptimizationV1MemoryEventSettings) []map[st
 	m := map[string]any{}
 
 	if s.ApplyType != nil {
-		m["apply_type"] = string(*s.ApplyType)
+		m[FieldApplyType] = string(*s.ApplyType)
 	}
 
 	if len(m) == 0 {
@@ -1045,10 +1800,179 @@ func toAntiAffinityMap(s *sdk.WorkloadoptimizationV1AntiAffinitySettings) []map[
 	return []map[string]any{m}
 }
 
+func toPredictiveScalingMap(s *sdk.WorkloadoptimizationV1PredictiveScalingSettings) []map[string]any {
+	if s == nil || s.Cpu == nil {
+		return nil
+	}
+
+	return []map[string]any{
+		{
+			FieldCPU: toPredictiveScalingResourceMap(s.Cpu),
+		},
+	}
+}
+
+func toPredictiveScaling(m map[string]any) *sdk.WorkloadoptimizationV1PredictiveScalingSettings {
+	if len(m) == 0 {
+		return nil
+	}
+
+	cpuResource := toPredictiveScalingResource(getFirstElem(m, FieldCPU))
+	if cpuResource == nil {
+		return nil
+	}
+
+	return &sdk.WorkloadoptimizationV1PredictiveScalingSettings{
+		Cpu: cpuResource,
+	}
+}
+
+func toPredictiveScalingResourceMap(s *sdk.WorkloadoptimizationV1PredictiveScaling) []map[string]any {
+	if s == nil {
+		return nil
+	}
+
+	return []map[string]any{
+		{
+			FieldEnabled: s.Enabled,
+		},
+	}
+}
+
+func toPredictiveScalingResource(m map[string]any) *sdk.WorkloadoptimizationV1PredictiveScaling {
+	if len(m) == 0 {
+		return nil
+	}
+
+	r := &sdk.WorkloadoptimizationV1PredictiveScaling{}
+
+	if v, ok := m[FieldEnabled].(bool); ok {
+		r.Enabled = v
+	}
+
+	return r
+}
+
+func toRolloutBehavior(m map[string]any) *sdk.WorkloadoptimizationV1RolloutBehaviorSettings {
+	if len(m) == 0 {
+		return nil
+	}
+
+	r := &sdk.WorkloadoptimizationV1RolloutBehaviorSettings{}
+	if v, ok := m[FieldRolloutBehaviorType].(string); ok && v != "" {
+		r.Type = lo.ToPtr(sdk.WorkloadoptimizationV1RolloutBehaviorType(v))
+	}
+	if v, ok := m[FieldRolloutBehaviorPreferOneByOneType].(bool); ok {
+		r.PreferOneByOne = lo.ToPtr(v)
+	}
+	if v, ok := m[FieldRolloutBehaviorDelaySeconds].(int); ok {
+		r.DelaySeconds = lo.ToPtr(int32(v))
+	}
+
+	if r.Type == nil && r.PreferOneByOne == nil && r.DelaySeconds == nil {
+		return nil
+	}
+
+	return r
+}
+
+func toRolloutBehaviorMap(s *sdk.WorkloadoptimizationV1RolloutBehaviorSettings) []map[string]any {
+	if s == nil {
+		return nil
+	}
+
+	if s.Type == nil && s.PreferOneByOne == nil && s.DelaySeconds == nil {
+		return nil
+	}
+
+	m := map[string]any{}
+	if s.Type != nil {
+		m[FieldRolloutBehaviorType] = string(*s.Type)
+	}
+	if s.PreferOneByOne != nil {
+		m[FieldRolloutBehaviorPreferOneByOneType] = *s.PreferOneByOne
+	}
+	if s.DelaySeconds != nil {
+		m[FieldRolloutBehaviorDelaySeconds] = int(*s.DelaySeconds)
+	}
+
+	return []map[string]any{m}
+}
+
+func toAnomalyDetection(m map[string]any) *sdk.WorkloadoptimizationV1AnomalyDetectionSettings {
+	if len(m) == 0 {
+		return nil
+	}
+	result := &sdk.WorkloadoptimizationV1AnomalyDetectionSettings{}
+	if cpuPressure := getFirstElem(m, FieldAnomalyDetectionCpuPressure); cpuPressure != nil {
+		result.CpuPressure = &sdk.WorkloadoptimizationV1CPUPressureSettings{
+			// schema already handles type validation, so casting is safe
+			CpuStallThresholdPercentage: cpuPressure[FieldCpuStallThresholdPercentage].(float64),
+			MinPressuredPodPercentage:   cpuPressure[FieldMinPressuredPodPercentage].(float64),
+		}
+	}
+	return result
+}
+
+func toAnomalyDetectionMap(s *sdk.WorkloadoptimizationV1AnomalyDetectionSettings) []map[string]any {
+	if s == nil {
+		return nil
+	}
+	m := map[string]any{}
+	if s.CpuPressure != nil {
+		m[FieldAnomalyDetectionCpuPressure] = []map[string]any{
+			{
+				FieldCpuStallThresholdPercentage: s.CpuPressure.CpuStallThresholdPercentage,
+				FieldMinPressuredPodPercentage:   s.CpuPressure.MinPressuredPodPercentage,
+			},
+		}
+	}
+	if len(m) == 0 {
+		return nil
+	}
+	return []map[string]any{m}
+}
+
+func toJvm(m map[string]any) *sdk.WorkloadoptimizationV1JVMSettings {
+	if len(m) == 0 {
+		return nil
+	}
+	result := &sdk.WorkloadoptimizationV1JVMSettings{}
+	if v, ok := m["auto_instrument"].(bool); ok {
+		result.AutoInstrument = lo.ToPtr(v)
+	}
+	if mem := getFirstElem(m, "memory"); mem != nil {
+		result.Memory = &sdk.WorkloadoptimizationV1JVMMemorySettings{}
+		if v, ok := mem["optimization"].(bool); ok {
+			result.Memory.Optimization = v
+		}
+	}
+	return result
+}
+
+func toJvmMap(s *sdk.WorkloadoptimizationV1JVMSettings) []map[string]any {
+	if s == nil {
+		return nil
+	}
+	m := map[string]any{}
+	if s.AutoInstrument != nil {
+		m["auto_instrument"] = *s.AutoInstrument
+	}
+	if s.Memory != nil {
+		m["memory"] = []map[string]any{{
+			"optimization": s.Memory.Optimization,
+		}}
+	}
+	if len(m) == 0 {
+		return nil
+	}
+	return []map[string]any{m}
+}
+
 func getWorkloadScalingPolicyByName(ctx context.Context, client sdk.ClientWithResponsesInterface, clusterID, name string) (*sdk.WorkloadoptimizationV1WorkloadScalingPolicy, error) {
 	list, err := client.WorkloadOptimizationAPIListWorkloadScalingPoliciesWithResponse(ctx, clusterID)
-	if checkErr := sdk.CheckOKResponse(list, err); checkErr != nil {
-		return nil, checkErr
+	if e := checkIfRetryable(list, err); e != nil {
+		return nil, e
 	}
 
 	for _, sp := range list.JSON200.Items {
@@ -1057,4 +1981,220 @@ func getWorkloadScalingPolicyByName(ctx context.Context, client sdk.ClientWithRe
 		}
 	}
 	return nil, fmt.Errorf("policy with name %q not found", name)
+}
+
+func toAssignmentRules(in map[string]any) (*[]sdk.WorkloadoptimizationV1ScalingPolicyAssignmentRule, error) {
+	if len(in) == 0 {
+		return nil, nil
+	}
+
+	rules, ok := in["rules"].([]any)
+	if !ok || len(rules) == 0 {
+		return &[]sdk.WorkloadoptimizationV1ScalingPolicyAssignmentRule{}, nil
+	}
+
+	result := make([]sdk.WorkloadoptimizationV1ScalingPolicyAssignmentRule, len(rules))
+	for i, rule := range rules {
+		ruleMap := rule.(map[string]any)
+
+		nsRules, err := toNamespaceAssignmentRule(ruleMap)
+		if err != nil {
+			return nil, fmt.Errorf("field assignment_rules[%d].namespace: %w", i, err)
+		}
+
+		wRules, err := toWorkloadAssignmentRule(ruleMap)
+		if err != nil {
+			return nil, fmt.Errorf("field assignment_rules[%d].workload: %w", i, err)
+		}
+		if nsRules == nil && wRules == nil {
+			continue
+		}
+		result[i] = sdk.WorkloadoptimizationV1ScalingPolicyAssignmentRule{
+			Workload:  wRules,
+			Namespace: nsRules,
+		}
+	}
+
+	return &result, nil
+}
+
+func toNamespaceAssignmentRule(ruleMap map[string]any) (*sdk.WorkloadoptimizationV1KubernetesNamespaceMatcher, error) {
+	namespaceMap := getFirstElem(ruleMap, "namespace")
+	if namespaceMap == nil {
+		return nil, nil
+	}
+
+	namespaceMatcher := &sdk.WorkloadoptimizationV1KubernetesNamespaceMatcher{}
+
+	if names := readOptionalValue[[]any](namespaceMap, "names"); names != nil {
+		namespaceMatcher.Names = lo.ToPtr(toStringList(*names))
+	}
+
+	labels, err := toKubernetesLabelExpressionMatcher(namespaceMap)
+	if err != nil {
+		return nil, err
+	}
+	namespaceMatcher.LabelsExpressions = labels
+
+	return namespaceMatcher, nil
+}
+
+func toKubernetesLabelExpressionMatcher(namespaceMap map[string]any) (*[]sdk.WorkloadoptimizationV1KubernetesLabelExpressionMatcher, error) {
+	exprs := readOptionalValue[[]any](namespaceMap, "labels_expressions")
+	if exprs == nil {
+		return nil, nil
+	}
+	expressions := make([]sdk.WorkloadoptimizationV1KubernetesLabelExpressionMatcher, len(*exprs))
+	for j, expr := range *exprs {
+		exprMap := expr.(map[string]any)
+		key := readOptionalValue[string](exprMap, "key")
+
+		operator, err := mustGetValue[string](exprMap, "operator")
+		if err != nil {
+			return nil, err
+		}
+
+		expressions[j] = sdk.WorkloadoptimizationV1KubernetesLabelExpressionMatcher{
+			Key:      key,
+			Operator: toLabelSelectorOperator(*operator),
+		}
+
+		values := readOptionalValue[[]any](exprMap, "values")
+		if values != nil {
+			expressions[j].Values = toStringList(*values)
+		}
+	}
+	return &expressions, nil
+}
+
+func toWorkloadAssignmentRule(ruleMap map[string]any) (*sdk.WorkloadoptimizationV1KubernetesWorkloadMatcher, error) {
+	workloadMap := getFirstElem(ruleMap, "workload")
+	if workloadMap == nil {
+		return nil, nil
+	}
+
+	workloadMatcher := &sdk.WorkloadoptimizationV1KubernetesWorkloadMatcher{}
+
+	if gvk := readOptionalValue[[]any](workloadMap, "gvk"); gvk != nil {
+		workloadMatcher.Gvk = lo.ToPtr(toStringList(*gvk))
+	}
+
+	labels, err := toKubernetesLabelExpressionMatcher(workloadMap)
+	if err != nil {
+		return nil, err
+	}
+	workloadMatcher.LabelsExpressions = labels
+
+	return workloadMatcher, nil
+}
+
+func getFirstElem(in map[string]any, key string) map[string]any {
+	list, ok := in[key].([]any)
+	if !ok || len(list) == 0 {
+		return nil
+	}
+	elem, ok := list[0].(map[string]any)
+	if !ok {
+		return nil
+	}
+	return elem
+}
+
+func toLabelSelectorOperator(in string) sdk.WorkloadoptimizationV1KubernetesLabelSelectorOperator {
+	switch in {
+	case K8sLabelInOperator:
+		return sdk.KUBERNETESLABELSELECTOROPIN
+	case K8sLabelNotInOperator:
+		return sdk.KUBERNETESLABELSELECTOROPNOTIN
+	case K8sLabelExistsOperator:
+		return sdk.KUBERNETESLABELSELECTOROPEXISTS
+	case K8sLabelDoesNotExistOperator:
+		return sdk.KUBERNETESLABELSELECTOROPDOESNOTEXIST
+	case K8sLabelContainsOperator:
+		return sdk.KUBERNETESLABELSELECTOROPCONTAINS
+	case K8sLabelRegexOperator:
+		return sdk.KUBERNETESLABELSELECTOROPREGEX
+	}
+	return sdk.KUBERNETESLABELSELECTOROPUNSPECIFIED
+}
+
+func toAssignmentRulesMap(previous map[string]any, rules *[]sdk.WorkloadoptimizationV1ScalingPolicyAssignmentRule) []any {
+	if rules == nil {
+		return nil
+	}
+
+	if len(*rules) == 0 && len(previous) == 0 {
+		return nil
+	}
+
+	result := make([]map[string]any, len(*rules))
+	for i, rule := range *rules {
+		ruleMap := make(map[string]any)
+
+		if rule.Namespace != nil {
+			namespaceMap := make(map[string]any)
+
+			if rule.Namespace.Names != nil {
+				namespaceMap["names"] = *rule.Namespace.Names
+			}
+
+			if rule.Namespace.LabelsExpressions != nil && len(*rule.Namespace.LabelsExpressions) > 0 {
+				namespaceMap["labels_expressions"] = toK8sLabelsExpressionsMap(*rule.Namespace.LabelsExpressions)
+			}
+
+			ruleMap["namespace"] = []map[string]any{namespaceMap}
+		}
+
+		if rule.Workload != nil {
+			workloadMap := make(map[string]any)
+
+			if rule.Workload.Gvk != nil && len(*rule.Workload.Gvk) > 0 {
+				workloadMap["gvk"] = *rule.Workload.Gvk
+			}
+
+			if rule.Workload.LabelsExpressions != nil && len(*rule.Workload.LabelsExpressions) > 0 {
+				workloadMap["labels_expressions"] = toK8sLabelsExpressionsMap(*rule.Workload.LabelsExpressions)
+			}
+
+			ruleMap["workload"] = []map[string]any{workloadMap}
+		}
+
+		result[i] = ruleMap
+	}
+
+	return []any{
+		map[string]any{
+			"rules": result,
+		},
+	}
+}
+
+func toK8sLabelsExpressionsMap(in []sdk.WorkloadoptimizationV1KubernetesLabelExpressionMatcher) []map[string]any {
+	expressions := make([]map[string]any, len(in))
+	for j, expr := range in {
+		expressions[j] = map[string]any{
+			"key":      expr.Key,
+			"operator": labelSelectorOperatorMap(expr.Operator),
+			"values":   expr.Values,
+		}
+	}
+	return expressions
+}
+
+func labelSelectorOperatorMap(in sdk.WorkloadoptimizationV1KubernetesLabelSelectorOperator) string {
+	switch in {
+	case sdk.KUBERNETESLABELSELECTOROPIN:
+		return K8sLabelInOperator
+	case sdk.KUBERNETESLABELSELECTOROPNOTIN:
+		return K8sLabelNotInOperator
+	case sdk.KUBERNETESLABELSELECTOROPEXISTS:
+		return K8sLabelExistsOperator
+	case sdk.KUBERNETESLABELSELECTOROPDOESNOTEXIST:
+		return K8sLabelDoesNotExistOperator
+	case sdk.KUBERNETESLABELSELECTOROPCONTAINS:
+		return K8sLabelContainsOperator
+	case sdk.KUBERNETESLABELSELECTOROPREGEX:
+		return K8sLabelRegexOperator
+	}
+	return "unspecified"
 }

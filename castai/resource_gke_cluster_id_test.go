@@ -72,6 +72,7 @@ func TestGKEClusterIdResourceReadContext(t *testing.T) {
 client_service_account = client-service-account
 location = eu-central-1
 name = gke-cluster
+organization_id = 2836f775-aaaa-eeee-bbbb-3d3c29512GKE
 project_id = project-id
 Tainted = false
 `, data.State().String())

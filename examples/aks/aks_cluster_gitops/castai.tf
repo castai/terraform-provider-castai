@@ -4,7 +4,7 @@ resource "castai_aks_cluster" "this" {
   region          = var.cluster_region
   subscription_id = data.azurerm_subscription.current.subscription_id
   tenant_id       = data.azurerm_subscription.current.tenant_id
-  client_id       = azuread_application.castai.application_id
+  client_id       = azuread_application.castai.client_id
   client_secret   = azuread_application_password.castai.value
 
 

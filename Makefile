@@ -1,27 +1,19 @@
 SHELL := /bin/bash
 
-export API_TAGS ?= ExternalClusterAPI,PoliciesAPI,NodeConfigurationAPI,NodeTemplatesAPI,AuthTokenAPI,ScheduledRebalancingAPI,InventoryAPI,UsersAPI,OperationsAPI,EvictorAPI,SSOAPI,CommitmentsAPI,WorkloadOptimizationAPI,ServiceAccountsAPI,RbacServiceAPI
-export SWAGGER_LOCATION ?= https://api.cast.ai/v1/spec/openapi.json
+export API_HOST ?= api.cast.ai
+export API_TAGS ?= ExternalClusterAPI,PoliciesAPI,NodeConfigurationAPI,NodeTemplatesAPI,AuthTokenAPI,ScheduledRebalancingAPI,InventoryAPI,UsersAPI,OperationsAPI,EvictorAPI,SSOAPI,CommitmentsAPI,WorkloadOptimizationAPI,ServiceAccountsAPI,RbacServiceAPI,RuntimeSecurityAPI,AllocationGroupAPI,DboAPI
+export SWAGGER_LOCATION ?= https://$(API_HOST)/v1/spec/openapi.json
+
+#  To add a new SDK, add a line here in the format: package_name:ApiTagName:spec_location
+SDK_SPECS := \
+	cluster_autoscaler:HibernationSchedulesAPI:https://$(API_HOST)/spec/cluster-autoscaler/openapi.yaml \
+	organization_management:EnterpriseAPI:https://$(API_HOST)/spec/organization-management/openapi.yaml \
+	patching_engine:PodMutationsAPI:https://$(API_HOST)/spec/patching-engine/openapi.yaml
+
+OMNI_SDK_SPECS := \
+	omni:EdgeLocationsAPI,ClustersAPI,EdgeConfigurationsAPI:https://$(API_HOST)/spec/omni/openapi.yaml
 
 default: build
-
-.PHONY: init-examples
-init-examples:
-	@echo "==> Creating symlinks for example/ projects to terraform-provider-castai binary"; \
-	TF_PROVIDER_FILENAME=terraform-provider-castai; \
-	GOOS=`go env GOOS`; \
-	GOARCH=`go env GOARCH`; \
-	git fetch --tags > /dev/null; \
-	NEXT_MINOR=`git tag --list 'v*'|sort -V|tail -n 1| awk -F. -v OFS=. '{$$NF += 1 ; print}'`; \
-	echo "using next possible minor version without 'v' prefix: $${NEXT_MINOR:1}"; \
-	for examples in examples/eks examples/gke examples/aks ; do \
-		for tfproject in $$examples/* ; do \
-			TF_PROJECT_PLUGIN_PATH="$${tfproject}/terraform.d/plugins/registry.terraform.io/castai/castai/$${NEXT_MINOR:1}/$${GOOS}_$${GOARCH}"; \
-			echo "creating $${TF_PROVIDER_FILENAME} symlink to $${TF_PROJECT_PLUGIN_PATH}/$${TF_PROVIDER_FILENAME}"; \
-			mkdir -p "${PWD}/$${TF_PROJECT_PLUGIN_PATH}"; \
-			ln -sf "${PWD}/terraform-provider-castai" "$${TF_PROJECT_PLUGIN_PATH}"; \
-		done \
-	done
 
 .PHONY: format-tf
 format-tf:
@@ -29,8 +21,31 @@ format-tf:
 
 .PHONY: generate-sdk
 generate-sdk:
-	echo "==> Generating castai sdk client"
+	@echo "==> Generating main sdk client"
+	$(MAKE) generate-sdk-new SPECS="$(SDK_SPECS)"
 	go generate castai/sdk/generate.go
+
+.PHONY: generate-omni-sdk
+generate-omni-sdk:
+	@echo "==> Generating omni sdk client"
+	$(MAKE) generate-sdk-new SPECS="$(OMNI_SDK_SPECS)"
+
+.PHONY: generate-sdk-new
+# Internal target: run oapi-codegen for the given SPECS variable.
+# Not meant to be called directly; use generate-sdk or generate-omni-sdk.
+generate-sdk-new:
+	@echo "==> Generating api sdk clients"
+	@go install github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen@v2.4.1
+	@go install github.com/golang/mock/mockgen
+	@cd castai/sdk && for spec in $(SPECS); do \
+		IFS=':' read -r pkg tag loc <<< "$$spec"; \
+		[ -z "$$pkg" ] && continue; \
+		echo "generating sdk for: $$tag from $$loc"; \
+		mkdir -p $$pkg/mock && \
+		oapi-codegen -o $$pkg/api.gen.go --old-config-style -generate types -include-tags $$tag -package $$pkg $$loc && \
+		oapi-codegen -o $$pkg/client.gen.go --old-config-style -templates codegen/templates -generate client -include-tags $$tag -package $$pkg $$loc && \
+		mockgen -source $$pkg/client.gen.go -destination $$pkg/mock/client.go . ClientInterface; \
+	done
 
 # The following command also rewrites existing documentation
 .PHONY: generate-docs
@@ -42,7 +57,6 @@ generate-docs:
 generate-all: generate-sdk generate-docs
 
 .PHONY: build
-build: init-examples
 build: generate-sdk
 build: generate-docs
 build:
@@ -56,23 +70,38 @@ lint:
 	golangci-lint run
 
 .PHONY: test
-test:
+test: build
 	@echo "==> Running tests"
 	go test $$(go list ./... | grep -v vendor/ | grep -v e2e)  -timeout=1m -parallel=4
 
-.PHONY: testacc
-testacc:
-	@echo "==> Running acceptance tests"
-	TF_ACC=1 go test ./castai/... '-run=^TestAcc' -v -timeout 50m
+.PHONY: testacc-eks
+testacc-eks: build
+	@echo "==> Running EKS acceptance tests"
+	TF_ACC=1 go test ./castai/... '-run=^TestAccEKS_' -v -timeout 50m
+
+.PHONY: testacc-gke
+testacc-gke: build
+	@echo "==> Running GKE acceptance tests"
+	TF_ACC=1 go test ./castai/... '-run=^TestAccGKE_' -v -timeout 50m
+
+.PHONY: testacc-aks
+testacc-aks: build
+	@echo "==> Running AKS acceptance tests"
+	TF_ACC=1 go test ./castai/... '-run=^TestAccAKS_' -v -timeout 50m
+
+.PHONY: testacc-cloud-agnostic
+testacc-cloud-agnostic: build
+	@echo "==> Running cloud agnostic acceptance tests"
+	TF_ACC=1 go test ./castai/... '-run=^TestAccCloudAgnostic_' -v -timeout 50m
 
 .PHONY: validate-terraform-examples
 validate-terraform-examples:
-	for examples in examples/eks examples/gke examples/aks ; do \
-		for tfproject in $$examples/* ; do \
-			echo "==> Validating terraform example $$tfproject"; \
-			cd $$tfproject; \
-			terraform init; \
-			terraform validate; \
-			cd -; \
-		done \
-	done
+	@.ci/scripts/validate-examples.sh
+
+.PHONY: plan-terraform-example
+plan-terraform-example:
+	@if [ -z "$(EXAMPLE_DIR)" ]; then \
+		echo "Error: EXAMPLE_DIR is required. Usage: make plan-terraform-example EXAMPLE_DIR=examples/.../..."; \
+		exit 1; \
+	fi
+	@.ci/scripts/plan-example.sh "$(EXAMPLE_DIR)"

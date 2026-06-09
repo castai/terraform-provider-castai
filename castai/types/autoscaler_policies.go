@@ -15,7 +15,7 @@ type UnschedulablePods struct {
 	Headroom        *Headroom        `mapstructure:"headroom" json:"headroom,omitempty"`
 	HeadroomSpot    *Headroom        `mapstructure:"headroom_spot" json:"headroomSpot,omitempty"`
 	NodeConstraints *NodeConstraints `mapstructure:"node_constraints" json:"nodeConstraints,omitempty"`
-	CustomInstances bool             `mapstructure:"custom_instances_enabled" json:"customInstancesEnabled"`
+	CustomInstances *bool            `mapstructure:"custom_instances_enabled" json:"customInstancesEnabled,omitempty"`
 	PodPinner       *PodPinner       `mapstructure:"pod_pinner" json:"podPinner,omitempty"`
 }
 

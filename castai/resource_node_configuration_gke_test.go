@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
 
 const (
@@ -15,7 +15,7 @@ const (
 	acceptanceTestClusterSubnetworkName = "ext-prov-e2e-shared-ip-range-nodes"
 )
 
-func TestAccResourceNodeConfiguration_gke(t *testing.T) {
+func TestAccGKE_ResourceNodeConfiguration(t *testing.T) {
 	rName := fmt.Sprintf("%v-node-cfg-%v", ResourcePrefix, acctest.RandString(8))
 	resourceName := "castai_node_configuration.test"
 	clusterName := "tf-core-acc-20230723"
@@ -37,10 +37,50 @@ func TestAccResourceNodeConfiguration_gke(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "eks.#", "0"),
 					resource.TestCheckResourceAttr(resourceName, "kops.#", "0"),
 					resource.TestCheckResourceAttr(resourceName, "gke.0.max_pods_per_node", "31"),
+					resource.TestCheckResourceAttr(resourceName, "gke.0.max_pods_per_node_formula", ""),
 					resource.TestCheckResourceAttr(resourceName, "gke.0.disk_type", "pd-balanced"),
 					resource.TestCheckResourceAttr(resourceName, "gke.0.network_tags.0", "ab"),
 					resource.TestCheckResourceAttr(resourceName, "gke.0.network_tags.1", "bc"),
 					resource.TestCheckResourceAttr(resourceName, "gke.0.zones.#", "0"),
+					resource.TestCheckResourceAttr(resourceName, "gke.0.on_host_maintenance", "MIGRATE"),
+				),
+			},
+			{
+				Config: testAccGKENodeConfigurationConfigWithoutMaxPods(rName, clusterName, projectID),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "name", rName),
+					resource.TestCheckResourceAttr(resourceName, "disk_cpu_ratio", "35"),
+					resource.TestCheckResourceAttr(resourceName, "drain_timeout_sec", "10"),
+					resource.TestCheckResourceAttr(resourceName, "min_disk_size", "122"),
+					resource.TestCheckResourceAttr(resourceName, "aks.#", "0"),
+					resource.TestCheckResourceAttr(resourceName, "eks.#", "0"),
+					resource.TestCheckResourceAttr(resourceName, "kops.#", "0"),
+					resource.TestCheckResourceAttr(resourceName, "gke.0.max_pods_per_node", "110"),
+					resource.TestCheckResourceAttr(resourceName, "gke.0.max_pods_per_node_formula", ""),
+					resource.TestCheckResourceAttr(resourceName, "gke.0.disk_type", "pd-balanced"),
+					resource.TestCheckResourceAttr(resourceName, "gke.0.network_tags.0", "ab"),
+					resource.TestCheckResourceAttr(resourceName, "gke.0.network_tags.1", "bc"),
+					resource.TestCheckResourceAttr(resourceName, "gke.0.zones.#", "0"),
+					resource.TestCheckResourceAttr(resourceName, "gke.0.on_host_maintenance", "MIGRATE"),
+				),
+			},
+			{
+				Config: testAccGKENodeConfigurationConfigWithMaxPodsFormula(rName, clusterName, projectID),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "name", rName),
+					resource.TestCheckResourceAttr(resourceName, "disk_cpu_ratio", "35"),
+					resource.TestCheckResourceAttr(resourceName, "drain_timeout_sec", "10"),
+					resource.TestCheckResourceAttr(resourceName, "min_disk_size", "122"),
+					resource.TestCheckResourceAttr(resourceName, "aks.#", "0"),
+					resource.TestCheckResourceAttr(resourceName, "eks.#", "0"),
+					resource.TestCheckResourceAttr(resourceName, "kops.#", "0"),
+					resource.TestCheckResourceAttr(resourceName, "gke.0.max_pods_per_node", "0"),
+					resource.TestCheckResourceAttr(resourceName, "gke.0.max_pods_per_node_formula", "NUM_CPU"),
+					resource.TestCheckResourceAttr(resourceName, "gke.0.disk_type", "pd-balanced"),
+					resource.TestCheckResourceAttr(resourceName, "gke.0.network_tags.0", "ab"),
+					resource.TestCheckResourceAttr(resourceName, "gke.0.network_tags.1", "bc"),
+					resource.TestCheckResourceAttr(resourceName, "gke.0.zones.#", "0"),
+					resource.TestCheckResourceAttr(resourceName, "gke.0.on_host_maintenance", "MIGRATE"),
 				),
 			},
 			{
@@ -52,6 +92,7 @@ func TestAccResourceNodeConfiguration_gke(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "eks.#", "0"),
 					resource.TestCheckResourceAttr(resourceName, "kops.#", "0"),
 					resource.TestCheckResourceAttr(resourceName, "gke.0.max_pods_per_node", "32"),
+					resource.TestCheckResourceAttr(resourceName, "gke.0.max_pods_per_node_formula", ""),
 					resource.TestCheckResourceAttr(resourceName, "gke.0.disk_type", "pd-ssd"),
 					resource.TestCheckResourceAttr(resourceName, "gke.0.network_tags.0", "bb"),
 					resource.TestCheckResourceAttr(resourceName, "gke.0.network_tags.1", "dd"),
@@ -80,6 +121,35 @@ func TestAccResourceNodeConfiguration_gke(t *testing.T) {
 }
 
 func testAccGKENodeConfigurationConfig(rName, clusterName, projectID string) string {
+	const gkeParams = `
+		max_pods_per_node = 31
+		network_tags = ["ab", "bc"]
+		disk_type = "pd-balanced"
+		on_host_maintenance = "MIGRATE"
+	`
+	return testAccGKENodeConfigurationConfigWithGKEConfig(rName, clusterName, projectID, gkeParams)
+}
+
+func testAccGKENodeConfigurationConfigWithoutMaxPods(rName, clusterName, projectID string) string {
+	const gkeParams = `
+		network_tags = ["ab", "bc"]
+		disk_type = "pd-balanced"
+		on_host_maintenance = "MIGRATE"
+	`
+	return testAccGKENodeConfigurationConfigWithGKEConfig(rName, clusterName, projectID, gkeParams)
+}
+
+func testAccGKENodeConfigurationConfigWithMaxPodsFormula(rName, clusterName, projectID string) string {
+	const gkeParams = `
+		max_pods_per_node_formula = "NUM_CPU"
+		network_tags = ["ab", "bc"]
+		disk_type = "pd-balanced"
+		on_host_maintenance = "MIGRATE"
+	`
+	return testAccGKENodeConfigurationConfigWithGKEConfig(rName, clusterName, projectID, gkeParams)
+}
+
+func testAccGKENodeConfigurationConfigWithGKEConfig(rName, clusterName, projectID, gkeParams string) string {
 	return ConfigCompose(testAccGKEClusterConfig(rName, clusterName, projectID), fmt.Sprintf(`
 resource "castai_node_configuration" "test" {
   name   		    = %[1]q
@@ -92,9 +162,7 @@ resource "castai_node_configuration" "test" {
     env = "development"
   }
   gke {
-	max_pods_per_node = 31
-    network_tags = ["ab", "bc"]
-    disk_type = "pd-balanced"
+		%s
   }
 }
 
@@ -102,7 +170,7 @@ resource "castai_node_configuration_default" "test" {
   cluster_id       = castai_gke_cluster.test.id
   configuration_id = castai_node_configuration.test.id
 }
-`, rName))
+`, rName, gkeParams))
 }
 
 func testAccGKENodeConfigurationUpdated(rName, clusterName, projectID string) string {

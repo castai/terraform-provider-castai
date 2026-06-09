@@ -17,8 +17,9 @@ import (
 	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	sdkterraform "github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/stretchr/testify/require"
 
 	"github.com/castai/terraform-provider-castai/castai/sdk"
@@ -46,6 +47,16 @@ func TestNodeTemplateResourceReadContext(t *testing.T) {
 				"configurationId": "7dc4f922-29c9-4377-889c-0c8c5fb8d497",
 				"configurationName": "default",
 				"isEnabled": true,
+			   "gpu": {
+				 "enableTimeSharing": true,
+				 "defaultSharedClientsPerGpu": 10,
+				 "userManagedGpuDrivers": true,
+				 "sharingConfiguration": {
+					"A100": {
+					  "sharedClientsPerGpu": 5
+					}
+				 }
+				},
 				"name": "gpu",
 				"constraints": {
 				  "spot": false,
@@ -54,6 +65,8 @@ func TestNodeTemplateResourceReadContext(t *testing.T) {
 				  "fallbackRestoreRateSeconds": 0,
 				  "enableSpotDiversity": false,
 				  "spotDiversityPriceIncreaseLimitPercent": 20,
+				  "enableSpotReliability": true,
+				  "spotReliabilityPriceIncreaseLimitPercent": 10,
 				  "spotInterruptionPredictionsEnabled": true,
 				  "spotInterruptionPredictionsType": "aws-rebalance-recommendations",
 				  "storageOptimized": true,
@@ -80,7 +93,8 @@ func TestNodeTemplateResourceReadContext(t *testing.T) {
 					  "NVIDIA"
 					],
 					"includeNames": [],
-					"excludeNames": []
+					"excludeNames": [],
+					"fractionalGPUs": "ENABLED"
 				  },
 				  "customPriority": [
 				    {
@@ -132,7 +146,8 @@ func TestNodeTemplateResourceReadContext(t *testing.T) {
 				  "minNodes": 0
 				},
 				"customInstancesEnabled": true,
-				"customInstancesWithExtendedMemoryEnabled": true
+				"customInstancesWithExtendedMemoryEnabled": true,
+				"edgeLocationIds": ["a1b2c3d4-e5f6-7890-abcd-ef1234567890", "b2c3d4e5-f6a7-8901-bcde-f12345678901"]
 			  }
 			}
 		  ]
@@ -147,10 +162,11 @@ func TestNodeTemplateResourceReadContext(t *testing.T) {
 		FieldClusterId:        cty.StringVal(clusterId),
 		FieldNodeTemplateName: cty.StringVal("gpu"),
 	})
-	state := terraform.NewInstanceStateShimmedFromValue(val, 0)
+	state := sdkterraform.NewInstanceStateShimmedFromValue(val, 0)
 	state.ID = "gpu"
 
 	data := resource.Data(state)
+	// spew.Dump(data)
 	result := resource.ReadContext(ctx, data, provider)
 	r.Nil(result)
 	r.False(result.HasError())
@@ -188,6 +204,7 @@ constraints.0.gpu.0.manufacturers.# = 1
 constraints.0.gpu.0.manufacturers.0 = NVIDIA
 constraints.0.gpu.0.max_count = 0
 constraints.0.gpu.0.min_count = 0
+constraints.0.gpu.0.fractional_gpus = enabled
 constraints.0.burstable_instances = 
 constraints.0.customer_specific = 
 constraints.0.instance_families.# = 1
@@ -223,11 +240,15 @@ constraints.0.resource_limits.0.cpu_limit_enabled = true
 constraints.0.resource_limits.0.cpu_limit_max_cores = 20
 constraints.0.spot = false
 constraints.0.spot_diversity_price_increase_limit_percent = 20
+constraints.0.spot_reliability_enabled = true
+constraints.0.spot_reliability_price_increase_limit_percent = 10
 constraints.0.spot_interruption_predictions_enabled = true
 constraints.0.spot_interruption_predictions_type = aws-rebalance-recommendations
 constraints.0.storage_optimized = false
 constraints.0.storage_optimized_state = enabled
 constraints.0.use_spot_fallbacks = false
+constraints.0.aws.# = 0
+constraints.0.bare_metal = unspecified
 custom_instances_enabled = true
 custom_instances_with_extended_memory_enabled = true
 custom_labels.% = 2
@@ -246,6 +267,18 @@ name = gpu
 rebalancing_config_min_nodes = 0
 should_taint = true
 Tainted = false
+clm_enabled = false
+edge_location_ids.# = 2
+edge_location_ids.0 = a1b2c3d4-e5f6-7890-abcd-ef1234567890
+edge_location_ids.1 = b2c3d4e5-f6a7-8901-bcde-f12345678901
+gpu.# = 1
+gpu.0.default_shared_clients_per_gpu = 10
+gpu.0.enable_time_sharing = true
+gpu.0.sharing_strategy = 
+gpu.0.user_managed_gpu_drivers = true
+gpu.0.sharing_configuration.# = 1
+gpu.0.sharing_configuration.0.gpu_name = A100
+gpu.0.sharing_configuration.0.shared_clients_per_gpu = 5
 `, "\n"),
 		strings.Split(data.State().String(), "\n"),
 	)
@@ -334,6 +367,101 @@ func Test_flattenNodeAffinity(t *testing.T) {
 	}
 }
 
+func Test_flattenPriceAdjustmentConfiguration(t *testing.T) {
+	tt := []struct {
+		name  string
+		input *sdk.NodetemplatesV1PriceAdjustmentConfiguration
+		want  []map[string]any
+	}{
+		{
+			name:  "nil input returns nil",
+			input: nil,
+			want:  nil,
+		},
+		{
+			name:  "empty configuration",
+			input: &sdk.NodetemplatesV1PriceAdjustmentConfiguration{},
+			want:  []map[string]any{{}},
+		},
+		{
+			name: "configuration with adjustments",
+			input: &sdk.NodetemplatesV1PriceAdjustmentConfiguration{
+				InstanceTypeAdjustments: &map[string]string{
+					"r7a.xlarge": "1.0",
+					"r7i.xlarge": "1.20",
+					"c6a.xlarge": "0.90",
+				},
+			},
+			want: []map[string]any{
+				{
+					FieldNodeTemplateInstanceTypeAdjustments: map[string]string{
+						"r7a.xlarge": "1.0",
+						"r7i.xlarge": "1.20",
+						"c6a.xlarge": "0.90",
+					},
+				},
+			},
+		},
+	}
+
+	for _, tc := range tt {
+		t.Run(tc.name, func(t *testing.T) {
+			r := require.New(t)
+			got := flattenPriceAdjustmentConfiguration(tc.input)
+			r.Equal(tc.want, got)
+		})
+	}
+}
+
+func Test_toPriceAdjustmentConfiguration(t *testing.T) {
+	tt := []struct {
+		name  string
+		input map[string]any
+		want  *sdk.NodetemplatesV1PriceAdjustmentConfiguration
+	}{
+		{
+			name:  "nil input returns nil",
+			input: nil,
+			want:  nil,
+		},
+		{
+			name:  "empty map returns empty configuration",
+			input: map[string]any{},
+			want:  &sdk.NodetemplatesV1PriceAdjustmentConfiguration{},
+		},
+		{
+			name: "map with adjustments",
+			input: map[string]any{
+				FieldNodeTemplateInstanceTypeAdjustments: map[string]any{
+					"r7a.xlarge": "1.0",
+					"r7i.xlarge": "1.20",
+				},
+			},
+			want: &sdk.NodetemplatesV1PriceAdjustmentConfiguration{
+				InstanceTypeAdjustments: &map[string]string{
+					"r7a.xlarge": "1.0",
+					"r7i.xlarge": "1.20",
+				},
+			},
+		},
+		{
+			name: "empty adjustments map",
+			input: map[string]any{
+				FieldNodeTemplateInstanceTypeAdjustments: map[string]any{},
+			},
+			want: &sdk.NodetemplatesV1PriceAdjustmentConfiguration{},
+		},
+	}
+
+	for _, tc := range tt {
+		t.Run(tc.name, func(t *testing.T) {
+			r := require.New(t)
+			got := toPriceAdjustmentConfiguration(tc.input)
+			r.Equal(tc.want, got)
+		})
+	}
+}
+
 func TestNodeTemplateResourceReadContextEmptyList(t *testing.T) {
 	r := require.New(t)
 	mockctrl := gomock.NewController(t)
@@ -352,19 +480,18 @@ func TestNodeTemplateResourceReadContextEmptyList(t *testing.T) {
 		NodeTemplatesAPIListNodeTemplates(gomock.Any(), clusterId, &sdk.NodeTemplatesAPIListNodeTemplatesParams{IncludeDefault: lo.ToPtr(true)}).
 		Return(&http.Response{StatusCode: 200, Body: body, Header: map[string][]string{"Content-Type": {"json"}}}, nil)
 
-	resource := resourceNodeTemplate()
+	nodeTemplate := resourceNodeTemplate()
 	val := cty.ObjectVal(map[string]cty.Value{
 		FieldClusterId:        cty.StringVal(clusterId),
 		FieldNodeTemplateName: cty.StringVal("gpu"),
 	})
-	state := terraform.NewInstanceStateShimmedFromValue(val, 0)
+	state := sdkterraform.NewInstanceStateShimmedFromValue(val, 0)
 	state.ID = "gpu"
 
-	data := resource.Data(state)
-	result := resource.ReadContext(ctx, data, provider)
-	r.NotNil(result)
-	r.True(result.HasError())
-	r.Equal(result[0].Summary, "failed to find node template with name: gpu")
+	data := nodeTemplate.Data(state)
+	result := nodeTemplate.ReadContext(ctx, data, provider)
+
+	r.Nil(result)
 }
 
 func TestNodeTemplateResourceCreate_defaultNodeTemplate(t *testing.T) {
@@ -390,6 +517,7 @@ func TestNodeTemplateResourceCreate_defaultNodeTemplate(t *testing.T) {
 				"name": "default-by-castai",
 				"isEnabled": true,
 				"isDefault": true,
+				"clmEnabled": false,
 				"constraints": {
 				  "spot": false,
 				  "onDemand": true,
@@ -430,9 +558,91 @@ func TestNodeTemplateResourceCreate_defaultNodeTemplate(t *testing.T) {
 		FieldNodeTemplateIsDefault:                                cty.BoolVal(true),
 		FieldNodeTemplateCustomInstancesEnabled:                   cty.BoolVal(true),
 		FieldNodeTemplateCustomInstancesWithExtendedMemoryEnabled: cty.BoolVal(true),
+		FieldNodeTemplateClmEnabled:                               cty.BoolVal(false),
 	})
-	state := terraform.NewInstanceStateShimmedFromValue(val, 0)
+	state := sdkterraform.NewInstanceStateShimmedFromValue(val, 0)
 	state.ID = "default-by-castai"
+
+	data := resource.Data(state)
+	result := resource.CreateContext(ctx, data, provider)
+	r.Nil(result)
+	r.False(result.HasError())
+}
+
+func TestNodeTemplateResourceCreate_customNodeTemplate(t *testing.T) {
+	r := require.New(t)
+	mockctrl := gomock.NewController(t)
+	mockClient := mock_sdk.NewMockClientInterface(mockctrl)
+
+	ctx := context.Background()
+	provider := &ProviderConfig{
+		api: &sdk.ClientWithResponses{
+			ClientInterface: mockClient,
+		},
+	}
+
+	name := "custom-template"
+	clusterId := "b6bfc074-a267-400f-b8f1-db0850c369b1"
+	templateResponse := `
+		{
+		  "configurationId": "7dc4f922-29c9-4377-889c-0c8c5fb8d497",
+		  "configurationName": "default",
+		  "name": "custom-template",
+		  "isEnabled": false,
+		  "clmEnabled": true,
+		  "constraints": {
+		    "spot": false,
+		    "onDemand": true,
+		    "minCpu": 10,
+		    "maxCpu": 10000,
+		    "architectures": ["amd64", "arm64"],
+		    "resourceLimits": {
+		  	"cpuLimitEnabled": true,
+		  	"cpuLimitMaxCores": 20
+		    }
+		  },
+		  "version": "3",
+		  "shouldTaint": true,
+		  "customLabels": {},
+		  "customTaints": [],
+		  "rebalancingConfig": {
+		    "minNodes": 0
+		  },
+		  "customInstancesEnabled": true,
+		  "customInstancesWithExtendedMemoryEnabled": true
+	    }
+	`
+
+	templateBody := io.NopCloser(bytes.NewReader([]byte(templateResponse)))
+	listBody := io.NopCloser(bytes.NewReader([]byte(fmt.Sprintf(`
+		{
+		  "items": [
+            {
+              "template": %s
+            }
+		  ]
+		}
+	`, templateResponse))))
+
+	mockClient.EXPECT().
+		NodeTemplatesAPIListNodeTemplates(gomock.Any(), clusterId, &sdk.NodeTemplatesAPIListNodeTemplatesParams{IncludeDefault: lo.ToPtr(true)}).
+		Return(&http.Response{StatusCode: 200, Body: listBody, Header: map[string][]string{"Content-Type": {"json"}}}, nil)
+	mockClient.EXPECT().
+		NodeTemplatesAPICreateNodeTemplate(gomock.Any(), clusterId, gomock.Any()).
+		Return(&http.Response{StatusCode: 200, Body: templateBody, Header: map[string][]string{"Content-Type": {"json"}}}, nil)
+
+	resource := resourceNodeTemplate()
+	val := cty.ObjectVal(map[string]cty.Value{
+		FieldClusterId:                                            cty.StringVal(clusterId),
+		FieldNodeTemplateName:                                     cty.StringVal(name),
+		FieldNodeTemplateIsDefault:                                cty.BoolVal(true),
+		FieldNodeTemplateIsEnabled:                                cty.BoolVal(false),
+		FieldNodeTemplateCustomInstancesEnabled:                   cty.BoolVal(true),
+		FieldNodeTemplateCustomInstancesWithExtendedMemoryEnabled: cty.BoolVal(true),
+		FieldNodeTemplateClmEnabled:                               cty.BoolVal(true),
+	})
+	state := sdkterraform.NewInstanceStateShimmedFromValue(val, 0)
+	state.ID = name
 
 	data := resource.Data(state)
 	result := resource.CreateContext(ctx, data, provider)
@@ -492,7 +702,7 @@ func TestNodeTemplateResourceDelete_defaultNodeTemplate(t *testing.T) {
 		FieldClusterId:        cty.StringVal(clusterId),
 		FieldNodeTemplateName: cty.StringVal("default-by-castai"),
 	})
-	state := terraform.NewInstanceStateShimmedFromValue(val, 0)
+	state := sdkterraform.NewInstanceStateShimmedFromValue(val, 0)
 	state.ID = "default-by-castai"
 
 	data := resource.Data(state)
@@ -511,15 +721,15 @@ func TestNodeTemplateResourceDelete_defaultNodeTemplate(t *testing.T) {
 		" false).", result[0].Detail)
 }
 
-func TestAccResourceNodeTemplate_basic(t *testing.T) {
+func TestAccEKS_ResourceNodeTemplate_basic(t *testing.T) {
 	rName := fmt.Sprintf("%v-node-template-%v", ResourcePrefix, acctest.RandString(8))
 	resourceName := "castai_node_template.test"
 	clusterName, _ := lo.Coalesce(os.Getenv("CLUSTER_NAME"), "cost-terraform")
 
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:          func() { testAccPreCheck(t) },
-		ProviderFactories: providerFactories,
-		CheckDestroy:      testAccCheckNodeTemplateDestroy(rName),
+	resource.Test(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		CheckDestroy:             testAccCheckNodeTemplateDestroy(rName),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNodeTemplateConfig(rName, clusterName),
@@ -527,6 +737,7 @@ func TestAccResourceNodeTemplate_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "name", rName),
 					resource.TestCheckResourceAttr(resourceName, "is_enabled", "true"),
 					resource.TestCheckResourceAttr(resourceName, "should_taint", "true"),
+					resource.TestCheckResourceAttr(resourceName, "clm_enabled", "false"),
 					resource.TestCheckResourceAttr(resourceName, "custom_instances_enabled", "false"),
 					resource.TestCheckResourceAttr(resourceName, "custom_instances_with_extended_memory_enabled", "false"),
 					resource.TestCheckResourceAttr(resourceName, "custom_labels.%", "2"),
@@ -549,6 +760,7 @@ func TestAccResourceNodeTemplate_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.gpu.0.manufacturers.0", "NVIDIA"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.gpu.0.include_names.#", "0"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.gpu.0.exclude_names.#", "0"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.gpu.0.fractional_gpus", "enabled"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.min_cpu", "4"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.max_cpu", "100"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.use_spot_fallbacks", "true"),
@@ -583,6 +795,18 @@ func TestAccResourceNodeTemplate_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.resource_limits.#", "1"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.resource_limits.0.cpu_limit_enabled", "false"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.resource_limits.0.cpu_limit_max_cores", "0"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.aws.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.aws.0.capacity_reservations.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.aws.0.capacity_reservations.0.id", "cr-12345678901234567"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.aws.0.capacity_reservations.0.type", "ON_DEMAND_CAPACITY_RESERVATION"),
+					resource.TestCheckResourceAttr(resourceName, "edge_location_ids.#", "2"),
+					resource.TestCheckResourceAttrSet(resourceName, "edge_location_ids.0"),
+					resource.TestCheckResourceAttrSet(resourceName, "edge_location_ids.1"),
+					resource.TestCheckResourceAttr(resourceName, "price_adjustment_configuration.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "price_adjustment_configuration.0.instance_type_adjustments.%", "3"),
+					resource.TestCheckResourceAttr(resourceName, "price_adjustment_configuration.0.instance_type_adjustments.m5.xlarge", "1.0"),
+					resource.TestCheckResourceAttr(resourceName, "price_adjustment_configuration.0.instance_type_adjustments.m5.2xlarge", "1.10"),
+					resource.TestCheckResourceAttr(resourceName, "price_adjustment_configuration.0.instance_type_adjustments.c5.xlarge", "0.95"),
 				),
 			},
 			{
@@ -600,6 +824,7 @@ func TestAccResourceNodeTemplate_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "name", rName),
 					resource.TestCheckResourceAttr(resourceName, "is_enabled", "true"),
 					resource.TestCheckResourceAttr(resourceName, "should_taint", "true"),
+					resource.TestCheckResourceAttr(resourceName, "clm_enabled", "true"),
 					resource.TestCheckResourceAttr(resourceName, "custom_instances_enabled", "false"),
 					resource.TestCheckResourceAttr(resourceName, "custom_instances_with_extended_memory_enabled", "false"),
 					resource.TestCheckResourceAttr(resourceName, "custom_labels.%", "2"),
@@ -617,6 +842,7 @@ func TestAccResourceNodeTemplate_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.gpu.0.manufacturers.#", "0"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.gpu.0.include_names.#", "0"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.gpu.0.exclude_names.#", "0"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.gpu.0.fractional_gpus", "disabled"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.min_cpu", "0"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.max_cpu", "0"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.use_spot_fallbacks", "true"),
@@ -631,8 +857,10 @@ func TestAccResourceNodeTemplate_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.azs.1", "eu-central-1b"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.azs.2", "eu-central-1c"),
 					resource.TestCheckResourceAttr(resourceName, "is_default", "false"),
-					resource.TestCheckResourceAttr(resourceName, "constraints.0.enable_spot_diversity", "true"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.enable_spot_diversity", "false"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.spot_diversity_price_increase_limit_percent", "22"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.spot_reliability_enabled", "true"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.spot_reliability_price_increase_limit_percent", "15"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.spot_interruption_predictions_enabled", "true"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.spot_interruption_predictions_type", "interruption-predictions"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.custom_priority.#", "2"),
@@ -657,6 +885,18 @@ func TestAccResourceNodeTemplate_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.resource_limits.#", "1"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.resource_limits.0.cpu_limit_enabled", "true"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.resource_limits.0.cpu_limit_max_cores", "50"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.aws.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.aws.0.capacity_reservations.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.aws.0.capacity_reservations.0.id", "cr-98765432109876543"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.aws.0.capacity_reservations.0.type", "ON_DEMAND_CAPACITY_RESERVATION"),
+					resource.TestCheckResourceAttr(resourceName, "gpu.0.default_shared_clients_per_gpu", "1"),
+					resource.TestCheckResourceAttr(resourceName, "gpu.0.enable_time_sharing", "false"),
+					resource.TestCheckResourceAttr(resourceName, "edge_location_ids.#", "1"),
+					resource.TestCheckResourceAttrSet(resourceName, "edge_location_ids.0"),
+					resource.TestCheckResourceAttr(resourceName, "price_adjustment_configuration.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "price_adjustment_configuration.0.instance_type_adjustments.%", "2"),
+					resource.TestCheckResourceAttr(resourceName, "price_adjustment_configuration.0.instance_type_adjustments.m5.xlarge", "1.05"),
+					resource.TestCheckResourceAttr(resourceName, "price_adjustment_configuration.0.instance_type_adjustments.r5.xlarge", "0.90"),
 				),
 			},
 		},
@@ -670,12 +910,13 @@ func TestAccResourceNodeTemplate_basic(t *testing.T) {
 }
 
 func testAccNodeTemplateConfig(rName, clusterName string) string {
-	return ConfigCompose(testAccEKSClusterConfig(rName, clusterName), testAccNodeConfig(rName), fmt.Sprintf(`
+	return ConfigCompose(testAccEKSClusterConfig(rName, clusterName), testAccNodeConfig(rName), testAccEdgeLocationsConfig(rName, clusterName), fmt.Sprintf(`
 		resource "castai_node_template" "test" {
-			cluster_id        = castai_eks_clusterid.test.id
+			cluster_id        = castai_eks_cluster.test.id
 			name = %[1]q
 			configuration_id = castai_node_configuration.test.id
 			should_taint = true
+			clm_enabled = false
 
 			custom_labels = {
 				%[1]s-label-key-1 = "%[1]s-label-value-1"
@@ -703,6 +944,16 @@ func testAccNodeTemplateConfig(rName, clusterName string) string {
 				key = "%[1]s-taint-key-4"
 			}
 
+			edge_location_ids = [castai_edge_location.test_1.id, castai_edge_location.test_2.id]
+
+			price_adjustment_configuration {
+				instance_type_adjustments = {
+					"m5.xlarge"  = "1.0"
+					"m5.2xlarge" = "1.10"
+					"c5.xlarge"  = "0.95"
+				}
+			}
+
 			constraints {
 				fallback_restore_rate_seconds = 1800
 				spot = true
@@ -724,6 +975,7 @@ func testAccNodeTemplateConfig(rName, clusterName string) string {
 					include_names = []
 					exclude_names = []
 					manufacturers = ["NVIDIA"]
+					fractional_gpus = "enabled"
 				}
 
 				custom_priority {
@@ -739,18 +991,105 @@ func testAccNodeTemplateConfig(rName, clusterName string) string {
 
 				cpu_manufacturers = ["INTEL", "AMD"]
 				architecture_priority = ["amd64"]
+
+				aws {
+					capacity_reservations {
+						id   = "cr-12345678901234567"
+						type = "ON_DEMAND_CAPACITY_RESERVATION"
+					}
+				}
 			}
 		}
 	`, rName))
 }
 
+func testAccEdgeLocationsConfig(rName, clusterName string) string {
+	organizationID := testAccGetOrganizationID()
+	return fmt.Sprintf(`
+resource "castai_omni_cluster" "test_omni" {
+  organization_id = %[1]q
+  cluster_id      = castai_eks_cluster.test.id
+  status = {
+    omni_agent_version = "0.0.0"
+    pod_cidr           = "10.244.0.0/16"
+  }
+}
+
+resource "castai_edge_location" "test_1" {
+  organization_id    = %[1]q
+  cluster_id         = castai_omni_cluster.test_omni.id
+  name               = "edge-loc-1"
+  description        = "Test edge location 1"
+  region             = "us-east-1"
+  control_plane_mode = "SHARED"
+  zones = [
+    {
+      id   = "us-east-1a"
+      name = "us-east-1a"
+    },
+    {
+      id   = "us-east-1b"
+      name = "us-east-1b"
+    }
+  ]
+
+  aws = {
+	# fake credentials for testing purposes only
+    account_id           = "123456789012"
+    access_key_id_wo     = "AKIAIOSFODNN7EXAMPLE"
+    secret_access_key_wo = "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
+    vpc_id               = "vpc-12345678"
+    security_group_id    = "sg-12345678"
+	vpc_peered           = false
+    vpc_cidr             = "10.0.0.0/16"
+    subnet_ids = {
+      "us-east-1a" = "subnet-12345678"
+      "us-east-1b" = "subnet-12345679"
+    }
+    name_tag = "test-edge-location-1"
+  }
+}
+
+resource "castai_edge_location" "test_2" {
+  organization_id    = %[1]q
+  cluster_id         = castai_omni_cluster.test_omni.id
+  name               = "edge-loc-2"
+  description        = "Test edge location 2"
+  region             = "us-west-2"
+  control_plane_mode = "SHARED"
+  zones = [
+    {
+      id   = "us-west-2a"
+      name = "us-west-2a"
+    }
+  ]
+
+  aws = {
+	# fake credentials for testing purposes only
+    account_id           = "123456789012"
+    access_key_id_wo     = "AKIAIOSFODNN7EXAMPLE"
+    secret_access_key_wo = "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
+    vpc_id               = "vpc-87654321"
+    security_group_id    = "sg-87654321"
+	vpc_peered           = false
+    vpc_cidr             = "10.1.0.0/16"
+    subnet_ids = {
+      "us-west-2a" = "subnet-87654321"
+    }
+    name_tag = "test-edge-location-2"
+  }
+}
+`, organizationID)
+}
+
 func testNodeTemplateUpdated(rName, clusterName string) string {
-	return ConfigCompose(testAccEKSClusterConfig(rName, clusterName), testAccNodeConfig(rName), fmt.Sprintf(`
+	return ConfigCompose(testAccEKSClusterConfig(rName, clusterName), testAccNodeConfig(rName), testAccEdgeLocationsConfig(rName, clusterName), fmt.Sprintf(`
 		resource "castai_node_template" "test" {
-			cluster_id        = castai_eks_clusterid.test.id
+			cluster_id        = castai_eks_cluster.test.id
 			name = %[1]q
 			configuration_id = castai_node_configuration.test.id
 			should_taint = true
+			clm_enabled = true
 			
 			custom_labels = {
 				%[1]s-label-key-1 = "%[1]s-label-value-1"
@@ -768,12 +1107,28 @@ func testNodeTemplateUpdated(rName, clusterName string) string {
 				effect = "NoSchedule"
 			}
 
+			gpu {
+			  default_shared_clients_per_gpu = 1
+			  enable_time_sharing            = false
+			}
+
+			edge_location_ids = [castai_edge_location.test_2.id]
+
+			price_adjustment_configuration {
+				instance_type_adjustments = {
+					"m5.xlarge"   = "1.05"
+					"r5.xlarge"   = "0.90"
+				}
+			}
+
 			constraints {
 				use_spot_fallbacks = true
 				spot = true
 				on_demand = true
-				enable_spot_diversity = true
+				enable_spot_diversity = false
 				spot_diversity_price_increase_limit_percent = 22
+				spot_reliability_enabled = true
+				spot_reliability_price_increase_limit_percent = 15
 				spot_interruption_predictions_enabled = true
 				spot_interruption_predictions_type = "interruption-predictions"
 				fallback_restore_rate_seconds = 1800
@@ -783,6 +1138,7 @@ func testNodeTemplateUpdated(rName, clusterName string) string {
 				burstable_instances = "enabled"
 				customer_specific = "enabled"
 				azs = ["eu-central-1a", "eu-central-1b", "eu-central-1c"]
+				bare_metal = false
 
 				custom_priority {
 					instance_families = ["a", "b"]
@@ -797,9 +1153,20 @@ func testNodeTemplateUpdated(rName, clusterName string) string {
 				cpu_manufacturers = ["INTEL", "AMD"]
 				architecture_priority = ["arm64"]
 
+				gpu {
+					fractional_gpus = "disabled"
+				}
+
 				resource_limits {
 					cpu_limit_enabled   = true
 					cpu_limit_max_cores = 50
+				}
+
+				aws {
+					capacity_reservations {
+						id   = "cr-98765432109876543"
+						type = "ON_DEMAND_CAPACITY_RESERVATION"
+					}
 				}
 			}
 		}
@@ -829,7 +1196,7 @@ func testAccCheckNodeTemplateDestroy(templateName string) func(s *terraform.Stat
 			if found, ok := lo.Find(*response.JSON200.Items, func(item sdk.NodetemplatesV1NodeTemplateListItem) bool {
 				return lo.FromPtr(item.Template.Name) == templateName
 			}); ok {
-				return fmt.Errorf("node template %q still exists; %+v", id, *found.Template)
+				return fmt.Errorf("node template %q still exists; %+v", id, found.Template)
 			}
 			return nil
 		}
@@ -868,4 +1235,508 @@ resource "castai_node_configuration_default" "default" {
 }
 
 `, rName))
+}
+
+func Test_toTemplateGpu(t *testing.T) {
+	tests := []struct {
+		name  string
+		input map[string]any
+		want  *sdk.NodetemplatesV1GPU
+	}{
+		{
+			name:  "nil input returns nil",
+			input: nil,
+			want:  nil,
+		},
+		{
+			name:  "empty map returns nil",
+			input: map[string]any{},
+			want:  nil,
+		},
+		{
+			name: "user_managed_gpu_drivers true",
+			input: map[string]any{
+				FieldNodeTemplateUserManagedGPUDrivers: true,
+			},
+			want: &sdk.NodetemplatesV1GPU{
+				DefaultSharedClientsPerGpu: nil, // Not set when 0 to avoid API validation error
+				EnableTimeSharing:          lo.ToPtr(false),
+				SharingConfiguration:       &map[string]sdk.NodetemplatesV1SharedGPU{},
+				UserManagedGpuDrivers:      lo.ToPtr(true),
+			},
+		},
+		{
+			name: "user_managed_gpu_drivers false",
+			input: map[string]any{
+				FieldNodeTemplateUserManagedGPUDrivers: false,
+			},
+			want: nil, // All fields are zero/false, so returns nil
+		},
+		{
+			name: "user_managed_gpu_drivers with time sharing enabled",
+			input: map[string]any{
+				FieldNodeTemplateUserManagedGPUDrivers:      true,
+				FieldNodeTemplateEnableTimeSharing:          true,
+				FieldNodeTemplateDefaultSharedClientsPerGpu: 8,
+			},
+			want: &sdk.NodetemplatesV1GPU{
+				DefaultSharedClientsPerGpu: lo.ToPtr(int32(8)),
+				EnableTimeSharing:          lo.ToPtr(true),
+				SharingConfiguration:       &map[string]sdk.NodetemplatesV1SharedGPU{},
+				UserManagedGpuDrivers:      lo.ToPtr(true),
+			},
+		},
+		{
+			name: "user_managed_gpu_drivers with sharing configuration",
+			input: map[string]any{
+				FieldNodeTemplateUserManagedGPUDrivers:      true,
+				FieldNodeTemplateEnableTimeSharing:          true,
+				FieldNodeTemplateDefaultSharedClientsPerGpu: 10,
+				FieldNodeTemplateSharingConfiguration: []any{
+					map[string]any{
+						FieldNodeTemplateSharedGpuName:       "A100",
+						FieldNodeTemplateSharedClientsPerGpu: 5,
+					},
+				},
+			},
+			want: &sdk.NodetemplatesV1GPU{
+				DefaultSharedClientsPerGpu: lo.ToPtr(int32(10)),
+				EnableTimeSharing:          lo.ToPtr(true),
+				SharingConfiguration: &map[string]sdk.NodetemplatesV1SharedGPU{
+					"A100": {
+						SharedClientsPerGpu: lo.ToPtr(int32(5)),
+					},
+				},
+				UserManagedGpuDrivers: lo.ToPtr(true),
+			},
+		},
+		{
+			name: "all gpu settings enabled",
+			input: map[string]any{
+				FieldNodeTemplateUserManagedGPUDrivers:      true,
+				FieldNodeTemplateEnableTimeSharing:          true,
+				FieldNodeTemplateDefaultSharedClientsPerGpu: 12,
+				FieldNodeTemplateSharingConfiguration: []any{
+					map[string]any{
+						FieldNodeTemplateSharedGpuName:       "V100",
+						FieldNodeTemplateSharedClientsPerGpu: 4,
+					},
+					map[string]any{
+						FieldNodeTemplateSharedGpuName:       "T4",
+						FieldNodeTemplateSharedClientsPerGpu: 8,
+					},
+				},
+			},
+			want: &sdk.NodetemplatesV1GPU{
+				DefaultSharedClientsPerGpu: lo.ToPtr(int32(12)),
+				EnableTimeSharing:          lo.ToPtr(true),
+				SharingConfiguration: &map[string]sdk.NodetemplatesV1SharedGPU{
+					"V100": {
+						SharedClientsPerGpu: lo.ToPtr(int32(4)),
+					},
+					"T4": {
+						SharedClientsPerGpu: lo.ToPtr(int32(8)),
+					},
+				},
+				UserManagedGpuDrivers: lo.ToPtr(true),
+			},
+		},
+		{
+			name: "only time sharing without user managed drivers",
+			input: map[string]any{
+				FieldNodeTemplateEnableTimeSharing:          true,
+				FieldNodeTemplateDefaultSharedClientsPerGpu: 6,
+			},
+			want: &sdk.NodetemplatesV1GPU{
+				DefaultSharedClientsPerGpu: lo.ToPtr(int32(6)), // Set when > 0
+				EnableTimeSharing:          lo.ToPtr(true),
+				SharingConfiguration:       &map[string]sdk.NodetemplatesV1SharedGPU{},
+				// UserManagedGpuDrivers not set (nil) - only sent when explicitly true (GKE-only)
+			},
+		},
+		{
+			name: "only enable_time_sharing true without default clients",
+			input: map[string]any{
+				FieldNodeTemplateEnableTimeSharing: true,
+			},
+			want: &sdk.NodetemplatesV1GPU{
+				DefaultSharedClientsPerGpu: nil, // Not set when 0
+				EnableTimeSharing:          lo.ToPtr(true),
+				SharingConfiguration:       &map[string]sdk.NodetemplatesV1SharedGPU{},
+				// UserManagedGpuDrivers not set (nil) - only sent when explicitly true (GKE-only)
+			},
+		},
+		{
+			name: "sharing_strategy mps",
+			input: map[string]any{
+				FieldNodeTemplateSharingStrategy:            "mps",
+				FieldNodeTemplateDefaultSharedClientsPerGpu: 4,
+			},
+			want: &sdk.NodetemplatesV1GPU{
+				DefaultSharedClientsPerGpu: lo.ToPtr(int32(4)),
+				EnableTimeSharing:          lo.ToPtr(false),
+				SharingConfiguration:       &map[string]sdk.NodetemplatesV1SharedGPU{},
+				SharingStrategy:            lo.ToPtr(sdk.GPUSHARINGSTRATEGYMPS),
+			},
+		},
+		{
+			name: "sharing_strategy time-slicing",
+			input: map[string]any{
+				FieldNodeTemplateSharingStrategy:            "time-slicing",
+				FieldNodeTemplateDefaultSharedClientsPerGpu: 8,
+			},
+			want: &sdk.NodetemplatesV1GPU{
+				DefaultSharedClientsPerGpu: lo.ToPtr(int32(8)),
+				EnableTimeSharing:          lo.ToPtr(false),
+				SharingConfiguration:       &map[string]sdk.NodetemplatesV1SharedGPU{},
+				SharingStrategy:            lo.ToPtr(sdk.GPUSHARINGSTRATEGYTIMESLICING),
+			},
+		},
+		{
+			name: "sharing_strategy mps with user_managed_gpu_drivers",
+			input: map[string]any{
+				FieldNodeTemplateSharingStrategy:       "mps",
+				FieldNodeTemplateUserManagedGPUDrivers: true,
+			},
+			want: &sdk.NodetemplatesV1GPU{
+				EnableTimeSharing:     lo.ToPtr(false),
+				SharingConfiguration:  &map[string]sdk.NodetemplatesV1SharedGPU{},
+				SharingStrategy:       lo.ToPtr(sdk.GPUSHARINGSTRATEGYMPS),
+				UserManagedGpuDrivers: lo.ToPtr(true),
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := toTemplateGpu(tt.input)
+
+			if tt.want == nil {
+				require.Nil(t, got)
+				return
+			}
+
+			require.NotNil(t, got)
+
+			// Compare DefaultSharedClientsPerGpu (can be nil)
+			if tt.want.DefaultSharedClientsPerGpu == nil {
+				require.Nil(t, got.DefaultSharedClientsPerGpu, "DefaultSharedClientsPerGpu should be nil")
+			} else {
+				require.NotNil(t, got.DefaultSharedClientsPerGpu, "DefaultSharedClientsPerGpu should not be nil")
+				require.Equal(t, *tt.want.DefaultSharedClientsPerGpu, *got.DefaultSharedClientsPerGpu)
+			}
+
+			require.Equal(t, tt.want.EnableTimeSharing, got.EnableTimeSharing)
+			require.Equal(t, tt.want.SharingStrategy, got.SharingStrategy)
+			require.Equal(t, tt.want.UserManagedGpuDrivers, got.UserManagedGpuDrivers)
+
+			if tt.want.SharingConfiguration != nil && got.SharingConfiguration != nil {
+				wantMap := *tt.want.SharingConfiguration
+				gotMap := *got.SharingConfiguration
+
+				// Both nil maps and empty maps are acceptable as equivalent
+				if (wantMap == nil && gotMap == nil) || (len(wantMap) == 0 && len(gotMap) == 0) {
+					// Pass - both are empty/nil
+				} else {
+					require.Equal(t, wantMap, gotMap)
+				}
+			} else {
+				// Both should be nil
+				require.Equal(t, tt.want.SharingConfiguration, got.SharingConfiguration, "SharingConfiguration pointers should be equal")
+			}
+		})
+	}
+}
+
+func Test_flattenGpuSettings(t *testing.T) {
+	tests := []struct {
+		name    string
+		input   *sdk.NodetemplatesV1GPU
+		want    []map[string]any
+		wantErr bool
+	}{
+		{
+			name:    "nil input returns nil",
+			input:   nil,
+			want:    nil,
+			wantErr: false,
+		},
+		{
+			name:  "empty gpu settings",
+			input: &sdk.NodetemplatesV1GPU{},
+			want: []map[string]any{
+				{},
+			},
+			wantErr: false,
+		},
+		{
+			name: "user_managed_gpu_drivers true",
+			input: &sdk.NodetemplatesV1GPU{
+				UserManagedGpuDrivers: lo.ToPtr(true),
+			},
+			want: []map[string]any{
+				{
+					FieldNodeTemplateUserManagedGPUDrivers: lo.ToPtr(true),
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "user_managed_gpu_drivers false",
+			input: &sdk.NodetemplatesV1GPU{
+				UserManagedGpuDrivers: lo.ToPtr(false),
+			},
+			want: []map[string]any{
+				{
+					FieldNodeTemplateUserManagedGPUDrivers: lo.ToPtr(false),
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "user_managed_gpu_drivers with time sharing",
+			input: &sdk.NodetemplatesV1GPU{
+				UserManagedGpuDrivers:      lo.ToPtr(true),
+				EnableTimeSharing:          lo.ToPtr(true),
+				DefaultSharedClientsPerGpu: lo.ToPtr(int32(10)),
+			},
+			want: []map[string]any{
+				{
+					FieldNodeTemplateUserManagedGPUDrivers:      lo.ToPtr(true),
+					FieldNodeTemplateEnableTimeSharing:          lo.ToPtr(true),
+					FieldNodeTemplateDefaultSharedClientsPerGpu: lo.ToPtr(int32(10)),
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "all gpu settings",
+			input: &sdk.NodetemplatesV1GPU{
+				UserManagedGpuDrivers:      lo.ToPtr(true),
+				EnableTimeSharing:          lo.ToPtr(true),
+				DefaultSharedClientsPerGpu: lo.ToPtr(int32(12)),
+				SharingConfiguration: &map[string]sdk.NodetemplatesV1SharedGPU{
+					"A100": {
+						SharedClientsPerGpu: lo.ToPtr(int32(5)),
+					},
+					"V100": {
+						SharedClientsPerGpu: lo.ToPtr(int32(3)),
+					},
+				},
+			},
+			want: []map[string]any{
+				{
+					FieldNodeTemplateUserManagedGPUDrivers:      lo.ToPtr(true),
+					FieldNodeTemplateEnableTimeSharing:          lo.ToPtr(true),
+					FieldNodeTemplateDefaultSharedClientsPerGpu: lo.ToPtr(int32(12)),
+					FieldNodeTemplateSharingConfiguration: []map[string]any{
+						{
+							FieldNodeTemplateSharedGpuName:       "A100",
+							FieldNodeTemplateSharedClientsPerGpu: int32(5),
+						},
+						{
+							FieldNodeTemplateSharedGpuName:       "V100",
+							FieldNodeTemplateSharedClientsPerGpu: int32(3),
+						},
+					},
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "sharing_strategy mps",
+			input: &sdk.NodetemplatesV1GPU{
+				SharingStrategy:            lo.ToPtr(sdk.GPUSHARINGSTRATEGYMPS),
+				DefaultSharedClientsPerGpu: lo.ToPtr(int32(4)),
+			},
+			want: []map[string]any{
+				{
+					FieldNodeTemplateSharingStrategy:            "mps",
+					FieldNodeTemplateDefaultSharedClientsPerGpu: lo.ToPtr(int32(4)),
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "sharing_strategy time-slicing",
+			input: &sdk.NodetemplatesV1GPU{
+				SharingStrategy:            lo.ToPtr(sdk.GPUSHARINGSTRATEGYTIMESLICING),
+				DefaultSharedClientsPerGpu: lo.ToPtr(int32(8)),
+			},
+			want: []map[string]any{
+				{
+					FieldNodeTemplateSharingStrategy:            "time-slicing",
+					FieldNodeTemplateDefaultSharedClientsPerGpu: lo.ToPtr(int32(8)),
+				},
+			},
+			wantErr: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := flattenGpuSettings(tt.input)
+			if tt.wantErr {
+				require.Error(t, err)
+				return
+			}
+
+			require.NoError(t, err)
+			require.Len(t, got, len(tt.want))
+
+			if len(tt.want) == 0 {
+				return
+			}
+
+			// Compare all fields except sharing_configuration
+			require.Equal(t, tt.want[0][FieldNodeTemplateUserManagedGPUDrivers], got[0][FieldNodeTemplateUserManagedGPUDrivers])
+			require.Equal(t, tt.want[0][FieldNodeTemplateEnableTimeSharing], got[0][FieldNodeTemplateEnableTimeSharing])
+			require.Equal(t, tt.want[0][FieldNodeTemplateSharingStrategy], got[0][FieldNodeTemplateSharingStrategy])
+			require.Equal(t, tt.want[0][FieldNodeTemplateDefaultSharedClientsPerGpu], got[0][FieldNodeTemplateDefaultSharedClientsPerGpu])
+
+			// Compare sharing_configuration with ElementsMatch (order doesn't matter)
+			wantSharing := tt.want[0][FieldNodeTemplateSharingConfiguration]
+			gotSharing := got[0][FieldNodeTemplateSharingConfiguration]
+			if wantSharing != nil || gotSharing != nil {
+				require.ElementsMatch(t, wantSharing, gotSharing)
+			}
+		})
+	}
+}
+
+func Test_flattenAWSConstraints(t *testing.T) {
+	tests := []struct {
+		name  string
+		input *sdk.NodetemplatesV1TemplateConstraintsAWSConstraints
+		want  []map[string]any
+	}{
+		{
+			name:  "nil input returns nil",
+			input: nil,
+			want:  nil,
+		},
+		{
+			name:  "empty reservations",
+			input: &sdk.NodetemplatesV1TemplateConstraintsAWSConstraints{},
+			want:  []map[string]any{{}},
+		},
+		{
+			name: "reservation with id",
+			input: &sdk.NodetemplatesV1TemplateConstraintsAWSConstraints{
+				CapacityReservations: &[]sdk.NodetemplatesV1TemplateConstraintsAWSConstraintsCapacityReservation{
+					{
+						Id:   lo.ToPtr("cr-123"),
+						Type: lo.ToPtr(sdk.NodetemplatesV1TemplateConstraintsAWSConstraintsCapacityReservationTypeONDEMANDCAPACITYRESERVATION),
+					},
+				},
+			},
+			want: []map[string]any{{
+				FieldNodeTemplateCapacityReservations: []map[string]any{
+					{
+						FieldNodeTemplateCapacityReservationId:   "cr-123",
+						FieldNodeTemplateCapacityReservationType: CapacityReservationTypeOnDemand,
+					},
+				},
+			}},
+		},
+		{
+			name: "reservation with ARN",
+			input: &sdk.NodetemplatesV1TemplateConstraintsAWSConstraints{
+				CapacityReservations: &[]sdk.NodetemplatesV1TemplateConstraintsAWSConstraintsCapacityReservation{
+					{
+						CapacityResourceGroupArn: lo.ToPtr("arn:aws:ec2:us-east-1:123456789012:capacity-reservation-group/my-group"),
+						Type:                     lo.ToPtr(sdk.NodetemplatesV1TemplateConstraintsAWSConstraintsCapacityReservationTypeCAPACITYBLOCK),
+					},
+				},
+			},
+			want: []map[string]any{{
+				FieldNodeTemplateCapacityReservations: []map[string]any{
+					{
+						FieldNodeTemplateCapacityResourceGroupArn: "arn:aws:ec2:us-east-1:123456789012:capacity-reservation-group/my-group",
+						FieldNodeTemplateCapacityReservationType:  CapacityReservationTypeCapacityBlock,
+					},
+				},
+			}},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := flattenAWSConstraints(tt.input)
+			require.Equal(t, tt.want, got)
+		})
+	}
+}
+
+func Test_toTemplateConstraintsAWSConstraints(t *testing.T) {
+	tests := map[string]struct {
+		input map[string]any
+		want  *sdk.NodetemplatesV1TemplateConstraintsAWSConstraints
+	}{
+		"nil input": {
+			input: nil,
+			want:  nil,
+		},
+		"reservation with id": {
+			input: map[string]any{
+				FieldNodeTemplateCapacityReservations: []any{
+					map[string]any{
+						FieldNodeTemplateCapacityReservationId:   "cr-123",
+						FieldNodeTemplateCapacityReservationType: CapacityReservationTypeOnDemand,
+					},
+				},
+			},
+			want: &sdk.NodetemplatesV1TemplateConstraintsAWSConstraints{
+				CapacityReservations: &[]sdk.NodetemplatesV1TemplateConstraintsAWSConstraintsCapacityReservation{
+					{
+						Id:   lo.ToPtr("cr-123"),
+						Type: lo.ToPtr(sdk.NodetemplatesV1TemplateConstraintsAWSConstraintsCapacityReservationTypeONDEMANDCAPACITYRESERVATION),
+					},
+				},
+			},
+		},
+		"reservation with ARN": {
+			input: map[string]any{
+				FieldNodeTemplateCapacityReservations: []any{
+					map[string]any{
+						FieldNodeTemplateCapacityResourceGroupArn: "arn:aws:ec2:us-east-1:123456789012:capacity-reservation-group/my-group",
+						FieldNodeTemplateCapacityReservationType:  CapacityReservationTypeCapacityBlock,
+					},
+				},
+			},
+			want: &sdk.NodetemplatesV1TemplateConstraintsAWSConstraints{
+				CapacityReservations: &[]sdk.NodetemplatesV1TemplateConstraintsAWSConstraintsCapacityReservation{
+					{
+						CapacityResourceGroupArn: lo.ToPtr("arn:aws:ec2:us-east-1:123456789012:capacity-reservation-group/my-group"),
+						Type:                     lo.ToPtr(sdk.NodetemplatesV1TemplateConstraintsAWSConstraintsCapacityReservationTypeCAPACITYBLOCK),
+					},
+				},
+			},
+		},
+		"reservation with both id and ARN": {
+			input: map[string]any{
+				FieldNodeTemplateCapacityReservations: []any{
+					map[string]any{
+						FieldNodeTemplateCapacityReservationId:    "cr-456",
+						FieldNodeTemplateCapacityResourceGroupArn: "arn:aws:ec2:us-east-1:123456789012:capacity-reservation-group/my-group",
+						FieldNodeTemplateCapacityReservationType:  CapacityReservationTypeCapacityBlock,
+					},
+				},
+			},
+			want: &sdk.NodetemplatesV1TemplateConstraintsAWSConstraints{
+				CapacityReservations: &[]sdk.NodetemplatesV1TemplateConstraintsAWSConstraintsCapacityReservation{
+					{
+						Id:                       lo.ToPtr("cr-456"),
+						CapacityResourceGroupArn: lo.ToPtr("arn:aws:ec2:us-east-1:123456789012:capacity-reservation-group/my-group"),
+						Type:                     lo.ToPtr(sdk.NodetemplatesV1TemplateConstraintsAWSConstraintsCapacityReservationTypeCAPACITYBLOCK),
+					},
+				},
+			},
+		},
+	}
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			got := toTemplateConstraintsAWSConstraints(tt.input)
+			require.Equal(t, tt.want, got)
+		})
+	}
 }

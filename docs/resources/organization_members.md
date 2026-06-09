@@ -41,10 +41,10 @@ resource "castai_organization_members" "dev" {
 
 ### Optional
 
-- `members` (List of String) A list of email addresses corresponding to users who should be given member access to the organization.
-- `owners` (List of String) A list of email addresses corresponding to users who should be given owner access to the organization.
+- `members` (List of String, Deprecated) A list of email addresses corresponding to users who should be given member access to the organization.
+- `owners` (List of String, Deprecated) A list of email addresses corresponding to users who should be given owner access to the organization.
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
-- `viewers` (List of String) A list of email addresses corresponding to users who should be given viewer access to the organization.
+- `viewers` (List of String, Deprecated) A list of email addresses corresponding to users who should be given viewer access to the organization.
 
 ### Read-Only
 

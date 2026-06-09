@@ -5,13 +5,13 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
-func TestAccResourceRebalancingJob_eks(t *testing.T) {
+func TestAccEKS_ResourceRebalancingJob(t *testing.T) {
 	rName := fmt.Sprintf("%v-rebalancing-job-%v", ResourcePrefix, acctest.RandString(8))
-	clusterName := "core-tf-acc"
+	clusterName := "core-tf-acc-21-08-2025"
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() { testAccPreCheck(t) },
 
@@ -83,9 +83,9 @@ func makeUpdatedRebalancingJobConfig(rName, clusterName string) string {
 	return ConfigCompose(testAccEKSClusterConfig(rName, clusterName), makeRebalancingJobConfig(rName, "enabled=false"))
 }
 
-func TestAccResourceRebalancingJobWithDataSource_eks(t *testing.T) {
+func TestAccEKS_ResourceRebalancingJobWithDataSource(t *testing.T) {
 	rName := fmt.Sprintf("%v-rebalancing-job-with-data-source-%v", ResourcePrefix, acctest.RandString(8))
-	clusterName := "core-tf-acc"
+	clusterName := "core-tf-acc-21-08-2025"
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() { testAccPreCheck(t) },
 
