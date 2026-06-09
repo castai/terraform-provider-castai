@@ -130,7 +130,17 @@ Optional:
 
 Optional:
 
+- `cni` (Attributes) CNI (kube-router) configuration for the edge cluster. (see [below for nested schema](#nestedatt--networking--cni))
 - `tunneled_cidrs` (List of String) List of destination CIDR blocks whose traffic should be routed through the main cluster instead of directly from the edge cluster.
+
+<a id="nestedatt--networking--cni"></a>
+### Nested Schema for `networking.cni`
+
+Optional:
+
+- `overlay` (String) Overlay mode for kube-router pod-to-pod traffic. Valid values: OVERLAY_UNSPECIFIED, OVERLAY_OFF, OVERLAY_SUBNET, OVERLAY_FULL.
+- `overlay_encap` (String) Encapsulation protocol used by the overlay. Valid values: OVERLAY_ENCAP_UNSPECIFIED, OVERLAY_ENCAP_IPIP, OVERLAY_ENCAP_FOU.
+
 
 
 <a id="nestedatt--oci"></a>
