@@ -50,8 +50,10 @@ func TestAccGKE_ResourceWorkloadScalingPolicy(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "cpu.0.apply_threshold_strategy.0.percentage", "0.6"),
 					resource.TestCheckResourceAttr(resourceName, "cpu.0.args.0", "0.86"),
 					resource.TestCheckResourceAttr(resourceName, "cpu.0.look_back_period_seconds", "86401"),
-					resource.TestCheckResourceAttr(resourceName, "cpu.0.min", "0.1"),
-					resource.TestCheckResourceAttr(resourceName, "cpu.0.max", "1"),
+					resource.TestCheckResourceAttr(resourceName, "cpu.0.constraints.0.min.0.constant", "0.1"),
+					resource.TestCheckResourceAttr(resourceName, "cpu.0.constraints.0.max.0.constant", "1"),
+					resource.TestCheckResourceAttr(resourceName, "cpu.0.min", "0"),
+					resource.TestCheckResourceAttr(resourceName, "cpu.0.max", "0"),
 					resource.TestCheckResourceAttr(resourceName, "cpu.0.limit.0.type", "MULTIPLIER"),
 					resource.TestCheckResourceAttr(resourceName, "cpu.0.limit.0.multiplier", "1.2"),
 					resource.TestCheckResourceAttr(resourceName, "memory.0.function", "MAX"),
@@ -61,7 +63,9 @@ func TestAccGKE_ResourceWorkloadScalingPolicy(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "memory.0.apply_threshold_strategy.0.denominator", "0.5"),
 					resource.TestCheckResourceAttr(resourceName, "memory.0.apply_threshold_strategy.0.exponent", "0.6"),
 					resource.TestCheckResourceAttr(resourceName, "memory.0.args.#", "0"),
-					resource.TestCheckResourceAttr(resourceName, "memory.0.min", "100"),
+					resource.TestCheckResourceAttr(resourceName, "memory.0.constraints.0.min.0.constant", "100"),
+					resource.TestCheckResourceAttr(resourceName, "memory.0.min", "0"),
+					resource.TestCheckResourceAttr(resourceName, "memory.0.max", "0"),
 					resource.TestCheckResourceAttr(resourceName, "memory.0.limit.0.type", "MULTIPLIER"),
 					resource.TestCheckResourceAttr(resourceName, "memory.0.limit.0.multiplier", "1.8"),
 					resource.TestCheckResourceAttr(resourceName, "memory.0.management_option", "READ_ONLY"),
@@ -100,15 +104,19 @@ func TestAccGKE_ResourceWorkloadScalingPolicy(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "cpu.0.apply_threshold", "0.1"),
 					resource.TestCheckResourceAttr(resourceName, "cpu.0.args.0", "0.9"),
 					resource.TestCheckResourceAttr(resourceName, "cpu.0.look_back_period_seconds", "86402"),
-					resource.TestCheckResourceAttr(resourceName, "cpu.0.min", "0.1"),
+					resource.TestCheckResourceAttr(resourceName, "cpu.0.constraints.0.min.0.constant", "0.1"),
+					resource.TestCheckResourceAttr(resourceName, "cpu.0.min", "0"),
+					resource.TestCheckResourceAttr(resourceName, "cpu.0.max", "0"),
 					resource.TestCheckResourceAttr(resourceName, "cpu.0.limit.0.type", "NO_LIMIT"),
 					resource.TestCheckResourceAttr(resourceName, "memory.0.function", "QUANTILE"),
 					resource.TestCheckResourceAttr(resourceName, "memory.0.overhead", "0.35"),
 					resource.TestCheckResourceAttr(resourceName, "memory.0.apply_threshold_strategy.0.type", "PERCENTAGE"),
 					resource.TestCheckResourceAttr(resourceName, "memory.0.apply_threshold_strategy.0.percentage", "0.2"),
 					resource.TestCheckResourceAttr(resourceName, "memory.0.args.0", "0.9"),
-					resource.TestCheckResourceAttr(resourceName, "memory.0.min", "100"),
-					resource.TestCheckResourceAttr(resourceName, "memory.0.max", "512"),
+					resource.TestCheckResourceAttr(resourceName, "memory.0.constraints.0.min.0.constant", "100"),
+					resource.TestCheckResourceAttr(resourceName, "memory.0.constraints.0.max.0.constant", "512"),
+					resource.TestCheckResourceAttr(resourceName, "memory.0.min", "0"),
+					resource.TestCheckResourceAttr(resourceName, "memory.0.max", "0"),
 					resource.TestCheckResourceAttr(resourceName, "memory.0.limit.0.type", "NO_LIMIT"),
 					resource.TestCheckResourceAttr(resourceName, "memory.0.management_option", "READ_ONLY"),
 					resource.TestCheckResourceAttr(resourceName, "startup.0.period_seconds", "123"),
@@ -127,6 +135,19 @@ func TestAccGKE_ResourceWorkloadScalingPolicy(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "jvm.0.memory.0.optimization", "true"),
 					resource.TestCheckResourceAttr(resourceName, "anomaly_detection.0.cpu_pressure.0.cpu_stall_threshold_percentage", "50"),
 					resource.TestCheckResourceAttr(resourceName, "anomaly_detection.0.cpu_pressure.0.min_pressured_pod_percentage", "30"),
+				),
+			},
+			// Final step: verify legacy fields still work by creating a new policy
+			{
+				Config: scalingPolicyConfigLegacy(clusterName, projectID, rName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("castai_workload_scaling_policy.legacy", "name", rName+"-legacy"),
+					resource.TestCheckResourceAttr("castai_workload_scaling_policy.legacy", "cpu.0.min", "0.01"),
+					resource.TestCheckResourceAttr("castai_workload_scaling_policy.legacy", "cpu.0.max", "1"),
+					resource.TestCheckResourceAttr("castai_workload_scaling_policy.legacy", "cpu.0.constraints.#", "0"),
+					resource.TestCheckResourceAttr("castai_workload_scaling_policy.legacy", "memory.0.min", "100"),
+					resource.TestCheckResourceAttr("castai_workload_scaling_policy.legacy", "memory.0.max", "512"),
+					resource.TestCheckResourceAttr("castai_workload_scaling_policy.legacy", "memory.0.constraints.#", "0"),
 				),
 			},
 		},
@@ -287,9 +308,11 @@ func scalingPolicyConfig(clusterName, projectID, name string) string {
 			function 		= "QUANTILE"
 			overhead 		= 0.05
 			args 			= ["0.86"]
-            min             = 0.1
-            max             = 1
 			look_back_period_seconds = 86401
+			constraints {
+				min { constant = 0.1 }
+				max { constant = 1 }
+			}
 			limit {
 				type 		    = "MULTIPLIER"
 				multiplier 	= 1.2
@@ -308,7 +331,9 @@ func scalingPolicyConfig(clusterName, projectID, name string) string {
 				denominator = 0.5
                 exponent = 0.6
 			}
-            min             = 100
+			constraints {
+				min { constant = 100 }
+			}
 			limit {
 				type 		    = "MULTIPLIER"
 				multiplier 	= 1.8
@@ -362,7 +387,9 @@ func scalingPolicyConfigUpdated(clusterName, projectID, name string) string {
 			apply_threshold = 0.1
 			args 			= ["0.9"]
 			look_back_period_seconds = 86402
-            min             = 0.1
+			constraints {
+				min { constant = 0.1 }
+			}
 			limit {
 				type 		    = "NO_LIMIT"
 			}
@@ -375,8 +402,10 @@ func scalingPolicyConfigUpdated(clusterName, projectID, name string) string {
 				percentage = 0.2
 			}
 			args 			= ["0.9"]
-            min             = 100
-            max             = 512
+			constraints {
+				min { constant = 100 }
+				max { constant = 512 }
+			}
 			limit {
 				type 		    = "NO_LIMIT"
 			}
@@ -409,6 +438,38 @@ func scalingPolicyConfigUpdated(clusterName, projectID, name string) string {
 			}
 		}
 	}`, updatedName)
+
+	return ConfigCompose(clusterComponentsConfig(clusterName, projectID, name), cfg)
+}
+
+// scalingPolicyConfigLegacy creates a scaling policy using deprecated legacy min/max fields.
+// This verifies backward compatibility while constraints are the preferred approach.
+// Let min CPU value will be filled in with the default
+func scalingPolicyConfigLegacy(clusterName, projectID, name string) string {
+	legacyName := name + "-legacy"
+	cfg := fmt.Sprintf(`
+	resource "castai_workload_scaling_policy" "legacy" {
+		depends_on          = [helm_release.castai_workload_autoscaler]
+
+		name 				= %[1]q
+		cluster_id			= castai_gke_cluster.test.id
+		apply_type			= "IMMEDIATE"
+		management_option	= "MANAGED"
+		cpu {
+			function 		= "QUANTILE"
+			overhead 		= 0.15
+			args 			= ["0.9"]
+			look_back_period_seconds = 86402
+			max             = 1
+		}
+		memory {
+			function 		= "QUANTILE"
+			overhead 		= 0.35
+			args 			= ["0.9"]
+			min             = 100
+			max             = 512
+		}
+	}`, legacyName)
 
 	return ConfigCompose(clusterComponentsConfig(clusterName, projectID, name), cfg)
 }
@@ -670,6 +731,302 @@ func Test_toWorkloadScalingPolicies_limit(t *testing.T) {
 			require.NoError(t, err)
 			require.NotNil(t, got.Limit)
 			require.Equal(t, tc.exp, *got.Limit)
+		})
+	}
+}
+
+func Test_toWorkloadScalingPolicies(t *testing.T) {
+	tests := map[string]struct {
+		args   map[string]any
+		exp    sdk.WorkloadoptimizationV1ResourcePolicies
+		expErr string
+	}{
+		"should parse constraints with constant min when only min is set": {
+			args: map[string]any{
+				"function": "MAX",
+				"constraints": []any{
+					map[string]any{
+						"min": []any{
+							map[string]any{
+								"constant": 0.5,
+							},
+						},
+					},
+				},
+			},
+			exp: sdk.WorkloadoptimizationV1ResourcePolicies{
+				Function: sdk.WorkloadoptimizationV1ResourcePoliciesFunctionMAX,
+				Constraints: &sdk.WorkloadoptimizationV1ConstraintsV2{
+					Min: &sdk.WorkloadoptimizationV1ConstraintsV2Strategy{
+						Constant: &sdk.WorkloadoptimizationV1ConstraintsV2Constant{Value: 0.5},
+					},
+				},
+			},
+		},
+		"should parse constraints with percentage max when only max is set": {
+			args: map[string]any{
+				"function": "MAX",
+				"constraints": []any{
+					map[string]any{
+						"max": []any{
+							map[string]any{
+								"percentage_of_original": 1.5,
+							},
+						},
+					},
+				},
+			},
+			exp: sdk.WorkloadoptimizationV1ResourcePolicies{
+				Function: sdk.WorkloadoptimizationV1ResourcePoliciesFunctionMAX,
+				Constraints: &sdk.WorkloadoptimizationV1ConstraintsV2{
+					Max: &sdk.WorkloadoptimizationV1ConstraintsV2Strategy{
+						PercentageOfOriginal: &sdk.WorkloadoptimizationV1ConstraintsV2PercentageOfOriginal{Value: 1.5},
+					},
+				},
+			},
+		},
+		"should parse constraints with both constant min and percentage max when both are set": {
+			args: map[string]any{
+				"function": "MAX",
+				"constraints": []any{
+					map[string]any{
+						"min": []any{
+							map[string]any{
+								"constant": 0.25,
+							},
+						},
+						"max": []any{
+							map[string]any{
+								"percentage_of_original": 2.0,
+							},
+						},
+					},
+				},
+			},
+			exp: sdk.WorkloadoptimizationV1ResourcePolicies{
+				Function: sdk.WorkloadoptimizationV1ResourcePoliciesFunctionMAX,
+				Constraints: &sdk.WorkloadoptimizationV1ConstraintsV2{
+					Min: &sdk.WorkloadoptimizationV1ConstraintsV2Strategy{
+						Constant: &sdk.WorkloadoptimizationV1ConstraintsV2Constant{Value: 0.25},
+					},
+					Max: &sdk.WorkloadoptimizationV1ConstraintsV2Strategy{
+						PercentageOfOriginal: &sdk.WorkloadoptimizationV1ConstraintsV2PercentageOfOriginal{Value: 2.0},
+					},
+				},
+			},
+		},
+		"should parse constraints with constant max when only max is set": {
+			args: map[string]any{
+				"function": "MAX",
+				"constraints": []any{
+					map[string]any{
+						"max": []any{
+							map[string]any{
+								"constant": 4.0,
+							},
+						},
+					},
+				},
+			},
+			exp: sdk.WorkloadoptimizationV1ResourcePolicies{
+				Function: sdk.WorkloadoptimizationV1ResourcePoliciesFunctionMAX,
+				Constraints: &sdk.WorkloadoptimizationV1ConstraintsV2{
+					Max: &sdk.WorkloadoptimizationV1ConstraintsV2Strategy{
+						Constant: &sdk.WorkloadoptimizationV1ConstraintsV2Constant{Value: 4.0},
+					},
+				},
+				Min: nil,
+			},
+		},
+		"should return nil constraints when constraints block is empty": {
+			args: map[string]any{
+				"function": "MAX",
+				"constraints": []any{
+					map[string]any{},
+				},
+			},
+			// Empty constraints block returns nil since toWorkloadConstraints returns nil for empty map
+			exp: sdk.WorkloadoptimizationV1ResourcePolicies{
+				Function:    sdk.WorkloadoptimizationV1ResourcePoliciesFunctionMAX,
+				Constraints: nil,
+			},
+		},
+		"should return error when both constant and percentage_of_original are set": {
+			args: map[string]any{
+				"function": "MAX",
+				"constraints": []any{
+					map[string]any{
+						"min": []any{
+							map[string]any{
+								"constant":               0.5,
+								"percentage_of_original": 1.2,
+							},
+						},
+					},
+				},
+			},
+			expErr: `field "cpu": field constraints: min: only one of constant or percentage_of_original may be set`,
+		},
+		"when constraints is set legacy max should be ignored": {
+			args: map[string]any{
+				"function": "MAX",
+				"max":      10.0, // should be ignored
+				"constraints": []any{
+					map[string]any{
+						"max": []any{
+							map[string]any{
+								"constant": 4.0,
+							},
+						},
+					},
+				},
+			},
+			exp: sdk.WorkloadoptimizationV1ResourcePolicies{
+				Function: sdk.WorkloadoptimizationV1ResourcePoliciesFunctionMAX,
+				Constraints: &sdk.WorkloadoptimizationV1ConstraintsV2{
+					Max: &sdk.WorkloadoptimizationV1ConstraintsV2Strategy{
+						Constant: &sdk.WorkloadoptimizationV1ConstraintsV2Constant{Value: 4.0},
+					},
+				},
+				// Max should be nil because constraints takes precedence
+				Max: nil,
+			},
+		},
+		"should use legacy min/max when constraints is not set": {
+			args: map[string]any{
+				"function": "MAX",
+				"min":      0.5,
+				"max":      8.0,
+			},
+			exp: sdk.WorkloadoptimizationV1ResourcePolicies{
+				Function: sdk.WorkloadoptimizationV1ResourcePoliciesFunctionMAX,
+				Min:      lo.ToPtr(0.5),
+				Max:      lo.ToPtr(8.0),
+			},
+		},
+	}
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			r := require.New(t)
+			got, err := toWorkloadScalingPolicies("cpu", tt.args)
+			if tt.expErr != "" {
+				r.EqualError(err, tt.expErr)
+				return
+			}
+			r.NoError(err)
+			r.Equal(tt.exp.Function, got.Function)
+			r.Equal(tt.exp.Constraints, got.Constraints)
+			r.Equal(tt.exp.Min, got.Min)
+			r.Equal(tt.exp.Max, got.Max)
+		})
+	}
+}
+
+func Test_toWorkloadConstraints_validation(t *testing.T) {
+	tests := map[string]struct {
+		resource string
+		args     map[string]any
+		expErr   string
+	}{
+		"should return error when cpu min.constant is below 0.01": {
+			resource: "cpu",
+			args: map[string]any{
+				"function": "MAX",
+				"constraints": []any{
+					map[string]any{
+						"min": []any{
+							map[string]any{
+								"constant": 0.005,
+							},
+						},
+					},
+				},
+			},
+			expErr: `field "cpu": constraints.min.constant value 0.005 is below the recommended minimum 0.01`,
+		},
+		"should succeed when cpu min.constant equals 0.01": {
+			resource: "cpu",
+			args: map[string]any{
+				"function": "MAX",
+				"constraints": []any{
+					map[string]any{
+						"min": []any{
+							map[string]any{
+								"constant": 0.01,
+							},
+						},
+					},
+				},
+			},
+		},
+		"should return error when memory min.constant is below 10": {
+			resource: "memory",
+			args: map[string]any{
+				"function": "MAX",
+				"constraints": []any{
+					map[string]any{
+						"min": []any{
+							map[string]any{
+								"constant": 5.0,
+							},
+						},
+					},
+				},
+			},
+			expErr: `field "memory": constraints.min.constant value 5 is below the recommended minimum 10`,
+		},
+		"should succeed when memory min.constant equals 10": {
+			resource: "memory",
+			args: map[string]any{
+				"function": "MAX",
+				"constraints": []any{
+					map[string]any{
+						"min": []any{
+							map[string]any{
+								"constant": 10.0,
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			r := require.New(t)
+			_, err := toWorkloadScalingPolicies(tt.resource, tt.args)
+			if tt.expErr != "" {
+				r.EqualError(err, tt.expErr)
+				return
+			}
+			r.NoError(err)
+		})
+	}
+}
+
+func Test_toConstraintStrategy_acceptsZero(t *testing.T) {
+	tests := map[string]struct {
+		args   map[string]any
+		exp    *sdk.WorkloadoptimizationV1ConstraintsV2Strategy
+		expErr string
+	}{
+		"should reject constant = 0 (zero is treated as absent)": {
+			args: map[string]any{
+				"constant": 0.0,
+			},
+			expErr: "either constant or percentage_of_original must be set",
+		},
+	}
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			r := require.New(t)
+			got, err := toConstraintStrategy(tt.args)
+			if tt.expErr != "" {
+				r.EqualError(err, tt.expErr)
+				return
+			}
+			r.NoError(err)
+			r.Equal(tt.exp, got)
 		})
 	}
 }
@@ -1447,6 +1804,203 @@ func Test_toWorkloadScalingPoliciesMap(t *testing.T) {
 				},
 			},
 		},
+		"should map constraints with constant min and percentage max": {
+			previousCfg: map[string]any{},
+			policies: sdk.WorkloadoptimizationV1ResourcePolicies{
+				Function: sdk.WorkloadoptimizationV1ResourcePoliciesFunctionMAX,
+				Overhead: 0.1,
+				Constraints: &sdk.WorkloadoptimizationV1ConstraintsV2{
+					Min: &sdk.WorkloadoptimizationV1ConstraintsV2Strategy{
+						Constant: &sdk.WorkloadoptimizationV1ConstraintsV2Constant{Value: 0.5},
+					},
+					Max: &sdk.WorkloadoptimizationV1ConstraintsV2Strategy{
+						PercentageOfOriginal: &sdk.WorkloadoptimizationV1ConstraintsV2PercentageOfOriginal{Value: 2.0},
+					},
+				},
+			},
+			expected: []map[string]any{
+				{
+					"function": sdk.WorkloadoptimizationV1ResourcePoliciesFunctionMAX,
+					"args":     []string(nil),
+					"overhead": 0.1,
+					"min":      (*float64)(nil),
+					"max":      (*float64)(nil),
+					"constraints": []map[string]any{
+						{
+							"min": []map[string]any{
+								{"constant": 0.5},
+							},
+							"max": []map[string]any{
+								{"percentage_of_original": 2.0},
+							},
+						},
+					},
+				},
+			},
+		},
+		"should map constraints with constant min only": {
+			previousCfg: map[string]any{},
+			policies: sdk.WorkloadoptimizationV1ResourcePolicies{
+				Function: sdk.WorkloadoptimizationV1ResourcePoliciesFunctionMAX,
+				Overhead: 0.1,
+				Constraints: &sdk.WorkloadoptimizationV1ConstraintsV2{
+					Min: &sdk.WorkloadoptimizationV1ConstraintsV2Strategy{
+						Constant: &sdk.WorkloadoptimizationV1ConstraintsV2Constant{Value: 0.25},
+					},
+				},
+			},
+			expected: []map[string]any{
+				{
+					"function": sdk.WorkloadoptimizationV1ResourcePoliciesFunctionMAX,
+					"args":     []string(nil),
+					"overhead": 0.1,
+					"min":      (*float64)(nil),
+					"max":      (*float64)(nil),
+					"constraints": []map[string]any{
+						{
+							"min": []map[string]any{
+								{"constant": 0.25},
+							},
+						},
+					},
+				},
+			},
+		},
+		"should map constraints with constant max only": {
+			previousCfg: map[string]any{},
+			policies: sdk.WorkloadoptimizationV1ResourcePolicies{
+				Function: sdk.WorkloadoptimizationV1ResourcePoliciesFunctionMAX,
+				Overhead: 0.1,
+				Constraints: &sdk.WorkloadoptimizationV1ConstraintsV2{
+					Max: &sdk.WorkloadoptimizationV1ConstraintsV2Strategy{
+						Constant: &sdk.WorkloadoptimizationV1ConstraintsV2Constant{Value: 4.0},
+					},
+				},
+			},
+			expected: []map[string]any{
+				{
+					"function": sdk.WorkloadoptimizationV1ResourcePoliciesFunctionMAX,
+					"args":     []string(nil),
+					"overhead": 0.1,
+					"min":      (*float64)(nil),
+					"max":      (*float64)(nil),
+					"constraints": []map[string]any{
+						{
+							"max": []map[string]any{
+								{"constant": 4.0},
+							},
+						},
+					},
+				},
+			},
+		},
+		"should map legacy min/max when constraints is nil": {
+			previousCfg: map[string]any{},
+			policies: sdk.WorkloadoptimizationV1ResourcePolicies{
+				Function: sdk.WorkloadoptimizationV1ResourcePoliciesFunctionMAX,
+				Overhead: 0.1,
+				Min:      lo.ToPtr(0.5),
+				Max:      lo.ToPtr(8.0),
+			},
+			expected: []map[string]any{
+				{
+					"function": sdk.WorkloadoptimizationV1ResourcePoliciesFunctionMAX,
+					"args":     []string(nil),
+					"overhead": 0.1,
+					"min":      lo.ToPtr(0.5),
+					"max":      lo.ToPtr(8.0),
+				},
+			},
+		},
+		"should prefer legacy when previous config had legacy even if API returns constraints": {
+			previousCfg: map[string]any{
+				"min": 0.01,
+				"max": 4096.0,
+			},
+			policies: sdk.WorkloadoptimizationV1ResourcePolicies{
+				Function: sdk.WorkloadoptimizationV1ResourcePoliciesFunctionMAX,
+				Overhead: 0.1,
+				Constraints: &sdk.WorkloadoptimizationV1ConstraintsV2{
+					Min: &sdk.WorkloadoptimizationV1ConstraintsV2Strategy{
+						Constant: &sdk.WorkloadoptimizationV1ConstraintsV2Constant{Value: 0.01},
+					},
+					Max: &sdk.WorkloadoptimizationV1ConstraintsV2Strategy{
+						Constant: &sdk.WorkloadoptimizationV1ConstraintsV2Constant{Value: 4096.0},
+					},
+				},
+				Min: lo.ToPtr(0.01),
+				Max: lo.ToPtr(4096.0),
+			},
+			expected: []map[string]any{
+				{
+					"function": sdk.WorkloadoptimizationV1ResourcePoliciesFunctionMAX,
+					"args":     []string(nil),
+					"overhead": 0.1,
+					"min":      lo.ToPtr(0.01),
+					"max":      lo.ToPtr(4096.0),
+				},
+			},
+		},
+		"should prefer constraints when previous config had constraints": {
+			previousCfg: map[string]any{
+				"constraints": []map[string]any{
+					{
+						"max": []map[string]any{
+							{"percentage_of_original": 200.0},
+						},
+					},
+				},
+			},
+			policies: sdk.WorkloadoptimizationV1ResourcePolicies{
+				Function: sdk.WorkloadoptimizationV1ResourcePoliciesFunctionMAX,
+				Overhead: 0.1,
+				Constraints: &sdk.WorkloadoptimizationV1ConstraintsV2{
+					Min: &sdk.WorkloadoptimizationV1ConstraintsV2Strategy{
+						Constant: &sdk.WorkloadoptimizationV1ConstraintsV2Constant{Value: 0.01},
+					},
+					Max: &sdk.WorkloadoptimizationV1ConstraintsV2Strategy{
+						PercentageOfOriginal: &sdk.WorkloadoptimizationV1ConstraintsV2PercentageOfOriginal{Value: 200.0},
+					},
+				},
+				Min: lo.ToPtr(0.01),
+				Max: lo.ToPtr(4096.0),
+			},
+			expected: []map[string]any{
+				{
+					"function": sdk.WorkloadoptimizationV1ResourcePoliciesFunctionMAX,
+					"args":     []string(nil),
+					"overhead": 0.1,
+					"min":      (*float64)(nil),
+					"max":      (*float64)(nil),
+					"constraints": []map[string]any{
+						{
+							"min": []map[string]any{
+								{"constant": 0.01},
+							},
+							"max": []map[string]any{
+								{"percentage_of_original": 200.0},
+							},
+						},
+					},
+				},
+			},
+		},
+		"should map neither constraints nor min/max when both are nil": {
+			previousCfg: map[string]any{},
+			policies: sdk.WorkloadoptimizationV1ResourcePolicies{
+				Function: sdk.WorkloadoptimizationV1ResourcePoliciesFunctionMAX,
+				Overhead: 0.1,
+			},
+			expected: []map[string]any{
+				{
+					"function": sdk.WorkloadoptimizationV1ResourcePoliciesFunctionMAX,
+					"args":     []string(nil),
+					"overhead": 0.1,
+					"min":      (*float64)(nil),
+					"max":      (*float64)(nil),
+				},
+			},
+		},
 	}
 
 	for name, tt := range tests {
@@ -1454,6 +2008,160 @@ func Test_toWorkloadScalingPoliciesMap(t *testing.T) {
 			r := require.New(t)
 			result := toWorkloadScalingPoliciesMap(tt.previousCfg, tt.policies)
 			r.Equal(tt.expected, result)
+		})
+	}
+}
+
+func Test_rawConfigHasField(t *testing.T) {
+	// Build test data objects once
+	objWithOnlyMemory := cty.ObjectVal(map[string]cty.Value{
+		"memory": cty.ListVal([]cty.Value{
+			cty.ObjectVal(map[string]cty.Value{
+				"function": cty.StringVal("MAX"),
+			}),
+		}),
+	})
+
+	objWithEmptyCPUList := cty.ObjectVal(map[string]cty.Value{
+		"cpu": cty.ListValEmpty(cty.EmptyObject),
+	})
+
+	objWithEmptyConstraints := cty.ObjectVal(map[string]cty.Value{
+		"cpu": cty.ListVal([]cty.Value{
+			cty.ObjectVal(map[string]cty.Value{
+				"constraints": cty.ListValEmpty(cty.EmptyObject),
+			}),
+		}),
+	})
+
+	objWithCPUConstraints := cty.ObjectVal(map[string]cty.Value{
+		"cpu": cty.ListVal([]cty.Value{
+			cty.ObjectVal(map[string]cty.Value{
+				"constraints": cty.ListVal([]cty.Value{
+					cty.ObjectVal(map[string]cty.Value{
+						"max": cty.ListVal([]cty.Value{
+							cty.ObjectVal(map[string]cty.Value{"constant": cty.NumberFloatVal(15)}),
+						}),
+					}),
+				}),
+			}),
+		}),
+	})
+
+	objWithLegacyMin := cty.ObjectVal(map[string]cty.Value{
+		"cpu": cty.ListVal([]cty.Value{
+			cty.ObjectVal(map[string]cty.Value{
+				"min": cty.NumberFloatVal(0.5),
+			}),
+		}),
+	})
+
+	objWithNullMin := cty.ObjectVal(map[string]cty.Value{
+		"cpu": cty.ListVal([]cty.Value{
+			cty.ObjectVal(map[string]cty.Value{
+				"min": cty.NilVal,
+			}),
+		}),
+	})
+
+	objWithConstraintsMin := cty.ObjectVal(map[string]cty.Value{
+		"cpu": cty.ListVal([]cty.Value{
+			cty.ObjectVal(map[string]cty.Value{
+				"constraints": cty.ListVal([]cty.Value{
+					cty.ObjectVal(map[string]cty.Value{
+						"min": cty.ListVal([]cty.Value{
+							cty.ObjectVal(map[string]cty.Value{
+								"constant": cty.NumberFloatVal(0.1),
+							}),
+						}),
+					}),
+				}),
+			}),
+		}),
+	})
+
+	objWithConstraintsNoMin := cty.ObjectVal(map[string]cty.Value{
+		"cpu": cty.ListVal([]cty.Value{
+			cty.ObjectVal(map[string]cty.Value{
+				"constraints": cty.ListVal([]cty.Value{
+					cty.ObjectVal(map[string]cty.Value{
+						"max": cty.ListVal([]cty.Value{
+							cty.ObjectVal(map[string]cty.Value{
+								"constant": cty.NumberFloatVal(15),
+							}),
+						}),
+					}),
+				}),
+			}),
+		}),
+	})
+
+	tests := []struct {
+		name      string
+		rawConfig cty.Value
+		path      []string
+		want      bool
+	}{
+		{
+			name:      "should return false when raw config is null",
+			rawConfig: cty.NilVal,
+			path:      []string{"cpu", "constraints"},
+			want:      false,
+		},
+		{
+			name:      "should return false when resource is absent",
+			rawConfig: objWithOnlyMemory,
+			path:      []string{"cpu", "constraints"},
+			want:      false,
+		},
+		{
+			name:      "should return false when resource list is empty",
+			rawConfig: objWithEmptyCPUList,
+			path:      []string{"cpu", "constraints"},
+			want:      false,
+		},
+		{
+			name:      "should return true when constraints block is present",
+			rawConfig: objWithCPUConstraints,
+			path:      []string{"cpu", "constraints"},
+			want:      true,
+		},
+		{
+			name:      "should return false when constraints list is empty",
+			rawConfig: objWithEmptyConstraints,
+			path:      []string{"cpu", "constraints"},
+			want:      false,
+		},
+		{
+			name:      "should return true when legacy min is present",
+			rawConfig: objWithLegacyMin,
+			path:      []string{"cpu", "min"},
+			want:      true,
+		},
+		{
+			name:      "should return false when field is null",
+			rawConfig: objWithNullMin,
+			path:      []string{"cpu", "min"},
+			want:      false,
+		},
+		{
+			name:      "should return true when nested min in constraints is present",
+			rawConfig: objWithConstraintsMin,
+			path:      []string{"cpu", "constraints", "min"},
+			want:      true,
+		},
+		{
+			name:      "should return false when nested min in constraints is absent",
+			rawConfig: objWithConstraintsNoMin,
+			path:      []string{"cpu", "constraints", "min"},
+			want:      false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			r := require.New(t)
+			r.Equal(tt.want, rawConfigHasField(tt.rawConfig, tt.path...))
 		})
 	}
 }
