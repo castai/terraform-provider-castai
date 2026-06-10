@@ -195,7 +195,7 @@ func updateClusterSettings(ctx context.Context, data *schema.ResourceData, clien
 		FieldEKSClusterAssumeRoleArn,
 		FieldClusterCredentialsId,
 	) {
-		log.Printf("[INFO] Nothing to update in cluster setttings.")
+		log.Printf("[INFO] Nothing to update in cluster settings.")
 		return nil
 	}
 
