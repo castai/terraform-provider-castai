@@ -8,7 +8,7 @@ resource "castai_edge_location" "this" {
   organization_id    = var.organization_id
   description        = var.description
   region             = var.region
-  control_plane_mode = var.control_plane_mode
+  control_plane_mode = "SHARED"
 
   custom = {}
 
