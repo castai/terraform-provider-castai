@@ -71,7 +71,6 @@ func resourceGKEClusterId() *schema.Resource {
 			},
 			FieldGKECastSA: {
 				Type:        schema.TypeString,
-				Optional:    true,
 				Computed:    true,
 				Description: "Service account email in cast project",
 			},
