@@ -286,8 +286,8 @@ type ClientInterface interface {
 	// DboAPIListDatabaseComponents request
 	DboAPIListDatabaseComponents(ctx context.Context, params *DboAPIListDatabaseComponentsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// DboAPIListDatabaseInstances request
-	DboAPIListDatabaseInstances(ctx context.Context, params *DboAPIListDatabaseInstancesParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// DboAPIListDatabaseInstancesLegacy request
+	DboAPIListDatabaseInstancesLegacy(ctx context.Context, params *DboAPIListDatabaseInstancesLegacyParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// DboAPIGetDatabaseInstance request
 	DboAPIGetDatabaseInstance(ctx context.Context, instanceId string, params *DboAPIGetDatabaseInstanceParams, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -1906,8 +1906,8 @@ func (c *Client) DboAPIListDatabaseComponents(ctx context.Context, params *DboAP
 	return c.Client.Do(req)
 }
 
-func (c *Client) DboAPIListDatabaseInstances(ctx context.Context, params *DboAPIListDatabaseInstancesParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewDboAPIListDatabaseInstancesRequest(c.Server, params)
+func (c *Client) DboAPIListDatabaseInstancesLegacy(ctx context.Context, params *DboAPIListDatabaseInstancesLegacyParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDboAPIListDatabaseInstancesLegacyRequest(c.Server, params)
 	if err != nil {
 		return nil, err
 	}
@@ -9300,8 +9300,8 @@ func NewDboAPIListDatabaseComponentsRequest(server string, params *DboAPIListDat
 	return req, nil
 }
 
-// NewDboAPIListDatabaseInstancesRequest generates requests for DboAPIListDatabaseInstances
-func NewDboAPIListDatabaseInstancesRequest(server string, params *DboAPIListDatabaseInstancesParams) (*http.Request, error) {
+// NewDboAPIListDatabaseInstancesLegacyRequest generates requests for DboAPIListDatabaseInstancesLegacy
+func NewDboAPIListDatabaseInstancesLegacyRequest(server string, params *DboAPIListDatabaseInstancesLegacyParams) (*http.Request, error) {
 	var err error
 
 	serverURL, err := url.Parse(server)
@@ -22213,8 +22213,8 @@ type ClientWithResponsesInterface interface {
 	// DboAPIListDatabaseComponents request
 	DboAPIListDatabaseComponentsWithResponse(ctx context.Context, params *DboAPIListDatabaseComponentsParams) (*DboAPIListDatabaseComponentsResponse, error)
 
-	// DboAPIListDatabaseInstances request
-	DboAPIListDatabaseInstancesWithResponse(ctx context.Context, params *DboAPIListDatabaseInstancesParams) (*DboAPIListDatabaseInstancesResponse, error)
+	// DboAPIListDatabaseInstancesLegacy request
+	DboAPIListDatabaseInstancesLegacyWithResponse(ctx context.Context, params *DboAPIListDatabaseInstancesLegacyParams) (*DboAPIListDatabaseInstancesLegacyResponse, error)
 
 	// DboAPIGetDatabaseInstance request
 	DboAPIGetDatabaseInstanceWithResponse(ctx context.Context, instanceId string, params *DboAPIGetDatabaseInstanceParams) (*DboAPIGetDatabaseInstanceResponse, error)
@@ -24681,14 +24681,14 @@ func (r DboAPIListDatabaseComponentsResponse) GetBody() []byte {
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
-type DboAPIListDatabaseInstancesResponse struct {
+type DboAPIListDatabaseInstancesLegacyResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *DboV1ListDatabaseInstancesResponse
 }
 
 // Status returns HTTPResponse.Status
-func (r DboAPIListDatabaseInstancesResponse) Status() string {
+func (r DboAPIListDatabaseInstancesLegacyResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -24696,7 +24696,7 @@ func (r DboAPIListDatabaseInstancesResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r DboAPIListDatabaseInstancesResponse) StatusCode() int {
+func (r DboAPIListDatabaseInstancesLegacyResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -24705,7 +24705,7 @@ func (r DboAPIListDatabaseInstancesResponse) StatusCode() int {
 
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
-func (r DboAPIListDatabaseInstancesResponse) GetBody() []byte {
+func (r DboAPIListDatabaseInstancesLegacyResponse) GetBody() []byte {
 	return r.Body
 }
 
@@ -31625,13 +31625,13 @@ func (c *ClientWithResponses) DboAPIListDatabaseComponentsWithResponse(ctx conte
 	return ParseDboAPIListDatabaseComponentsResponse(rsp)
 }
 
-// DboAPIListDatabaseInstancesWithResponse request returning *DboAPIListDatabaseInstancesResponse
-func (c *ClientWithResponses) DboAPIListDatabaseInstancesWithResponse(ctx context.Context, params *DboAPIListDatabaseInstancesParams) (*DboAPIListDatabaseInstancesResponse, error) {
-	rsp, err := c.DboAPIListDatabaseInstances(ctx, params)
+// DboAPIListDatabaseInstancesLegacyWithResponse request returning *DboAPIListDatabaseInstancesLegacyResponse
+func (c *ClientWithResponses) DboAPIListDatabaseInstancesLegacyWithResponse(ctx context.Context, params *DboAPIListDatabaseInstancesLegacyParams) (*DboAPIListDatabaseInstancesLegacyResponse, error) {
+	rsp, err := c.DboAPIListDatabaseInstancesLegacy(ctx, params)
 	if err != nil {
 		return nil, err
 	}
-	return ParseDboAPIListDatabaseInstancesResponse(rsp)
+	return ParseDboAPIListDatabaseInstancesLegacyResponse(rsp)
 }
 
 // DboAPIGetDatabaseInstanceWithResponse request returning *DboAPIGetDatabaseInstanceResponse
@@ -35554,15 +35554,15 @@ func ParseDboAPIListDatabaseComponentsResponse(rsp *http.Response) (*DboAPIListD
 	return response, nil
 }
 
-// ParseDboAPIListDatabaseInstancesResponse parses an HTTP response from a DboAPIListDatabaseInstancesWithResponse call
-func ParseDboAPIListDatabaseInstancesResponse(rsp *http.Response) (*DboAPIListDatabaseInstancesResponse, error) {
+// ParseDboAPIListDatabaseInstancesLegacyResponse parses an HTTP response from a DboAPIListDatabaseInstancesLegacyWithResponse call
+func ParseDboAPIListDatabaseInstancesLegacyResponse(rsp *http.Response) (*DboAPIListDatabaseInstancesLegacyResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
 	defer rsp.Body.Close()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &DboAPIListDatabaseInstancesResponse{
+	response := &DboAPIListDatabaseInstancesLegacyResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}

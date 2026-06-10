@@ -31,17 +31,6 @@ variable "description" {
   default     = "Custom edge location onboarded by Terraform"
 }
 
-variable "control_plane_mode" {
-  description = "Control plane mode for the edge location. Valid values: DEDICATED, SHARED."
-  type        = string
-  default     = "SHARED"
-
-  validation {
-    condition     = contains(["DEDICATED", "SHARED"], var.control_plane_mode)
-    error_message = "control_plane_mode must be DEDICATED or SHARED."
-  }
-}
-
 variable "tunneled_cidrs" {
   description = "List of destination CIDR blocks whose traffic should be routed through the main cluster."
   type        = list(string)
@@ -62,7 +51,7 @@ variable "cni_overlay" {
 variable "cni_overlay_encap" {
   description = "Encapsulation protocol used by the overlay. Valid: OVERLAY_ENCAP_UNSPECIFIED, OVERLAY_ENCAP_IPIP, OVERLAY_ENCAP_FOU."
   type        = string
-  default     = "OVERLAY_ENCAP_IPIP"
+  default     = "OVERLAY_ENCAP_FOU"
 
   validation {
     condition     = contains(["OVERLAY_ENCAP_UNSPECIFIED", "OVERLAY_ENCAP_IPIP", "OVERLAY_ENCAP_FOU"], var.cni_overlay_encap)

@@ -1915,24 +1915,24 @@ func (mr *MockClientInterfaceMockRecorder) DboAPIListDatabaseComponents(ctx, par
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIListDatabaseComponents", reflect.TypeOf((*MockClientInterface)(nil).DboAPIListDatabaseComponents), varargs...)
 }
 
-// DboAPIListDatabaseInstances mocks base method.
-func (m *MockClientInterface) DboAPIListDatabaseInstances(ctx context.Context, params *sdk.DboAPIListDatabaseInstancesParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+// DboAPIListDatabaseInstancesLegacy mocks base method.
+func (m *MockClientInterface) DboAPIListDatabaseInstancesLegacy(ctx context.Context, params *sdk.DboAPIListDatabaseInstancesLegacyParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{ctx, params}
 	for _, a := range reqEditors {
 		varargs = append(varargs, a)
 	}
-	ret := m.ctrl.Call(m, "DboAPIListDatabaseInstances", varargs...)
+	ret := m.ctrl.Call(m, "DboAPIListDatabaseInstancesLegacy", varargs...)
 	ret0, _ := ret[0].(*http.Response)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// DboAPIListDatabaseInstances indicates an expected call of DboAPIListDatabaseInstances.
-func (mr *MockClientInterfaceMockRecorder) DboAPIListDatabaseInstances(ctx, params interface{}, reqEditors ...interface{}) *gomock.Call {
+// DboAPIListDatabaseInstancesLegacy indicates an expected call of DboAPIListDatabaseInstancesLegacy.
+func (mr *MockClientInterfaceMockRecorder) DboAPIListDatabaseInstancesLegacy(ctx, params interface{}, reqEditors ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{ctx, params}, reqEditors...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIListDatabaseInstances", reflect.TypeOf((*MockClientInterface)(nil).DboAPIListDatabaseInstances), varargs...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIListDatabaseInstancesLegacy", reflect.TypeOf((*MockClientInterface)(nil).DboAPIListDatabaseInstancesLegacy), varargs...)
 }
 
 // DboAPIUpdateCacheConfiguration mocks base method.
@@ -10398,39 +10398,39 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) DboAPIListDatabaseCompon
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIListDatabaseComponentsWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DboAPIListDatabaseComponentsWithResponse), ctx, params)
 }
 
-// DboAPIListDatabaseInstances mocks base method.
-func (m *MockClientWithResponsesInterface) DboAPIListDatabaseInstances(ctx context.Context, params *sdk.DboAPIListDatabaseInstancesParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+// DboAPIListDatabaseInstancesLegacy mocks base method.
+func (m *MockClientWithResponsesInterface) DboAPIListDatabaseInstancesLegacy(ctx context.Context, params *sdk.DboAPIListDatabaseInstancesLegacyParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{ctx, params}
 	for _, a := range reqEditors {
 		varargs = append(varargs, a)
 	}
-	ret := m.ctrl.Call(m, "DboAPIListDatabaseInstances", varargs...)
+	ret := m.ctrl.Call(m, "DboAPIListDatabaseInstancesLegacy", varargs...)
 	ret0, _ := ret[0].(*http.Response)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// DboAPIListDatabaseInstances indicates an expected call of DboAPIListDatabaseInstances.
-func (mr *MockClientWithResponsesInterfaceMockRecorder) DboAPIListDatabaseInstances(ctx, params interface{}, reqEditors ...interface{}) *gomock.Call {
+// DboAPIListDatabaseInstancesLegacy indicates an expected call of DboAPIListDatabaseInstancesLegacy.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) DboAPIListDatabaseInstancesLegacy(ctx, params interface{}, reqEditors ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{ctx, params}, reqEditors...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIListDatabaseInstances", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DboAPIListDatabaseInstances), varargs...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIListDatabaseInstancesLegacy", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DboAPIListDatabaseInstancesLegacy), varargs...)
 }
 
-// DboAPIListDatabaseInstancesWithResponse mocks base method.
-func (m *MockClientWithResponsesInterface) DboAPIListDatabaseInstancesWithResponse(ctx context.Context, params *sdk.DboAPIListDatabaseInstancesParams) (*sdk.DboAPIListDatabaseInstancesResponse, error) {
+// DboAPIListDatabaseInstancesLegacyWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) DboAPIListDatabaseInstancesLegacyWithResponse(ctx context.Context, params *sdk.DboAPIListDatabaseInstancesLegacyParams) (*sdk.DboAPIListDatabaseInstancesLegacyResponse, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "DboAPIListDatabaseInstancesWithResponse", ctx, params)
-	ret0, _ := ret[0].(*sdk.DboAPIListDatabaseInstancesResponse)
+	ret := m.ctrl.Call(m, "DboAPIListDatabaseInstancesLegacyWithResponse", ctx, params)
+	ret0, _ := ret[0].(*sdk.DboAPIListDatabaseInstancesLegacyResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// DboAPIListDatabaseInstancesWithResponse indicates an expected call of DboAPIListDatabaseInstancesWithResponse.
-func (mr *MockClientWithResponsesInterfaceMockRecorder) DboAPIListDatabaseInstancesWithResponse(ctx, params interface{}) *gomock.Call {
+// DboAPIListDatabaseInstancesLegacyWithResponse indicates an expected call of DboAPIListDatabaseInstancesLegacyWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) DboAPIListDatabaseInstancesLegacyWithResponse(ctx, params interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIListDatabaseInstancesWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DboAPIListDatabaseInstancesWithResponse), ctx, params)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIListDatabaseInstancesLegacyWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DboAPIListDatabaseInstancesLegacyWithResponse), ctx, params)
 }
 
 // DboAPIUpdateCacheConfiguration mocks base method.

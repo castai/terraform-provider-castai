@@ -688,9 +688,21 @@ func (r *edgeLocationResource) Read(ctx context.Context, req resource.ReadReques
 				state.Networking.TunneledCIDRs = cidrs
 			}
 			if state.Networking.CNI != nil && apiNet.Cni != nil {
+				overlay := types.StringPointerValue((*string)(apiNet.Cni.Overlay))
+				overlayEncap := types.StringPointerValue((*string)(apiNet.Cni.OverlayEncap))
+
+				// Treat UNSPECIFIED values from the API as null when the user hasn't
+				// explicitly set them, to avoid perpetual diffs.
+				if state.Networking.CNI.Overlay.IsNull() && overlay.ValueString() == string(omni.OVERLAYUNSPECIFIED) {
+					overlay = types.StringNull()
+				}
+				if state.Networking.CNI.OverlayEncap.IsNull() && overlayEncap.ValueString() == string(omni.OVERLAYENCAPUNSPECIFIED) {
+					overlayEncap = types.StringNull()
+				}
+
 				state.Networking.CNI = &cniModel{
-					Overlay:      types.StringPointerValue((*string)(apiNet.Cni.Overlay)),
-					OverlayEncap: types.StringPointerValue((*string)(apiNet.Cni.OverlayEncap)),
+					Overlay:      overlay,
+					OverlayEncap: overlayEncap,
 				}
 			}
 		}

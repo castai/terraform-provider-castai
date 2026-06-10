@@ -11671,8 +11671,8 @@ type DboAPIListDatabaseComponentsParams struct {
 	EndTime *time.Time `form:"endTime,omitempty" json:"endTime,omitempty"`
 }
 
-// DboAPIListDatabaseInstancesParams defines parameters for DboAPIListDatabaseInstances.
-type DboAPIListDatabaseInstancesParams struct {
+// DboAPIListDatabaseInstancesLegacyParams defines parameters for DboAPIListDatabaseInstancesLegacy.
+type DboAPIListDatabaseInstancesLegacyParams struct {
 	// StartTime Start of period.
 	StartTime *time.Time `form:"startTime,omitempty" json:"startTime,omitempty"`
 
