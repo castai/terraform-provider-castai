@@ -6,7 +6,7 @@ locals {
 # Configure GKE cluster connection.
 module "iam-impersonate" {
   source             = "castai/iam-impersonate/gke"
-  version            = "1.0.0"
+  version            = "~> 1.1"
   service_account_id = local.service_account_id
   cluster_region     = var.cluster_region
   cluster_name       = var.cluster_name

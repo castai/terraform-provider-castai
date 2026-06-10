@@ -1,6 +1,6 @@
 module "gke" {
   source                     = "terraform-google-modules/kubernetes-engine/google"
-  version                    = "24.1.0"
+  version                    = "44.2.0"
   project_id                 = var.project_id
   name                       = var.cluster_name
   region                     = var.cluster_region
@@ -14,6 +14,7 @@ module "gke" {
   horizontal_pod_autoscaling = true
   filestore_csi_driver       = false
   create_service_account     = false
+  deletion_protection        = false
   service_account            = module.iam-impersonate.client_service_account_email
 
   node_pools = [
