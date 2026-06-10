@@ -134,6 +134,9 @@ func resourceCastaiGKEClusterIdCreate(ctx context.Context, data *schema.Resource
 		if err != nil {
 			return diag.FromErr(err)
 		}
+		if err := sdk.StatusOk(resp); err != nil {
+			return diag.FromErr(err)
+		}
 		if resp.JSON200 == nil || resp.JSON200.ServiceAccount == nil {
 			return diag.FromErr(fmt.Errorf("service account not returned"))
 		}
