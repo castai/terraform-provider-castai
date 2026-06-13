@@ -284,7 +284,7 @@ func (r *edgeConfigurationResource) Create(ctx context.Context, req resource.Cre
 	createReq := omni.EdgeConfiguration{
 		Name:           plan.Name.ValueString(),
 		Default:        lo.ToPtr(false),
-		UserDataBase64: lo.ToPtr(plan.UserDataBase64.ValueString()),
+		UserDataBase64: nonEmptyStringPtr(plan.UserDataBase64),
 		Gcp:            gcpConfig,
 		Aws:            awsConfig,
 		Oci:            ociConfig,
@@ -418,7 +418,7 @@ func (r *edgeConfigurationResource) Update(ctx context.Context, req resource.Upd
 
 	updateReq := omni.EdgeConfigurationUpdate{
 		Name:           lo.ToPtr(plan.Name.ValueString()),
-		UserDataBase64: lo.ToPtr(plan.UserDataBase64.ValueString()),
+		UserDataBase64: nonEmptyStringPtr(plan.UserDataBase64),
 		Gcp:            gcpConfig,
 		Aws:            awsConfig,
 		Oci:            ociConfig,
@@ -611,7 +611,7 @@ func (r *edgeConfigurationResource) toGCPConfiguration(ctx context.Context, plan
 
 	config := &omni.GCPConfiguration{}
 
-	if !plan.ImageID.IsNull() {
+	if !plan.ImageID.IsNull() && plan.ImageID.ValueString() != "" {
 		config.ImageId = lo.ToPtr(plan.ImageID.ValueString())
 	}
 
@@ -669,7 +669,7 @@ func (r *edgeConfigurationResource) toAWSConfiguration(ctx context.Context, plan
 
 	config := &omni.AWSConfiguration{}
 
-	if !plan.ImageID.IsNull() {
+	if !plan.ImageID.IsNull() && plan.ImageID.ValueString() != "" {
 		config.ImageId = lo.ToPtr(plan.ImageID.ValueString())
 	}
 
@@ -727,7 +727,7 @@ func (r *edgeConfigurationResource) toOCIConfiguration(ctx context.Context, plan
 
 	config := &omni.OCIConfiguration{}
 
-	if !plan.ImageID.IsNull() {
+	if !plan.ImageID.IsNull() && plan.ImageID.ValueString() != "" {
 		config.ImageId = lo.ToPtr(plan.ImageID.ValueString())
 	}
 
@@ -861,7 +861,7 @@ func (r *edgeConfigurationResource) toCRIConfiguration(_ context.Context, plan *
 
 	config := &omni.EdgeConfigurationCRIConfiguration{}
 
-	if !plan.Socket.IsNull() {
+	if !plan.Socket.IsNull() && plan.Socket.ValueString() != "" {
 		config.Socket = lo.ToPtr(plan.Socket.ValueString())
 	}
 
@@ -889,4 +889,15 @@ func normalizeStringPtr(s *string) types.String {
 		return types.StringNull()
 	}
 	return types.StringValue(*s)
+}
+
+// nonEmptyStringPtr returns a pointer to the string value, or nil if the value
+// is null or empty. This prevents sending "" to the API for optional string
+// fields, keeping the write and read paths consistent (the read path normalizes
+// empty strings back to null via normalizeStringPtr).
+func nonEmptyStringPtr(s types.String) *string {
+	if s.IsNull() || s.IsUnknown() || s.ValueString() == "" {
+		return nil
+	}
+	return lo.ToPtr(s.ValueString())
 }
