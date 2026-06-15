@@ -195,6 +195,46 @@ func (mr *MockClientInterfaceMockRecorder) EnterpriseAPIBatchCreateEnterpriseRol
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EnterpriseAPIBatchCreateEnterpriseRoleBindingsWithBody", reflect.TypeOf((*MockClientInterface)(nil).EnterpriseAPIBatchCreateEnterpriseRoleBindingsWithBody), varargs...)
 }
 
+// EnterpriseAPIBatchCreateEnterpriseServiceAccounts mocks base method.
+func (m *MockClientInterface) EnterpriseAPIBatchCreateEnterpriseServiceAccounts(ctx context.Context, enterpriseId string, body organization_management.EnterpriseAPIBatchCreateEnterpriseServiceAccountsJSONRequestBody, reqEditors ...organization_management.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, enterpriseId, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "EnterpriseAPIBatchCreateEnterpriseServiceAccounts", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// EnterpriseAPIBatchCreateEnterpriseServiceAccounts indicates an expected call of EnterpriseAPIBatchCreateEnterpriseServiceAccounts.
+func (mr *MockClientInterfaceMockRecorder) EnterpriseAPIBatchCreateEnterpriseServiceAccounts(ctx, enterpriseId, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, enterpriseId, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EnterpriseAPIBatchCreateEnterpriseServiceAccounts", reflect.TypeOf((*MockClientInterface)(nil).EnterpriseAPIBatchCreateEnterpriseServiceAccounts), varargs...)
+}
+
+// EnterpriseAPIBatchCreateEnterpriseServiceAccountsWithBody mocks base method.
+func (m *MockClientInterface) EnterpriseAPIBatchCreateEnterpriseServiceAccountsWithBody(ctx context.Context, enterpriseId, contentType string, body io.Reader, reqEditors ...organization_management.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, enterpriseId, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "EnterpriseAPIBatchCreateEnterpriseServiceAccountsWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// EnterpriseAPIBatchCreateEnterpriseServiceAccountsWithBody indicates an expected call of EnterpriseAPIBatchCreateEnterpriseServiceAccountsWithBody.
+func (mr *MockClientInterfaceMockRecorder) EnterpriseAPIBatchCreateEnterpriseServiceAccountsWithBody(ctx, enterpriseId, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, enterpriseId, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EnterpriseAPIBatchCreateEnterpriseServiceAccountsWithBody", reflect.TypeOf((*MockClientInterface)(nil).EnterpriseAPIBatchCreateEnterpriseServiceAccountsWithBody), varargs...)
+}
+
 // EnterpriseAPIBatchDeleteEnterpriseGroups mocks base method.
 func (m *MockClientInterface) EnterpriseAPIBatchDeleteEnterpriseGroups(ctx context.Context, enterpriseId string, body organization_management.EnterpriseAPIBatchDeleteEnterpriseGroupsJSONRequestBody, reqEditors ...organization_management.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
@@ -846,6 +886,76 @@ func (m *MockClientWithResponsesInterface) EnterpriseAPIBatchCreateEnterpriseRol
 func (mr *MockClientWithResponsesInterfaceMockRecorder) EnterpriseAPIBatchCreateEnterpriseRoleBindingsWithResponse(ctx, enterpriseId, body interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EnterpriseAPIBatchCreateEnterpriseRoleBindingsWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).EnterpriseAPIBatchCreateEnterpriseRoleBindingsWithResponse), ctx, enterpriseId, body)
+}
+
+// EnterpriseAPIBatchCreateEnterpriseServiceAccounts mocks base method.
+func (m *MockClientWithResponsesInterface) EnterpriseAPIBatchCreateEnterpriseServiceAccounts(ctx context.Context, enterpriseId string, body organization_management.EnterpriseAPIBatchCreateEnterpriseServiceAccountsJSONRequestBody, reqEditors ...organization_management.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, enterpriseId, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "EnterpriseAPIBatchCreateEnterpriseServiceAccounts", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// EnterpriseAPIBatchCreateEnterpriseServiceAccounts indicates an expected call of EnterpriseAPIBatchCreateEnterpriseServiceAccounts.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) EnterpriseAPIBatchCreateEnterpriseServiceAccounts(ctx, enterpriseId, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, enterpriseId, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EnterpriseAPIBatchCreateEnterpriseServiceAccounts", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).EnterpriseAPIBatchCreateEnterpriseServiceAccounts), varargs...)
+}
+
+// EnterpriseAPIBatchCreateEnterpriseServiceAccountsWithBody mocks base method.
+func (m *MockClientWithResponsesInterface) EnterpriseAPIBatchCreateEnterpriseServiceAccountsWithBody(ctx context.Context, enterpriseId, contentType string, body io.Reader, reqEditors ...organization_management.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, enterpriseId, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "EnterpriseAPIBatchCreateEnterpriseServiceAccountsWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// EnterpriseAPIBatchCreateEnterpriseServiceAccountsWithBody indicates an expected call of EnterpriseAPIBatchCreateEnterpriseServiceAccountsWithBody.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) EnterpriseAPIBatchCreateEnterpriseServiceAccountsWithBody(ctx, enterpriseId, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, enterpriseId, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EnterpriseAPIBatchCreateEnterpriseServiceAccountsWithBody", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).EnterpriseAPIBatchCreateEnterpriseServiceAccountsWithBody), varargs...)
+}
+
+// EnterpriseAPIBatchCreateEnterpriseServiceAccountsWithBodyWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) EnterpriseAPIBatchCreateEnterpriseServiceAccountsWithBodyWithResponse(ctx context.Context, enterpriseId, contentType string, body io.Reader) (*organization_management.EnterpriseAPIBatchCreateEnterpriseServiceAccountsResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "EnterpriseAPIBatchCreateEnterpriseServiceAccountsWithBodyWithResponse", ctx, enterpriseId, contentType, body)
+	ret0, _ := ret[0].(*organization_management.EnterpriseAPIBatchCreateEnterpriseServiceAccountsResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// EnterpriseAPIBatchCreateEnterpriseServiceAccountsWithBodyWithResponse indicates an expected call of EnterpriseAPIBatchCreateEnterpriseServiceAccountsWithBodyWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) EnterpriseAPIBatchCreateEnterpriseServiceAccountsWithBodyWithResponse(ctx, enterpriseId, contentType, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EnterpriseAPIBatchCreateEnterpriseServiceAccountsWithBodyWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).EnterpriseAPIBatchCreateEnterpriseServiceAccountsWithBodyWithResponse), ctx, enterpriseId, contentType, body)
+}
+
+// EnterpriseAPIBatchCreateEnterpriseServiceAccountsWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) EnterpriseAPIBatchCreateEnterpriseServiceAccountsWithResponse(ctx context.Context, enterpriseId string, body organization_management.EnterpriseAPIBatchCreateEnterpriseServiceAccountsJSONRequestBody) (*organization_management.EnterpriseAPIBatchCreateEnterpriseServiceAccountsResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "EnterpriseAPIBatchCreateEnterpriseServiceAccountsWithResponse", ctx, enterpriseId, body)
+	ret0, _ := ret[0].(*organization_management.EnterpriseAPIBatchCreateEnterpriseServiceAccountsResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// EnterpriseAPIBatchCreateEnterpriseServiceAccountsWithResponse indicates an expected call of EnterpriseAPIBatchCreateEnterpriseServiceAccountsWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) EnterpriseAPIBatchCreateEnterpriseServiceAccountsWithResponse(ctx, enterpriseId, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EnterpriseAPIBatchCreateEnterpriseServiceAccountsWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).EnterpriseAPIBatchCreateEnterpriseServiceAccountsWithResponse), ctx, enterpriseId, body)
 }
 
 // EnterpriseAPIBatchDeleteEnterpriseGroups mocks base method.

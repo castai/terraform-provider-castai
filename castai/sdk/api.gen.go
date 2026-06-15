@@ -1411,26 +1411,6 @@ const (
 	WorkloadOptimizationAPIGetWorkloadFiltersParamsManagementOptionsUNDEFINED WorkloadOptimizationAPIGetWorkloadFiltersParamsManagementOptions = "UNDEFINED"
 )
 
-// Defines values for WorkloadOptimizationAPIGetInstallCmdParamsCmePresets.
-const (
-	WorkloadOptimizationAPIGetInstallCmdParamsCmePresetsCODAHALE      WorkloadOptimizationAPIGetInstallCmdParamsCmePresets = "CODAHALE"
-	WorkloadOptimizationAPIGetInstallCmdParamsCmePresetsDROPWIZARD    WorkloadOptimizationAPIGetInstallCmdParamsCmePresets = "DROPWIZARD"
-	WorkloadOptimizationAPIGetInstallCmdParamsCmePresetsINVALID       WorkloadOptimizationAPIGetInstallCmdParamsCmePresets = "INVALID"
-	WorkloadOptimizationAPIGetInstallCmdParamsCmePresetsMICROMETER    WorkloadOptimizationAPIGetInstallCmdParamsCmePresets = "MICROMETER"
-	WorkloadOptimizationAPIGetInstallCmdParamsCmePresetsOTELJAVAAGENT WorkloadOptimizationAPIGetInstallCmdParamsCmePresets = "OTEL_JAVA_AGENT"
-	WorkloadOptimizationAPIGetInstallCmdParamsCmePresetsSDKPROMETHEUS WorkloadOptimizationAPIGetInstallCmdParamsCmePresets = "SDK_PROMETHEUS"
-)
-
-// Defines values for WorkloadOptimizationAPIGetInstallScriptParamsCmePresets.
-const (
-	WorkloadOptimizationAPIGetInstallScriptParamsCmePresetsCODAHALE      WorkloadOptimizationAPIGetInstallScriptParamsCmePresets = "CODAHALE"
-	WorkloadOptimizationAPIGetInstallScriptParamsCmePresetsDROPWIZARD    WorkloadOptimizationAPIGetInstallScriptParamsCmePresets = "DROPWIZARD"
-	WorkloadOptimizationAPIGetInstallScriptParamsCmePresetsINVALID       WorkloadOptimizationAPIGetInstallScriptParamsCmePresets = "INVALID"
-	WorkloadOptimizationAPIGetInstallScriptParamsCmePresetsMICROMETER    WorkloadOptimizationAPIGetInstallScriptParamsCmePresets = "MICROMETER"
-	WorkloadOptimizationAPIGetInstallScriptParamsCmePresetsOTELJAVAAGENT WorkloadOptimizationAPIGetInstallScriptParamsCmePresets = "OTEL_JAVA_AGENT"
-	WorkloadOptimizationAPIGetInstallScriptParamsCmePresetsSDKPROMETHEUS WorkloadOptimizationAPIGetInstallScriptParamsCmePresets = "SDK_PROMETHEUS"
-)
-
 // Defines values for WorkloadOptimizationAPIListClusterHPAsParamsManagementOptions.
 const (
 	WorkloadOptimizationAPIListClusterHPAsParamsManagementOptionsMANAGED   WorkloadOptimizationAPIListClusterHPAsParamsManagementOptions = "MANAGED"
@@ -9281,11 +9261,6 @@ type WorkloadoptimizationV1GetHPAV2MigrationEligibilityResponse struct {
 //   - NONE: No workloads eligible for migration - banner should not be shown
 type WorkloadoptimizationV1GetHPAV2MigrationEligibilityResponseMigrationStatus string
 
-// WorkloadoptimizationV1GetInstallCmdResponse defines model for workloadoptimization.v1.GetInstallCmdResponse.
-type WorkloadoptimizationV1GetInstallCmdResponse struct {
-	Script string `json:"script"`
-}
-
 // WorkloadoptimizationV1GetOrganizationAgentStatusesResponse defines model for workloadoptimization.v1.GetOrganizationAgentStatusesResponse.
 type WorkloadoptimizationV1GetOrganizationAgentStatusesResponse struct {
 	ClusterAgentStatuses []WorkloadoptimizationV1GetAgentStatusResponse `json:"clusterAgentStatuses"`
@@ -12598,25 +12573,6 @@ type WorkloadOptimizationAPIGetWorkloadGPUMetricsParams struct {
 	From *time.Time `form:"from,omitempty" json:"from,omitempty"`
 	To   *time.Time `form:"to,omitempty" json:"to,omitempty"`
 }
-
-// WorkloadOptimizationAPIGetInstallCmdParams defines parameters for WorkloadOptimizationAPIGetInstallCmd.
-type WorkloadOptimizationAPIGetInstallCmdParams struct {
-	ClusterId  string                                                  `form:"clusterId" json:"clusterId"`
-	CmeDsUrl   *string                                                 `form:"cmeDsUrl,omitempty" json:"cmeDsUrl,omitempty"`
-	CmePresets *[]WorkloadOptimizationAPIGetInstallCmdParamsCmePresets `form:"cmePresets,omitempty" json:"cmePresets,omitempty"`
-}
-
-// WorkloadOptimizationAPIGetInstallCmdParamsCmePresets defines parameters for WorkloadOptimizationAPIGetInstallCmd.
-type WorkloadOptimizationAPIGetInstallCmdParamsCmePresets string
-
-// WorkloadOptimizationAPIGetInstallScriptParams defines parameters for WorkloadOptimizationAPIGetInstallScript.
-type WorkloadOptimizationAPIGetInstallScriptParams struct {
-	CmeDsUrl   *string                                                    `form:"cmeDsUrl,omitempty" json:"cmeDsUrl,omitempty"`
-	CmePresets *[]WorkloadOptimizationAPIGetInstallScriptParamsCmePresets `form:"cmePresets,omitempty" json:"cmePresets,omitempty"`
-}
-
-// WorkloadOptimizationAPIGetInstallScriptParamsCmePresets defines parameters for WorkloadOptimizationAPIGetInstallScript.
-type WorkloadOptimizationAPIGetInstallScriptParamsCmePresets string
 
 // InventoryAPIListZonesParams defines parameters for InventoryAPIListZones.
 type InventoryAPIListZonesParams struct {

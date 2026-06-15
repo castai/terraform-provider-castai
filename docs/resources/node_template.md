@@ -181,6 +181,8 @@ Required:
 Optional:
 
 - `affinity` (Block List) (see [below for nested schema](#nestedblock--constraints--dedicated_node_affinity--affinity))
+- `cpus_per_gpu` (Number) Number of CPUs per GPU on the node.
+- `min_gpus_per_node` (Number) Minimal number of GPUs per node.
 
 <a id="nestedblock--constraints--dedicated_node_affinity--affinity"></a>
 ### Nested Schema for `constraints.dedicated_node_affinity.affinity`

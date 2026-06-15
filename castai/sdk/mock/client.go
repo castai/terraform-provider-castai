@@ -6355,46 +6355,6 @@ func (mr *MockClientInterfaceMockRecorder) WorkloadOptimizationAPIGetHPAV2Migrat
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIGetHPAV2MigrationEligibility", reflect.TypeOf((*MockClientInterface)(nil).WorkloadOptimizationAPIGetHPAV2MigrationEligibility), varargs...)
 }
 
-// WorkloadOptimizationAPIGetInstallCmd mocks base method.
-func (m *MockClientInterface) WorkloadOptimizationAPIGetInstallCmd(ctx context.Context, params *sdk.WorkloadOptimizationAPIGetInstallCmdParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
-	m.ctrl.T.Helper()
-	varargs := []interface{}{ctx, params}
-	for _, a := range reqEditors {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "WorkloadOptimizationAPIGetInstallCmd", varargs...)
-	ret0, _ := ret[0].(*http.Response)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// WorkloadOptimizationAPIGetInstallCmd indicates an expected call of WorkloadOptimizationAPIGetInstallCmd.
-func (mr *MockClientInterfaceMockRecorder) WorkloadOptimizationAPIGetInstallCmd(ctx, params interface{}, reqEditors ...interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, params}, reqEditors...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIGetInstallCmd", reflect.TypeOf((*MockClientInterface)(nil).WorkloadOptimizationAPIGetInstallCmd), varargs...)
-}
-
-// WorkloadOptimizationAPIGetInstallScript mocks base method.
-func (m *MockClientInterface) WorkloadOptimizationAPIGetInstallScript(ctx context.Context, params *sdk.WorkloadOptimizationAPIGetInstallScriptParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
-	m.ctrl.T.Helper()
-	varargs := []interface{}{ctx, params}
-	for _, a := range reqEditors {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "WorkloadOptimizationAPIGetInstallScript", varargs...)
-	ret0, _ := ret[0].(*http.Response)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// WorkloadOptimizationAPIGetInstallScript indicates an expected call of WorkloadOptimizationAPIGetInstallScript.
-func (mr *MockClientInterfaceMockRecorder) WorkloadOptimizationAPIGetInstallScript(ctx, params interface{}, reqEditors ...interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, params}, reqEditors...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIGetInstallScript", reflect.TypeOf((*MockClientInterface)(nil).WorkloadOptimizationAPIGetInstallScript), varargs...)
-}
-
 // WorkloadOptimizationAPIGetOrganizationAgentStatuses mocks base method.
 func (m *MockClientInterface) WorkloadOptimizationAPIGetOrganizationAgentStatuses(ctx context.Context, organizationId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
@@ -18066,76 +18026,6 @@ func (m *MockClientWithResponsesInterface) WorkloadOptimizationAPIGetHPAV2Migrat
 func (mr *MockClientWithResponsesInterfaceMockRecorder) WorkloadOptimizationAPIGetHPAV2MigrationEligibilityWithResponse(ctx, clusterId interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIGetHPAV2MigrationEligibilityWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).WorkloadOptimizationAPIGetHPAV2MigrationEligibilityWithResponse), ctx, clusterId)
-}
-
-// WorkloadOptimizationAPIGetInstallCmd mocks base method.
-func (m *MockClientWithResponsesInterface) WorkloadOptimizationAPIGetInstallCmd(ctx context.Context, params *sdk.WorkloadOptimizationAPIGetInstallCmdParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
-	m.ctrl.T.Helper()
-	varargs := []interface{}{ctx, params}
-	for _, a := range reqEditors {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "WorkloadOptimizationAPIGetInstallCmd", varargs...)
-	ret0, _ := ret[0].(*http.Response)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// WorkloadOptimizationAPIGetInstallCmd indicates an expected call of WorkloadOptimizationAPIGetInstallCmd.
-func (mr *MockClientWithResponsesInterfaceMockRecorder) WorkloadOptimizationAPIGetInstallCmd(ctx, params interface{}, reqEditors ...interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, params}, reqEditors...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIGetInstallCmd", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).WorkloadOptimizationAPIGetInstallCmd), varargs...)
-}
-
-// WorkloadOptimizationAPIGetInstallCmdWithResponse mocks base method.
-func (m *MockClientWithResponsesInterface) WorkloadOptimizationAPIGetInstallCmdWithResponse(ctx context.Context, params *sdk.WorkloadOptimizationAPIGetInstallCmdParams) (*sdk.WorkloadOptimizationAPIGetInstallCmdResponse, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "WorkloadOptimizationAPIGetInstallCmdWithResponse", ctx, params)
-	ret0, _ := ret[0].(*sdk.WorkloadOptimizationAPIGetInstallCmdResponse)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// WorkloadOptimizationAPIGetInstallCmdWithResponse indicates an expected call of WorkloadOptimizationAPIGetInstallCmdWithResponse.
-func (mr *MockClientWithResponsesInterfaceMockRecorder) WorkloadOptimizationAPIGetInstallCmdWithResponse(ctx, params interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIGetInstallCmdWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).WorkloadOptimizationAPIGetInstallCmdWithResponse), ctx, params)
-}
-
-// WorkloadOptimizationAPIGetInstallScript mocks base method.
-func (m *MockClientWithResponsesInterface) WorkloadOptimizationAPIGetInstallScript(ctx context.Context, params *sdk.WorkloadOptimizationAPIGetInstallScriptParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
-	m.ctrl.T.Helper()
-	varargs := []interface{}{ctx, params}
-	for _, a := range reqEditors {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "WorkloadOptimizationAPIGetInstallScript", varargs...)
-	ret0, _ := ret[0].(*http.Response)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// WorkloadOptimizationAPIGetInstallScript indicates an expected call of WorkloadOptimizationAPIGetInstallScript.
-func (mr *MockClientWithResponsesInterfaceMockRecorder) WorkloadOptimizationAPIGetInstallScript(ctx, params interface{}, reqEditors ...interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, params}, reqEditors...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIGetInstallScript", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).WorkloadOptimizationAPIGetInstallScript), varargs...)
-}
-
-// WorkloadOptimizationAPIGetInstallScriptWithResponse mocks base method.
-func (m *MockClientWithResponsesInterface) WorkloadOptimizationAPIGetInstallScriptWithResponse(ctx context.Context, params *sdk.WorkloadOptimizationAPIGetInstallScriptParams) (*sdk.WorkloadOptimizationAPIGetInstallScriptResponse, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "WorkloadOptimizationAPIGetInstallScriptWithResponse", ctx, params)
-	ret0, _ := ret[0].(*sdk.WorkloadOptimizationAPIGetInstallScriptResponse)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// WorkloadOptimizationAPIGetInstallScriptWithResponse indicates an expected call of WorkloadOptimizationAPIGetInstallScriptWithResponse.
-func (mr *MockClientWithResponsesInterfaceMockRecorder) WorkloadOptimizationAPIGetInstallScriptWithResponse(ctx, params interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIGetInstallScriptWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).WorkloadOptimizationAPIGetInstallScriptWithResponse), ctx, params)
 }
 
 // WorkloadOptimizationAPIGetOrganizationAgentStatuses mocks base method.
