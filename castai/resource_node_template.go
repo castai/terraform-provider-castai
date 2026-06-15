@@ -73,6 +73,8 @@ const (
 	FieldNodeTemplateAffinityKeyName                          = "key"
 	FieldNodeTemplateAffinityOperatorName                     = "operator"
 	FieldNodeTemplateAffinityValuesName                       = "values"
+	FieldNodeTemplateCpusPerGpu                               = "cpus_per_gpu"
+	FieldNodeTemplateMinGpusPerNode                           = "min_gpus_per_node"
 	FieldNodeTemplateBurstableInstances                       = "burstable_instances"
 	FieldNodeTemplateCustomerSpecific                         = "customer_specific"
 	FieldNodeTemplateCPUManufacturers                         = "cpu_manufacturers"
@@ -553,6 +555,16 @@ func resourceNodeTemplate() *schema.Resource {
 												},
 											},
 										},
+									},
+									FieldNodeTemplateCpusPerGpu: {
+										Optional:    true,
+										Type:        schema.TypeInt,
+										Description: "Number of CPUs per GPU on the node.",
+									},
+									FieldNodeTemplateMinGpusPerNode: {
+										Optional:    true,
+										Type:        schema.TypeInt,
+										Description: "Minimal number of GPUs per node.",
 									},
 								},
 							},
@@ -1225,6 +1237,13 @@ func flattenNodeAffinity(affinities []sdk.NodetemplatesV1TemplateConstraintsDedi
 
 		result[FieldNodeTemplateName] = lo.FromPtr(item.Name)
 		result[FieldNodeTemplateAzName] = lo.FromPtr(item.AzName)
+
+		if item.CpusPerGpu != nil {
+			result[FieldNodeTemplateCpusPerGpu] = lo.FromPtr(item.CpusPerGpu)
+		}
+		if item.MinGpusPerNode != nil {
+			result[FieldNodeTemplateMinGpusPerNode] = lo.FromPtr(item.MinGpusPerNode)
+		}
 
 		if item.Affinity != nil && len(*item.Affinity) > 0 {
 			result[FieldNodeTemplateAffinityName] = lo.Map(*item.Affinity, func(affinity sdk.K8sSelectorV1KubernetesNodeAffinity, index int) map[string]any {
@@ -2027,6 +2046,12 @@ func toTemplateConstraintsNodeAffinity(o map[string]any) *sdk.NodetemplatesV1Tem
 			}
 			return out
 		}))
+	}
+	if v, ok := o[FieldNodeTemplateCpusPerGpu].(int); ok && v != 0 {
+		out.CpusPerGpu = toPtr(int32(v))
+	}
+	if v, ok := o[FieldNodeTemplateMinGpusPerNode].(int); ok && v != 0 {
+		out.MinGpusPerNode = toPtr(int32(v))
 	}
 
 	return &out

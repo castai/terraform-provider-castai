@@ -114,7 +114,9 @@ func TestNodeTemplateResourceReadContext(t *testing.T) {
 							"operator": "In",	
 							"values": ["foo"]
 						  }
-						]
+						],
+						"cpusPerGpu": 4,
+              			"minGpusPerNode": 2
 					}
 				  ],
 				  "cpuManufacturers": ["INTEL", "AMD"],
@@ -229,8 +231,10 @@ constraints.0.dedicated_node_affinity.0.affinity.0.operator = In
 constraints.0.dedicated_node_affinity.0.affinity.0.values.# = 1
 constraints.0.dedicated_node_affinity.0.affinity.0.values.0 = foo
 constraints.0.dedicated_node_affinity.0.az_name = eu-central-1a
+constraints.0.dedicated_node_affinity.0.cpus_per_gpu = 4
 constraints.0.dedicated_node_affinity.0.instance_types.# = 1
 constraints.0.dedicated_node_affinity.0.instance_types.0 = m5.24xlarge
+constraints.0.dedicated_node_affinity.0.min_gpus_per_node = 2
 constraints.0.dedicated_node_affinity.0.name = foo
 constraints.0.on_demand = true
 constraints.0.os.# = 1
@@ -293,9 +297,11 @@ func Test_flattenNodeAffinity(t *testing.T) {
 					Operator: sdk.K8sSelectorV1Operator(op),
 					Values:   []string{"linux"},
 				}},
-				AzName:        lo.ToPtr("us-central1-c"),
-				InstanceTypes: &[]string{"e2"},
-				Name:          lo.ToPtr("linux-only"),
+				AzName:         lo.ToPtr("us-central1-c"),
+				InstanceTypes:  &[]string{"e2"},
+				Name:           lo.ToPtr("linux-only"),
+				CpusPerGpu:     lo.ToPtr(int32(4)),
+				MinGpusPerNode: lo.ToPtr(int32(2)),
 			},
 		}
 	}
@@ -303,9 +309,11 @@ func Test_flattenNodeAffinity(t *testing.T) {
 	makeMappedNodeAffinityWithOperator := func(op string) []map[string]any {
 		wantNA := []map[string]any{
 			{
-				FieldNodeTemplateInstanceTypes: []string{"e2"},
-				FieldNodeTemplateAzName:        "us-central1-c",
-				FieldNodeTemplateName:          "linux-only",
+				FieldNodeTemplateInstanceTypes:  []string{"e2"},
+				FieldNodeTemplateAzName:         "us-central1-c",
+				FieldNodeTemplateName:           "linux-only",
+				FieldNodeTemplateCpusPerGpu:     int32(4),
+				FieldNodeTemplateMinGpusPerNode: int32(2),
 				FieldNodeTemplateAffinityName: []map[string]any{
 					{
 						FieldNodeTemplateAffinityKeyName:      "kubernetes.io/os",
@@ -363,6 +371,54 @@ func Test_flattenNodeAffinity(t *testing.T) {
 			if tc.wantErr {
 				r.Error(err)
 			}
+		})
+	}
+}
+
+func Test_toTemplateConstraintsDedicatedAffinity(t *testing.T) {
+	tests := []struct {
+		name  string
+		input map[string]any
+		want  *sdk.NodetemplatesV1TemplateConstraintsDedicatedNodeAffinity
+	}{
+		{
+			name: "full map",
+			input: map[string]any{
+				FieldNodeTemplateName:           "test",
+				FieldNodeTemplateAzName:         "us-central1-c",
+				FieldNodeTemplateInstanceTypes:  []any{"e2"},
+				FieldNodeTemplateCpusPerGpu:     4,
+				FieldNodeTemplateMinGpusPerNode: 2,
+			},
+			want: &sdk.NodetemplatesV1TemplateConstraintsDedicatedNodeAffinity{
+				Name:           lo.ToPtr("test"),
+				AzName:         lo.ToPtr("us-central1-c"),
+				InstanceTypes:  &[]string{"e2"},
+				CpusPerGpu:     lo.ToPtr(int32(4)),
+				MinGpusPerNode: lo.ToPtr(int32(2)),
+			},
+		},
+		{
+			name:  "nil map returns nil",
+			input: nil,
+			want:  nil,
+		},
+		{
+			name: "partial map without new fields",
+			input: map[string]any{
+				FieldNodeTemplateName: "test",
+			},
+			want: &sdk.NodetemplatesV1TemplateConstraintsDedicatedNodeAffinity{
+				Name: lo.ToPtr("test"),
+			},
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			r := require.New(t)
+			got := toTemplateConstraintsNodeAffinity(tc.input)
+			r.Equal(tc.want, got)
 		})
 	}
 }

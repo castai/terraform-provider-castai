@@ -291,6 +291,33 @@ type BatchCreateEnterpriseRoleBindingsResponse struct {
 	RoleBindings *[]RoleBinding `json:"roleBindings,omitempty"`
 }
 
+// BatchCreateEnterpriseServiceAccountsRequest Request message for batch creating service accounts in an enterprise.
+type BatchCreateEnterpriseServiceAccountsRequest struct {
+	// EnterpriseId ID of the enterprise organization.
+	EnterpriseId string `json:"enterpriseId"`
+
+	// Requests List of service accounts to create. Maximum 100 per request.
+	Requests []BatchCreateEnterpriseServiceAccountsRequestServiceAccountRequest `json:"requests"`
+}
+
+// BatchCreateEnterpriseServiceAccountsRequestServiceAccountRequest ServiceAccountRequest is a single service account to create.
+type BatchCreateEnterpriseServiceAccountsRequestServiceAccountRequest struct {
+	// Description Description of the service account.
+	Description *string `json:"description,omitempty"`
+
+	// Name Name of the service account.
+	Name string `json:"name"`
+
+	// OrganizationId Organization ID — must be the enterprise itself or a direct child (deleted_at IS NULL).
+	OrganizationId string `json:"organizationId"`
+}
+
+// BatchCreateEnterpriseServiceAccountsResponse Response message for batch creating service accounts in an enterprise.
+type BatchCreateEnterpriseServiceAccountsResponse struct {
+	// Items ListEnterpriseServiceAccountsResponse contains the list of service accounts in the enterprise organization
+	Items *[]ListEnterpriseServiceAccountsResponseServiceAccount `json:"items,omitempty"`
+}
+
 // BatchDeleteEnterpriseGroupsRequest Request message for batch deleting enterprise groups
 type BatchDeleteEnterpriseGroupsRequest struct {
 	// EnterpriseId Required field that identifies the enterprise.
@@ -1441,6 +1468,9 @@ type EnterpriseAPIBatchDeleteEnterpriseRoleBindingsJSONRequestBody = BatchDelete
 
 // EnterpriseAPIBatchUpdateEnterpriseRoleBindingsJSONRequestBody defines body for EnterpriseAPIBatchUpdateEnterpriseRoleBindings for application/json ContentType.
 type EnterpriseAPIBatchUpdateEnterpriseRoleBindingsJSONRequestBody = BatchUpdateEnterpriseRoleBindingsRequest
+
+// EnterpriseAPIBatchCreateEnterpriseServiceAccountsJSONRequestBody defines body for EnterpriseAPIBatchCreateEnterpriseServiceAccounts for application/json ContentType.
+type EnterpriseAPIBatchCreateEnterpriseServiceAccountsJSONRequestBody = BatchCreateEnterpriseServiceAccountsRequest
 
 // EnterpriseAPIAddUserToChildOrganizationJSONRequestBody defines body for EnterpriseAPIAddUserToChildOrganization for application/json ContentType.
 type EnterpriseAPIAddUserToChildOrganizationJSONRequestBody = AddUserToChildOrganizationRequest

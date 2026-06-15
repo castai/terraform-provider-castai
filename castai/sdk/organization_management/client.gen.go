@@ -151,6 +151,11 @@ type ClientInterface interface {
 	// EnterpriseAPIListEnterpriseServiceAccounts request
 	EnterpriseAPIListEnterpriseServiceAccounts(ctx context.Context, enterpriseId string, params *EnterpriseAPIListEnterpriseServiceAccountsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// EnterpriseAPIBatchCreateEnterpriseServiceAccountsWithBody request with any body
+	EnterpriseAPIBatchCreateEnterpriseServiceAccountsWithBody(ctx context.Context, enterpriseId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	EnterpriseAPIBatchCreateEnterpriseServiceAccounts(ctx context.Context, enterpriseId string, body EnterpriseAPIBatchCreateEnterpriseServiceAccountsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// EnterpriseAPIAddUserToChildOrganizationWithBody request with any body
 	EnterpriseAPIAddUserToChildOrganizationWithBody(ctx context.Context, enterpriseId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -428,6 +433,30 @@ func (c *Client) EnterpriseAPIBatchUpdateEnterpriseRoleBindings(ctx context.Cont
 
 func (c *Client) EnterpriseAPIListEnterpriseServiceAccounts(ctx context.Context, enterpriseId string, params *EnterpriseAPIListEnterpriseServiceAccountsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewEnterpriseAPIListEnterpriseServiceAccountsRequest(c.Server, enterpriseId, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) EnterpriseAPIBatchCreateEnterpriseServiceAccountsWithBody(ctx context.Context, enterpriseId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewEnterpriseAPIBatchCreateEnterpriseServiceAccountsRequestWithBody(c.Server, enterpriseId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) EnterpriseAPIBatchCreateEnterpriseServiceAccounts(ctx context.Context, enterpriseId string, body EnterpriseAPIBatchCreateEnterpriseServiceAccountsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewEnterpriseAPIBatchCreateEnterpriseServiceAccountsRequest(c.Server, enterpriseId, body)
 	if err != nil {
 		return nil, err
 	}
@@ -1624,6 +1653,53 @@ func NewEnterpriseAPIListEnterpriseServiceAccountsRequest(server string, enterpr
 	return req, nil
 }
 
+// NewEnterpriseAPIBatchCreateEnterpriseServiceAccountsRequest calls the generic EnterpriseAPIBatchCreateEnterpriseServiceAccounts builder with application/json body
+func NewEnterpriseAPIBatchCreateEnterpriseServiceAccountsRequest(server string, enterpriseId string, body EnterpriseAPIBatchCreateEnterpriseServiceAccountsJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewEnterpriseAPIBatchCreateEnterpriseServiceAccountsRequestWithBody(server, enterpriseId, "application/json", bodyReader)
+}
+
+// NewEnterpriseAPIBatchCreateEnterpriseServiceAccountsRequestWithBody generates requests for EnterpriseAPIBatchCreateEnterpriseServiceAccounts with any type of body
+func NewEnterpriseAPIBatchCreateEnterpriseServiceAccountsRequestWithBody(server string, enterpriseId string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "enterpriseId", runtime.ParamLocationPath, enterpriseId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/organization-management/v1/enterprises/%s/service-accounts:batchCreate", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
 // NewEnterpriseAPIAddUserToChildOrganizationRequest calls the generic EnterpriseAPIAddUserToChildOrganization builder with application/json body
 func NewEnterpriseAPIAddUserToChildOrganizationRequest(server string, enterpriseId string, body EnterpriseAPIAddUserToChildOrganizationJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
@@ -1822,6 +1898,11 @@ type ClientWithResponsesInterface interface {
 
 	// EnterpriseAPIListEnterpriseServiceAccounts request
 	EnterpriseAPIListEnterpriseServiceAccountsWithResponse(ctx context.Context, enterpriseId string, params *EnterpriseAPIListEnterpriseServiceAccountsParams) (*EnterpriseAPIListEnterpriseServiceAccountsResponse, error)
+
+	// EnterpriseAPIBatchCreateEnterpriseServiceAccounts request  with any body
+	EnterpriseAPIBatchCreateEnterpriseServiceAccountsWithBodyWithResponse(ctx context.Context, enterpriseId string, contentType string, body io.Reader) (*EnterpriseAPIBatchCreateEnterpriseServiceAccountsResponse, error)
+
+	EnterpriseAPIBatchCreateEnterpriseServiceAccountsWithResponse(ctx context.Context, enterpriseId string, body EnterpriseAPIBatchCreateEnterpriseServiceAccountsJSONRequestBody) (*EnterpriseAPIBatchCreateEnterpriseServiceAccountsResponse, error)
 
 	// EnterpriseAPIAddUserToChildOrganization request  with any body
 	EnterpriseAPIAddUserToChildOrganizationWithBodyWithResponse(ctx context.Context, enterpriseId string, contentType string, body io.Reader) (*EnterpriseAPIAddUserToChildOrganizationResponse, error)
@@ -2305,6 +2386,37 @@ func (r EnterpriseAPIListEnterpriseServiceAccountsResponse) GetBody() []byte {
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
+type EnterpriseAPIBatchCreateEnterpriseServiceAccountsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *BatchCreateEnterpriseServiceAccountsResponse
+	JSONDefault  *Status
+}
+
+// Status returns HTTPResponse.Status
+func (r EnterpriseAPIBatchCreateEnterpriseServiceAccountsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r EnterpriseAPIBatchCreateEnterpriseServiceAccountsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r EnterpriseAPIBatchCreateEnterpriseServiceAccountsResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
 type EnterpriseAPIAddUserToChildOrganizationResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -2564,6 +2676,23 @@ func (c *ClientWithResponses) EnterpriseAPIListEnterpriseServiceAccountsWithResp
 		return nil, err
 	}
 	return ParseEnterpriseAPIListEnterpriseServiceAccountsResponse(rsp)
+}
+
+// EnterpriseAPIBatchCreateEnterpriseServiceAccountsWithBodyWithResponse request with arbitrary body returning *EnterpriseAPIBatchCreateEnterpriseServiceAccountsResponse
+func (c *ClientWithResponses) EnterpriseAPIBatchCreateEnterpriseServiceAccountsWithBodyWithResponse(ctx context.Context, enterpriseId string, contentType string, body io.Reader) (*EnterpriseAPIBatchCreateEnterpriseServiceAccountsResponse, error) {
+	rsp, err := c.EnterpriseAPIBatchCreateEnterpriseServiceAccountsWithBody(ctx, enterpriseId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseEnterpriseAPIBatchCreateEnterpriseServiceAccountsResponse(rsp)
+}
+
+func (c *ClientWithResponses) EnterpriseAPIBatchCreateEnterpriseServiceAccountsWithResponse(ctx context.Context, enterpriseId string, body EnterpriseAPIBatchCreateEnterpriseServiceAccountsJSONRequestBody) (*EnterpriseAPIBatchCreateEnterpriseServiceAccountsResponse, error) {
+	rsp, err := c.EnterpriseAPIBatchCreateEnterpriseServiceAccounts(ctx, enterpriseId, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseEnterpriseAPIBatchCreateEnterpriseServiceAccountsResponse(rsp)
 }
 
 // EnterpriseAPIAddUserToChildOrganizationWithBodyWithResponse request with arbitrary body returning *EnterpriseAPIAddUserToChildOrganizationResponse
@@ -3057,6 +3186,39 @@ func ParseEnterpriseAPIListEnterpriseServiceAccountsResponse(rsp *http.Response)
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest ListEnterpriseServiceAccountsResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
+		var dest Status
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSONDefault = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseEnterpriseAPIBatchCreateEnterpriseServiceAccountsResponse parses an HTTP response from a EnterpriseAPIBatchCreateEnterpriseServiceAccountsWithResponse call
+func ParseEnterpriseAPIBatchCreateEnterpriseServiceAccountsResponse(rsp *http.Response) (*EnterpriseAPIBatchCreateEnterpriseServiceAccountsResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &EnterpriseAPIBatchCreateEnterpriseServiceAccountsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest BatchCreateEnterpriseServiceAccountsResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}

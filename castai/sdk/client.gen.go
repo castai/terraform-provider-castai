@@ -1023,12 +1023,6 @@ type ClientInterface interface {
 	// WorkloadOptimizationAPIGetOrganizationAgentStatuses request
 	WorkloadOptimizationAPIGetOrganizationAgentStatuses(ctx context.Context, organizationId string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// WorkloadOptimizationAPIGetInstallCmd request
-	WorkloadOptimizationAPIGetInstallCmd(ctx context.Context, params *WorkloadOptimizationAPIGetInstallCmdParams, reqEditors ...RequestEditorFn) (*http.Response, error)
-
-	// WorkloadOptimizationAPIGetInstallScript request
-	WorkloadOptimizationAPIGetInstallScript(ctx context.Context, params *WorkloadOptimizationAPIGetInstallScriptParams, reqEditors ...RequestEditorFn) (*http.Response, error)
-
 	// InventoryAPIListZones request
 	InventoryAPIListZones(ctx context.Context, params *InventoryAPIListZonesParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -5110,30 +5104,6 @@ func (c *Client) WorkloadOptimizationAPIResetSystemOverrides(ctx context.Context
 
 func (c *Client) WorkloadOptimizationAPIGetOrganizationAgentStatuses(ctx context.Context, organizationId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewWorkloadOptimizationAPIGetOrganizationAgentStatusesRequest(c.Server, organizationId)
-	if err != nil {
-		return nil, err
-	}
-	req = req.WithContext(ctx)
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
-}
-
-func (c *Client) WorkloadOptimizationAPIGetInstallCmd(ctx context.Context, params *WorkloadOptimizationAPIGetInstallCmdParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewWorkloadOptimizationAPIGetInstallCmdRequest(c.Server, params)
-	if err != nil {
-		return nil, err
-	}
-	req = req.WithContext(ctx)
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
-}
-
-func (c *Client) WorkloadOptimizationAPIGetInstallScript(ctx context.Context, params *WorkloadOptimizationAPIGetInstallScriptParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewWorkloadOptimizationAPIGetInstallScriptRequest(c.Server, params)
 	if err != nil {
 		return nil, err
 	}
@@ -20988,148 +20958,6 @@ func NewWorkloadOptimizationAPIGetOrganizationAgentStatusesRequest(server string
 	return req, nil
 }
 
-// NewWorkloadOptimizationAPIGetInstallCmdRequest generates requests for WorkloadOptimizationAPIGetInstallCmd
-func NewWorkloadOptimizationAPIGetInstallCmdRequest(server string, params *WorkloadOptimizationAPIGetInstallCmdParams) (*http.Request, error) {
-	var err error
-
-	serverURL, err := url.Parse(server)
-	if err != nil {
-		return nil, err
-	}
-
-	operationPath := fmt.Sprintf("/v1/workload-autoscaling/scripts/workload-autoscaler-install")
-	if operationPath[0] == '/' {
-		operationPath = "." + operationPath
-	}
-
-	queryURL, err := serverURL.Parse(operationPath)
-	if err != nil {
-		return nil, err
-	}
-
-	if params != nil {
-		queryValues := queryURL.Query()
-
-		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "clusterId", runtime.ParamLocationQuery, params.ClusterId); err != nil {
-			return nil, err
-		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
-			return nil, err
-		} else {
-			for k, v := range parsed {
-				for _, v2 := range v {
-					queryValues.Add(k, v2)
-				}
-			}
-		}
-
-		if params.CmeDsUrl != nil {
-
-			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "cmeDsUrl", runtime.ParamLocationQuery, *params.CmeDsUrl); err != nil {
-				return nil, err
-			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
-				return nil, err
-			} else {
-				for k, v := range parsed {
-					for _, v2 := range v {
-						queryValues.Add(k, v2)
-					}
-				}
-			}
-
-		}
-
-		if params.CmePresets != nil {
-
-			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "cmePresets", runtime.ParamLocationQuery, *params.CmePresets); err != nil {
-				return nil, err
-			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
-				return nil, err
-			} else {
-				for k, v := range parsed {
-					for _, v2 := range v {
-						queryValues.Add(k, v2)
-					}
-				}
-			}
-
-		}
-
-		queryURL.RawQuery = queryValues.Encode()
-	}
-
-	req, err := http.NewRequest("GET", queryURL.String(), nil)
-	if err != nil {
-		return nil, err
-	}
-
-	return req, nil
-}
-
-// NewWorkloadOptimizationAPIGetInstallScriptRequest generates requests for WorkloadOptimizationAPIGetInstallScript
-func NewWorkloadOptimizationAPIGetInstallScriptRequest(server string, params *WorkloadOptimizationAPIGetInstallScriptParams) (*http.Request, error) {
-	var err error
-
-	serverURL, err := url.Parse(server)
-	if err != nil {
-		return nil, err
-	}
-
-	operationPath := fmt.Sprintf("/v1/workload-autoscaling/scripts/workload-autoscaler-install.sh")
-	if operationPath[0] == '/' {
-		operationPath = "." + operationPath
-	}
-
-	queryURL, err := serverURL.Parse(operationPath)
-	if err != nil {
-		return nil, err
-	}
-
-	if params != nil {
-		queryValues := queryURL.Query()
-
-		if params.CmeDsUrl != nil {
-
-			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "cmeDsUrl", runtime.ParamLocationQuery, *params.CmeDsUrl); err != nil {
-				return nil, err
-			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
-				return nil, err
-			} else {
-				for k, v := range parsed {
-					for _, v2 := range v {
-						queryValues.Add(k, v2)
-					}
-				}
-			}
-
-		}
-
-		if params.CmePresets != nil {
-
-			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "cmePresets", runtime.ParamLocationQuery, *params.CmePresets); err != nil {
-				return nil, err
-			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
-				return nil, err
-			} else {
-				for k, v := range parsed {
-					for _, v2 := range v {
-						queryValues.Add(k, v2)
-					}
-				}
-			}
-
-		}
-
-		queryURL.RawQuery = queryValues.Encode()
-	}
-
-	req, err := http.NewRequest("GET", queryURL.String(), nil)
-	if err != nil {
-		return nil, err
-	}
-
-	return req, nil
-}
-
 // NewInventoryAPIListZonesRequest generates requests for InventoryAPIListZones
 func NewInventoryAPIListZonesRequest(server string, params *InventoryAPIListZonesParams) (*http.Request, error) {
 	var err error
@@ -22685,12 +22513,6 @@ type ClientWithResponsesInterface interface {
 
 	// WorkloadOptimizationAPIGetOrganizationAgentStatuses request
 	WorkloadOptimizationAPIGetOrganizationAgentStatusesWithResponse(ctx context.Context, organizationId string) (*WorkloadOptimizationAPIGetOrganizationAgentStatusesResponse, error)
-
-	// WorkloadOptimizationAPIGetInstallCmd request
-	WorkloadOptimizationAPIGetInstallCmdWithResponse(ctx context.Context, params *WorkloadOptimizationAPIGetInstallCmdParams) (*WorkloadOptimizationAPIGetInstallCmdResponse, error)
-
-	// WorkloadOptimizationAPIGetInstallScript request
-	WorkloadOptimizationAPIGetInstallScriptWithResponse(ctx context.Context, params *WorkloadOptimizationAPIGetInstallScriptParams) (*WorkloadOptimizationAPIGetInstallScriptResponse, error)
 
 	// InventoryAPIListZones request
 	InventoryAPIListZonesWithResponse(ctx context.Context, params *InventoryAPIListZonesParams) (*InventoryAPIListZonesResponse, error)
@@ -30372,65 +30194,6 @@ func (r WorkloadOptimizationAPIGetOrganizationAgentStatusesResponse) GetBody() [
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
-type WorkloadOptimizationAPIGetInstallCmdResponse struct {
-	Body         []byte
-	HTTPResponse *http.Response
-	JSON200      *WorkloadoptimizationV1GetInstallCmdResponse
-}
-
-// Status returns HTTPResponse.Status
-func (r WorkloadOptimizationAPIGetInstallCmdResponse) Status() string {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.Status
-	}
-	return http.StatusText(0)
-}
-
-// StatusCode returns HTTPResponse.StatusCode
-func (r WorkloadOptimizationAPIGetInstallCmdResponse) StatusCode() int {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.StatusCode
-	}
-	return 0
-}
-
-// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-// Body returns body of byte array
-func (r WorkloadOptimizationAPIGetInstallCmdResponse) GetBody() []byte {
-	return r.Body
-}
-
-// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-
-type WorkloadOptimizationAPIGetInstallScriptResponse struct {
-	Body         []byte
-	HTTPResponse *http.Response
-}
-
-// Status returns HTTPResponse.Status
-func (r WorkloadOptimizationAPIGetInstallScriptResponse) Status() string {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.Status
-	}
-	return http.StatusText(0)
-}
-
-// StatusCode returns HTTPResponse.StatusCode
-func (r WorkloadOptimizationAPIGetInstallScriptResponse) StatusCode() int {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.StatusCode
-	}
-	return 0
-}
-
-// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-// Body returns body of byte array
-func (r WorkloadOptimizationAPIGetInstallScriptResponse) GetBody() []byte {
-	return r.Body
-}
-
-// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-
 type InventoryAPIListZonesResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -33576,24 +33339,6 @@ func (c *ClientWithResponses) WorkloadOptimizationAPIGetOrganizationAgentStatuse
 		return nil, err
 	}
 	return ParseWorkloadOptimizationAPIGetOrganizationAgentStatusesResponse(rsp)
-}
-
-// WorkloadOptimizationAPIGetInstallCmdWithResponse request returning *WorkloadOptimizationAPIGetInstallCmdResponse
-func (c *ClientWithResponses) WorkloadOptimizationAPIGetInstallCmdWithResponse(ctx context.Context, params *WorkloadOptimizationAPIGetInstallCmdParams) (*WorkloadOptimizationAPIGetInstallCmdResponse, error) {
-	rsp, err := c.WorkloadOptimizationAPIGetInstallCmd(ctx, params)
-	if err != nil {
-		return nil, err
-	}
-	return ParseWorkloadOptimizationAPIGetInstallCmdResponse(rsp)
-}
-
-// WorkloadOptimizationAPIGetInstallScriptWithResponse request returning *WorkloadOptimizationAPIGetInstallScriptResponse
-func (c *ClientWithResponses) WorkloadOptimizationAPIGetInstallScriptWithResponse(ctx context.Context, params *WorkloadOptimizationAPIGetInstallScriptParams) (*WorkloadOptimizationAPIGetInstallScriptResponse, error) {
-	rsp, err := c.WorkloadOptimizationAPIGetInstallScript(ctx, params)
-	if err != nil {
-		return nil, err
-	}
-	return ParseWorkloadOptimizationAPIGetInstallScriptResponse(rsp)
 }
 
 // InventoryAPIListZonesWithResponse request returning *InventoryAPIListZonesResponse
@@ -40262,48 +40007,6 @@ func ParseWorkloadOptimizationAPIGetOrganizationAgentStatusesResponse(rsp *http.
 		}
 		response.JSON200 = &dest
 
-	}
-
-	return response, nil
-}
-
-// ParseWorkloadOptimizationAPIGetInstallCmdResponse parses an HTTP response from a WorkloadOptimizationAPIGetInstallCmdWithResponse call
-func ParseWorkloadOptimizationAPIGetInstallCmdResponse(rsp *http.Response) (*WorkloadOptimizationAPIGetInstallCmdResponse, error) {
-	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
-	if err != nil {
-		return nil, err
-	}
-
-	response := &WorkloadOptimizationAPIGetInstallCmdResponse{
-		Body:         bodyBytes,
-		HTTPResponse: rsp,
-	}
-
-	switch {
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest WorkloadoptimizationV1GetInstallCmdResponse
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON200 = &dest
-
-	}
-
-	return response, nil
-}
-
-// ParseWorkloadOptimizationAPIGetInstallScriptResponse parses an HTTP response from a WorkloadOptimizationAPIGetInstallScriptWithResponse call
-func ParseWorkloadOptimizationAPIGetInstallScriptResponse(rsp *http.Response) (*WorkloadOptimizationAPIGetInstallScriptResponse, error) {
-	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
-	if err != nil {
-		return nil, err
-	}
-
-	response := &WorkloadOptimizationAPIGetInstallScriptResponse{
-		Body:         bodyBytes,
-		HTTPResponse: rsp,
 	}
 
 	return response, nil
