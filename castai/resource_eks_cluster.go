@@ -163,10 +163,19 @@ func resourceCastaiEKSClusterRead(ctx context.Context, data *schema.ResourceData
 	// Catch if credentials_id ever gets reset on cast side (since it holds credentials to access the role used for cross-account access).
 	// Drift in role is already caught above, but we want to force TF to update and regenerate the credentials ID.
 	if resp.JSON200.CredentialsId != nil && *resp.JSON200.CredentialsId != data.Get(FieldClusterCredentialsId) {
-		log.Printf("[WARN] Drift in credentials from state (%q) and in API (%q), resetting credentials JSON to force re-applying credentials from configuration",
-			data.Get(FieldClusterCredentialsId), *resp.JSON200.CredentialsId)
-		if err := data.Set(FieldEKSClusterAssumeRoleArn, "credentials-drift-detected-force-apply"); err != nil {
-			return diag.FromErr(fmt.Errorf("setting client ID: %w", err))
+		// Only trigger drift if assume_role_arn is present in state (i.e., user provided it directly).
+		// If it's empty (e.g., when using secret refs in Crossplane/upjet), treat as in sync
+		// because the credentials were provided out-of-band and are not expected to be in state.
+		assumeRoleARN, ok := data.GetOk(FieldEKSClusterAssumeRoleArn)
+		if ok && assumeRoleARN.(string) != "" {
+			log.Printf("[WARN] Drift in credentials from state (%q) and in API (%q), resetting credentials JSON to force re-applying credentials from configuration",
+				data.Get(FieldClusterCredentialsId), *resp.JSON200.CredentialsId)
+			if err := data.Set(FieldEKSClusterAssumeRoleArn, "credentials-drift-detected-force-apply"); err != nil {
+				return diag.FromErr(fmt.Errorf("setting client ID: %w", err))
+			}
+		} else {
+			log.Printf("[INFO] Credentials present in API (%q) but not in state; treating as in sync (credentials provided out-of-band via secret ref)",
+				*resp.JSON200.CredentialsId)
 		}
 	}
 

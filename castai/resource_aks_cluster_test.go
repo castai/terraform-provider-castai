@@ -275,6 +275,42 @@ Tainted = false
 			})
 		}
 	})
+
+	t.Run("when client_id is empty in state (secret ref scenario), no drift should be triggered even if credentials_id differs", func(t *testing.T) {
+		// This simulates the Crossplane/upjet scenario where credentials are provided
+		// out-of-band via a secret reference and are not stored in Terraform state.
+		r := require.New(t)
+		mockctrl := gomock.NewController(t)
+		mockClient := mock_sdk.NewMockClientInterface(mockctrl)
+		provider := &ProviderConfig{
+			api: &sdk.ClientWithResponses{
+				ClientInterface: mockClient,
+			},
+		}
+
+		body := io.NopCloser(bytes.NewReader([]byte(`{"credentialsId": "credentials-id-remote"}`)))
+		mockClient.EXPECT().
+			ExternalClusterAPIGetCluster(gomock.Any(), clusterID).
+			Return(&http.Response{StatusCode: 200, Body: body, Header: map[string][]string{"Content-Type": {"json"}}}, nil)
+
+		aksResource := resourceAKSCluster()
+
+		val := cty.ObjectVal(map[string]cty.Value{})
+		state := sdkterraform.NewInstanceStateShimmedFromValue(val, 0)
+		state.ID = clusterID
+		state.Attributes[FieldClusterCredentialsId] = ""
+		// client_id is empty (secret ref scenario)
+		state.Attributes[FieldAKSClusterClientID] = ""
+
+		data := aksResource.Data(state)
+		result := aksResource.ReadContext(ctx, data, provider)
+		r.Nil(result)
+		r.False(result.HasError())
+
+		clientIDAfterRead := data.Get(FieldAKSClusterClientID)
+		// Should NOT contain "drift" - client_id should remain empty
+		r.Equal("", clientIDAfterRead)
+	})
 }
 
 func TestAKSClusterResourceUpdateContext(t *testing.T) {

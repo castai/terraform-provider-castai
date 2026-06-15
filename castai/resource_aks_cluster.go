@@ -174,10 +174,19 @@ func resourceCastaiAKSClusterRead(ctx context.Context, data *schema.ResourceData
 	}
 
 	if resp.JSON200.CredentialsId != nil && *resp.JSON200.CredentialsId != data.Get(FieldClusterCredentialsId) {
-		log.Printf("[WARN] Drift in credentials from state (%q) and in API (%q), resetting client ID to force re-applying credentials from configuration",
-			data.Get(FieldClusterCredentialsId), *resp.JSON200.CredentialsId)
-		if err := data.Set(FieldAKSClusterClientID, "credentials-drift-detected-force-apply"); err != nil {
-			return diag.FromErr(fmt.Errorf("setting client ID: %w", err))
+		// Only trigger drift if client_id is present in state (i.e., user provided it directly).
+		// If it's empty (e.g., when using secret refs in Crossplane/upjet), treat as in sync
+		// because the credentials were provided out-of-band and are not expected to be in state.
+		clientID, ok := data.GetOk(FieldAKSClusterClientID)
+		if ok && clientID.(string) != "" {
+			log.Printf("[WARN] Drift in credentials from state (%q) and in API (%q), resetting client ID to force re-applying credentials from configuration",
+				data.Get(FieldClusterCredentialsId), *resp.JSON200.CredentialsId)
+			if err := data.Set(FieldAKSClusterClientID, "credentials-drift-detected-force-apply"); err != nil {
+				return diag.FromErr(fmt.Errorf("setting client ID: %w", err))
+			}
+		} else {
+			log.Printf("[INFO] Credentials present in API (%q) but not in state; treating as in sync (credentials provided out-of-band via secret ref)",
+				*resp.JSON200.CredentialsId)
 		}
 	}
 
