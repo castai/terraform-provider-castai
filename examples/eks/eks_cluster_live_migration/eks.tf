@@ -95,6 +95,22 @@ module "ebs_csi_irsa_role" {
   }
 }
 
+# Mark the EKS-created gp2 StorageClass as the cluster default.
+# EKS ships gp2 without the default annotation, so PVCs without an explicit
+# storageClassName would fail. We patch it here rather than creating a new SC.
+resource "kubernetes_annotations" "gp2_default_storage_class" {
+  api_version = "storage.k8s.io/v1"
+  kind        = "StorageClass"
+  metadata {
+    name = "gp2"
+  }
+  annotations = {
+    "storageclass.kubernetes.io/is-default-class" = "true"
+  }
+
+  depends_on = [module.eks]
+}
+
 # Example additional security group.
 resource "aws_security_group" "additional" {
   name_prefix = "${var.cluster_name}-additional"
