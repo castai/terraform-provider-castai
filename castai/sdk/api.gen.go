@@ -1158,6 +1158,14 @@ const (
 	DboAPIGetCacheQueriesParamsSortOrderDesc DboAPIGetCacheQueriesParamsSortOrder = "desc"
 )
 
+// Defines values for ExternalClusterAPIGetConnectAndEnableCASTAICmdParamsOnboardingPath.
+const (
+	ONBOARDINGPATHCASTCTL     ExternalClusterAPIGetConnectAndEnableCASTAICmdParamsOnboardingPath = "ONBOARDING_PATH_CASTCTL"
+	ONBOARDINGPATHHELM        ExternalClusterAPIGetConnectAndEnableCASTAICmdParamsOnboardingPath = "ONBOARDING_PATH_HELM"
+	ONBOARDINGPATHSCRIPT      ExternalClusterAPIGetConnectAndEnableCASTAICmdParamsOnboardingPath = "ONBOARDING_PATH_SCRIPT"
+	ONBOARDINGPATHUNSPECIFIED ExternalClusterAPIGetConnectAndEnableCASTAICmdParamsOnboardingPath = "ONBOARDING_PATH_UNSPECIFIED"
+)
+
 // Defines values for ExternalClusterAPIGetCredentialsScriptParamsKentParams.
 const (
 	EnableRebalancing                ExternalClusterAPIGetCredentialsScriptParamsKentParams = "enable_rebalancing"
@@ -2199,6 +2207,18 @@ type CastaiInventoryV1beta1DiscountPricing struct {
 // $4. Same if discount value is "-1", the final price will be $6.
 type CastaiInventoryV1beta1DiscountPricingType string
 
+// CastaiInventoryV1beta1EnaQueueInfo EnaQueueInfo describes ENA queue capabilities for an AWS instance type.
+type CastaiInventoryV1beta1EnaQueueInfo struct {
+	// DefaultQueueCountPerInterface Default number of ENA queues per network interface.
+	DefaultQueueCountPerInterface *int32 `json:"defaultQueueCountPerInterface,omitempty"`
+
+	// MaximumQueueCount Maximum total number of ENA queues across all interfaces on the instance.
+	MaximumQueueCount *int32 `json:"maximumQueueCount,omitempty"`
+
+	// MaximumQueueCountPerInterface Maximum number of ENA queues configurable per network interface.
+	MaximumQueueCountPerInterface *int32 `json:"maximumQueueCountPerInterface,omitempty"`
+}
+
 // CastaiInventoryV1beta1GCPCommitmentImport defines model for castai.inventory.v1beta1.GCPCommitmentImport.
 type CastaiInventoryV1beta1GCPCommitmentImport struct {
 	AutoRenew         *bool                                `json:"autoRenew,omitempty"`
@@ -2620,6 +2640,9 @@ type CastaiInventoryV1beta1NetworkInfo struct {
 
 	// EfaSupported Indicates if the AWS instance type supports EFA (Elastic Fabric Adapter).
 	EfaSupported *bool `json:"efaSupported,omitempty"`
+
+	// EnaQueueInfo EnaQueueInfo describes ENA queue capabilities for an AWS instance type.
+	EnaQueueInfo *CastaiInventoryV1beta1EnaQueueInfo `json:"enaQueueInfo,omitempty"`
 
 	// EncryptionInTransitSupported Indicates whether the instance type automatically encrypts in-transit traffic between instances. AWS only.
 	EncryptionInTransitSupported *bool `json:"encryptionInTransitSupported"`
@@ -3947,6 +3970,9 @@ type CastaiUsersV1beta1User struct {
 
 // CastaiUsersV1beta1UserOrganization UserOrganization describes organization user belongs to.
 type CastaiUsersV1beta1UserOrganization struct {
+	// BlockEscalatedPrivilege Whether the organization blocks escalated privileges for Cast AI members.
+	BlockEscalatedPrivilege *bool `json:"blockEscalatedPrivilege,omitempty"`
+
 	// ChildOrderId The order id of child org in enterprise by created_at - if the org is a child org.
 	ChildOrderId *int32 `json:"childOrderId"`
 
@@ -4969,9 +4995,6 @@ type DboV1DeleteAccountParams struct {
 	AccountId string `json:"accountId"`
 }
 
-// DboV1DeleteAccountResponse defines model for dbo.v1.DeleteAccountResponse.
-type DboV1DeleteAccountResponse = map[string]interface{}
-
 // DboV1DeleteCacheConfigurationResponse defines model for dbo.v1.DeleteCacheConfigurationResponse.
 type DboV1DeleteCacheConfigurationResponse = map[string]interface{}
 
@@ -4981,15 +5004,15 @@ type DboV1DeleteCacheGroupResponse = map[string]interface{}
 // DboV1DeleteCacheTTLResponse defines model for dbo.v1.DeleteCacheTTLResponse.
 type DboV1DeleteCacheTTLResponse = map[string]interface{}
 
-// DboV1DeleteLogicalDatabaseResponse defines model for dbo.v1.DeleteLogicalDatabaseResponse.
-type DboV1DeleteLogicalDatabaseResponse = map[string]interface{}
-
 // DboV1DeployCacheParams defines model for dbo.v1.DeployCacheParams.
 type DboV1DeployCacheParams struct {
 	CacheGroupId         string  `json:"cacheGroupId"`
 	HelmChartValues      *string `json:"helmChartValues,omitempty"`
 	ManualExecuteCommand *string `json:"manualExecuteCommand,omitempty"`
 	PoolingEnabled       *bool   `json:"poolingEnabled"`
+
+	// ProtocolType ProtocolType specifies the protocol type used by the database.
+	ProtocolType *DboV1CacheGroupProtocolType `json:"protocolType,omitempty"`
 }
 
 // DboV1DeployDBAgentParams defines model for dbo.v1.DeployDBAgentParams.
@@ -5135,20 +5158,6 @@ type DboV1ListCacheTTLsResponse struct {
 type DboV1ListDatabaseComponentsResponse struct {
 	Components []DboV1DatabaseComponent `json:"components"`
 	Summary    DboV1OrganizationSummary `json:"summary"`
-}
-
-// DboV1ListDatabaseInstancesResponse defines model for dbo.v1.ListDatabaseInstancesResponse.
-type DboV1ListDatabaseInstancesResponse struct {
-	Instances []DboV1DatabaseInstance  `json:"instances"`
-	Summary   DboV1OrganizationSummary `json:"summary"`
-}
-
-// DboV1LogicalDatabase defines model for dbo.v1.LogicalDatabase.
-type DboV1LogicalDatabase struct {
-	Id *string `json:"id,omitempty"`
-
-	// Name Name of the logical database.
-	Name string `json:"name"`
 }
 
 // DboV1OperationalMetricsSummary defines model for dbo.v1.OperationalMetricsSummary.
@@ -7566,10 +7575,20 @@ type NodetemplatesV1TemplateConstraintsCustomPriority struct {
 // NodetemplatesV1TemplateConstraintsDedicatedNodeAffinity defines model for nodetemplates.v1.TemplateConstraints.DedicatedNodeAffinity.
 type NodetemplatesV1TemplateConstraintsDedicatedNodeAffinity struct {
 	// Affinity The affinity rules required for choosing the node.
-	Affinity      *[]K8sSelectorV1KubernetesNodeAffinity `json:"affinity,omitempty"`
-	AzName        *string                                `json:"azName,omitempty"`
-	InstanceTypes *[]string                              `json:"instanceTypes,omitempty"`
-	Name          *string                                `json:"name,omitempty"`
+	Affinity *[]K8sSelectorV1KubernetesNodeAffinity `json:"affinity,omitempty"`
+	AzName   *string                                `json:"azName,omitempty"`
+
+	// CpusPerGpu Target number of CPUs to allocate per GPU on this dedicated/sole-tenant node group.
+	// This allows configuring nodes in the way that when all GPUs are in use, all CPUs are also utilized, maximizing resource efficiency.
+	// For a node with N GPUs and M CPUs, set cpus_per_gpu = M / N.
+	// If not set, no ratio-based sizing is applied.
+	CpusPerGpu    *int32    `json:"cpusPerGpu"`
+	InstanceTypes *[]string `json:"instanceTypes,omitempty"`
+
+	// MinGpusPerNode Minimum number of GPUs per node for this dedicated/sole-tenant node group.
+	// If not set, no minimum GPU count filtering is applied.
+	MinGpusPerNode *int32  `json:"minGpusPerNode"`
+	Name           *string `json:"name,omitempty"`
 }
 
 // NodetemplatesV1TemplateConstraintsGPUConstraints defines model for nodetemplates.v1.TemplateConstraints.GPUConstraints.
@@ -8721,6 +8740,8 @@ type WorkloadoptimizationV1ConstraintsV2Strategy struct {
 
 // WorkloadoptimizationV1Container defines model for workloadoptimization.v1.Container.
 type WorkloadoptimizationV1Container struct {
+	FirstSeenResources *WorkloadoptimizationV1Resources `json:"firstSeenResources,omitempty"`
+
 	// Name Name of the container.
 	Name              string                           `json:"name"`
 	OriginalResources *WorkloadoptimizationV1Resources `json:"originalResources,omitempty"`
@@ -9656,10 +9677,11 @@ type WorkloadoptimizationV1HPAState struct {
 
 // WorkloadoptimizationV1HPATargetWorkloadContainer HPATargetWorkloadContainer mirrors Container.
 type WorkloadoptimizationV1HPATargetWorkloadContainer struct {
-	Name              string                           `json:"name"`
-	OriginalResources *WorkloadoptimizationV1Resources `json:"originalResources,omitempty"`
-	Recommendation    *WorkloadoptimizationV1Resources `json:"recommendation,omitempty"`
-	Resources         *WorkloadoptimizationV1Resources `json:"resources,omitempty"`
+	FirstSeenResources *WorkloadoptimizationV1Resources `json:"firstSeenResources,omitempty"`
+	Name               string                           `json:"name"`
+	OriginalResources  *WorkloadoptimizationV1Resources `json:"originalResources,omitempty"`
+	Recommendation     *WorkloadoptimizationV1Resources `json:"recommendation,omitempty"`
+	Resources          *WorkloadoptimizationV1Resources `json:"resources,omitempty"`
 
 	// Runtime Defines the application runtime.
 	Runtime *WorkloadoptimizationV1Runtime `json:"runtime,omitempty"`
@@ -11671,15 +11693,6 @@ type DboAPIListDatabaseComponentsParams struct {
 	EndTime *time.Time `form:"endTime,omitempty" json:"endTime,omitempty"`
 }
 
-// DboAPIListDatabaseInstancesLegacyParams defines parameters for DboAPIListDatabaseInstancesLegacy.
-type DboAPIListDatabaseInstancesLegacyParams struct {
-	// StartTime Start of period.
-	StartTime *time.Time `form:"startTime,omitempty" json:"startTime,omitempty"`
-
-	// EndTime End of period.
-	EndTime *time.Time `form:"endTime,omitempty" json:"endTime,omitempty"`
-}
-
 // DboAPIGetDatabaseInstanceParams defines parameters for DboAPIGetDatabaseInstance.
 type DboAPIGetDatabaseInstanceParams struct {
 	// StartTime Start of period.
@@ -11687,18 +11700,6 @@ type DboAPIGetDatabaseInstanceParams struct {
 
 	// EndTime End of period.
 	EndTime *time.Time `form:"endTime,omitempty" json:"endTime,omitempty"`
-}
-
-// DboAPIGetDatabaseInstanceCachePerformanceParams defines parameters for DboAPIGetDatabaseInstanceCachePerformance.
-type DboAPIGetDatabaseInstanceCachePerformanceParams struct {
-	// StartTime Start of period.
-	StartTime time.Time `form:"startTime" json:"startTime"`
-
-	// EndTime End of period.
-	EndTime time.Time `form:"endTime" json:"endTime"`
-
-	// StepSeconds Aggregate items in specified interval steps.
-	StepSeconds int64 `form:"stepSeconds" json:"stepSeconds"`
 }
 
 // DboAPIGetDatabaseInstanceInfrastructureMetricsParams defines parameters for DboAPIGetDatabaseInstanceInfrastructureMetrics.
@@ -11711,14 +11712,6 @@ type DboAPIGetDatabaseInstanceInfrastructureMetricsParams struct {
 
 	// StepSeconds Aggregate items in specified interval steps.
 	StepSeconds int64 `form:"stepSeconds" json:"stepSeconds"`
-}
-
-// DboAPICreateLogicalDatabasesJSONBody defines parameters for DboAPICreateLogicalDatabases.
-type DboAPICreateLogicalDatabasesJSONBody = []DboV1LogicalDatabase
-
-// DboAPICreateLogicalDatabasesParams defines parameters for DboAPICreateLogicalDatabases.
-type DboAPICreateLogicalDatabasesParams struct {
-	CreateCacheConfigurations *bool `form:"createCacheConfigurations,omitempty" json:"createCacheConfigurations,omitempty"`
 }
 
 // InventoryAPIListInstanceTypeNamesParams defines parameters for InventoryAPIListInstanceTypeNames.
@@ -11813,8 +11806,16 @@ type ExternalClusterAPIGetConnectAndEnableCASTAICmdParams struct {
 	UseUmbrella *bool `form:"useUmbrella,omitempty" json:"useUmbrella,omitempty"`
 
 	// UseCastctl Whether to use castctl to connect a cluster.
+	// Deprecated. Use onboarding_path=ONBOARDING_PATH_CASTCTL.
 	UseCastctl *bool `form:"useCastctl,omitempty" json:"useCastctl,omitempty"`
+
+	// OnboardingPath Installation method (script, helm, castctl, …).
+	// Defaults to ONBOARDING_PATH_SCRIPT for backward compatibility.
+	OnboardingPath *ExternalClusterAPIGetConnectAndEnableCASTAICmdParamsOnboardingPath `form:"onboardingPath,omitempty" json:"onboardingPath,omitempty"`
 }
+
+// ExternalClusterAPIGetConnectAndEnableCASTAICmdParamsOnboardingPath defines parameters for ExternalClusterAPIGetConnectAndEnableCASTAICmd.
+type ExternalClusterAPIGetConnectAndEnableCASTAICmdParamsOnboardingPath string
 
 // ExternalClusterAPIGetCredentialsScriptParams defines parameters for ExternalClusterAPIGetCredentialsScript.
 type ExternalClusterAPIGetCredentialsScriptParams struct {
@@ -12691,9 +12692,6 @@ type DboAPIUpdateCacheGroupJSONRequestBody = DboV1CacheGroup
 
 // DboAPIExchangeCacheStateJSONRequestBody defines body for DboAPIExchangeCacheState for application/json ContentType.
 type DboAPIExchangeCacheStateJSONRequestBody = DboV1ProxyState
-
-// DboAPICreateLogicalDatabasesJSONRequestBody defines body for DboAPICreateLogicalDatabases for application/json ContentType.
-type DboAPICreateLogicalDatabasesJSONRequestBody = DboAPICreateLogicalDatabasesJSONBody
 
 // DboAPICreateRegistrationJSONRequestBody defines body for DboAPICreateRegistration for application/json ContentType.
 type DboAPICreateRegistrationJSONRequestBody = DboV1Registration
