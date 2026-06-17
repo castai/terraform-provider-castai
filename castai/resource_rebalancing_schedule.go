@@ -122,7 +122,7 @@ func resourceRebalancingSchedule() *schema.Resource {
 							Type:        schema.TypeBool,
 							Optional:    true,
 							Description: "Deprecated: Use aggressive_mode_config instead. When enabled, rebalancing considers all problematic pods (pods without controller, job pods, pods with removal-disabled annotation) as not-problematic.",
-							Deprecated:  "Use aggressive_mode_config instead.",
+							Deprecated:  "Use aggressive_mode_config instead and set every value to true to replicate the behaviour of this deprecated field.",
 						},
 						"aggressive_mode_config": {
 							Type:     schema.TypeList,
@@ -347,7 +347,7 @@ func stateToSchedule(d *schema.ResourceData) (*sdk.ScheduledrebalancingV1Rebalan
 			}
 		}
 
-		aggresiveMode := readOptionalValue[bool](launchConfigurationData, "aggressive_mode")
+		aggressiveMode := readOptionalValue[bool](launchConfigurationData, "aggressive_mode")
 
 		var aggressiveModeConfig *sdk.ScheduledrebalancingV1AggressiveModeConfig
 		aggressiveModeConfigSection := launchConfigurationData["aggressive_mode_config"].([]any)
@@ -368,7 +368,7 @@ func stateToSchedule(d *schema.ResourceData) (*sdk.ScheduledrebalancingV1Rebalan
 				MinNodes:              readOptionalNumber[int, int32](launchConfigurationData, "rebalancing_min_nodes"),
 				KeepDrainTimeoutNodes: keepDrainTimeoutNodes,
 				ExecutionConditions:   executionConditions,
-				AggressiveMode:        aggresiveMode,
+				AggressiveMode:        aggressiveMode,
 				AggressiveModeConfig:  aggressiveModeConfig,
 			},
 			Selector:                     selector,
