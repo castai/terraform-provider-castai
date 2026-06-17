@@ -78,6 +78,22 @@ module "eks" {
     }
   }
 
+  node_security_group_additional_rules = {
+    # Match eksctl default behaviour: allow the control plane to reach all workload TCP ports on nodes
+    # (ports 1025-65535). This covers any admission webhook on any port (e.g. castai-live on 9091,
+    # Istio on 15017/15012, etc.) without needing to enumerate each one individually.
+    # See: https://github.com/eksctl-io/eksctl/blob/main/pkg/cfn/builder/nodegroup.go
+    #      ControlPlaneNodeGroupEgressRules / makeNodeIngressRules
+    ingress_cluster_all_workload_ports = {
+      description                   = "Cluster API to node workload TCP ports (kubelet and webhooks)"
+      protocol                      = "tcp"
+      from_port                     = 1025
+      to_port                       = 65535
+      type                          = "ingress"
+      source_cluster_security_group = true
+    }
+  }
+
 }
 
 module "ebs_csi_irsa_role" {
