@@ -11,7 +11,7 @@ import (
 
 func TestAccCloudAgnostic_ResourceEdgeConfigurationDefault(t *testing.T) {
 	rName := fmt.Sprintf("%v-edgecfg-%v", ResourcePrefix, acctest.RandString(8))
-	clusterName := "omni-tf-acc-gcp"
+	clusterName := "omni-tf-acc-gcp-dflt"
 	resourceName := "castai_edge_configuration_default.test"
 
 	resource.Test(t, resource.TestCase{
