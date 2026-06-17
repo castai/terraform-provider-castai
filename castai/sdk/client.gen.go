@@ -662,6 +662,9 @@ type ClientInterface interface {
 
 	ServiceAccountsAPIUpdateServiceAccount(ctx context.Context, organizationId string, serviceAccountId string, body ServiceAccountsAPIUpdateServiceAccountJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// ServiceAccountsAPIListServiceAccountKeys request
+	ServiceAccountsAPIListServiceAccountKeys(ctx context.Context, organizationId string, serviceAccountId string, params *ServiceAccountsAPIListServiceAccountKeysParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// ServiceAccountsAPICreateServiceAccountKeyWithBody request with any body
 	ServiceAccountsAPICreateServiceAccountKeyWithBody(ctx context.Context, organizationId string, serviceAccountId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -3535,6 +3538,18 @@ func (c *Client) ServiceAccountsAPIUpdateServiceAccountWithBody(ctx context.Cont
 
 func (c *Client) ServiceAccountsAPIUpdateServiceAccount(ctx context.Context, organizationId string, serviceAccountId string, body ServiceAccountsAPIUpdateServiceAccountJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewServiceAccountsAPIUpdateServiceAccountRequest(c.Server, organizationId, serviceAccountId, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) ServiceAccountsAPIListServiceAccountKeys(ctx context.Context, organizationId string, serviceAccountId string, params *ServiceAccountsAPIListServiceAccountKeysParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewServiceAccountsAPIListServiceAccountKeysRequest(c.Server, organizationId, serviceAccountId, params)
 	if err != nil {
 		return nil, err
 	}
@@ -14604,6 +14619,85 @@ func NewServiceAccountsAPIUpdateServiceAccountRequestWithBody(server string, org
 	return req, nil
 }
 
+// NewServiceAccountsAPIListServiceAccountKeysRequest generates requests for ServiceAccountsAPIListServiceAccountKeys
+func NewServiceAccountsAPIListServiceAccountKeysRequest(server string, organizationId string, serviceAccountId string, params *ServiceAccountsAPIListServiceAccountKeysParams) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "organizationId", runtime.ParamLocationPath, organizationId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "serviceAccountId", runtime.ParamLocationPath, serviceAccountId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/organizations/%s/service-accounts/%s/keys", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if params.PageLimit != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "page.limit", runtime.ParamLocationQuery, *params.PageLimit); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.PageCursor != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "page.cursor", runtime.ParamLocationQuery, *params.PageCursor); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
 // NewServiceAccountsAPICreateServiceAccountKeyRequest calls the generic ServiceAccountsAPICreateServiceAccountKey builder with application/json body
 func NewServiceAccountsAPICreateServiceAccountKeyRequest(server string, organizationId string, serviceAccountId string, body ServiceAccountsAPICreateServiceAccountKeyJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
@@ -22231,6 +22325,9 @@ type ClientWithResponsesInterface interface {
 
 	ServiceAccountsAPIUpdateServiceAccountWithResponse(ctx context.Context, organizationId string, serviceAccountId string, body ServiceAccountsAPIUpdateServiceAccountJSONRequestBody) (*ServiceAccountsAPIUpdateServiceAccountResponse, error)
 
+	// ServiceAccountsAPIListServiceAccountKeys request
+	ServiceAccountsAPIListServiceAccountKeysWithResponse(ctx context.Context, organizationId string, serviceAccountId string, params *ServiceAccountsAPIListServiceAccountKeysParams) (*ServiceAccountsAPIListServiceAccountKeysResponse, error)
+
 	// ServiceAccountsAPICreateServiceAccountKey request  with any body
 	ServiceAccountsAPICreateServiceAccountKeyWithBodyWithResponse(ctx context.Context, organizationId string, serviceAccountId string, contentType string, body io.Reader) (*ServiceAccountsAPICreateServiceAccountKeyResponse, error)
 
@@ -27307,6 +27404,36 @@ func (r ServiceAccountsAPIUpdateServiceAccountResponse) GetBody() []byte {
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
+type ServiceAccountsAPIListServiceAccountKeysResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *CastaiServiceaccountsV1beta1ListServiceAccountKeysResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r ServiceAccountsAPIListServiceAccountKeysResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r ServiceAccountsAPIListServiceAccountKeysResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r ServiceAccountsAPIListServiceAccountKeysResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
 type ServiceAccountsAPICreateServiceAccountKeyResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -32302,6 +32429,15 @@ func (c *ClientWithResponses) ServiceAccountsAPIUpdateServiceAccountWithResponse
 		return nil, err
 	}
 	return ParseServiceAccountsAPIUpdateServiceAccountResponse(rsp)
+}
+
+// ServiceAccountsAPIListServiceAccountKeysWithResponse request returning *ServiceAccountsAPIListServiceAccountKeysResponse
+func (c *ClientWithResponses) ServiceAccountsAPIListServiceAccountKeysWithResponse(ctx context.Context, organizationId string, serviceAccountId string, params *ServiceAccountsAPIListServiceAccountKeysParams) (*ServiceAccountsAPIListServiceAccountKeysResponse, error) {
+	rsp, err := c.ServiceAccountsAPIListServiceAccountKeys(ctx, organizationId, serviceAccountId, params)
+	if err != nil {
+		return nil, err
+	}
+	return ParseServiceAccountsAPIListServiceAccountKeysResponse(rsp)
 }
 
 // ServiceAccountsAPICreateServiceAccountKeyWithBodyWithResponse request with arbitrary body returning *ServiceAccountsAPICreateServiceAccountKeyResponse
@@ -37570,6 +37706,32 @@ func ParseServiceAccountsAPIUpdateServiceAccountResponse(rsp *http.Response) (*S
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest CastaiServiceaccountsV1beta1UpdateServiceAccountResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseServiceAccountsAPIListServiceAccountKeysResponse parses an HTTP response from a ServiceAccountsAPIListServiceAccountKeysWithResponse call
+func ParseServiceAccountsAPIListServiceAccountKeysResponse(rsp *http.Response) (*ServiceAccountsAPIListServiceAccountKeysResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &ServiceAccountsAPIListServiceAccountKeysResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest CastaiServiceaccountsV1beta1ListServiceAccountKeysResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}

@@ -3417,6 +3417,18 @@ type CastaiServiceaccountsV1beta1GetServiceAccountResponse struct {
 	ServiceAccount CastaiServiceaccountsV1beta1ServiceAccount `json:"serviceAccount"`
 }
 
+// CastaiServiceaccountsV1beta1ListServiceAccountKeysResponse ListServiceAccountKeysResponse is the response for listing service account keys.
+type CastaiServiceaccountsV1beta1ListServiceAccountKeysResponse struct {
+	// Keys Keys is the list of service account keys.
+	Keys *[]CastaiServiceaccountsV1beta1ServiceAccountKey `json:"keys,omitempty"`
+
+	// NextPage Page defines how many and which fields should be returned.
+	NextPage CastaiPaginationV1beta1Page `json:"nextPage"`
+
+	// TotalCount TotalCount is the total number of keys in the dataset.
+	TotalCount *string `json:"totalCount,omitempty"`
+}
+
 // CastaiServiceaccountsV1beta1ListServiceAccountsResponse ListServiceAccountsResponse is the response for listing service accounts.
 type CastaiServiceaccountsV1beta1ListServiceAccountsResponse struct {
 	// NextPage Page defines how many and which fields should be returned.
@@ -3446,7 +3458,8 @@ type CastaiServiceaccountsV1beta1ServiceAccount struct {
 	// Id ID is the unique identifier of the service account.
 	Id *string `json:"id,omitempty"`
 
-	// Keys Keys is the list of keys associated with the service account.
+	// Keys Deprecated: Use ListServiceAccountKeys endpoint instead. This field is kept for backward compatibility.
+	// Deprecated:
 	Keys *[]CastaiServiceaccountsV1beta1ServiceAccountKey `json:"keys,omitempty"`
 
 	// ManagedBy Method used to create role binding, eg.: console, terraform.
@@ -8482,6 +8495,10 @@ type ScheduledrebalancingV1RebalancingJob struct {
 // ScheduledrebalancingV1RebalancingOptions defines model for scheduledrebalancing.v1.RebalancingOptions.
 type ScheduledrebalancingV1RebalancingOptions struct {
 	// AggressiveMode When enabled will also consider rebalancing problematic pods (pods without controller, job pods, pods with removal-disabled annotation).
+	//
+	// Deprecated: use AggressiveModeConfig instead.
+	// If set to true, this overrides all settings in AggressiveModeConfig to true.
+	// Deprecated:
 	AggressiveMode       *bool                                       `json:"aggressiveMode"`
 	AggressiveModeConfig *ScheduledrebalancingV1AggressiveModeConfig `json:"aggressiveModeConfig,omitempty"`
 
@@ -12028,6 +12045,15 @@ type ServiceAccountsAPIDeleteServiceAccountsParams struct {
 
 // ServiceAccountsAPIListServiceAccountsParams defines parameters for ServiceAccountsAPIListServiceAccounts.
 type ServiceAccountsAPIListServiceAccountsParams struct {
+	PageLimit *string `form:"page.limit,omitempty" json:"page.limit,omitempty"`
+
+	// PageCursor Cursor that defines token indicating where to start the next page.
+	// Empty value indicates to start from beginning of the dataset.
+	PageCursor *string `form:"page.cursor,omitempty" json:"page.cursor,omitempty"`
+}
+
+// ServiceAccountsAPIListServiceAccountKeysParams defines parameters for ServiceAccountsAPIListServiceAccountKeys.
+type ServiceAccountsAPIListServiceAccountKeysParams struct {
 	PageLimit *string `form:"page.limit,omitempty" json:"page.limit,omitempty"`
 
 	// PageCursor Cursor that defines token indicating where to start the next page.
