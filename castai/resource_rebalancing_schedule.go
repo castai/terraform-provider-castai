@@ -122,7 +122,7 @@ func resourceRebalancingSchedule() *schema.Resource {
 							Type:        schema.TypeBool,
 							Optional:    true,
 							Description: "Deprecated: Use aggressive_mode_config instead. When enabled, rebalancing considers all problematic pods (pods without controller, job pods, pods with removal-disabled annotation) as not-problematic.",
-							Deprecated:  "Use aggressive_mode_config instead and set every value to true to replicate the behaviour of this deprecated field.",
+							Deprecated:  "For equivalent behaviour use aggresive_mode_config = {ignore_local_persistent_volumes = true, ignore_problem_job_pods = true, ignore_problem_removal_disabled_pods = true, ignore_problem_pods_without_controller = true}",
 						},
 						"aggressive_mode_config": {
 							Type:     schema.TypeList,
