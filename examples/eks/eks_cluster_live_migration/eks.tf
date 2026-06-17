@@ -95,6 +95,14 @@ module "ebs_csi_irsa_role" {
   }
 }
 
+# The gp2 StorageClass is created by the EKS control plane / aws-ebs-csi-driver addon
+# asynchronously after the EKS module completes. A short sleep gives the addon time to
+# reconcile before we attempt to patch the annotation.
+resource "time_sleep" "wait_for_gp2" {
+  create_duration = "30s"
+  depends_on      = [module.eks]
+}
+
 # Mark the EKS-created gp2 StorageClass as the cluster default.
 # EKS ships gp2 without the default annotation, so PVCs without an explicit
 # storageClassName would fail. We patch it here rather than creating a new SC.
@@ -108,7 +116,7 @@ resource "kubernetes_annotations" "gp2_default_storage_class" {
     "storageclass.kubernetes.io/is-default-class" = "true"
   }
 
-  depends_on = [module.eks]
+  depends_on = [time_sleep.wait_for_gp2]
 }
 
 # Example additional security group.
