@@ -28,7 +28,7 @@ module "castai-eks-cluster" {
     }
 
     live = {
-      subnets              = var.subnets
+      subnets              = length(var.subnets) > 0 ? [var.subnets[0]] : [] // Set single subnet 
       instance_profile_arn = var.castai-eks-role-iam_instance_profile_arn
       security_groups      = var.security_groups
 
