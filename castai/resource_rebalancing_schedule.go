@@ -121,7 +121,8 @@ func resourceRebalancingSchedule() *schema.Resource {
 						"aggressive_mode": {
 							Type:        schema.TypeBool,
 							Optional:    true,
-							Description: "When enabled, rebalancing considers all problematic pods (pods without controller, job pods, pods with removal-disabled annotation) as not-problematic.",
+							Description: "Deprecated: Use aggressive_mode_config instead. When enabled, rebalancing considers all problematic pods (pods without controller, job pods, pods with removal-disabled annotation) as not-problematic.",
+							Deprecated:  "For equivalent behaviour use aggresive_mode_config = {ignore_local_persistent_volumes = true, ignore_problem_job_pods = true, ignore_problem_removal_disabled_pods = true, ignore_problem_pods_without_controller = true}",
 						},
 						"aggressive_mode_config": {
 							Type:     schema.TypeList,
@@ -346,7 +347,7 @@ func stateToSchedule(d *schema.ResourceData) (*sdk.ScheduledrebalancingV1Rebalan
 			}
 		}
 
-		aggresiveMode := readOptionalValue[bool](launchConfigurationData, "aggressive_mode")
+		aggressiveMode := readOptionalValue[bool](launchConfigurationData, "aggressive_mode")
 
 		var aggressiveModeConfig *sdk.ScheduledrebalancingV1AggressiveModeConfig
 		aggressiveModeConfigSection := launchConfigurationData["aggressive_mode_config"].([]any)
@@ -367,7 +368,7 @@ func stateToSchedule(d *schema.ResourceData) (*sdk.ScheduledrebalancingV1Rebalan
 				MinNodes:              readOptionalNumber[int, int32](launchConfigurationData, "rebalancing_min_nodes"),
 				KeepDrainTimeoutNodes: keepDrainTimeoutNodes,
 				ExecutionConditions:   executionConditions,
-				AggressiveMode:        aggresiveMode,
+				AggressiveMode:        aggressiveMode,
 				AggressiveModeConfig:  aggressiveModeConfig,
 			},
 			Selector:                     selector,
@@ -399,7 +400,7 @@ func scheduleToState(schedule *sdk.ScheduledrebalancingV1RebalancingSchedule, d 
 	if schedule.LaunchConfiguration.RebalancingOptions != nil {
 		launchConfig["rebalancing_min_nodes"] = schedule.LaunchConfiguration.RebalancingOptions.MinNodes
 		launchConfig["keep_drain_timeout_nodes"] = schedule.LaunchConfiguration.RebalancingOptions.KeepDrainTimeoutNodes
-		launchConfig["aggressive_mode"] = schedule.LaunchConfiguration.RebalancingOptions.AggressiveMode
+		launchConfig["aggressive_mode"] = schedule.LaunchConfiguration.RebalancingOptions.AggressiveMode //nolint:staticcheck // AggressiveMode is deprecated but still supported for backwards compatibility
 		launchConfig["target_node_selection_algorithm"] = schedule.LaunchConfiguration.TargetNodeSelectionAlgorithm
 		if schedule.LaunchConfiguration.RebalancingOptions.AggressiveModeConfig != nil {
 			launchConfig["aggressive_mode_config"] = []map[string]any{

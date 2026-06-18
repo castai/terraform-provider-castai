@@ -182,9 +182,6 @@ type ClientInterface interface {
 	// DboAPIListAccounts request
 	DboAPIListAccounts(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// DboAPIDeleteAccount request
-	DboAPIDeleteAccount(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
-
 	// DboAPIListCacheGroups request
 	DboAPIListCacheGroups(ctx context.Context, params *DboAPIListCacheGroupsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -286,25 +283,11 @@ type ClientInterface interface {
 	// DboAPIListDatabaseComponents request
 	DboAPIListDatabaseComponents(ctx context.Context, params *DboAPIListDatabaseComponentsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// DboAPIListDatabaseInstancesLegacy request
-	DboAPIListDatabaseInstancesLegacy(ctx context.Context, params *DboAPIListDatabaseInstancesLegacyParams, reqEditors ...RequestEditorFn) (*http.Response, error)
-
 	// DboAPIGetDatabaseInstance request
 	DboAPIGetDatabaseInstance(ctx context.Context, instanceId string, params *DboAPIGetDatabaseInstanceParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// DboAPIGetDatabaseInstanceCachePerformance request
-	DboAPIGetDatabaseInstanceCachePerformance(ctx context.Context, instanceId string, params *DboAPIGetDatabaseInstanceCachePerformanceParams, reqEditors ...RequestEditorFn) (*http.Response, error)
-
 	// DboAPIGetDatabaseInstanceInfrastructureMetrics request
 	DboAPIGetDatabaseInstanceInfrastructureMetrics(ctx context.Context, instanceId string, params *DboAPIGetDatabaseInstanceInfrastructureMetricsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
-
-	// DboAPIDeleteLogicalDatabase request
-	DboAPIDeleteLogicalDatabase(ctx context.Context, instanceId string, name string, reqEditors ...RequestEditorFn) (*http.Response, error)
-
-	// DboAPICreateLogicalDatabasesWithBody request with any body
-	DboAPICreateLogicalDatabasesWithBody(ctx context.Context, instanceId string, params *DboAPICreateLogicalDatabasesParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
-
-	DboAPICreateLogicalDatabases(ctx context.Context, instanceId string, params *DboAPICreateLogicalDatabasesParams, body DboAPICreateLogicalDatabasesJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// DboAPICreateRegistrationWithBody request with any body
 	DboAPICreateRegistrationWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -678,6 +661,9 @@ type ClientInterface interface {
 	ServiceAccountsAPIUpdateServiceAccountWithBody(ctx context.Context, organizationId string, serviceAccountId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	ServiceAccountsAPIUpdateServiceAccount(ctx context.Context, organizationId string, serviceAccountId string, body ServiceAccountsAPIUpdateServiceAccountJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// ServiceAccountsAPIListServiceAccountKeys request
+	ServiceAccountsAPIListServiceAccountKeys(ctx context.Context, organizationId string, serviceAccountId string, params *ServiceAccountsAPIListServiceAccountKeysParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// ServiceAccountsAPICreateServiceAccountKeyWithBody request with any body
 	ServiceAccountsAPICreateServiceAccountKeyWithBody(ctx context.Context, organizationId string, serviceAccountId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -1462,18 +1448,6 @@ func (c *Client) DboAPIListAccounts(ctx context.Context, reqEditors ...RequestEd
 	return c.Client.Do(req)
 }
 
-func (c *Client) DboAPIDeleteAccount(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewDboAPIDeleteAccountRequest(c.Server, id)
-	if err != nil {
-		return nil, err
-	}
-	req = req.WithContext(ctx)
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
-}
-
 func (c *Client) DboAPIListCacheGroups(ctx context.Context, params *DboAPIListCacheGroupsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewDboAPIListCacheGroupsRequest(c.Server, params)
 	if err != nil {
@@ -1906,18 +1880,6 @@ func (c *Client) DboAPIListDatabaseComponents(ctx context.Context, params *DboAP
 	return c.Client.Do(req)
 }
 
-func (c *Client) DboAPIListDatabaseInstancesLegacy(ctx context.Context, params *DboAPIListDatabaseInstancesLegacyParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewDboAPIListDatabaseInstancesLegacyRequest(c.Server, params)
-	if err != nil {
-		return nil, err
-	}
-	req = req.WithContext(ctx)
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
-}
-
 func (c *Client) DboAPIGetDatabaseInstance(ctx context.Context, instanceId string, params *DboAPIGetDatabaseInstanceParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewDboAPIGetDatabaseInstanceRequest(c.Server, instanceId, params)
 	if err != nil {
@@ -1930,56 +1892,8 @@ func (c *Client) DboAPIGetDatabaseInstance(ctx context.Context, instanceId strin
 	return c.Client.Do(req)
 }
 
-func (c *Client) DboAPIGetDatabaseInstanceCachePerformance(ctx context.Context, instanceId string, params *DboAPIGetDatabaseInstanceCachePerformanceParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewDboAPIGetDatabaseInstanceCachePerformanceRequest(c.Server, instanceId, params)
-	if err != nil {
-		return nil, err
-	}
-	req = req.WithContext(ctx)
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
-}
-
 func (c *Client) DboAPIGetDatabaseInstanceInfrastructureMetrics(ctx context.Context, instanceId string, params *DboAPIGetDatabaseInstanceInfrastructureMetricsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewDboAPIGetDatabaseInstanceInfrastructureMetricsRequest(c.Server, instanceId, params)
-	if err != nil {
-		return nil, err
-	}
-	req = req.WithContext(ctx)
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
-}
-
-func (c *Client) DboAPIDeleteLogicalDatabase(ctx context.Context, instanceId string, name string, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewDboAPIDeleteLogicalDatabaseRequest(c.Server, instanceId, name)
-	if err != nil {
-		return nil, err
-	}
-	req = req.WithContext(ctx)
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
-}
-
-func (c *Client) DboAPICreateLogicalDatabasesWithBody(ctx context.Context, instanceId string, params *DboAPICreateLogicalDatabasesParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewDboAPICreateLogicalDatabasesRequestWithBody(c.Server, instanceId, params, contentType, body)
-	if err != nil {
-		return nil, err
-	}
-	req = req.WithContext(ctx)
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
-}
-
-func (c *Client) DboAPICreateLogicalDatabases(ctx context.Context, instanceId string, params *DboAPICreateLogicalDatabasesParams, body DboAPICreateLogicalDatabasesJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewDboAPICreateLogicalDatabasesRequest(c.Server, instanceId, params, body)
 	if err != nil {
 		return nil, err
 	}
@@ -3624,6 +3538,18 @@ func (c *Client) ServiceAccountsAPIUpdateServiceAccountWithBody(ctx context.Cont
 
 func (c *Client) ServiceAccountsAPIUpdateServiceAccount(ctx context.Context, organizationId string, serviceAccountId string, body ServiceAccountsAPIUpdateServiceAccountJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewServiceAccountsAPIUpdateServiceAccountRequest(c.Server, organizationId, serviceAccountId, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) ServiceAccountsAPIListServiceAccountKeys(ctx context.Context, organizationId string, serviceAccountId string, params *ServiceAccountsAPIListServiceAccountKeysParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewServiceAccountsAPIListServiceAccountKeysRequest(c.Server, organizationId, serviceAccountId, params)
 	if err != nil {
 		return nil, err
 	}
@@ -7162,40 +7088,6 @@ func NewDboAPIListAccountsRequest(server string) (*http.Request, error) {
 	return req, nil
 }
 
-// NewDboAPIDeleteAccountRequest generates requests for DboAPIDeleteAccount
-func NewDboAPIDeleteAccountRequest(server string, id string) (*http.Request, error) {
-	var err error
-
-	var pathParam0 string
-
-	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
-	if err != nil {
-		return nil, err
-	}
-
-	serverURL, err := url.Parse(server)
-	if err != nil {
-		return nil, err
-	}
-
-	operationPath := fmt.Sprintf("/v1/dbo/accounts/%s", pathParam0)
-	if operationPath[0] == '/' {
-		operationPath = "." + operationPath
-	}
-
-	queryURL, err := serverURL.Parse(operationPath)
-	if err != nil {
-		return nil, err
-	}
-
-	req, err := http.NewRequest("DELETE", queryURL.String(), nil)
-	if err != nil {
-		return nil, err
-	}
-
-	return req, nil
-}
-
 // NewDboAPIListCacheGroupsRequest generates requests for DboAPIListCacheGroups
 func NewDboAPIListCacheGroupsRequest(server string, params *DboAPIListCacheGroupsParams) (*http.Request, error) {
 	var err error
@@ -9300,71 +9192,6 @@ func NewDboAPIListDatabaseComponentsRequest(server string, params *DboAPIListDat
 	return req, nil
 }
 
-// NewDboAPIListDatabaseInstancesLegacyRequest generates requests for DboAPIListDatabaseInstancesLegacy
-func NewDboAPIListDatabaseInstancesLegacyRequest(server string, params *DboAPIListDatabaseInstancesLegacyParams) (*http.Request, error) {
-	var err error
-
-	serverURL, err := url.Parse(server)
-	if err != nil {
-		return nil, err
-	}
-
-	operationPath := fmt.Sprintf("/v1/dbo/db-instances")
-	if operationPath[0] == '/' {
-		operationPath = "." + operationPath
-	}
-
-	queryURL, err := serverURL.Parse(operationPath)
-	if err != nil {
-		return nil, err
-	}
-
-	if params != nil {
-		queryValues := queryURL.Query()
-
-		if params.StartTime != nil {
-
-			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "startTime", runtime.ParamLocationQuery, *params.StartTime); err != nil {
-				return nil, err
-			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
-				return nil, err
-			} else {
-				for k, v := range parsed {
-					for _, v2 := range v {
-						queryValues.Add(k, v2)
-					}
-				}
-			}
-
-		}
-
-		if params.EndTime != nil {
-
-			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "endTime", runtime.ParamLocationQuery, *params.EndTime); err != nil {
-				return nil, err
-			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
-				return nil, err
-			} else {
-				for k, v := range parsed {
-					for _, v2 := range v {
-						queryValues.Add(k, v2)
-					}
-				}
-			}
-
-		}
-
-		queryURL.RawQuery = queryValues.Encode()
-	}
-
-	req, err := http.NewRequest("GET", queryURL.String(), nil)
-	if err != nil {
-		return nil, err
-	}
-
-	return req, nil
-}
-
 // NewDboAPIGetDatabaseInstanceRequest generates requests for DboAPIGetDatabaseInstance
 func NewDboAPIGetDatabaseInstanceRequest(server string, instanceId string, params *DboAPIGetDatabaseInstanceParams) (*http.Request, error) {
 	var err error
@@ -9424,82 +9251,6 @@ func NewDboAPIGetDatabaseInstanceRequest(server string, instanceId string, param
 				}
 			}
 
-		}
-
-		queryURL.RawQuery = queryValues.Encode()
-	}
-
-	req, err := http.NewRequest("GET", queryURL.String(), nil)
-	if err != nil {
-		return nil, err
-	}
-
-	return req, nil
-}
-
-// NewDboAPIGetDatabaseInstanceCachePerformanceRequest generates requests for DboAPIGetDatabaseInstanceCachePerformance
-func NewDboAPIGetDatabaseInstanceCachePerformanceRequest(server string, instanceId string, params *DboAPIGetDatabaseInstanceCachePerformanceParams) (*http.Request, error) {
-	var err error
-
-	var pathParam0 string
-
-	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "instanceId", runtime.ParamLocationPath, instanceId)
-	if err != nil {
-		return nil, err
-	}
-
-	serverURL, err := url.Parse(server)
-	if err != nil {
-		return nil, err
-	}
-
-	operationPath := fmt.Sprintf("/v1/dbo/db-instances/%s/cache-performance", pathParam0)
-	if operationPath[0] == '/' {
-		operationPath = "." + operationPath
-	}
-
-	queryURL, err := serverURL.Parse(operationPath)
-	if err != nil {
-		return nil, err
-	}
-
-	if params != nil {
-		queryValues := queryURL.Query()
-
-		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "startTime", runtime.ParamLocationQuery, params.StartTime); err != nil {
-			return nil, err
-		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
-			return nil, err
-		} else {
-			for k, v := range parsed {
-				for _, v2 := range v {
-					queryValues.Add(k, v2)
-				}
-			}
-		}
-
-		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "endTime", runtime.ParamLocationQuery, params.EndTime); err != nil {
-			return nil, err
-		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
-			return nil, err
-		} else {
-			for k, v := range parsed {
-				for _, v2 := range v {
-					queryValues.Add(k, v2)
-				}
-			}
-		}
-
-		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "stepSeconds", runtime.ParamLocationQuery, params.StepSeconds); err != nil {
-			return nil, err
-		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
-			return nil, err
-		} else {
-			for k, v := range parsed {
-				for _, v2 := range v {
-					queryValues.Add(k, v2)
-				}
-			}
 		}
 
 		queryURL.RawQuery = queryValues.Encode()
@@ -9585,116 +9336,6 @@ func NewDboAPIGetDatabaseInstanceInfrastructureMetricsRequest(server string, ins
 	if err != nil {
 		return nil, err
 	}
-
-	return req, nil
-}
-
-// NewDboAPIDeleteLogicalDatabaseRequest generates requests for DboAPIDeleteLogicalDatabase
-func NewDboAPIDeleteLogicalDatabaseRequest(server string, instanceId string, name string) (*http.Request, error) {
-	var err error
-
-	var pathParam0 string
-
-	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "instanceId", runtime.ParamLocationPath, instanceId)
-	if err != nil {
-		return nil, err
-	}
-
-	var pathParam1 string
-
-	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "name", runtime.ParamLocationPath, name)
-	if err != nil {
-		return nil, err
-	}
-
-	serverURL, err := url.Parse(server)
-	if err != nil {
-		return nil, err
-	}
-
-	operationPath := fmt.Sprintf("/v1/dbo/db-instances/%s/logical-db/%s", pathParam0, pathParam1)
-	if operationPath[0] == '/' {
-		operationPath = "." + operationPath
-	}
-
-	queryURL, err := serverURL.Parse(operationPath)
-	if err != nil {
-		return nil, err
-	}
-
-	req, err := http.NewRequest("DELETE", queryURL.String(), nil)
-	if err != nil {
-		return nil, err
-	}
-
-	return req, nil
-}
-
-// NewDboAPICreateLogicalDatabasesRequest calls the generic DboAPICreateLogicalDatabases builder with application/json body
-func NewDboAPICreateLogicalDatabasesRequest(server string, instanceId string, params *DboAPICreateLogicalDatabasesParams, body DboAPICreateLogicalDatabasesJSONRequestBody) (*http.Request, error) {
-	var bodyReader io.Reader
-	buf, err := json.Marshal(body)
-	if err != nil {
-		return nil, err
-	}
-	bodyReader = bytes.NewReader(buf)
-	return NewDboAPICreateLogicalDatabasesRequestWithBody(server, instanceId, params, "application/json", bodyReader)
-}
-
-// NewDboAPICreateLogicalDatabasesRequestWithBody generates requests for DboAPICreateLogicalDatabases with any type of body
-func NewDboAPICreateLogicalDatabasesRequestWithBody(server string, instanceId string, params *DboAPICreateLogicalDatabasesParams, contentType string, body io.Reader) (*http.Request, error) {
-	var err error
-
-	var pathParam0 string
-
-	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "instanceId", runtime.ParamLocationPath, instanceId)
-	if err != nil {
-		return nil, err
-	}
-
-	serverURL, err := url.Parse(server)
-	if err != nil {
-		return nil, err
-	}
-
-	operationPath := fmt.Sprintf("/v1/dbo/db-instances/%s/logical-dbs", pathParam0)
-	if operationPath[0] == '/' {
-		operationPath = "." + operationPath
-	}
-
-	queryURL, err := serverURL.Parse(operationPath)
-	if err != nil {
-		return nil, err
-	}
-
-	if params != nil {
-		queryValues := queryURL.Query()
-
-		if params.CreateCacheConfigurations != nil {
-
-			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "createCacheConfigurations", runtime.ParamLocationQuery, *params.CreateCacheConfigurations); err != nil {
-				return nil, err
-			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
-				return nil, err
-			} else {
-				for k, v := range parsed {
-					for _, v2 := range v {
-						queryValues.Add(k, v2)
-					}
-				}
-			}
-
-		}
-
-		queryURL.RawQuery = queryValues.Encode()
-	}
-
-	req, err := http.NewRequest("POST", queryURL.String(), body)
-	if err != nil {
-		return nil, err
-	}
-
-	req.Header.Add("Content-Type", contentType)
 
 	return req, nil
 }
@@ -11611,6 +11252,22 @@ func NewExternalClusterAPIGetConnectAndEnableCASTAICmdRequest(server string, par
 		if params.UseCastctl != nil {
 
 			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "useCastctl", runtime.ParamLocationQuery, *params.UseCastctl); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.OnboardingPath != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "onboardingPath", runtime.ParamLocationQuery, *params.OnboardingPath); err != nil {
 				return nil, err
 			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
 				return nil, err
@@ -14958,6 +14615,85 @@ func NewServiceAccountsAPIUpdateServiceAccountRequestWithBody(server string, org
 	}
 
 	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewServiceAccountsAPIListServiceAccountKeysRequest generates requests for ServiceAccountsAPIListServiceAccountKeys
+func NewServiceAccountsAPIListServiceAccountKeysRequest(server string, organizationId string, serviceAccountId string, params *ServiceAccountsAPIListServiceAccountKeysParams) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "organizationId", runtime.ParamLocationPath, organizationId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "serviceAccountId", runtime.ParamLocationPath, serviceAccountId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/organizations/%s/service-accounts/%s/keys", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if params.PageLimit != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "page.limit", runtime.ParamLocationQuery, *params.PageLimit); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.PageCursor != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "page.cursor", runtime.ParamLocationQuery, *params.PageCursor); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
 
 	return req, nil
 }
@@ -22109,9 +21845,6 @@ type ClientWithResponsesInterface interface {
 	// DboAPIListAccounts request
 	DboAPIListAccountsWithResponse(ctx context.Context) (*DboAPIListAccountsResponse, error)
 
-	// DboAPIDeleteAccount request
-	DboAPIDeleteAccountWithResponse(ctx context.Context, id string) (*DboAPIDeleteAccountResponse, error)
-
 	// DboAPIListCacheGroups request
 	DboAPIListCacheGroupsWithResponse(ctx context.Context, params *DboAPIListCacheGroupsParams) (*DboAPIListCacheGroupsResponse, error)
 
@@ -22213,25 +21946,11 @@ type ClientWithResponsesInterface interface {
 	// DboAPIListDatabaseComponents request
 	DboAPIListDatabaseComponentsWithResponse(ctx context.Context, params *DboAPIListDatabaseComponentsParams) (*DboAPIListDatabaseComponentsResponse, error)
 
-	// DboAPIListDatabaseInstancesLegacy request
-	DboAPIListDatabaseInstancesLegacyWithResponse(ctx context.Context, params *DboAPIListDatabaseInstancesLegacyParams) (*DboAPIListDatabaseInstancesLegacyResponse, error)
-
 	// DboAPIGetDatabaseInstance request
 	DboAPIGetDatabaseInstanceWithResponse(ctx context.Context, instanceId string, params *DboAPIGetDatabaseInstanceParams) (*DboAPIGetDatabaseInstanceResponse, error)
 
-	// DboAPIGetDatabaseInstanceCachePerformance request
-	DboAPIGetDatabaseInstanceCachePerformanceWithResponse(ctx context.Context, instanceId string, params *DboAPIGetDatabaseInstanceCachePerformanceParams) (*DboAPIGetDatabaseInstanceCachePerformanceResponse, error)
-
 	// DboAPIGetDatabaseInstanceInfrastructureMetrics request
 	DboAPIGetDatabaseInstanceInfrastructureMetricsWithResponse(ctx context.Context, instanceId string, params *DboAPIGetDatabaseInstanceInfrastructureMetricsParams) (*DboAPIGetDatabaseInstanceInfrastructureMetricsResponse, error)
-
-	// DboAPIDeleteLogicalDatabase request
-	DboAPIDeleteLogicalDatabaseWithResponse(ctx context.Context, instanceId string, name string) (*DboAPIDeleteLogicalDatabaseResponse, error)
-
-	// DboAPICreateLogicalDatabases request  with any body
-	DboAPICreateLogicalDatabasesWithBodyWithResponse(ctx context.Context, instanceId string, params *DboAPICreateLogicalDatabasesParams, contentType string, body io.Reader) (*DboAPICreateLogicalDatabasesResponse, error)
-
-	DboAPICreateLogicalDatabasesWithResponse(ctx context.Context, instanceId string, params *DboAPICreateLogicalDatabasesParams, body DboAPICreateLogicalDatabasesJSONRequestBody) (*DboAPICreateLogicalDatabasesResponse, error)
 
 	// DboAPICreateRegistration request  with any body
 	DboAPICreateRegistrationWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader) (*DboAPICreateRegistrationResponse, error)
@@ -22605,6 +22324,9 @@ type ClientWithResponsesInterface interface {
 	ServiceAccountsAPIUpdateServiceAccountWithBodyWithResponse(ctx context.Context, organizationId string, serviceAccountId string, contentType string, body io.Reader) (*ServiceAccountsAPIUpdateServiceAccountResponse, error)
 
 	ServiceAccountsAPIUpdateServiceAccountWithResponse(ctx context.Context, organizationId string, serviceAccountId string, body ServiceAccountsAPIUpdateServiceAccountJSONRequestBody) (*ServiceAccountsAPIUpdateServiceAccountResponse, error)
+
+	// ServiceAccountsAPIListServiceAccountKeys request
+	ServiceAccountsAPIListServiceAccountKeysWithResponse(ctx context.Context, organizationId string, serviceAccountId string, params *ServiceAccountsAPIListServiceAccountKeysParams) (*ServiceAccountsAPIListServiceAccountKeysResponse, error)
 
 	// ServiceAccountsAPICreateServiceAccountKey request  with any body
 	ServiceAccountsAPICreateServiceAccountKeyWithBodyWithResponse(ctx context.Context, organizationId string, serviceAccountId string, contentType string, body io.Reader) (*ServiceAccountsAPICreateServiceAccountKeyResponse, error)
@@ -23781,36 +23503,6 @@ func (r DboAPIListAccountsResponse) GetBody() []byte {
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
-type DboAPIDeleteAccountResponse struct {
-	Body         []byte
-	HTTPResponse *http.Response
-	JSON200      *DboV1DeleteAccountResponse
-}
-
-// Status returns HTTPResponse.Status
-func (r DboAPIDeleteAccountResponse) Status() string {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.Status
-	}
-	return http.StatusText(0)
-}
-
-// StatusCode returns HTTPResponse.StatusCode
-func (r DboAPIDeleteAccountResponse) StatusCode() int {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.StatusCode
-	}
-	return 0
-}
-
-// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-// Body returns body of byte array
-func (r DboAPIDeleteAccountResponse) GetBody() []byte {
-	return r.Body
-}
-
-// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-
 type DboAPIListCacheGroupsResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -24681,36 +24373,6 @@ func (r DboAPIListDatabaseComponentsResponse) GetBody() []byte {
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
-type DboAPIListDatabaseInstancesLegacyResponse struct {
-	Body         []byte
-	HTTPResponse *http.Response
-	JSON200      *DboV1ListDatabaseInstancesResponse
-}
-
-// Status returns HTTPResponse.Status
-func (r DboAPIListDatabaseInstancesLegacyResponse) Status() string {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.Status
-	}
-	return http.StatusText(0)
-}
-
-// StatusCode returns HTTPResponse.StatusCode
-func (r DboAPIListDatabaseInstancesLegacyResponse) StatusCode() int {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.StatusCode
-	}
-	return 0
-}
-
-// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-// Body returns body of byte array
-func (r DboAPIListDatabaseInstancesLegacyResponse) GetBody() []byte {
-	return r.Body
-}
-
-// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-
 type DboAPIGetDatabaseInstanceResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -24741,36 +24403,6 @@ func (r DboAPIGetDatabaseInstanceResponse) GetBody() []byte {
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
-type DboAPIGetDatabaseInstanceCachePerformanceResponse struct {
-	Body         []byte
-	HTTPResponse *http.Response
-	JSON200      *[]DboV1CachePerformanceTimeseries
-}
-
-// Status returns HTTPResponse.Status
-func (r DboAPIGetDatabaseInstanceCachePerformanceResponse) Status() string {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.Status
-	}
-	return http.StatusText(0)
-}
-
-// StatusCode returns HTTPResponse.StatusCode
-func (r DboAPIGetDatabaseInstanceCachePerformanceResponse) StatusCode() int {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.StatusCode
-	}
-	return 0
-}
-
-// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-// Body returns body of byte array
-func (r DboAPIGetDatabaseInstanceCachePerformanceResponse) GetBody() []byte {
-	return r.Body
-}
-
-// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-
 type DboAPIGetDatabaseInstanceInfrastructureMetricsResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -24796,66 +24428,6 @@ func (r DboAPIGetDatabaseInstanceInfrastructureMetricsResponse) StatusCode() int
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
 func (r DboAPIGetDatabaseInstanceInfrastructureMetricsResponse) GetBody() []byte {
-	return r.Body
-}
-
-// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-
-type DboAPIDeleteLogicalDatabaseResponse struct {
-	Body         []byte
-	HTTPResponse *http.Response
-	JSON200      *DboV1DeleteLogicalDatabaseResponse
-}
-
-// Status returns HTTPResponse.Status
-func (r DboAPIDeleteLogicalDatabaseResponse) Status() string {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.Status
-	}
-	return http.StatusText(0)
-}
-
-// StatusCode returns HTTPResponse.StatusCode
-func (r DboAPIDeleteLogicalDatabaseResponse) StatusCode() int {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.StatusCode
-	}
-	return 0
-}
-
-// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-// Body returns body of byte array
-func (r DboAPIDeleteLogicalDatabaseResponse) GetBody() []byte {
-	return r.Body
-}
-
-// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-
-type DboAPICreateLogicalDatabasesResponse struct {
-	Body         []byte
-	HTTPResponse *http.Response
-	JSON200      *[]DboV1LogicalDatabase
-}
-
-// Status returns HTTPResponse.Status
-func (r DboAPICreateLogicalDatabasesResponse) Status() string {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.Status
-	}
-	return http.StatusText(0)
-}
-
-// StatusCode returns HTTPResponse.StatusCode
-func (r DboAPICreateLogicalDatabasesResponse) StatusCode() int {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.StatusCode
-	}
-	return 0
-}
-
-// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-// Body returns body of byte array
-func (r DboAPICreateLogicalDatabasesResponse) GetBody() []byte {
 	return r.Body
 }
 
@@ -27827,6 +27399,36 @@ func (r ServiceAccountsAPIUpdateServiceAccountResponse) StatusCode() int {
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
 func (r ServiceAccountsAPIUpdateServiceAccountResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type ServiceAccountsAPIListServiceAccountKeysResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *CastaiServiceaccountsV1beta1ListServiceAccountKeysResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r ServiceAccountsAPIListServiceAccountKeysResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r ServiceAccountsAPIListServiceAccountKeysResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r ServiceAccountsAPIListServiceAccountKeysResponse) GetBody() []byte {
 	return r.Body
 }
 
@@ -31299,15 +30901,6 @@ func (c *ClientWithResponses) DboAPIListAccountsWithResponse(ctx context.Context
 	return ParseDboAPIListAccountsResponse(rsp)
 }
 
-// DboAPIDeleteAccountWithResponse request returning *DboAPIDeleteAccountResponse
-func (c *ClientWithResponses) DboAPIDeleteAccountWithResponse(ctx context.Context, id string) (*DboAPIDeleteAccountResponse, error) {
-	rsp, err := c.DboAPIDeleteAccount(ctx, id)
-	if err != nil {
-		return nil, err
-	}
-	return ParseDboAPIDeleteAccountResponse(rsp)
-}
-
 // DboAPIListCacheGroupsWithResponse request returning *DboAPIListCacheGroupsResponse
 func (c *ClientWithResponses) DboAPIListCacheGroupsWithResponse(ctx context.Context, params *DboAPIListCacheGroupsParams) (*DboAPIListCacheGroupsResponse, error) {
 	rsp, err := c.DboAPIListCacheGroups(ctx, params)
@@ -31625,15 +31218,6 @@ func (c *ClientWithResponses) DboAPIListDatabaseComponentsWithResponse(ctx conte
 	return ParseDboAPIListDatabaseComponentsResponse(rsp)
 }
 
-// DboAPIListDatabaseInstancesLegacyWithResponse request returning *DboAPIListDatabaseInstancesLegacyResponse
-func (c *ClientWithResponses) DboAPIListDatabaseInstancesLegacyWithResponse(ctx context.Context, params *DboAPIListDatabaseInstancesLegacyParams) (*DboAPIListDatabaseInstancesLegacyResponse, error) {
-	rsp, err := c.DboAPIListDatabaseInstancesLegacy(ctx, params)
-	if err != nil {
-		return nil, err
-	}
-	return ParseDboAPIListDatabaseInstancesLegacyResponse(rsp)
-}
-
 // DboAPIGetDatabaseInstanceWithResponse request returning *DboAPIGetDatabaseInstanceResponse
 func (c *ClientWithResponses) DboAPIGetDatabaseInstanceWithResponse(ctx context.Context, instanceId string, params *DboAPIGetDatabaseInstanceParams) (*DboAPIGetDatabaseInstanceResponse, error) {
 	rsp, err := c.DboAPIGetDatabaseInstance(ctx, instanceId, params)
@@ -31643,15 +31227,6 @@ func (c *ClientWithResponses) DboAPIGetDatabaseInstanceWithResponse(ctx context.
 	return ParseDboAPIGetDatabaseInstanceResponse(rsp)
 }
 
-// DboAPIGetDatabaseInstanceCachePerformanceWithResponse request returning *DboAPIGetDatabaseInstanceCachePerformanceResponse
-func (c *ClientWithResponses) DboAPIGetDatabaseInstanceCachePerformanceWithResponse(ctx context.Context, instanceId string, params *DboAPIGetDatabaseInstanceCachePerformanceParams) (*DboAPIGetDatabaseInstanceCachePerformanceResponse, error) {
-	rsp, err := c.DboAPIGetDatabaseInstanceCachePerformance(ctx, instanceId, params)
-	if err != nil {
-		return nil, err
-	}
-	return ParseDboAPIGetDatabaseInstanceCachePerformanceResponse(rsp)
-}
-
 // DboAPIGetDatabaseInstanceInfrastructureMetricsWithResponse request returning *DboAPIGetDatabaseInstanceInfrastructureMetricsResponse
 func (c *ClientWithResponses) DboAPIGetDatabaseInstanceInfrastructureMetricsWithResponse(ctx context.Context, instanceId string, params *DboAPIGetDatabaseInstanceInfrastructureMetricsParams) (*DboAPIGetDatabaseInstanceInfrastructureMetricsResponse, error) {
 	rsp, err := c.DboAPIGetDatabaseInstanceInfrastructureMetrics(ctx, instanceId, params)
@@ -31659,32 +31234,6 @@ func (c *ClientWithResponses) DboAPIGetDatabaseInstanceInfrastructureMetricsWith
 		return nil, err
 	}
 	return ParseDboAPIGetDatabaseInstanceInfrastructureMetricsResponse(rsp)
-}
-
-// DboAPIDeleteLogicalDatabaseWithResponse request returning *DboAPIDeleteLogicalDatabaseResponse
-func (c *ClientWithResponses) DboAPIDeleteLogicalDatabaseWithResponse(ctx context.Context, instanceId string, name string) (*DboAPIDeleteLogicalDatabaseResponse, error) {
-	rsp, err := c.DboAPIDeleteLogicalDatabase(ctx, instanceId, name)
-	if err != nil {
-		return nil, err
-	}
-	return ParseDboAPIDeleteLogicalDatabaseResponse(rsp)
-}
-
-// DboAPICreateLogicalDatabasesWithBodyWithResponse request with arbitrary body returning *DboAPICreateLogicalDatabasesResponse
-func (c *ClientWithResponses) DboAPICreateLogicalDatabasesWithBodyWithResponse(ctx context.Context, instanceId string, params *DboAPICreateLogicalDatabasesParams, contentType string, body io.Reader) (*DboAPICreateLogicalDatabasesResponse, error) {
-	rsp, err := c.DboAPICreateLogicalDatabasesWithBody(ctx, instanceId, params, contentType, body)
-	if err != nil {
-		return nil, err
-	}
-	return ParseDboAPICreateLogicalDatabasesResponse(rsp)
-}
-
-func (c *ClientWithResponses) DboAPICreateLogicalDatabasesWithResponse(ctx context.Context, instanceId string, params *DboAPICreateLogicalDatabasesParams, body DboAPICreateLogicalDatabasesJSONRequestBody) (*DboAPICreateLogicalDatabasesResponse, error) {
-	rsp, err := c.DboAPICreateLogicalDatabases(ctx, instanceId, params, body)
-	if err != nil {
-		return nil, err
-	}
-	return ParseDboAPICreateLogicalDatabasesResponse(rsp)
 }
 
 // DboAPICreateRegistrationWithBodyWithResponse request with arbitrary body returning *DboAPICreateRegistrationResponse
@@ -32880,6 +32429,15 @@ func (c *ClientWithResponses) ServiceAccountsAPIUpdateServiceAccountWithResponse
 		return nil, err
 	}
 	return ParseServiceAccountsAPIUpdateServiceAccountResponse(rsp)
+}
+
+// ServiceAccountsAPIListServiceAccountKeysWithResponse request returning *ServiceAccountsAPIListServiceAccountKeysResponse
+func (c *ClientWithResponses) ServiceAccountsAPIListServiceAccountKeysWithResponse(ctx context.Context, organizationId string, serviceAccountId string, params *ServiceAccountsAPIListServiceAccountKeysParams) (*ServiceAccountsAPIListServiceAccountKeysResponse, error) {
+	rsp, err := c.ServiceAccountsAPIListServiceAccountKeys(ctx, organizationId, serviceAccountId, params)
+	if err != nil {
+		return nil, err
+	}
+	return ParseServiceAccountsAPIListServiceAccountKeysResponse(rsp)
 }
 
 // ServiceAccountsAPICreateServiceAccountKeyWithBodyWithResponse request with arbitrary body returning *ServiceAccountsAPICreateServiceAccountKeyResponse
@@ -34774,32 +34332,6 @@ func ParseDboAPIListAccountsResponse(rsp *http.Response) (*DboAPIListAccountsRes
 	return response, nil
 }
 
-// ParseDboAPIDeleteAccountResponse parses an HTTP response from a DboAPIDeleteAccountWithResponse call
-func ParseDboAPIDeleteAccountResponse(rsp *http.Response) (*DboAPIDeleteAccountResponse, error) {
-	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
-	if err != nil {
-		return nil, err
-	}
-
-	response := &DboAPIDeleteAccountResponse{
-		Body:         bodyBytes,
-		HTTPResponse: rsp,
-	}
-
-	switch {
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest DboV1DeleteAccountResponse
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON200 = &dest
-
-	}
-
-	return response, nil
-}
-
 // ParseDboAPIListCacheGroupsResponse parses an HTTP response from a DboAPIListCacheGroupsWithResponse call
 func ParseDboAPIListCacheGroupsResponse(rsp *http.Response) (*DboAPIListCacheGroupsResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
@@ -35554,32 +35086,6 @@ func ParseDboAPIListDatabaseComponentsResponse(rsp *http.Response) (*DboAPIListD
 	return response, nil
 }
 
-// ParseDboAPIListDatabaseInstancesLegacyResponse parses an HTTP response from a DboAPIListDatabaseInstancesLegacyWithResponse call
-func ParseDboAPIListDatabaseInstancesLegacyResponse(rsp *http.Response) (*DboAPIListDatabaseInstancesLegacyResponse, error) {
-	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
-	if err != nil {
-		return nil, err
-	}
-
-	response := &DboAPIListDatabaseInstancesLegacyResponse{
-		Body:         bodyBytes,
-		HTTPResponse: rsp,
-	}
-
-	switch {
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest DboV1ListDatabaseInstancesResponse
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON200 = &dest
-
-	}
-
-	return response, nil
-}
-
 // ParseDboAPIGetDatabaseInstanceResponse parses an HTTP response from a DboAPIGetDatabaseInstanceWithResponse call
 func ParseDboAPIGetDatabaseInstanceResponse(rsp *http.Response) (*DboAPIGetDatabaseInstanceResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
@@ -35606,32 +35112,6 @@ func ParseDboAPIGetDatabaseInstanceResponse(rsp *http.Response) (*DboAPIGetDatab
 	return response, nil
 }
 
-// ParseDboAPIGetDatabaseInstanceCachePerformanceResponse parses an HTTP response from a DboAPIGetDatabaseInstanceCachePerformanceWithResponse call
-func ParseDboAPIGetDatabaseInstanceCachePerformanceResponse(rsp *http.Response) (*DboAPIGetDatabaseInstanceCachePerformanceResponse, error) {
-	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
-	if err != nil {
-		return nil, err
-	}
-
-	response := &DboAPIGetDatabaseInstanceCachePerformanceResponse{
-		Body:         bodyBytes,
-		HTTPResponse: rsp,
-	}
-
-	switch {
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest []DboV1CachePerformanceTimeseries
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON200 = &dest
-
-	}
-
-	return response, nil
-}
-
 // ParseDboAPIGetDatabaseInstanceInfrastructureMetricsResponse parses an HTTP response from a DboAPIGetDatabaseInstanceInfrastructureMetricsWithResponse call
 func ParseDboAPIGetDatabaseInstanceInfrastructureMetricsResponse(rsp *http.Response) (*DboAPIGetDatabaseInstanceInfrastructureMetricsResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
@@ -35648,58 +35128,6 @@ func ParseDboAPIGetDatabaseInstanceInfrastructureMetricsResponse(rsp *http.Respo
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest []DboV1InstanceMetrics
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON200 = &dest
-
-	}
-
-	return response, nil
-}
-
-// ParseDboAPIDeleteLogicalDatabaseResponse parses an HTTP response from a DboAPIDeleteLogicalDatabaseWithResponse call
-func ParseDboAPIDeleteLogicalDatabaseResponse(rsp *http.Response) (*DboAPIDeleteLogicalDatabaseResponse, error) {
-	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
-	if err != nil {
-		return nil, err
-	}
-
-	response := &DboAPIDeleteLogicalDatabaseResponse{
-		Body:         bodyBytes,
-		HTTPResponse: rsp,
-	}
-
-	switch {
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest DboV1DeleteLogicalDatabaseResponse
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON200 = &dest
-
-	}
-
-	return response, nil
-}
-
-// ParseDboAPICreateLogicalDatabasesResponse parses an HTTP response from a DboAPICreateLogicalDatabasesWithResponse call
-func ParseDboAPICreateLogicalDatabasesResponse(rsp *http.Response) (*DboAPICreateLogicalDatabasesResponse, error) {
-	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
-	if err != nil {
-		return nil, err
-	}
-
-	response := &DboAPICreateLogicalDatabasesResponse{
-		Body:         bodyBytes,
-		HTTPResponse: rsp,
-	}
-
-	switch {
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest []DboV1LogicalDatabase
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -38278,6 +37706,32 @@ func ParseServiceAccountsAPIUpdateServiceAccountResponse(rsp *http.Response) (*S
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest CastaiServiceaccountsV1beta1UpdateServiceAccountResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseServiceAccountsAPIListServiceAccountKeysResponse parses an HTTP response from a ServiceAccountsAPIListServiceAccountKeysWithResponse call
+func ParseServiceAccountsAPIListServiceAccountKeysResponse(rsp *http.Response) (*ServiceAccountsAPIListServiceAccountKeysResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &ServiceAccountsAPIListServiceAccountKeysResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest CastaiServiceaccountsV1beta1ListServiceAccountKeysResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
