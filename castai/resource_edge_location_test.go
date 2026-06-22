@@ -15,6 +15,7 @@ import (
 
 func TestAccCloudAgnostic_ResourceEdgeLocationOCI(t *testing.T) {
 	rName := fmt.Sprintf("%v-edge-loc-%v", ResourcePrefix, acctest.RandString(8))
+	clusterName := "test-oci-cluster"
 	resourceName := "castai_edge_location.test"
 
 	resource.Test(t, resource.TestCase{
@@ -23,7 +24,7 @@ func TestAccCloudAgnostic_ResourceEdgeLocationOCI(t *testing.T) {
 		CheckDestroy:             testAccCheckEdgeLocationDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccEdgeLocationOCIConfig(rName),
+				Config: testAccEdgeLocationOCIConfig(rName, clusterName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "name", rName),
 					resource.TestCheckResourceAttr(resourceName, "description", "Test OCI edge location"),
@@ -40,13 +41,13 @@ func TestAccCloudAgnostic_ResourceEdgeLocationOCI(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccEdgeLocationOCIUpdated(rName),
+				Config: testAccEdgeLocationOCIUpdated(rName, clusterName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "description", "Updated OCI edge location"),
 				),
 			},
 			{
-				Config: testAccEdgeLocationOCICredentialsUpdated(rName),
+				Config: testAccEdgeLocationOCICredentialsUpdated(rName, clusterName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "credentials_revision", "2"),
 				),
@@ -55,30 +56,29 @@ func TestAccCloudAgnostic_ResourceEdgeLocationOCI(t *testing.T) {
 	})
 }
 
-func testAccEdgeLocationOCIConfig(rName string) string {
-	return testAccEdgeLocationOCIConfigWithParams(rName, "Test OCI edge location",
+func testAccEdgeLocationOCIConfig(rName, clusterName string) string {
+	return testAccEdgeLocationOCIConfigWithParams(rName, clusterName, "Test OCI edge location",
 		`user_id_wo      = "ocid1.user.oc1..example"
     fingerprint_wo  = "aa:bb:cc:dd:ee:ff:00:11:22:33:44:55:66:77:88:99"
     private_key_base64_wo  = base64encode("-----BEGIN RSA PRIVATE KEY-----\nMIIE...EXAMPLE...==\n-----END RSA PRIVATE KEY-----\n")`)
 }
 
-func testAccEdgeLocationOCIUpdated(rName string) string {
-	return testAccEdgeLocationOCIConfigWithParams(rName, "Updated OCI edge location",
+func testAccEdgeLocationOCIUpdated(rName, clusterName string) string {
+	return testAccEdgeLocationOCIConfigWithParams(rName, clusterName, "Updated OCI edge location",
 		`user_id_wo      = "ocid1.user.oc1..example"
     fingerprint_wo  = "aa:bb:cc:dd:ee:ff:00:11:22:33:44:55:66:77:88:99"
     private_key_base64_wo  = base64encode("-----BEGIN RSA PRIVATE KEY-----\nMIIE...EXAMPLE...==\n-----END RSA PRIVATE KEY-----\n")`)
 }
 
-func testAccEdgeLocationOCICredentialsUpdated(rName string) string {
-	return testAccEdgeLocationOCIConfigWithParams(rName, "Updated OCI edge location",
+func testAccEdgeLocationOCICredentialsUpdated(rName, clusterName string) string {
+	return testAccEdgeLocationOCIConfigWithParams(rName, clusterName, "Updated OCI edge location",
 		`user_id_wo      = "ocid1.user.oc1..example"
     fingerprint_wo  = "11:22:33:44:55:66:77:88:99:aa:bb:cc:dd:ee:ff:00"
     private_key_base64_wo  = base64encode("-----BEGIN RSA PRIVATE KEY-----\nMIIE...NEWKEY...==\n-----END RSA PRIVATE KEY-----\n")`)
 }
 
-func testAccEdgeLocationOCIConfigWithParams(rName, description, ociCredentials string) string {
+func testAccEdgeLocationOCIConfigWithParams(rName, clusterName, description, ociCredentials string) string {
 	organizationID := testAccGetOrganizationID()
-	clusterName := "test-oci-cluster"
 
 	return ConfigCompose(testOmniClusterConfig(clusterName), fmt.Sprintf(`
 resource "castai_edge_location" "test" {
