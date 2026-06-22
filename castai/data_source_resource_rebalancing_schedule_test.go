@@ -137,6 +137,7 @@ launch_configuration.0.aggressive_mode_config.0.ignore_local_persistent_volumes 
 launch_configuration.0.aggressive_mode_config.0.ignore_problem_job_pods = true
 launch_configuration.0.aggressive_mode_config.0.ignore_problem_pods_without_controller = true
 launch_configuration.0.aggressive_mode_config.0.ignore_problem_removal_disabled_pods = true
+launch_configuration.0.drain_failure_config.# = 0
 launch_configuration.0.execution_conditions.# = 1
 launch_configuration.0.execution_conditions.0.achieved_savings_percentage = 15
 launch_configuration.0.execution_conditions.0.enabled = true
