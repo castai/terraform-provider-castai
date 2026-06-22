@@ -3462,6 +3462,9 @@ type CastaiServiceaccountsV1beta1ServiceAccount struct {
 	// Deprecated:
 	Keys *[]CastaiServiceaccountsV1beta1ServiceAccountKey `json:"keys,omitempty"`
 
+	// KeysCount Number of keys associated with the service account.
+	KeysCount *int64 `json:"keysCount,omitempty"`
+
 	// ManagedBy Method used to create role binding, eg.: console, terraform.
 	ManagedBy *string `json:"managedBy,omitempty"`
 
@@ -5417,6 +5420,7 @@ type DboV1TrafficInsightsType string
 // DboV1UninstallCacheParams defines model for dbo.v1.UninstallCacheParams.
 type DboV1UninstallCacheParams struct {
 	CacheGroupId string `json:"cacheGroupId"`
+	IsRoxy       *bool  `json:"isRoxy"`
 }
 
 // DboV1UninstallDBAgentParams defines model for dbo.v1.UninstallDBAgentParams.
@@ -8398,7 +8402,7 @@ type ScheduledrebalancingV1DrainFailureConfig struct {
 	DisableUncordon *bool `json:"disableUncordon"`
 
 	// UncordonAfterSeconds Time in seconds after which a drain-failed node should be automatically uncordoned.
-	// Clamped to [3600, 259200] (1h–72h). Defaults to 10800 (3h).
+	// Clamped to [60, 259200] (1m–72h). Defaults to 1800 (30 minutes).
 	UncordonAfterSeconds *int32 `json:"uncordonAfterSeconds,omitempty"`
 }
 
@@ -8510,8 +8514,11 @@ type ScheduledrebalancingV1RebalancingOptions struct {
 	EvictGracefully *bool `json:"evictGracefully"`
 
 	// ExecutionConditions Defines the conditions which must be met in order to fully execute the plan.
-	ExecutionConditions   *ScheduledrebalancingV1ExecutionConditions `json:"executionConditions,omitempty"`
-	KeepDrainTimeoutNodes *bool                                      `json:"keepDrainTimeoutNodes"`
+	ExecutionConditions *ScheduledrebalancingV1ExecutionConditions `json:"executionConditions,omitempty"`
+
+	// KeepDrainTimeoutNodes Deprecated: use evictGracefully instead.
+	// Deprecated:
+	KeepDrainTimeoutNodes *bool `json:"keepDrainTimeoutNodes"`
 
 	// MinNodes Minimum number of nodes that should be kept in the cluster after rebalancing.
 	MinNodes *int32 `json:"minNodes,omitempty"`

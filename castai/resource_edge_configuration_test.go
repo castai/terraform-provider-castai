@@ -306,7 +306,7 @@ func testAccEdgeConfigurationOCIConfig(rName, clusterName string) string {
 	organizationID := testAccGetOrganizationID()
 
 	return ConfigCompose(
-		testAccEdgeLocationOCIConfig(rName),
+		testAccEdgeLocationOCIConfig(rName, clusterName),
 		fmt.Sprintf(`
 resource "castai_edge_configuration" "test" {
   organization_id  = %[1]q
@@ -336,7 +336,7 @@ func testAccEdgeConfigurationOCIUpdated(rName, clusterName string) string {
 	organizationID := testAccGetOrganizationID()
 
 	return ConfigCompose(
-		testAccEdgeLocationOCIConfig(rName),
+		testAccEdgeLocationOCIConfig(rName, clusterName),
 		fmt.Sprintf(`
 resource "castai_edge_configuration" "test" {
   organization_id  = %[1]q

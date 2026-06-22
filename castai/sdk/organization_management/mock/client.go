@@ -415,6 +415,26 @@ func (mr *MockClientInterfaceMockRecorder) EnterpriseAPIDeleteChildOrganization(
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EnterpriseAPIDeleteChildOrganization", reflect.TypeOf((*MockClientInterface)(nil).EnterpriseAPIDeleteChildOrganization), varargs...)
 }
 
+// EnterpriseAPIGetEnterpriseGroup mocks base method.
+func (m *MockClientInterface) EnterpriseAPIGetEnterpriseGroup(ctx context.Context, enterpriseId, id string, reqEditors ...organization_management.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, enterpriseId, id}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "EnterpriseAPIGetEnterpriseGroup", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// EnterpriseAPIGetEnterpriseGroup indicates an expected call of EnterpriseAPIGetEnterpriseGroup.
+func (mr *MockClientInterfaceMockRecorder) EnterpriseAPIGetEnterpriseGroup(ctx, enterpriseId, id interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, enterpriseId, id}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EnterpriseAPIGetEnterpriseGroup", reflect.TypeOf((*MockClientInterface)(nil).EnterpriseAPIGetEnterpriseGroup), varargs...)
+}
+
 // EnterpriseAPIInviteUsers mocks base method.
 func (m *MockClientInterface) EnterpriseAPIInviteUsers(ctx context.Context, enterpriseId string, body organization_management.EnterpriseAPIInviteUsersJSONRequestBody, reqEditors ...organization_management.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
@@ -473,6 +493,26 @@ func (mr *MockClientInterfaceMockRecorder) EnterpriseAPIListChildrenOrganization
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{ctx, enterpriseId, params}, reqEditors...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EnterpriseAPIListChildrenOrganizations", reflect.TypeOf((*MockClientInterface)(nil).EnterpriseAPIListChildrenOrganizations), varargs...)
+}
+
+// EnterpriseAPIListEnterpriseServiceAccounts mocks base method.
+func (m *MockClientInterface) EnterpriseAPIListEnterpriseServiceAccounts(ctx context.Context, enterpriseId string, params *organization_management.EnterpriseAPIListEnterpriseServiceAccountsParams, reqEditors ...organization_management.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, enterpriseId, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "EnterpriseAPIListEnterpriseServiceAccounts", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// EnterpriseAPIListEnterpriseServiceAccounts indicates an expected call of EnterpriseAPIListEnterpriseServiceAccounts.
+func (mr *MockClientInterfaceMockRecorder) EnterpriseAPIListEnterpriseServiceAccounts(ctx, enterpriseId, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, enterpriseId, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EnterpriseAPIListEnterpriseServiceAccounts", reflect.TypeOf((*MockClientInterface)(nil).EnterpriseAPIListEnterpriseServiceAccounts), varargs...)
 }
 
 // EnterpriseAPIListGroups mocks base method.
@@ -1193,6 +1233,41 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) EnterpriseAPIDeleteChild
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EnterpriseAPIDeleteChildOrganizationWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).EnterpriseAPIDeleteChildOrganizationWithResponse), ctx, enterpriseId, id)
 }
 
+// EnterpriseAPIGetEnterpriseGroup mocks base method.
+func (m *MockClientWithResponsesInterface) EnterpriseAPIGetEnterpriseGroup(ctx context.Context, enterpriseId, id string, reqEditors ...organization_management.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, enterpriseId, id}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "EnterpriseAPIGetEnterpriseGroup", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// EnterpriseAPIGetEnterpriseGroup indicates an expected call of EnterpriseAPIGetEnterpriseGroup.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) EnterpriseAPIGetEnterpriseGroup(ctx, enterpriseId, id interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, enterpriseId, id}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EnterpriseAPIGetEnterpriseGroup", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).EnterpriseAPIGetEnterpriseGroup), varargs...)
+}
+
+// EnterpriseAPIGetEnterpriseGroupWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) EnterpriseAPIGetEnterpriseGroupWithResponse(ctx context.Context, enterpriseId, id string) (*organization_management.EnterpriseAPIGetEnterpriseGroupResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "EnterpriseAPIGetEnterpriseGroupWithResponse", ctx, enterpriseId, id)
+	ret0, _ := ret[0].(*organization_management.EnterpriseAPIGetEnterpriseGroupResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// EnterpriseAPIGetEnterpriseGroupWithResponse indicates an expected call of EnterpriseAPIGetEnterpriseGroupWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) EnterpriseAPIGetEnterpriseGroupWithResponse(ctx, enterpriseId, id interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EnterpriseAPIGetEnterpriseGroupWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).EnterpriseAPIGetEnterpriseGroupWithResponse), ctx, enterpriseId, id)
+}
+
 // EnterpriseAPIInviteUsers mocks base method.
 func (m *MockClientWithResponsesInterface) EnterpriseAPIInviteUsers(ctx context.Context, enterpriseId string, body organization_management.EnterpriseAPIInviteUsersJSONRequestBody, reqEditors ...organization_management.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
@@ -1296,6 +1371,41 @@ func (m *MockClientWithResponsesInterface) EnterpriseAPIListChildrenOrganization
 func (mr *MockClientWithResponsesInterfaceMockRecorder) EnterpriseAPIListChildrenOrganizationsWithResponse(ctx, enterpriseId, params interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EnterpriseAPIListChildrenOrganizationsWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).EnterpriseAPIListChildrenOrganizationsWithResponse), ctx, enterpriseId, params)
+}
+
+// EnterpriseAPIListEnterpriseServiceAccounts mocks base method.
+func (m *MockClientWithResponsesInterface) EnterpriseAPIListEnterpriseServiceAccounts(ctx context.Context, enterpriseId string, params *organization_management.EnterpriseAPIListEnterpriseServiceAccountsParams, reqEditors ...organization_management.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, enterpriseId, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "EnterpriseAPIListEnterpriseServiceAccounts", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// EnterpriseAPIListEnterpriseServiceAccounts indicates an expected call of EnterpriseAPIListEnterpriseServiceAccounts.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) EnterpriseAPIListEnterpriseServiceAccounts(ctx, enterpriseId, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, enterpriseId, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EnterpriseAPIListEnterpriseServiceAccounts", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).EnterpriseAPIListEnterpriseServiceAccounts), varargs...)
+}
+
+// EnterpriseAPIListEnterpriseServiceAccountsWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) EnterpriseAPIListEnterpriseServiceAccountsWithResponse(ctx context.Context, enterpriseId string, params *organization_management.EnterpriseAPIListEnterpriseServiceAccountsParams) (*organization_management.EnterpriseAPIListEnterpriseServiceAccountsResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "EnterpriseAPIListEnterpriseServiceAccountsWithResponse", ctx, enterpriseId, params)
+	ret0, _ := ret[0].(*organization_management.EnterpriseAPIListEnterpriseServiceAccountsResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// EnterpriseAPIListEnterpriseServiceAccountsWithResponse indicates an expected call of EnterpriseAPIListEnterpriseServiceAccountsWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) EnterpriseAPIListEnterpriseServiceAccountsWithResponse(ctx, enterpriseId, params interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EnterpriseAPIListEnterpriseServiceAccountsWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).EnterpriseAPIListEnterpriseServiceAccountsWithResponse), ctx, enterpriseId, params)
 }
 
 // EnterpriseAPIListGroups mocks base method.

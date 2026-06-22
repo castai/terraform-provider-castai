@@ -42,6 +42,15 @@ const (
 	DefinitionMemberKindSUBJECTKINDUSER           DefinitionMemberKind = "SUBJECT_KIND_USER"
 )
 
+// Defines values for GetEnterpriseGroupResponseSsoProvider.
+const (
+	SSOPROVIDEROIDC        GetEnterpriseGroupResponseSsoProvider = "SSO_PROVIDER_OIDC"
+	SSOPROVIDEROKTA        GetEnterpriseGroupResponseSsoProvider = "SSO_PROVIDER_OKTA"
+	SSOPROVIDERSAML        GetEnterpriseGroupResponseSsoProvider = "SSO_PROVIDER_SAML"
+	SSOPROVIDERUNSPECIFIED GetEnterpriseGroupResponseSsoProvider = "SSO_PROVIDER_UNSPECIFIED"
+	SSOPROVIDERWAAD        GetEnterpriseGroupResponseSsoProvider = "SSO_PROVIDER_WAAD"
+)
+
 // Defines values for GroupDefinitionAuthorKind.
 const (
 	GroupDefinitionAuthorKindKINDSERVICEACCOUNT GroupDefinitionAuthorKind = "KIND_SERVICE_ACCOUNT"
@@ -104,10 +113,18 @@ const (
 
 // Defines values for EnterpriseAPIListChildrenOrganizationsParamsSortOrder.
 const (
-	ASC  EnterpriseAPIListChildrenOrganizationsParamsSortOrder = "ASC"
-	Asc  EnterpriseAPIListChildrenOrganizationsParamsSortOrder = "asc"
-	DESC EnterpriseAPIListChildrenOrganizationsParamsSortOrder = "DESC"
-	Desc EnterpriseAPIListChildrenOrganizationsParamsSortOrder = "desc"
+	EnterpriseAPIListChildrenOrganizationsParamsSortOrderASC  EnterpriseAPIListChildrenOrganizationsParamsSortOrder = "ASC"
+	EnterpriseAPIListChildrenOrganizationsParamsSortOrderAsc  EnterpriseAPIListChildrenOrganizationsParamsSortOrder = "asc"
+	EnterpriseAPIListChildrenOrganizationsParamsSortOrderDESC EnterpriseAPIListChildrenOrganizationsParamsSortOrder = "DESC"
+	EnterpriseAPIListChildrenOrganizationsParamsSortOrderDesc EnterpriseAPIListChildrenOrganizationsParamsSortOrder = "desc"
+)
+
+// Defines values for EnterpriseAPIListEnterpriseServiceAccountsParamsSortOrder.
+const (
+	EnterpriseAPIListEnterpriseServiceAccountsParamsSortOrderASC  EnterpriseAPIListEnterpriseServiceAccountsParamsSortOrder = "ASC"
+	EnterpriseAPIListEnterpriseServiceAccountsParamsSortOrderAsc  EnterpriseAPIListEnterpriseServiceAccountsParamsSortOrder = "asc"
+	EnterpriseAPIListEnterpriseServiceAccountsParamsSortOrderDESC EnterpriseAPIListEnterpriseServiceAccountsParamsSortOrder = "DESC"
+	EnterpriseAPIListEnterpriseServiceAccountsParamsSortOrderDesc EnterpriseAPIListEnterpriseServiceAccountsParamsSortOrder = "desc"
 )
 
 // AddUserToChildOrganizationRequest Request message for adding a user to a child organization
@@ -531,6 +548,48 @@ type DefinitionRoleBinding struct {
 	Scopes *[]RoleBindingScope `json:"scopes,omitempty"`
 }
 
+// GetEnterpriseGroupResponse Response message containing the requested enterprise group
+type GetEnterpriseGroupResponse struct {
+	// CreateTime CreateTime is the timestamp when the group was created.
+	CreateTime *time.Time `json:"createTime,omitempty"`
+
+	// Definition Definition is the group definition (members and author).
+	Definition *GetEnterpriseGroupResponseGroupDefinition `json:"definition,omitempty"`
+
+	// Description Description is the description of the group.
+	Description *string `json:"description,omitempty"`
+
+	// Id ID is the unique identifier of the group.
+	Id *string `json:"id,omitempty"`
+
+	// ManagedBy ManagedBy is the method used to create the group, e.g.: console, terraform.
+	ManagedBy *string `json:"managedBy,omitempty"`
+
+	// Name Name is the name of the group.
+	Name *string `json:"name,omitempty"`
+
+	// OrganizationId OrganizationID is the unique identifier of the organization the group belongs to.
+	OrganizationId *string `json:"organizationId,omitempty"`
+
+	// SsoProvider SSOProvider is the SSO provider information if the group is managed by SSO.
+	SsoProvider *GetEnterpriseGroupResponseSsoProvider `json:"ssoProvider,omitempty"`
+
+	// UpdateTime UpdateTime is the timestamp when the group was last updated.
+	UpdateTime *time.Time `json:"updateTime,omitempty"`
+}
+
+// GetEnterpriseGroupResponseSsoProvider SSOProvider is the SSO provider information if the group is managed by SSO.
+type GetEnterpriseGroupResponseSsoProvider string
+
+// GetEnterpriseGroupResponseGroupDefinition GroupDefinition represents the definition of a group
+type GetEnterpriseGroupResponseGroupDefinition struct {
+	// Author Author is the author of the group.
+	Author *GroupDefinitionAuthor `json:"author,omitempty"`
+
+	// Members Members is a list of members.
+	Members *[]GroupDefinitionMember `json:"members,omitempty"`
+}
+
 // GoogleProtobufAny Contains an arbitrary serialized message along with a @type that describes the type of the serialized message.
 type GoogleProtobufAny struct {
 	// Type The type of the serialized message.
@@ -723,6 +782,52 @@ type ListChildrenOrganizationsResponseChildOrganization struct {
 
 // ListChildrenOrganizationsResponseChildOrganizationType Type of the organization.
 type ListChildrenOrganizationsResponseChildOrganizationType string
+
+// ListEnterpriseServiceAccountsResponse Response message containing the list of service accounts in the enterprise organization
+type ListEnterpriseServiceAccountsResponse struct {
+	// Items List of service accounts.
+	Items *[]ListEnterpriseServiceAccountsResponseServiceAccount `json:"items,omitempty"`
+
+	// NextPageCursor A token to retrieve the next page of results. Pass this value in the
+	//  `page.cursor` field in the subsequent call to `ListEnterpriseServiceAccounts` to retrieve the
+	//  next page of results.
+	NextPageCursor *string `json:"nextPageCursor,omitempty"`
+
+	// PrevPageCursor A token to retrieve the previous page of results. Pass this value in the
+	//  `page.cursor` field in the subsequent call to `ListEnterpriseServiceAccounts` to retrieve the
+	//  previous page of results.
+	PrevPageCursor *string `json:"prevPageCursor,omitempty"`
+
+	// TotalSize The total number of service accounts in the list.
+	TotalSize *int32 `json:"totalSize,omitempty"`
+}
+
+// ListEnterpriseServiceAccountsResponseServiceAccount ServiceAccount represents a service account item in the enterprise.
+type ListEnterpriseServiceAccountsResponseServiceAccount struct {
+	// Author Author is the author of the service account.
+	Author *ServiceAccountAuthor `json:"author,omitempty"`
+
+	// CreateTime CreateTime is the timestamp when the service account was created.
+	CreateTime *time.Time `json:"createTime,omitempty"`
+
+	// Description Description is the description of the service account.
+	Description *string `json:"description,omitempty"`
+
+	// Email Email is the email of the service account.
+	Email *string `json:"email,omitempty"`
+
+	// Id ID is the unique identifier of the service account.
+	Id *string `json:"id,omitempty"`
+
+	// ManagedBy Method used to create the service account, e.g.: console, terraform.
+	ManagedBy *string `json:"managedBy,omitempty"`
+
+	// Name Name is the name of the service account.
+	Name *string `json:"name,omitempty"`
+
+	// OrganizationId OrganizationID is the organization this service account belongs to.
+	OrganizationId *string `json:"organizationId,omitempty"`
+}
 
 // ListGroupsResponse Response message containing the list of groups in the enterprise organization
 type ListGroupsResponse struct {
@@ -1132,6 +1237,18 @@ type ServiceAccountSubject struct {
 	Name *string `json:"name,omitempty"`
 }
 
+// ServiceAccountAuthor Author is the author of the service account.
+type ServiceAccountAuthor struct {
+	// Email Email is the email of the author.
+	Email *string `json:"email,omitempty"`
+
+	// Id ID is the unique identifier of the author.
+	Id *string `json:"id,omitempty"`
+
+	// Kind Kind is the kind of the author (e.g. "user").
+	Kind *string `json:"kind,omitempty"`
+}
+
 // Status The `Status` type defines a logical error model that is suitable for different programming environments, including REST APIs and RPC APIs. It is used by [gRPC](https://github.com/grpc). Each `Status` message contains three pieces of data: error code, error message, and error details. You can find out more about this error model and how to work with it in the [API Design Guide](https://cloud.google.com/apis/design/errors).
 type Status struct {
 	// Code The status code, which should be an enum value of [google.rpc.Code][google.rpc.Code].
@@ -1277,6 +1394,29 @@ type EnterpriseAPIListRoleBindingsParams struct {
 	//  &subject_id=x&subject_id=y)
 	SubjectId *[]string `form:"subjectId,omitempty" json:"subjectId,omitempty"`
 }
+
+// EnterpriseAPIListEnterpriseServiceAccountsParams defines parameters for EnterpriseAPIListEnterpriseServiceAccounts.
+type EnterpriseAPIListEnterpriseServiceAccountsParams struct {
+	// PageLimit Defines the number of items that should be returned
+	PageLimit *string `form:"page.limit,omitempty" json:"page.limit,omitempty"`
+
+	// PageCursor Cursor that defines token indicating where to start the next page.
+	//  Empty value indicates to start from beginning of the dataset.
+	PageCursor *string `form:"page.cursor,omitempty" json:"page.cursor,omitempty"`
+
+	// OrganizationId Filter by organization ID. Multiple values can be passed as query
+	//  parameters (e.g., &organization_id=x&organization_id=y).
+	OrganizationId *[]string `form:"organizationId,omitempty" json:"organizationId,omitempty"`
+
+	// SortField The field name to order by. Nested fields can be specified by using a dot (e.g. user.name).
+	SortField *string `form:"sort.field,omitempty" json:"sort.field,omitempty"`
+
+	// SortOrder The order of returned items. Default is ASC.
+	SortOrder *EnterpriseAPIListEnterpriseServiceAccountsParamsSortOrder `form:"sort.order,omitempty" json:"sort.order,omitempty"`
+}
+
+// EnterpriseAPIListEnterpriseServiceAccountsParamsSortOrder defines parameters for EnterpriseAPIListEnterpriseServiceAccounts.
+type EnterpriseAPIListEnterpriseServiceAccountsParamsSortOrder string
 
 // EnterpriseAPIBatchCreateEnterpriseGroupsJSONRequestBody defines body for EnterpriseAPIBatchCreateEnterpriseGroups for application/json ContentType.
 type EnterpriseAPIBatchCreateEnterpriseGroupsJSONRequestBody = BatchCreateEnterpriseGroupsRequest
