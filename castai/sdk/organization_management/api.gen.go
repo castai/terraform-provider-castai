@@ -356,6 +356,25 @@ type BatchDeleteEnterpriseRoleBindingsRequestDeleteRoleBindingRequest struct {
 	OrganizationId string `json:"organizationId"`
 }
 
+// BatchDeleteEnterpriseServiceAccountsRequest Request message for batch deleting enterprise service accounts.
+type BatchDeleteEnterpriseServiceAccountsRequest struct {
+	// EnterpriseId ID of the enterprise organization.
+	EnterpriseId string `json:"enterpriseId"`
+
+	// Requests The requests specifying the service accounts to delete.
+	//  A maximum of 100 service accounts can be deleted in a batch.
+	Requests []BatchDeleteEnterpriseServiceAccountsRequestDeleteServiceAccountRequest `json:"requests"`
+}
+
+// BatchDeleteEnterpriseServiceAccountsRequestDeleteServiceAccountRequest Request message for deleting a single service account.
+type BatchDeleteEnterpriseServiceAccountsRequestDeleteServiceAccountRequest struct {
+	// Id The ID of the service account to delete.
+	Id string `json:"id"`
+
+	// OrganizationId Organization ID — must be the enterprise itself or a direct child (deleted_at IS NULL).
+	OrganizationId string `json:"organizationId"`
+}
+
 // BatchUpdateEnterpriseGroupsRequest Request message for batch updating groups in an enterprise
 type BatchUpdateEnterpriseGroupsRequest struct {
 	// EnterpriseId Required field that identifies the enterprise.
@@ -1471,6 +1490,9 @@ type EnterpriseAPIBatchUpdateEnterpriseRoleBindingsJSONRequestBody = BatchUpdate
 
 // EnterpriseAPIBatchCreateEnterpriseServiceAccountsJSONRequestBody defines body for EnterpriseAPIBatchCreateEnterpriseServiceAccounts for application/json ContentType.
 type EnterpriseAPIBatchCreateEnterpriseServiceAccountsJSONRequestBody = BatchCreateEnterpriseServiceAccountsRequest
+
+// EnterpriseAPIBatchDeleteEnterpriseServiceAccountsJSONRequestBody defines body for EnterpriseAPIBatchDeleteEnterpriseServiceAccounts for application/json ContentType.
+type EnterpriseAPIBatchDeleteEnterpriseServiceAccountsJSONRequestBody = BatchDeleteEnterpriseServiceAccountsRequest
 
 // EnterpriseAPIAddUserToChildOrganizationJSONRequestBody defines body for EnterpriseAPIAddUserToChildOrganization for application/json ContentType.
 type EnterpriseAPIAddUserToChildOrganizationJSONRequestBody = AddUserToChildOrganizationRequest
