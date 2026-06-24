@@ -19,6 +19,8 @@ const (
 	FieldSSOConnectionName                   = "name"
 	FieldSSOConnectionEmailDomain            = "email_domain"
 	FieldSSOConnectionAdditionalEmailDomains = "additional_email_domains"
+	FieldSSOConnectionSynchronizeUserGroups  = "synchronize_user_groups"
+	FieldSSOConnectionSyncAuthToken          = "sync_auth_token"
 
 	FieldSSOConnectionAAD            = "aad"
 	FieldSSOConnectionADDomain       = "ad_domain"
@@ -67,6 +69,18 @@ func resourceSSOConnection() *schema.Resource {
 					Type:             schema.TypeString,
 					ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 				},
+			},
+			FieldSSOConnectionSynchronizeUserGroups: {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     false,
+				Description: "When enabled, user groups from the identity provider will be synchronized with CAST AI. A sync auth token is generated on activation and stored in sync_auth_token.",
+			},
+			FieldSSOConnectionSyncAuthToken: {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Sensitive:   true,
+				Description: "Auth token generated when synchronize_user_groups is enabled. Only populated on the transition from false to true.",
 			},
 			FieldSSOConnectionAAD: {
 				Type:        schema.TypeList,
@@ -181,7 +195,15 @@ func resourceCastaiSSOConnectionCreate(ctx context.Context, data *schema.Resourc
 
 	data.SetId(*resp.JSON200.Id)
 
-	return resourceCastaiSSOConnectionRead(ctx, data, meta)
+	var syncDiags diag.Diagnostics
+	if data.Get(FieldSSOConnectionSynchronizeUserGroups).(bool) {
+		syncDiags = setSSOConnectionSync(ctx, client, data, true)
+		if syncDiags.HasError() {
+			return syncDiags
+		}
+	}
+
+	return append(syncDiags, resourceCastaiSSOConnectionRead(ctx, data, meta)...)
 }
 
 func resourceCastaiSSOConnectionRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -207,6 +229,21 @@ func resourceCastaiSSOConnectionRead(ctx context.Context, data *schema.ResourceD
 		return diag.Errorf("setting additional email domains: %v", err)
 	}
 
+	isSynced := false
+	if connection.Connection.IsSynced != nil {
+		isSynced = *connection.Connection.IsSynced
+	}
+	if err := data.Set(FieldSSOConnectionSynchronizeUserGroups, isSynced); err != nil {
+		return diag.Errorf("setting synchronize_user_groups: %v", err)
+	}
+
+	// sync_auth_token is a one-time value returned only by the SetSync endpoint — the GET
+	// API never returns it. Explicitly write back the current state value so Terraform does
+	// not drop it from state during a refresh.
+	if err := data.Set(FieldSSOConnectionSyncAuthToken, data.Get(FieldSSOConnectionSyncAuthToken)); err != nil {
+		return diag.Errorf("setting sync_auth_token: %v", err)
+	}
+
 	return nil
 }
 
@@ -217,6 +254,7 @@ func resourceCastaiSSOConnectionUpdate(ctx context.Context, data *schema.Resourc
 		FieldSSOConnectionAdditionalEmailDomains,
 		FieldSSOConnectionAAD,
 		FieldSSOConnectionOkta,
+		FieldSSOConnectionSynchronizeUserGroups,
 	) {
 		return nil
 	}
@@ -247,16 +285,39 @@ func resourceCastaiSSOConnectionUpdate(ctx context.Context, data *schema.Resourc
 		req.Okta = toOktaConnector(v[0].(map[string]any))
 	}
 
-	resp, err := client.SSOAPIUpdateSSOConnectionWithResponse(ctx, data.Id(), req)
-	if err := sdk.CheckOKResponse(resp, err); err != nil {
-		return diag.Errorf("updating sso connection: %v", err)
+	if data.HasChanges(
+		FieldSSOConnectionName,
+		FieldSSOConnectionEmailDomain,
+		FieldSSOConnectionAdditionalEmailDomains,
+		FieldSSOConnectionAAD,
+		FieldSSOConnectionOkta,
+	) {
+		resp, err := client.SSOAPIUpdateSSOConnectionWithResponse(ctx, data.Id(), req)
+		if err := sdk.CheckOKResponse(resp, err); err != nil {
+			return diag.Errorf("updating sso connection: %v", err)
+		}
+
+		if err := checkSSOStatus(resp.JSON200); err != nil {
+			return diag.FromErr(err)
+		}
 	}
 
-	if err := checkSSOStatus(resp.JSON200); err != nil {
-		return diag.FromErr(err)
+	var syncDiags diag.Diagnostics
+	if data.HasChange(FieldSSOConnectionSynchronizeUserGroups) {
+		oldVal, newVal := data.GetChange(FieldSSOConnectionSynchronizeUserGroups)
+		oldSync := oldVal.(bool)
+		newSync := newVal.(bool)
+
+		// Only call SetSync on actual transitions.
+		if oldSync != newSync {
+			syncDiags = setSSOConnectionSync(ctx, client, data, newSync)
+			if syncDiags.HasError() {
+				return syncDiags
+			}
+		}
 	}
 
-	return resourceCastaiSSOConnectionRead(ctx, data, meta)
+	return append(syncDiags, resourceCastaiSSOConnectionRead(ctx, data, meta)...)
 }
 
 func resourceCastaiSSOConnectionDelete(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -339,4 +400,33 @@ func toOktaConnector(obj map[string]any) *sdk.CastaiSsoV1beta1Okta {
 	}
 
 	return out
+}
+
+// setSSOConnectionSync calls the SetSync API and, on a false→true transition, stores the
+// returned auth token and emits a warning so the user knows to save it.
+func setSSOConnectionSync(ctx context.Context, client sdk.ClientWithResponsesInterface, data *schema.ResourceData, sync bool) diag.Diagnostics {
+	resp, err := client.SSOAPISetSyncForSSOConnectionWithResponse(ctx, data.Id(), sdk.SSOAPISetSyncForSSOConnectionJSONRequestBody{
+		Sync: sync,
+	})
+	if err := sdk.CheckOKResponse(resp, err); err != nil {
+		return diag.Errorf("setting sso connection sync: %v", err)
+	}
+
+	if sync {
+		// Store the token if one was returned.
+		if resp.JSON200 != nil && resp.JSON200.Token != nil && resp.JSON200.Token.Token != nil {
+			if err := data.Set(FieldSSOConnectionSyncAuthToken, *resp.JSON200.Token.Token); err != nil {
+				return diag.Errorf("setting sync_auth_token: %v", err)
+			}
+		}
+		return diag.Diagnostics{
+			{
+				Severity: diag.Warning,
+				Summary:  "SSO sync auth token generated",
+				Detail:   "A sync auth token was generated and stored in sync_auth_token. Retrieve it from the Terraform state or outputs now — it is only returned once when synchronization is enabled.",
+			},
+		}
+	}
+
+	return nil
 }

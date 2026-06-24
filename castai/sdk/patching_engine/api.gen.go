@@ -359,6 +359,9 @@ type ObjectFilterV2 struct {
 	// ExcludeNamespaces Namespaces of the objects that should be excluded from applying mutation. Empty means none objects.
 	ExcludeNamespaces *[]ObjectFilterV2Matcher `json:"excludeNamespaces,omitempty"`
 
+	// ExcludeTolerations Tolerations filter for pods that should be excluded from applying mutation.
+	ExcludeTolerations *ObjectFilterV2TolerationsFilter `json:"excludeTolerations,omitempty"`
+
 	// Kinds Kinds of the objects that the pod mutation should apply to. Empty means all kinds.
 	Kinds *[]ObjectFilterV2Matcher `json:"kinds,omitempty"`
 

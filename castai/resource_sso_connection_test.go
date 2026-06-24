@@ -13,6 +13,7 @@ import (
 
 	"github.com/golang/mock/gomock"
 	"github.com/hashicorp/go-cty/cty"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	sdkterraform "github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -69,7 +70,8 @@ func TestSSOConnection_ReadContext(t *testing.T) {
 		data := resource.Data(
 			sdkterraform.NewInstanceStateShimmedFromValue(cty.ObjectVal(map[string]cty.Value{
 				"id": cty.StringVal(connectionID),
-			}), 0))
+			}), 0),
+		)
 
 		result := resource.ReadContext(context.Background(), data, &ProviderConfig{
 			api: &sdk.ClientWithResponses{
@@ -102,7 +104,8 @@ func TestSSOConnection_ReadContext(t *testing.T) {
 		data := resource.Data(
 			sdkterraform.NewInstanceStateShimmedFromValue(cty.ObjectVal(map[string]cty.Value{
 				"id": cty.StringVal(connectionID),
-			}), 0))
+			}), 0),
+		)
 
 		result := resource.ReadContext(context.Background(), data, &ProviderConfig{
 			api: &sdk.ClientWithResponses{
@@ -641,7 +644,8 @@ func TestSSOConnection_DeleteContext(t *testing.T) {
 		sdkterraform.NewInstanceStateShimmedFromValue(
 			cty.ObjectVal(map[string]cty.Value{
 				"id": cty.StringVal(connectionID),
-			}), 0),
+			}), 0,
+		),
 	)
 
 	mockClient.EXPECT().
@@ -656,6 +660,261 @@ func TestSSOConnection_DeleteContext(t *testing.T) {
 	r.Empty(data.Get(FieldSSOConnectionAAD))
 	r.Empty(data.Get(FieldSSOConnectionName))
 	r.Empty(data.Get(FieldSSOConnectionEmailDomain))
+}
+
+func TestSSOConnection_SynchronizeUserGroups(t *testing.T) {
+	t.Run("create with synchronize_user_groups=true calls SetSync and stores token", func(t *testing.T) {
+		t.Parallel()
+		r := require.New(t)
+		mockClient := mock_sdk.NewMockClientInterface(gomock.NewController(t))
+
+		connectionID := "b6bfc074-a267-400f-b8f1-db0850c369b1"
+
+		mockClient.EXPECT().
+			SSOAPICreateSSOConnection(gomock.Any(), gomock.Any()).
+			Return(&http.Response{
+				StatusCode: 200,
+				Header:     map[string][]string{"Content-Type": {"json"}},
+				Body:       io.NopCloser(bytes.NewReader([]byte(`{"id": "b6bfc074-a267-400f-b8f1-db0850c369b1", "status": "STATUS_ACTIVE"}`))),
+			}, nil)
+
+		mockClient.EXPECT().
+			SSOAPISetSyncForSSOConnection(gomock.Any(), connectionID, sdk.SSOAPISetSyncForSSOConnectionJSONRequestBody{Sync: true}, gomock.Any()).
+			Return(&http.Response{
+				StatusCode: 200,
+				Header:     map[string][]string{"Content-Type": {"json"}},
+				Body:       io.NopCloser(bytes.NewReader([]byte(`{"token": {"token": "test-sync-token", "name": "sync"}}`))),
+			}, nil)
+
+		mockClient.EXPECT().
+			SSOAPIGetSSOConnection(gomock.Any(), connectionID).
+			Return(&http.Response{
+				StatusCode: 200,
+				Header:     map[string][]string{"Content-Type": {"json"}},
+				Body: io.NopCloser(bytes.NewReader([]byte(`{"connection":{
+					"id": "b6bfc074-a267-400f-b8f1-db0850c369b1",
+					"name": "test_sso",
+					"emailDomain": "test_email",
+					"isSynced": true,
+					"aad": {"adDomain": "test_connector", "clientId": "test_client", "clientSecret": "test_secret"}
+				}}`))),
+			}, nil)
+
+		res := resourceSSOConnection()
+		data := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
+			FieldSSOConnectionName:        "test_sso",
+			FieldSSOConnectionEmailDomain: "test_email",
+		})
+		r.NoError(data.Set(FieldSSOConnectionSynchronizeUserGroups, true))
+		r.NoError(data.Set(FieldSSOConnectionAAD, []map[string]interface{}{
+			{
+				FieldSSOConnectionADDomain:       "test_connector",
+				FieldSSOConnectionADClientID:     "test_client",
+				FieldSSOConnectionADClientSecret: "test_secret",
+			},
+		}))
+
+		result := res.CreateContext(context.Background(), data, &ProviderConfig{
+			api: &sdk.ClientWithResponses{ClientInterface: mockClient},
+		})
+
+		r.False(result.HasError())
+		r.Equal("test-sync-token", data.Get(FieldSSOConnectionSyncAuthToken))
+		r.True(data.Get(FieldSSOConnectionSynchronizeUserGroups).(bool))
+		// Warning should be present.
+		r.Len(result, 1)
+		r.Equal(diag.Warning, result[0].Severity)
+	})
+
+	t.Run("create with synchronize_user_groups=false does not call SetSync", func(t *testing.T) {
+		t.Parallel()
+		r := require.New(t)
+		mockClient := mock_sdk.NewMockClientInterface(gomock.NewController(t))
+
+		connectionID := "b6bfc074-a267-400f-b8f1-db0850c369b1"
+
+		mockClient.EXPECT().
+			SSOAPICreateSSOConnection(gomock.Any(), gomock.Any()).
+			Return(&http.Response{
+				StatusCode: 200,
+				Header:     map[string][]string{"Content-Type": {"json"}},
+				Body:       io.NopCloser(bytes.NewReader([]byte(`{"id": "b6bfc074-a267-400f-b8f1-db0850c369b1", "status": "STATUS_ACTIVE"}`))),
+			}, nil)
+
+		// No SSOAPISetSyncForSSOConnection call expected.
+
+		mockClient.EXPECT().
+			SSOAPIGetSSOConnection(gomock.Any(), connectionID).
+			Return(&http.Response{
+				StatusCode: 200,
+				Header:     map[string][]string{"Content-Type": {"json"}},
+				Body: io.NopCloser(bytes.NewReader([]byte(`{"connection":{
+					"id": "b6bfc074-a267-400f-b8f1-db0850c369b1",
+					"name": "test_sso",
+					"emailDomain": "test_email",
+					"isSynced": false,
+					"aad": {"adDomain": "test_connector", "clientId": "test_client", "clientSecret": "test_secret"}
+				}}`))),
+			}, nil)
+
+		res := resourceSSOConnection()
+		data := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
+			FieldSSOConnectionName:        "test_sso",
+			FieldSSOConnectionEmailDomain: "test_email",
+		})
+		r.NoError(data.Set(FieldSSOConnectionAAD, []map[string]interface{}{
+			{
+				FieldSSOConnectionADDomain:       "test_connector",
+				FieldSSOConnectionADClientID:     "test_client",
+				FieldSSOConnectionADClientSecret: "test_secret",
+			},
+		}))
+
+		result := res.CreateContext(context.Background(), data, &ProviderConfig{
+			api: &sdk.ClientWithResponses{ClientInterface: mockClient},
+		})
+
+		r.False(result.HasError())
+		r.Equal("", data.Get(FieldSSOConnectionSyncAuthToken))
+		r.False(data.Get(FieldSSOConnectionSynchronizeUserGroups).(bool))
+	})
+
+	t.Run("setSSOConnectionSync enable stores token and returns warning", func(t *testing.T) {
+		t.Parallel()
+		r := require.New(t)
+		mockClient := mock_sdk.NewMockClientInterface(gomock.NewController(t))
+
+		connectionID := "b6bfc074-a267-400f-b8f1-db0850c369b1"
+
+		mockClient.EXPECT().
+			SSOAPISetSyncForSSOConnection(gomock.Any(), connectionID, sdk.SSOAPISetSyncForSSOConnectionJSONRequestBody{Sync: true}, gomock.Any()).
+			Return(&http.Response{
+				StatusCode: 200,
+				Header:     map[string][]string{"Content-Type": {"json"}},
+				Body:       io.NopCloser(bytes.NewReader([]byte(`{"token": {"token": "new-sync-token", "name": "sync"}}`))),
+			}, nil)
+
+		res := resourceSSOConnection()
+		data := res.Data(sdkterraform.NewInstanceStateShimmedFromValue(cty.ObjectVal(map[string]cty.Value{
+			"id": cty.StringVal(connectionID),
+		}), 0))
+
+		diags := setSSOConnectionSync(context.Background(), &sdk.ClientWithResponses{ClientInterface: mockClient}, data, true)
+
+		r.False(diags.HasError())
+		r.Len(diags, 1)
+		r.Equal(diag.Warning, diags[0].Severity)
+		r.Equal("new-sync-token", data.Get(FieldSSOConnectionSyncAuthToken))
+	})
+
+	t.Run("setSSOConnectionSync disable preserves token for reuse and returns no warning", func(t *testing.T) {
+		t.Parallel()
+		r := require.New(t)
+		mockClient := mock_sdk.NewMockClientInterface(gomock.NewController(t))
+
+		connectionID := "b6bfc074-a267-400f-b8f1-db0850c369b1"
+
+		mockClient.EXPECT().
+			SSOAPISetSyncForSSOConnection(gomock.Any(), connectionID, sdk.SSOAPISetSyncForSSOConnectionJSONRequestBody{Sync: false}, gomock.Any()).
+			Return(&http.Response{
+				StatusCode: 200,
+				Header:     map[string][]string{"Content-Type": {"json"}},
+				Body:       io.NopCloser(bytes.NewReader([]byte(`{"emptyResponse": {}}`))),
+			}, nil)
+
+		res := resourceSSOConnection()
+		data := res.Data(sdkterraform.NewInstanceStateShimmedFromValue(cty.ObjectVal(map[string]cty.Value{
+			"id": cty.StringVal(connectionID),
+		}), 0))
+		r.NoError(data.Set(FieldSSOConnectionSyncAuthToken, "old-sync-token"))
+
+		diags := setSSOConnectionSync(context.Background(), &sdk.ClientWithResponses{ClientInterface: mockClient}, data, false)
+
+		r.False(diags.HasError())
+		r.Len(diags, 0)
+		// Token is preserved so it can be reused if sync is re-enabled.
+		r.Equal("old-sync-token", data.Get(FieldSSOConnectionSyncAuthToken))
+	})
+}
+
+func TestSSOConnection_ReadContext_IsSynced(t *testing.T) {
+	t.Run("read sets synchronize_user_groups from isSynced=true", func(t *testing.T) {
+		t.Parallel()
+
+		readBody := `{"connection":{"id":"fce35ba2-5c06-4078-8391-1ac8f7ba798b","name":"test_sso","emailDomain":"test_email","isSynced":true,"aad":{"adDomain":"d","clientId":"c","clientSecret":"s"}}}`
+		mockClient := mock_sdk.NewMockClientInterface(gomock.NewController(t))
+		connectionID := "fce35ba2-5c06-4078-8391-1ac8f7ba798b"
+
+		mockClient.EXPECT().
+			SSOAPIGetSSOConnection(gomock.Any(), connectionID).
+			Return(&http.Response{StatusCode: 200, Body: io.NopCloser(bytes.NewReader([]byte(readBody))), Header: map[string][]string{"Content-Type": {"json"}}}, nil)
+
+		res := resourceSSOConnection()
+		data := res.Data(sdkterraform.NewInstanceStateShimmedFromValue(cty.ObjectVal(map[string]cty.Value{
+			"id": cty.StringVal(connectionID),
+		}), 0))
+
+		result := res.ReadContext(context.Background(), data, &ProviderConfig{
+			api: &sdk.ClientWithResponses{ClientInterface: mockClient},
+		})
+
+		r := require.New(t)
+		r.False(result.HasError())
+		r.True(data.Get(FieldSSOConnectionSynchronizeUserGroups).(bool))
+	})
+
+	t.Run("read sets synchronize_user_groups from isSynced=false", func(t *testing.T) {
+		t.Parallel()
+
+		readBody := `{"connection":{"id":"fce35ba2-5c06-4078-8391-1ac8f7ba798b","name":"test_sso","emailDomain":"test_email","isSynced":false,"aad":{"adDomain":"d","clientId":"c","clientSecret":"s"}}}`
+		mockClient := mock_sdk.NewMockClientInterface(gomock.NewController(t))
+		connectionID := "fce35ba2-5c06-4078-8391-1ac8f7ba798b"
+
+		mockClient.EXPECT().
+			SSOAPIGetSSOConnection(gomock.Any(), connectionID).
+			Return(&http.Response{StatusCode: 200, Body: io.NopCloser(bytes.NewReader([]byte(readBody))), Header: map[string][]string{"Content-Type": {"json"}}}, nil)
+
+		res := resourceSSOConnection()
+		data := res.Data(sdkterraform.NewInstanceStateShimmedFromValue(cty.ObjectVal(map[string]cty.Value{
+			"id": cty.StringVal(connectionID),
+		}), 0))
+
+		result := res.ReadContext(context.Background(), data, &ProviderConfig{
+			api: &sdk.ClientWithResponses{ClientInterface: mockClient},
+		})
+
+		r := require.New(t)
+		r.False(result.HasError())
+		r.False(data.Get(FieldSSOConnectionSynchronizeUserGroups).(bool))
+	})
+
+	t.Run("read preserves existing sync_auth_token from state", func(t *testing.T) {
+		t.Parallel()
+
+		readBody := `{"connection":{"id":"fce35ba2-5c06-4078-8391-1ac8f7ba798b","name":"test_sso","emailDomain":"test_email","isSynced":true,"aad":{"adDomain":"d","clientId":"c","clientSecret":"s"}}}`
+		mockClient := mock_sdk.NewMockClientInterface(gomock.NewController(t))
+		connectionID := "fce35ba2-5c06-4078-8391-1ac8f7ba798b"
+
+		mockClient.EXPECT().
+			SSOAPIGetSSOConnection(gomock.Any(), connectionID).
+			Return(&http.Response{StatusCode: 200, Body: io.NopCloser(bytes.NewReader([]byte(readBody))), Header: map[string][]string{"Content-Type": {"json"}}}, nil)
+
+		res := resourceSSOConnection()
+		// Simulate state where sync_auth_token was previously stored.
+		data := res.Data(sdkterraform.NewInstanceStateShimmedFromValue(cty.ObjectVal(map[string]cty.Value{
+			"id":                            cty.StringVal(connectionID),
+			FieldSSOConnectionSyncAuthToken: cty.StringVal("previously-stored-token"),
+		}), 0))
+
+		result := res.ReadContext(context.Background(), data, &ProviderConfig{
+			api: &sdk.ClientWithResponses{ClientInterface: mockClient},
+		})
+
+		r := require.New(t)
+		r.False(result.HasError())
+		r.Equal("previously-stored-token", data.Get(FieldSSOConnectionSyncAuthToken),
+			"sync_auth_token must be preserved across reads since the API never returns it")
+	})
 }
 
 func testAccCreateSSOConnectionConfig(rName, clientID, clientSecret, adDomain string) string {
