@@ -206,7 +206,7 @@ func TestCacheGroupResource_Delete(t *testing.T) {
 	deleteResponse := sdk.DboV1DeleteCacheGroupResponse{}
 	deleteBody, _ := json.Marshal(deleteResponse)
 	mockClient.EXPECT().
-		DboAPIDeleteCacheGroup(ctx, cacheGroupID).
+		DboAPIDeleteCacheGroup(ctx, cacheGroupID, gomock.Any()).
 		Return(&http.Response{
 			StatusCode: http.StatusOK,
 			Header:     http.Header{"Content-Type": []string{"application/json"}},

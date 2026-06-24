@@ -13,7 +13,37 @@ SDK_SPECS := \
 OMNI_SDK_SPECS := \
 	omni:EdgeLocationsAPI,ClustersAPI,EdgeConfigurationsAPI:https://$(API_HOST)/spec/omni/openapi.yaml
 
-default: build
+default: help
+
+.PHONY: help
+help:
+	@echo "Usage: make <target>"
+	@echo ""
+	@echo "Development:"
+	@echo "  build                        Generate SDK, docs, and build the provider binary"
+	@echo "  lint                         Run golangci-lint"
+	@echo "  format-tf                    Format Terraform example files"
+	@echo ""
+	@echo "Code generation:"
+	@echo "  generate-sdk                 Generate main SDK client from API spec"
+	@echo "  generate-omni-sdk            Generate Omni SDK client"
+	@echo "  generate-docs                Generate Terraform provider documentation"
+	@echo "  generate-all                 Run generate-sdk and generate-docs"
+	@echo ""
+	@echo "Testing:"
+	@echo "  test                         Run unit tests (excludes e2e)"
+	@echo "  testacc-eks                  Run EKS acceptance tests (requires TF_ACC creds)"
+	@echo "  testacc-gke                  Run GKE acceptance tests (requires TF_ACC creds)"
+	@echo "  testacc-aks                  Run AKS acceptance tests (requires TF_ACC creds)"
+	@echo "  testacc-cloud-agnostic       Run cloud-agnostic acceptance tests"
+	@echo ""
+	@echo "Terraform examples:"
+	@echo "  validate-terraform-examples  Validate all Terraform examples"
+	@echo "  plan-terraform-example       Plan a single example (EXAMPLE_DIR=examples/...)"
+	@echo ""
+	@echo "Configuration:"
+	@echo "  API_HOST=$(API_HOST)"
+	@echo "  SWAGGER_LOCATION=$(SWAGGER_LOCATION)"
 
 .PHONY: format-tf
 format-tf:
