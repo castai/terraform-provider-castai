@@ -247,7 +247,7 @@ type ClientInterface interface {
 	DboAPICreateCacheDiagnosticUploadURL(ctx context.Context, groupId string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// DboAPIDeleteCacheGroup request
-	DboAPIDeleteCacheGroup(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
+	DboAPIDeleteCacheGroup(ctx context.Context, id string, params *DboAPIDeleteCacheGroupParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// DboAPIGetCacheGroup request
 	DboAPIGetCacheGroup(ctx context.Context, id string, params *DboAPIGetCacheGroupParams, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -1718,8 +1718,8 @@ func (c *Client) DboAPICreateCacheDiagnosticUploadURL(ctx context.Context, group
 	return c.Client.Do(req)
 }
 
-func (c *Client) DboAPIDeleteCacheGroup(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewDboAPIDeleteCacheGroupRequest(c.Server, id)
+func (c *Client) DboAPIDeleteCacheGroup(ctx context.Context, id string, params *DboAPIDeleteCacheGroupParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDboAPIDeleteCacheGroupRequest(c.Server, id, params)
 	if err != nil {
 		return nil, err
 	}
@@ -8328,7 +8328,7 @@ func NewDboAPICreateCacheDiagnosticUploadURLRequest(server string, groupId strin
 }
 
 // NewDboAPIDeleteCacheGroupRequest generates requests for DboAPIDeleteCacheGroup
-func NewDboAPIDeleteCacheGroupRequest(server string, id string) (*http.Request, error) {
+func NewDboAPIDeleteCacheGroupRequest(server string, id string, params *DboAPIDeleteCacheGroupParams) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -8351,6 +8351,28 @@ func NewDboAPIDeleteCacheGroupRequest(server string, id string) (*http.Request, 
 	queryURL, err := serverURL.Parse(operationPath)
 	if err != nil {
 		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if params.Roxy != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "roxy", runtime.ParamLocationQuery, *params.Roxy); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
 	}
 
 	req, err := http.NewRequest("DELETE", queryURL.String(), nil)
@@ -21738,7 +21760,7 @@ type ClientWithResponsesInterface interface {
 	DboAPICreateCacheDiagnosticUploadURLWithResponse(ctx context.Context, groupId string) (*DboAPICreateCacheDiagnosticUploadURLResponse, error)
 
 	// DboAPIDeleteCacheGroup request
-	DboAPIDeleteCacheGroupWithResponse(ctx context.Context, id string) (*DboAPIDeleteCacheGroupResponse, error)
+	DboAPIDeleteCacheGroupWithResponse(ctx context.Context, id string, params *DboAPIDeleteCacheGroupParams) (*DboAPIDeleteCacheGroupResponse, error)
 
 	// DboAPIGetCacheGroup request
 	DboAPIGetCacheGroupWithResponse(ctx context.Context, id string, params *DboAPIGetCacheGroupParams) (*DboAPIGetCacheGroupResponse, error)
@@ -30867,8 +30889,8 @@ func (c *ClientWithResponses) DboAPICreateCacheDiagnosticUploadURLWithResponse(c
 }
 
 // DboAPIDeleteCacheGroupWithResponse request returning *DboAPIDeleteCacheGroupResponse
-func (c *ClientWithResponses) DboAPIDeleteCacheGroupWithResponse(ctx context.Context, id string) (*DboAPIDeleteCacheGroupResponse, error) {
-	rsp, err := c.DboAPIDeleteCacheGroup(ctx, id)
+func (c *ClientWithResponses) DboAPIDeleteCacheGroupWithResponse(ctx context.Context, id string, params *DboAPIDeleteCacheGroupParams) (*DboAPIDeleteCacheGroupResponse, error) {
+	rsp, err := c.DboAPIDeleteCacheGroup(ctx, id, params)
 	if err != nil {
 		return nil, err
 	}
