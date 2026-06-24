@@ -237,6 +237,13 @@ func resourceCastaiSSOConnectionRead(ctx context.Context, data *schema.ResourceD
 		return diag.Errorf("setting synchronize_user_groups: %v", err)
 	}
 
+	// sync_auth_token is a one-time value returned only by the SetSync endpoint — the GET
+	// API never returns it. Explicitly write back the current state value so Terraform does
+	// not drop it from state during a refresh.
+	if err := data.Set(FieldSSOConnectionSyncAuthToken, data.Get(FieldSSOConnectionSyncAuthToken)); err != nil {
+		return diag.Errorf("setting sync_auth_token: %v", err)
+	}
+
 	return nil
 }
 
@@ -419,11 +426,6 @@ func setSSOConnectionSync(ctx context.Context, client sdk.ClientWithResponsesInt
 				Detail:   "A sync auth token was generated and stored in sync_auth_token. Retrieve it from the Terraform state or outputs now — it is only returned once when synchronization is enabled.",
 			},
 		}
-	}
-
-	// On disable, clear the stored token.
-	if err := data.Set(FieldSSOConnectionSyncAuthToken, ""); err != nil {
-		return diag.Errorf("clearing sync_auth_token: %v", err)
 	}
 
 	return nil

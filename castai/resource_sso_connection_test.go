@@ -70,7 +70,8 @@ func TestSSOConnection_ReadContext(t *testing.T) {
 		data := resource.Data(
 			sdkterraform.NewInstanceStateShimmedFromValue(cty.ObjectVal(map[string]cty.Value{
 				"id": cty.StringVal(connectionID),
-			}), 0))
+			}), 0),
+		)
 
 		result := resource.ReadContext(context.Background(), data, &ProviderConfig{
 			api: &sdk.ClientWithResponses{
@@ -103,7 +104,8 @@ func TestSSOConnection_ReadContext(t *testing.T) {
 		data := resource.Data(
 			sdkterraform.NewInstanceStateShimmedFromValue(cty.ObjectVal(map[string]cty.Value{
 				"id": cty.StringVal(connectionID),
-			}), 0))
+			}), 0),
+		)
 
 		result := resource.ReadContext(context.Background(), data, &ProviderConfig{
 			api: &sdk.ClientWithResponses{
@@ -642,7 +644,8 @@ func TestSSOConnection_DeleteContext(t *testing.T) {
 		sdkterraform.NewInstanceStateShimmedFromValue(
 			cty.ObjectVal(map[string]cty.Value{
 				"id": cty.StringVal(connectionID),
-			}), 0),
+			}), 0,
+		),
 	)
 
 	mockClient.EXPECT().
@@ -804,7 +807,7 @@ func TestSSOConnection_SynchronizeUserGroups(t *testing.T) {
 		r.Equal("new-sync-token", data.Get(FieldSSOConnectionSyncAuthToken))
 	})
 
-	t.Run("setSSOConnectionSync disable clears token and returns no warning", func(t *testing.T) {
+	t.Run("setSSOConnectionSync disable preserves token for reuse and returns no warning", func(t *testing.T) {
 		t.Parallel()
 		r := require.New(t)
 		mockClient := mock_sdk.NewMockClientInterface(gomock.NewController(t))
@@ -829,7 +832,8 @@ func TestSSOConnection_SynchronizeUserGroups(t *testing.T) {
 
 		r.False(diags.HasError())
 		r.Len(diags, 0)
-		r.Equal("", data.Get(FieldSSOConnectionSyncAuthToken))
+		// Token is preserved so it can be reused if sync is re-enabled.
+		r.Equal("old-sync-token", data.Get(FieldSSOConnectionSyncAuthToken))
 	})
 }
 
@@ -882,6 +886,34 @@ func TestSSOConnection_ReadContext_IsSynced(t *testing.T) {
 		r := require.New(t)
 		r.False(result.HasError())
 		r.False(data.Get(FieldSSOConnectionSynchronizeUserGroups).(bool))
+	})
+
+	t.Run("read preserves existing sync_auth_token from state", func(t *testing.T) {
+		t.Parallel()
+
+		readBody := `{"connection":{"id":"fce35ba2-5c06-4078-8391-1ac8f7ba798b","name":"test_sso","emailDomain":"test_email","isSynced":true,"aad":{"adDomain":"d","clientId":"c","clientSecret":"s"}}}`
+		mockClient := mock_sdk.NewMockClientInterface(gomock.NewController(t))
+		connectionID := "fce35ba2-5c06-4078-8391-1ac8f7ba798b"
+
+		mockClient.EXPECT().
+			SSOAPIGetSSOConnection(gomock.Any(), connectionID).
+			Return(&http.Response{StatusCode: 200, Body: io.NopCloser(bytes.NewReader([]byte(readBody))), Header: map[string][]string{"Content-Type": {"json"}}}, nil)
+
+		res := resourceSSOConnection()
+		// Simulate state where sync_auth_token was previously stored.
+		data := res.Data(sdkterraform.NewInstanceStateShimmedFromValue(cty.ObjectVal(map[string]cty.Value{
+			"id":                            cty.StringVal(connectionID),
+			FieldSSOConnectionSyncAuthToken: cty.StringVal("previously-stored-token"),
+		}), 0))
+
+		result := res.ReadContext(context.Background(), data, &ProviderConfig{
+			api: &sdk.ClientWithResponses{ClientInterface: mockClient},
+		})
+
+		r := require.New(t)
+		r.False(result.HasError())
+		r.Equal("previously-stored-token", data.Get(FieldSSOConnectionSyncAuthToken),
+			"sync_auth_token must be preserved across reads since the API never returns it")
 	})
 }
 
