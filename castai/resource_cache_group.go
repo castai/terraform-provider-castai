@@ -177,7 +177,7 @@ func resourceCacheGroupUpdate(ctx context.Context, d *schema.ResourceData, meta 
 func resourceCacheGroupDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*ProviderConfig).api
 
-	resp, err := client.DboAPIDeleteCacheGroupWithResponse(ctx, d.Id())
+	resp, err := client.DboAPIDeleteCacheGroupWithResponse(ctx, d.Id(), nil)
 	if err := sdk.CheckOKResponse(resp, err); err != nil {
 		return diag.FromErr(err)
 	}

@@ -1276,9 +1276,9 @@ func (mr *MockClientInterfaceMockRecorder) DboAPIDeleteCacheConfiguration(ctx, g
 }
 
 // DboAPIDeleteCacheGroup mocks base method.
-func (m *MockClientInterface) DboAPIDeleteCacheGroup(ctx context.Context, id string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+func (m *MockClientInterface) DboAPIDeleteCacheGroup(ctx context.Context, id string, params *sdk.DboAPIDeleteCacheGroupParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
-	varargs := []interface{}{ctx, id}
+	varargs := []interface{}{ctx, id, params}
 	for _, a := range reqEditors {
 		varargs = append(varargs, a)
 	}
@@ -1289,9 +1289,9 @@ func (m *MockClientInterface) DboAPIDeleteCacheGroup(ctx context.Context, id str
 }
 
 // DboAPIDeleteCacheGroup indicates an expected call of DboAPIDeleteCacheGroup.
-func (mr *MockClientInterfaceMockRecorder) DboAPIDeleteCacheGroup(ctx, id interface{}, reqEditors ...interface{}) *gomock.Call {
+func (mr *MockClientInterfaceMockRecorder) DboAPIDeleteCacheGroup(ctx, id, params interface{}, reqEditors ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, id}, reqEditors...)
+	varargs := append([]interface{}{ctx, id, params}, reqEditors...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIDeleteCacheGroup", reflect.TypeOf((*MockClientInterface)(nil).DboAPIDeleteCacheGroup), varargs...)
 }
 
@@ -9139,9 +9139,9 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) DboAPIDeleteCacheConfigu
 }
 
 // DboAPIDeleteCacheGroup mocks base method.
-func (m *MockClientWithResponsesInterface) DboAPIDeleteCacheGroup(ctx context.Context, id string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+func (m *MockClientWithResponsesInterface) DboAPIDeleteCacheGroup(ctx context.Context, id string, params *sdk.DboAPIDeleteCacheGroupParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
-	varargs := []interface{}{ctx, id}
+	varargs := []interface{}{ctx, id, params}
 	for _, a := range reqEditors {
 		varargs = append(varargs, a)
 	}
@@ -9152,25 +9152,25 @@ func (m *MockClientWithResponsesInterface) DboAPIDeleteCacheGroup(ctx context.Co
 }
 
 // DboAPIDeleteCacheGroup indicates an expected call of DboAPIDeleteCacheGroup.
-func (mr *MockClientWithResponsesInterfaceMockRecorder) DboAPIDeleteCacheGroup(ctx, id interface{}, reqEditors ...interface{}) *gomock.Call {
+func (mr *MockClientWithResponsesInterfaceMockRecorder) DboAPIDeleteCacheGroup(ctx, id, params interface{}, reqEditors ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, id}, reqEditors...)
+	varargs := append([]interface{}{ctx, id, params}, reqEditors...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIDeleteCacheGroup", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DboAPIDeleteCacheGroup), varargs...)
 }
 
 // DboAPIDeleteCacheGroupWithResponse mocks base method.
-func (m *MockClientWithResponsesInterface) DboAPIDeleteCacheGroupWithResponse(ctx context.Context, id string) (*sdk.DboAPIDeleteCacheGroupResponse, error) {
+func (m *MockClientWithResponsesInterface) DboAPIDeleteCacheGroupWithResponse(ctx context.Context, id string, params *sdk.DboAPIDeleteCacheGroupParams) (*sdk.DboAPIDeleteCacheGroupResponse, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "DboAPIDeleteCacheGroupWithResponse", ctx, id)
+	ret := m.ctrl.Call(m, "DboAPIDeleteCacheGroupWithResponse", ctx, id, params)
 	ret0, _ := ret[0].(*sdk.DboAPIDeleteCacheGroupResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // DboAPIDeleteCacheGroupWithResponse indicates an expected call of DboAPIDeleteCacheGroupWithResponse.
-func (mr *MockClientWithResponsesInterfaceMockRecorder) DboAPIDeleteCacheGroupWithResponse(ctx, id interface{}) *gomock.Call {
+func (mr *MockClientWithResponsesInterfaceMockRecorder) DboAPIDeleteCacheGroupWithResponse(ctx, id, params interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIDeleteCacheGroupWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DboAPIDeleteCacheGroupWithResponse), ctx, id)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIDeleteCacheGroupWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DboAPIDeleteCacheGroupWithResponse), ctx, id, params)
 }
 
 // DboAPIDeleteCacheTTL mocks base method.

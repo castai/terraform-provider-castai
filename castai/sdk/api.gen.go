@@ -3853,11 +3853,6 @@ type CastaiUsersV1beta1NewMembershipByEmail struct {
 	// RoleBindings The role bindings the user will be bound to after the invitation is claimed.
 	RoleBindings *[]CastaiUsersV1beta1InvitationRoleBinding `json:"roleBindings,omitempty"`
 
-	// RoleId Deprecated: Use role bindings instead.
-	// string roleID.
-	// Deprecated:
-	RoleId *string `json:"roleId,omitempty"`
-
 	// UserEmail email of the invited person.
 	UserEmail string `json:"userEmail"`
 }
@@ -3916,11 +3911,6 @@ type CastaiUsersV1beta1PendingInvitation struct {
 
 	// RoleBindings The role bindings the user will be bound to after the invitation is claimed.
 	RoleBindings *[]CastaiUsersV1beta1InvitationRoleBinding `json:"roleBindings,omitempty"`
-
-	// RoleId Deprecated: Use role bindings instead.
-	// role_id is the role ID of the invited person.
-	// Deprecated:
-	RoleId *string `json:"roleId,omitempty"`
 
 	// ValidUntil invitation expiration date.
 	ValidUntil *time.Time `json:"validUntil,omitempty"`
@@ -4604,6 +4594,7 @@ type DboV1CacheGroup struct {
 
 	// ProtocolType ProtocolType specifies the protocol type used by the database.
 	ProtocolType     DboV1CacheGroupProtocolType      `json:"protocolType"`
+	Roxy             *bool                            `json:"roxy,omitempty"`
 	StatusConditions *DboV1CacheGroupStatusConditions `json:"statusConditions,omitempty"`
 	Version          *int32                           `json:"version,omitempty"`
 }
@@ -5400,7 +5391,7 @@ type DboV1TrafficInsightsType string
 // DboV1UninstallCacheParams defines model for dbo.v1.UninstallCacheParams.
 type DboV1UninstallCacheParams struct {
 	CacheGroupId string `json:"cacheGroupId"`
-	IsRoxy       *bool  `json:"isRoxy"`
+	Roxy         *bool  `json:"roxy"`
 }
 
 // DboV1UninstallDBAgentParams defines model for dbo.v1.UninstallDBAgentParams.
@@ -11591,6 +11582,11 @@ type DboAPIGetCacheSummaryParams struct {
 
 	// Username Filter by username.
 	Username *string `form:"username,omitempty" json:"username,omitempty"`
+}
+
+// DboAPIDeleteCacheGroupParams defines parameters for DboAPIDeleteCacheGroup.
+type DboAPIDeleteCacheGroupParams struct {
+	Roxy *bool `form:"roxy,omitempty" json:"roxy,omitempty"`
 }
 
 // DboAPIGetCacheGroupParams defines parameters for DboAPIGetCacheGroup.
