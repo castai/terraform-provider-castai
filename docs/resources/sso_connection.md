@@ -36,11 +36,13 @@ resource "castai_sso_connection" "sso" {
 - `aad` (Block List, Max: 1) Azure AD connector (see [below for nested schema](#nestedblock--aad))
 - `additional_email_domains` (List of String) Additional email domains that will be allowed to sign in via the connection
 - `okta` (Block List, Max: 1) Okta connector (see [below for nested schema](#nestedblock--okta))
+- `synchronize_user_groups` (Boolean) When enabled, user groups from the identity provider will be synchronized with CAST AI. A sync auth token is generated on activation and stored in sync_auth_token.
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
 ### Read-Only
 
 - `id` (String) The ID of this resource.
+- `sync_auth_token` (String, Sensitive) Auth token generated when synchronize_user_groups is enabled. Only populated on the transition from false to true.
 
 <a id="nestedblock--aad"></a>
 ### Nested Schema for `aad`
