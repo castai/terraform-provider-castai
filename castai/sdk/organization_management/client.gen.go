@@ -156,6 +156,11 @@ type ClientInterface interface {
 
 	EnterpriseAPIBatchCreateEnterpriseServiceAccounts(ctx context.Context, enterpriseId string, body EnterpriseAPIBatchCreateEnterpriseServiceAccountsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// EnterpriseAPIBatchDeleteEnterpriseServiceAccountsWithBody request with any body
+	EnterpriseAPIBatchDeleteEnterpriseServiceAccountsWithBody(ctx context.Context, enterpriseId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	EnterpriseAPIBatchDeleteEnterpriseServiceAccounts(ctx context.Context, enterpriseId string, body EnterpriseAPIBatchDeleteEnterpriseServiceAccountsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// EnterpriseAPIAddUserToChildOrganizationWithBody request with any body
 	EnterpriseAPIAddUserToChildOrganizationWithBody(ctx context.Context, enterpriseId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -457,6 +462,30 @@ func (c *Client) EnterpriseAPIBatchCreateEnterpriseServiceAccountsWithBody(ctx c
 
 func (c *Client) EnterpriseAPIBatchCreateEnterpriseServiceAccounts(ctx context.Context, enterpriseId string, body EnterpriseAPIBatchCreateEnterpriseServiceAccountsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewEnterpriseAPIBatchCreateEnterpriseServiceAccountsRequest(c.Server, enterpriseId, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) EnterpriseAPIBatchDeleteEnterpriseServiceAccountsWithBody(ctx context.Context, enterpriseId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewEnterpriseAPIBatchDeleteEnterpriseServiceAccountsRequestWithBody(c.Server, enterpriseId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) EnterpriseAPIBatchDeleteEnterpriseServiceAccounts(ctx context.Context, enterpriseId string, body EnterpriseAPIBatchDeleteEnterpriseServiceAccountsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewEnterpriseAPIBatchDeleteEnterpriseServiceAccountsRequest(c.Server, enterpriseId, body)
 	if err != nil {
 		return nil, err
 	}
@@ -1700,6 +1729,53 @@ func NewEnterpriseAPIBatchCreateEnterpriseServiceAccountsRequestWithBody(server 
 	return req, nil
 }
 
+// NewEnterpriseAPIBatchDeleteEnterpriseServiceAccountsRequest calls the generic EnterpriseAPIBatchDeleteEnterpriseServiceAccounts builder with application/json body
+func NewEnterpriseAPIBatchDeleteEnterpriseServiceAccountsRequest(server string, enterpriseId string, body EnterpriseAPIBatchDeleteEnterpriseServiceAccountsJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewEnterpriseAPIBatchDeleteEnterpriseServiceAccountsRequestWithBody(server, enterpriseId, "application/json", bodyReader)
+}
+
+// NewEnterpriseAPIBatchDeleteEnterpriseServiceAccountsRequestWithBody generates requests for EnterpriseAPIBatchDeleteEnterpriseServiceAccounts with any type of body
+func NewEnterpriseAPIBatchDeleteEnterpriseServiceAccountsRequestWithBody(server string, enterpriseId string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "enterpriseId", runtime.ParamLocationPath, enterpriseId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/organization-management/v1/enterprises/%s/service-accounts:batchDelete", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
 // NewEnterpriseAPIAddUserToChildOrganizationRequest calls the generic EnterpriseAPIAddUserToChildOrganization builder with application/json body
 func NewEnterpriseAPIAddUserToChildOrganizationRequest(server string, enterpriseId string, body EnterpriseAPIAddUserToChildOrganizationJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
@@ -1903,6 +1979,11 @@ type ClientWithResponsesInterface interface {
 	EnterpriseAPIBatchCreateEnterpriseServiceAccountsWithBodyWithResponse(ctx context.Context, enterpriseId string, contentType string, body io.Reader) (*EnterpriseAPIBatchCreateEnterpriseServiceAccountsResponse, error)
 
 	EnterpriseAPIBatchCreateEnterpriseServiceAccountsWithResponse(ctx context.Context, enterpriseId string, body EnterpriseAPIBatchCreateEnterpriseServiceAccountsJSONRequestBody) (*EnterpriseAPIBatchCreateEnterpriseServiceAccountsResponse, error)
+
+	// EnterpriseAPIBatchDeleteEnterpriseServiceAccounts request  with any body
+	EnterpriseAPIBatchDeleteEnterpriseServiceAccountsWithBodyWithResponse(ctx context.Context, enterpriseId string, contentType string, body io.Reader) (*EnterpriseAPIBatchDeleteEnterpriseServiceAccountsResponse, error)
+
+	EnterpriseAPIBatchDeleteEnterpriseServiceAccountsWithResponse(ctx context.Context, enterpriseId string, body EnterpriseAPIBatchDeleteEnterpriseServiceAccountsJSONRequestBody) (*EnterpriseAPIBatchDeleteEnterpriseServiceAccountsResponse, error)
 
 	// EnterpriseAPIAddUserToChildOrganization request  with any body
 	EnterpriseAPIAddUserToChildOrganizationWithBodyWithResponse(ctx context.Context, enterpriseId string, contentType string, body io.Reader) (*EnterpriseAPIAddUserToChildOrganizationResponse, error)
@@ -2417,6 +2498,36 @@ func (r EnterpriseAPIBatchCreateEnterpriseServiceAccountsResponse) GetBody() []b
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
+type EnterpriseAPIBatchDeleteEnterpriseServiceAccountsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSONDefault  *Status
+}
+
+// Status returns HTTPResponse.Status
+func (r EnterpriseAPIBatchDeleteEnterpriseServiceAccountsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r EnterpriseAPIBatchDeleteEnterpriseServiceAccountsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r EnterpriseAPIBatchDeleteEnterpriseServiceAccountsResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
 type EnterpriseAPIAddUserToChildOrganizationResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -2693,6 +2804,23 @@ func (c *ClientWithResponses) EnterpriseAPIBatchCreateEnterpriseServiceAccountsW
 		return nil, err
 	}
 	return ParseEnterpriseAPIBatchCreateEnterpriseServiceAccountsResponse(rsp)
+}
+
+// EnterpriseAPIBatchDeleteEnterpriseServiceAccountsWithBodyWithResponse request with arbitrary body returning *EnterpriseAPIBatchDeleteEnterpriseServiceAccountsResponse
+func (c *ClientWithResponses) EnterpriseAPIBatchDeleteEnterpriseServiceAccountsWithBodyWithResponse(ctx context.Context, enterpriseId string, contentType string, body io.Reader) (*EnterpriseAPIBatchDeleteEnterpriseServiceAccountsResponse, error) {
+	rsp, err := c.EnterpriseAPIBatchDeleteEnterpriseServiceAccountsWithBody(ctx, enterpriseId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseEnterpriseAPIBatchDeleteEnterpriseServiceAccountsResponse(rsp)
+}
+
+func (c *ClientWithResponses) EnterpriseAPIBatchDeleteEnterpriseServiceAccountsWithResponse(ctx context.Context, enterpriseId string, body EnterpriseAPIBatchDeleteEnterpriseServiceAccountsJSONRequestBody) (*EnterpriseAPIBatchDeleteEnterpriseServiceAccountsResponse, error) {
+	rsp, err := c.EnterpriseAPIBatchDeleteEnterpriseServiceAccounts(ctx, enterpriseId, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseEnterpriseAPIBatchDeleteEnterpriseServiceAccountsResponse(rsp)
 }
 
 // EnterpriseAPIAddUserToChildOrganizationWithBodyWithResponse request with arbitrary body returning *EnterpriseAPIAddUserToChildOrganizationResponse
@@ -3224,6 +3352,32 @@ func ParseEnterpriseAPIBatchCreateEnterpriseServiceAccountsResponse(rsp *http.Re
 		}
 		response.JSON200 = &dest
 
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
+		var dest Status
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSONDefault = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseEnterpriseAPIBatchDeleteEnterpriseServiceAccountsResponse parses an HTTP response from a EnterpriseAPIBatchDeleteEnterpriseServiceAccountsWithResponse call
+func ParseEnterpriseAPIBatchDeleteEnterpriseServiceAccountsResponse(rsp *http.Response) (*EnterpriseAPIBatchDeleteEnterpriseServiceAccountsResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &EnterpriseAPIBatchDeleteEnterpriseServiceAccountsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
 		var dest Status
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
