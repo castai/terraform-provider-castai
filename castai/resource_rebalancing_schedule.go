@@ -193,6 +193,31 @@ func resourceRebalancingSchedule() *schema.Resource {
 								"TargetNodeSelectionAlgorithmUtilization",
 							}, false)),
 						},
+						"drain_failure_config": {
+							Type:     schema.TypeList,
+							MaxItems: 1,
+							Optional: true,
+							Description: "Configures behavior when a node fails to drain during rebalancing. " +
+								"Relevant only when `keep_drain_timeout_nodes` is true.",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"disable_uncordon": {
+										Type:     schema.TypeBool,
+										Optional: true,
+										Description: "When true, drain-failed nodes will NOT be automatically uncordoned. " +
+											"Defaults to false (nodes are uncordoned after the timeout).",
+									},
+									"uncordon_after_seconds": {
+										Type:     schema.TypeInt,
+										Optional: true,
+										Description: "Time in seconds after which a drain-failed node is automatically uncordoned. " +
+											"Must be between 60 (1m) and 259200 (72h). Defaults to 1800 (30m). " +
+											"Ignored when `disable_uncordon` is true.",
+										ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(60, 259200)),
+									},
+								},
+							},
+						},
 					},
 				},
 			},
@@ -360,6 +385,19 @@ func stateToSchedule(d *schema.ResourceData) (*sdk.ScheduledrebalancingV1Rebalan
 			}
 		}
 
+		var drainFailureConfig *sdk.ScheduledrebalancingV1DrainFailureConfig
+		drainFailureConfigSection := launchConfigurationData["drain_failure_config"].([]any)
+		if len(drainFailureConfigSection) != 0 {
+			drainFailureConfigData := drainFailureConfigSection[0].(map[string]any)
+			drainFailureConfig = &sdk.ScheduledrebalancingV1DrainFailureConfig{
+				DisableUncordon: readOptionalValue[bool](drainFailureConfigData, "disable_uncordon"),
+			}
+			// Only send uncordon_after_seconds if it is populated.
+			if secs := drainFailureConfigData["uncordon_after_seconds"].(int); secs != 0 {
+				drainFailureConfig.UncordonAfterSeconds = lo.ToPtr(int32(secs))
+			}
+		}
+
 		targetAlgorithm := sdk.ScheduledrebalancingV1TargetNodeSelectionAlgorithm(*readOptionalValue[string](launchConfigurationData, "target_node_selection_algorithm"))
 		result.LaunchConfiguration = sdk.ScheduledrebalancingV1LaunchConfiguration{
 			NodeTtlSeconds:   readOptionalNumber[int, int32](launchConfigurationData, "node_ttl_seconds"),
@@ -370,6 +408,7 @@ func stateToSchedule(d *schema.ResourceData) (*sdk.ScheduledrebalancingV1Rebalan
 				ExecutionConditions:   executionConditions,
 				AggressiveMode:        aggressiveMode,
 				AggressiveModeConfig:  aggressiveModeConfig,
+				DrainFailureConfig:    drainFailureConfig,
 			},
 			Selector:                     selector,
 			TargetNodeSelectionAlgorithm: &targetAlgorithm,
@@ -409,6 +448,15 @@ func scheduleToState(schedule *sdk.ScheduledrebalancingV1RebalancingSchedule, d 
 					"ignore_problem_job_pods":                schedule.LaunchConfiguration.RebalancingOptions.AggressiveModeConfig.IgnoreProblemJobPods,
 					"ignore_problem_removal_disabled_pods":   schedule.LaunchConfiguration.RebalancingOptions.AggressiveModeConfig.IgnoreProblemRemovalDisabledPods,
 					"ignore_problem_pods_without_controller": schedule.LaunchConfiguration.RebalancingOptions.AggressiveModeConfig.IgnoreProblemPodsWithoutController,
+				},
+			}
+		}
+
+		if schedule.LaunchConfiguration.RebalancingOptions.DrainFailureConfig != nil {
+			launchConfig["drain_failure_config"] = []map[string]any{
+				{
+					"disable_uncordon":       schedule.LaunchConfiguration.RebalancingOptions.DrainFailureConfig.DisableUncordon,
+					"uncordon_after_seconds": schedule.LaunchConfiguration.RebalancingOptions.DrainFailureConfig.UncordonAfterSeconds,
 				},
 			}
 		}

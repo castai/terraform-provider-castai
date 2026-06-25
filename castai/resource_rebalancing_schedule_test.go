@@ -43,6 +43,15 @@ func TestAccCloudAgnostic_ResourceRebalancingSchedule_basic(t *testing.T) {
 					resource.TestCheckResourceAttr("castai_rebalancing_schedule.test", "launch_configuration.0.rebalancing_min_nodes", "0"),
 				),
 			},
+			{
+				Config: makeConfigWithDrainFailureConfig(rName + " drain_failure"),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("castai_rebalancing_schedule.test", "name", rName+" drain_failure"),
+					resource.TestCheckResourceAttr("castai_rebalancing_schedule.test", "launch_configuration.0.keep_drain_timeout_nodes", "true"),
+					resource.TestCheckResourceAttr("castai_rebalancing_schedule.test", "launch_configuration.0.drain_failure_config.0.disable_uncordon", "false"),
+					resource.TestCheckResourceAttr("castai_rebalancing_schedule.test", "launch_configuration.0.drain_failure_config.0.uncordon_after_seconds", "7200"),
+				),
+			},
 			// We keep the ImportState test cases at the end so they will test any newly added fields.
 			// This way it will also verify that after importing the state the output of `tf plan` is empty.
 			{
@@ -58,7 +67,7 @@ func TestAccCloudAgnostic_ResourceRebalancingSchedule_basic(t *testing.T) {
 				// Make sure to use the resource (rebalancing schedule) name from the latest prior step that changes the resource,
 				// otherwise this step will not to see the changes made after the State ID you provided,
 				// and this step will fail.
-				ImportStateId:     rName + " min_nodes_zero",
+				ImportStateId:     rName + " drain_failure",
 				ImportStateVerify: true,
 			},
 		},
@@ -122,6 +131,32 @@ resource "castai_rebalancing_schedule" "test" {
 		execution_conditions {
 			enabled = true
 			achieved_savings_percentage = 10
+		}
+	}
+}
+`
+	return fmt.Sprintf(template, rName)
+}
+
+func makeConfigWithDrainFailureConfig(rName string) string {
+	template := `
+resource "castai_rebalancing_schedule" "test" {
+	name = %q
+	schedule {
+		cron = "1 4 * * *"
+	}
+	trigger_conditions {
+		savings_percentage = 10
+	}
+	launch_configuration {
+		keep_drain_timeout_nodes = true
+		drain_failure_config {
+			disable_uncordon       = false
+			uncordon_after_seconds = 7200
+		}
+		execution_conditions {
+			enabled = true
+			achieved_savings_percentage = 0
 		}
 	}
 }

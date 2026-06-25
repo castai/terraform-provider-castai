@@ -26,7 +26,14 @@ resource "castai_rebalancing_schedule" "spots" {
     node_ttl_seconds         = 300
     num_targeted_nodes       = 3
     rebalancing_min_nodes    = 2
-    keep_drain_timeout_nodes = false
+    keep_drain_timeout_nodes = true
+    # When keep_drain_timeout_nodes is true, configure how drain-failed nodes are handled.
+    drain_failure_config {
+      # Set to true to leave drain-failed nodes cordoned indefinitely (no auto-uncordon).
+      disable_uncordon = false
+      # Uncordon drain-failed nodes after 2 hours (default is 30m; range: 1m–72h).
+      uncordon_after_seconds = 7200
+    }
     # equivalent to the deprecated config: aggressive_mode = true.
     aggressive_mode_config {
       ignore_local_persistent_volumes        = true
@@ -77,6 +84,7 @@ Optional:
 
 - `aggressive_mode` (Boolean, Deprecated) Deprecated: Use aggressive_mode_config instead. When enabled, rebalancing considers all problematic pods (pods without controller, job pods, pods with removal-disabled annotation) as not-problematic.
 - `aggressive_mode_config` (Block List, Max: 1) Advanced configuration for the aggressive rebalancing mode. This is the recommended way to configure aggressive rebalancing. Please keep the `aggressive_mode` parameter unset or set it `aggressive_mode=false` before using this config option. When the legacy `aggressive_mode` is set to `true`, it takes precedence over this option. (see [below for nested schema](#nestedblock--launch_configuration--aggressive_mode_config))
+- `drain_failure_config` (Block List, Max: 1) Configures behavior when a node fails to drain during rebalancing. Relevant only when `keep_drain_timeout_nodes` is true. (see [below for nested schema](#nestedblock--launch_configuration--drain_failure_config))
 - `execution_conditions` (Block List, Max: 1) (see [below for nested schema](#nestedblock--launch_configuration--execution_conditions))
 - `keep_drain_timeout_nodes` (Boolean) Defines whether the nodes that failed to get drained until a predefined timeout, will be kept with a rebalancing.cast.ai/status=drain-failed annotation instead of forcefully drained.
 - `node_ttl_seconds` (Number) Specifies amount of time since node creation before the node is allowed to be considered for automated rebalancing.
@@ -94,6 +102,15 @@ Required:
 - `ignore_problem_job_pods` (Boolean) Pods spawned by Jobs or CronJobs will not prevent the Rebalancer from deleting a node on which they run. WARNING: When true, pods spawned by Jobs or CronJobs will be terminated if the Rebalancer picks a node that runs them. As such, they are likely to lose their progress.
 - `ignore_problem_pods_without_controller` (Boolean) Pods that don't have a controller (bare pods) will not prevent the Rebalancer from deleting a node on which they run. WARNING: When true, such pods might not restart, since they have no controller to do it.
 - `ignore_problem_removal_disabled_pods` (Boolean) Pods that are marked with "removal disabled" will not prevent the Rebalancer from deleting a node on which they run. WARNING: When true, such pods will be evicted and disrupted.
+
+
+<a id="nestedblock--launch_configuration--drain_failure_config"></a>
+### Nested Schema for `launch_configuration.drain_failure_config`
+
+Optional:
+
+- `disable_uncordon` (Boolean) When true, drain-failed nodes will NOT be automatically uncordoned. Defaults to false (nodes are uncordoned after the timeout).
+- `uncordon_after_seconds` (Number) Time in seconds after which a drain-failed node is automatically uncordoned. Must be between 60 (1m) and 259200 (72h). Defaults to 1800 (30m). Ignored when `disable_uncordon` is true.
 
 
 <a id="nestedblock--launch_configuration--execution_conditions"></a>
