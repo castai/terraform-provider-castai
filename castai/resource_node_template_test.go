@@ -965,6 +965,90 @@ func TestAccEKS_ResourceNodeTemplate_basic(t *testing.T) {
 	})
 }
 
+// TestAccEKS_ResourceNodeTemplate_spotFieldsDrift reproduces CSU-5463.
+// It creates a node template with spot-related constraint fields set, then
+// removes those fields from the Terraform configuration. With the buggy
+// provider, the API keeps returning the old values, so a subsequent plan
+// still shows a diff (perpetual drift). The final PlanOnly step therefore
+// fails until the fields are marked Computed.
+func TestAccEKS_ResourceNodeTemplate_spotFieldsDrift(t *testing.T) {
+	rName := fmt.Sprintf("%v-node-template-spot-drift-%v", ResourcePrefix, acctest.RandString(8))
+	resourceName := "castai_node_template.test"
+	clusterName, _ := lo.Coalesce(os.Getenv("CLUSTER_NAME"), "cost-terraform")
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		CheckDestroy:             testAccCheckNodeTemplateDestroy(rName),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNodeTemplateSpotDriftInitialConfig(rName, clusterName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "name", rName),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.spot_reliability_price_increase_limit_percent", "20"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.spot_diversity_price_increase_limit_percent", "21"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.spot_interruption_predictions_type", "interruption-predictions"),
+				),
+			},
+			{
+				Config: testAccNodeTemplateSpotDriftUpdatedConfig(rName, clusterName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "name", rName),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.min_cpu", "2"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.on_demand", "true"),
+				),
+			},
+			{
+				// This step fails on the buggy provider because the previous
+				// apply did not actually clear the spot fields in the API,
+				// so Terraform still wants to change them to null.
+				Config:   testAccNodeTemplateSpotDriftUpdatedConfig(rName, clusterName),
+				PlanOnly: true,
+			},
+		},
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"aws": {
+				Source:            "hashicorp/aws",
+				VersionConstraint: "~> 4.0",
+			},
+		},
+	})
+}
+
+func testAccNodeTemplateSpotDriftInitialConfig(rName, clusterName string) string {
+	return ConfigCompose(testAccEKSClusterConfig(rName, clusterName), testAccNodeConfig(rName), fmt.Sprintf(`
+		resource "castai_node_template" "test" {
+			cluster_id       = castai_eks_cluster.test.id
+			name             = %[1]q
+			configuration_id = castai_node_configuration.test.id
+
+			constraints {
+				on_demand = true
+				min_cpu   = 2
+
+				spot_reliability_price_increase_limit_percent = 20
+				spot_diversity_price_increase_limit_percent   = 21
+				spot_interruption_predictions_type            = "interruption-predictions"
+			}
+		}
+	`, rName))
+}
+
+func testAccNodeTemplateSpotDriftUpdatedConfig(rName, clusterName string) string {
+	return ConfigCompose(testAccEKSClusterConfig(rName, clusterName), testAccNodeConfig(rName), fmt.Sprintf(`
+		resource "castai_node_template" "test" {
+			cluster_id       = castai_eks_cluster.test.id
+			name             = %[1]q
+			configuration_id = castai_node_configuration.test.id
+
+			constraints {
+				on_demand = true
+				min_cpu   = 2
+			}
+		}
+	`, rName))
+}
+
 func testAccNodeTemplateConfig(rName, clusterName string) string {
 	return ConfigCompose(testAccEKSClusterConfig(rName, clusterName), testAccNodeConfig(rName), testAccEdgeLocationsConfig(rName, clusterName), fmt.Sprintf(`
 		resource "castai_node_template" "test" {
