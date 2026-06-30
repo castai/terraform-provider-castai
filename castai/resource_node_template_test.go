@@ -1024,7 +1024,7 @@ func TestAccEKS_ResourceNodeTemplate_defaultSpotFieldsDrift(t *testing.T) {
 }
 
 func testAccDefaultNodeTemplateSpotDriftInitialConfig(rName, clusterName string) string {
-	return ConfigCompose(testAccEKSClusterConfig(rName, clusterName), testAccNodeConfig(rName), fmt.Sprintf(`
+	return ConfigCompose(testAccEKSClusterConfig(rName, clusterName), testAccNodeConfig(rName), `
 		resource "castai_node_template" "default" {
 			cluster_id       = castai_eks_cluster.test.id
 			name             = "default-by-castai"
@@ -1041,11 +1041,11 @@ func testAccDefaultNodeTemplateSpotDriftInitialConfig(rName, clusterName string)
 				spot_interruption_predictions_type            = "interruption-predictions"
 			}
 		}
-	`, rName))
+	`)
 }
 
 func testAccDefaultNodeTemplateSpotDriftUpdatedConfig(rName, clusterName string) string {
-	return ConfigCompose(testAccEKSClusterConfig(rName, clusterName), testAccNodeConfig(rName), fmt.Sprintf(`
+	return ConfigCompose(testAccEKSClusterConfig(rName, clusterName), testAccNodeConfig(rName), `
 		resource "castai_node_template" "default" {
 			cluster_id       = castai_eks_cluster.test.id
 			name             = "default-by-castai"
@@ -1058,7 +1058,7 @@ func testAccDefaultNodeTemplateSpotDriftUpdatedConfig(rName, clusterName string)
 				min_cpu   = 2
 			}
 		}
-	`, rName))
+	`)
 }
 
 func testAccNodeTemplateConfig(rName, clusterName string) string {
