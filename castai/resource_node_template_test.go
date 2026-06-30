@@ -965,44 +965,52 @@ func TestAccEKS_ResourceNodeTemplate_basic(t *testing.T) {
 	})
 }
 
-// TestAccEKS_ResourceNodeTemplate_spotFieldsDrift reproduces CSU-5463.
-// It creates a node template with spot-related constraint fields set, then
-// removes those fields from the Terraform configuration. With the buggy
-// provider, the API keeps returning the old values, so a subsequent plan
-// still shows a diff (perpetual drift). The final PlanOnly step therefore
-// fails until the fields are marked Computed.
-func TestAccEKS_ResourceNodeTemplate_spotFieldsDrift(t *testing.T) {
-	rName := fmt.Sprintf("%v-node-template-spot-drift-%v", ResourcePrefix, acctest.RandString(8))
-	resourceName := "castai_node_template.test"
+// TestAccEKS_ResourceNodeTemplate_defaultSpotFieldsDrift reproduces CSU-5463.
+// The customer's issue is specifically on the default node template
+// "default-by-castai", where spot-related detail fields were populated by
+// CAST AI (e.g. during a spot-reliability rollout) and then persisted even
+// after spot was disabled. The Terraform config does not set those fields,
+// so the provider tries to clear them on every apply, but the API keeps
+// returning them, causing a perpetual diff.
+func TestAccEKS_ResourceNodeTemplate_defaultSpotFieldsDrift(t *testing.T) {
+	rName := fmt.Sprintf("%v-default-spot-drift-%v", ResourcePrefix, acctest.RandString(8))
+	resourceName := "castai_node_template.default"
 	clusterName, _ := lo.Coalesce(os.Getenv("CLUSTER_NAME"), "cost-terraform")
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
-		CheckDestroy:             testAccCheckNodeTemplateDestroy(rName),
+		// Default node templates cannot be deleted, so there is no destroy check.
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNodeTemplateSpotDriftInitialConfig(rName, clusterName),
+				// First seed the default template with the spot detail fields.
+				// In the customer case these values were written by CAST AI, not
+				// by Terraform, but setting them through Terraform lets us
+				// reproduce the same backend state.
+				Config: testAccDefaultNodeTemplateSpotDriftInitialConfig(rName, clusterName),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceName, "name", rName),
+					resource.TestCheckResourceAttr(resourceName, "name", "default-by-castai"),
+					resource.TestCheckResourceAttr(resourceName, "is_default", "true"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.spot_reliability_price_increase_limit_percent", "20"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.spot_diversity_price_increase_limit_percent", "21"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.spot_interruption_predictions_type", "interruption-predictions"),
 				),
 			},
 			{
-				Config: testAccNodeTemplateSpotDriftUpdatedConfig(rName, clusterName),
+				// Now apply the same config the customer has: default template
+				// with on_demand/min_cpu only, no spot detail fields.
+				Config: testAccDefaultNodeTemplateSpotDriftUpdatedConfig(rName, clusterName),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceName, "name", rName),
+					resource.TestCheckResourceAttr(resourceName, "name", "default-by-castai"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.min_cpu", "2"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.on_demand", "true"),
 				),
 			},
 			{
-				// This step fails on the buggy provider because the previous
-				// apply did not actually clear the spot fields in the API,
-				// so Terraform still wants to change them to null.
-				Config:   testAccNodeTemplateSpotDriftUpdatedConfig(rName, clusterName),
+				// This step fails if the provider still shows drift. With the
+				// current provider/API behavior, the spot detail fields keep
+				// coming back from the API, so the plan is non-empty.
+				Config:   testAccDefaultNodeTemplateSpotDriftUpdatedConfig(rName, clusterName),
 				PlanOnly: true,
 			},
 		},
@@ -1015,11 +1023,13 @@ func TestAccEKS_ResourceNodeTemplate_spotFieldsDrift(t *testing.T) {
 	})
 }
 
-func testAccNodeTemplateSpotDriftInitialConfig(rName, clusterName string) string {
+func testAccDefaultNodeTemplateSpotDriftInitialConfig(rName, clusterName string) string {
 	return ConfigCompose(testAccEKSClusterConfig(rName, clusterName), testAccNodeConfig(rName), fmt.Sprintf(`
-		resource "castai_node_template" "test" {
+		resource "castai_node_template" "default" {
 			cluster_id       = castai_eks_cluster.test.id
-			name             = %[1]q
+			name             = "default-by-castai"
+			is_default       = true
+			is_enabled       = true
 			configuration_id = castai_node_configuration.test.id
 
 			constraints {
@@ -1034,11 +1044,13 @@ func testAccNodeTemplateSpotDriftInitialConfig(rName, clusterName string) string
 	`, rName))
 }
 
-func testAccNodeTemplateSpotDriftUpdatedConfig(rName, clusterName string) string {
+func testAccDefaultNodeTemplateSpotDriftUpdatedConfig(rName, clusterName string) string {
 	return ConfigCompose(testAccEKSClusterConfig(rName, clusterName), testAccNodeConfig(rName), fmt.Sprintf(`
-		resource "castai_node_template" "test" {
+		resource "castai_node_template" "default" {
 			cluster_id       = castai_eks_cluster.test.id
-			name             = %[1]q
+			name             = "default-by-castai"
+			is_default       = true
+			is_enabled       = true
 			configuration_id = castai_node_configuration.test.id
 
 			constraints {
