@@ -986,7 +986,7 @@ func TestAccEKS_ResourceNodeTemplate_defaultSpotFieldsDrift(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				// Step 1: Terraform creates the default template with a minimal
-				// constraints block.
+				// constraints block (only on_demand).
 				Config: testAccDefaultNodeTemplateSpotDriftConfig(rName, clusterName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "name", "default-by-castai"),
@@ -995,33 +995,27 @@ func TestAccEKS_ResourceNodeTemplate_defaultSpotFieldsDrift(t *testing.T) {
 				),
 			},
 			{
-				// Step 2: Simulate the customer making changes in the CAST AI UI.
-				// They set min_cpu = 16 and the three spot detail fields. This
-				// bypasses Terraform state.
+				// Step 2: Simulate the customer editing the template in the
+				// CAST AI UI. The Check writes min_cpu = 16 and the three spot
+				// detail fields directly via the API, bypassing Terraform. After
+				// the Check runs, the refresh sees the new values that are not
+				// in config, so a non-empty plan is expected here.
 				Config: testAccDefaultNodeTemplateSpotDriftConfig(rName, clusterName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccSetDefaultNodeTemplateConstraintsViaAPI(resourceName, 16),
 				),
+				ExpectNonEmptyPlan: true,
 			},
 			{
-				// Step 3: Re-apply the same Terraform config. The provider will
-				// try to clear min_cpu and the spot detail fields. min_cpu is
-				// expected to be cleared, the spot detail fields are expected to
-				// drift.
+				// Step 3: Re-apply the same Terraform config. The apply must
+				// clear every field that the previous step added so that the
+				// refresh plan is empty. With the bug, the spot detail fields
+				// are not cleared and this step fails because the refresh plan
+				// is non-empty.
 				Config: testAccDefaultNodeTemplateSpotDriftConfig(rName, clusterName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.on_demand", "true"),
-					// After the fix this should also be cleared. Until then the
-					// API keeps returning 16 and this check would fail, which is
-					// part of demonstrating the drift.
-					resource.TestCheckNoResourceAttr(resourceName, "constraints.0.min_cpu"),
 				),
-			},
-			{
-				// Step 4: A subsequent plan should be empty. With the bug, it is
-				// not empty because the spot detail fields keep coming back.
-				Config:   testAccDefaultNodeTemplateSpotDriftConfig(rName, clusterName),
-				PlanOnly: true,
 			},
 		},
 		ExternalProviders: map[string]resource.ExternalProvider{
