@@ -111,6 +111,13 @@ const (
 	MEMBERSTATUSUNSPECIFIED   EnterpriseAPIListMembersParamsStatus = "MEMBER_STATUS_UNSPECIFIED"
 )
 
+// Defines values for EnterpriseAPIGetEnterpriseMemberParamsType.
+const (
+	GETENTERPRISEMEMBERTYPEINVITATION  EnterpriseAPIGetEnterpriseMemberParamsType = "GET_ENTERPRISE_MEMBER_TYPE_INVITATION"
+	GETENTERPRISEMEMBERTYPEUNSPECIFIED EnterpriseAPIGetEnterpriseMemberParamsType = "GET_ENTERPRISE_MEMBER_TYPE_UNSPECIFIED"
+	GETENTERPRISEMEMBERTYPEUSER        EnterpriseAPIGetEnterpriseMemberParamsType = "GET_ENTERPRISE_MEMBER_TYPE_USER"
+)
+
 // Defines values for EnterpriseAPIListChildrenOrganizationsParamsSortOrder.
 const (
 	EnterpriseAPIListChildrenOrganizationsParamsSortOrderASC  EnterpriseAPIListChildrenOrganizationsParamsSortOrder = "ASC"
@@ -507,6 +514,36 @@ type BatchUpdateEnterpriseRoleBindingsResponse struct {
 	RoleBindings *[]RoleBinding `json:"roleBindings,omitempty"`
 }
 
+// BatchUpdateEnterpriseServiceAccountsRequest Request message for batch updating service accounts in an enterprise.
+type BatchUpdateEnterpriseServiceAccountsRequest struct {
+	// EnterpriseId ID of the enterprise organization.
+	EnterpriseId string `json:"enterpriseId"`
+
+	// Requests List of service accounts to update. Maximum 100 per request.
+	Requests []BatchUpdateEnterpriseServiceAccountsRequestUpdateServiceAccountRequest `json:"requests"`
+}
+
+// BatchUpdateEnterpriseServiceAccountsRequestUpdateServiceAccountRequest UpdateServiceAccountRequest is a single service account to update.
+type BatchUpdateEnterpriseServiceAccountsRequestUpdateServiceAccountRequest struct {
+	// Description If absent, the existing description is preserved. If present and empty, the description is cleared.
+	Description *string `json:"description,omitempty"`
+
+	// Name If absent, the existing name is preserved.
+	Name *string `json:"name,omitempty"`
+
+	// OrganizationId Organization ID — must be the enterprise itself or a direct child (deleted_at IS NULL).
+	OrganizationId string `json:"organizationId"`
+
+	// ServiceAccountId ID of the service account to update.
+	ServiceAccountId string `json:"serviceAccountId"`
+}
+
+// BatchUpdateEnterpriseServiceAccountsResponse Response message for batch updating service accounts in an enterprise.
+type BatchUpdateEnterpriseServiceAccountsResponse struct {
+	// Items Updated service accounts.
+	Items *[]ListEnterpriseServiceAccountsResponseServiceAccount `json:"items,omitempty"`
+}
+
 // ChildOrganizationOrganizationCounters OrganizationCounters holds organization counters.
 type ChildOrganizationOrganizationCounters struct {
 	// Clusters Number of clusters in the organization.
@@ -634,6 +671,12 @@ type GetEnterpriseGroupResponseGroupDefinition struct {
 
 	// Members Members is a list of members.
 	Members *[]GroupDefinitionMember `json:"members,omitempty"`
+}
+
+// GetEnterpriseMemberResponse GetEnterpriseMemberResponse message containing user or invitation in the enterprise org or its child
+type GetEnterpriseMemberResponse struct {
+	// Item Users in the enterprise or child organization
+	Item *ListMembersResponseItem `json:"item,omitempty"`
 }
 
 // GoogleProtobufAny Contains an arbitrary serialized message along with a @type that describes the type of the serialized message.
@@ -1397,6 +1440,15 @@ type EnterpriseAPIListMembersParamsSortOrder string
 // EnterpriseAPIListMembersParamsStatus defines parameters for EnterpriseAPIListMembers.
 type EnterpriseAPIListMembersParamsStatus string
 
+// EnterpriseAPIGetEnterpriseMemberParams defines parameters for EnterpriseAPIGetEnterpriseMember.
+type EnterpriseAPIGetEnterpriseMemberParams struct {
+	// Type Kind of member to fetch. Required; must be either USER or INVITATION.
+	Type *EnterpriseAPIGetEnterpriseMemberParamsType `form:"type,omitempty" json:"type,omitempty"`
+}
+
+// EnterpriseAPIGetEnterpriseMemberParamsType defines parameters for EnterpriseAPIGetEnterpriseMember.
+type EnterpriseAPIGetEnterpriseMemberParamsType string
+
 // EnterpriseAPIListChildrenOrganizationsParams defines parameters for EnterpriseAPIListChildrenOrganizations.
 type EnterpriseAPIListChildrenOrganizationsParams struct {
 	// PageLimit Defines the number of items that should be returned
@@ -1493,6 +1545,9 @@ type EnterpriseAPIBatchCreateEnterpriseServiceAccountsJSONRequestBody = BatchCre
 
 // EnterpriseAPIBatchDeleteEnterpriseServiceAccountsJSONRequestBody defines body for EnterpriseAPIBatchDeleteEnterpriseServiceAccounts for application/json ContentType.
 type EnterpriseAPIBatchDeleteEnterpriseServiceAccountsJSONRequestBody = BatchDeleteEnterpriseServiceAccountsRequest
+
+// EnterpriseAPIBatchUpdateEnterpriseServiceAccountsJSONRequestBody defines body for EnterpriseAPIBatchUpdateEnterpriseServiceAccounts for application/json ContentType.
+type EnterpriseAPIBatchUpdateEnterpriseServiceAccountsJSONRequestBody = BatchUpdateEnterpriseServiceAccountsRequest
 
 // EnterpriseAPIAddUserToChildOrganizationJSONRequestBody defines body for EnterpriseAPIAddUserToChildOrganization for application/json ContentType.
 type EnterpriseAPIAddUserToChildOrganizationJSONRequestBody = AddUserToChildOrganizationRequest

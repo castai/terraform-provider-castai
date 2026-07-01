@@ -119,6 +119,9 @@ type ClientInterface interface {
 	// EnterpriseAPIListMembers request
 	EnterpriseAPIListMembers(ctx context.Context, enterpriseId string, params *EnterpriseAPIListMembersParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// EnterpriseAPIGetEnterpriseMember request
+	EnterpriseAPIGetEnterpriseMember(ctx context.Context, enterpriseId string, id string, params *EnterpriseAPIGetEnterpriseMemberParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// EnterpriseAPIListChildrenOrganizations request
 	EnterpriseAPIListChildrenOrganizations(ctx context.Context, enterpriseId string, params *EnterpriseAPIListChildrenOrganizationsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -160,6 +163,11 @@ type ClientInterface interface {
 	EnterpriseAPIBatchDeleteEnterpriseServiceAccountsWithBody(ctx context.Context, enterpriseId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	EnterpriseAPIBatchDeleteEnterpriseServiceAccounts(ctx context.Context, enterpriseId string, body EnterpriseAPIBatchDeleteEnterpriseServiceAccountsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// EnterpriseAPIBatchUpdateEnterpriseServiceAccountsWithBody request with any body
+	EnterpriseAPIBatchUpdateEnterpriseServiceAccountsWithBody(ctx context.Context, enterpriseId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	EnterpriseAPIBatchUpdateEnterpriseServiceAccounts(ctx context.Context, enterpriseId string, body EnterpriseAPIBatchUpdateEnterpriseServiceAccountsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// EnterpriseAPIAddUserToChildOrganizationWithBody request with any body
 	EnterpriseAPIAddUserToChildOrganizationWithBody(ctx context.Context, enterpriseId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -294,6 +302,18 @@ func (c *Client) EnterpriseAPIInviteUsers(ctx context.Context, enterpriseId stri
 
 func (c *Client) EnterpriseAPIListMembers(ctx context.Context, enterpriseId string, params *EnterpriseAPIListMembersParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewEnterpriseAPIListMembersRequest(c.Server, enterpriseId, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) EnterpriseAPIGetEnterpriseMember(ctx context.Context, enterpriseId string, id string, params *EnterpriseAPIGetEnterpriseMemberParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewEnterpriseAPIGetEnterpriseMemberRequest(c.Server, enterpriseId, id, params)
 	if err != nil {
 		return nil, err
 	}
@@ -486,6 +506,30 @@ func (c *Client) EnterpriseAPIBatchDeleteEnterpriseServiceAccountsWithBody(ctx c
 
 func (c *Client) EnterpriseAPIBatchDeleteEnterpriseServiceAccounts(ctx context.Context, enterpriseId string, body EnterpriseAPIBatchDeleteEnterpriseServiceAccountsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewEnterpriseAPIBatchDeleteEnterpriseServiceAccountsRequest(c.Server, enterpriseId, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) EnterpriseAPIBatchUpdateEnterpriseServiceAccountsWithBody(ctx context.Context, enterpriseId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewEnterpriseAPIBatchUpdateEnterpriseServiceAccountsRequestWithBody(c.Server, enterpriseId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) EnterpriseAPIBatchUpdateEnterpriseServiceAccounts(ctx context.Context, enterpriseId string, body EnterpriseAPIBatchUpdateEnterpriseServiceAccountsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewEnterpriseAPIBatchUpdateEnterpriseServiceAccountsRequest(c.Server, enterpriseId, body)
 	if err != nil {
 		return nil, err
 	}
@@ -1069,6 +1113,69 @@ func NewEnterpriseAPIListMembersRequest(server string, enterpriseId string, para
 		if params.Status != nil {
 
 			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "status", runtime.ParamLocationQuery, *params.Status); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewEnterpriseAPIGetEnterpriseMemberRequest generates requests for EnterpriseAPIGetEnterpriseMember
+func NewEnterpriseAPIGetEnterpriseMemberRequest(server string, enterpriseId string, id string, params *EnterpriseAPIGetEnterpriseMemberParams) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "enterpriseId", runtime.ParamLocationPath, enterpriseId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/organization-management/v1/enterprises/%s/members/%s", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if params.Type != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "type", runtime.ParamLocationQuery, *params.Type); err != nil {
 				return nil, err
 			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
 				return nil, err
@@ -1776,6 +1883,53 @@ func NewEnterpriseAPIBatchDeleteEnterpriseServiceAccountsRequestWithBody(server 
 	return req, nil
 }
 
+// NewEnterpriseAPIBatchUpdateEnterpriseServiceAccountsRequest calls the generic EnterpriseAPIBatchUpdateEnterpriseServiceAccounts builder with application/json body
+func NewEnterpriseAPIBatchUpdateEnterpriseServiceAccountsRequest(server string, enterpriseId string, body EnterpriseAPIBatchUpdateEnterpriseServiceAccountsJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewEnterpriseAPIBatchUpdateEnterpriseServiceAccountsRequestWithBody(server, enterpriseId, "application/json", bodyReader)
+}
+
+// NewEnterpriseAPIBatchUpdateEnterpriseServiceAccountsRequestWithBody generates requests for EnterpriseAPIBatchUpdateEnterpriseServiceAccounts with any type of body
+func NewEnterpriseAPIBatchUpdateEnterpriseServiceAccountsRequestWithBody(server string, enterpriseId string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "enterpriseId", runtime.ParamLocationPath, enterpriseId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/organization-management/v1/enterprises/%s/service-accounts:batchUpdate", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
 // NewEnterpriseAPIAddUserToChildOrganizationRequest calls the generic EnterpriseAPIAddUserToChildOrganization builder with application/json body
 func NewEnterpriseAPIAddUserToChildOrganizationRequest(server string, enterpriseId string, body EnterpriseAPIAddUserToChildOrganizationJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
@@ -1943,6 +2097,9 @@ type ClientWithResponsesInterface interface {
 	// EnterpriseAPIListMembers request
 	EnterpriseAPIListMembersWithResponse(ctx context.Context, enterpriseId string, params *EnterpriseAPIListMembersParams) (*EnterpriseAPIListMembersResponse, error)
 
+	// EnterpriseAPIGetEnterpriseMember request
+	EnterpriseAPIGetEnterpriseMemberWithResponse(ctx context.Context, enterpriseId string, id string, params *EnterpriseAPIGetEnterpriseMemberParams) (*EnterpriseAPIGetEnterpriseMemberResponse, error)
+
 	// EnterpriseAPIListChildrenOrganizations request
 	EnterpriseAPIListChildrenOrganizationsWithResponse(ctx context.Context, enterpriseId string, params *EnterpriseAPIListChildrenOrganizationsParams) (*EnterpriseAPIListChildrenOrganizationsResponse, error)
 
@@ -1984,6 +2141,11 @@ type ClientWithResponsesInterface interface {
 	EnterpriseAPIBatchDeleteEnterpriseServiceAccountsWithBodyWithResponse(ctx context.Context, enterpriseId string, contentType string, body io.Reader) (*EnterpriseAPIBatchDeleteEnterpriseServiceAccountsResponse, error)
 
 	EnterpriseAPIBatchDeleteEnterpriseServiceAccountsWithResponse(ctx context.Context, enterpriseId string, body EnterpriseAPIBatchDeleteEnterpriseServiceAccountsJSONRequestBody) (*EnterpriseAPIBatchDeleteEnterpriseServiceAccountsResponse, error)
+
+	// EnterpriseAPIBatchUpdateEnterpriseServiceAccounts request  with any body
+	EnterpriseAPIBatchUpdateEnterpriseServiceAccountsWithBodyWithResponse(ctx context.Context, enterpriseId string, contentType string, body io.Reader) (*EnterpriseAPIBatchUpdateEnterpriseServiceAccountsResponse, error)
+
+	EnterpriseAPIBatchUpdateEnterpriseServiceAccountsWithResponse(ctx context.Context, enterpriseId string, body EnterpriseAPIBatchUpdateEnterpriseServiceAccountsJSONRequestBody) (*EnterpriseAPIBatchUpdateEnterpriseServiceAccountsResponse, error)
 
 	// EnterpriseAPIAddUserToChildOrganization request  with any body
 	EnterpriseAPIAddUserToChildOrganizationWithBodyWithResponse(ctx context.Context, enterpriseId string, contentType string, body io.Reader) (*EnterpriseAPIAddUserToChildOrganizationResponse, error)
@@ -2216,6 +2378,37 @@ func (r EnterpriseAPIListMembersResponse) StatusCode() int {
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
 func (r EnterpriseAPIListMembersResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type EnterpriseAPIGetEnterpriseMemberResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *GetEnterpriseMemberResponse
+	JSONDefault  *Status
+}
+
+// Status returns HTTPResponse.Status
+func (r EnterpriseAPIGetEnterpriseMemberResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r EnterpriseAPIGetEnterpriseMemberResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r EnterpriseAPIGetEnterpriseMemberResponse) GetBody() []byte {
 	return r.Body
 }
 
@@ -2528,6 +2721,37 @@ func (r EnterpriseAPIBatchDeleteEnterpriseServiceAccountsResponse) GetBody() []b
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
+type EnterpriseAPIBatchUpdateEnterpriseServiceAccountsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *BatchUpdateEnterpriseServiceAccountsResponse
+	JSONDefault  *Status
+}
+
+// Status returns HTTPResponse.Status
+func (r EnterpriseAPIBatchUpdateEnterpriseServiceAccountsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r EnterpriseAPIBatchUpdateEnterpriseServiceAccountsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r EnterpriseAPIBatchUpdateEnterpriseServiceAccountsResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
 type EnterpriseAPIAddUserToChildOrganizationResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -2685,6 +2909,15 @@ func (c *ClientWithResponses) EnterpriseAPIListMembersWithResponse(ctx context.C
 	return ParseEnterpriseAPIListMembersResponse(rsp)
 }
 
+// EnterpriseAPIGetEnterpriseMemberWithResponse request returning *EnterpriseAPIGetEnterpriseMemberResponse
+func (c *ClientWithResponses) EnterpriseAPIGetEnterpriseMemberWithResponse(ctx context.Context, enterpriseId string, id string, params *EnterpriseAPIGetEnterpriseMemberParams) (*EnterpriseAPIGetEnterpriseMemberResponse, error) {
+	rsp, err := c.EnterpriseAPIGetEnterpriseMember(ctx, enterpriseId, id, params)
+	if err != nil {
+		return nil, err
+	}
+	return ParseEnterpriseAPIGetEnterpriseMemberResponse(rsp)
+}
+
 // EnterpriseAPIListChildrenOrganizationsWithResponse request returning *EnterpriseAPIListChildrenOrganizationsResponse
 func (c *ClientWithResponses) EnterpriseAPIListChildrenOrganizationsWithResponse(ctx context.Context, enterpriseId string, params *EnterpriseAPIListChildrenOrganizationsParams) (*EnterpriseAPIListChildrenOrganizationsResponse, error) {
 	rsp, err := c.EnterpriseAPIListChildrenOrganizations(ctx, enterpriseId, params)
@@ -2821,6 +3054,23 @@ func (c *ClientWithResponses) EnterpriseAPIBatchDeleteEnterpriseServiceAccountsW
 		return nil, err
 	}
 	return ParseEnterpriseAPIBatchDeleteEnterpriseServiceAccountsResponse(rsp)
+}
+
+// EnterpriseAPIBatchUpdateEnterpriseServiceAccountsWithBodyWithResponse request with arbitrary body returning *EnterpriseAPIBatchUpdateEnterpriseServiceAccountsResponse
+func (c *ClientWithResponses) EnterpriseAPIBatchUpdateEnterpriseServiceAccountsWithBodyWithResponse(ctx context.Context, enterpriseId string, contentType string, body io.Reader) (*EnterpriseAPIBatchUpdateEnterpriseServiceAccountsResponse, error) {
+	rsp, err := c.EnterpriseAPIBatchUpdateEnterpriseServiceAccountsWithBody(ctx, enterpriseId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseEnterpriseAPIBatchUpdateEnterpriseServiceAccountsResponse(rsp)
+}
+
+func (c *ClientWithResponses) EnterpriseAPIBatchUpdateEnterpriseServiceAccountsWithResponse(ctx context.Context, enterpriseId string, body EnterpriseAPIBatchUpdateEnterpriseServiceAccountsJSONRequestBody) (*EnterpriseAPIBatchUpdateEnterpriseServiceAccountsResponse, error) {
+	rsp, err := c.EnterpriseAPIBatchUpdateEnterpriseServiceAccounts(ctx, enterpriseId, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseEnterpriseAPIBatchUpdateEnterpriseServiceAccountsResponse(rsp)
 }
 
 // EnterpriseAPIAddUserToChildOrganizationWithBodyWithResponse request with arbitrary body returning *EnterpriseAPIAddUserToChildOrganizationResponse
@@ -3064,6 +3314,39 @@ func ParseEnterpriseAPIListMembersResponse(rsp *http.Response) (*EnterpriseAPILi
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest ListMembersResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
+		var dest Status
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSONDefault = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseEnterpriseAPIGetEnterpriseMemberResponse parses an HTTP response from a EnterpriseAPIGetEnterpriseMemberWithResponse call
+func ParseEnterpriseAPIGetEnterpriseMemberResponse(rsp *http.Response) (*EnterpriseAPIGetEnterpriseMemberResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &EnterpriseAPIGetEnterpriseMemberResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest GetEnterpriseMemberResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -3378,6 +3661,39 @@ func ParseEnterpriseAPIBatchDeleteEnterpriseServiceAccountsResponse(rsp *http.Re
 	}
 
 	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
+		var dest Status
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSONDefault = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseEnterpriseAPIBatchUpdateEnterpriseServiceAccountsResponse parses an HTTP response from a EnterpriseAPIBatchUpdateEnterpriseServiceAccountsWithResponse call
+func ParseEnterpriseAPIBatchUpdateEnterpriseServiceAccountsResponse(rsp *http.Response) (*EnterpriseAPIBatchUpdateEnterpriseServiceAccountsResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &EnterpriseAPIBatchUpdateEnterpriseServiceAccountsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest BatchUpdateEnterpriseServiceAccountsResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
 		var dest Status
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
