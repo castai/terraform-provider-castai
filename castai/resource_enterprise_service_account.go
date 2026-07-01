@@ -3,10 +3,12 @@ package castai
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/samber/lo"
 
 	"github.com/castai/terraform-provider-castai/castai/sdk"
@@ -29,18 +31,26 @@ func resourceEnterpriseServiceAccount() *schema.Resource {
 		DeleteContext: resourceEnterpriseServiceAccountDelete,
 		Description:   "CAST AI Enterprise Service Account resource.",
 
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(2 * time.Minute),
+			Update: schema.DefaultTimeout(2 * time.Minute),
+			Delete: schema.DefaultTimeout(1 * time.Minute),
+		},
+
 		Schema: map[string]*schema.Schema{
 			FieldEnterpriseServiceAccountEnterpriseID: {
-				Type:        schema.TypeString,
-				Required:    true,
-				ForceNew:    true,
-				Description: "Enterprise organization ID.",
+				Type:             schema.TypeString,
+				Required:         true,
+				ForceNew:         true,
+				Description:      "Enterprise organization ID.",
+				ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
 			},
 			FieldEnterpriseServiceAccountOrganizationID: {
-				Type:        schema.TypeString,
-				Required:    true,
-				ForceNew:    true,
-				Description: "Target organization ID where the service account is created.",
+				Type:             schema.TypeString,
+				Required:         true,
+				ForceNew:         true,
+				Description:      "Target organization ID where the service account is created.",
+				ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
 			},
 			FieldEnterpriseServiceAccountName: {
 				Type:        schema.TypeString,
@@ -67,45 +77,43 @@ func resourceEnterpriseServiceAccountRead(ctx context.Context, data *schema.Reso
 
 	tflog.Debug(ctx, "Reading enterprise service account", map[string]any{"id": data.Id()})
 
-	enterpriseID, ok := data.GetOk(FieldEnterpriseServiceAccountEnterpriseID)
-	if !ok {
-		return diag.FromErr(fmt.Errorf("enterprise ID is not set"))
-	}
-
-	orgID, ok := data.GetOk(FieldEnterpriseServiceAccountOrganizationID)
-	if !ok {
-		return diag.FromErr(fmt.Errorf("organization ID is not set"))
-	}
-
-	orgIDStr := orgID.(string)
-
-	resp, err := client.EnterpriseAPIListEnterpriseServiceAccountsWithResponse(
-		ctx,
-		enterpriseID.(string),
-		&organization_management.EnterpriseAPIListEnterpriseServiceAccountsParams{
-			OrganizationId: &[]string{orgIDStr},
-		},
-	)
-	if err := sdk.CheckOKResponse(resp, err); err != nil {
-		return diag.FromErr(fmt.Errorf("list enterprise service accounts failed: %w", err))
-	}
-
-	if resp.JSON200 == nil || resp.JSON200.Items == nil {
-		return diag.FromErr(fmt.Errorf("unexpected empty response from list enterprise service accounts"))
-	}
+	enterpriseIDStr := data.Get(FieldEnterpriseServiceAccountEnterpriseID).(string)
+	orgIDStr := data.Get(FieldEnterpriseServiceAccountOrganizationID).(string)
 
 	var found *organization_management.ListEnterpriseServiceAccountsResponseServiceAccount
-	for _, item := range *resp.JSON200.Items {
-		if item.Id != nil && *item.Id == data.Id() {
-			found = &item
+	var cursor *string
+	for {
+		resp, err := client.EnterpriseAPIListEnterpriseServiceAccountsWithResponse(
+			ctx,
+			enterpriseIDStr,
+			&organization_management.EnterpriseAPIListEnterpriseServiceAccountsParams{
+				OrganizationId: &[]string{orgIDStr},
+				PageCursor:     cursor,
+			},
+		)
+		if err := sdk.CheckOKResponse(resp, err); err != nil {
+			return diag.FromErr(fmt.Errorf("list enterprise service accounts failed: %w", err))
+		}
+		if resp.JSON200 == nil {
+			return diag.FromErr(fmt.Errorf("unexpected empty response from list enterprise service accounts"))
+		}
+		for _, item := range lo.FromPtr(resp.JSON200.Items) {
+			if item.Id != nil && *item.Id == data.Id() {
+				itemCopy := item
+				found = &itemCopy
+				break
+			}
+		}
+		if found != nil || resp.JSON200.NextPageCursor == nil || *resp.JSON200.NextPageCursor == "" {
 			break
 		}
+		cursor = resp.JSON200.NextPageCursor
 	}
 
 	if found == nil {
 		tflog.Warn(ctx, "Enterprise service account not found, removing from state", map[string]any{
 			"id":              data.Id(),
-			"enterprise_id":   enterpriseID.(string),
+			"enterprise_id":   enterpriseIDStr,
 			"organization_id": orgIDStr,
 		})
 		data.SetId("")
@@ -175,21 +183,45 @@ func resourceEnterpriseServiceAccountCreate(ctx context.Context, data *schema.Re
 		return diag.FromErr(fmt.Errorf("created enterprise service account has no ID"))
 	}
 
-	if created.Email != nil {
-		if err := data.Set(FieldEnterpriseServiceAccountEmail, *created.Email); err != nil {
-			return diag.FromErr(err)
-		}
-	}
-
 	data.SetId(*created.Id)
 
 	tflog.Debug(ctx, "Created enterprise service account", map[string]any{"id": *created.Id})
 
-	return nil
+	return resourceEnterpriseServiceAccountRead(ctx, data, meta)
 }
 
-func resourceEnterpriseServiceAccountUpdate(_ context.Context, _ *schema.ResourceData, _ any) diag.Diagnostics {
-	return diag.Errorf("updating enterprise service accounts is not yet supported (pending CID-236); to change name or description, delete and recreate the resource")
+func resourceEnterpriseServiceAccountUpdate(ctx context.Context, data *schema.ResourceData, meta any) diag.Diagnostics {
+	client := meta.(*ProviderConfig).organizationManagementClient
+
+	enterpriseID := data.Get(FieldEnterpriseServiceAccountEnterpriseID).(string)
+	orgID := data.Get(FieldEnterpriseServiceAccountOrganizationID).(string)
+	name := data.Get(FieldEnterpriseServiceAccountName).(string)
+	description := data.Get(FieldEnterpriseServiceAccountDescription).(string)
+
+	tflog.Debug(ctx, "Updating enterprise service account", map[string]any{"id": data.Id()})
+
+	resp, err := client.EnterpriseAPIBatchUpdateEnterpriseServiceAccountsWithResponse(
+		ctx,
+		enterpriseID,
+		organization_management.BatchUpdateEnterpriseServiceAccountsRequest{
+			EnterpriseId: enterpriseID,
+			Requests: []organization_management.BatchUpdateEnterpriseServiceAccountsRequestUpdateServiceAccountRequest{
+				{
+					ServiceAccountId: data.Id(),
+					OrganizationId:   orgID,
+					Name:             lo.ToPtr(name),
+					Description:      lo.ToPtr(description),
+				},
+			},
+		},
+	)
+	if err := sdk.CheckOKResponse(resp, err); err != nil {
+		return diag.FromErr(fmt.Errorf("batch update enterprise service accounts failed: %w", err))
+	}
+
+	tflog.Debug(ctx, "Updated enterprise service account", map[string]any{"id": data.Id()})
+
+	return resourceEnterpriseServiceAccountRead(ctx, data, meta)
 }
 
 func resourceEnterpriseServiceAccountDelete(ctx context.Context, data *schema.ResourceData, meta any) diag.Diagnostics {

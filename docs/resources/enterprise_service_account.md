@@ -33,10 +33,20 @@ resource "castai_enterprise_service_account" "example" {
 ### Optional
 
 - `description` (String) Service account description.
+- `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
 ### Read-Only
 
 - `email` (String) Auto-generated service account email (read-only).
 - `id` (String) The ID of this resource.
+
+<a id="nestedblock--timeouts"></a>
+### Nested Schema for `timeouts`
+
+Optional:
+
+- `create` (String)
+- `delete` (String)
+- `update` (String)
 
 
