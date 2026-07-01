@@ -3,6 +3,7 @@ package castai
 import (
 	"context"
 	"fmt"
+	"github.com/samber/lo"
 	"net/http"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -15,8 +16,9 @@ import (
 )
 
 var (
-	_ resource.Resource              = (*omniClusterResource)(nil)
-	_ resource.ResourceWithConfigure = (*omniClusterResource)(nil)
+	_ resource.Resource                = (*omniClusterResource)(nil)
+	_ resource.ResourceWithConfigure   = (*omniClusterResource)(nil)
+	_ resource.ResourceWithImportState = (*omniClusterResource)(nil)
 )
 
 type omniClusterResource struct {
@@ -215,6 +217,45 @@ func (r *omniClusterResource) Update(ctx context.Context, req resource.UpdateReq
 	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, plan)...)
+}
+
+func (r *omniClusterResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	clusterID := req.ID
+
+	clusterData, err := fetchClusterData(ctx, r.client.api, clusterID)
+	if err != nil {
+		resp.Diagnostics.AddError("Failed to fetch cluster data for import", err.Error())
+		return
+	}
+	if clusterData == nil {
+		resp.Diagnostics.AddError("Cluster not found", fmt.Sprintf("cluster %q not found", clusterID))
+		return
+	}
+	if clusterData.JSON200.OrganizationId == nil {
+		resp.Diagnostics.AddError("Missing organization ID", fmt.Sprintf("cluster %q has no organization ID", clusterID))
+		return
+	}
+
+	omniClusterResp, err := r.client.omniAPI.ClustersAPIGetClusterWithResponse(ctx, *clusterData.JSON200.OrganizationId, clusterID, nil)
+	if err != nil {
+		resp.Diagnostics.AddError("Failed to read omni cluster", err.Error())
+		return
+	}
+
+	if omniClusterResp.StatusCode() != http.StatusOK {
+		resp.Diagnostics.AddError("Unexpected omni cluster status", fmt.Sprintf("status code: %d, body: %s", omniClusterResp.StatusCode(), string(omniClusterResp.Body)))
+		return
+	}
+
+	resp.Diagnostics.Append(resp.State.Set(ctx, &omniClusterModel{
+		ID:             types.StringValue(clusterID),
+		OrganizationID: types.StringValue(*clusterData.JSON200.OrganizationId),
+		ClusterID:      types.StringValue(clusterID),
+		Status: &omniClusterStatusModel{
+			OmniAgentVersion: types.StringValue(lo.FromPtr(omniClusterResp.JSON200.OmniAgentVersion)),
+			PodCIDR:          types.StringValue(lo.FromPtr(omniClusterResp.JSON200.PodCidr)),
+		},
+	})...)
 }
 
 func (r *omniClusterResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {

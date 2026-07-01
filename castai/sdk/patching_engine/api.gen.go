@@ -347,6 +347,9 @@ type ObjectFilterLabelsOperator string
 
 // ObjectFilterV2 ObjectFilterV2 represents an advanced filter for Kubernetes objects with support for exact and regex matching.
 type ObjectFilterV2 struct {
+	// CelExpression CEL expression to filter objects. When set, the object must match the expression.
+	CelExpression *string `json:"celExpression,omitempty"`
+
 	// ExcludeKinds Kinds of the objects that should be excluded from applying mutation. Empty means none kinds.
 	ExcludeKinds *[]ObjectFilterV2Matcher `json:"excludeKinds,omitempty"`
 

@@ -8444,6 +8444,22 @@ func NewDboAPIGetCacheGroupRequest(server string, id string, params *DboAPIGetCa
 
 		}
 
+		if params.Roxy != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "roxy", runtime.ParamLocationQuery, *params.Roxy); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
 		queryURL.RawQuery = queryValues.Encode()
 	}
 
@@ -8615,6 +8631,22 @@ func NewDboAPIGetCacheGroupPerformanceRequest(server string, id string, params *
 
 		}
 
+		if params.Roxy != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "roxy", runtime.ParamLocationQuery, *params.Roxy); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
 		queryURL.RawQuery = queryValues.Encode()
 	}
 
@@ -8722,6 +8754,22 @@ func NewDboAPIGetCacheGroupPerformanceSummaryRequest(server string, id string, p
 		if params.Username != nil {
 
 			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "username", runtime.ParamLocationQuery, *params.Username); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.Roxy != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "roxy", runtime.ParamLocationQuery, *params.Roxy); err != nil {
 				return nil, err
 			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
 				return nil, err
@@ -11260,6 +11308,22 @@ func NewExternalClusterAPIGetConnectAndEnableCASTAICmdRequest(server string, par
 		if params.OnboardingPath != nil {
 
 			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "onboardingPath", runtime.ParamLocationQuery, *params.OnboardingPath); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.InstallReliabilityMetrics != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "installReliabilityMetrics", runtime.ParamLocationQuery, *params.InstallReliabilityMetrics); err != nil {
 				return nil, err
 			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
 				return nil, err

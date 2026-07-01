@@ -225,6 +225,22 @@ const (
 	USER           CastaiRbacV1beta1Kind = "USER"
 )
 
+// Defines values for CastaiRbacV1beta1LabelSelectorCondition.
+const (
+	LABELSELECTORCONDITIONAND         CastaiRbacV1beta1LabelSelectorCondition = "LABEL_SELECTOR_CONDITION_AND"
+	LABELSELECTORCONDITIONOR          CastaiRbacV1beta1LabelSelectorCondition = "LABEL_SELECTOR_CONDITION_OR"
+	LABELSELECTORCONDITIONUNSPECIFIED CastaiRbacV1beta1LabelSelectorCondition = "LABEL_SELECTOR_CONDITION_UNSPECIFIED"
+)
+
+// Defines values for CastaiRbacV1beta1LabelSelectorOperator.
+const (
+	LABELSELECTOROPERATORDOESNOTEXIST CastaiRbacV1beta1LabelSelectorOperator = "LABEL_SELECTOR_OPERATOR_DOES_NOT_EXIST"
+	LABELSELECTOROPERATOREXISTS       CastaiRbacV1beta1LabelSelectorOperator = "LABEL_SELECTOR_OPERATOR_EXISTS"
+	LABELSELECTOROPERATORIN           CastaiRbacV1beta1LabelSelectorOperator = "LABEL_SELECTOR_OPERATOR_IN"
+	LABELSELECTOROPERATORNOTIN        CastaiRbacV1beta1LabelSelectorOperator = "LABEL_SELECTOR_OPERATOR_NOT_IN"
+	LABELSELECTOROPERATORUNSPECIFIED  CastaiRbacV1beta1LabelSelectorOperator = "LABEL_SELECTOR_OPERATOR_UNSPECIFIED"
+)
+
 // Defines values for CastaiRbacV1beta1PoliciesState.
 const (
 	CastaiRbacV1beta1PoliciesStateACCEPTED CastaiRbacV1beta1PoliciesState = "ACCEPTED"
@@ -1466,6 +1482,9 @@ type GroupsIsTheGroupsToBeUpdated struct {
 
 	// Description Description is the description of the group.
 	Description *string `json:"description,omitempty"`
+
+	// LabelSelector LabelSelector represents a label selector for namespaces.
+	LabelSelector *CastaiRbacV1beta1LabelSelector `json:"labelSelector,omitempty"`
 
 	// Name Name is the name of the group.
 	Name string `json:"name"`
@@ -2997,6 +3016,9 @@ type CastaiRbacV1beta1CreateGroupRequestGroup struct {
 	// Description Description is the description of the group.
 	Description *string `json:"description,omitempty"`
 
+	// LabelSelector LabelSelector represents a label selector for namespaces.
+	LabelSelector *CastaiRbacV1beta1LabelSelector `json:"labelSelector,omitempty"`
+
 	// Name Name is the name of the group.
 	Name string `json:"name"`
 }
@@ -3040,6 +3062,9 @@ type CastaiRbacV1beta1Group struct {
 	// Id ID is the unique identifier of the group.
 	Id *string `json:"id,omitempty"`
 
+	// LabelSelector LabelSelector represents a label selector for namespaces.
+	LabelSelector *CastaiRbacV1beta1LabelSelector `json:"labelSelector,omitempty"`
+
 	// ManagedBy Method used to create group, eg.: console, terraform.
 	ManagedBy *string `json:"managedBy,omitempty"`
 
@@ -3073,6 +3098,33 @@ type CastaiRbacV1beta1GroupSubject struct {
 
 // CastaiRbacV1beta1Kind Kind represents the type of the member.
 type CastaiRbacV1beta1Kind string
+
+// CastaiRbacV1beta1LabelSelector LabelSelector represents a label selector for namespaces.
+type CastaiRbacV1beta1LabelSelector struct {
+	// Condition LabelSelectorCondition represents the condition of a label selector.
+	Condition CastaiRbacV1beta1LabelSelectorCondition `json:"condition"`
+
+	// Requirements Requirements is the list of label selector requirements.
+	Requirements []CastaiRbacV1beta1LabelSelectorRequirement `json:"requirements"`
+}
+
+// CastaiRbacV1beta1LabelSelectorCondition LabelSelectorCondition represents the condition of a label selector.
+type CastaiRbacV1beta1LabelSelectorCondition string
+
+// CastaiRbacV1beta1LabelSelectorOperator LabelSelectorOperator represents the operator of a label selector requirement.
+type CastaiRbacV1beta1LabelSelectorOperator string
+
+// CastaiRbacV1beta1LabelSelectorRequirement LabelSelectorRequirement represents a single label selector requirement.
+type CastaiRbacV1beta1LabelSelectorRequirement struct {
+	// Key Key is the label key that the selector applies to.
+	Key string `json:"key"`
+
+	// Operator LabelSelectorOperator represents the operator of a label selector requirement.
+	Operator CastaiRbacV1beta1LabelSelectorOperator `json:"operator"`
+
+	// Values Values is the list of label values that the requirement applies to.
+	Values *[]string `json:"values,omitempty"`
+}
 
 // CastaiRbacV1beta1ListPermissionGroupsResponse ListPermissionGroupsResponse is the response message for listing available permission groups.
 type CastaiRbacV1beta1ListPermissionGroupsResponse struct {
@@ -7485,8 +7537,13 @@ type NodetemplatesV1TemplateConstraints struct {
 	LifecycleTaintsDisabled *bool  `json:"lifecycleTaintsDisabled"`
 	MaxCpu                  *int32 `json:"maxCpu"`
 	MaxMemory               *int32 `json:"maxMemory"`
-	MinCpu                  *int32 `json:"minCpu"`
-	MinMemory               *int32 `json:"minMemory"`
+
+	// MaxPricePerCpu Maximum price per vCPU (hourly, in USD) for instance type filtering.
+	// Instance types whose price/vCPU exceeds this threshold are excluded.
+	// When price adjustments are configured, the filter applies to the adjusted price.
+	MaxPricePerCpu *float64 `json:"maxPricePerCpu"`
+	MinCpu         *int32   `json:"minCpu"`
+	MinMemory      *int32   `json:"minMemory"`
 
 	// OnDemand Should include on-demand instances in the considered pool.
 	OnDemand       *bool                                             `json:"onDemand"`
@@ -10549,6 +10606,7 @@ type WorkloadoptimizationV1ResourceMetricSource struct {
 type WorkloadoptimizationV1ResourceMetrics struct {
 	Avg          float64   `json:"avg"`
 	AvgPredicted float64   `json:"avgPredicted"`
+	Limit        float64   `json:"limit"`
 	Max          float64   `json:"max"`
 	Min          float64   `json:"min"`
 	P25          float64   `json:"p25"`
@@ -10778,7 +10836,8 @@ type WorkloadoptimizationV1StartupSettings struct {
 	// PeriodSeconds Defines the duration (in seconds) during which elevated resource usage is expected at startup.
 	// When set, recommendations will be adjusted to disregard resource spikes within this period.
 	// If not specified, the workload will receive standard recommendations without startup considerations.
-	PeriodSeconds *int32 `json:"periodSeconds"`
+	PeriodSeconds           *int32                                         `json:"periodSeconds"`
+	TwoPhaseRecommendations *WorkloadoptimizationV1TwoPhaseRecommendations `json:"twoPhaseRecommendations,omitempty"`
 }
 
 // WorkloadoptimizationV1SummaryConfidence defines model for workloadoptimization.v1.SummaryConfidence.
@@ -10853,6 +10912,12 @@ type WorkloadoptimizationV1SystemOverrideTriggeredEvent struct {
 type WorkloadoptimizationV1TimeSeriesMetric struct {
 	Timestamp time.Time `json:"timestamp"`
 	Value     float64   `json:"value"`
+}
+
+// WorkloadoptimizationV1TwoPhaseRecommendations defines model for workloadoptimization.v1.TwoPhaseRecommendations.
+type WorkloadoptimizationV1TwoPhaseRecommendations struct {
+	Enabled           bool                                    `json:"enabled"`
+	RequestsOnStartup *WorkloadoptimizationV1ResourceQuantity `json:"requestsOnStartup,omitempty"`
 }
 
 // WorkloadoptimizationV1UnboundMemoryGrowthEvent defines model for workloadoptimization.v1.UnboundMemoryGrowthEvent.
@@ -11100,6 +11165,7 @@ type WorkloadoptimizationV1WorkloadMetricContainer struct {
 	CpuCoresPredictionsAggregated *WorkloadoptimizationV1AggregatedPredictionMetrics `json:"cpuCoresPredictionsAggregated,omitempty"`
 	CpuStallPct                   *[]WorkloadoptimizationV1ResourceMetrics           `json:"cpuStallPct,omitempty"`
 	CpuStallPctAggregated         *WorkloadoptimizationV1AggregatedCPUStallMetrics   `json:"cpuStallPctAggregated,omitempty"`
+	FirstSeenResources            *WorkloadoptimizationV1Resources                   `json:"firstSeenResources,omitempty"`
 	Jvm                           *WorkloadoptimizationV1JVMContainerMetrics         `json:"jvm,omitempty"`
 	MemoryGib                     []WorkloadoptimizationV1ResourceMetrics            `json:"memoryGib"`
 	MemoryGibAggregated           WorkloadoptimizationV1AggregatedMetrics            `json:"memoryGibAggregated"`
@@ -11596,6 +11662,7 @@ type DboAPIGetCacheGroupParams struct {
 
 	// MetricsRangeEnd End of period.
 	MetricsRangeEnd *time.Time `form:"metricsRange.end,omitempty" json:"metricsRange.end,omitempty"`
+	Roxy            *bool      `form:"roxy,omitempty" json:"roxy,omitempty"`
 }
 
 // DboAPIGetCacheGroupPerformanceParams defines parameters for DboAPIGetCacheGroupPerformance.
@@ -11617,6 +11684,7 @@ type DboAPIGetCacheGroupPerformanceParams struct {
 
 	// Username Filter by username. Cannot be combined with endpoint_name.
 	Username *string `form:"username,omitempty" json:"username,omitempty"`
+	Roxy     *bool   `form:"roxy,omitempty" json:"roxy,omitempty"`
 }
 
 // DboAPIGetCacheGroupPerformanceSummaryParams defines parameters for DboAPIGetCacheGroupPerformanceSummary.
@@ -11635,6 +11703,7 @@ type DboAPIGetCacheGroupPerformanceSummaryParams struct {
 
 	// Username Filter by username. Cannot be combined with endpoint_name.
 	Username *string `form:"username,omitempty" json:"username,omitempty"`
+	Roxy     *bool   `form:"roxy,omitempty" json:"roxy,omitempty"`
 }
 
 // DboAPIGetCacheGroupMetricsFilterOptionsParams defines parameters for DboAPIGetCacheGroupMetricsFilterOptions.
@@ -11807,6 +11876,9 @@ type ExternalClusterAPIGetConnectAndEnableCASTAICmdParams struct {
 	// OnboardingPath Installation method (script, helm, castctl, …).
 	// Defaults to ONBOARDING_PATH_SCRIPT for backward compatibility.
 	OnboardingPath *ExternalClusterAPIGetConnectAndEnableCASTAICmdParamsOnboardingPath `form:"onboardingPath,omitempty" json:"onboardingPath,omitempty"`
+
+	// InstallReliabilityMetrics Whether CAST AI Reliability Metrics should be installed.
+	InstallReliabilityMetrics *bool `form:"installReliabilityMetrics,omitempty" json:"installReliabilityMetrics,omitempty"`
 }
 
 // ExternalClusterAPIGetConnectAndEnableCASTAICmdParamsOnboardingPath defines parameters for ExternalClusterAPIGetConnectAndEnableCASTAICmd.
