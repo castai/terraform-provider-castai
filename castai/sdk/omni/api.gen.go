@@ -178,6 +178,12 @@ type Cluster struct {
 	// Name Name of the cluster.
 	Name *string `json:"name,omitempty"`
 
+	// OmniAgentVersion The version of omni agent running on the cluster.
+	OmniAgentVersion *string `json:"omniAgentVersion,omitempty"`
+
+	// PodCidr The comma-separated list of pod CIDRs of the cluster.
+	PodCidr *string `json:"podCidr,omitempty"`
+
 	// ProviderType The type of the cluster.
 	ProviderType *ClusterProviderType `json:"providerType,omitempty"`
 
@@ -244,8 +250,27 @@ type EdgeClusterCNIOverlayEncap string
 
 // EdgeClusterControlPlane EdgeClusterControlPlane contains control plane configuration overrides for the edge cluster.
 type EdgeClusterControlPlane struct {
+	// ApiServerPort ApiServerPort is the port used for the API server.
+	ApiServerPort *int32 `json:"apiServerPort,omitempty"`
+
+	// ExternalAddress ExternalAddress is the IP address or hostname used to reach the API server from outside the cluster
+	//  if you can't reach in-cluster LoadBalancer services (e.g.: cluster is hidden behind an external LoadBalancer).
+	ExternalAddress *string `json:"externalAddress,omitempty"`
+
 	// Ha Switch from HA mode to single control plane and etcd replica. If not set default is HA.
 	Ha *bool `json:"ha,omitempty"`
+
+	// KonnectivityPort KonnectivityPort is the port used for konnectivity server.
+	KonnectivityPort *int32 `json:"konnectivityPort,omitempty"`
+
+	// ServiceAnnotations ServiceAnnotations are custom annotations to apply to the control plane service.
+	ServiceAnnotations *map[string]string `json:"serviceAnnotations,omitempty"`
+}
+
+// EdgeClusterLiqoSpec EdgeClusterLiqoSpec contains configuration overrides for liqo.
+type EdgeClusterLiqoSpec struct {
+	// GatewayServer GatewayServerConfig contains overrides for the Gateway server.
+	GatewayServer *GatewayServerConfig `json:"gatewayServer,omitempty"`
 }
 
 // EdgeClusterNetworking EdgeClusterNetworking contains networking configuration options for the edge cluster.
@@ -265,6 +290,9 @@ type EdgeClusterNetworking struct {
 type EdgeClusterSpec struct {
 	// ControlPlane Control plane configuration overrides.
 	ControlPlane *EdgeClusterControlPlane `json:"controlPlane,omitempty"`
+
+	// Liqo Liqo configuration overrides.
+	Liqo *EdgeClusterLiqoSpec `json:"liqo,omitempty"`
 
 	// Networking Networking configuration.
 	Networking *EdgeClusterNetworking `json:"networking,omitempty"`
@@ -293,8 +321,11 @@ type EdgeConfiguration struct {
 	// EdgeCount The number of edges using this configuration.
 	EdgeCount *int32 `json:"edgeCount,omitempty"`
 
-	// EdgeLocationId The ID of the Edge Location configuration belongs to.
+	// EdgeLocationId The ID of the Edge Location this Edge Configuration belongs to.
 	EdgeLocationId *string `json:"edgeLocationId,omitempty"`
+
+	// EdgeLocationName The Name of the Edge Location this Edge Configuration belongs to.
+	EdgeLocationName *string `json:"edgeLocationName,omitempty"`
 
 	// Gcp GCP specific configuration.
 	Gcp *GCPConfiguration `json:"gcp,omitempty"`
@@ -607,6 +638,21 @@ type GPUConfigTimeSharing struct {
 	Replicas *int32 `json:"replicas,omitempty"`
 }
 
+// GatewayServerConfig GatewayServerConfig contains configuration overrides for the Liqo gateway server.
+type GatewayServerConfig struct {
+	// ExternalAddress ExternalAddress is the IP address or hostname used to reach the Liqo gateway server from outside the cluster.
+	ExternalAddress *string `json:"externalAddress,omitempty"`
+
+	// ExternalPort ExternalPort is the port used for the Liqo gateway server.
+	ExternalPort *int32 `json:"externalPort,omitempty"`
+
+	// ServiceAnnotations ServiceAnnotations are custom annotations to apply to the Liqo gateway service.
+	ServiceAnnotations *map[string]string `json:"serviceAnnotations,omitempty"`
+
+	// ServiceLabels ServiceLabels are custom labels to apply to the Liqo gateway service.
+	ServiceLabels *map[string]string `json:"serviceLabels,omitempty"`
+}
+
 // GoogleProtobufAny Contains an arbitrary serialized message along with a @type that describes the type of the serialized message.
 type GoogleProtobufAny struct {
 	// Type The type of the serialized message.
@@ -710,6 +756,14 @@ type OCIParamCredentials struct {
 
 // OCIParamNetworking Networking configuration of OCI edge location.
 type OCIParamNetworking struct {
+	// AvailabilityDomainWithPrefix The OCI Availability Domain with a prefix - to be used for FSS File Storage by that location.
+	//  Only used if OCI CSI is enabled during onboarding.
+	AvailabilityDomainWithPrefix *string `json:"availabilityDomainWithPrefix,omitempty"`
+
+	// MountTargetId The OCID of the OCI File Storage mount target associated with the edge location.
+	//  Only used if OCI CSI is enabled during onboarding.
+	MountTargetId *string `json:"mountTargetId,omitempty"`
+
 	// SecurityGroupId The id of the security group to be used in the selected region.
 	SecurityGroupId *string `json:"securityGroupId,omitempty"`
 
@@ -776,7 +830,7 @@ type RegisteredClusterStatus struct {
 	// OmniAgentVersion The version of omni agent running on the cluster.
 	OmniAgentVersion string `json:"omniAgentVersion"`
 
-	// PodCidr The pod CIDR of the cluster.
+	// PodCidr The comma-separated list of pod CIDRs of the cluster.
 	PodCidr string `json:"podCidr"`
 }
 
@@ -806,7 +860,7 @@ type ReportStatusRequestCluster struct {
 	// ExternalCidr The external CIDR.
 	ExternalCidr *string `json:"externalCidr,omitempty"`
 
-	// PodCidr The pod CIDR.
+	// PodCidr The comma-separated list of pod CIDRs.
 	PodCidr *string `json:"podCidr,omitempty"`
 
 	// Status The status of the cluster.

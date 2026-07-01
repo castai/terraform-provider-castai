@@ -3,6 +3,7 @@ package castai
 import (
 	"context"
 	"fmt"
+	"github.com/samber/lo"
 	"net/http"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -235,10 +236,25 @@ func (r *omniClusterResource) ImportState(ctx context.Context, req resource.Impo
 		return
 	}
 
+	omniClusterResp, err := r.client.omniAPI.ClustersAPIGetClusterWithResponse(ctx, *clusterData.JSON200.OrganizationId, clusterID, nil)
+	if err != nil {
+		resp.Diagnostics.AddError("Failed to read omni cluster", err.Error())
+		return
+	}
+
+	if omniClusterResp.StatusCode() != http.StatusOK {
+		resp.Diagnostics.AddError("Unexpected omni cluster status", fmt.Sprintf("status code: %d, body: %s", omniClusterResp.StatusCode(), string(omniClusterResp.Body)))
+		return
+	}
+
 	resp.Diagnostics.Append(resp.State.Set(ctx, &omniClusterModel{
 		ID:             types.StringValue(clusterID),
 		OrganizationID: types.StringValue(*clusterData.JSON200.OrganizationId),
 		ClusterID:      types.StringValue(clusterID),
+		Status: &omniClusterStatusModel{
+			OmniAgentVersion: types.StringValue(lo.FromPtr(omniClusterResp.JSON200.OmniAgentVersion)),
+			PodCIDR:          types.StringValue(lo.FromPtr(omniClusterResp.JSON200.PodCidr)),
+		},
 	})...)
 }
 
