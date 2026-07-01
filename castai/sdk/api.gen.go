@@ -7537,8 +7537,13 @@ type NodetemplatesV1TemplateConstraints struct {
 	LifecycleTaintsDisabled *bool  `json:"lifecycleTaintsDisabled"`
 	MaxCpu                  *int32 `json:"maxCpu"`
 	MaxMemory               *int32 `json:"maxMemory"`
-	MinCpu                  *int32 `json:"minCpu"`
-	MinMemory               *int32 `json:"minMemory"`
+
+	// MaxPricePerCpu Maximum price per vCPU (hourly, in USD) for instance type filtering.
+	// Instance types whose price/vCPU exceeds this threshold are excluded.
+	// When price adjustments are configured, the filter applies to the adjusted price.
+	MaxPricePerCpu *float64 `json:"maxPricePerCpu"`
+	MinCpu         *int32   `json:"minCpu"`
+	MinMemory      *int32   `json:"minMemory"`
 
 	// OnDemand Should include on-demand instances in the considered pool.
 	OnDemand       *bool                                             `json:"onDemand"`
@@ -11657,6 +11662,7 @@ type DboAPIGetCacheGroupParams struct {
 
 	// MetricsRangeEnd End of period.
 	MetricsRangeEnd *time.Time `form:"metricsRange.end,omitempty" json:"metricsRange.end,omitempty"`
+	Roxy            *bool      `form:"roxy,omitempty" json:"roxy,omitempty"`
 }
 
 // DboAPIGetCacheGroupPerformanceParams defines parameters for DboAPIGetCacheGroupPerformance.
@@ -11678,6 +11684,7 @@ type DboAPIGetCacheGroupPerformanceParams struct {
 
 	// Username Filter by username. Cannot be combined with endpoint_name.
 	Username *string `form:"username,omitempty" json:"username,omitempty"`
+	Roxy     *bool   `form:"roxy,omitempty" json:"roxy,omitempty"`
 }
 
 // DboAPIGetCacheGroupPerformanceSummaryParams defines parameters for DboAPIGetCacheGroupPerformanceSummary.
@@ -11696,6 +11703,7 @@ type DboAPIGetCacheGroupPerformanceSummaryParams struct {
 
 	// Username Filter by username. Cannot be combined with endpoint_name.
 	Username *string `form:"username,omitempty" json:"username,omitempty"`
+	Roxy     *bool   `form:"roxy,omitempty" json:"roxy,omitempty"`
 }
 
 // DboAPIGetCacheGroupMetricsFilterOptionsParams defines parameters for DboAPIGetCacheGroupMetricsFilterOptions.
