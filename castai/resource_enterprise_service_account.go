@@ -97,8 +97,7 @@ func resourceEnterpriseServiceAccountRead(ctx context.Context, data *schema.Reso
 	var found *organization_management.ListEnterpriseServiceAccountsResponseServiceAccount
 	for _, item := range *resp.JSON200.Items {
 		if item.Id != nil && *item.Id == data.Id() {
-			copy := item
-			found = &copy
+			found = &item
 			break
 		}
 	}
