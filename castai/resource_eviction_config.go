@@ -411,6 +411,8 @@ func toPodSelector(in interface{}) (*sdk.CastaiEvictorV1PodSelector, error) {
 			}
 		case FieldPodSelectorReplicasMin:
 			if replicasMin, ok := v.(int); ok {
+				// 0 and unset both mean "no minimum enforced" to the evictor, so treating
+				// 0 as unset avoids Terraform's int zero-value/unset ambiguity without changing behavior.
 				if replicasMin == 0 {
 					continue
 				}
