@@ -233,6 +233,15 @@ type CustomCloudConfiguration = map[string]interface{}
 // CustomProviderParam Custom cloud provider params.
 type CustomProviderParam = map[string]interface{}
 
+// EdgeClusterAddon EdgeClusterAddon configures a single optional addon installed on the edge cluster.
+type EdgeClusterAddon struct {
+	// Name The addon identifier. Must match one of the supported optional addons.
+	Name string `json:"name"`
+
+	// Values Helm values for the addon, deep-merged over the chart's default values.
+	Values *map[string]interface{} `json:"values,omitempty"`
+}
+
 // EdgeClusterCNI EdgeClusterCNI contains CNI (kube-router) configuration for the edge cluster.
 type EdgeClusterCNI struct {
 	// Overlay Overlay mode for kube-router pod-to-pod traffic.
@@ -288,6 +297,16 @@ type EdgeClusterNetworking struct {
 //
 //	Fields left unset will use system defaults.
 type EdgeClusterSpec struct {
+	// Addons Addons to install on the edge cluster. When set, only the listed addons are
+	//  installed (an empty list installs no optional addons).
+	//
+	//  Available optional addons:
+	//    * `nvidia-gpu-operator`     - NVIDIA GPU Operator.
+	//    * `nvidia-dra`              - NVIDIA Dynamic Resource Allocation driver.
+	//    * `nvidia-network-operator` - NVIDIA Network Operator.
+	//    * `oci-csi`                 - Oracle Cloud Infrastructure CSI driver.
+	Addons *[]EdgeClusterAddon `json:"addons,omitempty"`
+
 	// ControlPlane Control plane configuration overrides.
 	ControlPlane *EdgeClusterControlPlane `json:"controlPlane,omitempty"`
 

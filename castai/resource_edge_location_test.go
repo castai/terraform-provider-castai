@@ -211,6 +211,8 @@ func TestAccCloudAgnostic_ResourceEdgeLocationGCPImpersonation(t *testing.T) {
 					resource.TestCheckResourceAttrSet(resourceName, "id"),
 					resource.TestCheckResourceAttr(resourceName, "credentials_revision", "1"),
 					resource.TestCheckResourceAttr(resourceName, "networking.tunneled_cidrs.#", "0"),
+					resource.TestCheckResourceAttr(resourceName, "addons.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "addons.0.name", "nvidia-gpu-operator"),
 				),
 			},
 			{
@@ -223,6 +225,29 @@ func TestAccCloudAgnostic_ResourceEdgeLocationGCPImpersonation(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "zones.0.name", "us-central1-a"),
 					resource.TestCheckResourceAttr(resourceName, "zones.1.id", "us-central1-b"),
 					resource.TestCheckResourceAttr(resourceName, "zones.1.name", "us-central1-b"),
+				),
+			},
+			// Set explicit addon list.
+			{
+				Config: testAccEdgeLocationGCPImpersonationConfigWithAddons(rName, clusterName, `addons = [{ name = "nvidia-network-operator" }]`),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "addons.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "addons.0.name", "nvidia-network-operator"),
+				),
+			},
+			// Explicit empty list → no addons.
+			{
+				Config: testAccEdgeLocationGCPImpersonationConfigWithAddons(rName, clusterName, `addons = []`),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "addons.#", "0"),
+				),
+			},
+			// Remove addons block entirely → reverts to default nvidia-gpu-operator.
+			{
+				Config: testAccEdgeLocationGCPImpersonationConfigWithAddons(rName, clusterName, ``),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "addons.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "addons.0.name", "nvidia-gpu-operator"),
 				),
 			},
 		},
@@ -325,7 +350,8 @@ func testAccEdgeLocationGCPImpersonationConfig(rName, clusterName string) string
 		"Test GCP edge location impersonation",
 		"castai-omni@test-project-123456.iam.gserviceaccount.com",
 		[]string{"us-central1-a", "us-central1-b"},
-		[]string{"edge-location", "castai"})
+		[]string{"edge-location", "castai"},
+		"")
 }
 
 func testAccEdgeLocationGCPImpersonationUpdated(rName, clusterName string) string {
@@ -333,7 +359,8 @@ func testAccEdgeLocationGCPImpersonationUpdated(rName, clusterName string) strin
 		"Updated GCP edge location impersonation",
 		"castai-omni-updated@test-project-123456.iam.gserviceaccount.com",
 		[]string{"us-central1-a", "us-central1-b"},
-		[]string{"edge-location", "castai"})
+		[]string{"edge-location", "castai"},
+		"")
 }
 
 func formatGCPZones(zones []string) string {
@@ -365,7 +392,16 @@ func formatGCPNetworkTags(networkTags []string) string {
 	return builder.String()
 }
 
-func testAccEdgeLocationGCPImpersonationConfigWithParams(rName, clusterName, description, targetSA string, zones []string, networkTags []string) string {
+func testAccEdgeLocationGCPImpersonationConfigWithAddons(rName, clusterName, addonsBlock string) string {
+	return testAccEdgeLocationGCPImpersonationConfigWithParams(rName, clusterName,
+		"Test GCP edge location impersonation",
+		"castai-omni@test-project-123456.iam.gserviceaccount.com",
+		[]string{"us-central1-a", "us-central1-b"},
+		[]string{"edge-location", "castai"},
+		addonsBlock)
+}
+
+func testAccEdgeLocationGCPImpersonationConfigWithParams(rName, clusterName, description, targetSA string, zones []string, networkTags []string, addonsBlock string) string {
 	organizationID := testAccGetOrganizationID()
 
 	zonesConfig := formatGCPZones(zones)
@@ -380,6 +416,7 @@ resource "castai_edge_location" "test" {
   region          	 = "us-central1"
   control_plane_mode = "SHARED"
 %[3]s
+%[7]s
 
   networking = {
     tunneled_cidrs = []
@@ -395,7 +432,7 @@ resource "castai_edge_location" "test" {
     network_tags                 = [%[4]s]
   }
 }
-`, rName, description, zonesConfig, networkTagsConfig, organizationID, targetSA))
+`, rName, description, zonesConfig, networkTagsConfig, organizationID, targetSA, addonsBlock))
 }
 
 func TestAccCloudAgnostic_ResourceEdgeLocationCustom(t *testing.T) {

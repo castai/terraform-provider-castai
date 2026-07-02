@@ -2,6 +2,7 @@ package castai
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"strings"
@@ -10,12 +11,14 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/objectvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/resourcevalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
@@ -49,6 +52,7 @@ type edgeLocationModel struct {
 	ControlPlaneMode types.String       `tfsdk:"control_plane_mode"`
 	ControlPlane     *controlPlaneModel `tfsdk:"control_plane"`
 	Networking       *networkingModel   `tfsdk:"networking"`
+	Addons           []addonModel       `tfsdk:"addons"`
 	Zones            []zoneModel        `tfsdk:"zones"`
 	AWS              *awsModel          `tfsdk:"aws"`
 	GCP              *gcpModel          `tfsdk:"gcp"`
@@ -57,6 +61,30 @@ type edgeLocationModel struct {
 	// Computed revision number incremented each time credentials have changed.
 	CredentialsRevision types.Int64 `tfsdk:"credentials_revision"`
 }
+
+type addonModel struct {
+	Name   types.String `tfsdk:"name"`
+	Values types.String `tfsdk:"values"`
+}
+
+func (m addonModel) Equal(other addonModel) bool {
+	return m.Name.Equal(other.Name) && m.Values.Equal(other.Values)
+}
+
+var addonObjectType = types.ObjectType{
+	AttrTypes: map[string]attr.Type{
+		"name":   types.StringType,
+		"values": types.StringType,
+	},
+}
+
+// defaultAddonsList is the schema-level default applied when addons is omitted from config.
+var defaultAddonsList = types.ListValueMust(addonObjectType, []attr.Value{
+	types.ObjectValueMust(addonObjectType.AttrTypes, map[string]attr.Value{
+		"name":   types.StringValue("nvidia-gpu-operator"),
+		"values": types.StringNull(),
+	}),
+})
 
 type controlPlaneModel struct {
 	Ha types.Bool `tfsdk:"ha"`
@@ -91,6 +119,19 @@ func (m *networkingModel) Equal(other *networkingModel) bool {
 		return m == other
 	}
 	return m.TunneledCIDRs.Equal(other.TunneledCIDRs) && m.CNI.Equal(other.CNI)
+}
+
+// addonsEqual reports whether two addon slices are semantically equivalent.
+func addonsEqual(a, b []addonModel) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for i := range a {
+		if !a[i].Equal(b[i]) {
+			return false
+		}
+	}
+	return true
 }
 
 type zoneModel struct {
@@ -338,6 +379,27 @@ func (r *edgeLocationResource) Schema(_ context.Context, _ resource.SchemaReques
 					},
 				},
 			},
+			"addons": schema.ListNestedAttribute{
+				Optional:    true,
+				Computed:    true,
+				Default:     listdefault.StaticValue(defaultAddonsList),
+				Description: "Optional addons to install on the edge cluster. Defaults to installing nvidia-gpu-operator. Set to an empty list to install no optional addons.",
+				NestedObject: schema.NestedAttributeObject{
+					Attributes: map[string]schema.Attribute{
+						"name": schema.StringAttribute{
+							Required:    true,
+							Description: "Addon identifier. One of: nvidia-gpu-operator, nvidia-dra, nvidia-network-operator, oci-csi.",
+						},
+						"values": schema.StringAttribute{
+							Optional:    true,
+							Description: "Helm values for the addon, encoded as a JSON object. Deep-merged over the chart's default values.",
+							Validators: []validator.String{
+								validators.ValidJSON(),
+							},
+						},
+					},
+				},
+			},
 			"zones": schema.ListNestedAttribute{
 				Optional:    true,
 				Description: "List of availability zones for the edge location",
@@ -572,7 +634,7 @@ func (r *edgeLocationResource) Create(ctx context.Context, req resource.CreateRe
 		createReq.Description = lo.ToPtr(plan.Description.ValueString())
 	}
 
-	createReq.EdgeClusterSpec, diags = r.toEdgeClusterSpec(ctx, plan.ControlPlane, plan.Networking)
+	createReq.EdgeClusterSpec, diags = r.toEdgeClusterSpec(ctx, plan.ControlPlane, plan.Networking, plan.Addons)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -664,7 +726,7 @@ func (r *edgeLocationResource) Read(ctx context.Context, req resource.ReadReques
 	}
 	state.Name = types.StringValue(edgeLocation.Name)
 	state.Description = types.StringNull()
-	if edgeLocation.Description != nil {
+	if edgeLocation.Description != nil && *edgeLocation.Description != "" {
 		state.Description = types.StringValue(*edgeLocation.Description)
 	}
 	if edgeLocation.ControlPlaneMode != nil {
@@ -705,6 +767,9 @@ func (r *edgeLocationResource) Read(ctx context.Context, req resource.ReadReques
 					OverlayEncap: overlayEncap,
 				}
 			}
+		}
+		if edgeLocation.EdgeClusterSpec.Addons != nil {
+			state.Addons = r.toAddonsModel(*edgeLocation.EdgeClusterSpec.Addons)
 		}
 	}
 
@@ -940,9 +1005,10 @@ func (r *edgeLocationResource) edgeClusterSpecUpdate(ctx context.Context, plan, 
 		diags      diag.Diagnostics
 		cpChanged  = !plan.ControlPlane.Equal(state.ControlPlane)
 		netChanged = !plan.Networking.Equal(state.Networking)
+		addonsChg  = !addonsEqual(plan.Addons, state.Addons)
 	)
 
-	if !cpChanged && !netChanged {
+	if !cpChanged && !netChanged && !addonsChg {
 		return nil, diags
 	}
 
@@ -967,6 +1033,14 @@ func (r *edgeLocationResource) edgeClusterSpecUpdate(ctx context.Context, plan, 
 			}
 		}
 	}
+	if addonsChg {
+		converted, d := r.toAddons(plan.Addons)
+		diags.Append(d...)
+		if diags.HasError() {
+			return nil, diags
+		}
+		spec.Addons = &converted
+	}
 	return spec, diags
 }
 
@@ -984,9 +1058,9 @@ func (r *edgeLocationResource) toCNI(cni *cniModel) *omni.EdgeClusterCNI {
 	return out
 }
 
-func (r *edgeLocationResource) toEdgeClusterSpec(ctx context.Context, cp *controlPlaneModel, net *networkingModel) (*omni.EdgeClusterSpec, diag.Diagnostics) {
+func (r *edgeLocationResource) toEdgeClusterSpec(ctx context.Context, cp *controlPlaneModel, net *networkingModel, addons []addonModel) (*omni.EdgeClusterSpec, diag.Diagnostics) {
 	var diags diag.Diagnostics
-	if cp == nil && net == nil {
+	if cp == nil && net == nil && len(addons) == 0 {
 		return nil, diags
 	}
 
@@ -1010,7 +1084,61 @@ func (r *edgeLocationResource) toEdgeClusterSpec(ctx context.Context, cp *contro
 			spec.Networking.Cni = r.toCNI(net.CNI)
 		}
 	}
+
+	converted, d := r.toAddons(addons)
+	diags.Append(d...)
+	if diags.HasError() {
+		return nil, diags
+	}
+	spec.Addons = &converted
 	return spec, diags
+}
+
+// toAddons converts the Terraform addon model to the SDK type. Values are decoded
+// from a JSON-encoded string into the SDK's map[string]interface{} representation.
+func (r *edgeLocationResource) toAddons(addons []addonModel) ([]omni.EdgeClusterAddon, diag.Diagnostics) {
+	var diags diag.Diagnostics
+	out := make([]omni.EdgeClusterAddon, 0, len(addons))
+	for _, a := range addons {
+		entry := omni.EdgeClusterAddon{
+			Name: a.Name.ValueString(),
+		}
+		if !a.Values.IsNull() && !a.Values.IsUnknown() {
+			var raw map[string]interface{}
+			if err := json.Unmarshal([]byte(a.Values.ValueString()), &raw); err != nil {
+				diags.AddAttributeError(
+					path.Root("addons").AtListIndex(len(out)),
+					"Invalid addon values JSON",
+					fmt.Sprintf("addon %q values must be a valid JSON object: %s", entry.Name, err.Error()),
+				)
+				return nil, diags
+			}
+			entry.Values = &raw
+		}
+		out = append(out, entry)
+	}
+	return out, diags
+}
+
+func (r *edgeLocationResource) toAddonsModel(apiAddons []omni.EdgeClusterAddon) []addonModel {
+	out := make([]addonModel, 0, len(apiAddons))
+	for _, a := range apiAddons {
+		m := addonModel{
+			Name: types.StringValue(a.Name),
+		}
+		if a.Values != nil {
+			b, err := json.Marshal(*a.Values)
+			if err != nil {
+				// Should not happen for in-memory map[string]interface{}, but fall back to empty
+				// JSON object rather than producing a non-JSON string that would fail validation.
+				m.Values = types.StringValue("{}")
+			} else {
+				m.Values = types.StringValue(string(b))
+			}
+		}
+		out = append(out, m)
+	}
+	return out
 }
 
 func (r *edgeLocationResource) toZones(zones []zoneModel) []omni.Zone {
@@ -1185,7 +1313,7 @@ func (r *edgeLocationResource) toGCPModel(ctx context.Context, config *omni.GCPP
 		NetworkTags:                      types.SetNull(types.StringType),
 	}
 
-	if config.InstanceServiceAccount != nil {
+	if config.InstanceServiceAccount != nil && *config.InstanceServiceAccount != "" {
 		gcp.InstanceServiceAccount = types.StringValue(*config.InstanceServiceAccount)
 	}
 
