@@ -71,7 +71,6 @@ func resourceGKEClusterId() *schema.Resource {
 			},
 			FieldGKECastSA: {
 				Type:        schema.TypeString,
-				Optional:    true,
 				Computed:    true,
 				Description: "Service account email in cast project",
 			},
@@ -133,6 +132,9 @@ func resourceCastaiGKEClusterIdCreate(ctx context.Context, data *schema.Resource
 			},
 		})
 		if err != nil {
+			return diag.FromErr(err)
+		}
+		if err := sdk.StatusOk(resp); err != nil {
 			return diag.FromErr(err)
 		}
 		if resp.JSON200 == nil || resp.JSON200.ServiceAccount == nil {

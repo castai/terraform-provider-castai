@@ -23,12 +23,12 @@ GKE cluster resource allows connecting an existing GKE cluster to CAST AI.
 
 ### Optional
 
-- `cast_service_account` (String) Service account email in cast project
 - `client_service_account` (String) Service account email in client project
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
 ### Read-Only
 
+- `cast_service_account` (String) Service account email in cast project
 - `cluster_token` (String, Sensitive) CAST.AI agent cluster token
 - `id` (String) The ID of this resource.
 - `organization_id` (String) CAST AI organization ID
