@@ -3177,11 +3177,29 @@ type CastaiRbacV1beta1OrganizationScope struct {
 
 // CastaiRbacV1beta1PermissionGroup PermissionGroup represents a named group of permissions.
 type CastaiRbacV1beta1PermissionGroup struct {
+	// CategoryDescription Description of the category.
+	CategoryDescription *string `json:"categoryDescription,omitempty"`
+
+	// CategoryDisplayName Human-readable display name for the category.
+	CategoryDisplayName *string `json:"categoryDisplayName,omitempty"`
+
+	// Description Description of the permission group.
+	Description *string `json:"description,omitempty"`
+
+	// DisplayName Human-readable display name for the permission group.
+	DisplayName *string `json:"displayName,omitempty"`
+
 	// Name Name of the permission group.
 	Name *string `json:"name,omitempty"`
 
 	// Permissions List of permissions in this group.
 	Permissions *[]CastaiRbacV1beta1Permissions `json:"permissions,omitempty"`
+
+	// ResourceDescription Description of the resource.
+	ResourceDescription *string `json:"resourceDescription,omitempty"`
+
+	// ResourceDisplayName Human-readable display name for the resource.
+	ResourceDisplayName *string `json:"resourceDisplayName,omitempty"`
 }
 
 // CastaiRbacV1beta1Permissions defines model for castai.rbac.v1beta1.Permissions.
@@ -3802,6 +3820,9 @@ type CastaiUsersV1beta1CurrentUserProfileResponse struct {
 	// Email User email.
 	Email     *string `json:"email,omitempty"`
 	EmailHash *string `json:"emailHash,omitempty"`
+
+	// Fingerprint Fingerprint is a unique identifier for the user's device or browser.
+	Fingerprint *string `json:"fingerprint"`
 
 	// FirstLogin User first login.
 	FirstLogin *bool `json:"firstLogin,omitempty"`
