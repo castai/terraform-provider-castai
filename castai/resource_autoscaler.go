@@ -391,9 +391,19 @@ func resourceAutoscaler() *schema.Resource {
 												FieldSpotInterruptionPredictionsType: {
 													Type:             schema.TypeString,
 													Optional:         true,
-													Default:          "AWSRebalanceRecommendations",
-													Description:      "define the type of the spot interruption prediction to handle. Allowed values are AWSRebalanceRecommendations, CASTAIInterruptionPredictions.",
+													Default:          "CASTAIInterruptionPredictions",
+													Description:      "define the type of the spot interruption prediction to handle. The value \"AWSRebalanceRecommendations\" is deprecated; use \"CASTAIInterruptionPredictions\".",
+													Deprecated:       "The value \"AWSRebalanceRecommendations\" is deprecated. Cast AI ML predictions are now used for all spot interruption prediction.",
 													ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"AWSRebalanceRecommendations", "CASTAIInterruptionPredictions"}, false)),
+													DiffSuppressFunc: func(k, oldVal, newVal string, d *schema.ResourceData) bool {
+														normalize := func(v string) string {
+															if v == "AWSRebalanceRecommendations" {
+																return "CASTAIInterruptionPredictions"
+															}
+															return v
+														}
+														return normalize(oldVal) == normalize(newVal)
+													},
 												},
 											},
 										},
