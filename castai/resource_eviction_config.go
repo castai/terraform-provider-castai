@@ -27,6 +27,7 @@ const (
 	FieldEvictionOptionDisposable = "disposable"
 	FieldPodSelectorKind          = "kind"
 	FieldPodSelectorNamespace     = "namespace"
+	FieldPodSelectorReplicasMin   = "replicas_min"
 	FieldMatchLabels              = "match_labels"
 	FieldMatchExpressions         = "match_expressions"
 	FieldMatchExpressionKey       = "key"
@@ -72,6 +73,11 @@ func resourceEvictionConfig() *schema.Resource {
 									FieldPodSelectorKind: {
 										Type:     schema.TypeString,
 										Optional: true,
+									},
+									FieldPodSelectorReplicasMin: {
+										Type:        schema.TypeInt,
+										Optional:    true,
+										Description: "Minimum number of pod replicas to keep running when evicting matched pods",
 									},
 									FieldMatchLabels: {
 										Type:     schema.TypeMap,
@@ -403,6 +409,17 @@ func toPodSelector(in interface{}) (*sdk.CastaiEvictorV1PodSelector, error) {
 			} else {
 				return nil, fmt.Errorf("expecting bool, got %T", v)
 			}
+		case FieldPodSelectorReplicasMin:
+			if replicasMin, ok := v.(int); ok {
+				// 0 and unset both mean "no minimum enforced" to the evictor, so treating
+				// 0 as unset avoids Terraform's int zero-value/unset ambiguity without changing behavior.
+				if replicasMin == 0 {
+					continue
+				}
+				out.ReplicasMin = lo.ToPtr(int32(replicasMin))
+			} else {
+				return nil, fmt.Errorf("expecting int, got %T", v)
+			}
 		case FieldMatchExpressions:
 			if mes, ok := v.([]interface{}); ok {
 				me, err := toMatchExpressions(mes)
@@ -506,6 +523,9 @@ func flattenPodSelector(ps *sdk.CastaiEvictorV1PodSelector) []map[string]any {
 	}
 	if ps.Namespace != nil {
 		out[FieldPodSelectorNamespace] = *ps.Namespace
+	}
+	if ps.ReplicasMin != nil {
+		out[FieldPodSelectorReplicasMin] = int(*ps.ReplicasMin)
 	}
 	if ps.LabelSelector != nil {
 		if ps.LabelSelector.MatchLabels != nil {
