@@ -126,6 +126,7 @@ Optional:
 - `is_gpu_only` (Boolean) GPU instance constraint - will only pick nodes with GPU if true
 - `max_cpu` (Number) Max CPU cores per node.
 - `max_memory` (Number) Max Memory (Mib) per node.
+- `max_price_per_cpu` (Number) Maximum price per vCPU threshold. When price adjustments are configured, the filter applies to the adjusted price.
 - `min_cpu` (Number) Min CPU cores per node.
 - `min_memory` (Number) Min Memory (Mib) per node.
 - `on_demand` (Boolean) Should include on-demand instances in the considered pool.

@@ -222,6 +222,7 @@ constraints.0.instance_families.0.include.# = 0
 constraints.0.is_gpu_only = false
 constraints.0.max_cpu = 10000
 constraints.0.max_memory = 0
+constraints.0.max_price_per_cpu = 0
 constraints.0.min_cpu = 10
 constraints.0.min_memory = 0
 constraints.0.dedicated_node_affinity.# = 1
