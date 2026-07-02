@@ -134,7 +134,7 @@ Optional:
 - `spot` (Boolean) Should include spot instances in the considered pool.
 - `spot_diversity_price_increase_limit_percent` (Number) Allowed node configuration price increase when diversifying instance types. E.g. if the value is 10%, then the overall price of diversified instance types can be 10% higher than the price of the optimal configuration.
 - `spot_interruption_predictions_enabled` (Boolean) Enable/disable spot interruption predictions.
-- `spot_interruption_predictions_type` (String) Spot interruption predictions type. Can be either "aws-rebalance-recommendations" or "interruption-predictions".
+- `spot_interruption_predictions_type` (String, Deprecated) Spot interruption predictions type. Only "interruption-predictions" is supported.
 - `spot_reliability_enabled` (Boolean) Enable/disable spot reliability. When enabled, autoscaler will create instances with highest reliability score within price increase threshold.
 - `spot_reliability_price_increase_limit_percent` (Number) Allowed node price increase when using spot reliability on ordering the instance types . E.g. if the value is 10%, then the overall price of instance types can be 10% higher than the price of the optimal configuration.
 - `storage_optimized` (Boolean) Storage optimized instance constraint (deprecated).
