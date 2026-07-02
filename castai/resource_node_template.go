@@ -1693,13 +1693,13 @@ func toTemplateConstraints(obj map[string]any) *sdk.NodetemplatesV1TemplateConst
 	if v, ok := obj[FieldNodeTemplateMaxMemory].(int); ok && v != 0 {
 		out.MaxMemory = toPtr(int32(v))
 	}
-	if v, ok := obj[FieldNodeTemplateMinCpu].(int); ok {
+	if v, ok := obj[FieldNodeTemplateMinCpu].(int); ok && v != 0 {
 		out.MinCpu = toPtr(int32(v))
 	}
 	if v, ok := obj[FieldNodeTemplateMaxPricePerCpu].(float64); ok {
 		out.MaxPricePerCpu = toPtr(v)
 	}
-	if v, ok := obj[FieldNodeTemplateMinMemory].(int); ok {
+	if v, ok := obj[FieldNodeTemplateMinMemory].(int); ok && v != 0 {
 		out.MinMemory = toPtr(int32(v))
 	}
 	if v, ok := obj[FieldNodeTemplateSpot].(bool); ok {
