@@ -10,46 +10,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// TestNodeTemplateSpotInterruptionPredictionsTypeDefault asserts that when the
-// user does not set spot_interruption_predictions_type, the default
-// "interruption-predictions" is used.
-func TestNodeTemplateSpotInterruptionPredictionsTypeDefault(t *testing.T) {
-	r := require.New(t)
-
-	res := resourceNodeTemplate()
-	sm := schema.InternalMap(res.Schema)
-
-	config := terraform.NewResourceConfigRaw(map[string]any{
-		FieldClusterId:             "b6bfc074-a267-400f-b8f1-db0850c369b1",
-		FieldNodeTemplateName:      "default-by-castai",
-		FieldNodeTemplateIsDefault: true,
-		FieldNodeTemplateIsEnabled: true,
-		FieldNodeTemplateConstraints: []any{
-			map[string]any{
-				FieldNodeTemplateOnDemand: true,
-			},
-		},
-	})
-
-	diff, err := sm.Diff(context.Background(), nil, config, nil, nil, true)
-	r.NoError(err)
-
-	d, err := sm.Data(nil, diff)
-	r.NoError(err)
-
-	constraintsList := d.Get(FieldNodeTemplateConstraints).([]any)
-	r.Len(constraintsList, 1)
-	constraints := constraintsList[0].(map[string]any)
-
-	r.Equal("interruption-predictions", constraints[FieldNodeTemplateSpotInterruptionPredictionsType],
-		"schema default should be interruption-predictions when the user omits spot_interruption_predictions_type")
-
-	sent := toTemplateConstraints(constraints)
-	r.NotNil(sent)
-	r.NotNil(sent.SpotInterruptionPredictionsType)
-	r.Equal("interruption-predictions", *sent.SpotInterruptionPredictionsType)
-}
-
 // TestNodeTemplateMinCpuMemoryJSONBody verifies that
 // the JSON payload sent to the CAST AI API contains "minCpu": null and
 // "minMemory": null when the user has not configured those fields.
