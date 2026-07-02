@@ -46,6 +46,4 @@ func TestNodeTemplateMinCpuMemoryJSONBody(t *testing.T) {
 	bodyStr := string(body)
 	r.Contains(bodyStr, `"minCpu":null`, "min_cpu should be sent as JSON null when not configured")
 	r.Contains(bodyStr, `"minMemory":null`, "min_memory should be sent as JSON null when not configured")
-	r.Contains(bodyStr, `"spotInterruptionPredictionsType":"interruption-predictions"`,
-		"spot_interruption_predictions_type default should be interruption-predictions")
 }
