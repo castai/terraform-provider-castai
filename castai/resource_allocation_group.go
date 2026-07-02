@@ -63,9 +63,9 @@ func resourceAllocationGroup() *schema.Resource {
 	OR (default) - workload needs to have at least one label to be included
 	AND - workload needs to have all the labels to be included`,
 				Optional: true,
-				Default:  sdk.OR,
+				Default:  sdk.CostreportV1beta1FilterOperatorOR,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{
-					string(sdk.AND), string(sdk.OR),
+					string(sdk.CostreportV1beta1FilterOperatorAND), string(sdk.CostreportV1beta1FilterOperatorOR),
 				}, false)),
 			},
 		},
@@ -231,7 +231,7 @@ func resourceAllocationGroupDelete(ctx context.Context, d *schema.ResourceData, 
 }
 
 func toLabelsOperator(d *schema.ResourceData) *sdk.CostreportV1beta1FilterOperator {
-	defaultLabelOperator := sdk.OR
+	defaultLabelOperator := sdk.CostreportV1beta1FilterOperatorOR
 	if v, ok := d.GetOk("labels_operator"); ok {
 		if lv := v.(string); lv != "" {
 			labelOperator := sdk.CostreportV1beta1FilterOperator(lv)
@@ -260,7 +260,7 @@ func toLabels(lv map[string]interface{}) []sdk.CostreportV1beta1AllocationGroupF
 	if len(lv) > 0 {
 		labelsStringMap := toStringMap(lv)
 
-		operator := sdk.CostreportV1beta1AllocationGroupFilterLabelValueOperatorEqual
+		operator := sdk.Equal
 
 		if len(labelsStringMap) > 0 {
 			labels := make([]sdk.CostreportV1beta1AllocationGroupFilterLabelValue, 0, len(labelsStringMap))
