@@ -965,6 +965,122 @@ func TestAccEKS_ResourceNodeTemplate_basic(t *testing.T) {
 	})
 }
 
+// TestAccEKS_ResourceNodeTemplate_defaultSpotFieldsDrift reproduces CSU-5463.
+// The customer's flow was:
+//  1. Create the default node template with only on_demand in constraints.
+//  2. In the CAST AI UI, remove the lingering zero-valued constraints and
+//     set min_cpu = 16.
+//  3. Re-apply the same Terraform config.
+//  4. Terraform tries to reset min_cpu to null and clear the spot detail
+//     fields, but the spot detail fields never get cleared, causing a
+//     perpetual diff.
+func TestAccEKS_ResourceNodeTemplate_defaultSpotFieldsDrift(t *testing.T) {
+	rName := fmt.Sprintf("%v-default-spot-drift-%v", ResourcePrefix, acctest.RandString(8))
+	resourceName := "castai_node_template.default"
+	clusterName, _ := lo.Coalesce(os.Getenv("CLUSTER_NAME"), "cost-terraform")
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		// Default node templates cannot be deleted, so there is no destroy check.
+		Steps: []resource.TestStep{
+			{
+				// Step 1: Terraform creates the default template with a minimal
+				// constraints block (only on_demand).
+				Config: testAccDefaultNodeTemplateSpotDriftConfig(rName, clusterName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "name", "default-by-castai"),
+					resource.TestCheckResourceAttr(resourceName, "is_default", "true"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.on_demand", "true"),
+				),
+			},
+			{
+				// Step 2: Simulate the customer editing the template in the
+				// CAST AI UI. The Check writes min_cpu = 16 and the three spot
+				// detail fields directly via the API, bypassing Terraform. After
+				// the Check runs, the refresh sees the new values that are not
+				// in config, so a non-empty plan is expected here.
+				Config: testAccDefaultNodeTemplateSpotDriftConfig(rName, clusterName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccSetDefaultNodeTemplateConstraintsViaAPI(resourceName, 16),
+				),
+				ExpectNonEmptyPlan: true,
+			},
+			{
+				// Step 3: Re-apply the same Terraform config. The apply must
+				// clear every field that the previous step added so that the
+				// refresh plan is empty. With the bug, the spot detail fields
+				// are not cleared and this step fails because the refresh plan
+				// is non-empty.
+				Config: testAccDefaultNodeTemplateSpotDriftConfig(rName, clusterName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.on_demand", "true"),
+				),
+			},
+		},
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"aws": {
+				Source:            "hashicorp/aws",
+				VersionConstraint: "~> 4.0",
+			},
+		},
+	})
+}
+
+func testAccDefaultNodeTemplateSpotDriftConfig(rName, clusterName string) string {
+	return ConfigCompose(testAccEKSClusterConfig(rName, clusterName), testAccNodeConfig(rName), `
+		resource "castai_node_template" "default" {
+			cluster_id       = castai_eks_cluster.test.id
+			name             = "default-by-castai"
+			is_default       = true
+			is_enabled       = true
+			configuration_id = castai_node_configuration.test.id
+
+			constraints {
+				on_demand = true
+			}
+		}
+	`)
+}
+
+// testAccSetDefaultNodeTemplateConstraintsViaAPI simulates a user editing the
+// default node template in the CAST AI UI. It sets min_cpu and the three
+// spot-related detail fields that drift in CSU-5463.
+func testAccSetDefaultNodeTemplateConstraintsViaAPI(resourceName string, minCPU int32) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources[resourceName]
+		if !ok {
+			return fmt.Errorf("resource %q not found in state", resourceName)
+		}
+
+		clusterID := rs.Primary.Attributes["cluster_id"]
+		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+		defer cancel()
+
+		client := testAccProvider.Meta().(*ProviderConfig).api
+
+		req := sdk.NodeTemplatesAPIUpdateNodeTemplateJSONRequestBody{
+			Constraints: &sdk.NodetemplatesV1TemplateConstraints{
+				OnDemand:                                 toPtr(true),
+				MinCpu:                                   toPtr(minCPU),
+				SpotReliabilityPriceIncreaseLimitPercent: toPtr(int32(20)),
+				SpotDiversityPriceIncreaseLimitPercent:   toPtr(int32(21)),
+				SpotInterruptionPredictionsType:          toPtr("interruption-predictions"),
+			},
+		}
+
+		resp, err := client.NodeTemplatesAPIUpdateNodeTemplateWithResponse(ctx, clusterID, "default-by-castai", req)
+		if err != nil {
+			return fmt.Errorf("updating default node template via API: %w", err)
+		}
+		if err := sdk.CheckOKResponse(resp, err); err != nil {
+			return fmt.Errorf("updating default node template via API: %w", err)
+		}
+
+		return nil
+	}
+}
+
 func testAccNodeTemplateConfig(rName, clusterName string) string {
 	return ConfigCompose(testAccEKSClusterConfig(rName, clusterName), testAccNodeConfig(rName), testAccEdgeLocationsConfig(rName, clusterName), fmt.Sprintf(`
 		resource "castai_node_template" "test" {
