@@ -227,18 +227,17 @@ const (
 
 // Defines values for CastaiRbacV1beta1LabelSelectorCondition.
 const (
-	LABELSELECTORCONDITIONAND         CastaiRbacV1beta1LabelSelectorCondition = "LABEL_SELECTOR_CONDITION_AND"
-	LABELSELECTORCONDITIONOR          CastaiRbacV1beta1LabelSelectorCondition = "LABEL_SELECTOR_CONDITION_OR"
-	LABELSELECTORCONDITIONUNSPECIFIED CastaiRbacV1beta1LabelSelectorCondition = "LABEL_SELECTOR_CONDITION_UNSPECIFIED"
+	CastaiRbacV1beta1LabelSelectorConditionAND         CastaiRbacV1beta1LabelSelectorCondition = "AND"
+	CastaiRbacV1beta1LabelSelectorConditionOR          CastaiRbacV1beta1LabelSelectorCondition = "OR"
+	CastaiRbacV1beta1LabelSelectorConditionUNSPECIFIED CastaiRbacV1beta1LabelSelectorCondition = "UNSPECIFIED"
 )
 
 // Defines values for CastaiRbacV1beta1LabelSelectorOperator.
 const (
-	LABELSELECTOROPERATORDOESNOTEXIST CastaiRbacV1beta1LabelSelectorOperator = "LABEL_SELECTOR_OPERATOR_DOES_NOT_EXIST"
-	LABELSELECTOROPERATOREXISTS       CastaiRbacV1beta1LabelSelectorOperator = "LABEL_SELECTOR_OPERATOR_EXISTS"
-	LABELSELECTOROPERATORIN           CastaiRbacV1beta1LabelSelectorOperator = "LABEL_SELECTOR_OPERATOR_IN"
-	LABELSELECTOROPERATORNOTIN        CastaiRbacV1beta1LabelSelectorOperator = "LABEL_SELECTOR_OPERATOR_NOT_IN"
-	LABELSELECTOROPERATORUNSPECIFIED  CastaiRbacV1beta1LabelSelectorOperator = "LABEL_SELECTOR_OPERATOR_UNSPECIFIED"
+	CastaiRbacV1beta1LabelSelectorOperatorDOESNOTEXIST CastaiRbacV1beta1LabelSelectorOperator = "DOES_NOT_EXIST"
+	CastaiRbacV1beta1LabelSelectorOperatorEXISTS       CastaiRbacV1beta1LabelSelectorOperator = "EXISTS"
+	CastaiRbacV1beta1LabelSelectorOperatorIN           CastaiRbacV1beta1LabelSelectorOperator = "IN"
+	CastaiRbacV1beta1LabelSelectorOperatorNOTIN        CastaiRbacV1beta1LabelSelectorOperator = "NOT_IN"
 )
 
 // Defines values for CastaiRbacV1beta1PoliciesState.
@@ -293,16 +292,16 @@ const (
 
 // Defines values for CostreportV1beta1AllocationGroupFilterLabelValueOperator.
 const (
-	CostreportV1beta1AllocationGroupFilterLabelValueOperatorDoesNotExist CostreportV1beta1AllocationGroupFilterLabelValueOperator = "DoesNotExist"
-	CostreportV1beta1AllocationGroupFilterLabelValueOperatorEqual        CostreportV1beta1AllocationGroupFilterLabelValueOperator = "Equal"
-	CostreportV1beta1AllocationGroupFilterLabelValueOperatorExists       CostreportV1beta1AllocationGroupFilterLabelValueOperator = "Exists"
-	CostreportV1beta1AllocationGroupFilterLabelValueOperatorNotEqual     CostreportV1beta1AllocationGroupFilterLabelValueOperator = "NotEqual"
+	DoesNotExist CostreportV1beta1AllocationGroupFilterLabelValueOperator = "DoesNotExist"
+	Equal        CostreportV1beta1AllocationGroupFilterLabelValueOperator = "Equal"
+	Exists       CostreportV1beta1AllocationGroupFilterLabelValueOperator = "Exists"
+	NotEqual     CostreportV1beta1AllocationGroupFilterLabelValueOperator = "NotEqual"
 )
 
 // Defines values for CostreportV1beta1FilterOperator.
 const (
-	AND CostreportV1beta1FilterOperator = "AND"
-	OR  CostreportV1beta1FilterOperator = "OR"
+	CostreportV1beta1FilterOperatorAND CostreportV1beta1FilterOperator = "AND"
+	CostreportV1beta1FilterOperatorOR  CostreportV1beta1FilterOperator = "OR"
 )
 
 // Defines values for CostreportV1beta1NoDataReason.
@@ -7451,9 +7450,10 @@ type NodetemplatesV1NodeTemplateListItem struct {
 
 // NodetemplatesV1NodeTemplateListItemStats defines model for nodetemplates.v1.NodeTemplateListItem.Stats.
 type NodetemplatesV1NodeTemplateListItemStats struct {
-	CountFallback int32 `json:"countFallback"`
-	CountOnDemand int32 `json:"countOnDemand"`
-	CountSpot     int32 `json:"countSpot"`
+	CountFallback   int32 `json:"countFallback"`
+	CountOnDemand   int32 `json:"countOnDemand"`
+	CountSoleTenant int32 `json:"countSoleTenant"`
+	CountSpot       int32 `json:"countSpot"`
 }
 
 // NodetemplatesV1PriceAdjustmentConfiguration PriceAdjustmentConfiguration represents price adjustment multipliers.
@@ -8656,6 +8656,10 @@ type WorkloadoptimizationV1AnomalyDetectionSettings struct {
 	// CpuPressure CPUPressureSettings configures CPU pressure anomaly detection thresholds.
 	// Values are percentages in the range 0-100.
 	CpuPressure *WorkloadoptimizationV1CPUPressureSettings `json:"cpuPressure,omitempty"`
+
+	// InfiniteMemoryScaling InfiniteMemoryScalingSettings configures the infinite memory scaling detector.
+	// When enabled, the detection is performed for the particular workload.
+	InfiniteMemoryScaling *WorkloadoptimizationV1InfiniteMemoryScalingSettings `json:"infiniteMemoryScaling,omitempty"`
 }
 
 // WorkloadoptimizationV1AntiAffinitySettings defines model for workloadoptimization.v1.AntiAffinitySettings.
@@ -9908,6 +9912,14 @@ type WorkloadoptimizationV1HorizontalPodAutoscalerBehavior struct {
 
 // WorkloadoptimizationV1InPlaceResizeStatus InPlaceResizeStatus explains the in-place resize status.
 type WorkloadoptimizationV1InPlaceResizeStatus string
+
+// WorkloadoptimizationV1InfiniteMemoryScalingSettings InfiniteMemoryScalingSettings configures the infinite memory scaling detector.
+// When enabled, the detection is performed for the particular workload.
+type WorkloadoptimizationV1InfiniteMemoryScalingSettings struct {
+	// Enabled Enabled opts the workload into infinite memory scaling detection.
+	// When false, the detector skips this workload even if the cluster-level feature flag is enabled.
+	Enabled bool `json:"enabled"`
+}
 
 // WorkloadoptimizationV1InitiatedBy defines model for workloadoptimization.v1.InitiatedBy.
 type WorkloadoptimizationV1InitiatedBy struct {
