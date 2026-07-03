@@ -17,10 +17,11 @@ resource "castai_evictor_advanced_config" "config" {
   cluster_id = castai_eks_cluster.test.id
   evictor_advanced_config {
     pod_selector {
-      kind      = "Job"
-      namespace = "test"
+      kind         = "Deployment"
+      namespace    = "test"
+      replicas_min = 2
       match_labels = {
-        "job" = "test"
+        "app" = "test"
       }
     }
     aggressive = true
@@ -86,6 +87,7 @@ Optional:
 - `match_expressions` (Block List) (see [below for nested schema](#nestedblock--evictor_advanced_config--pod_selector--match_expressions))
 - `match_labels` (Map of String)
 - `namespace` (String)
+- `replicas_min` (Number) Minimum number of pod replicas to keep running when evicting matched pods
 
 <a id="nestedblock--evictor_advanced_config--pod_selector--match_expressions"></a>
 ### Nested Schema for `evictor_advanced_config.pod_selector.match_expressions`
