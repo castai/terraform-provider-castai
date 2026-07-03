@@ -1060,7 +1060,7 @@ func (r *edgeLocationResource) toCNI(cni *cniModel) *omni.EdgeClusterCNI {
 
 func (r *edgeLocationResource) toEdgeClusterSpec(ctx context.Context, cp *controlPlaneModel, net *networkingModel, addons []addonModel) (*omni.EdgeClusterSpec, diag.Diagnostics) {
 	var diags diag.Diagnostics
-	if cp == nil && net == nil && len(addons) == 0 {
+	if cp == nil && net == nil && addons == nil {
 		return nil, diags
 	}
 
