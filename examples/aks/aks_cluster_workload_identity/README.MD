@@ -4,7 +4,7 @@ This example shows how to connect an existing AKS cluster to CAST AI using Azure
 
 Workload Identity uses federated credentials, which means no client secrets are created or rotated. Permissions are scoped to the cluster's resource groups via a User-Assigned Managed Identity.
 
-> **Note:** This feature requires a feature flag to be enabled on your CAST AI account before `terraform apply` will succeed. `terraform plan` will complete without it, but `terraform apply` will fail with a 403 error. Contact CAST AI support to enable it.
+> **Note:** This feature requires a feature flag to be enabled before `terraform apply` will succeed. `terraform plan` will complete without it, but `terraform apply` will fail with a 403 error. Contact CAST AI support to have it enabled.
 
 The only difference from the standard [aks_cluster_existing](../aks_cluster_existing) example is `authentication_method = "workload_identity"` in the module block.
 
