@@ -25,10 +25,11 @@ variable "castai_api_url" {
   default     = "https://api.cast.ai"
 }
 
-# Variables required for connecting EKS cluster to CAST AI
+# Variables required for connecting AKS cluster to CAST AI
 variable "castai_api_token" {
   type        = string
   description = "CAST AI API token created in console.cast.ai API Access keys section"
+  sensitive   = true
 }
 
 variable "castai_grpc_url" {
