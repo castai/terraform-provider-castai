@@ -127,7 +127,6 @@ resource "aws_iam_role_policy" "inline_role_policy" {
         Action = [
           "ec2:CreateTags",
           "ec2:DeleteKeyPair",
-          "ec2:CreateTags",
           "ec2:ImportKeyPair",
         ],
         Resource = "*"
