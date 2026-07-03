@@ -227,18 +227,17 @@ const (
 
 // Defines values for CastaiRbacV1beta1LabelSelectorCondition.
 const (
-	LABELSELECTORCONDITIONAND         CastaiRbacV1beta1LabelSelectorCondition = "LABEL_SELECTOR_CONDITION_AND"
-	LABELSELECTORCONDITIONOR          CastaiRbacV1beta1LabelSelectorCondition = "LABEL_SELECTOR_CONDITION_OR"
-	LABELSELECTORCONDITIONUNSPECIFIED CastaiRbacV1beta1LabelSelectorCondition = "LABEL_SELECTOR_CONDITION_UNSPECIFIED"
+	CastaiRbacV1beta1LabelSelectorConditionAND         CastaiRbacV1beta1LabelSelectorCondition = "AND"
+	CastaiRbacV1beta1LabelSelectorConditionOR          CastaiRbacV1beta1LabelSelectorCondition = "OR"
+	CastaiRbacV1beta1LabelSelectorConditionUNSPECIFIED CastaiRbacV1beta1LabelSelectorCondition = "UNSPECIFIED"
 )
 
 // Defines values for CastaiRbacV1beta1LabelSelectorOperator.
 const (
-	LABELSELECTOROPERATORDOESNOTEXIST CastaiRbacV1beta1LabelSelectorOperator = "LABEL_SELECTOR_OPERATOR_DOES_NOT_EXIST"
-	LABELSELECTOROPERATOREXISTS       CastaiRbacV1beta1LabelSelectorOperator = "LABEL_SELECTOR_OPERATOR_EXISTS"
-	LABELSELECTOROPERATORIN           CastaiRbacV1beta1LabelSelectorOperator = "LABEL_SELECTOR_OPERATOR_IN"
-	LABELSELECTOROPERATORNOTIN        CastaiRbacV1beta1LabelSelectorOperator = "LABEL_SELECTOR_OPERATOR_NOT_IN"
-	LABELSELECTOROPERATORUNSPECIFIED  CastaiRbacV1beta1LabelSelectorOperator = "LABEL_SELECTOR_OPERATOR_UNSPECIFIED"
+	CastaiRbacV1beta1LabelSelectorOperatorDOESNOTEXIST CastaiRbacV1beta1LabelSelectorOperator = "DOES_NOT_EXIST"
+	CastaiRbacV1beta1LabelSelectorOperatorEXISTS       CastaiRbacV1beta1LabelSelectorOperator = "EXISTS"
+	CastaiRbacV1beta1LabelSelectorOperatorIN           CastaiRbacV1beta1LabelSelectorOperator = "IN"
+	CastaiRbacV1beta1LabelSelectorOperatorNOTIN        CastaiRbacV1beta1LabelSelectorOperator = "NOT_IN"
 )
 
 // Defines values for CastaiRbacV1beta1PoliciesState.
@@ -293,16 +292,16 @@ const (
 
 // Defines values for CostreportV1beta1AllocationGroupFilterLabelValueOperator.
 const (
-	CostreportV1beta1AllocationGroupFilterLabelValueOperatorDoesNotExist CostreportV1beta1AllocationGroupFilterLabelValueOperator = "DoesNotExist"
-	CostreportV1beta1AllocationGroupFilterLabelValueOperatorEqual        CostreportV1beta1AllocationGroupFilterLabelValueOperator = "Equal"
-	CostreportV1beta1AllocationGroupFilterLabelValueOperatorExists       CostreportV1beta1AllocationGroupFilterLabelValueOperator = "Exists"
-	CostreportV1beta1AllocationGroupFilterLabelValueOperatorNotEqual     CostreportV1beta1AllocationGroupFilterLabelValueOperator = "NotEqual"
+	DoesNotExist CostreportV1beta1AllocationGroupFilterLabelValueOperator = "DoesNotExist"
+	Equal        CostreportV1beta1AllocationGroupFilterLabelValueOperator = "Equal"
+	Exists       CostreportV1beta1AllocationGroupFilterLabelValueOperator = "Exists"
+	NotEqual     CostreportV1beta1AllocationGroupFilterLabelValueOperator = "NotEqual"
 )
 
 // Defines values for CostreportV1beta1FilterOperator.
 const (
-	AND CostreportV1beta1FilterOperator = "AND"
-	OR  CostreportV1beta1FilterOperator = "OR"
+	CostreportV1beta1FilterOperatorAND CostreportV1beta1FilterOperator = "AND"
+	CostreportV1beta1FilterOperatorOR  CostreportV1beta1FilterOperator = "OR"
 )
 
 // Defines values for CostreportV1beta1NoDataReason.
@@ -3206,11 +3205,29 @@ type CastaiRbacV1beta1OrganizationScope struct {
 
 // CastaiRbacV1beta1PermissionGroup PermissionGroup represents a named group of permissions.
 type CastaiRbacV1beta1PermissionGroup struct {
+	// CategoryDescription Description of the category.
+	CategoryDescription *string `json:"categoryDescription,omitempty"`
+
+	// CategoryDisplayName Human-readable display name for the category.
+	CategoryDisplayName *string `json:"categoryDisplayName,omitempty"`
+
+	// Description Description of the permission group.
+	Description *string `json:"description,omitempty"`
+
+	// DisplayName Human-readable display name for the permission group.
+	DisplayName *string `json:"displayName,omitempty"`
+
 	// Name Name of the permission group.
 	Name *string `json:"name,omitempty"`
 
 	// Permissions List of permissions in this group.
 	Permissions *[]CastaiRbacV1beta1Permissions `json:"permissions,omitempty"`
+
+	// ResourceDescription Description of the resource.
+	ResourceDescription *string `json:"resourceDescription,omitempty"`
+
+	// ResourceDisplayName Human-readable display name for the resource.
+	ResourceDisplayName *string `json:"resourceDisplayName,omitempty"`
 }
 
 // CastaiRbacV1beta1Permissions defines model for castai.rbac.v1beta1.Permissions.
@@ -3831,6 +3848,9 @@ type CastaiUsersV1beta1CurrentUserProfileResponse struct {
 	// Email User email.
 	Email     *string `json:"email,omitempty"`
 	EmailHash *string `json:"emailHash,omitempty"`
+
+	// Fingerprint Fingerprint is a unique identifier for the user's device or browser.
+	Fingerprint *string `json:"fingerprint"`
 
 	// FirstLogin User first login.
 	FirstLogin *bool `json:"firstLogin,omitempty"`
