@@ -28,7 +28,6 @@
       "Effect": "Allow",
       "Action": [
         "iam:CreateServiceLinkedRole",
-        "ec2:CreateKeyPair",
         "ec2:CreateTags",
         "ec2:DeleteKeyPair",
         "ec2:DescribeCapacityReservations",
