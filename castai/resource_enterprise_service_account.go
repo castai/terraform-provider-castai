@@ -84,8 +84,6 @@ func resourceEnterpriseServiceAccountCustomizeDiff(_ context.Context, d *schema.
 	return nil
 }
 
-// getEnterpriseServiceAccountOrgID returns organization_id from state, falling back to enterprise_id.
-// The fallback covers imports and older state entries written before organization_id became optional.
 func getEnterpriseServiceAccountOrgID(d *schema.ResourceData) string {
 	if orgID := d.Get(FieldEnterpriseServiceAccountOrganizationID).(string); orgID != "" {
 		return orgID
