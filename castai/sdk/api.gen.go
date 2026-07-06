@@ -7450,9 +7450,10 @@ type NodetemplatesV1NodeTemplateListItem struct {
 
 // NodetemplatesV1NodeTemplateListItemStats defines model for nodetemplates.v1.NodeTemplateListItem.Stats.
 type NodetemplatesV1NodeTemplateListItemStats struct {
-	CountFallback int32 `json:"countFallback"`
-	CountOnDemand int32 `json:"countOnDemand"`
-	CountSpot     int32 `json:"countSpot"`
+	CountFallback   int32 `json:"countFallback"`
+	CountOnDemand   int32 `json:"countOnDemand"`
+	CountSoleTenant int32 `json:"countSoleTenant"`
+	CountSpot       int32 `json:"countSpot"`
 }
 
 // NodetemplatesV1PriceAdjustmentConfiguration PriceAdjustmentConfiguration represents price adjustment multipliers.
@@ -8655,6 +8656,10 @@ type WorkloadoptimizationV1AnomalyDetectionSettings struct {
 	// CpuPressure CPUPressureSettings configures CPU pressure anomaly detection thresholds.
 	// Values are percentages in the range 0-100.
 	CpuPressure *WorkloadoptimizationV1CPUPressureSettings `json:"cpuPressure,omitempty"`
+
+	// InfiniteMemoryScaling InfiniteMemoryScalingSettings configures the infinite memory scaling detector.
+	// When enabled, the detection is performed for the particular workload.
+	InfiniteMemoryScaling *WorkloadoptimizationV1InfiniteMemoryScalingSettings `json:"infiniteMemoryScaling,omitempty"`
 }
 
 // WorkloadoptimizationV1AntiAffinitySettings defines model for workloadoptimization.v1.AntiAffinitySettings.
@@ -9907,6 +9912,14 @@ type WorkloadoptimizationV1HorizontalPodAutoscalerBehavior struct {
 
 // WorkloadoptimizationV1InPlaceResizeStatus InPlaceResizeStatus explains the in-place resize status.
 type WorkloadoptimizationV1InPlaceResizeStatus string
+
+// WorkloadoptimizationV1InfiniteMemoryScalingSettings InfiniteMemoryScalingSettings configures the infinite memory scaling detector.
+// When enabled, the detection is performed for the particular workload.
+type WorkloadoptimizationV1InfiniteMemoryScalingSettings struct {
+	// Enabled Enabled opts the workload into infinite memory scaling detection.
+	// When false, the detector skips this workload even if the cluster-level feature flag is enabled.
+	Enabled bool `json:"enabled"`
+}
 
 // WorkloadoptimizationV1InitiatedBy defines model for workloadoptimization.v1.InitiatedBy.
 type WorkloadoptimizationV1InitiatedBy struct {
