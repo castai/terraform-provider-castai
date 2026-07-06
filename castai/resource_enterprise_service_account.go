@@ -37,6 +37,8 @@ func resourceEnterpriseServiceAccount() *schema.Resource {
 			Delete: schema.DefaultTimeout(1 * time.Minute),
 		},
 
+		CustomizeDiff: resourceEnterpriseServiceAccountCustomizeDiff,
+
 		Schema: map[string]*schema.Schema{
 			FieldEnterpriseServiceAccountEnterpriseID: {
 				Type:             schema.TypeString,
@@ -47,9 +49,10 @@ func resourceEnterpriseServiceAccount() *schema.Resource {
 			},
 			FieldEnterpriseServiceAccountOrganizationID: {
 				Type:             schema.TypeString,
-				Required:         true,
+				Optional:         true,
+				Computed:         true,
 				ForceNew:         true,
-				Description:      "Target organization ID where the service account is created.",
+				Description:      "Target organization ID where the service account is created. Defaults to enterprise_id (enterprise scope) when omitted.",
 				ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
 			},
 			FieldEnterpriseServiceAccountName: {
@@ -72,13 +75,31 @@ func resourceEnterpriseServiceAccount() *schema.Resource {
 	}
 }
 
+func resourceEnterpriseServiceAccountCustomizeDiff(_ context.Context, d *schema.ResourceDiff, _ any) error {
+	if d.Get(FieldEnterpriseServiceAccountOrganizationID).(string) == "" {
+		if enterpriseID := d.Get(FieldEnterpriseServiceAccountEnterpriseID).(string); enterpriseID != "" {
+			return d.SetNew(FieldEnterpriseServiceAccountOrganizationID, enterpriseID)
+		}
+	}
+	return nil
+}
+
+// getEnterpriseServiceAccountOrgID returns organization_id from state, falling back to enterprise_id.
+// The fallback covers imports and older state entries written before organization_id became optional.
+func getEnterpriseServiceAccountOrgID(d *schema.ResourceData) string {
+	if orgID := d.Get(FieldEnterpriseServiceAccountOrganizationID).(string); orgID != "" {
+		return orgID
+	}
+	return d.Get(FieldEnterpriseServiceAccountEnterpriseID).(string)
+}
+
 func resourceEnterpriseServiceAccountRead(ctx context.Context, data *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(*ProviderConfig).organizationManagementClient
 
 	tflog.Debug(ctx, "Reading enterprise service account", map[string]any{"id": data.Id()})
 
 	enterpriseIDStr := data.Get(FieldEnterpriseServiceAccountEnterpriseID).(string)
-	orgIDStr := data.Get(FieldEnterpriseServiceAccountOrganizationID).(string)
+	orgIDStr := getEnterpriseServiceAccountOrgID(data)
 
 	var found *organization_management.ListEnterpriseServiceAccountsResponseServiceAccount
 	var cursor *string
@@ -145,7 +166,7 @@ func resourceEnterpriseServiceAccountCreate(ctx context.Context, data *schema.Re
 	client := meta.(*ProviderConfig).organizationManagementClient
 
 	enterpriseID := data.Get(FieldEnterpriseServiceAccountEnterpriseID).(string)
-	orgID := data.Get(FieldEnterpriseServiceAccountOrganizationID).(string)
+	orgID := getEnterpriseServiceAccountOrgID(data)
 	name := data.Get(FieldEnterpriseServiceAccountName).(string)
 	description := data.Get(FieldEnterpriseServiceAccountDescription).(string)
 
@@ -194,7 +215,7 @@ func resourceEnterpriseServiceAccountUpdate(ctx context.Context, data *schema.Re
 	client := meta.(*ProviderConfig).organizationManagementClient
 
 	enterpriseID := data.Get(FieldEnterpriseServiceAccountEnterpriseID).(string)
-	orgID := data.Get(FieldEnterpriseServiceAccountOrganizationID).(string)
+	orgID := getEnterpriseServiceAccountOrgID(data)
 	name := data.Get(FieldEnterpriseServiceAccountName).(string)
 	description := data.Get(FieldEnterpriseServiceAccountDescription).(string)
 
@@ -228,7 +249,7 @@ func resourceEnterpriseServiceAccountDelete(ctx context.Context, data *schema.Re
 	client := meta.(*ProviderConfig).organizationManagementClient
 
 	enterpriseID := data.Get(FieldEnterpriseServiceAccountEnterpriseID).(string)
-	orgID := data.Get(FieldEnterpriseServiceAccountOrganizationID).(string)
+	orgID := getEnterpriseServiceAccountOrgID(data)
 
 	tflog.Debug(ctx, "Deleting enterprise service account", map[string]any{"id": data.Id()})
 

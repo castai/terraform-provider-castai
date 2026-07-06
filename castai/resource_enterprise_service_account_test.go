@@ -482,6 +482,82 @@ func TestEnterpriseServiceAccountCreateContext(t *testing.T) {
 		r.Equal("a description", data.Get(FieldEnterpriseServiceAccountDescription).(string))
 		r.Equal("my-sa@cast.ai", data.Get(FieldEnterpriseServiceAccountEmail).(string))
 	})
+
+	t.Run("when organization_id is omitted the API receives enterprise_id as organization_id", func(t *testing.T) {
+		t.Parallel()
+		r := require.New(t)
+		mockClient := mockOrganizationManagement.NewMockClientWithResponsesInterface(gomock.NewController(t))
+
+		ctx := context.Background()
+		provider := &ProviderConfig{
+			organizationManagementClient: mockClient,
+		}
+
+		enterpriseID := uuid.NewString()
+		saID := uuid.NewString()
+
+		mockClient.EXPECT().
+			EnterpriseAPIBatchCreateEnterpriseServiceAccountsWithResponse(
+				gomock.Any(),
+				enterpriseID,
+				organization_management.BatchCreateEnterpriseServiceAccountsRequest{
+					EnterpriseId: enterpriseID,
+					Requests: []organization_management.BatchCreateEnterpriseServiceAccountsRequestServiceAccountRequest{
+						{Name: "my-sa", Description: lo.ToPtr(""), OrganizationId: enterpriseID},
+					},
+				},
+			).
+			Return(&organization_management.EnterpriseAPIBatchCreateEnterpriseServiceAccountsResponse{
+				HTTPResponse: &http.Response{StatusCode: http.StatusOK},
+				JSON200: &organization_management.BatchCreateEnterpriseServiceAccountsResponse{
+					Items: &[]organization_management.ListEnterpriseServiceAccountsResponseServiceAccount{
+						{
+							Id:             lo.ToPtr(saID),
+							Name:           lo.ToPtr("my-sa"),
+							Description:    lo.ToPtr(""),
+							Email:          lo.ToPtr("my-sa@cast.ai"),
+							OrganizationId: lo.ToPtr(enterpriseID),
+						},
+					},
+				},
+			}, nil)
+
+		mockClient.EXPECT().
+			EnterpriseAPIListEnterpriseServiceAccountsWithResponse(gomock.Any(), enterpriseID, gomock.Any()).
+			Return(&organization_management.EnterpriseAPIListEnterpriseServiceAccountsResponse{
+				HTTPResponse: &http.Response{StatusCode: http.StatusOK},
+				JSON200: &organization_management.ListEnterpriseServiceAccountsResponse{
+					Items: &[]organization_management.ListEnterpriseServiceAccountsResponseServiceAccount{
+						{
+							Id:             lo.ToPtr(saID),
+							Name:           lo.ToPtr("my-sa"),
+							Description:    lo.ToPtr(""),
+							Email:          lo.ToPtr("my-sa@cast.ai"),
+							OrganizationId: lo.ToPtr(enterpriseID),
+						},
+					},
+				},
+			}, nil)
+
+		// organization_id is intentionally empty — simulates a config that omits it
+		stateValue := cty.ObjectVal(map[string]cty.Value{
+			FieldEnterpriseServiceAccountEnterpriseID:   cty.StringVal(enterpriseID),
+			FieldEnterpriseServiceAccountOrganizationID: cty.StringVal(""),
+			FieldEnterpriseServiceAccountName:           cty.StringVal("my-sa"),
+			FieldEnterpriseServiceAccountDescription:    cty.StringVal(""),
+			FieldEnterpriseServiceAccountEmail:          cty.StringVal(""),
+		})
+		state := terraform.NewInstanceStateShimmedFromValue(stateValue, 0)
+
+		res := resourceEnterpriseServiceAccount()
+		data := res.Data(state)
+
+		result := res.CreateContext(ctx, data, provider)
+
+		r.Nil(result)
+		r.False(result.HasError())
+		r.Equal(saID, data.Id())
+	})
 }
 
 func TestEnterpriseServiceAccountUpdateContext(t *testing.T) {
@@ -594,6 +670,45 @@ func TestEnterpriseServiceAccountUpdateContext(t *testing.T) {
 		r.Equal("updated-sa", data.Get(FieldEnterpriseServiceAccountName).(string))
 		r.Equal("updated desc", data.Get(FieldEnterpriseServiceAccountDescription).(string))
 		r.Equal("updated-sa@cast.ai", data.Get(FieldEnterpriseServiceAccountEmail).(string))
+	})
+}
+
+func TestEnterpriseServiceAccountGetOrganizationID(t *testing.T) {
+	t.Parallel()
+
+	res := resourceEnterpriseServiceAccount()
+
+	t.Run("when organization_id is set it is returned", func(t *testing.T) {
+		t.Parallel()
+		enterpriseID := uuid.NewString()
+		orgID := uuid.NewString()
+
+		stateValue := cty.ObjectVal(map[string]cty.Value{
+			FieldEnterpriseServiceAccountEnterpriseID:   cty.StringVal(enterpriseID),
+			FieldEnterpriseServiceAccountOrganizationID: cty.StringVal(orgID),
+			FieldEnterpriseServiceAccountName:           cty.StringVal("my-sa"),
+			FieldEnterpriseServiceAccountDescription:    cty.StringVal(""),
+			FieldEnterpriseServiceAccountEmail:          cty.StringVal(""),
+		})
+		data := res.Data(terraform.NewInstanceStateShimmedFromValue(stateValue, 0))
+
+		require.Equal(t, orgID, getEnterpriseServiceAccountOrgID(data))
+	})
+
+	t.Run("when organization_id is empty it falls back to enterprise_id", func(t *testing.T) {
+		t.Parallel()
+		enterpriseID := uuid.NewString()
+
+		stateValue := cty.ObjectVal(map[string]cty.Value{
+			FieldEnterpriseServiceAccountEnterpriseID:   cty.StringVal(enterpriseID),
+			FieldEnterpriseServiceAccountOrganizationID: cty.StringVal(""),
+			FieldEnterpriseServiceAccountName:           cty.StringVal("my-sa"),
+			FieldEnterpriseServiceAccountDescription:    cty.StringVal(""),
+			FieldEnterpriseServiceAccountEmail:          cty.StringVal(""),
+		})
+		data := res.Data(terraform.NewInstanceStateShimmedFromValue(stateValue, 0))
+
+		require.Equal(t, enterpriseID, getEnterpriseServiceAccountOrgID(data))
 	})
 }
 
