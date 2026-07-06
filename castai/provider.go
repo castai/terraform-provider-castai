@@ -80,6 +80,7 @@ func Provider(version string) *schema.Provider {
 			"castai_allocation_group":           resourceAllocationGroup(),
 			"castai_enterprise_group":           resourceEnterpriseGroup(),
 			"castai_enterprise_role_binding":    resourceEnterpriseRoleBinding(),
+			"castai_enterprise_service_account": resourceEnterpriseServiceAccount(),
 			"castai_cache_group":                resourceCacheGroup(),
 			"castai_cache_configuration":        resourceCacheConfiguration(),
 			"castai_cache_rule":                 resourceCacheRule(),
