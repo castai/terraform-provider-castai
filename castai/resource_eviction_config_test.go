@@ -102,6 +102,17 @@ func TestEvictionConfig_ReadContext(t *testing.T) {
 				r.Equal("value1", nodeSelectorLabelValue)
 			},
 		},
+		"should read pod_selector replicas_min": {
+			data: `{"evictionConfig":[{"podSelector":{"kind":"Deployment","replicasMin":2,"labelSelector":{"matchLabels":{"key1":"value1"}}},"settings":{"aggressive":{"enabled":true}}}]}`,
+			testFunc: func(t *testing.T, res diag.Diagnostics, data *schema.ResourceData) {
+				r := require.New(t)
+				r.Nil(res)
+				r.False(res.HasError())
+				replicasMin, isOK := data.GetOk(fmt.Sprintf("%s.0.%s.0.%s", FieldEvictorAdvancedConfig, FieldPodSelector, FieldPodSelectorReplicasMin))
+				r.True(isOK)
+				r.Equal(2, replicasMin)
+			},
+		},
 		"should handle label expressions": {
 			data: `{"evictionConfig":[ {"podSelector":{"kind":"Job","labelSelector":{"matchExpressions":[{"key":"value1", "operator":"In", "values":["v1", "v2"]}]}},"settings":{"aggressive":{"enabled":true}}} ]}`,
 			testFunc: func(t *testing.T, res diag.Diagnostics, data *schema.ResourceData) {
@@ -222,6 +233,88 @@ func TestEvictionConfig_CreateContext(t *testing.T) {
 	r.True(isOK)
 	r.NotNil(podSelectorKind)
 	r.Equal("Job", podSelectorKind)
+}
+
+func TestEvictionConfig_CreateContext_ReplicasMin(t *testing.T) {
+	r := require.New(t)
+	mockctrl := gomock.NewController(t)
+	mockClient := mock_sdk.NewMockClientInterface(mockctrl)
+
+	ctx := context.Background()
+	provider := &ProviderConfig{
+		api: &sdk.ClientWithResponses{
+			ClientInterface: mockClient,
+		},
+	}
+	clusterId := "b6bfc074-a267-400f-b8f1-db0850c369b1"
+	evictionConfigResponse := `{
+  "evictionConfig": [
+    {
+      "podSelector": {
+        "kind": "Deployment",
+        "labelSelector": {
+          "matchLabels": {
+            "key1": "value1"
+          }
+        },
+		"replicasMin": 2
+      },
+      "settings": {
+        "aggressive": {
+          "enabled": true
+        }
+      }
+    }
+  ]
+}`
+
+	resource := resourceEvictionConfig()
+
+	val := cty.ObjectVal(map[string]cty.Value{
+		FieldClusterId: cty.StringVal(clusterId),
+		FieldEvictorAdvancedConfig: cty.ListVal([]cty.Value{
+			cty.ObjectVal(map[string]cty.Value{
+				"pod_selector": cty.ListVal([]cty.Value{cty.ObjectVal(map[string]cty.Value{
+					"kind":         cty.StringVal("Deployment"),
+					"replicas_min": cty.NumberIntVal(2),
+					"match_labels": cty.MapVal(map[string]cty.Value{
+						"key1": cty.StringVal("value1"),
+					}),
+				}),
+				}),
+				"aggressive": cty.BoolVal(true),
+			}),
+		}),
+	})
+
+	state := terraform.NewInstanceStateShimmedFromValue(val, 0)
+	data := resource.Data(state)
+
+	mockClient.EXPECT().EvictorAPIUpsertAdvancedConfigWithBody(gomock.Any(), clusterId, "application/json", gomock.Any()).
+		DoAndReturn(func(ctx context.Context, clusterId string, contentType string, body io.Reader) (*http.Response, error) {
+
+			got, _ := io.ReadAll(body)
+			expected := []byte(evictionConfigResponse)
+
+			eq, err := JSONBytesEqual(got, expected)
+			r.NoError(err)
+			r.True(eq, fmt.Sprintf("got:      %v\n"+
+				"expected: %v\n", string(got), string(expected)))
+
+			return &http.Response{
+				StatusCode: 200,
+				Header:     map[string][]string{"Content-Type": {"json"}},
+				Body:       io.NopCloser(bytes.NewReader([]byte(evictionConfigResponse))),
+			}, nil
+		}).Times(1)
+
+	result := resource.CreateContext(ctx, data, provider)
+
+	r.Nil(result)
+	r.False(result.HasError())
+	replicasMin, isOK := data.GetOk(fmt.Sprintf("%s.0.%s.0.%s", FieldEvictorAdvancedConfig, FieldPodSelector, FieldPodSelectorReplicasMin))
+	r.True(isOK)
+	r.Equal(2, replicasMin)
 }
 
 func TestEvictionConfig_UpdateContext(t *testing.T) {

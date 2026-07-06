@@ -51,6 +51,7 @@ const (
 	FieldNodeTemplateMinCount                                 = "min_count"
 	FieldNodeTemplateMinCpu                                   = "min_cpu"
 	FieldNodeTemplateMinMemory                                = "min_memory"
+	FieldNodeTemplateMaxPricePerCpu                           = "max_price_per_cpu"
 	FieldNodeTemplateName                                     = "name"
 	FieldNodeTemplateOnDemand                                 = "on_demand"
 	FieldNodeTemplateOs                                       = "os"
@@ -296,6 +297,11 @@ func resourceNodeTemplate() *schema.Resource {
 							Type:        schema.TypeInt,
 							Optional:    true,
 							Description: "Min CPU cores per node.",
+						},
+						FieldNodeTemplateMaxPricePerCpu: {
+							Type:        schema.TypeFloat,
+							Optional:    true,
+							Description: "Maximum price per vCPU threshold. When price adjustments are configured, the filter applies to the adjusted price.",
 						},
 						FieldNodeTemplateMaxCpu: {
 							Type:        schema.TypeInt,
@@ -1081,6 +1087,9 @@ func flattenConstraints(c *sdk.NodetemplatesV1TemplateConstraints) ([]map[string
 	if c.MinCpu != nil {
 		out[FieldNodeTemplateMinCpu] = c.MinCpu
 	}
+	if c.MaxPricePerCpu != nil {
+		out[FieldNodeTemplateMaxPricePerCpu] = c.MaxPricePerCpu
+	}
 	if c.MaxCpu != nil {
 		out[FieldNodeTemplateMaxCpu] = c.MaxCpu
 	}
@@ -1684,10 +1693,13 @@ func toTemplateConstraints(obj map[string]any) *sdk.NodetemplatesV1TemplateConst
 	if v, ok := obj[FieldNodeTemplateMaxMemory].(int); ok && v != 0 {
 		out.MaxMemory = toPtr(int32(v))
 	}
-	if v, ok := obj[FieldNodeTemplateMinCpu].(int); ok {
+	if v, ok := obj[FieldNodeTemplateMinCpu].(int); ok && v != 0 {
 		out.MinCpu = toPtr(int32(v))
 	}
-	if v, ok := obj[FieldNodeTemplateMinMemory].(int); ok {
+	if v, ok := obj[FieldNodeTemplateMaxPricePerCpu].(float64); ok {
+		out.MaxPricePerCpu = toPtr(v)
+	}
+	if v, ok := obj[FieldNodeTemplateMinMemory].(int); ok && v != 0 {
 		out.MinMemory = toPtr(int32(v))
 	}
 	if v, ok := obj[FieldNodeTemplateSpot].(bool); ok {
