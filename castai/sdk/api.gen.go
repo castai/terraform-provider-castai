@@ -6889,7 +6889,8 @@ type NodeconfigV1EC2VolumesConfig struct {
 // NodeconfigV1EKSConfig defines model for nodeconfig.v1.EKSConfig.
 type NodeconfigV1EKSConfig struct {
 	// DnsClusterIp Comma-separated IP addresses to use for DNS queries within the cluster. Defaults to 10.100.0.10 or 172.20.0.10 based on the primary interface's IP address.
-	DnsClusterIp *string `json:"dnsClusterIp"`
+	DnsClusterIp              *string `json:"dnsClusterIp"`
+	EnaQueueCountPerInterface *int32  `json:"enaQueueCountPerInterface"`
 
 	// ImageFamily List of supported image families (OSes) for EKS.
 	//
