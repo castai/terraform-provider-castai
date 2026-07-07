@@ -370,6 +370,7 @@ const (
 	DeleteAccount      DboV1RegistrationType = "DeleteAccount"
 	DeployCache        DboV1RegistrationType = "DeployCache"
 	DeployDBAgent      DboV1RegistrationType = "DeployDBAgent"
+	DeployDBO          DboV1RegistrationType = "DeployDBO"
 	PhaseOneOnboarding DboV1RegistrationType = "PhaseOneOnboarding"
 	UninstallCache     DboV1RegistrationType = "UninstallCache"
 	UninstallDBAgent   DboV1RegistrationType = "UninstallDBAgent"
@@ -2103,20 +2104,21 @@ type CastaiInventoryV1beta1Commitment struct {
 	AllowedUsage *float32 `json:"allowedUsage,omitempty"`
 
 	// AutoAssignment Assign commitment to all existing and future clusters that fall within the region of this commitment.
-	AutoAssignment              *bool                                              `json:"autoAssignment,omitempty"`
-	AwsCapacityBlockContext     *CastaiInventoryV1beta1AWSCapacityBlockContext     `json:"awsCapacityBlockContext,omitempty"`
-	AwsOdcrContext              *CastaiInventoryV1beta1AWSODCRContext              `json:"awsOdcrContext,omitempty"`
-	AwsReservedInstancesContext *CastaiInventoryV1beta1AWSReservedInstancesContext `json:"awsReservedInstancesContext,omitempty"`
-	AwsSavingsPlanContext       *CastaiInventoryV1beta1AWSSavingsPlan              `json:"awsSavingsPlanContext,omitempty"`
-	AzureReservationContext     *CastaiInventoryV1beta1AzureReservation            `json:"azureReservationContext,omitempty"`
-	AzureSavingsPlanContext     *CastaiInventoryV1beta1AzureSavingsPlanContext     `json:"azureSavingsPlanContext,omitempty"`
-	EndDate                     *time.Time                                         `json:"endDate"`
-	GcpFlexCudContext           *CastaiInventoryV1beta1GCPFlexCUD                  `json:"gcpFlexCudContext,omitempty"`
-	GcpResourceCudContext       *CastaiInventoryV1beta1GCPResourceCUD              `json:"gcpResourceCudContext,omitempty"`
-	Id                          *string                                            `json:"id,omitempty"`
-	Name                        *string                                            `json:"name,omitempty"`
-	Prioritization              *bool                                              `json:"prioritization,omitempty"`
-	Region                      *string                                            `json:"region,omitempty"`
+	AutoAssignment                *bool                                                `json:"autoAssignment,omitempty"`
+	AwsCapacityBlockContext       *CastaiInventoryV1beta1AWSCapacityBlockContext       `json:"awsCapacityBlockContext,omitempty"`
+	AwsOdcrContext                *CastaiInventoryV1beta1AWSODCRContext                `json:"awsOdcrContext,omitempty"`
+	AwsReservedInstancesContext   *CastaiInventoryV1beta1AWSReservedInstancesContext   `json:"awsReservedInstancesContext,omitempty"`
+	AwsSavingsPlanContext         *CastaiInventoryV1beta1AWSSavingsPlan                `json:"awsSavingsPlanContext,omitempty"`
+	AzureReservationContext       *CastaiInventoryV1beta1AzureReservation              `json:"azureReservationContext,omitempty"`
+	AzureSavingsPlanContext       *CastaiInventoryV1beta1AzureSavingsPlanContext       `json:"azureSavingsPlanContext,omitempty"`
+	EndDate                       *time.Time                                           `json:"endDate"`
+	GcpCapacityReservationContext *CastaiInventoryV1beta1GCPCapacityReservationContext `json:"gcpCapacityReservationContext,omitempty"`
+	GcpFlexCudContext             *CastaiInventoryV1beta1GCPFlexCUD                    `json:"gcpFlexCudContext,omitempty"`
+	GcpResourceCudContext         *CastaiInventoryV1beta1GCPResourceCUD                `json:"gcpResourceCudContext,omitempty"`
+	Id                            *string                                              `json:"id,omitempty"`
+	Name                          *string                                              `json:"name,omitempty"`
+	Prioritization                *bool                                                `json:"prioritization,omitempty"`
+	Region                        *string                                              `json:"region,omitempty"`
 
 	// ScalingStrategy Scaling strategy specifies how to use commitment by autoscaler.
 	//
@@ -2215,6 +2217,33 @@ type CastaiInventoryV1beta1EnaQueueInfo struct {
 
 	// MaximumQueueCountPerInterface Maximum number of ENA queues configurable per network interface.
 	MaximumQueueCountPerInterface *int32 `json:"maximumQueueCountPerInterface,omitempty"`
+}
+
+// CastaiInventoryV1beta1GCPCapacityReservationContext defines model for castai.inventory.v1beta1.GCPCapacityReservationContext.
+type CastaiInventoryV1beta1GCPCapacityReservationContext struct {
+	AssuredInstanceCount *string `json:"assuredInstanceCount,omitempty"`
+
+	// EffectiveCount Effective instance count is the adjusted original commitment count based only on the portion remaining after out-of-cluster usage.
+	EffectiveCount *string `json:"effectiveCount,omitempty"`
+
+	// EffectiveCpu Effective CPU is the remaining CPU capacity after out-of-cluster usage (committed CPU - external usage CPU).
+	EffectiveCpu *string `json:"effectiveCpu,omitempty"`
+
+	// EffectiveMemoryMib Effective memory in MiB is the remaining memory capacity after out-of-cluster usage (committed memory - external usage memory).
+	EffectiveMemoryMib    *string                                       `json:"effectiveMemoryMib,omitempty"`
+	Id                    *string                                       `json:"id,omitempty"`
+	InUseInstanceCount    *string                                       `json:"inUseInstanceCount,omitempty"`
+	InstanceType          *string                                       `json:"instanceType,omitempty"`
+	InstanceTypeCpu       *string                                       `json:"instanceTypeCpu,omitempty"`
+	InstanceTypeMemoryMib *string                                       `json:"instanceTypeMemoryMib,omitempty"`
+	InstanceTypesUsage    *CastaiInventoryV1beta1InstanceTypeBasedUsage `json:"instanceTypesUsage,omitempty"`
+	ProjectId             *string                                       `json:"projectId,omitempty"`
+
+	// SpecificReservationRequired If true, the reservation requires explicit reservation affinity to be used.
+	SpecificReservationRequired *bool   `json:"specificReservationRequired,omitempty"`
+	State                       *string `json:"state,omitempty"`
+	TotalInstanceCount          *string `json:"totalInstanceCount,omitempty"`
+	Zone                        *string `json:"zone,omitempty"`
 }
 
 // CastaiInventoryV1beta1GCPCommitmentImport defines model for castai.inventory.v1beta1.GCPCommitmentImport.
@@ -5081,6 +5110,18 @@ type DboV1DeployDBAgentParams struct {
 	ManualExecuteCommand *string `json:"manualExecuteCommand,omitempty"`
 }
 
+// DboV1DeployDBOParams defines model for dbo.v1.DeployDBOParams.
+type DboV1DeployDBOParams struct {
+	CacheGroupId         string  `json:"cacheGroupId"`
+	DatabaseInstanceId   *string `json:"databaseInstanceId"`
+	DbAgentEnabled       *bool   `json:"dbAgentEnabled"`
+	DbOptimizerEnabled   *bool   `json:"dbOptimizerEnabled"`
+	DbProxyEnabled       *bool   `json:"dbProxyEnabled"`
+	HelmChartValues      *string `json:"helmChartValues,omitempty"`
+	ManualExecuteCommand *string `json:"manualExecuteCommand,omitempty"`
+	PoolingEnabled       *bool   `json:"poolingEnabled"`
+}
+
 // DboV1Endpoint defines model for dbo.v1.Endpoint.
 type DboV1Endpoint struct {
 	// ConnectionString Connection string for corresponding endpoint on DBO deployment.
@@ -5401,6 +5442,7 @@ type DboV1Registration struct {
 	DeleteAccount    *DboV1DeleteAccountParams    `json:"deleteAccount,omitempty"`
 	DeployCache      *DboV1DeployCacheParams      `json:"deployCache,omitempty"`
 	DeployDbAgent    *DboV1DeployDBAgentParams    `json:"deployDbAgent,omitempty"`
+	DeployDbo        *DboV1DeployDBOParams        `json:"deployDbo,omitempty"`
 	ExecuteCommand   *string                      `json:"executeCommand,omitempty"`
 	Id               *string                      `json:"id,omitempty"`
 	PhaseOne         *DboV1PhaseOneParams         `json:"phaseOne,omitempty"`
