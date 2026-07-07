@@ -86,7 +86,7 @@ resource "castai_node_template" "default_by_castai" {
 - `custom_taints` (Block List) Custom taints to be added to the nodes created from this template. `shouldTaint` has to be `true` in order to create/update the node template with custom taints. If `shouldTaint` is `true`, but no custom taints are provided, the nodes will be tainted with the default node template taint. (see [below for nested schema](#nestedblock--custom_taints))
 - `edge_location_ids` (List of String) List of edge location IDs to associate with this node template. Must be valid UUIDs referencing castai_edge_location resources.
 - `gpu` (Block List, Max: 1) GPU configuration. (see [below for nested schema](#nestedblock--gpu))
-- `is_default` (Boolean) Flag whether the node template is default.
+- `is_default` (Boolean) Flag whether the node template is default. It's is always set to 'true' on 'default-by-castai' node template and 'false' otherwise.
 - `is_enabled` (Boolean) Flag whether the node template is enabled and considered for autoscaling.
 - `price_adjustment_configuration` (Block List, Max: 1) Configuration for adjusting instance type prices during autoscaling. Adjustments only affect placement decisions, not cost reporting. (see [below for nested schema](#nestedblock--price_adjustment_configuration))
 - `rebalancing_config_min_nodes` (Number) Minimum nodes that will be kept when rebalancing nodes using this node template.

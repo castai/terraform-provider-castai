@@ -207,8 +207,9 @@ func resourceNodeTemplate() *schema.Resource {
 			FieldNodeTemplateIsDefault: {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				Default:     false,
-				Description: "Flag whether the node template is default.",
+				Default:     nil,
+				Computed:    true,
+				Description: "Flag whether the node template is default. It's is always set to 'true' on 'default-by-castai' node template and 'false' otherwise.",
 			},
 			FieldNodeTemplateConfigurationId: {
 				Type:             schema.TypeString,
@@ -1334,8 +1335,11 @@ func updateNodeTemplate(ctx context.Context, d *schema.ResourceData, meta any, s
 	name := d.Get(FieldNodeTemplateName).(string)
 
 	req := sdk.NodeTemplatesAPIUpdateNodeTemplateJSONRequestBody{}
-	if v, _ := d.GetOk(FieldNodeTemplateIsDefault); v != nil {
-		req.IsDefault = toPtr(v.(bool))
+
+	if name == "default-by-castai" {
+		req.IsDefault = toPtr(true)
+	} else {
+		req.IsDefault = toPtr(false)
 	}
 
 	if v, _ := d.GetOk(FieldNodeTemplateIsEnabled); v != nil {
@@ -1426,18 +1430,17 @@ func resourceNodeTemplateCreate(ctx context.Context, d *schema.ResourceData, met
 	clusterID := d.Get(FieldClusterID).(string)
 
 	name := d.Get(FieldNodeTemplateName).(string)
-	isDefault := d.Get(FieldNodeTemplateIsDefault).(bool)
 
 	// When creating a default node template, use PUT instead of POST because a default node template is automatically created in the background.
 	// Since name of the default node template is fixed, we can use it to identify the default node template. All other
 	// requests should be treated as regular node template creation requests to avoid conflicts for validation of the request.
-	if isDefault && name == "default-by-castai" {
+	if name == "default-by-castai" {
 		return updateDefaultNodeTemplate(ctx, d, meta)
 	}
 
 	req := sdk.NodeTemplatesAPICreateNodeTemplateJSONRequestBody{
 		Name:            lo.ToPtr(name),
-		IsDefault:       lo.ToPtr(isDefault),
+		IsDefault:       lo.ToPtr(false),
 		ConfigurationId: lo.ToPtr(d.Get(FieldNodeTemplateConfigurationId).(string)),
 		ShouldTaint:     lo.ToPtr(d.Get(FieldNodeTemplateShouldTaint).(bool)),
 		ClmEnabled:      lo.ToPtr(d.Get(FieldNodeTemplateClmEnabled).(bool)),
