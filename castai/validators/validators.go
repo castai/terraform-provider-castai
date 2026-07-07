@@ -3,6 +3,7 @@ package validators
 import (
 	"context"
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
@@ -36,6 +37,37 @@ func (v Base64Validator) ValidateString(ctx context.Context, req validator.Strin
 			req.Path,
 			"Invalid Base64 Value",
 			fmt.Sprintf("Value must be valid base64 encoded string: %s", err.Error()),
+		)
+	}
+}
+
+var _ validator.String = JSONValidator{}
+
+// JSONValidator validates that a string is a valid JSON document.
+type JSONValidator struct{}
+
+func ValidJSON() JSONValidator {
+	return JSONValidator{}
+}
+
+func (v JSONValidator) Description(_ context.Context) string {
+	return "value must be a valid JSON document"
+}
+
+func (v JSONValidator) MarkdownDescription(ctx context.Context) string {
+	return v.Description(ctx)
+}
+
+func (v JSONValidator) ValidateString(ctx context.Context, req validator.StringRequest, resp *validator.StringResponse) {
+	if req.ConfigValue.IsNull() || req.ConfigValue.IsUnknown() {
+		return
+	}
+	var any interface{}
+	if err := json.Unmarshal([]byte(req.ConfigValue.ValueString()), &any); err != nil {
+		resp.Diagnostics.AddAttributeError(
+			req.Path,
+			"Invalid JSON Value",
+			fmt.Sprintf("Value must be a valid JSON document: %s", err.Error()),
 		)
 	}
 }
