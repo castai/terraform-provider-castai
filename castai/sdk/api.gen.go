@@ -494,11 +494,15 @@ const (
 const (
 	NodeconfigV1AKSConfigImageFamilyFAMILYAZURELINUX  NodeconfigV1AKSConfigImageFamily = "FAMILY_AZURE_LINUX"
 	NodeconfigV1AKSConfigImageFamilyFAMILYUBUNTU      NodeconfigV1AKSConfigImageFamily = "FAMILY_UBUNTU"
+	NodeconfigV1AKSConfigImageFamilyFAMILYUBUNTU2204  NodeconfigV1AKSConfigImageFamily = "FAMILY_UBUNTU_2204"
+	NodeconfigV1AKSConfigImageFamilyFAMILYUBUNTU2404  NodeconfigV1AKSConfigImageFamily = "FAMILY_UBUNTU_2404"
 	NodeconfigV1AKSConfigImageFamilyFAMILYUNSPECIFIED NodeconfigV1AKSConfigImageFamily = "FAMILY_UNSPECIFIED"
 	NodeconfigV1AKSConfigImageFamilyFAMILYWINDOWS2019 NodeconfigV1AKSConfigImageFamily = "FAMILY_WINDOWS_2019"
 	NodeconfigV1AKSConfigImageFamilyFAMILYWINDOWS2022 NodeconfigV1AKSConfigImageFamily = "FAMILY_WINDOWS_2022"
 	NodeconfigV1AKSConfigImageFamilyFamilyAzureLinux  NodeconfigV1AKSConfigImageFamily = "family_azure_linux"
 	NodeconfigV1AKSConfigImageFamilyFamilyUbuntu      NodeconfigV1AKSConfigImageFamily = "family_ubuntu"
+	NodeconfigV1AKSConfigImageFamilyFamilyUbuntu2204  NodeconfigV1AKSConfigImageFamily = "family_ubuntu_2204"
+	NodeconfigV1AKSConfigImageFamilyFamilyUbuntu2404  NodeconfigV1AKSConfigImageFamily = "family_ubuntu_2404"
 	NodeconfigV1AKSConfigImageFamilyFamilyWindows2019 NodeconfigV1AKSConfigImageFamily = "family_windows_2019"
 	NodeconfigV1AKSConfigImageFamilyFamilyWindows2022 NodeconfigV1AKSConfigImageFamily = "family_windows_2022"
 )
