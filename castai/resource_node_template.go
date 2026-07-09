@@ -2149,12 +2149,3 @@ func gpuSharingStrategyToTerraform(s sdk.NodetemplatesV1GPUSharingStrategy) stri
 		return ""
 	}
 }
-
-// normalizeSpotInterruptionPredictionsType maps the deprecated "aws-rebalance-recommendations"
-// value to "interruption-predictions". Used in DiffSuppressFunc and read-path normalization.
-func normalizeSpotInterruptionPredictionsType(v string) string {
-	if v == "aws-rebalance-recommendations" {
-		return "interruption-predictions"
-	}
-	return v
-}
