@@ -7985,10 +7985,14 @@ type PoliciesV1SpotInterruptionPredictions struct {
 	Enabled *bool `json:"enabled,omitempty"`
 
 	// Type SpotInterruptionPredictionsType defines the type of the SPOT interruption predictions to enable.
+	//
+	//  - AWSRebalanceRecommendations: Deprecated: Switch to Cast AI ML Interruption predictions instead.
 	Type *PoliciesV1SpotInterruptionPredictionsType `json:"type,omitempty"`
 }
 
 // PoliciesV1SpotInterruptionPredictionsType SpotInterruptionPredictionsType defines the type of the SPOT interruption predictions to enable.
+//
+//   - AWSRebalanceRecommendations: Deprecated: Switch to Cast AI ML Interruption predictions instead.
 type PoliciesV1SpotInterruptionPredictionsType string
 
 // PoliciesV1UnschedulablePodsPolicy Policy defining autoscaler's behavior when unscedulable pods were detected.

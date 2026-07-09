@@ -319,6 +319,12 @@ func resourceNodeConfiguration() *schema.Resource {
 								},
 							},
 						},
+						"ena_queue_count_per_interface": {
+							Type:             schema.TypeInt,
+							Optional:         true,
+							Description:      "Number of ENA queues per network interface.",
+							ValidateDiagFunc: validation.ToDiagFunc(validation.IntAtLeast(1)),
+						},
 					},
 				},
 			},
@@ -1025,6 +1031,10 @@ func toEKSConfig(obj map[string]interface{}) *sdk.NodeconfigV1EKSConfig {
 		out.ImageFamily = toEKSImageFamily(v)
 	}
 
+	if v, ok := obj["ena_queue_count_per_interface"].(int); ok && v != 0 {
+		out.EnaQueueCountPerInterface = toPtr(int32(v))
+	}
+
 	return out
 }
 
@@ -1119,6 +1129,10 @@ func flattenEKSConfig(config *sdk.NodeconfigV1EKSConfig) []map[string]interface{
 
 	if v := config.ImageFamily; v != nil {
 		m[FieldNodeConfigurationEKSImageFamily] = fromEKSImageFamily(*v)
+	}
+
+	if v := config.EnaQueueCountPerInterface; v != nil {
+		m["ena_queue_count_per_interface"] = *config.EnaQueueCountPerInterface
 	}
 
 	return []map[string]interface{}{m}
