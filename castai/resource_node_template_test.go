@@ -11,7 +11,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/samber/lo"
 
 	"github.com/golang/mock/gomock"
@@ -1799,66 +1798,6 @@ func Test_toTemplateConstraintsAWSConstraints(t *testing.T) {
 	}
 }
 
-func Test_normalizeSpotInterruptionPredictionsType(t *testing.T) {
-	tests := map[string]struct {
-		input string
-		want  string
-	}{
-		"aws-rebalance-recommendations is normalized": {
-			input: "aws-rebalance-recommendations",
-			want:  "interruption-predictions",
-		},
-		"interruption-predictions stays as-is": {
-			input: "interruption-predictions",
-			want:  "interruption-predictions",
-		},
-		"empty string stays as-is": {
-			input: "",
-			want:  "",
-		},
-		"unknown value stays as-is": {
-			input: "some-other-value",
-			want:  "some-other-value",
-		},
-	}
-	for name, tt := range tests {
-		t.Run(name, func(t *testing.T) {
-			got := normalizeSpotInterruptionPredictionsType(tt.input)
-			require.Equal(t, tt.want, got)
-		})
-	}
-}
-
-func Test_flattenConstraints_normalizesSpotInterruptionPredictionsType(t *testing.T) {
-	tests := map[string]struct {
-		apiType  string
-		wantType string
-	}{
-		"aws-rebalance-recommendations normalized on read": {
-			apiType:  "aws-rebalance-recommendations",
-			wantType: "interruption-predictions",
-		},
-		"interruption-predictions stays on read": {
-			apiType:  "interruption-predictions",
-			wantType: "interruption-predictions",
-		},
-	}
-	for name, tt := range tests {
-		t.Run(name, func(t *testing.T) {
-			input := &sdk.NodetemplatesV1TemplateConstraints{
-				SpotInterruptionPredictionsEnabled: toPtr(true),
-				SpotInterruptionPredictionsType:    toPtr(tt.apiType),
-			}
-			result, err := flattenConstraints(input)
-			require.NoError(t, err)
-			require.Len(t, result, 1)
-			got, ok := result[0][FieldNodeTemplateSpotInterruptionPredictionsType].(*string)
-			require.True(t, ok)
-			require.Equal(t, tt.wantType, *got)
-		})
-	}
-}
-
 func Test_toNodeTemplateConstraints_persistsSpotInterruptionPredictionsType(t *testing.T) {
 	tests := map[string]struct {
 		inputType string
@@ -1882,39 +1821,6 @@ func Test_toNodeTemplateConstraints_persistsSpotInterruptionPredictionsType(t *t
 			result := toTemplateConstraints(obj)
 			require.NotNil(t, result.SpotInterruptionPredictionsType)
 			require.Equal(t, tt.wantType, *result.SpotInterruptionPredictionsType)
-		})
-	}
-}
-
-func Test_spotInterruptionPredictionsType_diffSuppression(t *testing.T) {
-	s := resourceNodeTemplate().Schema["constraints"].Elem.(*schema.Resource).Schema[FieldNodeTemplateSpotInterruptionPredictionsType]
-	require.NotNil(t, s.DiffSuppressFunc)
-
-	tests := map[string]struct {
-		oldVal       string
-		newVal       string
-		wantSuppress bool
-	}{
-		"same value - suppress": {
-			oldVal: "interruption-predictions", newVal: "interruption-predictions", wantSuppress: true,
-		},
-		"deprecated old, normalized new - suppress": {
-			oldVal: "aws-rebalance-recommendations", newVal: "interruption-predictions", wantSuppress: true,
-		},
-		"normalized old, deprecated new - suppress": {
-			oldVal: "interruption-predictions", newVal: "aws-rebalance-recommendations", wantSuppress: true,
-		},
-		"both deprecated - suppress": {
-			oldVal: "aws-rebalance-recommendations", newVal: "aws-rebalance-recommendations", wantSuppress: true,
-		},
-		"different real values - no suppress": {
-			oldVal: "interruption-predictions", newVal: "some-other-value", wantSuppress: false,
-		},
-	}
-	for name, tt := range tests {
-		t.Run(name, func(t *testing.T) {
-			got := s.DiffSuppressFunc("", tt.oldVal, tt.newVal, nil)
-			require.Equal(t, tt.wantSuppress, got)
 		})
 	}
 }

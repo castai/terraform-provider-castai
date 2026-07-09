@@ -164,7 +164,7 @@ Optional:
 Optional:
 
 - `enabled` (Boolean) enable/disable spot interruption predictions.
-- `spot_interruption_predictions_type` (String) define the type of the spot interruption prediction to handle. The value "AWSRebalanceRecommendations" is deprecated; use "CASTAIInterruptionPredictions".
+- `spot_interruption_predictions_type` (String, Deprecated) define the type of the spot interruption prediction to handle. The value "AWSRebalanceRecommendations" is deprecated; use "CASTAIInterruptionPredictions".
 
 
 
