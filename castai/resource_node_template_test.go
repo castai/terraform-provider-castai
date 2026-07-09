@@ -1859,16 +1859,16 @@ func Test_flattenConstraints_normalizesSpotInterruptionPredictionsType(t *testin
 	}
 }
 
-func Test_toNodeTemplateConstraints_normalizesSpotInterruptionPredictionsType(t *testing.T) {
+func Test_toNodeTemplateConstraints_persistsSpotInterruptionPredictionsType(t *testing.T) {
 	tests := map[string]struct {
 		inputType string
 		wantType  string
 	}{
-		"aws-rebalance-recommendations normalized on write": {
+		"aws-rebalance-recommendations persisted as-is": {
 			inputType: "aws-rebalance-recommendations",
-			wantType:  "interruption-predictions",
+			wantType:  "aws-rebalance-recommendations",
 		},
-		"interruption-predictions stays on write": {
+		"interruption-predictions persisted as-is": {
 			inputType: "interruption-predictions",
 			wantType:  "interruption-predictions",
 		},

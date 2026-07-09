@@ -1763,7 +1763,7 @@ func toTemplateConstraints(obj map[string]any) *sdk.NodetemplatesV1TemplateConst
 		out.SpotInterruptionPredictionsEnabled = toPtr(v)
 	}
 	if v, ok := obj[FieldNodeTemplateSpotInterruptionPredictionsType].(string); ok {
-		out.SpotInterruptionPredictionsType = toPtr(normalizeSpotInterruptionPredictionsType(v))
+		out.SpotInterruptionPredictionsType = toPtr(v)
 	}
 	if v, ok := obj[FieldNodeTemplateCustomPriority].([]any); ok && len(v) > 0 {
 		if ok {
