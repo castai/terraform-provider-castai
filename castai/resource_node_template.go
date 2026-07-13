@@ -289,11 +289,14 @@ func resourceNodeTemplate() *schema.Resource {
 							Description: "Enable/disable spot interruption predictions.",
 						},
 						FieldNodeTemplateSpotInterruptionPredictionsType: {
-							Type:             schema.TypeString,
-							Optional:         true,
-							Default:          "interruption-predictions",
-							Description:      "Spot interruption predictions type. Only \"interruption-predictions\" is supported.",
-							Deprecated:       "The value \"aws-rebalance-recommendations\" is deprecated and will be removed in a future major version. Cast AI ML predictions (\"interruption-predictions\") are now used for all spot interruption prediction.",
+							Type:        schema.TypeString,
+							Optional:    true,
+							Default:     "interruption-predictions",
+							Description: "Spot interruption predictions type. Only \"interruption-predictions\" is supported.",
+							Deprecated:  "The value \"aws-rebalance-recommendations\" is deprecated and will be removed in a future major version. Cast AI ML predictions (\"interruption-predictions\") are now used for all spot interruption prediction.",
+							DiffSuppressFunc: func(k, oldValue, newValue string, d *schema.ResourceData) bool {
+								return true
+							},
 							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"aws-rebalance-recommendations", "interruption-predictions"}, false)),
 						},
 						FieldNodeTemplateMinCpu: {
