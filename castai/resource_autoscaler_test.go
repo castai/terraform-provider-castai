@@ -1241,6 +1241,7 @@ resource "castai_node_template" "default" {
       configuration_id,
       constraints[0].azs,
       constraints[0].cpu_manufacturers,
+      constraints[0].spot_interruption_predictions_type,
     ]
   }
 }
