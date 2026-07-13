@@ -295,9 +295,6 @@ func resourceNodeTemplate() *schema.Resource {
 							Description:      "Spot interruption predictions type. Only \"interruption-predictions\" is supported.",
 							Deprecated:       "The value \"aws-rebalance-recommendations\" is deprecated and will be removed in a future major version. Cast AI ML predictions (\"interruption-predictions\") are now used for all spot interruption prediction.",
 							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"aws-rebalance-recommendations", "interruption-predictions"}, false)),
-							DiffSuppressFunc: func(k, oldVal, newVal string, d *schema.ResourceData) bool {
-								return normalizeSpotInterruptionPredictionsType(oldVal) == normalizeSpotInterruptionPredictionsType(newVal)
-							},
 						},
 						FieldNodeTemplateMinCpu: {
 							Type:        schema.TypeInt,
@@ -1082,8 +1079,7 @@ func flattenConstraints(c *sdk.NodetemplatesV1TemplateConstraints) ([]map[string
 		out[FieldNodeTemplateSpotInterruptionPredictionsEnabled] = c.SpotInterruptionPredictionsEnabled
 	}
 	if c.SpotInterruptionPredictionsType != nil {
-		normalized := normalizeSpotInterruptionPredictionsType(*c.SpotInterruptionPredictionsType)
-		out[FieldNodeTemplateSpotInterruptionPredictionsType] = &normalized
+		out[FieldNodeTemplateSpotInterruptionPredictionsType] = c.SpotInterruptionPredictionsType
 	}
 
 	if c.MinMemory != nil {
@@ -1763,7 +1759,7 @@ func toTemplateConstraints(obj map[string]any) *sdk.NodetemplatesV1TemplateConst
 		out.SpotInterruptionPredictionsEnabled = toPtr(v)
 	}
 	if v, ok := obj[FieldNodeTemplateSpotInterruptionPredictionsType].(string); ok {
-		out.SpotInterruptionPredictionsType = toPtr(normalizeSpotInterruptionPredictionsType(v))
+		out.SpotInterruptionPredictionsType = toPtr(v)
 	}
 	if v, ok := obj[FieldNodeTemplateCustomPriority].([]any); ok && len(v) > 0 {
 		if ok {
@@ -2152,13 +2148,4 @@ func gpuSharingStrategyToTerraform(s sdk.NodetemplatesV1GPUSharingStrategy) stri
 	default:
 		return ""
 	}
-}
-
-// normalizeSpotInterruptionPredictionsType maps the deprecated "aws-rebalance-recommendations"
-// value to "interruption-predictions". Used in DiffSuppressFunc and read-path normalization.
-func normalizeSpotInterruptionPredictionsType(v string) string {
-	if v == "aws-rebalance-recommendations" {
-		return "interruption-predictions"
-	}
-	return v
 }
