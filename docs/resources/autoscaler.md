@@ -99,7 +99,7 @@ Optional:
 Optional:
 
 - `max_cores` (Number) defines the maximum allowed amount of vCPUs in the whole cluster.
-- `min_cores` (Number) defines the minimum allowed amount of CPUs in the whole cluster.
+- `min_cores` (Number, Deprecated) defines the minimum allowed amount of CPUs in the whole cluster. This field is deprecated.
 
 
 
