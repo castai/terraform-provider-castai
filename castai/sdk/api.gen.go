@@ -248,6 +248,14 @@ const (
 	CastaiRbacV1beta1PoliciesStateUNKNOWN  CastaiRbacV1beta1PoliciesState = "UNKNOWN"
 )
 
+// Defines values for CastaiRbacV1beta1ProductType.
+const (
+	CastaiRbacV1beta1ProductTypePRODUCTTYPEBOTH        CastaiRbacV1beta1ProductType = "PRODUCT_TYPE_BOTH"
+	CastaiRbacV1beta1ProductTypePRODUCTTYPECAST        CastaiRbacV1beta1ProductType = "PRODUCT_TYPE_CAST"
+	CastaiRbacV1beta1ProductTypePRODUCTTYPEKIMCHI      CastaiRbacV1beta1ProductType = "PRODUCT_TYPE_KIMCHI"
+	CastaiRbacV1beta1ProductTypePRODUCTTYPEUNSPECIFIED CastaiRbacV1beta1ProductType = "PRODUCT_TYPE_UNSPECIFIED"
+)
+
 // Defines values for CastaiRbacV1beta1ScopeType.
 const (
 	CastaiRbacV1beta1ScopeTypeCLUSTER      CastaiRbacV1beta1ScopeType = "CLUSTER"
@@ -1056,6 +1064,7 @@ const (
 
 // Defines values for WorkloadoptimizationV1Runtime.
 const (
+	WorkloadoptimizationV1RuntimeGPU                WorkloadoptimizationV1Runtime = "GPU"
 	WorkloadoptimizationV1RuntimeJVM                WorkloadoptimizationV1Runtime = "JVM"
 	WorkloadoptimizationV1RuntimeRUNTIMEUNSPECIFIED WorkloadoptimizationV1Runtime = "RUNTIME_UNSPECIFIED"
 )
@@ -1097,6 +1106,14 @@ const (
 	SYSTEMOVERRIDETARGETALL                  WorkloadoptimizationV1SystemOverrideTarget = "SYSTEM_OVERRIDE_TARGET_ALL"
 	SYSTEMOVERRIDETARGETUNSPECIFIED          WorkloadoptimizationV1SystemOverrideTarget = "SYSTEM_OVERRIDE_TARGET_UNSPECIFIED"
 	SYSTEMOVERRIDETARGETVERTICALOPTIMIZATION WorkloadoptimizationV1SystemOverrideTarget = "SYSTEM_OVERRIDE_TARGET_VERTICAL_OPTIMIZATION"
+)
+
+// Defines values for RbacServiceAPIListPermissionGroupsParamsProduct.
+const (
+	RbacServiceAPIListPermissionGroupsParamsProductPRODUCTTYPEBOTH        RbacServiceAPIListPermissionGroupsParamsProduct = "PRODUCT_TYPE_BOTH"
+	RbacServiceAPIListPermissionGroupsParamsProductPRODUCTTYPECAST        RbacServiceAPIListPermissionGroupsParamsProduct = "PRODUCT_TYPE_CAST"
+	RbacServiceAPIListPermissionGroupsParamsProductPRODUCTTYPEKIMCHI      RbacServiceAPIListPermissionGroupsParamsProduct = "PRODUCT_TYPE_KIMCHI"
+	RbacServiceAPIListPermissionGroupsParamsProductPRODUCTTYPEUNSPECIFIED RbacServiceAPIListPermissionGroupsParamsProduct = "PRODUCT_TYPE_UNSPECIFIED"
 )
 
 // Defines values for CommitmentsAPIGetCommitmentUsageHistoryParamsAggregationInterval.
@@ -1420,6 +1437,7 @@ const (
 
 // Defines values for WorkloadOptimizationAPIListWorkloadsParamsAnyContainerWithRuntime.
 const (
+	WorkloadOptimizationAPIListWorkloadsParamsAnyContainerWithRuntimeGPU                WorkloadOptimizationAPIListWorkloadsParamsAnyContainerWithRuntime = "GPU"
 	WorkloadOptimizationAPIListWorkloadsParamsAnyContainerWithRuntimeJVM                WorkloadOptimizationAPIListWorkloadsParamsAnyContainerWithRuntime = "JVM"
 	WorkloadOptimizationAPIListWorkloadsParamsAnyContainerWithRuntimeRUNTIMEUNSPECIFIED WorkloadOptimizationAPIListWorkloadsParamsAnyContainerWithRuntime = "RUNTIME_UNSPECIFIED"
 )
@@ -3215,6 +3233,9 @@ type CastaiRbacV1beta1PermissionGroup struct {
 	// CategoryDisplayName Human-readable display name for the category.
 	CategoryDisplayName *string `json:"categoryDisplayName,omitempty"`
 
+	// CategoryProduct ProductType represents which product a category belongs to.
+	CategoryProduct *CastaiRbacV1beta1ProductType `json:"categoryProduct,omitempty"`
+
 	// Description Description of the permission group.
 	Description *string `json:"description,omitempty"`
 
@@ -3253,6 +3274,9 @@ type CastaiRbacV1beta1PoliciesState string
 type CastaiRbacV1beta1PolicyID struct {
 	Id string `json:"id"`
 }
+
+// CastaiRbacV1beta1ProductType ProductType represents which product a category belongs to.
+type CastaiRbacV1beta1ProductType string
 
 // CastaiRbacV1beta1ResourceScope ResourceScope represents the resource scope.
 // Resource can be any resources inside the organization.
@@ -3552,6 +3576,9 @@ type CastaiServiceaccountsV1beta1ServiceAccount struct {
 
 	// Name Name is the name of the service account.
 	Name *string `json:"name,omitempty"`
+
+	// OrganizationId OrganizationID is the organization that owns the service account.
+	OrganizationId *string `json:"organizationId,omitempty"`
 }
 
 // CastaiServiceaccountsV1beta1ServiceAccountAuthor Author is the author of the service account.
@@ -6790,6 +6817,9 @@ type NodeconfigV1AKSConfig struct {
 	EnableEncryptionAtHost      *bool     `json:"enableEncryptionAtHost"`
 
 	// ImageFamily List of supported image families (OSes) for AKS.
+	//
+	//  - FAMILY_UBUNTU_2204: Ubuntu 22.04 (supported on k8s < 1.37).
+	//  - FAMILY_UBUNTU_2404: Ubuntu 24.04 (supported on k8s >= 1.32).
 	ImageFamily *NodeconfigV1AKSConfigImageFamily `json:"imageFamily,omitempty"`
 
 	// LoadBalancers List of load balancers to attach nodes to. Populating this field disables Cast's default load balancer autodiscovery mechanism.
@@ -6819,6 +6849,9 @@ type NodeconfigV1AKSConfig struct {
 type NodeconfigV1AKSConfigAcceleratedNetworkingMode string
 
 // NodeconfigV1AKSConfigImageFamily List of supported image families (OSes) for AKS.
+//
+//   - FAMILY_UBUNTU_2204: Ubuntu 22.04 (supported on k8s < 1.37).
+//   - FAMILY_UBUNTU_2404: Ubuntu 24.04 (supported on k8s >= 1.32).
 type NodeconfigV1AKSConfigImageFamily string
 
 // NodeconfigV1AKSConfigLoadBalancers defines model for nodeconfig.v1.AKSConfig.LoadBalancers.
@@ -11380,7 +11413,13 @@ type RbacServiceAPIListPermissionGroupsParams struct {
 	// PageCursor Cursor that defines token indicating where to start the next page.
 	// Empty value indicates to start from beginning of the dataset.
 	PageCursor *string `form:"page.cursor,omitempty" json:"page.cursor,omitempty"`
+
+	// Product Filter by product type.
+	Product *RbacServiceAPIListPermissionGroupsParamsProduct `form:"product,omitempty" json:"product,omitempty"`
 }
+
+// RbacServiceAPIListPermissionGroupsParamsProduct defines parameters for RbacServiceAPIListPermissionGroups.
+type RbacServiceAPIListPermissionGroupsParamsProduct string
 
 // CommitmentsAPIGetCommitmentUsageHistoryParams defines parameters for CommitmentsAPIGetCommitmentUsageHistory.
 type CommitmentsAPIGetCommitmentUsageHistoryParams struct {
