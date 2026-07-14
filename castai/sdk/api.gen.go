@@ -5950,6 +5950,23 @@ type ExternalclusterV1GCPCreateSAResponse struct {
 	ServiceAccountId *string `json:"serviceAccountId,omitempty"`
 }
 
+// ExternalclusterV1GCPNodeConfig GCPNodeConfig holds GCP-specific configuration for node provisioning.
+type ExternalclusterV1GCPNodeConfig struct {
+	ReservationAffinity *ExternalclusterV1GCPNodeConfigReservationAffinity `json:"reservationAffinity,omitempty"`
+}
+
+// ExternalclusterV1GCPNodeConfigReservationAffinity defines model for externalcluster.v1.GCPNodeConfig.ReservationAffinity.
+type ExternalclusterV1GCPNodeConfigReservationAffinity struct {
+	// ConsumeReservationType "ConsumeReservationType" as defined by the GCP ReservationAffinity API type.
+	// Currently only "SPECIFIC_RESERVATION" is supported.
+	ConsumeReservationType *string `json:"consumeReservationType,omitempty"`
+
+	// Key "Key" as defined by the GCP ReservationAffinity API type.
+	// Currently only "compute.googleapis.com/reservation-name" is supported.
+	Key    *string   `json:"key,omitempty"`
+	Values *[]string `json:"values,omitempty"`
+}
+
 // ExternalclusterV1GKEClusterParams GKEClusterParams defines GKE-specific arguments.
 type ExternalclusterV1GKEClusterParams struct {
 	CastServiceAccount   *string `json:"castServiceAccount,omitempty"`
@@ -6236,6 +6253,9 @@ type ExternalclusterV1NodeBatchConfig struct {
 	// EdgeConfig EdgeConfig holds Edge specific configuration.
 	EdgeConfig *ExternalclusterV1EdgeConfig `json:"edgeConfig,omitempty"`
 
+	// Gcp GCPNodeConfig holds GCP-specific configuration for node provisioning.
+	Gcp *ExternalclusterV1GCPNodeConfig `json:"gcp,omitempty"`
+
 	// GpuConfig GPUConfig describes instance GPU configuration.
 	//
 	// Use for:
@@ -6302,6 +6322,9 @@ type ExternalclusterV1NodeConfig struct {
 
 	// EdgeConfig EdgeConfig holds Edge specific configuration.
 	EdgeConfig *ExternalclusterV1EdgeConfig `json:"edgeConfig,omitempty"`
+
+	// Gcp GCPNodeConfig holds GCP-specific configuration for node provisioning.
+	Gcp *ExternalclusterV1GCPNodeConfig `json:"gcp,omitempty"`
 
 	// GpuConfig GPUConfig describes instance GPU configuration.
 	//
