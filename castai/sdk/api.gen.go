@@ -7833,6 +7833,7 @@ type PoliciesV1ClusterLimitsCpu struct {
 	MaxCores *int32 `json:"maxCores,omitempty"`
 
 	// MinCores Defines the minimum allowed amount of CPUs in the whole cluster.
+	// Deprecated: Min CPU limit is no longer enforced.
 	MinCores *int32 `json:"minCores,omitempty"`
 }
 
