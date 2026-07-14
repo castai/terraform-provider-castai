@@ -248,6 +248,14 @@ const (
 	CastaiRbacV1beta1PoliciesStateUNKNOWN  CastaiRbacV1beta1PoliciesState = "UNKNOWN"
 )
 
+// Defines values for CastaiRbacV1beta1ProductType.
+const (
+	CastaiRbacV1beta1ProductTypePRODUCTTYPEBOTH        CastaiRbacV1beta1ProductType = "PRODUCT_TYPE_BOTH"
+	CastaiRbacV1beta1ProductTypePRODUCTTYPECAST        CastaiRbacV1beta1ProductType = "PRODUCT_TYPE_CAST"
+	CastaiRbacV1beta1ProductTypePRODUCTTYPEKIMCHI      CastaiRbacV1beta1ProductType = "PRODUCT_TYPE_KIMCHI"
+	CastaiRbacV1beta1ProductTypePRODUCTTYPEUNSPECIFIED CastaiRbacV1beta1ProductType = "PRODUCT_TYPE_UNSPECIFIED"
+)
+
 // Defines values for CastaiRbacV1beta1ScopeType.
 const (
 	CastaiRbacV1beta1ScopeTypeCLUSTER      CastaiRbacV1beta1ScopeType = "CLUSTER"
@@ -494,11 +502,15 @@ const (
 const (
 	NodeconfigV1AKSConfigImageFamilyFAMILYAZURELINUX  NodeconfigV1AKSConfigImageFamily = "FAMILY_AZURE_LINUX"
 	NodeconfigV1AKSConfigImageFamilyFAMILYUBUNTU      NodeconfigV1AKSConfigImageFamily = "FAMILY_UBUNTU"
+	NodeconfigV1AKSConfigImageFamilyFAMILYUBUNTU2204  NodeconfigV1AKSConfigImageFamily = "FAMILY_UBUNTU_2204"
+	NodeconfigV1AKSConfigImageFamilyFAMILYUBUNTU2404  NodeconfigV1AKSConfigImageFamily = "FAMILY_UBUNTU_2404"
 	NodeconfigV1AKSConfigImageFamilyFAMILYUNSPECIFIED NodeconfigV1AKSConfigImageFamily = "FAMILY_UNSPECIFIED"
 	NodeconfigV1AKSConfigImageFamilyFAMILYWINDOWS2019 NodeconfigV1AKSConfigImageFamily = "FAMILY_WINDOWS_2019"
 	NodeconfigV1AKSConfigImageFamilyFAMILYWINDOWS2022 NodeconfigV1AKSConfigImageFamily = "FAMILY_WINDOWS_2022"
 	NodeconfigV1AKSConfigImageFamilyFamilyAzureLinux  NodeconfigV1AKSConfigImageFamily = "family_azure_linux"
 	NodeconfigV1AKSConfigImageFamilyFamilyUbuntu      NodeconfigV1AKSConfigImageFamily = "family_ubuntu"
+	NodeconfigV1AKSConfigImageFamilyFamilyUbuntu2204  NodeconfigV1AKSConfigImageFamily = "family_ubuntu_2204"
+	NodeconfigV1AKSConfigImageFamilyFamilyUbuntu2404  NodeconfigV1AKSConfigImageFamily = "family_ubuntu_2404"
 	NodeconfigV1AKSConfigImageFamilyFamilyWindows2019 NodeconfigV1AKSConfigImageFamily = "family_windows_2019"
 	NodeconfigV1AKSConfigImageFamilyFamilyWindows2022 NodeconfigV1AKSConfigImageFamily = "family_windows_2022"
 )
@@ -784,28 +796,29 @@ const (
 
 // Defines values for WorkloadoptimizationV1EventType.
 const (
-	WorkloadoptimizationV1EventTypeEVENTTYPECONFIGURATIONCHANGEDV2     WorkloadoptimizationV1EventType = "EVENT_TYPE_CONFIGURATION_CHANGEDV2"
-	WorkloadoptimizationV1EventTypeEVENTTYPECPUPRESSURE                WorkloadoptimizationV1EventType = "EVENT_TYPE_CPU_PRESSURE"
-	WorkloadoptimizationV1EventTypeEVENTTYPECPUPRESSURERESOLVED        WorkloadoptimizationV1EventType = "EVENT_TYPE_CPU_PRESSURE_RESOLVED"
-	WorkloadoptimizationV1EventTypeEVENTTYPEFAILEDHELMTESTHOOK         WorkloadoptimizationV1EventType = "EVENT_TYPE_FAILED_HELM_TEST_HOOK"
-	WorkloadoptimizationV1EventTypeEVENTTYPEHPAALMOSTMAXEDOUT          WorkloadoptimizationV1EventType = "EVENT_TYPE_HPA_ALMOST_MAXED_OUT"
-	WorkloadoptimizationV1EventTypeEVENTTYPEHPAMAXEDOUT                WorkloadoptimizationV1EventType = "EVENT_TYPE_HPA_MAXED_OUT"
-	WorkloadoptimizationV1EventTypeEVENTTYPEINVALID                    WorkloadoptimizationV1EventType = "EVENT_TYPE_INVALID"
-	WorkloadoptimizationV1EventTypeEVENTTYPEMEMORYPRESSUREEVICTION     WorkloadoptimizationV1EventType = "EVENT_TYPE_MEMORY_PRESSURE_EVICTION"
-	WorkloadoptimizationV1EventTypeEVENTTYPENATIVEVPASTATECHANGED      WorkloadoptimizationV1EventType = "EVENT_TYPE_NATIVE_VPA_STATE_CHANGED"
-	WorkloadoptimizationV1EventTypeEVENTTYPEOOMKILL                    WorkloadoptimizationV1EventType = "EVENT_TYPE_OOM_KILL"
-	WorkloadoptimizationV1EventTypeEVENTTYPERECOMMENDEDPODCOUNTCHANGED WorkloadoptimizationV1EventType = "EVENT_TYPE_RECOMMENDED_POD_COUNT_CHANGED"
-	WorkloadoptimizationV1EventTypeEVENTTYPERECOMMENDEDREQUESTSCHANGED WorkloadoptimizationV1EventType = "EVENT_TYPE_RECOMMENDED_REQUESTS_CHANGED"
-	WorkloadoptimizationV1EventTypeEVENTTYPESCALINGPOLICYASSIGNED      WorkloadoptimizationV1EventType = "EVENT_TYPE_SCALING_POLICY_ASSIGNED"
-	WorkloadoptimizationV1EventTypeEVENTTYPESCALINGPOLICYCREATED       WorkloadoptimizationV1EventType = "EVENT_TYPE_SCALING_POLICY_CREATED"
-	WorkloadoptimizationV1EventTypeEVENTTYPESCALINGPOLICYDELETED       WorkloadoptimizationV1EventType = "EVENT_TYPE_SCALING_POLICY_DELETED"
-	WorkloadoptimizationV1EventTypeEVENTTYPESCALINGPOLICYORDERUPDATED  WorkloadoptimizationV1EventType = "EVENT_TYPE_SCALING_POLICY_ORDER_UPDATED"
-	WorkloadoptimizationV1EventTypeEVENTTYPESCALINGPOLICYUPDATED       WorkloadoptimizationV1EventType = "EVENT_TYPE_SCALING_POLICY_UPDATED"
-	WorkloadoptimizationV1EventTypeEVENTTYPESTARTUPFAILURE             WorkloadoptimizationV1EventType = "EVENT_TYPE_STARTUP_FAILURE"
-	WorkloadoptimizationV1EventTypeEVENTTYPESURGE                      WorkloadoptimizationV1EventType = "EVENT_TYPE_SURGE"
-	WorkloadoptimizationV1EventTypeEVENTTYPESYSTEMOVERRIDERESET        WorkloadoptimizationV1EventType = "EVENT_TYPE_SYSTEM_OVERRIDE_RESET"
-	WorkloadoptimizationV1EventTypeEVENTTYPESYSTEMOVERRIDETRIGGERED    WorkloadoptimizationV1EventType = "EVENT_TYPE_SYSTEM_OVERRIDE_TRIGGERED"
-	WorkloadoptimizationV1EventTypeEVENTTYPEUNBOUNDMEMORYGROWTH        WorkloadoptimizationV1EventType = "EVENT_TYPE_UNBOUND_MEMORY_GROWTH"
+	WorkloadoptimizationV1EventTypeEVENTTYPECONFIGURATIONCHANGEDV2        WorkloadoptimizationV1EventType = "EVENT_TYPE_CONFIGURATION_CHANGEDV2"
+	WorkloadoptimizationV1EventTypeEVENTTYPECPUPRESSURE                   WorkloadoptimizationV1EventType = "EVENT_TYPE_CPU_PRESSURE"
+	WorkloadoptimizationV1EventTypeEVENTTYPECPUPRESSURERESOLVED           WorkloadoptimizationV1EventType = "EVENT_TYPE_CPU_PRESSURE_RESOLVED"
+	WorkloadoptimizationV1EventTypeEVENTTYPEFAILEDHELMTESTHOOK            WorkloadoptimizationV1EventType = "EVENT_TYPE_FAILED_HELM_TEST_HOOK"
+	WorkloadoptimizationV1EventTypeEVENTTYPEGPURECOMMENDEDREQUESTSCHANGED WorkloadoptimizationV1EventType = "EVENT_TYPE_GPU_RECOMMENDED_REQUESTS_CHANGED"
+	WorkloadoptimizationV1EventTypeEVENTTYPEHPAALMOSTMAXEDOUT             WorkloadoptimizationV1EventType = "EVENT_TYPE_HPA_ALMOST_MAXED_OUT"
+	WorkloadoptimizationV1EventTypeEVENTTYPEHPAMAXEDOUT                   WorkloadoptimizationV1EventType = "EVENT_TYPE_HPA_MAXED_OUT"
+	WorkloadoptimizationV1EventTypeEVENTTYPEINVALID                       WorkloadoptimizationV1EventType = "EVENT_TYPE_INVALID"
+	WorkloadoptimizationV1EventTypeEVENTTYPEMEMORYPRESSUREEVICTION        WorkloadoptimizationV1EventType = "EVENT_TYPE_MEMORY_PRESSURE_EVICTION"
+	WorkloadoptimizationV1EventTypeEVENTTYPENATIVEVPASTATECHANGED         WorkloadoptimizationV1EventType = "EVENT_TYPE_NATIVE_VPA_STATE_CHANGED"
+	WorkloadoptimizationV1EventTypeEVENTTYPEOOMKILL                       WorkloadoptimizationV1EventType = "EVENT_TYPE_OOM_KILL"
+	WorkloadoptimizationV1EventTypeEVENTTYPERECOMMENDEDPODCOUNTCHANGED    WorkloadoptimizationV1EventType = "EVENT_TYPE_RECOMMENDED_POD_COUNT_CHANGED"
+	WorkloadoptimizationV1EventTypeEVENTTYPERECOMMENDEDREQUESTSCHANGED    WorkloadoptimizationV1EventType = "EVENT_TYPE_RECOMMENDED_REQUESTS_CHANGED"
+	WorkloadoptimizationV1EventTypeEVENTTYPESCALINGPOLICYASSIGNED         WorkloadoptimizationV1EventType = "EVENT_TYPE_SCALING_POLICY_ASSIGNED"
+	WorkloadoptimizationV1EventTypeEVENTTYPESCALINGPOLICYCREATED          WorkloadoptimizationV1EventType = "EVENT_TYPE_SCALING_POLICY_CREATED"
+	WorkloadoptimizationV1EventTypeEVENTTYPESCALINGPOLICYDELETED          WorkloadoptimizationV1EventType = "EVENT_TYPE_SCALING_POLICY_DELETED"
+	WorkloadoptimizationV1EventTypeEVENTTYPESCALINGPOLICYORDERUPDATED     WorkloadoptimizationV1EventType = "EVENT_TYPE_SCALING_POLICY_ORDER_UPDATED"
+	WorkloadoptimizationV1EventTypeEVENTTYPESCALINGPOLICYUPDATED          WorkloadoptimizationV1EventType = "EVENT_TYPE_SCALING_POLICY_UPDATED"
+	WorkloadoptimizationV1EventTypeEVENTTYPESTARTUPFAILURE                WorkloadoptimizationV1EventType = "EVENT_TYPE_STARTUP_FAILURE"
+	WorkloadoptimizationV1EventTypeEVENTTYPESURGE                         WorkloadoptimizationV1EventType = "EVENT_TYPE_SURGE"
+	WorkloadoptimizationV1EventTypeEVENTTYPESYSTEMOVERRIDERESET           WorkloadoptimizationV1EventType = "EVENT_TYPE_SYSTEM_OVERRIDE_RESET"
+	WorkloadoptimizationV1EventTypeEVENTTYPESYSTEMOVERRIDETRIGGERED       WorkloadoptimizationV1EventType = "EVENT_TYPE_SYSTEM_OVERRIDE_TRIGGERED"
+	WorkloadoptimizationV1EventTypeEVENTTYPEUNBOUNDMEMORYGROWTH           WorkloadoptimizationV1EventType = "EVENT_TYPE_UNBOUND_MEMORY_GROWTH"
 )
 
 // Defines values for WorkloadoptimizationV1GetAgentStatusResponseAgentStatus.
@@ -1052,6 +1065,7 @@ const (
 
 // Defines values for WorkloadoptimizationV1Runtime.
 const (
+	WorkloadoptimizationV1RuntimeGPU                WorkloadoptimizationV1Runtime = "GPU"
 	WorkloadoptimizationV1RuntimeJVM                WorkloadoptimizationV1Runtime = "JVM"
 	WorkloadoptimizationV1RuntimeRUNTIMEUNSPECIFIED WorkloadoptimizationV1Runtime = "RUNTIME_UNSPECIFIED"
 )
@@ -1093,6 +1107,14 @@ const (
 	SYSTEMOVERRIDETARGETALL                  WorkloadoptimizationV1SystemOverrideTarget = "SYSTEM_OVERRIDE_TARGET_ALL"
 	SYSTEMOVERRIDETARGETUNSPECIFIED          WorkloadoptimizationV1SystemOverrideTarget = "SYSTEM_OVERRIDE_TARGET_UNSPECIFIED"
 	SYSTEMOVERRIDETARGETVERTICALOPTIMIZATION WorkloadoptimizationV1SystemOverrideTarget = "SYSTEM_OVERRIDE_TARGET_VERTICAL_OPTIMIZATION"
+)
+
+// Defines values for RbacServiceAPIListPermissionGroupsParamsProduct.
+const (
+	RbacServiceAPIListPermissionGroupsParamsProductPRODUCTTYPEBOTH        RbacServiceAPIListPermissionGroupsParamsProduct = "PRODUCT_TYPE_BOTH"
+	RbacServiceAPIListPermissionGroupsParamsProductPRODUCTTYPECAST        RbacServiceAPIListPermissionGroupsParamsProduct = "PRODUCT_TYPE_CAST"
+	RbacServiceAPIListPermissionGroupsParamsProductPRODUCTTYPEKIMCHI      RbacServiceAPIListPermissionGroupsParamsProduct = "PRODUCT_TYPE_KIMCHI"
+	RbacServiceAPIListPermissionGroupsParamsProductPRODUCTTYPEUNSPECIFIED RbacServiceAPIListPermissionGroupsParamsProduct = "PRODUCT_TYPE_UNSPECIFIED"
 )
 
 // Defines values for CommitmentsAPIGetCommitmentUsageHistoryParamsAggregationInterval.
@@ -1341,54 +1363,56 @@ const (
 
 // Defines values for WorkloadOptimizationAPIListWorkloadEventsParamsType.
 const (
-	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPECONFIGURATIONCHANGEDV2     WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_CONFIGURATION_CHANGEDV2"
-	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPECPUPRESSURE                WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_CPU_PRESSURE"
-	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPECPUPRESSURERESOLVED        WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_CPU_PRESSURE_RESOLVED"
-	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPEFAILEDHELMTESTHOOK         WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_FAILED_HELM_TEST_HOOK"
-	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPEHPAALMOSTMAXEDOUT          WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_HPA_ALMOST_MAXED_OUT"
-	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPEHPAMAXEDOUT                WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_HPA_MAXED_OUT"
-	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPEINVALID                    WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_INVALID"
-	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPEMEMORYPRESSUREEVICTION     WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_MEMORY_PRESSURE_EVICTION"
-	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPENATIVEVPASTATECHANGED      WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_NATIVE_VPA_STATE_CHANGED"
-	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPEOOMKILL                    WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_OOM_KILL"
-	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPERECOMMENDEDPODCOUNTCHANGED WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_RECOMMENDED_POD_COUNT_CHANGED"
-	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPERECOMMENDEDREQUESTSCHANGED WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_RECOMMENDED_REQUESTS_CHANGED"
-	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPESCALINGPOLICYASSIGNED      WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_SCALING_POLICY_ASSIGNED"
-	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPESCALINGPOLICYCREATED       WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_SCALING_POLICY_CREATED"
-	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPESCALINGPOLICYDELETED       WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_SCALING_POLICY_DELETED"
-	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPESCALINGPOLICYORDERUPDATED  WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_SCALING_POLICY_ORDER_UPDATED"
-	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPESCALINGPOLICYUPDATED       WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_SCALING_POLICY_UPDATED"
-	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPESTARTUPFAILURE             WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_STARTUP_FAILURE"
-	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPESURGE                      WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_SURGE"
-	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPESYSTEMOVERRIDERESET        WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_SYSTEM_OVERRIDE_RESET"
-	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPESYSTEMOVERRIDETRIGGERED    WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_SYSTEM_OVERRIDE_TRIGGERED"
-	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPEUNBOUNDMEMORYGROWTH        WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_UNBOUND_MEMORY_GROWTH"
+	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPECONFIGURATIONCHANGEDV2        WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_CONFIGURATION_CHANGEDV2"
+	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPECPUPRESSURE                   WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_CPU_PRESSURE"
+	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPECPUPRESSURERESOLVED           WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_CPU_PRESSURE_RESOLVED"
+	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPEFAILEDHELMTESTHOOK            WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_FAILED_HELM_TEST_HOOK"
+	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPEGPURECOMMENDEDREQUESTSCHANGED WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_GPU_RECOMMENDED_REQUESTS_CHANGED"
+	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPEHPAALMOSTMAXEDOUT             WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_HPA_ALMOST_MAXED_OUT"
+	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPEHPAMAXEDOUT                   WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_HPA_MAXED_OUT"
+	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPEINVALID                       WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_INVALID"
+	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPEMEMORYPRESSUREEVICTION        WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_MEMORY_PRESSURE_EVICTION"
+	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPENATIVEVPASTATECHANGED         WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_NATIVE_VPA_STATE_CHANGED"
+	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPEOOMKILL                       WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_OOM_KILL"
+	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPERECOMMENDEDPODCOUNTCHANGED    WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_RECOMMENDED_POD_COUNT_CHANGED"
+	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPERECOMMENDEDREQUESTSCHANGED    WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_RECOMMENDED_REQUESTS_CHANGED"
+	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPESCALINGPOLICYASSIGNED         WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_SCALING_POLICY_ASSIGNED"
+	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPESCALINGPOLICYCREATED          WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_SCALING_POLICY_CREATED"
+	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPESCALINGPOLICYDELETED          WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_SCALING_POLICY_DELETED"
+	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPESCALINGPOLICYORDERUPDATED     WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_SCALING_POLICY_ORDER_UPDATED"
+	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPESCALINGPOLICYUPDATED          WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_SCALING_POLICY_UPDATED"
+	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPESTARTUPFAILURE                WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_STARTUP_FAILURE"
+	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPESURGE                         WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_SURGE"
+	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPESYSTEMOVERRIDERESET           WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_SYSTEM_OVERRIDE_RESET"
+	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPESYSTEMOVERRIDETRIGGERED       WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_SYSTEM_OVERRIDE_TRIGGERED"
+	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPEUNBOUNDMEMORYGROWTH           WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_UNBOUND_MEMORY_GROWTH"
 )
 
 // Defines values for WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType.
 const (
-	EVENTTYPECONFIGURATIONCHANGEDV2     WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_CONFIGURATION_CHANGEDV2"
-	EVENTTYPECPUPRESSURE                WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_CPU_PRESSURE"
-	EVENTTYPECPUPRESSURERESOLVED        WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_CPU_PRESSURE_RESOLVED"
-	EVENTTYPEFAILEDHELMTESTHOOK         WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_FAILED_HELM_TEST_HOOK"
-	EVENTTYPEHPAALMOSTMAXEDOUT          WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_HPA_ALMOST_MAXED_OUT"
-	EVENTTYPEHPAMAXEDOUT                WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_HPA_MAXED_OUT"
-	EVENTTYPEINVALID                    WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_INVALID"
-	EVENTTYPEMEMORYPRESSUREEVICTION     WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_MEMORY_PRESSURE_EVICTION"
-	EVENTTYPENATIVEVPASTATECHANGED      WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_NATIVE_VPA_STATE_CHANGED"
-	EVENTTYPEOOMKILL                    WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_OOM_KILL"
-	EVENTTYPERECOMMENDEDPODCOUNTCHANGED WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_RECOMMENDED_POD_COUNT_CHANGED"
-	EVENTTYPERECOMMENDEDREQUESTSCHANGED WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_RECOMMENDED_REQUESTS_CHANGED"
-	EVENTTYPESCALINGPOLICYASSIGNED      WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_SCALING_POLICY_ASSIGNED"
-	EVENTTYPESCALINGPOLICYCREATED       WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_SCALING_POLICY_CREATED"
-	EVENTTYPESCALINGPOLICYDELETED       WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_SCALING_POLICY_DELETED"
-	EVENTTYPESCALINGPOLICYORDERUPDATED  WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_SCALING_POLICY_ORDER_UPDATED"
-	EVENTTYPESCALINGPOLICYUPDATED       WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_SCALING_POLICY_UPDATED"
-	EVENTTYPESTARTUPFAILURE             WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_STARTUP_FAILURE"
-	EVENTTYPESURGE                      WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_SURGE"
-	EVENTTYPESYSTEMOVERRIDERESET        WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_SYSTEM_OVERRIDE_RESET"
-	EVENTTYPESYSTEMOVERRIDETRIGGERED    WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_SYSTEM_OVERRIDE_TRIGGERED"
-	EVENTTYPEUNBOUNDMEMORYGROWTH        WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_UNBOUND_MEMORY_GROWTH"
+	EVENTTYPECONFIGURATIONCHANGEDV2        WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_CONFIGURATION_CHANGEDV2"
+	EVENTTYPECPUPRESSURE                   WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_CPU_PRESSURE"
+	EVENTTYPECPUPRESSURERESOLVED           WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_CPU_PRESSURE_RESOLVED"
+	EVENTTYPEFAILEDHELMTESTHOOK            WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_FAILED_HELM_TEST_HOOK"
+	EVENTTYPEGPURECOMMENDEDREQUESTSCHANGED WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_GPU_RECOMMENDED_REQUESTS_CHANGED"
+	EVENTTYPEHPAALMOSTMAXEDOUT             WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_HPA_ALMOST_MAXED_OUT"
+	EVENTTYPEHPAMAXEDOUT                   WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_HPA_MAXED_OUT"
+	EVENTTYPEINVALID                       WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_INVALID"
+	EVENTTYPEMEMORYPRESSUREEVICTION        WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_MEMORY_PRESSURE_EVICTION"
+	EVENTTYPENATIVEVPASTATECHANGED         WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_NATIVE_VPA_STATE_CHANGED"
+	EVENTTYPEOOMKILL                       WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_OOM_KILL"
+	EVENTTYPERECOMMENDEDPODCOUNTCHANGED    WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_RECOMMENDED_POD_COUNT_CHANGED"
+	EVENTTYPERECOMMENDEDREQUESTSCHANGED    WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_RECOMMENDED_REQUESTS_CHANGED"
+	EVENTTYPESCALINGPOLICYASSIGNED         WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_SCALING_POLICY_ASSIGNED"
+	EVENTTYPESCALINGPOLICYCREATED          WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_SCALING_POLICY_CREATED"
+	EVENTTYPESCALINGPOLICYDELETED          WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_SCALING_POLICY_DELETED"
+	EVENTTYPESCALINGPOLICYORDERUPDATED     WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_SCALING_POLICY_ORDER_UPDATED"
+	EVENTTYPESCALINGPOLICYUPDATED          WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_SCALING_POLICY_UPDATED"
+	EVENTTYPESTARTUPFAILURE                WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_STARTUP_FAILURE"
+	EVENTTYPESURGE                         WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_SURGE"
+	EVENTTYPESYSTEMOVERRIDERESET           WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_SYSTEM_OVERRIDE_RESET"
+	EVENTTYPESYSTEMOVERRIDETRIGGERED       WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_SYSTEM_OVERRIDE_TRIGGERED"
+	EVENTTYPEUNBOUNDMEMORYGROWTH           WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_UNBOUND_MEMORY_GROWTH"
 )
 
 // Defines values for WorkloadOptimizationAPIListWorkloadsParamsManagementOptions.
@@ -1416,6 +1440,7 @@ const (
 
 // Defines values for WorkloadOptimizationAPIListWorkloadsParamsAnyContainerWithRuntime.
 const (
+	WorkloadOptimizationAPIListWorkloadsParamsAnyContainerWithRuntimeGPU                WorkloadOptimizationAPIListWorkloadsParamsAnyContainerWithRuntime = "GPU"
 	WorkloadOptimizationAPIListWorkloadsParamsAnyContainerWithRuntimeJVM                WorkloadOptimizationAPIListWorkloadsParamsAnyContainerWithRuntime = "JVM"
 	WorkloadOptimizationAPIListWorkloadsParamsAnyContainerWithRuntimeRUNTIMEUNSPECIFIED WorkloadOptimizationAPIListWorkloadsParamsAnyContainerWithRuntime = "RUNTIME_UNSPECIFIED"
 )
@@ -3211,6 +3236,9 @@ type CastaiRbacV1beta1PermissionGroup struct {
 	// CategoryDisplayName Human-readable display name for the category.
 	CategoryDisplayName *string `json:"categoryDisplayName,omitempty"`
 
+	// CategoryProduct ProductType represents which product a category belongs to.
+	CategoryProduct *CastaiRbacV1beta1ProductType `json:"categoryProduct,omitempty"`
+
 	// Description Description of the permission group.
 	Description *string `json:"description,omitempty"`
 
@@ -3249,6 +3277,9 @@ type CastaiRbacV1beta1PoliciesState string
 type CastaiRbacV1beta1PolicyID struct {
 	Id string `json:"id"`
 }
+
+// CastaiRbacV1beta1ProductType ProductType represents which product a category belongs to.
+type CastaiRbacV1beta1ProductType string
 
 // CastaiRbacV1beta1ResourceScope ResourceScope represents the resource scope.
 // Resource can be any resources inside the organization.
@@ -3548,6 +3579,9 @@ type CastaiServiceaccountsV1beta1ServiceAccount struct {
 
 	// Name Name is the name of the service account.
 	Name *string `json:"name,omitempty"`
+
+	// OrganizationId OrganizationID is the organization that owns the service account.
+	OrganizationId *string `json:"organizationId,omitempty"`
 }
 
 // CastaiServiceaccountsV1beta1ServiceAccountAuthor Author is the author of the service account.
@@ -6786,6 +6820,9 @@ type NodeconfigV1AKSConfig struct {
 	EnableEncryptionAtHost      *bool     `json:"enableEncryptionAtHost"`
 
 	// ImageFamily List of supported image families (OSes) for AKS.
+	//
+	//  - FAMILY_UBUNTU_2204: Ubuntu 22.04 (supported on k8s < 1.37).
+	//  - FAMILY_UBUNTU_2404: Ubuntu 24.04 (supported on k8s >= 1.32).
 	ImageFamily *NodeconfigV1AKSConfigImageFamily `json:"imageFamily,omitempty"`
 
 	// LoadBalancers List of load balancers to attach nodes to. Populating this field disables Cast's default load balancer autodiscovery mechanism.
@@ -6815,6 +6852,9 @@ type NodeconfigV1AKSConfig struct {
 type NodeconfigV1AKSConfigAcceleratedNetworkingMode string
 
 // NodeconfigV1AKSConfigImageFamily List of supported image families (OSes) for AKS.
+//
+//   - FAMILY_UBUNTU_2204: Ubuntu 22.04 (supported on k8s < 1.37).
+//   - FAMILY_UBUNTU_2404: Ubuntu 24.04 (supported on k8s >= 1.32).
 type NodeconfigV1AKSConfigImageFamily string
 
 // NodeconfigV1AKSConfigLoadBalancers defines model for nodeconfig.v1.AKSConfig.LoadBalancers.
@@ -9206,24 +9246,25 @@ type WorkloadoptimizationV1DownscalingSettings struct {
 
 // WorkloadoptimizationV1Event defines model for workloadoptimization.v1.Event.
 type WorkloadoptimizationV1Event struct {
-	ConfigurationChangedV2     *WorkloadoptimizationV1ConfigurationChangedEventV2     `json:"configurationChangedV2,omitempty"`
-	CpuPressure                *WorkloadoptimizationV1CPUPressureEvent                `json:"cpuPressure,omitempty"`
-	CpuPressureResolved        *WorkloadoptimizationV1CPUPressureResolvedEvent        `json:"cpuPressureResolved,omitempty"`
-	FailedHook                 *WorkloadoptimizationV1FailedHookEvent                 `json:"failedHook,omitempty"`
-	HpaAlmostMaxedOut          *WorkloadoptimizationV1HPAMaxedOutEvent                `json:"hpaAlmostMaxedOut,omitempty"`
-	HpaMaxedOut                *WorkloadoptimizationV1HPAMaxedOutEvent                `json:"hpaMaxedOut,omitempty"`
-	MemoryPressureEviction     *WorkloadoptimizationV1MemoryPressureEvictionEvent     `json:"memoryPressureEviction,omitempty"`
-	NativeVpaStateChanged      *WorkloadoptimizationV1NativeVPAStateChangedEvent      `json:"nativeVpaStateChanged,omitempty"`
-	OomKill                    *WorkloadoptimizationV1OOMKillEvent                    `json:"oomKill,omitempty"`
-	RecommendedPodCountChanged *WorkloadoptimizationV1RecommendedPodCountChangedEvent `json:"recommendedPodCountChanged,omitempty"`
-	RecommendedRequestsChanged *WorkloadoptimizationV1RecommendedRequestsChangedEvent `json:"recommendedRequestsChanged,omitempty"`
-	ScalingPolicyAssigned      *WorkloadoptimizationV1ScalingPolicyAssigned           `json:"scalingPolicyAssigned,omitempty"`
-	ScalingPolicyCreated       *WorkloadoptimizationV1ScalingPolicyCreated            `json:"scalingPolicyCreated,omitempty"`
-	ScalingPolicyDeleted       *WorkloadoptimizationV1ScalingPolicyDeleted            `json:"scalingPolicyDeleted,omitempty"`
-	ScalingPolicyOrderUpdated  *WorkloadoptimizationV1ScalingPolicyOrderUpdatedEvent  `json:"scalingPolicyOrderUpdated,omitempty"`
-	ScalingPolicyUpdated       *WorkloadoptimizationV1ScalingPolicyUpdated            `json:"scalingPolicyUpdated,omitempty"`
-	StartupFailure             *WorkloadoptimizationV1StartupFailureEvent             `json:"startupFailure,omitempty"`
-	Surge                      *WorkloadoptimizationV1SurgeEvent                      `json:"surge,omitempty"`
+	ConfigurationChangedV2        *WorkloadoptimizationV1ConfigurationChangedEventV2        `json:"configurationChangedV2,omitempty"`
+	CpuPressure                   *WorkloadoptimizationV1CPUPressureEvent                   `json:"cpuPressure,omitempty"`
+	CpuPressureResolved           *WorkloadoptimizationV1CPUPressureResolvedEvent           `json:"cpuPressureResolved,omitempty"`
+	FailedHook                    *WorkloadoptimizationV1FailedHookEvent                    `json:"failedHook,omitempty"`
+	GpuRecommendedRequestsChanged *WorkloadoptimizationV1GPURecommendedRequestsChangedEvent `json:"gpuRecommendedRequestsChanged,omitempty"`
+	HpaAlmostMaxedOut             *WorkloadoptimizationV1HPAMaxedOutEvent                   `json:"hpaAlmostMaxedOut,omitempty"`
+	HpaMaxedOut                   *WorkloadoptimizationV1HPAMaxedOutEvent                   `json:"hpaMaxedOut,omitempty"`
+	MemoryPressureEviction        *WorkloadoptimizationV1MemoryPressureEvictionEvent        `json:"memoryPressureEviction,omitempty"`
+	NativeVpaStateChanged         *WorkloadoptimizationV1NativeVPAStateChangedEvent         `json:"nativeVpaStateChanged,omitempty"`
+	OomKill                       *WorkloadoptimizationV1OOMKillEvent                       `json:"oomKill,omitempty"`
+	RecommendedPodCountChanged    *WorkloadoptimizationV1RecommendedPodCountChangedEvent    `json:"recommendedPodCountChanged,omitempty"`
+	RecommendedRequestsChanged    *WorkloadoptimizationV1RecommendedRequestsChangedEvent    `json:"recommendedRequestsChanged,omitempty"`
+	ScalingPolicyAssigned         *WorkloadoptimizationV1ScalingPolicyAssigned              `json:"scalingPolicyAssigned,omitempty"`
+	ScalingPolicyCreated          *WorkloadoptimizationV1ScalingPolicyCreated               `json:"scalingPolicyCreated,omitempty"`
+	ScalingPolicyDeleted          *WorkloadoptimizationV1ScalingPolicyDeleted               `json:"scalingPolicyDeleted,omitempty"`
+	ScalingPolicyOrderUpdated     *WorkloadoptimizationV1ScalingPolicyOrderUpdatedEvent     `json:"scalingPolicyOrderUpdated,omitempty"`
+	ScalingPolicyUpdated          *WorkloadoptimizationV1ScalingPolicyUpdated               `json:"scalingPolicyUpdated,omitempty"`
+	StartupFailure                *WorkloadoptimizationV1StartupFailureEvent                `json:"startupFailure,omitempty"`
+	Surge                         *WorkloadoptimizationV1SurgeEvent                         `json:"surge,omitempty"`
 
 	// SystemOverrideReset SystemOverrideResetEvent is emitted when a system override on a workload is deactivated.
 	SystemOverrideReset *WorkloadoptimizationV1SystemOverrideResetEvent `json:"systemOverrideReset,omitempty"`
@@ -9275,6 +9316,18 @@ type WorkloadoptimizationV1GPUDeviceMetadata struct {
 	ModelName *string `json:"modelName,omitempty"`
 }
 
+// WorkloadoptimizationV1GPUDeviceRecommendation defines model for workloadoptimization.v1.GPUDeviceRecommendation.
+type WorkloadoptimizationV1GPUDeviceRecommendation struct {
+	Count              int32    `json:"count"`
+	IdleFraction       *float64 `json:"idleFraction,omitempty"`
+	MaxUsedMemoryBytes *string  `json:"maxUsedMemoryBytes,omitempty"`
+	MemoryUtilPeak     *float64 `json:"memoryUtilPeak,omitempty"`
+	MigProfile         *string  `json:"migProfile,omitempty"`
+	ProductName        string   `json:"productName"`
+	SharingStrategy    *string  `json:"sharingStrategy,omitempty"`
+	SmActive           *float64 `json:"smActive,omitempty"`
+}
+
 // WorkloadoptimizationV1GPUMetrics defines model for workloadoptimization.v1.GPUMetrics.
 type WorkloadoptimizationV1GPUMetrics struct {
 	// DeviceCount Effective GPU device count, accounting for cross-workload sharing (fractional).
@@ -9316,6 +9369,18 @@ type WorkloadoptimizationV1GPUMetrics struct {
 	// RequestMemoryUsedMib Current requested GPU memory used in MiB after optimization.
 	RequestMemoryUsedMib *float64   `json:"requestMemoryUsedMib"`
 	Timestamp            *time.Time `json:"timestamp,omitempty"`
+}
+
+// WorkloadoptimizationV1GPURecommendationContainer defines model for workloadoptimization.v1.GPURecommendationContainer.
+type WorkloadoptimizationV1GPURecommendationContainer struct {
+	Devices *[]WorkloadoptimizationV1GPUDeviceRecommendation `json:"devices,omitempty"`
+	Name    string                                           `json:"name"`
+}
+
+// WorkloadoptimizationV1GPURecommendedRequestsChangedEvent defines model for workloadoptimization.v1.GPURecommendedRequestsChangedEvent.
+type WorkloadoptimizationV1GPURecommendedRequestsChangedEvent struct {
+	Containers []WorkloadoptimizationV1GPURecommendationContainer `json:"containers"`
+	DebugData  *map[string]interface{}                            `json:"debugData,omitempty"`
 }
 
 // WorkloadoptimizationV1GPUSettings defines model for workloadoptimization.v1.GPUSettings.
@@ -9480,6 +9545,16 @@ type WorkloadoptimizationV1GetWorkloadSpecResponse struct {
 	Object         map[string]interface{} `json:"object"`
 	OrganizationId string                 `json:"organizationId"`
 	Version        string                 `json:"version"`
+}
+
+// WorkloadoptimizationV1GetWorkloadsAccessContextResponse defines model for workloadoptimization.v1.GetWorkloadsAccessContextResponse.
+type WorkloadoptimizationV1GetWorkloadsAccessContextResponse struct {
+	// IsOwner Specifies if the user is the owner.
+	IsOwner bool `json:"isOwner"`
+
+	// WritableNamespaces Specifies namespaces where the caller has write permissions on workloads.
+	// Not returned if is_owner=true.
+	WritableNamespaces *[]string `json:"writableNamespaces,omitempty"`
 }
 
 // WorkloadoptimizationV1GetWorkloadsSummaryMetricsResponse defines model for workloadoptimization.v1.GetWorkloadsSummaryMetricsResponse.
@@ -11376,7 +11451,13 @@ type RbacServiceAPIListPermissionGroupsParams struct {
 	// PageCursor Cursor that defines token indicating where to start the next page.
 	// Empty value indicates to start from beginning of the dataset.
 	PageCursor *string `form:"page.cursor,omitempty" json:"page.cursor,omitempty"`
+
+	// Product Filter by product type.
+	Product *RbacServiceAPIListPermissionGroupsParamsProduct `form:"product,omitempty" json:"product,omitempty"`
 }
+
+// RbacServiceAPIListPermissionGroupsParamsProduct defines parameters for RbacServiceAPIListPermissionGroups.
+type RbacServiceAPIListPermissionGroupsParamsProduct string
 
 // CommitmentsAPIGetCommitmentUsageHistoryParams defines parameters for CommitmentsAPIGetCommitmentUsageHistory.
 type CommitmentsAPIGetCommitmentUsageHistoryParams struct {
