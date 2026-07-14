@@ -297,7 +297,8 @@ func resourceAutoscaler() *schema.Resource {
 													Type:             schema.TypeInt,
 													Optional:         true,
 													Default:          1,
-													Description:      "defines the minimum allowed amount of CPUs in the whole cluster.",
+													Deprecated:       "This field is deprecated and will be removed in a future major version of the provider.",
+													Description:      "defines the minimum allowed amount of CPUs in the whole cluster. This field is deprecated.",
 													ValidateDiagFunc: validation.ToDiagFunc(validation.IntAtLeast(1)),
 												},
 												FieldMaxCores: {
