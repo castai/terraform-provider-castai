@@ -6575,6 +6575,26 @@ func (mr *MockClientInterfaceMockRecorder) WorkloadOptimizationAPIGetWorkloadSpe
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIGetWorkloadSpec", reflect.TypeOf((*MockClientInterface)(nil).WorkloadOptimizationAPIGetWorkloadSpec), varargs...)
 }
 
+// WorkloadOptimizationAPIGetWorkloadsAccessContext mocks base method.
+func (m *MockClientInterface) WorkloadOptimizationAPIGetWorkloadsAccessContext(ctx context.Context, clusterId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "WorkloadOptimizationAPIGetWorkloadsAccessContext", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// WorkloadOptimizationAPIGetWorkloadsAccessContext indicates an expected call of WorkloadOptimizationAPIGetWorkloadsAccessContext.
+func (mr *MockClientInterfaceMockRecorder) WorkloadOptimizationAPIGetWorkloadsAccessContext(ctx, clusterId interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIGetWorkloadsAccessContext", reflect.TypeOf((*MockClientInterface)(nil).WorkloadOptimizationAPIGetWorkloadsAccessContext), varargs...)
+}
+
 // WorkloadOptimizationAPIGetWorkloadsSummary mocks base method.
 func (m *MockClientInterface) WorkloadOptimizationAPIGetWorkloadsSummary(ctx context.Context, clusterId string, params *sdk.WorkloadOptimizationAPIGetWorkloadsSummaryParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
@@ -18411,6 +18431,41 @@ func (m *MockClientWithResponsesInterface) WorkloadOptimizationAPIGetWorkloadWit
 func (mr *MockClientWithResponsesInterfaceMockRecorder) WorkloadOptimizationAPIGetWorkloadWithResponse(ctx, clusterId, workloadId, params interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIGetWorkloadWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).WorkloadOptimizationAPIGetWorkloadWithResponse), ctx, clusterId, workloadId, params)
+}
+
+// WorkloadOptimizationAPIGetWorkloadsAccessContext mocks base method.
+func (m *MockClientWithResponsesInterface) WorkloadOptimizationAPIGetWorkloadsAccessContext(ctx context.Context, clusterId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "WorkloadOptimizationAPIGetWorkloadsAccessContext", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// WorkloadOptimizationAPIGetWorkloadsAccessContext indicates an expected call of WorkloadOptimizationAPIGetWorkloadsAccessContext.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) WorkloadOptimizationAPIGetWorkloadsAccessContext(ctx, clusterId interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIGetWorkloadsAccessContext", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).WorkloadOptimizationAPIGetWorkloadsAccessContext), varargs...)
+}
+
+// WorkloadOptimizationAPIGetWorkloadsAccessContextWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) WorkloadOptimizationAPIGetWorkloadsAccessContextWithResponse(ctx context.Context, clusterId string) (*sdk.WorkloadOptimizationAPIGetWorkloadsAccessContextResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "WorkloadOptimizationAPIGetWorkloadsAccessContextWithResponse", ctx, clusterId)
+	ret0, _ := ret[0].(*sdk.WorkloadOptimizationAPIGetWorkloadsAccessContextResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// WorkloadOptimizationAPIGetWorkloadsAccessContextWithResponse indicates an expected call of WorkloadOptimizationAPIGetWorkloadsAccessContextWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) WorkloadOptimizationAPIGetWorkloadsAccessContextWithResponse(ctx, clusterId interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIGetWorkloadsAccessContextWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).WorkloadOptimizationAPIGetWorkloadsAccessContextWithResponse), ctx, clusterId)
 }
 
 // WorkloadOptimizationAPIGetWorkloadsSummary mocks base method.
