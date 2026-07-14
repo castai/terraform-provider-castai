@@ -5146,8 +5146,7 @@ type DboV1DeployDBAgentParams struct {
 
 // DboV1DeployDBOParams defines model for dbo.v1.DeployDBOParams.
 type DboV1DeployDBOParams struct {
-	CacheGroupId         string  `json:"cacheGroupId"`
-	DatabaseInstanceId   *string `json:"databaseInstanceId"`
+	DatabaseInstanceId   string  `json:"databaseInstanceId"`
 	DbAgentEnabled       *bool   `json:"dbAgentEnabled"`
 	DbOptimizerEnabled   *bool   `json:"dbOptimizerEnabled"`
 	DbProxyEnabled       *bool   `json:"dbProxyEnabled"`
