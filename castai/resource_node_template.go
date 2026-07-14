@@ -295,8 +295,9 @@ func resourceNodeTemplate() *schema.Resource {
 							Deprecated:       "The value \"aws-rebalance-recommendations\" is deprecated and will be removed in a future major version. Cast AI ML predictions (\"interruption-predictions\") are now used for all spot interruption prediction.",
 							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"aws-rebalance-recommendations", "interruption-predictions"}, false)),
 							DiffSuppressFunc: func(k, oldVal, newVal string, d *schema.ResourceData) bool {
-								return newVal == "" && oldVal == "interruption-predictions"
+								return true
 							},
+							DiffSuppressOnRefresh: true,
 						},
 						FieldNodeTemplateMinCpu: {
 							Type:        schema.TypeInt,
