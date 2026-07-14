@@ -291,7 +291,6 @@ func resourceNodeTemplate() *schema.Resource {
 						FieldNodeTemplateSpotInterruptionPredictionsType: {
 							Type:             schema.TypeString,
 							Optional:         true,
-							Default:          "interruption-predictions",
 							Description:      "Spot interruption predictions type. Only \"interruption-predictions\" is supported.",
 							Deprecated:       "The value \"aws-rebalance-recommendations\" is deprecated and will be removed in a future major version. Cast AI ML predictions (\"interruption-predictions\") are now used for all spot interruption prediction.",
 							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"aws-rebalance-recommendations", "interruption-predictions"}, false)),
@@ -1758,7 +1757,7 @@ func toTemplateConstraints(obj map[string]any) *sdk.NodetemplatesV1TemplateConst
 	if v, ok := obj[FieldNodeTemplateSpotInterruptionPredictionsEnabled].(bool); ok {
 		out.SpotInterruptionPredictionsEnabled = toPtr(v)
 	}
-	if v, ok := obj[FieldNodeTemplateSpotInterruptionPredictionsType].(string); ok {
+	if v, ok := obj[FieldNodeTemplateSpotInterruptionPredictionsType].(string); ok && v != "" {
 		out.SpotInterruptionPredictionsType = toPtr(v)
 	}
 	if v, ok := obj[FieldNodeTemplateCustomPriority].([]any); ok && len(v) > 0 {
