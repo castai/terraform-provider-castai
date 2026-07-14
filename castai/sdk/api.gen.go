@@ -9547,6 +9547,16 @@ type WorkloadoptimizationV1GetWorkloadSpecResponse struct {
 	Version        string                 `json:"version"`
 }
 
+// WorkloadoptimizationV1GetWorkloadsAccessContextResponse defines model for workloadoptimization.v1.GetWorkloadsAccessContextResponse.
+type WorkloadoptimizationV1GetWorkloadsAccessContextResponse struct {
+	// IsOwner Specifies if the user is the owner.
+	IsOwner bool `json:"isOwner"`
+
+	// WritableNamespaces Specifies namespaces where the caller has write permissions on workloads.
+	// Not returned if is_owner=true.
+	WritableNamespaces *[]string `json:"writableNamespaces,omitempty"`
+}
+
 // WorkloadoptimizationV1GetWorkloadsSummaryMetricsResponse defines model for workloadoptimization.v1.GetWorkloadsSummaryMetricsResponse.
 type WorkloadoptimizationV1GetWorkloadsSummaryMetricsResponse struct {
 	Items []WorkloadoptimizationV1WorkloadsSummaryMetrics `json:"items"`
