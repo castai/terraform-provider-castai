@@ -163,9 +163,6 @@ func TestCacheGroupDataSourceReadNotFound(t *testing.T) {
 }
 
 func TestAccCloudAgnostic_DataSourceCacheGroup(t *testing.T) {
-	// TODO(POLY-1928): Fix me. Re-enable once the backend is fixed.
-	t.Skip("https://castai.atlassian.net/browse/POLY-1928")
-
 	rName := fmt.Sprintf("%v-cache-group-%v", ResourcePrefix, acctest.RandString(8))
 	resourceName := "castai_cache_group.test"
 	dataSourceName := "data.castai_cache_group.test"
@@ -190,9 +187,6 @@ func TestAccCloudAgnostic_DataSourceCacheGroup(t *testing.T) {
 }
 
 func TestAccCloudAgnostic_DataSourceCacheGroupWithEndpoints(t *testing.T) {
-	// TODO(POLY-1928): Fix me. Re-enable once the backend is fixed.
-	t.Skip("https://castai.atlassian.net/browse/POLY-1928")
-
 	rName := fmt.Sprintf("%v-cache-group-%v", ResourcePrefix, acctest.RandString(8))
 	resourceName := "castai_cache_group.test"
 	dataSourceName := "data.castai_cache_group.test"
