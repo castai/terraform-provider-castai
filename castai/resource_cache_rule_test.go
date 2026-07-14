@@ -358,9 +358,6 @@ func TestCacheRuleResource_NotFound(t *testing.T) {
 }
 
 func TestAccCloudAgnostic_ResourceCacheRule(t *testing.T) {
-	// TODO(POLY-1928): Fix me. Re-enable once the backend is fixed.
-	t.Skip("https://castai.atlassian.net/browse/POLY-1928")
-
 	rName := fmt.Sprintf("%v-cache-rule-%v", ResourcePrefix, acctest.RandString(8))
 	dbName := fmt.Sprintf("testdb_%v", acctest.RandString(8))
 	tableName := fmt.Sprintf("test_table_%v", acctest.RandString(8))
