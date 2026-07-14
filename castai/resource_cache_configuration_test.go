@@ -400,6 +400,9 @@ func TestCacheConfigurationResource_ModeValidation(t *testing.T) {
 }
 
 func TestAccCloudAgnostic_ResourceCacheConfiguration(t *testing.T) {
+	// TODO(POLY-1928): Fix me. Re-enable once the backend is fixed.
+	t.Skip("https://castai.atlassian.net/browse/POLY-1928")
+
 	rName := fmt.Sprintf("%v-cache-config-%v", ResourcePrefix, acctest.RandString(8))
 	dbName := fmt.Sprintf("testdb_%v", acctest.RandString(8))
 	resourceName := "castai_cache_configuration.test"
