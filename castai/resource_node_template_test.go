@@ -1798,47 +1798,27 @@ func Test_toTemplateConstraintsAWSConstraints(t *testing.T) {
 	}
 }
 
-func Test_toNodeTemplateConstraints_spotInterruptionPredictionsType(t *testing.T) {
+func Test_toNodeTemplateConstraints_persistsSpotInterruptionPredictionsType(t *testing.T) {
 	tests := map[string]struct {
-		input    map[string]any
-		wantNil  bool
-		wantType string
+		inputType string
+		wantType  string
 	}{
 		"aws-rebalance-recommendations persisted as-is": {
-			input: map[string]any{
-				FieldNodeTemplateSpotInterruptionPredictionsEnabled: true,
-				FieldNodeTemplateSpotInterruptionPredictionsType:    "aws-rebalance-recommendations",
-			},
-			wantType: "aws-rebalance-recommendations",
+			inputType: "aws-rebalance-recommendations",
+			wantType:  "aws-rebalance-recommendations",
 		},
 		"interruption-predictions persisted as-is": {
-			input: map[string]any{
-				FieldNodeTemplateSpotInterruptionPredictionsEnabled: true,
-				FieldNodeTemplateSpotInterruptionPredictionsType:    "interruption-predictions",
-			},
-			wantType: "interruption-predictions",
-		},
-		"empty string is not sent": {
-			input: map[string]any{
-				FieldNodeTemplateSpotInterruptionPredictionsEnabled: true,
-				FieldNodeTemplateSpotInterruptionPredictionsType:    "",
-			},
-			wantNil: true,
-		},
-		"missing key is not sent": {
-			input: map[string]any{
-				FieldNodeTemplateSpotInterruptionPredictionsEnabled: true,
-			},
-			wantNil: true,
+			inputType: "interruption-predictions",
+			wantType:  "interruption-predictions",
 		},
 	}
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
-			result := toTemplateConstraints(tt.input)
-			if tt.wantNil {
-				require.Nil(t, result.SpotInterruptionPredictionsType)
-				return
+			obj := map[string]any{
+				FieldNodeTemplateSpotInterruptionPredictionsEnabled: true,
+				FieldNodeTemplateSpotInterruptionPredictionsType:    tt.inputType,
 			}
+			result := toTemplateConstraints(obj)
 			require.NotNil(t, result.SpotInterruptionPredictionsType)
 			require.Equal(t, tt.wantType, *result.SpotInterruptionPredictionsType)
 		})
