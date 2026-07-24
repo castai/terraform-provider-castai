@@ -30,6 +30,7 @@ const (
 
 const (
 	minResourceMultiplierValue      = 1.0
+	maxResourceOverheadValue        = 2.5
 	minApplyThresholdValue          = 0.01
 	maxApplyThresholdValue          = 2.5
 	defaultApplyThresholdPercentage = 0.1
@@ -179,6 +180,10 @@ It can be either:
 				Description:      "Scaling policy name",
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringMatch(k8sNameRegex, "name must adhere to the format guidelines of Kubernetes labels/annotations")),
 			},
+			FieldIsOpsPilot: withAPIDefaultDiffSuppression(
+				isOpsPilotSchema(),
+				FieldIsOpsPilot,
+			),
 			FieldApplyType: {
 				Type:     schema.TypeString,
 				Required: true,
@@ -225,6 +230,11 @@ It can be either:
 							Description:      "Defines the duration (in seconds) during which elevated resource usage is expected at startup.\nWhen set, recommendations will be adjusted to disregard resource spikes within this period.\nIf not specified, the workload will receive standard recommendations without startup considerations.",
 							ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(120, 3600)),
 						},
+						FieldTwoPhaseRecommendations: withAPIDefaultDiffSuppression(
+							twoPhaseRecommendationsSchema(),
+							"startup",
+							FieldTwoPhaseRecommendations,
+						),
 					},
 				},
 			},
@@ -310,6 +320,18 @@ It can be either:
 					},
 				},
 			},
+			FieldHPASettings: withAPIDefaultDiffSuppression(
+				hpaSettingsSchema(),
+				FieldHPASettings,
+			),
+			FieldHPAConverters: withAPIDefaultDiffSuppression(
+				hpaConvertersSchema(),
+				FieldHPAConverters,
+			),
+			FieldGPU: withAPIDefaultDiffSuppression(
+				gpuSchema(),
+				FieldGPU,
+			),
 			FieldRolloutBehavior: {
 				Type:     schema.TypeList,
 				Optional: true,
@@ -407,6 +429,11 @@ It can be either:
 								},
 							},
 						},
+						FieldAnomalyDetectionInfiniteMemoryScaling: withAPIDefaultDiffSuppression(
+							infiniteMemoryScalingSchema(),
+							FieldAnomalyDetection,
+							FieldAnomalyDetectionInfiniteMemoryScaling,
+						),
 					},
 				},
 			},
@@ -495,7 +522,7 @@ func workloadScalingPolicyResourceSchema(resource, function string, overhead, mi
 				Optional:         true,
 				Description:      "Overhead for the recommendation, e.g. `0.1` will result in 10% higher recommendation",
 				Default:          overhead,
-				ValidateDiagFunc: validation.ToDiagFunc(validation.FloatBetween(0, 1)),
+				ValidateDiagFunc: validation.ToDiagFunc(validation.FloatBetween(0, maxResourceOverheadValue)),
 			},
 			DeprecatedFieldApplyThreshold: {
 				Type:     schema.TypeFloat,
@@ -580,7 +607,12 @@ func workloadScalingPolicyResourceLimitSchema() *schema.Resource {
 	- %s - keep existing resource limits. While limits provide stability predictability, they may restrict workloads that need to temporarily burst beyond their allocation.
 	- %s - used to calculate the resource limit. The final value is determined by multiplying the resource request by the specified factor.
 	- %s - maintains the original ratio between requests and limits.`, sdk.WorkloadoptimizationV1ResourceLimitStrategyTypeNOLIMIT, sdk.WorkloadoptimizationV1ResourceLimitStrategyTypeKEEPLIMITS, sdk.WorkloadoptimizationV1ResourceLimitStrategyTypeMULTIPLIER, sdk.WorkloadoptimizationV1ResourceLimitStrategyTypeMAINTAINRATIO),
-				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{string(sdk.WorkloadoptimizationV1ResourceLimitStrategyTypeMULTIPLIER), string(sdk.WorkloadoptimizationV1ResourceLimitStrategyTypeKEEPLIMITS), string(sdk.WorkloadoptimizationV1ResourceLimitStrategyTypeNOLIMIT)}, false)),
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{
+					string(sdk.WorkloadoptimizationV1ResourceLimitStrategyTypeMULTIPLIER),
+					string(sdk.WorkloadoptimizationV1ResourceLimitStrategyTypeKEEPLIMITS),
+					string(sdk.WorkloadoptimizationV1ResourceLimitStrategyTypeNOLIMIT),
+					string(sdk.WorkloadoptimizationV1ResourceLimitStrategyTypeMAINTAINRATIO),
+				}, false)),
 			},
 			FieldLimitStrategyMultiplier: {
 				Type:             schema.TypeFloat,
@@ -726,7 +758,11 @@ func resourceWorkloadScalingPolicyCreate(ctx context.Context, d *schema.Resource
 		ApplyType: sdk.WorkloadoptimizationV1ApplyType(d.Get(FieldApplyType).(string)),
 		RecommendationPolicies: sdk.WorkloadoptimizationV1RecommendationPolicies{
 			ManagementOption: sdk.WorkloadoptimizationV1ManagementOption(d.Get("management_option").(string)),
+			ApplyType:        sdk.WorkloadoptimizationV1ApplyType(d.Get(FieldApplyType).(string)),
 		},
+	}
+	if v, ok := d.GetOkExists(FieldIsOpsPilot); ok {
+		req.IsOpsPilot = lo.ToPtr(v.(bool))
 	}
 
 	if v, ok := d.GetOk("cpu"); ok {
@@ -763,7 +799,13 @@ func resourceWorkloadScalingPolicyCreate(ctx context.Context, d *schema.Resource
 
 	req.RecommendationPolicies.AnomalyDetection = toAnomalyDetection(toSection(d, FieldAnomalyDetection))
 
+	req.RecommendationPolicies.HpaConverters = toHPAConverters(d)
+
+	req.RecommendationPolicies.Gpu = toGPU(toSection(d, FieldGPU))
+
 	req.RecommendationPolicies.ExcludedContainers = toExcludedContainers(d)
+
+	req.HpaSettings = toHPASettings(toSection(d, FieldHPASettings))
 
 	ar, err := toAssignmentRules(toSection(d, FieldAssignmentRules))
 	if err != nil {
@@ -867,6 +909,9 @@ func fetchScalingPolicy(ctx context.Context, d *schema.ResourceData, meta any) (
 	if err := d.Set("name", sp.Name); err != nil {
 		return nil, fmt.Errorf("setting name: %w", err)
 	}
+	if err := d.Set(FieldIsOpsPilot, sp.IsOpsPilot); err != nil {
+		return nil, fmt.Errorf("setting OpsPilot ownership: %w", err)
+	}
 	if err := d.Set(FieldApplyType, sp.ApplyType); err != nil {
 		return nil, fmt.Errorf("setting apply type: %w", err)
 	}
@@ -909,6 +954,15 @@ func fetchScalingPolicy(ctx context.Context, d *schema.ResourceData, meta any) (
 	if err := d.Set(FieldAnomalyDetection, toAnomalyDetectionMap(sp.RecommendationPolicies.AnomalyDetection)); err != nil {
 		return nil, fmt.Errorf("setting anomaly detection: %w", err)
 	}
+	if err := d.Set(FieldHPAConverters, toHPAConvertersMap(sp.RecommendationPolicies.HpaConverters)); err != nil {
+		return nil, fmt.Errorf("setting HPA converters: %w", err)
+	}
+	if err := d.Set(FieldGPU, toGPUMap(sp.RecommendationPolicies.Gpu)); err != nil {
+		return nil, fmt.Errorf("setting GPU settings: %w", err)
+	}
+	if err := d.Set(FieldHPASettings, toHPASettingsMap(sp.HpaSettings)); err != nil {
+		return nil, fmt.Errorf("setting HPA settings: %w", err)
+	}
 	if err := d.Set(FieldAssignmentRules, toAssignmentRulesMap(getResourceFrom(d, FieldAssignmentRules), sp.AssignmentRules)); err != nil {
 		return nil, fmt.Errorf("setting assignment rules: %w", err)
 	}
@@ -934,6 +988,7 @@ func resourceWorkloadScalingPolicyUpdate(ctx context.Context, d *schema.Resource
 func updateScalingPolicy(ctx context.Context, d *schema.ResourceData, meta any) (sdk.Response, error) {
 	if !d.HasChanges(
 		"name",
+		FieldIsOpsPilot,
 		FieldApplyType,
 		"management_option",
 		"cpu",
@@ -948,6 +1003,9 @@ func updateScalingPolicy(ctx context.Context, d *schema.ResourceData, meta any) 
 		FieldRolloutBehavior,
 		FieldJVM,
 		FieldAnomalyDetection,
+		FieldHPAConverters,
+		FieldGPU,
+		FieldHPASettings,
 		FieldExcludedContainers,
 	) {
 		tflog.Info(ctx, "scaling policy up to date")
@@ -973,8 +1031,10 @@ func updateScalingPolicy(ctx context.Context, d *schema.ResourceData, meta any) 
 		Name:            d.Get("name").(string),
 		ApplyType:       sdk.WorkloadoptimizationV1ApplyType(d.Get(FieldApplyType).(string)),
 		AssignmentRules: ar,
+		HpaSettings:     toHPASettings(toSection(d, FieldHPASettings)),
 		RecommendationPolicies: sdk.WorkloadoptimizationV1RecommendationPolicies{
 			ManagementOption:   sdk.WorkloadoptimizationV1ManagementOption(d.Get("management_option").(string)),
+			ApplyType:          sdk.WorkloadoptimizationV1ApplyType(d.Get(FieldApplyType).(string)),
 			Cpu:                cpu,
 			Memory:             memory,
 			Startup:            toStartup(toSection(d, "startup")),
@@ -986,8 +1046,13 @@ func updateScalingPolicy(ctx context.Context, d *schema.ResourceData, meta any) 
 			RolloutBehavior:    toRolloutBehavior(toSection(d, FieldRolloutBehavior)),
 			Jvm:                toJvm(toSection(d, FieldJVM)),
 			AnomalyDetection:   toAnomalyDetection(toSection(d, FieldAnomalyDetection)),
+			HpaConverters:      toHPAConverters(d),
+			Gpu:                toGPU(toSection(d, FieldGPU)),
 			ExcludedContainers: toExcludedContainers(d),
 		},
+	}
+	if v, ok := d.GetOkExists(FieldIsOpsPilot); ok {
+		req.IsOpsPilot = lo.ToPtr(v.(bool))
 	}
 
 	resp, err := client.WorkloadOptimizationAPIUpdateWorkloadScalingPolicyWithResponse(ctx, clusterID, d.Id(), req)
@@ -1059,7 +1124,7 @@ func resourceWorkloadScalingPolicyDiff(_ context.Context, d *schema.ResourceDiff
 			return err
 		}
 	}
-	return nil
+	return validateHPASettings(d)
 }
 
 // rawConfigHasField walks a path of nested attributes in a Terraform raw config.
@@ -1682,6 +1747,9 @@ func toStartup(startup map[string]any) *sdk.WorkloadoptimizationV1StartupSetting
 	if v, ok := startup["period_seconds"].(int); ok && v > 0 {
 		result.PeriodSeconds = lo.ToPtr(int32(v))
 	}
+	if v := getFirstElem(startup, FieldTwoPhaseRecommendations); v != nil {
+		result.TwoPhaseRecommendations = toTwoPhaseRecommendations(v)
+	}
 
 	return result
 }
@@ -1695,6 +1763,9 @@ func toStartupMap(s *sdk.WorkloadoptimizationV1StartupSettings) []map[string]any
 
 	if s.PeriodSeconds != nil {
 		m["period_seconds"] = int(*s.PeriodSeconds)
+	}
+	if s.TwoPhaseRecommendations != nil {
+		m[FieldTwoPhaseRecommendations] = toTwoPhaseRecommendationsMap(s.TwoPhaseRecommendations)
 	}
 
 	if len(m) == 0 {
@@ -1911,6 +1982,13 @@ func toAnomalyDetection(m map[string]any) *sdk.WorkloadoptimizationV1AnomalyDete
 			MinPressuredPodPercentage:   cpuPressure[FieldMinPressuredPodPercentage].(float64),
 		}
 	}
+	if infiniteMemoryScaling := getFirstElem(m, FieldAnomalyDetectionInfiniteMemoryScaling); infiniteMemoryScaling != nil {
+		if enabled, ok := infiniteMemoryScaling[FieldEnabled].(bool); ok {
+			result.InfiniteMemoryScaling = &sdk.WorkloadoptimizationV1InfiniteMemoryScalingSettings{
+				Enabled: enabled,
+			}
+		}
+	}
 	return result
 }
 
@@ -1924,6 +2002,13 @@ func toAnomalyDetectionMap(s *sdk.WorkloadoptimizationV1AnomalyDetectionSettings
 			{
 				FieldCpuStallThresholdPercentage: s.CpuPressure.CpuStallThresholdPercentage,
 				FieldMinPressuredPodPercentage:   s.CpuPressure.MinPressuredPodPercentage,
+			},
+		}
+	}
+	if s.InfiniteMemoryScaling != nil {
+		m[FieldAnomalyDetectionInfiniteMemoryScaling] = []map[string]any{
+			{
+				FieldEnabled: s.InfiniteMemoryScaling.Enabled,
 			},
 		}
 	}
@@ -2089,15 +2174,24 @@ func toWorkloadAssignmentRule(ruleMap map[string]any) (*sdk.Workloadoptimization
 }
 
 func getFirstElem(in map[string]any, key string) map[string]any {
-	list, ok := in[key].([]any)
-	if !ok || len(list) == 0 {
+	switch list := in[key].(type) {
+	case []any:
+		if len(list) == 0 {
+			return nil
+		}
+		elem, ok := list[0].(map[string]any)
+		if !ok {
+			return nil
+		}
+		return elem
+	case []map[string]any:
+		if len(list) == 0 {
+			return nil
+		}
+		return list[0]
+	default:
 		return nil
 	}
-	elem, ok := list[0].(map[string]any)
-	if !ok {
-		return nil
-	}
-	return elem
 }
 
 func toLabelSelectorOperator(in string) sdk.WorkloadoptimizationV1KubernetesLabelSelectorOperator {
