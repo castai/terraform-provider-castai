@@ -146,6 +146,21 @@ const (
 	CastaiInventoryV1beta1GCPFlexCUDCUDPlanTWELVEMONTH    CastaiInventoryV1beta1GCPFlexCUDCUDPlan = "TWELVE_MONTH"
 )
 
+// Defines values for CastaiInventoryV1beta1GCPReservationLocalSsdInterface.
+const (
+	GCPRESERVATIONLOCALSSDINTERFACENVME        CastaiInventoryV1beta1GCPReservationLocalSsdInterface = "GCP_RESERVATION_LOCAL_SSD_INTERFACE_NVME"
+	GCPRESERVATIONLOCALSSDINTERFACESCSI        CastaiInventoryV1beta1GCPReservationLocalSsdInterface = "GCP_RESERVATION_LOCAL_SSD_INTERFACE_SCSI"
+	GCPRESERVATIONLOCALSSDINTERFACEUNSPECIFIED CastaiInventoryV1beta1GCPReservationLocalSsdInterface = "GCP_RESERVATION_LOCAL_SSD_INTERFACE_UNSPECIFIED"
+)
+
+// Defines values for CastaiInventoryV1beta1GCPReservationShareType.
+const (
+	GCPRESERVATIONSHARETYPELOCAL            CastaiInventoryV1beta1GCPReservationShareType = "GCP_RESERVATION_SHARE_TYPE_LOCAL"
+	GCPRESERVATIONSHARETYPEORGANIZATION     CastaiInventoryV1beta1GCPReservationShareType = "GCP_RESERVATION_SHARE_TYPE_ORGANIZATION"
+	GCPRESERVATIONSHARETYPESPECIFICPROJECTS CastaiInventoryV1beta1GCPReservationShareType = "GCP_RESERVATION_SHARE_TYPE_SPECIFIC_PROJECTS"
+	GCPRESERVATIONSHARETYPEUNSPECIFIED      CastaiInventoryV1beta1GCPReservationShareType = "GCP_RESERVATION_SHARE_TYPE_UNSPECIFIED"
+)
+
 // Defines values for CastaiInventoryV1beta1GCPResourceCUDCUDPlan.
 const (
 	CastaiInventoryV1beta1GCPResourceCUDCUDPlanTHIRTYSIXMONTH CastaiInventoryV1beta1GCPResourceCUDCUDPlan = "THIRTY_SIX_MONTH"
@@ -2246,7 +2261,10 @@ type CastaiInventoryV1beta1EnaQueueInfo struct {
 
 // CastaiInventoryV1beta1GCPCapacityReservationContext defines model for castai.inventory.v1beta1.GCPCapacityReservationContext.
 type CastaiInventoryV1beta1GCPCapacityReservationContext struct {
-	AssuredInstanceCount *string `json:"assuredInstanceCount,omitempty"`
+	// Accelerators Accelerators (GPUs) that reserved VMs must match exactly (type and count)
+	// to consume this reservation.
+	Accelerators         *[]CastaiInventoryV1beta1GCPReservationAccelerator `json:"accelerators,omitempty"`
+	AssuredInstanceCount *string                                            `json:"assuredInstanceCount,omitempty"`
 
 	// EffectiveCount Effective instance count is the adjusted original commitment count based only on the portion remaining after out-of-cluster usage.
 	EffectiveCount *string `json:"effectiveCount,omitempty"`
@@ -2262,7 +2280,20 @@ type CastaiInventoryV1beta1GCPCapacityReservationContext struct {
 	InstanceTypeCpu       *string                                       `json:"instanceTypeCpu,omitempty"`
 	InstanceTypeMemoryMib *string                                       `json:"instanceTypeMemoryMib,omitempty"`
 	InstanceTypesUsage    *CastaiInventoryV1beta1InstanceTypeBasedUsage `json:"instanceTypesUsage,omitempty"`
-	ProjectId             *string                                       `json:"projectId,omitempty"`
+
+	// LocalSsds Local SSD disks that reserved VMs must match exactly (interface and size)
+	// to consume this reservation.
+	LocalSsds *[]CastaiInventoryV1beta1GCPReservationLocalSsd `json:"localSsds,omitempty"`
+
+	// MinCpuPlatform Minimum CPU platform the reserved VMs require (e.g. "Intel Cascade Lake").
+	// Empty when the reservation does not constrain the CPU platform. A VM can
+	// consume this reservation only if its minimum CPU platform matches.
+	MinCpuPlatform *string `json:"minCpuPlatform,omitempty"`
+	ProjectId      *string `json:"projectId,omitempty"`
+
+	// ShareSettings GCPReservationShareSettings represents the share_settings object on a GCP
+	// capacity reservation. It controls which projects can consume the reservation.
+	ShareSettings *CastaiInventoryV1beta1GCPReservationShareSettings `json:"shareSettings,omitempty"`
 
 	// SpecificReservationRequired If true, the reservation requires explicit reservation affinity to be used.
 	SpecificReservationRequired *bool   `json:"specificReservationRequired,omitempty"`
@@ -2311,6 +2342,63 @@ type CastaiInventoryV1beta1GCPFlexCUD struct {
 // CastaiInventoryV1beta1GCPFlexCUDCUDPlan - TWELVE_MONTH: 1 year commitment plan
 //   - THIRTY_SIX_MONTH: 3 year commitment plan
 type CastaiInventoryV1beta1GCPFlexCUDCUDPlan string
+
+// CastaiInventoryV1beta1GCPReservationAccelerator GCPReservationAccelerator describes a GPU type and count that a reserved VM
+// must match exactly to consume a GCP capacity reservation.
+type CastaiInventoryV1beta1GCPReservationAccelerator struct {
+	// AcceleratorCount Number of accelerators of this type per VM.
+	AcceleratorCount *string `json:"acceleratorCount,omitempty"`
+
+	// AcceleratorType Accelerator (GPU) type as the full GCP acceleratorType URL, e.g.
+	// "https://www.googleapis.com/compute/v1/projects/<p>/zones/<z>/acceleratorTypes/nvidia-tesla-t4".
+	AcceleratorType *string `json:"acceleratorType,omitempty"`
+}
+
+// CastaiInventoryV1beta1GCPReservationLocalSsd GCPReservationLocalSsd describes a local SSD disk that a reserved VM must
+// match exactly to consume a GCP capacity reservation.
+type CastaiInventoryV1beta1GCPReservationLocalSsd struct {
+	// DiskSizeGb Disk size in GB.
+	DiskSizeGb *string `json:"diskSizeGb,omitempty"`
+
+	// Interface GCPReservationLocalSsdInterface describes the disk interface of a local SSD
+	// attached to a GCP capacity reservation's reserved VMs.
+	//
+	//  - GCP_RESERVATION_LOCAL_SSD_INTERFACE_UNSPECIFIED: Interface not reported by GCP.
+	//  - GCP_RESERVATION_LOCAL_SSD_INTERFACE_SCSI: SCSI interface.
+	//  - GCP_RESERVATION_LOCAL_SSD_INTERFACE_NVME: NVME interface.
+	Interface *CastaiInventoryV1beta1GCPReservationLocalSsdInterface `json:"interface,omitempty"`
+}
+
+// CastaiInventoryV1beta1GCPReservationLocalSsdInterface GCPReservationLocalSsdInterface describes the disk interface of a local SSD
+// attached to a GCP capacity reservation's reserved VMs.
+//
+//   - GCP_RESERVATION_LOCAL_SSD_INTERFACE_UNSPECIFIED: Interface not reported by GCP.
+//   - GCP_RESERVATION_LOCAL_SSD_INTERFACE_SCSI: SCSI interface.
+//   - GCP_RESERVATION_LOCAL_SSD_INTERFACE_NVME: NVME interface.
+type CastaiInventoryV1beta1GCPReservationLocalSsdInterface string
+
+// CastaiInventoryV1beta1GCPReservationShareSettings GCPReservationShareSettings represents the share_settings object on a GCP
+// capacity reservation. It controls which projects can consume the reservation.
+type CastaiInventoryV1beta1GCPReservationShareSettings struct {
+	// ProjectIds Project IDs this reservation is shared with. Only valid when share_type is SPECIFIC_PROJECTS.
+	ProjectIds *[]string `json:"projectIds,omitempty"`
+
+	// ShareType GCPReservationShareType describes how a GCP capacity reservation is shared.
+	//
+	//  - GCP_RESERVATION_SHARE_TYPE_UNSPECIFIED: Unspecified share type.
+	//  - GCP_RESERVATION_SHARE_TYPE_LOCAL: Reservation is only usable by the owner project.
+	//  - GCP_RESERVATION_SHARE_TYPE_SPECIFIC_PROJECTS: Reservation is shared with specific projects listed in project_ids.
+	//  - GCP_RESERVATION_SHARE_TYPE_ORGANIZATION: Reservation is shared across the entire GCP organization.
+	ShareType *CastaiInventoryV1beta1GCPReservationShareType `json:"shareType,omitempty"`
+}
+
+// CastaiInventoryV1beta1GCPReservationShareType GCPReservationShareType describes how a GCP capacity reservation is shared.
+//
+//   - GCP_RESERVATION_SHARE_TYPE_UNSPECIFIED: Unspecified share type.
+//   - GCP_RESERVATION_SHARE_TYPE_LOCAL: Reservation is only usable by the owner project.
+//   - GCP_RESERVATION_SHARE_TYPE_SPECIFIC_PROJECTS: Reservation is shared with specific projects listed in project_ids.
+//   - GCP_RESERVATION_SHARE_TYPE_ORGANIZATION: Reservation is shared across the entire GCP organization.
+type CastaiInventoryV1beta1GCPReservationShareType string
 
 // CastaiInventoryV1beta1GCPResource defines model for castai.inventory.v1beta1.GCPResource.
 type CastaiInventoryV1beta1GCPResource struct {
@@ -8679,6 +8767,10 @@ type ScheduledrebalancingV1RebalancingOptions struct {
 	// Deprecated:
 	KeepDrainTimeoutNodes *bool `json:"keepDrainTimeoutNodes"`
 
+	// MaxSimultaneousDrains Number of nodes to drain simultaniously.
+	// when unspecified, defaults to unlimited.
+	MaxSimultaneousDrains *int32 `json:"maxSimultaneousDrains"`
+
 	// MinNodes Minimum number of nodes that should be kept in the cluster after rebalancing.
 	MinNodes *int32 `json:"minNodes,omitempty"`
 }
@@ -11456,15 +11548,17 @@ type WorkloadoptimizationV1WorkloadThresholds struct {
 
 // WorkloadoptimizationV1WorkloadsSummaryMetrics defines model for workloadoptimization.v1.WorkloadsSummaryMetrics.
 type WorkloadoptimizationV1WorkloadsSummaryMetrics struct {
-	CpuOriginalRequestCores   float64   `json:"cpuOriginalRequestCores"`
-	CpuRecommendationCores    float64   `json:"cpuRecommendationCores"`
-	CpuRequestCores           float64   `json:"cpuRequestCores"`
-	CpuUsageCores             float64   `json:"cpuUsageCores"`
-	MemoryOriginalRequestGibs float64   `json:"memoryOriginalRequestGibs"`
-	MemoryRecommendationGibs  float64   `json:"memoryRecommendationGibs"`
-	MemoryRequestGibs         float64   `json:"memoryRequestGibs"`
-	MemoryUsageGibs           float64   `json:"memoryUsageGibs"`
-	Timestamp                 time.Time `json:"timestamp"`
+	CpuFirstSeenRequestCores   float64   `json:"cpuFirstSeenRequestCores"`
+	CpuOriginalRequestCores    float64   `json:"cpuOriginalRequestCores"`
+	CpuRecommendationCores     float64   `json:"cpuRecommendationCores"`
+	CpuRequestCores            float64   `json:"cpuRequestCores"`
+	CpuUsageCores              float64   `json:"cpuUsageCores"`
+	MemoryFirstSeenRequestGibs float64   `json:"memoryFirstSeenRequestGibs"`
+	MemoryOriginalRequestGibs  float64   `json:"memoryOriginalRequestGibs"`
+	MemoryRecommendationGibs   float64   `json:"memoryRecommendationGibs"`
+	MemoryRequestGibs          float64   `json:"memoryRequestGibs"`
+	MemoryUsageGibs            float64   `json:"memoryUsageGibs"`
+	Timestamp                  time.Time `json:"timestamp"`
 }
 
 // RbacServiceAPIListPermissionGroupsParams defines parameters for RbacServiceAPIListPermissionGroups.
