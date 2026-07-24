@@ -3,6 +3,7 @@ package castai
 import (
 	"bytes"
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -10,6 +11,8 @@ import (
 	"os"
 	"testing"
 	"time"
+
+	"golang.org/x/crypto/bcrypt"
 
 	"github.com/golang/mock/gomock"
 	"github.com/hashicorp/go-cty/cty"
@@ -1123,6 +1126,132 @@ func TestSSOConnection_UpdateOIDCConnector(t *testing.T) {
 	r.False(updateResult.HasError())
 	r.Equal("updated_name", data.Get(FieldSSOConnectionName))
 	equalOIDCConnector(t, r, data.Get(FieldSSOConnectionOIDC), "https://keycloak.example.com/realms/updated", "updated_client_id", "updated_client_secret", "TYPE_FRONT_CHANNEL")
+}
+
+func TestSSOConnection_OIDCSecretDiffSuppress(t *testing.T) {
+	t.Parallel()
+	r := require.New(t)
+
+	// Get the DiffSuppressFunc from the schema definition.
+	res := resourceSSOConnection()
+	suppress := res.Schema[FieldSSOConnectionOIDC].Elem.(*schema.Resource).Schema[FieldSSOConnectionOIDCClientSecret].DiffSuppressFunc
+
+	// Simulate a read response: backend returns base64(bcrypt(secret)).
+	plaintext := "super-secret"
+	hash, err := bcrypt.GenerateFromPassword([]byte(plaintext), bcrypt.MinCost)
+	r.NoError(err)
+	encoded := base64.StdEncoding.EncodeToString(hash)
+
+	// Same plaintext as stored hash → suppress diff.
+	r.True(suppress(FieldSSOConnectionOIDCClientSecret, encoded, plaintext, nil))
+	// Different plaintext → do not suppress.
+	r.False(suppress(FieldSSOConnectionOIDCClientSecret, encoded, "wrong-secret", nil))
+	// Invalid base64 (e.g. first apply before any read) → do not suppress.
+	r.False(suppress(FieldSSOConnectionOIDCClientSecret, "not-valid-base64!!", plaintext, nil))
+}
+
+func TestSSOConnection_ConnectorMutualExclusivity(t *testing.T) {
+	t.Parallel()
+	r := require.New(t)
+
+	makeGetter := func(fields map[string][]any) func(string) interface{} {
+		return func(key string) interface{} {
+			if v, ok := fields[key]; ok {
+				return v
+			}
+			return []any{}
+		}
+	}
+
+	// Exactly one connector → valid.
+	r.Equal(1, countSSOConnectors(makeGetter(map[string][]any{
+		FieldSSOConnectionOIDC: {map[string]any{}},
+	})))
+	r.Equal(1, countSSOConnectors(makeGetter(map[string][]any{
+		FieldSSOConnectionAAD: {map[string]any{}},
+	})))
+
+	// Two connectors → invalid.
+	r.Equal(2, countSSOConnectors(makeGetter(map[string][]any{
+		FieldSSOConnectionOIDC: {map[string]any{}},
+		FieldSSOConnectionAAD:  {map[string]any{}},
+	})))
+
+	// Zero connectors → invalid.
+	r.Equal(0, countSSOConnectors(makeGetter(map[string][]any{})))
+}
+
+func TestSSOConnection_UpdateOIDCToAADConnector(t *testing.T) {
+	r := require.New(t)
+	mockClient := mock_sdk.NewMockClientInterface(gomock.NewController(t))
+
+	ctx := context.Background()
+	provider := &ProviderConfig{
+		api: &sdk.ClientWithResponses{
+			ClientInterface: mockClient,
+		},
+	}
+	connectionID := "b6bfc074-a267-400f-b8f1-db0850c369b1"
+
+	raw := make(map[string]interface{})
+	raw[FieldSSOConnectionName] = "updated_name"
+
+	resource := resourceSSOConnection()
+	data := schema.TestResourceDataRaw(t, resource.Schema, raw)
+	data.SetId(connectionID)
+	// Switch: remove OIDC, add AAD.
+	r.NoError(data.Set(FieldSSOConnectionAAD, []map[string]interface{}{
+		{
+			FieldSSOConnectionADDomain:       "new-ad-domain",
+			FieldSSOConnectionADClientID:     "new-client-id",
+			FieldSSOConnectionADClientSecret: "new-client-secret",
+		},
+	}))
+
+	mockClient.EXPECT().SSOAPIUpdateSSOConnection(gomock.Any(), gomock.Any(), gomock.Any()).
+		DoAndReturn(func(_ context.Context, _ string, body sdk.SSOAPIUpdateSSOConnectionJSONRequestBody) (*http.Response, error) {
+			got, err := json.Marshal(body)
+			r.NoError(err)
+
+			expected := []byte(`{
+  "aad": {
+    "adDomain": "new-ad-domain",
+    "clientId": "new-client-id",
+    "clientSecret": "new-client-secret"
+  },
+  "defaultRoleId": null,
+  "name": "updated_name"
+}`)
+			eq, err := JSONBytesEqual(got, expected)
+			r.NoError(err)
+			r.True(eq, fmt.Sprintf("got:      %v\nexpected: %v\n", string(got), string(expected)))
+
+			return &http.Response{
+				StatusCode: 200,
+				Header:     map[string][]string{"Content-Type": {"json"}},
+				Body:       io.NopCloser(bytes.NewReader([]byte(`{"status":"STATUS_ACTIVE","name":"updated_name"}`))),
+			}, nil
+		}).Times(1)
+
+	readBody := io.NopCloser(bytes.NewReader([]byte(`{"connection":{
+  "id": "b6bfc074-a267-400f-b8f1-db0850c369b1",
+  "name": "updated_name",
+  "emailDomain": "test_email",
+  "aad": {
+    "adDomain": "new-ad-domain",
+    "clientId": "new-client-id",
+    "clientSecret": "new-client-secret"
+  }
+}}`)))
+	mockClient.EXPECT().
+		SSOAPIGetSSOConnection(gomock.Any(), connectionID).
+		Return(&http.Response{StatusCode: 200, Body: readBody, Header: map[string][]string{"Content-Type": {"json"}}}, nil)
+
+	result := resource.UpdateContext(ctx, data, provider)
+	r.Nil(result)
+	r.False(result.HasError())
+	r.Empty(data.Get(FieldSSOConnectionOIDC))
+	equalADConnector(t, r, data.Get(FieldSSOConnectionAAD), "new-ad-domain", "new-client-id", "new-client-secret")
 }
 
 func equalOIDCConnector(t *testing.T, r *require.Assertions, in interface{}, expectedIssuerURL, expectedClientID, expectedClientSecret, expectedType string) {

@@ -188,6 +188,10 @@ func resourceSSOConnection() *schema.Resource {
 							Sensitive:        true,
 							Description:      "OIDC client secret",
 							ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
+							// The backend stores secrets as bcrypt hashes and returns them base64-encoded.
+							// On reads, oldValue is base64(bcrypt(secret)); newValue is the plaintext from config.
+							// bcrypt.CompareHashAndPassword is CPU-intensive by design; this cost is accepted
+							// on every plan, consistent with the aad and okta connector implementations.
 							DiffSuppressFunc: func(_, oldValue, newValue string, _ *schema.ResourceData) bool {
 								decodedSecret, err := base64.StdEncoding.DecodeString(oldValue)
 								if err != nil {
@@ -411,24 +415,22 @@ func checkSSOStatus(input *sdk.CastaiSsoV1beta1SSOConnection) error {
 }
 
 func resourceCastaiSSOConnectionDiff(_ context.Context, rd *schema.ResourceDiff, _ interface{}) error {
-	connectors := 0
-	if v, ok := rd.Get(FieldSSOConnectionAAD).([]any); ok && len(v) > 0 {
-		connectors++
-	}
-
-	if v, ok := rd.Get(FieldSSOConnectionOkta).([]any); ok && len(v) > 0 {
-		connectors++
-	}
-
-	if v, ok := rd.Get(FieldSSOConnectionOIDC).([]any); ok && len(v) > 0 {
-		connectors++
-	}
-
-	if connectors != 1 {
+	if countSSOConnectors(rd.Get) != 1 {
 		return errors.New("only 1 connector can be configured")
 	}
-
 	return nil
+}
+
+// countSSOConnectors counts how many connector blocks are non-empty.
+// Accepts a getter func so the logic can be tested independently of schema.ResourceDiff.
+func countSSOConnectors(get func(string) interface{}) int {
+	n := 0
+	for _, field := range []string{FieldSSOConnectionAAD, FieldSSOConnectionOkta, FieldSSOConnectionOIDC} {
+		if v, ok := get(field).([]any); ok && len(v) > 0 {
+			n++
+		}
+	}
+	return n
 }
 
 func toADConnector(obj map[string]any) *sdk.CastaiSsoV1beta1AzureAAD {
