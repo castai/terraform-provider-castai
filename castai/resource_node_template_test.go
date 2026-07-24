@@ -47,6 +47,7 @@ func TestNodeTemplateResourceReadContext(t *testing.T) {
 				"configurationId": "7dc4f922-29c9-4377-889c-0c8c5fb8d497",
 				"configurationName": "default",
 				"isEnabled": true,
+				"stopEnabled": true,
 			   "gpu": {
 				 "enableTimeSharing": true,
 				 "defaultSharedClientsPerGpu": 10,
@@ -282,6 +283,7 @@ rebalancing_config_min_nodes = 0
 should_taint = true
 Tainted = false
 clm_enabled = false
+stop_enabled = true
 edge_location_ids.# = 2
 edge_location_ids.0 = a1b2c3d4-e5f6-7890-abcd-ef1234567890
 edge_location_ids.1 = b2c3d4e5-f6a7-8901-bcde-f12345678901
@@ -588,6 +590,7 @@ func TestNodeTemplateResourceCreate_defaultNodeTemplate(t *testing.T) {
 				"isEnabled": true,
 				"isDefault": true,
 				"clmEnabled": false,
+				"stopEnabled": false,
 				"constraints": {
 				  "spot": false,
 				  "onDemand": true,
@@ -619,6 +622,10 @@ func TestNodeTemplateResourceCreate_defaultNodeTemplate(t *testing.T) {
 
 	mockClient.EXPECT().
 		NodeTemplatesAPIUpdateNodeTemplate(gomock.Any(), clusterId, "default-by-castai", gomock.Any()).
+		Do(func(_ context.Context, _, _ string, body sdk.NodeTemplatesAPIUpdateNodeTemplateJSONRequestBody) {
+			r.NotNil(body.StopEnabled)
+			r.False(*body.StopEnabled)
+		}).
 		Return(&http.Response{StatusCode: 200, Body: io.NopCloser(bytes.NewReader([]byte{}))}, nil)
 
 	resource := resourceNodeTemplate()
@@ -629,6 +636,7 @@ func TestNodeTemplateResourceCreate_defaultNodeTemplate(t *testing.T) {
 		FieldNodeTemplateCustomInstancesEnabled:                   cty.BoolVal(true),
 		FieldNodeTemplateCustomInstancesWithExtendedMemoryEnabled: cty.BoolVal(true),
 		FieldNodeTemplateClmEnabled:                               cty.BoolVal(false),
+		FieldNodeTemplateStopEnabled:                              cty.BoolVal(false),
 	})
 	state := sdkterraform.NewInstanceStateShimmedFromValue(val, 0)
 	state.ID = "default-by-castai"
@@ -660,6 +668,7 @@ func TestNodeTemplateResourceCreate_customNodeTemplate(t *testing.T) {
 		  "name": "custom-template",
 		  "isEnabled": false,
 		  "clmEnabled": true,
+		  "stopEnabled": true,
 		  "constraints": {
 		    "spot": false,
 		    "onDemand": true,
@@ -699,6 +708,10 @@ func TestNodeTemplateResourceCreate_customNodeTemplate(t *testing.T) {
 		Return(&http.Response{StatusCode: 200, Body: listBody, Header: map[string][]string{"Content-Type": {"json"}}}, nil)
 	mockClient.EXPECT().
 		NodeTemplatesAPICreateNodeTemplate(gomock.Any(), clusterId, gomock.Any()).
+		Do(func(_ context.Context, _ string, body sdk.NodeTemplatesAPICreateNodeTemplateJSONRequestBody) {
+			r.NotNil(body.StopEnabled)
+			r.True(*body.StopEnabled)
+		}).
 		Return(&http.Response{StatusCode: 200, Body: templateBody, Header: map[string][]string{"Content-Type": {"json"}}}, nil)
 
 	resource := resourceNodeTemplate()
@@ -710,6 +723,7 @@ func TestNodeTemplateResourceCreate_customNodeTemplate(t *testing.T) {
 		FieldNodeTemplateCustomInstancesEnabled:                   cty.BoolVal(true),
 		FieldNodeTemplateCustomInstancesWithExtendedMemoryEnabled: cty.BoolVal(true),
 		FieldNodeTemplateClmEnabled:                               cty.BoolVal(true),
+		FieldNodeTemplateStopEnabled:                              cty.BoolVal(true),
 	})
 	state := sdkterraform.NewInstanceStateShimmedFromValue(val, 0)
 	state.ID = name
@@ -808,6 +822,7 @@ func TestAccEKS_ResourceNodeTemplate_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "is_enabled", "true"),
 					resource.TestCheckResourceAttr(resourceName, "should_taint", "true"),
 					resource.TestCheckResourceAttr(resourceName, "clm_enabled", "false"),
+					resource.TestCheckResourceAttr(resourceName, "stop_enabled", "true"),
 					resource.TestCheckResourceAttr(resourceName, "custom_instances_enabled", "false"),
 					resource.TestCheckResourceAttr(resourceName, "custom_instances_with_extended_memory_enabled", "false"),
 					resource.TestCheckResourceAttr(resourceName, "custom_labels.%", "2"),
@@ -895,6 +910,7 @@ func TestAccEKS_ResourceNodeTemplate_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "is_enabled", "true"),
 					resource.TestCheckResourceAttr(resourceName, "should_taint", "true"),
 					resource.TestCheckResourceAttr(resourceName, "clm_enabled", "true"),
+					resource.TestCheckResourceAttr(resourceName, "stop_enabled", "false"),
 					resource.TestCheckResourceAttr(resourceName, "custom_instances_enabled", "false"),
 					resource.TestCheckResourceAttr(resourceName, "custom_instances_with_extended_memory_enabled", "false"),
 					resource.TestCheckResourceAttr(resourceName, "custom_labels.%", "2"),
@@ -987,6 +1003,7 @@ func testAccNodeTemplateConfig(rName, clusterName string) string {
 			configuration_id = castai_node_configuration.test.id
 			should_taint = true
 			clm_enabled = false
+			stop_enabled = true
 
 			custom_labels = {
 				%[1]s-label-key-1 = "%[1]s-label-value-1"
@@ -1160,6 +1177,7 @@ func testNodeTemplateUpdated(rName, clusterName string) string {
 			configuration_id = castai_node_configuration.test.id
 			should_taint = true
 			clm_enabled = true
+			stop_enabled = false
 			
 			custom_labels = {
 				%[1]s-label-key-1 = "%[1]s-label-value-1"
