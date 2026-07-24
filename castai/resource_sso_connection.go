@@ -31,6 +31,12 @@ const (
 	FieldSSOConnectionOktaDomain       = "okta_domain"
 	FieldSSOConnectionOktaClientID     = "client_id"
 	FieldSSOConnectionOktaClientSecret = "client_secret"
+
+	FieldSSOConnectionOIDC             = "oidc"
+	FieldSSOConnectionOIDCIssuerURL    = "issuer_url"
+	FieldSSOConnectionOIDCClientID     = "client_id"
+	FieldSSOConnectionOIDCClientSecret = "client_secret"
+	FieldSSOConnectionOIDCType         = "type"
 )
 
 func resourceSSOConnection() *schema.Resource {
@@ -156,6 +162,57 @@ func resourceSSOConnection() *schema.Resource {
 					},
 				},
 			},
+			FieldSSOConnectionOIDC: {
+				Type:        schema.TypeList,
+				MaxItems:    1,
+				MinItems:    1,
+				Optional:    true,
+				Description: "OIDC connector (e.g. Keycloak)",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						FieldSSOConnectionOIDCIssuerURL: {
+							Type:             schema.TypeString,
+							Required:         true,
+							Description:      "Issuer URL of the OpenID Connect provider",
+							ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
+						},
+						FieldSSOConnectionOIDCClientID: {
+							Type:             schema.TypeString,
+							Required:         true,
+							Description:      "OIDC client ID",
+							ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
+						},
+						FieldSSOConnectionOIDCClientSecret: {
+							Type:             schema.TypeString,
+							Required:         true,
+							Sensitive:        true,
+							Description:      "OIDC client secret",
+							ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
+							// The backend stores secrets as bcrypt hashes and returns them base64-encoded.
+							// On reads, oldValue is base64(bcrypt(secret)); newValue is the plaintext from config.
+							// bcrypt.CompareHashAndPassword is CPU-intensive by design; this cost is accepted
+							// on every plan, consistent with the aad and okta connector implementations.
+							DiffSuppressFunc: func(_, oldValue, newValue string, _ *schema.ResourceData) bool {
+								decodedSecret, err := base64.StdEncoding.DecodeString(oldValue)
+								if err != nil {
+									return false
+								}
+								return bcrypt.CompareHashAndPassword(decodedSecret, []byte(newValue)) == nil
+							},
+						},
+						FieldSSOConnectionOIDCType: {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Default:     string(sdk.CastaiSsoV1beta1OIDCTypeTYPEBACKCHANNEL),
+							Description: "OIDC connection type (TYPE_BACK_CHANNEL or TYPE_FRONT_CHANNEL)",
+							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{
+								string(sdk.CastaiSsoV1beta1OIDCTypeTYPEBACKCHANNEL),
+								string(sdk.CastaiSsoV1beta1OIDCTypeTYPEFRONTCHANNEL),
+							}, false)),
+						},
+					},
+				},
+			},
 		},
 	}
 }
@@ -182,6 +239,10 @@ func resourceCastaiSSOConnectionCreate(ctx context.Context, data *schema.Resourc
 
 	if v, ok := data.Get(FieldSSOConnectionOkta).([]any); ok && len(v) > 0 {
 		req.Okta = toOktaConnector(v[0].(map[string]any))
+	}
+
+	if v, ok := data.Get(FieldSSOConnectionOIDC).([]any); ok && len(v) > 0 {
+		req.Oidc = toOIDCConnector(v[0].(map[string]any))
 	}
 
 	resp, err := client.SSOAPICreateSSOConnectionWithResponse(ctx, req)
@@ -254,6 +315,7 @@ func resourceCastaiSSOConnectionUpdate(ctx context.Context, data *schema.Resourc
 		FieldSSOConnectionAdditionalEmailDomains,
 		FieldSSOConnectionAAD,
 		FieldSSOConnectionOkta,
+		FieldSSOConnectionOIDC,
 		FieldSSOConnectionSynchronizeUserGroups,
 	) {
 		return nil
@@ -285,12 +347,17 @@ func resourceCastaiSSOConnectionUpdate(ctx context.Context, data *schema.Resourc
 		req.Okta = toOktaConnector(v[0].(map[string]any))
 	}
 
+	if v, ok := data.Get(FieldSSOConnectionOIDC).([]any); ok && len(v) > 0 {
+		req.Oidc = toOIDCConnector(v[0].(map[string]any))
+	}
+
 	if data.HasChanges(
 		FieldSSOConnectionName,
 		FieldSSOConnectionEmailDomain,
 		FieldSSOConnectionAdditionalEmailDomains,
 		FieldSSOConnectionAAD,
 		FieldSSOConnectionOkta,
+		FieldSSOConnectionOIDC,
 	) {
 		resp, err := client.SSOAPIUpdateSSOConnectionWithResponse(ctx, data.Id(), req)
 		if err := sdk.CheckOKResponse(resp, err); err != nil {
@@ -348,20 +415,22 @@ func checkSSOStatus(input *sdk.CastaiSsoV1beta1SSOConnection) error {
 }
 
 func resourceCastaiSSOConnectionDiff(_ context.Context, rd *schema.ResourceDiff, _ interface{}) error {
-	connectors := 0
-	if v, ok := rd.Get(FieldSSOConnectionAAD).([]any); ok && len(v) > 0 {
-		connectors++
-	}
-
-	if v, ok := rd.Get(FieldSSOConnectionOkta).([]any); ok && len(v) > 0 {
-		connectors++
-	}
-
-	if connectors != 1 {
+	if countSSOConnectors(rd.Get) != 1 {
 		return errors.New("only 1 connector can be configured")
 	}
-
 	return nil
+}
+
+// countSSOConnectors counts how many connector blocks are non-empty.
+// Accepts a getter func so the logic can be tested independently of schema.ResourceDiff.
+func countSSOConnectors(get func(string) interface{}) int {
+	n := 0
+	for _, field := range []string{FieldSSOConnectionAAD, FieldSSOConnectionOkta, FieldSSOConnectionOIDC} {
+		if v, ok := get(field).([]any); ok && len(v) > 0 {
+			n++
+		}
+	}
+	return n
 }
 
 func toADConnector(obj map[string]any) *sdk.CastaiSsoV1beta1AzureAAD {
@@ -397,6 +466,28 @@ func toOktaConnector(obj map[string]any) *sdk.CastaiSsoV1beta1Okta {
 	}
 	if v, ok := obj[FieldSSOConnectionOktaClientSecret].(string); ok {
 		out.ClientSecret = toPtr(v)
+	}
+
+	return out
+}
+
+func toOIDCConnector(obj map[string]any) *sdk.CastaiSsoV1beta1OIDC {
+	if obj == nil {
+		return nil
+	}
+
+	out := &sdk.CastaiSsoV1beta1OIDC{}
+	if v, ok := obj[FieldSSOConnectionOIDCIssuerURL].(string); ok {
+		out.IssuerUrl = v
+	}
+	if v, ok := obj[FieldSSOConnectionOIDCClientID].(string); ok {
+		out.ClientId = v
+	}
+	if v, ok := obj[FieldSSOConnectionOIDCClientSecret].(string); ok {
+		out.ClientSecret = toPtr(v)
+	}
+	if v, ok := obj[FieldSSOConnectionOIDCType].(string); ok {
+		out.Type = sdk.CastaiSsoV1beta1OIDCType(v)
 	}
 
 	return out
