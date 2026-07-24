@@ -12,13 +12,23 @@ SSO Connection resource allows creating SSO trust relationship with CAST AI.
 ## Example Usage
 
 ```terraform
-resource "castai_sso_connection" "sso" {
+resource "castai_sso_connection" "aad" {
   name         = "aad_connection"
   email_domain = "aad_connection@test.com"
   aad {
     client_id     = azuread_application.castai_sso.client_id
     client_secret = azuread_application_password.castai_sso.value
     ad_domain     = azuread_application.castai_sso.publisher_domain
+  }
+}
+
+resource "castai_sso_connection" "keycloak" {
+  name         = "keycloak_connection"
+  email_domain = "example.com"
+  oidc {
+    issuer_url    = "https://keycloak.example.com/realms/my-realm"
+    client_id     = "castai"
+    client_secret = var.keycloak_client_secret
   }
 }
 ```
@@ -35,6 +45,7 @@ resource "castai_sso_connection" "sso" {
 
 - `aad` (Block List, Max: 1) Azure AD connector (see [below for nested schema](#nestedblock--aad))
 - `additional_email_domains` (List of String) Additional email domains that will be allowed to sign in via the connection
+- `oidc` (Block List, Max: 1) OIDC connector (e.g. Keycloak) (see [below for nested schema](#nestedblock--oidc))
 - `okta` (Block List, Max: 1) Okta connector (see [below for nested schema](#nestedblock--okta))
 - `synchronize_user_groups` (Boolean) When enabled, user groups from the identity provider will be synchronized with CAST AI. A sync auth token is generated on activation and stored in sync_auth_token.
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
@@ -52,6 +63,20 @@ Required:
 - `ad_domain` (String) Azure AD domain
 - `client_id` (String) Azure AD client ID
 - `client_secret` (String, Sensitive) Azure AD client secret
+
+
+<a id="nestedblock--oidc"></a>
+### Nested Schema for `oidc`
+
+Required:
+
+- `client_id` (String) OIDC client ID
+- `client_secret` (String, Sensitive) OIDC client secret
+- `issuer_url` (String) Issuer URL of the OpenID Connect provider
+
+Optional:
+
+- `type` (String) OIDC connection type (TYPE_BACK_CHANNEL or TYPE_FRONT_CHANNEL)
 
 
 <a id="nestedblock--okta"></a>
