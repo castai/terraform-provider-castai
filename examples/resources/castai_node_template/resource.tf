@@ -6,6 +6,7 @@ resource "castai_node_template" "default_by_castai" {
   is_enabled       = true
   configuration_id = castai_node_configuration.default.id
   should_taint     = true
+  stop_enabled     = true
 
   custom_labels = {
     env = "production"

@@ -21,6 +21,7 @@ resource "castai_node_template" "default_by_castai" {
   is_enabled       = true
   configuration_id = castai_node_configuration.default.id
   should_taint     = true
+  stop_enabled     = true
 
   custom_labels = {
     env = "production"
@@ -91,6 +92,7 @@ resource "castai_node_template" "default_by_castai" {
 - `price_adjustment_configuration` (Block List, Max: 1) Configuration for adjusting instance type prices during autoscaling. Adjustments only affect placement decisions, not cost reporting. (see [below for nested schema](#nestedblock--price_adjustment_configuration))
 - `rebalancing_config_min_nodes` (Number) Minimum nodes that will be kept when rebalancing nodes using this node template.
 - `should_taint` (Boolean) Marks whether the templated nodes will have a taint.
+- `stop_enabled` (Boolean) Marks whether Storage Optimization (STOP) should be enabled for nodes created from this template.
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
 ### Read-Only

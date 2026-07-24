@@ -58,6 +58,7 @@ const (
 	FieldNodeTemplateRebalancingConfigMinNodes                = "rebalancing_config_min_nodes"
 	FieldNodeTemplateShouldTaint                              = "should_taint"
 	FieldNodeTemplateSpot                                     = "spot"
+	FieldNodeTemplateStopEnabled                              = "stop_enabled"
 	FieldNodeTemplateSpotDiversityPriceIncreaseLimitPercent   = "spot_diversity_price_increase_limit_percent"
 	FieldNodeTemplateSpotReliabilityEnabled                   = "spot_reliability_enabled"
 	FieldNodeTemplateSpotReliabilityPriceIncreaseLimitPercent = "spot_reliability_price_increase_limit_percent"
@@ -221,6 +222,12 @@ func resourceNodeTemplate() *schema.Resource {
 				Type:        schema.TypeBool,
 				Optional:    true,
 				Description: "Marks whether the templated nodes will have a taint.",
+			},
+			FieldNodeTemplateStopEnabled: {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     false,
+				Description: "Marks whether Storage Optimization (STOP) should be enabled for nodes created from this template.",
 			},
 			FieldNodeTemplateConstraints: {
 				Type:     schema.TypeList,
@@ -905,6 +912,9 @@ func resourceNodeTemplateRead(ctx context.Context, d *schema.ResourceData, meta 
 	if err := d.Set(FieldNodeTemplateShouldTaint, nodeTemplate.ShouldTaint); err != nil {
 		return diag.FromErr(fmt.Errorf("setting should taint: %w", err))
 	}
+	if err := d.Set(FieldNodeTemplateStopEnabled, nodeTemplate.StopEnabled); err != nil {
+		return diag.FromErr(fmt.Errorf("setting stop enabled: %w", err))
+	}
 	if nodeTemplate.RebalancingConfig != nil {
 		if err := d.Set(FieldNodeTemplateRebalancingConfigMinNodes, nodeTemplate.RebalancingConfig.MinNodes); err != nil {
 			return diag.FromErr(fmt.Errorf("setting configuration id: %w", err))
@@ -1315,6 +1325,7 @@ func updateNodeTemplate(ctx context.Context, d *schema.ResourceData, meta any, s
 	if !skipChangeCheck && !d.HasChanges(
 		FieldNodeTemplateName,
 		FieldNodeTemplateShouldTaint,
+		FieldNodeTemplateStopEnabled,
 		FieldNodeTemplateConfigurationId,
 		FieldNodeTemplateRebalancingConfigMinNodes,
 		FieldNodeTemplateCustomLabels,
@@ -1373,6 +1384,10 @@ func updateNodeTemplate(ctx context.Context, d *schema.ResourceData, meta any, s
 
 	if v, _ := d.GetOk(FieldNodeTemplateShouldTaint); v != nil {
 		req.ShouldTaint = toPtr(v.(bool))
+	}
+
+	if v, _ := d.GetOk(FieldNodeTemplateStopEnabled); v != nil {
+		req.StopEnabled = lo.ToPtr(v.(bool))
 	}
 
 	if v, ok := d.Get(FieldNodeTemplateCustomTaints).([]any); ok && len(v) > 0 {
@@ -1453,6 +1468,7 @@ func resourceNodeTemplateCreate(ctx context.Context, d *schema.ResourceData, met
 		ConfigurationId: lo.ToPtr(d.Get(FieldNodeTemplateConfigurationId).(string)),
 		ShouldTaint:     lo.ToPtr(d.Get(FieldNodeTemplateShouldTaint).(bool)),
 		ClmEnabled:      lo.ToPtr(d.Get(FieldNodeTemplateClmEnabled).(bool)),
+		StopEnabled:     lo.ToPtr(d.Get(FieldNodeTemplateStopEnabled).(bool)),
 	}
 
 	if v, ok := d.Get(FieldNodeTemplateEdgeLocationIDs).([]any); ok && len(v) > 0 {
