@@ -47,6 +47,16 @@ const (
 	OVERLAYENCAPUNSPECIFIED EdgeClusterCNIOverlayEncap = "OVERLAY_ENCAP_UNSPECIFIED"
 )
 
+// Defines values for EdgeLocationCloudProviderType.
+const (
+	AWS                          EdgeLocationCloudProviderType = "AWS"
+	CLOUDPROVIDERTYPEUNSPECIFIED EdgeLocationCloudProviderType = "CLOUD_PROVIDER_TYPE_UNSPECIFIED"
+	CUSTOM                       EdgeLocationCloudProviderType = "CUSTOM"
+	GCP                          EdgeLocationCloudProviderType = "GCP"
+	NEBIUS                       EdgeLocationCloudProviderType = "NEBIUS"
+	OCI                          EdgeLocationCloudProviderType = "OCI"
+)
+
 // Defines values for EdgeLocationControlPlaneMode.
 const (
 	CONTROLPLANEMODEUNSPECIFIED EdgeLocationControlPlaneMode = "CONTROL_PLANE_MODE_UNSPECIFIED"
@@ -235,8 +245,14 @@ type CustomProviderParam = map[string]interface{}
 
 // EdgeClusterAddon EdgeClusterAddon configures a single optional addon installed on the edge cluster.
 type EdgeClusterAddon struct {
+	// Message Human-readable description of the addon's current status.
+	Message *string `json:"message,omitempty"`
+
 	// Name The addon identifier. Must match one of the supported optional addons.
 	Name string `json:"name"`
+
+	// Ready Whether the addon is fully installed and ready.
+	Ready *bool `json:"ready,omitempty"`
 
 	// Values Helm values for the addon, deep-merged over the chart's default values.
 	Values *map[string]interface{} `json:"values,omitempty"`
@@ -355,6 +371,9 @@ type EdgeConfiguration struct {
 	// Name The name of the edge configuration.
 	Name string `json:"name"`
 
+	// Nebius OCI specific configuration.
+	Nebius *NebiusConfiguration `json:"nebius,omitempty"`
+
 	// Oci OCI specific configuration.
 	Oci *OCIConfiguration `json:"oci,omitempty"`
 
@@ -416,6 +435,9 @@ type EdgeConfigurationUpdate struct {
 
 	// Name The name of the edge configuration.
 	Name *string `json:"name,omitempty"`
+
+	// Nebius Nebius specific configuration.
+	Nebius *NebiusConfiguration `json:"nebius,omitempty"`
 
 	// Oci OCI specific configuration.
 	Oci *OCIConfiguration `json:"oci,omitempty"`
@@ -482,6 +504,9 @@ type EdgeLocation struct {
 	// Aws AWS specific parameters.
 	Aws *AWSParam `json:"aws,omitempty"`
 
+	// CloudProviderType The cloud provider type of the edge location.
+	CloudProviderType *EdgeLocationCloudProviderType `json:"cloudProviderType,omitempty"`
+
 	// CloudResourceId Name used to create/tag cloud resources.
 	CloudResourceId *string `json:"cloudResourceId,omitempty"`
 
@@ -517,6 +542,9 @@ type EdgeLocation struct {
 	//  and GCP has a limit of 30 characters for service account names.
 	Name string `json:"name"`
 
+	// Nebius Nebius cloud parameters.
+	Nebius *NebiusParam `json:"nebius,omitempty"`
+
 	// Oci OCI cloud parameters.
 	Oci *OCIParam `json:"oci,omitempty"`
 
@@ -535,6 +563,9 @@ type EdgeLocation struct {
 	// Zones The zones of edge location.
 	Zones *[]Zone `json:"zones,omitempty"`
 }
+
+// EdgeLocationCloudProviderType The cloud provider type of the edge location.
+type EdgeLocationCloudProviderType string
 
 // EdgeLocationControlPlaneMode The mode of control plane inside edge location.
 type EdgeLocationControlPlaneMode string
@@ -559,11 +590,26 @@ type EdgeLocationUpdate struct {
 	// Gcp Google Cloud specific parameters.
 	Gcp *GCPParam `json:"gcp,omitempty"`
 
+	// Nebius Nebius specific parameters.
+	Nebius *NebiusParam `json:"nebius,omitempty"`
+
 	// Oci OCI specific parameters.
 	Oci *OCIParam `json:"oci,omitempty"`
 
 	// Zones The zones of edge location.
 	Zones *[]Zone `json:"zones,omitempty"`
+}
+
+// EdgeLocationAddonStatus AddonStatus represents the readiness status of a single addon.
+type EdgeLocationAddonStatus struct {
+	// Message Message explaining why the addon is not ready, if applicable.
+	Message *string `json:"message,omitempty"`
+
+	// Name The name of the addon.
+	Name *string `json:"name,omitempty"`
+
+	// Ready Whether the addon is ready.
+	Ready *bool `json:"ready,omitempty"`
 }
 
 // GCPConfiguration GCP specific parameters present in edge configuration.
@@ -630,6 +676,11 @@ type GCPParamGCPNetworking struct {
 type GPUConfig struct {
 	// Count Number of GPUs.
 	Count *uint32 `json:"count,omitempty"`
+
+	// DraEnabled DraEnabled enables Dynamic Resource Allocation (DRA).
+	//  When enabled, the device plugin is disabled and GPU resources
+	//  are advertised via K8s ResourceSlices for allocation through K8s ResourceClaims.
+	DraEnabled *bool `json:"draEnabled,omitempty"`
 
 	// Mig MIG configuration for the GPU.
 	Mig *GPUConfigMigConfig `json:"mig,omitempty"`
@@ -731,6 +782,57 @@ type ListEdgeLocationsResponse struct {
 
 	// TotalCount The total number of items.
 	TotalCount *int32 `json:"totalCount,omitempty"`
+}
+
+// NebiusConfiguration Nebius specific parameters present in edge configuration.
+type NebiusConfiguration struct {
+	// BootDiskSizeGib Boot disk size.
+	BootDiskSizeGib *int32 `json:"bootDiskSizeGib,omitempty"`
+
+	// ImageId ImageID to be used for edge creation.
+	ImageId *string `json:"imageId,omitempty"`
+
+	// Labels Instance/VM labels.
+	Labels *map[string]string `json:"labels,omitempty"`
+}
+
+// NebiusParam Nebius cloud provider params.
+type NebiusParam struct {
+	// Credentials The credentials used to authenticate Nebius API.
+	Credentials *NebiusParamCredentials `json:"credentials,omitempty"`
+
+	// Networking The networking configuration details.
+	Networking *NebiusParamNetworking `json:"networking,omitempty"`
+
+	// ParentId The parent ID (project ID) that owns the edge location resources.
+	ParentId *string `json:"parentId,omitempty"`
+
+	// ServiceAccountId The service account ID to be impersonated by CAST AI.
+	ServiceAccountId *string `json:"serviceAccountId,omitempty"`
+}
+
+// NebiusParamCredentials NebiusParamCredentials Nebius credentials.
+type NebiusParamCredentials struct {
+	// AuthorizedKeyId The authorized key ID uploaded to the service account.
+	AuthorizedKeyId *string `json:"authorizedKeyId,omitempty"`
+
+	// PrivateKeyBase64 The private key (base64-encoded) for the service account.
+	PrivateKeyBase64 *string `json:"privateKeyBase64,omitempty"`
+}
+
+// NebiusParamNetworking NebiusParamNetworking Networking configuration of Nebius edge location.
+type NebiusParamNetworking struct {
+	// NetworkId The network ID of the VPC network to be used in the selected region.
+	NetworkId *string `json:"networkId,omitempty"`
+
+	// SecurityGroupId The security group ID to be used in the selected region.
+	SecurityGroupId *string `json:"securityGroupId,omitempty"`
+
+	// SubnetCidr The IPv4 CIDR block of the subnet.
+	SubnetCidr *string `json:"subnetCidr,omitempty"`
+
+	// SubnetId The subnet ID of the subnet to be used in the selected region.
+	SubnetId *string `json:"subnetId,omitempty"`
 }
 
 // OCIConfiguration OCI specific parameters present in edge configuration.
@@ -897,6 +999,9 @@ type ReportStatusRequestEdge struct {
 
 // ReportStatusRequestEdgeLocation EdgeLocation object.
 type ReportStatusRequestEdgeLocation struct {
+	// Addons The readiness status of each installed addon.
+	Addons *[]EdgeLocationAddonStatus `json:"addons,omitempty"`
+
 	// Id The ID of the edge location.
 	Id string `json:"id"`
 
