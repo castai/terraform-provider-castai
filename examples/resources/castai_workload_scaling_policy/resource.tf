@@ -55,6 +55,9 @@ resource "castai_workload_scaling_policy" "services" {
   }
   startup {
     period_seconds = 240
+    two_phase_recommendations {
+      enabled = true
+    }
   }
   downscaling {
     apply_type = "DEFERRED"
@@ -76,6 +79,53 @@ resource "castai_workload_scaling_policy" "services" {
       cpu_stall_threshold_percentage = 50
       min_pressured_pod_percentage   = 30
     }
+    infinite_memory_scaling {
+      enabled = true
+    }
+  }
+  hpa_settings {
+    management_option = "READ_ONLY"
+    take_ownership    = false
+    native_hpa_spec {
+      min_replicas = 2
+      max_replicas = 20
+      metrics {
+        type = "RESOURCE"
+        resource {
+          name = "cpu"
+          target {
+            type  = "UTILIZATION"
+            value = "80"
+          }
+        }
+      }
+      behavior {
+        scale_up {
+          stabilization_window_seconds = 0
+          select_policy                = "MAX_CHANGE_POLICY_SELECT"
+          policies {
+            type           = "PERCENT_SCALING_POLICY"
+            value          = 100
+            period_seconds = 15
+          }
+        }
+        scale_down {
+          stabilization_window_seconds = 300
+          select_policy                = "MAX_CHANGE_POLICY_SELECT"
+          policies {
+            type           = "PERCENT_SCALING_POLICY"
+            value          = 100
+            period_seconds = 15
+          }
+        }
+      }
+    }
+  }
+  hpa_converters {
+    type = "AVERAGE_VALUE_FROM_ORIGINAL_REQUESTS"
+  }
+  gpu {
+    management_option = "READ_ONLY"
   }
   jvm {
     memory {
