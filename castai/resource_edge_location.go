@@ -57,6 +57,7 @@ type edgeLocationModel struct {
 	AWS              *awsModel          `tfsdk:"aws"`
 	GCP              *gcpModel          `tfsdk:"gcp"`
 	OCI              *ociModel          `tfsdk:"oci"`
+	Nebius           *nebiusModel       `tfsdk:"nebius"`
 	Custom           *customModel       `tfsdk:"custom"`
 	// Computed revision number incremented each time credentials have changed.
 	CredentialsRevision types.Int64 `tfsdk:"credentials_revision"`
@@ -179,6 +180,17 @@ type ociModel struct {
 
 type customModel struct{}
 
+type nebiusModel struct {
+	ParentID           types.String `tfsdk:"parent_id"`
+	ServiceAccountID   types.String `tfsdk:"service_account_id"`
+	AuthorizedKeyIDWO  types.String `tfsdk:"authorized_key_id_wo"`
+	PrivateKeyBase64WO types.String `tfsdk:"private_key_base64_wo"`
+	NetworkID          types.String `tfsdk:"network_id"`
+	SubnetID           types.String `tfsdk:"subnet_id"`
+	SubnetCidr         types.String `tfsdk:"subnet_cidr"`
+	SecurityGroupID    types.String `tfsdk:"security_group_id"`
+}
+
 func (m customModel) credentials() types.String {
 	return types.StringNull()
 }
@@ -247,6 +259,21 @@ func (m ociModel) Equal(other *ociModel) bool {
 		m.SecurityGroupID.Equal(other.SecurityGroupID)
 }
 
+func (m nebiusModel) credentials() types.String {
+	return types.StringValue(m.AuthorizedKeyIDWO.String() + m.PrivateKeyBase64WO.String())
+}
+
+func (m nebiusModel) Equal(other *nebiusModel) bool {
+	if other == nil {
+		return false
+	}
+	return m.ParentID.Equal(other.ParentID) &&
+		m.ServiceAccountID.Equal(other.ServiceAccountID) &&
+		m.NetworkID.Equal(other.NetworkID) &&
+		m.SubnetID.Equal(other.SubnetID) &&
+		m.SecurityGroupID.Equal(other.SecurityGroupID)
+}
+
 type ModelWithCredentials interface {
 	credentials() types.String
 }
@@ -261,6 +288,7 @@ func (r *edgeLocationResource) ConfigValidators(_ context.Context) []resource.Co
 			path.MatchRoot("aws"),
 			path.MatchRoot("gcp"),
 			path.MatchRoot("oci"),
+			path.MatchRoot("nebius"),
 			path.MatchRoot("custom"),
 		),
 	}
@@ -587,6 +615,54 @@ func (r *edgeLocationResource) Schema(_ context.Context, _ resource.SchemaReques
 				Description: "Custom cloud provider configuration for the edge location",
 				Attributes:  map[string]schema.Attribute{},
 			},
+			"nebius": schema.SingleNestedAttribute{
+				Optional:    true,
+				Description: "Nebius configuration for the edge location",
+				Validators: []validator.Object{
+					objectvalidator.AlsoRequires(path.MatchRoot("region")),
+				},
+				Attributes: map[string]schema.Attribute{
+					"parent_id": schema.StringAttribute{
+						Required:    true,
+						Description: "Nebius project ID that owns the edge location resources",
+					},
+					"service_account_id": schema.StringAttribute{
+						Required:    true,
+						Description: "Nebius service account ID to be impersonated by CAST AI",
+					},
+					"authorized_key_id_wo": schema.StringAttribute{
+						Required:    true,
+						Sensitive:   true,
+						WriteOnly:   true,
+						Description: "ID of the authorized public key uploaded to the service account",
+					},
+					"private_key_base64_wo": schema.StringAttribute{
+						Required:    true,
+						Sensitive:   true,
+						WriteOnly:   true,
+						Description: "Base64 encoded private key for the service account",
+						Validators: []validator.String{
+							validators.ValidBase64(),
+						},
+					},
+					"network_id": schema.StringAttribute{
+						Required:    true,
+						Description: "The ID of the VPC network to be used in the selected region",
+					},
+					"subnet_id": schema.StringAttribute{
+						Required:    true,
+						Description: "The ID of the subnet to be used in the selected region",
+					},
+					"subnet_cidr": schema.StringAttribute{
+						Optional:    true,
+						Description: "The IPv4 CIDR block of the subnet",
+					},
+					"security_group_id": schema.StringAttribute{
+						Optional:    true,
+						Description: "The ID of the security group to be used in the selected region",
+					},
+				},
+			},
 		},
 	}
 }
@@ -653,6 +729,10 @@ func (r *edgeLocationResource) Create(ctx context.Context, req resource.CreateRe
 	if plan.OCI != nil {
 		createReq.Oci = r.toOCI(plan.OCI, config.OCI)
 		mc = config.OCI
+	}
+	if plan.Nebius != nil {
+		createReq.Nebius = r.toNebius(plan.Nebius, config.Nebius)
+		mc = config.Nebius
 	}
 	if plan.Custom != nil {
 		createReq.Custom = r.toCustom(plan.Custom, config.Custom)
@@ -787,6 +867,9 @@ func (r *edgeLocationResource) Read(ctx context.Context, req resource.ReadReques
 	if edgeLocation.Oci != nil {
 		state.OCI = r.toOCIModel(edgeLocation.Oci)
 	}
+	if edgeLocation.Nebius != nil {
+		state.Nebius = r.toNebiusModel(edgeLocation.Nebius)
+	}
 	if edgeLocation.Custom != nil {
 		state.Custom = r.toCustomModel(edgeLocation.Custom)
 	}
@@ -853,6 +936,9 @@ func (r *edgeLocationResource) Update(ctx context.Context, req resource.UpdateRe
 	case plan.OCI != nil && (!plan.OCI.Equal(state.OCI) || credentialsChanged):
 		updateReq.Oci = r.toOCI(plan.OCI, config.OCI)
 		mc = config.OCI
+	case plan.Nebius != nil && (!plan.Nebius.Equal(state.Nebius) || credentialsChanged):
+		updateReq.Nebius = r.toNebius(plan.Nebius, config.Nebius)
+		mc = config.Nebius
 	case plan.Custom != nil && (!plan.Custom.Equal(state.Custom)):
 		updateReq.Custom = r.toCustom(plan.Custom, config.Custom)
 	}
@@ -962,7 +1048,8 @@ func (r *edgeLocationResource) ModifyPlan(ctx context.Context, req resource.Modi
 		mc = config.GCP
 	case config.OCI != nil:
 		mc = config.OCI
-
+	case config.Nebius != nil:
+		mc = config.Nebius
 	}
 
 	// Skip credentials comparison when no credentials are provided (e.g. impersonation flow)
@@ -1390,6 +1477,59 @@ func (r *edgeLocationResource) toOCIModel(config *omni.OCIParam) *ociModel {
 	}
 
 	return oci
+}
+
+func (r *edgeLocationResource) toNebius(plan, config *nebiusModel) *omni.NebiusParam {
+	if plan == nil || config == nil {
+		return nil
+	}
+
+	out := &omni.NebiusParam{
+		ParentId:         toPtr(plan.ParentID.ValueString()),
+		ServiceAccountId: toPtr(plan.ServiceAccountID.ValueString()),
+		Networking: &omni.NebiusParamNetworking{
+			NetworkId:       toPtr(plan.NetworkID.ValueString()),
+			SubnetId:        toPtr(plan.SubnetID.ValueString()),
+			SubnetCidr:      plan.SubnetCidr.ValueStringPointer(),
+			SecurityGroupId: plan.SecurityGroupID.ValueStringPointer(),
+		},
+		Credentials: &omni.NebiusParamCredentials{
+			AuthorizedKeyId:  toPtr(config.AuthorizedKeyIDWO.ValueString()),
+			PrivateKeyBase64: toPtr(config.PrivateKeyBase64WO.ValueString()),
+		},
+	}
+
+	return out
+}
+
+func (r *edgeLocationResource) toNebiusModel(config *omni.NebiusParam) *nebiusModel {
+	if config == nil {
+		return nil
+	}
+
+	nebius := &nebiusModel{
+		ParentID:           types.StringValue(lo.FromPtr(config.ParentId)),
+		ServiceAccountID:   types.StringValue(lo.FromPtr(config.ServiceAccountId)),
+		NetworkID:          types.StringNull(),
+		SubnetID:           types.StringNull(),
+		SubnetCidr:         types.StringNull(),
+		SecurityGroupID:    types.StringNull(),
+		AuthorizedKeyIDWO:  types.StringNull(),
+		PrivateKeyBase64WO: types.StringNull(),
+	}
+
+	if config.Networking != nil {
+		nebius.NetworkID = types.StringValue(lo.FromPtr(config.Networking.NetworkId))
+		nebius.SubnetID = types.StringValue(lo.FromPtr(config.Networking.SubnetId))
+		if config.Networking.SubnetCidr != nil && *config.Networking.SubnetCidr != "" {
+			nebius.SubnetCidr = types.StringValue(*config.Networking.SubnetCidr)
+		}
+		if config.Networking.SecurityGroupId != nil && *config.Networking.SecurityGroupId != "" {
+			nebius.SecurityGroupID = types.StringValue(*config.Networking.SecurityGroupId)
+		}
+	}
+
+	return nebius
 }
 
 func (r *edgeLocationResource) toCustom(plan, config *customModel) *omni.CustomProviderParam {
