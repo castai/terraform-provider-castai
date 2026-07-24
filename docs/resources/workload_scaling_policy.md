@@ -72,6 +72,9 @@ resource "castai_workload_scaling_policy" "services" {
   }
   startup {
     period_seconds = 240
+    two_phase_recommendations {
+      enabled = true
+    }
   }
   downscaling {
     apply_type = "DEFERRED"
@@ -93,6 +96,53 @@ resource "castai_workload_scaling_policy" "services" {
       cpu_stall_threshold_percentage = 50
       min_pressured_pod_percentage   = 30
     }
+    infinite_memory_scaling {
+      enabled = true
+    }
+  }
+  hpa_settings {
+    management_option = "READ_ONLY"
+    take_ownership    = false
+    native_hpa_spec {
+      min_replicas = 2
+      max_replicas = 20
+      metrics {
+        type = "RESOURCE"
+        resource {
+          name = "cpu"
+          target {
+            type  = "UTILIZATION"
+            value = "80"
+          }
+        }
+      }
+      behavior {
+        scale_up {
+          stabilization_window_seconds = 0
+          select_policy                = "MAX_CHANGE_POLICY_SELECT"
+          policies {
+            type           = "PERCENT_SCALING_POLICY"
+            value          = 100
+            period_seconds = 15
+          }
+        }
+        scale_down {
+          stabilization_window_seconds = 300
+          select_policy                = "MAX_CHANGE_POLICY_SELECT"
+          policies {
+            type           = "PERCENT_SCALING_POLICY"
+            value          = 100
+            period_seconds = 15
+          }
+        }
+      }
+    }
+  }
+  hpa_converters {
+    type = "AVERAGE_VALUE_FROM_ORIGINAL_REQUESTS"
+  }
+  gpu {
+    management_option = "READ_ONLY"
   }
   jvm {
     memory {
@@ -127,6 +177,10 @@ resource "castai_workload_scaling_policy" "services" {
 - `confidence` (Block List, Max: 1) Defines the confidence settings for applying recommendations. (see [below for nested schema](#nestedblock--confidence))
 - `downscaling` (Block List, Max: 1) (see [below for nested schema](#nestedblock--downscaling))
 - `excluded_containers` (List of String) Defines containers to be excluded from receiving recommendations. The containers are matched by exact name.
+- `gpu` (Block List, Max: 1) Configures GPU optimization. (see [below for nested schema](#nestedblock--gpu))
+- `hpa_converters` (Block List) Configures conversion of existing HPAs when vertical optimization is used without HPA management. (see [below for nested schema](#nestedblock--hpa_converters))
+- `hpa_settings` (Block List, Max: 1) Configures horizontal pod autoscaling for workloads using this policy. (see [below for nested schema](#nestedblock--hpa_settings))
+- `is_ops_pilot` (Boolean) Marks a policy as managed by OpsPilot.
 - `jvm` (Block List, Max: 1) JVM optimization settings. (see [below for nested schema](#nestedblock--jvm))
 - `memory_event` (Block List, Max: 1) (see [below for nested schema](#nestedblock--memory_event))
 - `predictive_scaling` (Block List, Max: 1) (see [below for nested schema](#nestedblock--predictive_scaling))
@@ -317,6 +371,7 @@ Optional:
 Optional:
 
 - `cpu_pressure` (Block List, Max: 1) Configures CPU pressure anomaly detection thresholds. (see [below for nested schema](#nestedblock--anomaly_detection--cpu_pressure))
+- `infinite_memory_scaling` (Block List, Max: 1) Configures infinite memory scaling anomaly detection. (see [below for nested schema](#nestedblock--anomaly_detection--infinite_memory_scaling))
 
 <a id="nestedblock--anomaly_detection--cpu_pressure"></a>
 ### Nested Schema for `anomaly_detection.cpu_pressure`
@@ -325,6 +380,14 @@ Required:
 
 - `cpu_stall_threshold_percentage` (Number) Percentage of time (0-100) that a pod must experience CPU pressure to be considered under pressure.
 - `min_pressured_pod_percentage` (Number) Percentage (0-100) of pods that must be experiencing pressure for the detector to trigger.
+
+
+<a id="nestedblock--anomaly_detection--infinite_memory_scaling"></a>
+### Nested Schema for `anomaly_detection.infinite_memory_scaling`
+
+Required:
+
+- `enabled` (Boolean) Enables infinite memory scaling detection for workloads using this policy.
 
 
 
@@ -420,6 +483,251 @@ Optional:
 	- DEFERRED - pods are not restarted and recommendation values are applied during natural restarts only (new deployment, etc.)
 
 
+<a id="nestedblock--gpu"></a>
+### Nested Schema for `gpu`
+
+Required:
+
+- `management_option` (String) Defines whether CAST AI observes or manages the feature.
+
+
+<a id="nestedblock--hpa_converters"></a>
+### Nested Schema for `hpa_converters`
+
+Required:
+
+- `type` (String) HPA converter strategy.
+
+
+<a id="nestedblock--hpa_settings"></a>
+### Nested Schema for `hpa_settings`
+
+Required:
+
+- `management_option` (String) Defines whether CAST AI observes or manages the feature.
+- `native_hpa_spec` (Block List, Min: 1, Max: 1) Native Kubernetes HPA specification. (see [below for nested schema](#nestedblock--hpa_settings--native_hpa_spec))
+- `take_ownership` (Boolean) Allows CAST AI to take ownership of eligible existing HPAs.
+
+<a id="nestedblock--hpa_settings--native_hpa_spec"></a>
+### Nested Schema for `hpa_settings.native_hpa_spec`
+
+Required:
+
+- `max_replicas` (Number) Maximum number of replicas.
+- `metrics` (Block List, Min: 1) Metrics used by the HPA. (see [below for nested schema](#nestedblock--hpa_settings--native_hpa_spec--metrics))
+- `min_replicas` (Number) Minimum number of replicas.
+
+Optional:
+
+- `behavior` (Block List, Max: 1) (see [below for nested schema](#nestedblock--hpa_settings--native_hpa_spec--behavior))
+
+<a id="nestedblock--hpa_settings--native_hpa_spec--metrics"></a>
+### Nested Schema for `hpa_settings.native_hpa_spec.metrics`
+
+Required:
+
+- `type` (String)
+
+Optional:
+
+- `container_resource` (Block List, Max: 1) (see [below for nested schema](#nestedblock--hpa_settings--native_hpa_spec--metrics--container_resource))
+- `external` (Block List, Max: 1) (see [below for nested schema](#nestedblock--hpa_settings--native_hpa_spec--metrics--external))
+- `object` (Block List, Max: 1) (see [below for nested schema](#nestedblock--hpa_settings--native_hpa_spec--metrics--object))
+- `pods` (Block List, Max: 1) (see [below for nested schema](#nestedblock--hpa_settings--native_hpa_spec--metrics--pods))
+- `resource` (Block List, Max: 1) (see [below for nested schema](#nestedblock--hpa_settings--native_hpa_spec--metrics--resource))
+
+<a id="nestedblock--hpa_settings--native_hpa_spec--metrics--container_resource"></a>
+### Nested Schema for `hpa_settings.native_hpa_spec.metrics.container_resource`
+
+Required:
+
+- `container` (String)
+- `name` (String)
+- `target` (Block List, Min: 1, Max: 1) (see [below for nested schema](#nestedblock--hpa_settings--native_hpa_spec--metrics--container_resource--target))
+
+<a id="nestedblock--hpa_settings--native_hpa_spec--metrics--container_resource--target"></a>
+### Nested Schema for `hpa_settings.native_hpa_spec.metrics.container_resource.target`
+
+Required:
+
+- `type` (String)
+- `value` (String)
+
+
+
+<a id="nestedblock--hpa_settings--native_hpa_spec--metrics--external"></a>
+### Nested Schema for `hpa_settings.native_hpa_spec.metrics.external`
+
+Required:
+
+- `metric` (Block List, Min: 1, Max: 1) (see [below for nested schema](#nestedblock--hpa_settings--native_hpa_spec--metrics--external--metric))
+- `target` (Block List, Min: 1, Max: 1) (see [below for nested schema](#nestedblock--hpa_settings--native_hpa_spec--metrics--external--target))
+
+<a id="nestedblock--hpa_settings--native_hpa_spec--metrics--external--metric"></a>
+### Nested Schema for `hpa_settings.native_hpa_spec.metrics.external.metric`
+
+Required:
+
+- `name` (String)
+
+Optional:
+
+- `selector` (Map of String) Metric label selector.
+
+
+<a id="nestedblock--hpa_settings--native_hpa_spec--metrics--external--target"></a>
+### Nested Schema for `hpa_settings.native_hpa_spec.metrics.external.target`
+
+Required:
+
+- `type` (String)
+- `value` (String)
+
+
+
+<a id="nestedblock--hpa_settings--native_hpa_spec--metrics--object"></a>
+### Nested Schema for `hpa_settings.native_hpa_spec.metrics.object`
+
+Required:
+
+- `described_object` (Block List, Min: 1, Max: 1) (see [below for nested schema](#nestedblock--hpa_settings--native_hpa_spec--metrics--object--described_object))
+- `metric` (Block List, Min: 1, Max: 1) (see [below for nested schema](#nestedblock--hpa_settings--native_hpa_spec--metrics--object--metric))
+- `target` (Block List, Min: 1, Max: 1) (see [below for nested schema](#nestedblock--hpa_settings--native_hpa_spec--metrics--object--target))
+
+<a id="nestedblock--hpa_settings--native_hpa_spec--metrics--object--described_object"></a>
+### Nested Schema for `hpa_settings.native_hpa_spec.metrics.object.described_object`
+
+Optional:
+
+- `api_version` (String)
+- `kind` (String)
+- `name` (String)
+
+
+<a id="nestedblock--hpa_settings--native_hpa_spec--metrics--object--metric"></a>
+### Nested Schema for `hpa_settings.native_hpa_spec.metrics.object.metric`
+
+Required:
+
+- `name` (String)
+
+Optional:
+
+- `selector` (Map of String) Metric label selector.
+
+
+<a id="nestedblock--hpa_settings--native_hpa_spec--metrics--object--target"></a>
+### Nested Schema for `hpa_settings.native_hpa_spec.metrics.object.target`
+
+Required:
+
+- `type` (String)
+- `value` (String)
+
+
+
+<a id="nestedblock--hpa_settings--native_hpa_spec--metrics--pods"></a>
+### Nested Schema for `hpa_settings.native_hpa_spec.metrics.pods`
+
+Required:
+
+- `metric` (Block List, Min: 1, Max: 1) (see [below for nested schema](#nestedblock--hpa_settings--native_hpa_spec--metrics--pods--metric))
+- `target` (Block List, Min: 1, Max: 1) (see [below for nested schema](#nestedblock--hpa_settings--native_hpa_spec--metrics--pods--target))
+
+<a id="nestedblock--hpa_settings--native_hpa_spec--metrics--pods--metric"></a>
+### Nested Schema for `hpa_settings.native_hpa_spec.metrics.pods.metric`
+
+Required:
+
+- `name` (String)
+
+Optional:
+
+- `selector` (Map of String) Metric label selector.
+
+
+<a id="nestedblock--hpa_settings--native_hpa_spec--metrics--pods--target"></a>
+### Nested Schema for `hpa_settings.native_hpa_spec.metrics.pods.target`
+
+Required:
+
+- `type` (String)
+- `value` (String)
+
+
+
+<a id="nestedblock--hpa_settings--native_hpa_spec--metrics--resource"></a>
+### Nested Schema for `hpa_settings.native_hpa_spec.metrics.resource`
+
+Required:
+
+- `name` (String)
+- `target` (Block List, Min: 1, Max: 1) (see [below for nested schema](#nestedblock--hpa_settings--native_hpa_spec--metrics--resource--target))
+
+<a id="nestedblock--hpa_settings--native_hpa_spec--metrics--resource--target"></a>
+### Nested Schema for `hpa_settings.native_hpa_spec.metrics.resource.target`
+
+Required:
+
+- `type` (String)
+- `value` (String)
+
+
+
+
+<a id="nestedblock--hpa_settings--native_hpa_spec--behavior"></a>
+### Nested Schema for `hpa_settings.native_hpa_spec.behavior`
+
+Optional:
+
+- `scale_down` (Block List, Max: 1) (see [below for nested schema](#nestedblock--hpa_settings--native_hpa_spec--behavior--scale_down))
+- `scale_up` (Block List, Max: 1) (see [below for nested schema](#nestedblock--hpa_settings--native_hpa_spec--behavior--scale_up))
+
+<a id="nestedblock--hpa_settings--native_hpa_spec--behavior--scale_down"></a>
+### Nested Schema for `hpa_settings.native_hpa_spec.behavior.scale_down`
+
+Optional:
+
+- `policies` (Block List) (see [below for nested schema](#nestedblock--hpa_settings--native_hpa_spec--behavior--scale_down--policies))
+- `select_policy` (String)
+- `stabilization_window_seconds` (Number)
+- `tolerance` (String)
+
+<a id="nestedblock--hpa_settings--native_hpa_spec--behavior--scale_down--policies"></a>
+### Nested Schema for `hpa_settings.native_hpa_spec.behavior.scale_down.policies`
+
+Required:
+
+- `period_seconds` (Number)
+- `type` (String)
+- `value` (Number)
+
+
+
+<a id="nestedblock--hpa_settings--native_hpa_spec--behavior--scale_up"></a>
+### Nested Schema for `hpa_settings.native_hpa_spec.behavior.scale_up`
+
+Optional:
+
+- `policies` (Block List) (see [below for nested schema](#nestedblock--hpa_settings--native_hpa_spec--behavior--scale_up--policies))
+- `select_policy` (String)
+- `stabilization_window_seconds` (Number)
+- `tolerance` (String)
+
+<a id="nestedblock--hpa_settings--native_hpa_spec--behavior--scale_up--policies"></a>
+### Nested Schema for `hpa_settings.native_hpa_spec.behavior.scale_up.policies`
+
+Required:
+
+- `period_seconds` (Number)
+- `type` (String)
+- `value` (Number)
+
+
+
+
+
+
 <a id="nestedblock--jvm"></a>
 ### Nested Schema for `jvm`
 
@@ -483,6 +791,28 @@ Optional:
 - `period_seconds` (Number) Defines the duration (in seconds) during which elevated resource usage is expected at startup.
 When set, recommendations will be adjusted to disregard resource spikes within this period.
 If not specified, the workload will receive standard recommendations without startup considerations.
+- `two_phase_recommendations` (Block List, Max: 1) Configures startup recommendations that use original requests during startup and optimized recommendations afterwards. (see [below for nested schema](#nestedblock--startup--two_phase_recommendations))
+
+<a id="nestedblock--startup--two_phase_recommendations"></a>
+### Nested Schema for `startup.two_phase_recommendations`
+
+Required:
+
+- `enabled` (Boolean) Enables two-phase startup recommendations.
+
+Optional:
+
+- `requests_on_startup` (Block List, Max: 1) Overrides the requests used during the startup phase. (see [below for nested schema](#nestedblock--startup--two_phase_recommendations--requests_on_startup))
+
+<a id="nestedblock--startup--two_phase_recommendations--requests_on_startup"></a>
+### Nested Schema for `startup.two_phase_recommendations.requests_on_startup`
+
+Optional:
+
+- `cpu_cores` (Number) CPU request in cores used during startup.
+- `memory_gib` (Number) Memory request in GiB used during startup.
+
+
 
 
 <a id="nestedblock--timeouts"></a>
