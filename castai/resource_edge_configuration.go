@@ -839,16 +839,15 @@ func (r *edgeConfigurationResource) toCustomConfigurationModel(ctx context.Conte
 
 func (r *edgeConfigurationResource) toCRIConfiguration(_ context.Context, plan *criConfigurationModel) (*omni.EdgeConfigurationCRIConfiguration, diag.Diagnostics) {
 	var diags diag.Diagnostics
-	config := &omni.EdgeConfigurationCRIConfiguration{
-		Socket: toPtr(""),
-	}
 
 	if plan == nil {
 		// Return an empty struct (not nil) so the request JSON includes
 		// cri: {} instead of omitting the field. This tells the API to
 		// explicitly clear any existing CRI configuration.
-		return config, diags
+		return &omni.EdgeConfigurationCRIConfiguration{}, diags
 	}
+
+	config := &omni.EdgeConfigurationCRIConfiguration{}
 
 	if !plan.Socket.IsNull() {
 		config.Socket = lo.ToPtr(plan.Socket.ValueString())
