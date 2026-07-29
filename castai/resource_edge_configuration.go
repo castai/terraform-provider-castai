@@ -606,7 +606,8 @@ func (r *edgeConfigurationResource) toGCPConfiguration(ctx context.Context, plan
 	}
 
 	config := &omni.GCPConfiguration{
-		ImageId: toPtr(""),
+		ImageId:         lo.ToPtr(""),
+		BootDiskSizeGib: lo.ToPtr(int32(0)),
 	}
 
 	if !plan.ImageID.IsNull() && plan.ImageID.ValueString() != "" {
@@ -643,7 +644,7 @@ func (r *edgeConfigurationResource) toGCPConfigurationModel(ctx context.Context,
 		model.ImageID = types.StringValue(*config.ImageId)
 	}
 
-	if config.BootDiskSizeGib != nil {
+	if config.BootDiskSizeGib != nil && *config.BootDiskSizeGib != 0 {
 		model.BootDiskSizeGiB = types.Int64Value(int64(*config.BootDiskSizeGib))
 	}
 
@@ -666,7 +667,8 @@ func (r *edgeConfigurationResource) toAWSConfiguration(ctx context.Context, plan
 	}
 
 	config := &omni.AWSConfiguration{
-		ImageId: toPtr(""),
+		ImageId:         lo.ToPtr(""),
+		BootDiskSizeGib: lo.ToPtr(int32(0)),
 	}
 
 	if !plan.ImageID.IsNull() {
@@ -703,7 +705,7 @@ func (r *edgeConfigurationResource) toAWSConfigurationModel(ctx context.Context,
 		model.ImageID = types.StringValue(*config.ImageId)
 	}
 
-	if config.BootDiskSizeGib != nil {
+	if config.BootDiskSizeGib != nil && *config.BootDiskSizeGib != 0 {
 		model.BootDiskSizeGiB = types.Int64Value(int64(*config.BootDiskSizeGib))
 	}
 
@@ -726,7 +728,8 @@ func (r *edgeConfigurationResource) toOCIConfiguration(ctx context.Context, plan
 	}
 
 	config := &omni.OCIConfiguration{
-		ImageId: toPtr(""),
+		ImageId:         lo.ToPtr(""),
+		BootDiskSizeGib: lo.ToPtr(int32(0)),
 	}
 
 	if !plan.ImageID.IsNull() {
@@ -763,7 +766,7 @@ func (r *edgeConfigurationResource) toOCIConfigurationModel(ctx context.Context,
 		model.ImageID = types.StringValue(*config.ImageId)
 	}
 
-	if config.BootDiskSizeGib != nil {
+	if config.BootDiskSizeGib != nil && *config.BootDiskSizeGib != 0 {
 		model.BootDiskSizeGiB = types.Int64Value(int64(*config.BootDiskSizeGib))
 	}
 
