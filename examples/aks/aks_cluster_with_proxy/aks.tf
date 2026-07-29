@@ -56,6 +56,10 @@ resource "azurerm_kubernetes_cluster" "aks" {
     type = "SystemAssigned"
   }
 
+  node_provisioning_profile {
+    mode = "Manual"
+  }
+
   network_profile {
     network_plugin = "azure"
     network_policy = "azure"
