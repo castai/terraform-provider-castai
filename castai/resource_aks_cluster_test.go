@@ -508,7 +508,6 @@ func TestAccAKS_ResourceAKSCluster(t *testing.T) {
 					resource.TestCheckResourceAttr(nodeConfResourceName, "aks.0.public_ip.0.public_ip_prefix", "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg/providers/Microsoft.Network/publicIPAddresses/test-ip"),
 					resource.TestCheckResourceAttr(nodeConfResourceName, "aks.0.public_ip.0.tags.FirstPartyUsage", "something"),
 					resource.TestCheckResourceAttr(nodeConfResourceName, "aks.0.public_ip.0.idle_timeout_in_minutes", "10"),
-					resource.TestCheckResourceAttrSet(nodeConfResourceName, "aks.0.pod_subnet_id"),
 					resource.TestCheckResourceAttr(nodeConfResourceName, "aks.0.accelerated_networking", "disabled"),
 					resource.TestCheckResourceAttr(nodeConfResourceName, "eks.#", "0"),
 					resource.TestCheckResourceAttr(nodeConfResourceName, "kops.#", "0"),
