@@ -222,8 +222,18 @@ Required:
 Optional:
 
 - `multiplier` (Number) Multiplier used to calculate the resource limit. It must be defined for the MULTIPLIER strategy.
-- `only_if_original_exist` (Boolean) Apply the strategy only when the original resource has limits defined.
-- `only_if_original_lower` (Boolean) Use the original resource limits if they are higher than recommended values.
+- `only_if_original_exist` (Boolean) When set to true, limits will only be set if the workload originally had limits defined in its manifest. 
+	If the original workload has no limits specified, no limits will be added.
+	
+	This flag allows conditional limit management based on the original workload configuration.
+	
+	Only applicable when the type is set to multiplier.
+- `only_if_original_lower` (Boolean) When set to true, limits will only be updated if the original limits are lower than the calculated value (requests × multiplier). 
+	If the original limits are already higher than the calculated value, they remain unchanged.
+	
+	This flag prevents reducing existing limits and ensures limits only increase when beneficial.
+	
+	Only applicable when the type is set to multiplier.
 
 
 
@@ -306,8 +316,18 @@ Required:
 Optional:
 
 - `multiplier` (Number) Multiplier used to calculate the resource limit. It must be defined for the MULTIPLIER strategy.
-- `only_if_original_exist` (Boolean) Apply the strategy only when the original resource has limits defined.
-- `only_if_original_lower` (Boolean) Use the original resource limits if they are higher than recommended values.
+- `only_if_original_exist` (Boolean) When set to true, limits will only be set if the workload originally had limits defined in its manifest. 
+	If the original workload has no limits specified, no limits will be added.
+	
+	This flag allows conditional limit management based on the original workload configuration.
+	
+	Only applicable when the type is set to multiplier.
+- `only_if_original_lower` (Boolean) When set to true, limits will only be updated if the original limits are lower than the calculated value (requests × multiplier). 
+	If the original limits are already higher than the calculated value, they remain unchanged.
+	
+	This flag prevents reducing existing limits and ensures limits only increase when beneficial.
+	
+	Only applicable when the type is set to multiplier.
 
 
 
