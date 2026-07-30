@@ -1463,7 +1463,6 @@ func (r PodMutationsAPIGetPodMutatorInstallCmdResponse) GetBody() []byte {
 type PodMutationsAPIGetPodMutatorInstallScriptResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON200      *GetPodMutatorInstallScriptResponse
 	JSONDefault  *Status
 }
 
@@ -1959,13 +1958,6 @@ func ParsePodMutationsAPIGetPodMutatorInstallScriptResponse(rsp *http.Response) 
 	}
 
 	switch {
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest GetPodMutatorInstallScriptResponse
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON200 = &dest
-
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
 		var dest Status
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
