@@ -580,7 +580,7 @@ func workloadScalingPolicyResourceLimitSchema() *schema.Resource {
 	- %s - keep existing resource limits. While limits provide stability predictability, they may restrict workloads that need to temporarily burst beyond their allocation.
 	- %s - used to calculate the resource limit. The final value is determined by multiplying the resource request by the specified factor.
 	- %s - maintains the original ratio between requests and limits.`, sdk.WorkloadoptimizationV1ResourceLimitStrategyTypeNOLIMIT, sdk.WorkloadoptimizationV1ResourceLimitStrategyTypeKEEPLIMITS, sdk.WorkloadoptimizationV1ResourceLimitStrategyTypeMULTIPLIER, sdk.WorkloadoptimizationV1ResourceLimitStrategyTypeMAINTAINRATIO),
-				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{string(sdk.WorkloadoptimizationV1ResourceLimitStrategyTypeMULTIPLIER), string(sdk.WorkloadoptimizationV1ResourceLimitStrategyTypeKEEPLIMITS), string(sdk.WorkloadoptimizationV1ResourceLimitStrategyTypeNOLIMIT)}, false)),
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{string(sdk.WorkloadoptimizationV1ResourceLimitStrategyTypeMULTIPLIER), string(sdk.WorkloadoptimizationV1ResourceLimitStrategyTypeKEEPLIMITS), string(sdk.WorkloadoptimizationV1ResourceLimitStrategyTypeNOLIMIT), string(sdk.WorkloadoptimizationV1ResourceLimitStrategyTypeMAINTAINRATIO)}, false)),
 			},
 			FieldLimitStrategyMultiplier: {
 				Type:             schema.TypeFloat,
