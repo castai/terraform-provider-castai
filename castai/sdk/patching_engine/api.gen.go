@@ -197,12 +197,6 @@ type GetPodMutatorInstallCmdResponse struct {
 	Cmd *string `json:"cmd,omitempty"`
 }
 
-// GetPodMutatorInstallScriptResponse GetPodMutatorInstallScriptResponse represents the response to get the script to install the pod mutator.
-type GetPodMutatorInstallScriptResponse struct {
-	// Script The script to install the pod mutator
-	Script string `json:"script"`
-}
-
 // GoogleProtobufAny Contains an arbitrary serialized message along with a @type that describes the type of the serialized message.
 type GoogleProtobufAny struct {
 	// Type The type of the serialized message.
