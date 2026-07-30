@@ -40,8 +40,8 @@ variable "vpc_id" {
 
 variable "profile" {
   type        = string
-  description = "Profile used with AWS CLI"
-  default     = "default"
+  description = "AWS CLI profile to use. Leave unset to use the default AWS credential chain (env vars, SSO, IRSA, instance profile)."
+  default     = null
 }
 
 variable "castai_api_url" {

@@ -160,7 +160,7 @@ A flattened object with the same defaults as the original example. Set it to `nu
 | `autoscaler_settings` | `object` | see `variables.tf` | Autoscaler settings; `null` disables management |
 | `castai_api_url` | `string` | `https://api.cast.ai` | CAST AI API URL |
 | `delete_nodes_on_disconnect` | `bool` | `false` | Delete CAST AI nodes on cluster destroy |
-| `profile` | `string` | `"default"` | AWS CLI profile |
+| `profile` | `string` | `null` | AWS CLI profile; unset uses the default AWS credential chain |
 
 ## Outputs
 
