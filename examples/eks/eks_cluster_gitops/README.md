@@ -1,177 +1,187 @@
-## EKS and CAST AI example for GitOps onboarding flow
+# EKS + CAST AI GitOps onboarding as a reusable module (Terragrunt friendly)
 
-## GitOps flow 
+This is the [`eks_cluster_gitops`](../eks_cluster_gitops) example reshaped into a **reusable module**.
+Instead of hardcoding one node configuration and three node templates in `castai.tf`, the whole
+node configuration / node template surface is driven by two input maps:
 
-Terraform Managed ==>  IAM roles, CAST AI Node Configuration, CAST Node Templates and CAST Autoscaler policies
+- `node_configurations` — `map(object(...))`, keyed by configuration name
+- `node_templates` — `map(object(...))`, keyed by template name
 
-Helm Managed ==>  All Castware components such as `castai-agent`, `castai-cluster-controller`, `castai-evictor`, `castai-spot-handler`, `castai-kvisor`, `castai-workload-autoscaler`, `castai-pod-pinner`, `castai-egressd` are to be installed using other means (e.g ArgoCD, manual Helm releases, etc.)
+That makes it consumable from Terragrunt (or any wrapper) where each cluster unit only supplies its
+own inputs, and the module code stays shared.
 
+Like the original example, this covers only the **Terraform half** of GitOps onboarding: it creates
+the IAM resources, connects the cluster to CAST AI, and configures node configurations, node
+templates and the autoscaler. Installing `castai-agent`, `castai-cluster-controller`,
+`castai-evictor`, `castai-spot-handler` and `castai-kvisor` is left to your GitOps tool (Argo CD,
+Flux, …) using the `cluster_id` and `cluster_token` outputs. See the
+[original example's README](../eks_cluster_gitops/README.md) for the Helm chart values and the
+onboarding sequence — this module is a drop-in replacement for its Terraform step.
 
-                                                +-------------------------+
-                                                |         Start           |
-                                                +-------------------------+
-                                                            | Set Profile in AWS CLI
-                                                            | 
-                                                +-------------------------+
-                                                | 0. AWS CLI profile is already set to default,override if only required
-                                                | 
-                                                +-------------------------+
-                                                            | 
-                                                            | AWS CLI
-                                                +-------------------------+
-                                                | 1.Check EKS Auth Mode is API/API_CONFIGMAP
-                                                | 
-                                                +-------------------------+
-                                                            |
-                                                            | 
-                                    -----------------------------------------------------
-                                    | YES                                               | NO
-                                    |                                                   |
-                        +-------------------------+                      +-----------------------------------------+
-                        No action needed from User                     2. User to add cast role in aws-auth configmap
-                        
-                        +-------------------------+                      +-----------------------------------------+
-                                    |                                                   |
-                                    |                                                   |
-                                    -----------------------------------------------------
-                                                            | 
-                                                            | 
-                                                            | TERRAFORM
-                                                +-------------------------+
-                                                | 3. Update TF.VARS 
-                                                  4. Terraform Init & Apply| 
-                                                +-------------------------+
-                                                            | 
-                                                            | TERRAFORM OUTPUT
-                                                +-------------------------+
-                                                |  5. Execute terraform output command
-                                                | terraform output cluster_id  
-                                                  terraform output cluster_token
-                                                +-------------------------+
-                                                            | 
-                                                            |GITOPS
-                                                +-------------------------+
-                                                | 6. Deploy Helm chart of castai-agent castai-cluster-controller`, `castai-evictor`, `castai-spot-handler`, `castai-kvisor`, `castai-workload-autoscaler`, `castai-pod-pinner`
-                                                +-------------------------+         
-                                                            | 
-                                                            | 
-                                                +-------------------------+
-                                                |         END             |
-                                                +-------------------------+
+## Usage with Terragrunt
 
+A complete unit is in [`examples/terragrunt/terragrunt.hcl`](./examples/terragrunt/terragrunt.hcl).
+The short version:
 
-Prerequisites:
-- CAST AI account
-- Obtained CAST AI Key [API Access key](https://docs.cast.ai/docs/authentication#obtaining-api-access-key) with Full Access
+```hcl
+terraform {
+  source = "git::https://github.com/castai/terraform-provider-castai.git//examples/eks/eks_cluster_gitops_terragrunt?ref=v8.52.0"
+}
 
+inputs = {
+  aws_account_id     = get_aws_account_id()
+  aws_cluster_region = "us-east-1"
+  aws_cluster_name   = dependency.eks.outputs.cluster_name
+  vpc_id             = dependency.eks.outputs.vpc_id
+  castai_api_token   = get_env("CASTAI_API_TOKEN")
 
-### Step 0: Set Profile in AWS CLI
-AWS CLI profile is already set to default, override if only required.
+  subnets            = dependency.eks.outputs.private_subnet_ids
+  security_group_ids = [
+    dependency.eks.outputs.cluster_security_group_id,
+    dependency.eks.outputs.node_security_group_id,
+  ]
 
+  node_configurations = {
+    default = {
+      disk_cpu_ratio = 0
+      min_disk_size  = 100
+    }
+  }
 
-### Step 1: Get EKS cluster authentication mode
-```
-CLUSTER_NAME=""
-REGION="" 
-current_auth_mode=$(aws eks describe-cluster --name $CLUSTER_NAME --region $REGION | grep authenticationMode | awk '{print $2}') 
-echo "Authentication mode is $current_auth_mode"
+  node_templates = {
+    default-by-castai = {
+      is_default   = true
+      should_taint = false
+      constraints  = { on_demand = true }
+    }
+  }
+}
 ```
 
+Terragrunt users typically generate provider blocks. If you do, delete `providers.tf` from your
+vendored copy (or let the `generate` block override it, as shown in the example unit).
 
-### Step 2: If EKS AUTH mode is API/API_CONFIGMAP, This step can be SKIPPED.
-#### User to add cast role in aws-auth configmap, configmap may have other entries, so add the below role to it
-```
-apiVersion: v1
-data:
-  mapRoles: |
-    - rolearn: arn:aws:iam::028075177508:role/castai-eks-instance-<clustername>
-      username: system:node:{{EC2PrivateDNSName}}
-      groups:
-      - system:bootstrappers
-      - system:nodes
-kind: ConfigMap
-metadata:
-  name: aws-auth
-  namespace: kube-system
+## Usage with plain Terraform / OpenTofu
+
+Copy [`terraform.tfvars.example`](./terraform.tfvars.example) to `terraform.tfvars`, fill it in, then:
+
+```sh
+terraform init
+terraform apply
 ```
 
+Or reference it as a module:
 
-### Step 3 & 4: Update TF vars & TF Init, plan & apply
-After successful apply, CAST Console UI will be in `Connecting` state. \
-Note generated 'CASTAI_CLUSTER_ID' from outputs
-
-### Step 5: Execute TF output command & save the below output values
-terraform output cluster_id  
-terraform output cluster_token
-
-Obtained values are needed for next step. Note that cluster_token must be used within few hours after creation or it gets expired. It is recommended to install at least castai-agent to keep cluster_token active.
-
-### Step 6: Deploy Helm chart of CAST Components
-Coponents: `castai-cluster-controller`,`castai-evictor`, `castai-spot-handler`, `castai-kvisor`, `castai-workload-autoscaler`, `castai-pod-pinner` \
-After all CAST AI components are installed in the cluster its status in CAST AI console would change from `Connecting` to `Connected` which means that cluster onboarding process completed successfully.
-
-```
-CASTAI_API_KEY="<Replace cluster_token>"
-CAST_CONFIG_CLUSTERID="castai-agent-metadata"
-CAST_SECRET_APIKEY="castai-agent"
-
-
-#### Mandatory Component: Castai-agent
-helm upgrade -i castai-agent castai-helm/castai-agent -n castai-agent --create-namespace \
-  --set apiKey="$CASTAI_API_KEY" \
-  --set provider=eks \
-  --set createNamespace=false \ 
-  --set metadataStore.enabled=true
-
-#### Mandatory Component: castai-cluster-controller
-helm upgrade -i cluster-controller castai-helm/castai-cluster-controller -n castai-agent \
-  --set autoscaling.enabled=true \
-  --set "envFrom[0].secretRef.name=$CAST_SECRET_APIKEY" \
-  --set "envFrom[1].configMapRef.name=$CAST_CONFIG_CLUSTERID"
-
-#### castai-spot-handler
-helm upgrade -i castai-spot-handler castai-helm/castai-spot-handler -n castai-agent \
---set "envFrom[0].configMapRef.name=$CAST_CONFIG_CLUSTERID" \
---set castai.provider=aws
-
-#### castai-evictor
-helm upgrade -i castai-evictor castai-helm/castai-evictor -n castai-agent --set replicaCount=1
-
-#### castai-pod-pinner
-helm upgrade -i castai-pod-pinner castai-helm/castai-pod-pinner -n castai-agent \
---set "envFrom[0].secretRef.name=$CAST_SECRET_APIKEY" \
---set "envFrom[1].configMapRef.name=$CAST_CONFIG_CLUSTERID" \ 
---set replicaCount=0
-
-#### castai-workload-autoscaler
-helm upgrade -i castai-workload-autoscaler castai-helm/castai-workload-autoscaler -n castai-agent \
---set "envFrom[0].secretRef.name=$CAST_SECRET_APIKEY" \
---set "envFrom[1].configMapRef.name=$CAST_CONFIG_CLUSTERID" \ 
-
-#### castai-kvisor
-helm upgrade -i castai-kvisor castai-helm/castai-kvisor -n castai-agent \
---set "envFrom[0].secretRef.name=$CAST_SECRET_APIKEY" \
---set "envFrom[1].configMapRef.name=$CAST_CONFIG_CLUSTERID" \ 
---set controller.extraArgs.kube-linter-enabled=true \
---set controller.extraArgs.image-scan-enabled=true \
---set controller.extraArgs.kube-bench-enabled=true \
---set controller.extraArgs.kube-bench-cloud-provider=eks
+```hcl
+module "castai" {
+  source = "github.com/castai/terraform-provider-castai//examples/eks/eks_cluster_gitops_terragrunt?ref=v8.52.0"
+  # ... inputs
+}
 ```
 
-## Steps Overview
+## How the two maps work
 
-1. If EKS auth mode is not API/API_CONFIGMAP - Update [aws-auth](https://docs.aws.amazon.com/eks/latest/userguide/add-user-role.html) configmap with instance profile used by CAST AI. This instance profile is used by CAST AI managed nodes to communicate with EKS control plane.  Example of entry can be found [here](https://github.com/castai/terraform-provider-castai/blob/157babd57b0977f499eb162e9bee27bee51d292a/examples/eks/eks_cluster_assumerole/eks.tf#L28-L38).
-2. Configure `terraform.tfvars.example` file with required values. If EKS cluster is already managed by Terraform you could instead directly reference those resources.
-3. Run `terraform init`
-4. Run `terraform apply` and make a note of `cluster_id`  output values. At this stage you would see that your cluster is in `Connecting` state in CAST AI console
-5. Install CAST AI components using Helm. Use `cluster_id` and `api_key` values to configure Helm releases:
-- Set `castai.apiKey` property to `api_key`
-- Set `castai.clusterID` property to `cluster_id`
-6. After all CAST AI components are installed in the cluster its status in CAST AI console would change from `Connecting` to `Connected` which means that cluster onboarding process completed successfully.
+### `node_configurations`
 
+The map key becomes the node configuration name. Every attribute is optional; anything you omit
+falls back to the CAST AI default, with three convenience fallbacks:
 
-## Importing already onboarded cluster to Terraform
+| Attribute | Falls back to |
+| --- | --- |
+| `subnets` | `var.subnets` |
+| `eks.security_groups` | `var.security_group_ids` |
+| `eks.instance_profile_arn` | instance profile created by the `castai/eks-role-iam/castai` module |
 
-This example can also be used to import EKS cluster to Terraform which is already onboarded to CAST AI console through [script](https://docs.cast.ai/docs/cluster-onboarding#how-it-works).   
-For importing existing cluster follow steps 1-3 above and change `castai_node_configuration.default` Node Configuration name.
-This would allow to manage already onboarded clusters' CAST AI Node Configurations and Node Templates through IaC.
+So a minimal single-configuration setup needs nothing but the module-level `subnets` and
+`security_group_ids`, and per-configuration overrides are opt-in:
+
+```hcl
+node_configurations = {
+  default = {
+    disk_cpu_ratio = 0
+    min_disk_size  = 100
+  }
+
+  storage = {
+    min_disk_size = 500
+    subnets       = ["subnet-aaa", "subnet-bbb"] # overrides var.subnets
+
+    eks = {
+      volume_type       = "gp3"
+      volume_iops       = 6000
+      volume_throughput = 250
+    }
+  }
+}
+```
+
+`default_node_configuration` names the key that gets promoted via
+`castai_node_configuration_default` (defaults to `"default"`). A precondition fails the plan if that
+key is missing.
+
+### `node_templates`
+
+The map key becomes the template name. `node_configuration` references a **key of
+`node_configurations`** — not a raw ID — so units never have to thread IDs around; omit it and the
+template attaches to `default_node_configuration`.
+
+```hcl
+node_templates = {
+  spot = {
+    node_configuration = "default"
+    should_taint       = true
+
+    custom_labels = { type = "spot" }
+    custom_taints = [{ key = "dedicated", value = "spot", effect = "NoSchedule" }]
+
+    constraints = {
+      spot                  = true
+      use_spot_fallbacks    = true
+      enable_spot_diversity = true
+      architectures         = ["amd64"]
+
+      instance_families = { exclude = ["m5"] }
+      custom_priority   = [{ instance_families = ["c5"], spot = true }]
+    }
+  }
+}
+```
+
+`constraints` supports the common scalars plus the nested blocks `instance_families`,
+`custom_priority`, `dedicated_node_affinity`, `gpu` and `aws.capacity_reservations`. Blocks are only
+emitted when you supply them, so leaving them out keeps the CAST AI defaults. See
+`variables.tf` for the full object type.
+
+### `autoscaler_settings`
+
+A flattened object with the same defaults as the original example. Set it to `null` to stop managing
+`castai_autoscaler` entirely (useful if the autoscaler is owned by another unit).
+
+## Inputs
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `aws_account_id` | `string` | — | ID of the AWS account the cluster lives in |
+| `aws_cluster_region` | `string` | — | Cluster region |
+| `aws_cluster_name` | `string` | — | Cluster name |
+| `castai_api_token` | `string` | — | CAST AI API token |
+| `vpc_id` | `string` | — | EKS cluster VPC ID |
+| `subnets` | `list(string)` | — | Default subnets for node configurations |
+| `security_group_ids` | `list(string)` | — | Default security groups for node configurations |
+| `node_configurations` | `map(object)` | one `default` configuration | Node configurations to create |
+| `default_node_configuration` | `string` | `"default"` | Which configuration becomes the cluster default |
+| `node_templates` | `map(object)` | one `default-by-castai` template | Node templates to create |
+| `autoscaler_settings` | `object` | see `variables.tf` | Autoscaler settings; `null` disables management |
+| `castai_api_url` | `string` | `https://api.cast.ai` | CAST AI API URL |
+| `delete_nodes_on_disconnect` | `bool` | `false` | Delete CAST AI nodes on cluster destroy |
+| `profile` | `string` | `"default"` | AWS CLI profile |
+
+## Outputs
+
+| Name | Description |
+| --- | --- |
+| `cluster_id` | CAST AI cluster ID (needed by the Helm charts) |
+| `cluster_token` | CAST AI cluster token (sensitive; needed by the Helm charts) |
+| `node_configuration_ids` | Map of configuration name → CAST AI node configuration ID |
+| `node_template_names` | Names of the managed node templates |
+| `instance_profile_arn` / `instance_profile_role_arn` / `cast_role_arn` | IAM resources created for CAST AI |
