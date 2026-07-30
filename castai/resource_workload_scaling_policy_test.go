@@ -669,6 +669,21 @@ func Test_validateResourcePolicy(t *testing.T) {
 				}},
 			},
 		},
+		"should not return error when limit strategy MAINTAIN_RATIO is used": {
+			args: map[string]interface{}{
+				"limit": []interface{}{map[string]interface{}{
+					"type": "MAINTAIN_RATIO",
+				}},
+			},
+		},
+		"should not return error when MAINTAIN_RATIO has only_if_original_exist": {
+			args: map[string]interface{}{
+				"limit": []interface{}{map[string]interface{}{
+					"type":                   "MAINTAIN_RATIO",
+					"only_if_original_exist": true,
+				}},
+			},
+		},
 	}
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
@@ -2223,6 +2238,33 @@ func Test_rawConfigHasField(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			r := require.New(t)
 			r.Equal(tt.want, rawConfigHasField(tt.rawConfig, tt.path...))
+		})
+	}
+}
+
+func Test_workloadScalingPolicyResourceLimitSchema_acceptsMaintainRatio(t *testing.T) {
+	r := require.New(t)
+	limitSchema := workloadScalingPolicyResourceLimitSchema().Schema[FieldLimitStrategyType]
+	r.NotNil(limitSchema.ValidateDiagFunc)
+
+	for _, tc := range []struct {
+		name  string
+		value string
+		valid bool
+	}{
+		{"MULTIPLIER is valid", "MULTIPLIER", true},
+		{"KEEP_LIMITS is valid", "KEEP_LIMITS", true},
+		{"NO_LIMIT is valid", "NO_LIMIT", true},
+		{"MAINTAIN_RATIO is valid", "MAINTAIN_RATIO", true},
+		{"invalid value rejected", "UNKNOWN_TYPE", false},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			diags := limitSchema.ValidateDiagFunc(tc.value, nil)
+			if tc.valid {
+				r.Empty(diags, `expected %q to be accepted`, tc.value)
+			} else {
+				r.NotEmpty(diags, `expected %q to be rejected`, tc.value)
+			}
 		})
 	}
 }
