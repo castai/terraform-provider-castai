@@ -54,7 +54,7 @@ func TestCheckOrphanedNodes_WithRemainingNodes(t *testing.T) {
 	r.Contains(diags[0].Summary, "2 CAST-managed node(s) remain after cluster disconnect")
 	r.Contains(diags[0].Detail, "i-aaa")
 	r.Contains(diags[0].Detail, "i-bbb")
-	r.Contains(diags[0].Detail, "IAM")
+	r.Contains(diags[0].Detail, "credentials")
 }
 
 func TestCheckOrphanedNodes_WithRemainingNodesNilInstanceId(t *testing.T) {

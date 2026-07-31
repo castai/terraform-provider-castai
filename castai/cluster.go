@@ -135,7 +135,9 @@ func checkOrphanedNodes(ctx context.Context, client sdk.ClientWithResponsesInter
 		return nil
 	}
 	if resp.StatusCode() != http.StatusOK || resp.JSON200 == nil || resp.JSON200.Items == nil {
-		// Cluster is likely already gone (e.g. 404), nothing to check.
+		if resp.StatusCode() != http.StatusNotFound {
+			log.Printf("[WARN] Unexpected response status %d when listing nodes after cluster disconnect", resp.StatusCode())
+		}
 		return nil
 	}
 
@@ -173,12 +175,11 @@ func checkOrphanedNodes(ctx context.Context, client sdk.ClientWithResponsesInter
 			Severity: diag.Warning,
 			Summary:  fmt.Sprintf("%d CAST-managed node(s) remain after cluster disconnect", len(orphaned)),
 			Detail: fmt.Sprintf(
-				"Node cleanup may have failed, possibly because cloud credentials (IAM role) were revoked before the backend could delete the nodes. "+
+				"Node cleanup may have failed, possibly because cloud credentials were revoked before the backend could delete the nodes. "+
 					"The following instances may be orphaned in your cloud account: %s\n\n"+
-					"To prevent this in the future, ensure your Terraform configuration destroys the IAM role AFTER the castai cluster resource "+
-					"(use depends_on or reference the role ARN directly in assume_role_arn). Otherwise, IAM may be destroyed in parallel, causing "+
-					"node cleanup to fail and leaving orphaned instances. "+
-					"See: https://github.com/castai/terraform-provider-castai/blob/master/examples/eks/eks_cluster_existing/castai.tf",
+					"To prevent this in the future, ensure your Terraform configuration destroys cloud credentials AFTER the castai cluster resource "+
+					"(use depends_on or reference the credentials directly in the cluster resource configuration). "+
+					"Otherwise, credentials may be destroyed in parallel, causing node cleanup to fail and leaving orphaned instances.",
 				strings.Join(instanceIDs, ", "),
 			),
 		},

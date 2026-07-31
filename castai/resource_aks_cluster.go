@@ -106,7 +106,7 @@ func resourceAKSCluster() *schema.Resource {
 			FieldDeleteNodesOnDisconnect: {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				Description: "Should CAST AI remove nodes managed by CAST AI on disconnect. When set to true, ensure your Terraform configuration destroys the cloud IAM role AFTER the castai cluster resource (use depends_on or reference the role ARN directly in assume_role_arn). Otherwise, IAM may be destroyed in parallel, causing node cleanup to fail and leaving orphaned instances.",
+				Description: "Should CAST AI remove nodes managed by CAST AI on disconnect. When set to true, ensure your Terraform configuration destroys cloud credentials AFTER the castai cluster resource (use depends_on). Otherwise, credentials may be destroyed in parallel, causing node cleanup to fail and leaving orphaned instances.",
 			},
 			FieldClusterCredentialsId: {
 				Type:        schema.TypeString,
