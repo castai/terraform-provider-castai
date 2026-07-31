@@ -188,7 +188,7 @@ func resourceCacheConfigurationUpdate(ctx context.Context, d *schema.ResourceDat
 		Mode:         &mode,
 	}
 
-	resp, err := client.DboAPIUpdateCacheConfigurationWithResponse(ctx, cacheGroupID, configID, req)
+	resp, err := client.DboAPIUpdateCacheConfigurationWithResponse(ctx, cacheGroupID, configID, nil, req)
 	if err := sdk.CheckOKResponse(resp, err); err != nil {
 		return diag.FromErr(err)
 	}
@@ -207,7 +207,7 @@ func resourceCacheConfigurationDelete(ctx context.Context, d *schema.ResourceDat
 	cacheGroupID := d.Get(FieldCacheConfigurationCacheGroupID).(string)
 	configID := d.Id()
 
-	resp, err := client.DboAPIDeleteCacheConfigurationWithResponse(ctx, cacheGroupID, configID)
+	resp, err := client.DboAPIDeleteCacheConfigurationWithResponse(ctx, cacheGroupID, configID, nil)
 	if err := sdk.CheckOKResponse(resp, err); err != nil {
 		return diag.FromErr(err)
 	}
