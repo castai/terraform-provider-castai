@@ -183,6 +183,7 @@ Optional:
 
 - `affinity` (Block List) (see [below for nested schema](#nestedblock--constraints--dedicated_node_affinity--affinity))
 - `cpus_per_gpu` (Number) Number of CPUs per GPU on the node.
+- `max_cpu` (Number) Maximum number of CPUs that can be provisioned from this dedicated node affinity across all nodes for the specific node template. If not set, no CPU cap is applied. If cpus_per_gpu is set, max_cpu must be a multiple of cpus_per_gpu.
 - `min_gpus_per_node` (Number) Minimal number of GPUs per node.
 
 <a id="nestedblock--constraints--dedicated_node_affinity--affinity"></a>
