@@ -141,7 +141,7 @@ func TestCacheConfigurationResource_CreateIdempotent(t *testing.T) {
 	updateResponse := existingConfig
 	updateBody, _ := json.Marshal(updateResponse)
 	mockClient.EXPECT().
-		DboAPIUpdateCacheConfiguration(ctx, cacheGroupID, existingConfigID, gomock.Any()).
+		DboAPIUpdateCacheConfiguration(ctx, cacheGroupID, existingConfigID, nil, gomock.Any()).
 		Return(&http.Response{
 			StatusCode: http.StatusOK,
 			Header:     http.Header{"Content-Type": []string{"application/json"}},
@@ -256,7 +256,7 @@ func TestCacheConfigurationResource_Update(t *testing.T) {
 	}
 	updateBody, _ := json.Marshal(updateResponse)
 	mockClient.EXPECT().
-		DboAPIUpdateCacheConfiguration(ctx, cacheGroupID, configID, gomock.Any()).
+		DboAPIUpdateCacheConfiguration(ctx, cacheGroupID, configID, nil, gomock.Any()).
 		Return(&http.Response{
 			StatusCode: http.StatusOK,
 			Header:     http.Header{"Content-Type": []string{"application/json"}},
@@ -308,7 +308,7 @@ func TestCacheConfigurationResource_Delete(t *testing.T) {
 	deleteResponse := sdk.DboV1DeleteCacheConfigurationResponse{}
 	deleteBody, _ := json.Marshal(deleteResponse)
 	mockClient.EXPECT().
-		DboAPIDeleteCacheConfiguration(ctx, cacheGroupID, configID).
+		DboAPIDeleteCacheConfiguration(ctx, cacheGroupID, configID, nil).
 		Return(&http.Response{
 			StatusCode: http.StatusOK,
 			Body:       io.NopCloser(bytes.NewReader(deleteBody)),

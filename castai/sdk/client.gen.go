@@ -231,12 +231,12 @@ type ClientInterface interface {
 	DboAPIGetCacheConfiguration(ctx context.Context, groupId string, databaseName string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// DboAPIDeleteCacheConfiguration request
-	DboAPIDeleteCacheConfiguration(ctx context.Context, groupId string, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
+	DboAPIDeleteCacheConfiguration(ctx context.Context, groupId string, id string, params *DboAPIDeleteCacheConfigurationParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// DboAPIUpdateCacheConfigurationWithBody request with any body
-	DboAPIUpdateCacheConfigurationWithBody(ctx context.Context, groupId string, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+	DboAPIUpdateCacheConfigurationWithBody(ctx context.Context, groupId string, id string, params *DboAPIUpdateCacheConfigurationParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	DboAPIUpdateCacheConfiguration(ctx context.Context, groupId string, id string, body DboAPIUpdateCacheConfigurationJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+	DboAPIUpdateCacheConfiguration(ctx context.Context, groupId string, id string, params *DboAPIUpdateCacheConfigurationParams, body DboAPIUpdateCacheConfigurationJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// DboAPICreateCacheTTLWithBody request with any body
 	DboAPICreateCacheTTLWithBody(ctx context.Context, groupId string, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -1649,8 +1649,8 @@ func (c *Client) DboAPIGetCacheConfiguration(ctx context.Context, groupId string
 	return c.Client.Do(req)
 }
 
-func (c *Client) DboAPIDeleteCacheConfiguration(ctx context.Context, groupId string, id string, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewDboAPIDeleteCacheConfigurationRequest(c.Server, groupId, id)
+func (c *Client) DboAPIDeleteCacheConfiguration(ctx context.Context, groupId string, id string, params *DboAPIDeleteCacheConfigurationParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDboAPIDeleteCacheConfigurationRequest(c.Server, groupId, id, params)
 	if err != nil {
 		return nil, err
 	}
@@ -1661,8 +1661,8 @@ func (c *Client) DboAPIDeleteCacheConfiguration(ctx context.Context, groupId str
 	return c.Client.Do(req)
 }
 
-func (c *Client) DboAPIUpdateCacheConfigurationWithBody(ctx context.Context, groupId string, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewDboAPIUpdateCacheConfigurationRequestWithBody(c.Server, groupId, id, contentType, body)
+func (c *Client) DboAPIUpdateCacheConfigurationWithBody(ctx context.Context, groupId string, id string, params *DboAPIUpdateCacheConfigurationParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDboAPIUpdateCacheConfigurationRequestWithBody(c.Server, groupId, id, params, contentType, body)
 	if err != nil {
 		return nil, err
 	}
@@ -1673,8 +1673,8 @@ func (c *Client) DboAPIUpdateCacheConfigurationWithBody(ctx context.Context, gro
 	return c.Client.Do(req)
 }
 
-func (c *Client) DboAPIUpdateCacheConfiguration(ctx context.Context, groupId string, id string, body DboAPIUpdateCacheConfigurationJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewDboAPIUpdateCacheConfigurationRequest(c.Server, groupId, id, body)
+func (c *Client) DboAPIUpdateCacheConfiguration(ctx context.Context, groupId string, id string, params *DboAPIUpdateCacheConfigurationParams, body DboAPIUpdateCacheConfigurationJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDboAPIUpdateCacheConfigurationRequest(c.Server, groupId, id, params, body)
 	if err != nil {
 		return nil, err
 	}
@@ -8176,7 +8176,7 @@ func NewDboAPIGetCacheConfigurationRequest(server string, groupId string, databa
 }
 
 // NewDboAPIDeleteCacheConfigurationRequest generates requests for DboAPIDeleteCacheConfiguration
-func NewDboAPIDeleteCacheConfigurationRequest(server string, groupId string, id string) (*http.Request, error) {
+func NewDboAPIDeleteCacheConfigurationRequest(server string, groupId string, id string, params *DboAPIDeleteCacheConfigurationParams) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -8206,6 +8206,28 @@ func NewDboAPIDeleteCacheConfigurationRequest(server string, groupId string, id 
 	queryURL, err := serverURL.Parse(operationPath)
 	if err != nil {
 		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if params.Roxy != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "roxy", runtime.ParamLocationQuery, *params.Roxy); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
 	}
 
 	req, err := http.NewRequest("DELETE", queryURL.String(), nil)
@@ -8217,18 +8239,18 @@ func NewDboAPIDeleteCacheConfigurationRequest(server string, groupId string, id 
 }
 
 // NewDboAPIUpdateCacheConfigurationRequest calls the generic DboAPIUpdateCacheConfiguration builder with application/json body
-func NewDboAPIUpdateCacheConfigurationRequest(server string, groupId string, id string, body DboAPIUpdateCacheConfigurationJSONRequestBody) (*http.Request, error) {
+func NewDboAPIUpdateCacheConfigurationRequest(server string, groupId string, id string, params *DboAPIUpdateCacheConfigurationParams, body DboAPIUpdateCacheConfigurationJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
 	buf, err := json.Marshal(body)
 	if err != nil {
 		return nil, err
 	}
 	bodyReader = bytes.NewReader(buf)
-	return NewDboAPIUpdateCacheConfigurationRequestWithBody(server, groupId, id, "application/json", bodyReader)
+	return NewDboAPIUpdateCacheConfigurationRequestWithBody(server, groupId, id, params, "application/json", bodyReader)
 }
 
 // NewDboAPIUpdateCacheConfigurationRequestWithBody generates requests for DboAPIUpdateCacheConfiguration with any type of body
-func NewDboAPIUpdateCacheConfigurationRequestWithBody(server string, groupId string, id string, contentType string, body io.Reader) (*http.Request, error) {
+func NewDboAPIUpdateCacheConfigurationRequestWithBody(server string, groupId string, id string, params *DboAPIUpdateCacheConfigurationParams, contentType string, body io.Reader) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -8258,6 +8280,28 @@ func NewDboAPIUpdateCacheConfigurationRequestWithBody(server string, groupId str
 	queryURL, err := serverURL.Parse(operationPath)
 	if err != nil {
 		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if params.Roxy != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "roxy", runtime.ParamLocationQuery, *params.Roxy); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
 	}
 
 	req, err := http.NewRequest("PUT", queryURL.String(), body)
@@ -21873,12 +21917,12 @@ type ClientWithResponsesInterface interface {
 	DboAPIGetCacheConfigurationWithResponse(ctx context.Context, groupId string, databaseName string) (*DboAPIGetCacheConfigurationResponse, error)
 
 	// DboAPIDeleteCacheConfiguration request
-	DboAPIDeleteCacheConfigurationWithResponse(ctx context.Context, groupId string, id string) (*DboAPIDeleteCacheConfigurationResponse, error)
+	DboAPIDeleteCacheConfigurationWithResponse(ctx context.Context, groupId string, id string, params *DboAPIDeleteCacheConfigurationParams) (*DboAPIDeleteCacheConfigurationResponse, error)
 
 	// DboAPIUpdateCacheConfiguration request  with any body
-	DboAPIUpdateCacheConfigurationWithBodyWithResponse(ctx context.Context, groupId string, id string, contentType string, body io.Reader) (*DboAPIUpdateCacheConfigurationResponse, error)
+	DboAPIUpdateCacheConfigurationWithBodyWithResponse(ctx context.Context, groupId string, id string, params *DboAPIUpdateCacheConfigurationParams, contentType string, body io.Reader) (*DboAPIUpdateCacheConfigurationResponse, error)
 
-	DboAPIUpdateCacheConfigurationWithResponse(ctx context.Context, groupId string, id string, body DboAPIUpdateCacheConfigurationJSONRequestBody) (*DboAPIUpdateCacheConfigurationResponse, error)
+	DboAPIUpdateCacheConfigurationWithResponse(ctx context.Context, groupId string, id string, params *DboAPIUpdateCacheConfigurationParams, body DboAPIUpdateCacheConfigurationJSONRequestBody) (*DboAPIUpdateCacheConfigurationResponse, error)
 
 	// DboAPICreateCacheTTL request  with any body
 	DboAPICreateCacheTTLWithBodyWithResponse(ctx context.Context, groupId string, id string, contentType string, body io.Reader) (*DboAPICreateCacheTTLResponse, error)
@@ -30999,8 +31043,8 @@ func (c *ClientWithResponses) DboAPIGetCacheConfigurationWithResponse(ctx contex
 }
 
 // DboAPIDeleteCacheConfigurationWithResponse request returning *DboAPIDeleteCacheConfigurationResponse
-func (c *ClientWithResponses) DboAPIDeleteCacheConfigurationWithResponse(ctx context.Context, groupId string, id string) (*DboAPIDeleteCacheConfigurationResponse, error) {
-	rsp, err := c.DboAPIDeleteCacheConfiguration(ctx, groupId, id)
+func (c *ClientWithResponses) DboAPIDeleteCacheConfigurationWithResponse(ctx context.Context, groupId string, id string, params *DboAPIDeleteCacheConfigurationParams) (*DboAPIDeleteCacheConfigurationResponse, error) {
+	rsp, err := c.DboAPIDeleteCacheConfiguration(ctx, groupId, id, params)
 	if err != nil {
 		return nil, err
 	}
@@ -31008,16 +31052,16 @@ func (c *ClientWithResponses) DboAPIDeleteCacheConfigurationWithResponse(ctx con
 }
 
 // DboAPIUpdateCacheConfigurationWithBodyWithResponse request with arbitrary body returning *DboAPIUpdateCacheConfigurationResponse
-func (c *ClientWithResponses) DboAPIUpdateCacheConfigurationWithBodyWithResponse(ctx context.Context, groupId string, id string, contentType string, body io.Reader) (*DboAPIUpdateCacheConfigurationResponse, error) {
-	rsp, err := c.DboAPIUpdateCacheConfigurationWithBody(ctx, groupId, id, contentType, body)
+func (c *ClientWithResponses) DboAPIUpdateCacheConfigurationWithBodyWithResponse(ctx context.Context, groupId string, id string, params *DboAPIUpdateCacheConfigurationParams, contentType string, body io.Reader) (*DboAPIUpdateCacheConfigurationResponse, error) {
+	rsp, err := c.DboAPIUpdateCacheConfigurationWithBody(ctx, groupId, id, params, contentType, body)
 	if err != nil {
 		return nil, err
 	}
 	return ParseDboAPIUpdateCacheConfigurationResponse(rsp)
 }
 
-func (c *ClientWithResponses) DboAPIUpdateCacheConfigurationWithResponse(ctx context.Context, groupId string, id string, body DboAPIUpdateCacheConfigurationJSONRequestBody) (*DboAPIUpdateCacheConfigurationResponse, error) {
-	rsp, err := c.DboAPIUpdateCacheConfiguration(ctx, groupId, id, body)
+func (c *ClientWithResponses) DboAPIUpdateCacheConfigurationWithResponse(ctx context.Context, groupId string, id string, params *DboAPIUpdateCacheConfigurationParams, body DboAPIUpdateCacheConfigurationJSONRequestBody) (*DboAPIUpdateCacheConfigurationResponse, error) {
+	rsp, err := c.DboAPIUpdateCacheConfiguration(ctx, groupId, id, params, body)
 	if err != nil {
 		return nil, err
 	}
