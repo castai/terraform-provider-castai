@@ -7864,6 +7864,11 @@ type NodetemplatesV1TemplateConstraintsDedicatedNodeAffinity struct {
 	CpusPerGpu    *int32    `json:"cpusPerGpu"`
 	InstanceTypes *[]string `json:"instanceTypes,omitempty"`
 
+	// MaxCpu Maximum number of CPUs that can be provisioned from this dedicated/sole-tenant node group
+	// across all nodes for the specific node template. If not set, no CPU cap is applied.
+	// If cpus_per_gpu is set, max_cpu must be a multiple of cpus_per_gpu.
+	MaxCpu *int32 `json:"maxCpu"`
+
 	// MinGpusPerNode Minimum number of GPUs per node for this dedicated/sole-tenant node group.
 	// If not set, no minimum GPU count filtering is applied.
 	MinGpusPerNode *int32  `json:"minGpusPerNode"`
@@ -11946,6 +11951,16 @@ type DboAPIGetCacheSummaryParams struct {
 
 	// Username Filter by username.
 	Username *string `form:"username,omitempty" json:"username,omitempty"`
+}
+
+// DboAPIDeleteCacheConfigurationParams defines parameters for DboAPIDeleteCacheConfiguration.
+type DboAPIDeleteCacheConfigurationParams struct {
+	Roxy *bool `form:"roxy,omitempty" json:"roxy,omitempty"`
+}
+
+// DboAPIUpdateCacheConfigurationParams defines parameters for DboAPIUpdateCacheConfiguration.
+type DboAPIUpdateCacheConfigurationParams struct {
+	Roxy *bool `form:"roxy,omitempty" json:"roxy,omitempty"`
 }
 
 // DboAPIDeleteCacheGroupParams defines parameters for DboAPIDeleteCacheGroup.
