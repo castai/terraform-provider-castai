@@ -30,5 +30,6 @@ e2e/**/local.auto.tfvars
 terraform.tfstate
 .DS_Store
 .tofu.rc
+.tofurc
 # dist dir created by goreleaser
 dist
