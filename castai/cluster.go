@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/cenkalti/backoff/v4"
@@ -109,7 +110,79 @@ func resourceCastaiClusterDelete(ctx context.Context, data *schema.ResourceData,
 		return diag.FromErr(err)
 	}
 
-	return nil
+	// NEW: Check for orphaned nodes when delete_nodes_on_disconnect was requested.
+	var diags diag.Diagnostics
+
+	if deleteNodesRequested, ok := data.GetOk(FieldDeleteNodesOnDisconnect); ok && deleteNodesRequested.(bool) {
+		diags = checkOrphanedNodes(ctx, client, clusterId)
+	}
+
+	data.SetId("")
+	return diags
+}
+
+// checkOrphanedNodes queries the CAST AI API for any remaining nodes after cluster
+// disconnect. If the cluster is already gone (404 or error), the check is skipped
+// silently. Otherwise, any non-deleted CAST-managed nodes are reported as a warning
+// so the user is aware that node cleanup may have failed (e.g. due to IAM
+// credentials being revoked before the backend could delete the nodes).
+func checkOrphanedNodes(ctx context.Context, client sdk.ClientWithResponsesInterface, clusterId string) diag.Diagnostics {
+	resp, err := client.ExternalClusterAPIListNodesWithResponse(ctx, clusterId, &sdk.ExternalClusterAPIListNodesParams{
+		ExcludeDeleting: toPtr(true),
+	})
+	if err != nil {
+		log.Printf("[WARN] Failed to list nodes after cluster disconnect: %v", err)
+		return nil
+	}
+	if resp.StatusCode() != http.StatusOK || resp.JSON200 == nil || resp.JSON200.Items == nil {
+		// Cluster is likely already gone (e.g. 404), nothing to check.
+		return nil
+	}
+
+	var orphaned []sdk.ExternalclusterV1Node
+	for _, node := range *resp.JSON200.Items {
+		// Skip nodes already in deleted state.
+		if node.State.Phase != nil && *node.State.Phase == "deleted" {
+			continue
+		}
+		// Only CAST-managed nodes are CAST AI's responsibility to clean up.
+		// Nodes with no AddedBy marker or a non-"cast" value are customer-managed.
+		if node.AddedBy == nil || *node.AddedBy != "cast" {
+			continue
+		}
+		orphaned = append(orphaned, node)
+	}
+
+	if len(orphaned) == 0 {
+		return nil
+	}
+
+	var instanceIDs []string
+	for _, node := range orphaned {
+		if node.InstanceId != nil && *node.InstanceId != "" {
+			instanceIDs = append(instanceIDs, *node.InstanceId)
+		} else {
+			instanceIDs = append(instanceIDs, node.Id)
+		}
+	}
+
+	log.Printf("[WARN] %d CAST-managed nodes remain after cluster disconnect: %v", len(orphaned), instanceIDs)
+
+	return diag.Diagnostics{
+		diag.Diagnostic{
+			Severity: diag.Warning,
+			Summary:  fmt.Sprintf("%d CAST-managed node(s) remain after cluster disconnect", len(orphaned)),
+			Detail: fmt.Sprintf(
+				"Node cleanup may have failed, possibly because cloud credentials (IAM role) were revoked before the backend could delete the nodes. "+
+					"The following instances may be orphaned in your cloud account: %s\n\n"+
+					"To prevent this in the future, ensure your Terraform configuration destroys the IAM role AFTER the castai cluster resource "+
+					"(use depends_on or reference the role ARN directly in assume_role_arn). Otherwise, IAM may be destroyed in parallel, causing "+
+					"node cleanup to fail and leaving orphaned instances. "+
+					"See: https://github.com/castai/terraform-provider-castai/blob/master/examples/eks/eks_cluster_existing/castai.tf",
+				strings.Join(instanceIDs, ", "),
+			),
+		},
+	}
 }
 
 func fetchClusterData(ctx context.Context, client sdk.ClientWithResponsesInterface, clusterID string) (*sdk.ExternalClusterAPIGetClusterResponse, error) {
