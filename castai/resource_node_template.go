@@ -576,6 +576,11 @@ func resourceNodeTemplate() *schema.Resource {
 										Type:        schema.TypeInt,
 										Description: "Number of CPUs per GPU on the node.",
 									},
+									FieldNodeTemplateMaxCpu: {
+										Optional:    true,
+										Type:        schema.TypeInt,
+										Description: "Maximum number of CPUs that can be provisioned from this dedicated node affinity across all nodes for the specific node template. If not set, no CPU cap is applied. If cpus_per_gpu is set, max_cpu must be a multiple of cpus_per_gpu.",
+									},
 									FieldNodeTemplateMinGpusPerNode: {
 										Optional:    true,
 										Type:        schema.TypeInt,
@@ -1259,6 +1264,9 @@ func flattenNodeAffinity(affinities []sdk.NodetemplatesV1TemplateConstraintsDedi
 
 		if item.CpusPerGpu != nil {
 			result[FieldNodeTemplateCpusPerGpu] = lo.FromPtr(item.CpusPerGpu)
+		}
+		if item.MaxCpu != nil {
+			result[FieldNodeTemplateMaxCpu] = lo.FromPtr(item.MaxCpu)
 		}
 		if item.MinGpusPerNode != nil {
 			result[FieldNodeTemplateMinGpusPerNode] = lo.FromPtr(item.MinGpusPerNode)
@@ -2073,6 +2081,9 @@ func toTemplateConstraintsNodeAffinity(o map[string]any) *sdk.NodetemplatesV1Tem
 	}
 	if v, ok := o[FieldNodeTemplateCpusPerGpu].(int); ok && v != 0 {
 		out.CpusPerGpu = toPtr(int32(v))
+	}
+	if v, ok := o[FieldNodeTemplateMaxCpu].(int); ok && v != 0 {
+		out.MaxCpu = toPtr(int32(v))
 	}
 	if v, ok := o[FieldNodeTemplateMinGpusPerNode].(int); ok && v != 0 {
 		out.MinGpusPerNode = toPtr(int32(v))

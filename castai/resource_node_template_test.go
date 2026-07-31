@@ -116,7 +116,8 @@ func TestNodeTemplateResourceReadContext(t *testing.T) {
 						  }
 						],
 						"cpusPerGpu": 4,
-              			"minGpusPerNode": 2
+              			"minGpusPerNode": 2,
+					    "maxCpu": 96
 					}
 				  ],
 				  "cpuManufacturers": ["INTEL", "AMD"],
@@ -233,6 +234,7 @@ constraints.0.dedicated_node_affinity.0.affinity.0.values.# = 1
 constraints.0.dedicated_node_affinity.0.affinity.0.values.0 = foo
 constraints.0.dedicated_node_affinity.0.az_name = eu-central-1a
 constraints.0.dedicated_node_affinity.0.cpus_per_gpu = 4
+constraints.0.dedicated_node_affinity.0.max_cpu = 96
 constraints.0.dedicated_node_affinity.0.instance_types.# = 1
 constraints.0.dedicated_node_affinity.0.instance_types.0 = m5.24xlarge
 constraints.0.dedicated_node_affinity.0.min_gpus_per_node = 2
@@ -302,6 +304,7 @@ func Test_flattenNodeAffinity(t *testing.T) {
 				InstanceTypes:  &[]string{"e2"},
 				Name:           lo.ToPtr("linux-only"),
 				CpusPerGpu:     lo.ToPtr(int32(4)),
+				MaxCpu:         lo.ToPtr(int32(96)),
 				MinGpusPerNode: lo.ToPtr(int32(2)),
 			},
 		}
@@ -314,6 +317,7 @@ func Test_flattenNodeAffinity(t *testing.T) {
 				FieldNodeTemplateAzName:         "us-central1-c",
 				FieldNodeTemplateName:           "linux-only",
 				FieldNodeTemplateCpusPerGpu:     int32(4),
+				FieldNodeTemplateMaxCpu:         int32(96),
 				FieldNodeTemplateMinGpusPerNode: int32(2),
 				FieldNodeTemplateAffinityName: []map[string]any{
 					{
@@ -389,6 +393,7 @@ func Test_toTemplateConstraintsDedicatedAffinity(t *testing.T) {
 				FieldNodeTemplateAzName:         "us-central1-c",
 				FieldNodeTemplateInstanceTypes:  []any{"e2"},
 				FieldNodeTemplateCpusPerGpu:     4,
+				FieldNodeTemplateMaxCpu:         96,
 				FieldNodeTemplateMinGpusPerNode: 2,
 			},
 			want: &sdk.NodetemplatesV1TemplateConstraintsDedicatedNodeAffinity{
@@ -396,6 +401,7 @@ func Test_toTemplateConstraintsDedicatedAffinity(t *testing.T) {
 				AzName:         lo.ToPtr("us-central1-c"),
 				InstanceTypes:  &[]string{"e2"},
 				CpusPerGpu:     lo.ToPtr(int32(4)),
+				MaxCpu:         lo.ToPtr(int32(96)),
 				MinGpusPerNode: lo.ToPtr(int32(2)),
 			},
 		},
