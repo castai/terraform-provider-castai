@@ -528,12 +528,14 @@ const (
 	NodeconfigV1AKSConfigImageFamilyFAMILYUNSPECIFIED NodeconfigV1AKSConfigImageFamily = "FAMILY_UNSPECIFIED"
 	NodeconfigV1AKSConfigImageFamilyFAMILYWINDOWS2019 NodeconfigV1AKSConfigImageFamily = "FAMILY_WINDOWS_2019"
 	NodeconfigV1AKSConfigImageFamilyFAMILYWINDOWS2022 NodeconfigV1AKSConfigImageFamily = "FAMILY_WINDOWS_2022"
+	NodeconfigV1AKSConfigImageFamilyFAMILYWINDOWS2025 NodeconfigV1AKSConfigImageFamily = "FAMILY_WINDOWS_2025"
 	NodeconfigV1AKSConfigImageFamilyFamilyAzureLinux  NodeconfigV1AKSConfigImageFamily = "family_azure_linux"
 	NodeconfigV1AKSConfigImageFamilyFamilyUbuntu      NodeconfigV1AKSConfigImageFamily = "family_ubuntu"
 	NodeconfigV1AKSConfigImageFamilyFamilyUbuntu2204  NodeconfigV1AKSConfigImageFamily = "family_ubuntu_2204"
 	NodeconfigV1AKSConfigImageFamilyFamilyUbuntu2404  NodeconfigV1AKSConfigImageFamily = "family_ubuntu_2404"
 	NodeconfigV1AKSConfigImageFamilyFamilyWindows2019 NodeconfigV1AKSConfigImageFamily = "family_windows_2019"
 	NodeconfigV1AKSConfigImageFamilyFamilyWindows2022 NodeconfigV1AKSConfigImageFamily = "family_windows_2022"
+	NodeconfigV1AKSConfigImageFamilyFamilyWindows2025 NodeconfigV1AKSConfigImageFamily = "family_windows_2025"
 )
 
 // Defines values for NodeconfigV1AKSConfigOsDiskEphemeralCacheType.
@@ -6951,6 +6953,9 @@ type NodeconfigV1AKSConfig struct {
 
 	// ImageFamily List of supported image families (OSes) for AKS.
 	//
+	//  - FAMILY_WINDOWS_2019: Windows 2019 (supported on k8s < 1.33)
+	//  - FAMILY_WINDOWS_2022: Windows 2019 (supported on k8s versions > 1.22 and < 1.37)
+	//  - FAMILY_WINDOWS_2025: Windows 2025 (supported on k8s >= 1.32)
 	//  - FAMILY_UBUNTU_2204: Ubuntu 22.04 (supported on k8s < 1.37).
 	//  - FAMILY_UBUNTU_2404: Ubuntu 24.04 (supported on k8s >= 1.32).
 	ImageFamily *NodeconfigV1AKSConfigImageFamily `json:"imageFamily,omitempty"`
@@ -6983,6 +6988,9 @@ type NodeconfigV1AKSConfigAcceleratedNetworkingMode string
 
 // NodeconfigV1AKSConfigImageFamily List of supported image families (OSes) for AKS.
 //
+//   - FAMILY_WINDOWS_2019: Windows 2019 (supported on k8s < 1.33)
+//   - FAMILY_WINDOWS_2022: Windows 2019 (supported on k8s versions > 1.22 and < 1.37)
+//   - FAMILY_WINDOWS_2025: Windows 2025 (supported on k8s >= 1.32)
 //   - FAMILY_UBUNTU_2204: Ubuntu 22.04 (supported on k8s < 1.37).
 //   - FAMILY_UBUNTU_2404: Ubuntu 24.04 (supported on k8s >= 1.32).
 type NodeconfigV1AKSConfigImageFamily string
@@ -12192,6 +12200,11 @@ type ExternalClusterAPIGetConnectAndEnableCASTAICmdParams struct {
 
 	// InstallReliabilityMetrics Whether CAST AI Reliability Metrics should be installed.
 	InstallReliabilityMetrics *bool `form:"installReliabilityMetrics,omitempty" json:"installReliabilityMetrics,omitempty"`
+
+	// ClusterId Optional CAST AI cluster ID. When set on the helm onboarding path, the
+	// agent attaches to an existing cluster instead of registering a new one
+	// (rendered as global.castai.clusterID). No-op for other onboarding paths.
+	ClusterId *string `form:"clusterId,omitempty" json:"clusterId,omitempty"`
 }
 
 // ExternalClusterAPIGetConnectAndEnableCASTAICmdParamsOnboardingPath defines parameters for ExternalClusterAPIGetConnectAndEnableCASTAICmd.
