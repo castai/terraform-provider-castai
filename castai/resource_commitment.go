@@ -759,6 +759,20 @@ func (r *genericCommitmentResource) ValidateConfig(ctx context.Context, req reso
 			)
 		}
 	}
+
+	// Validate that end_time is after start_time.
+	if !config.StartTime.IsNull() && !config.StartTime.IsUnknown() &&
+		!config.EndTime.IsNull() && !config.EndTime.IsUnknown() {
+		start, err1 := time.Parse(time.RFC3339, config.StartTime.ValueString())
+		end, err2 := time.Parse(time.RFC3339, config.EndTime.ValueString())
+		if err1 == nil && err2 == nil && !end.After(start) {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("end_time"),
+				"end_time must be after start_time",
+				fmt.Sprintf("end_time %q is not after start_time %q", config.EndTime.ValueString(), config.StartTime.ValueString()),
+			)
+		}
+	}
 }
 
 func (r *genericCommitmentResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
@@ -1101,4 +1115,3 @@ func (v rfc3339Validator) ValidateString(ctx context.Context, req validator.Stri
 		)
 	}
 }
-
