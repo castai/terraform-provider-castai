@@ -3,11 +3,13 @@ package castai
 import (
 	"context"
 	"fmt"
+	"math"
 	"net/http"
 	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/float64validator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/resourcevalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -89,6 +91,9 @@ func (r *genericCommitmentResource) Schema(_ context.Context, _ resource.SchemaR
 			"name": schema.StringAttribute{
 				Required:    true,
 				Description: "Commitment name.",
+				Validators: []validator.String{
+					stringvalidator.LengthAtLeast(1),
+				},
 			},
 			"cloud": schema.StringAttribute{
 				Required:      true,
@@ -276,6 +281,9 @@ func (r *genericCommitmentResource) Schema(_ context.Context, _ resource.SchemaR
 					"count": schema.Int64Attribute{
 						Required:    true,
 						Description: "Count of reserved instances.",
+						Validators: []validator.Int64{
+							int64validator.AtMost(math.MaxInt32),
+						},
 					},
 					"instance_flexibility": schema.StringAttribute{
 						Optional:    true,
