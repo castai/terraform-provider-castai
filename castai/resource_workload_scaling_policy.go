@@ -589,14 +589,24 @@ func workloadScalingPolicyResourceLimitSchema() *schema.Resource {
 				ValidateDiagFunc: validation.ToDiagFunc(validation.FloatAtLeast(minResourceMultiplierValue)),
 			},
 			FieldLimitStrategyOnlyIfOriginalExist: {
-				Type:        schema.TypeBool,
-				Optional:    true,
-				Description: "Apply the strategy only when the original resource has limits defined.",
+				Type:     schema.TypeBool,
+				Optional: true,
+				Description: `When set to true, limits will only be set if the workload originally had limits defined in its manifest. 
+	If the original workload has no limits specified, no limits will be added.
+	
+	This flag allows conditional limit management based on the original workload configuration.
+	
+	Only applicable when the type is set to multiplier.`,
 			},
 			FieldLimitStrategyOnlyIfOriginalLower: {
-				Type:        schema.TypeBool,
-				Optional:    true,
-				Description: "Use the original resource limits if they are higher than recommended values.",
+				Type:     schema.TypeBool,
+				Optional: true,
+				Description: `When set to true, limits will only be updated if the original limits are lower than the calculated value (requests × multiplier). 
+	If the original limits are already higher than the calculated value, they remain unchanged.
+	
+	This flag prevents reducing existing limits and ensures limits only increase when beneficial.
+	
+	Only applicable when the type is set to multiplier.`,
 			},
 		},
 	}
