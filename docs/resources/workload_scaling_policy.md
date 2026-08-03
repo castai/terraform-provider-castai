@@ -222,8 +222,18 @@ Required:
 Optional:
 
 - `multiplier` (Number) Multiplier used to calculate the resource limit. It must be defined for the MULTIPLIER strategy.
-- `only_if_original_exist` (Boolean) Apply the strategy only when the original resource has limits defined.
-- `only_if_original_lower` (Boolean) Use the original resource limits if they are higher than recommended values.
+- `only_if_original_exist` (Boolean) When set to true, limits will only be set if the workload originally had limits defined in its manifest. 
+	If the original workload has no limits specified, no limits will be added.
+	
+	This flag allows conditional limit management based on the original workload configuration.
+	
+	Only applicable when the type is set to multiplier.
+- `only_if_original_lower` (Boolean) When set to true, limits will only be updated if the original limits are lower than the calculated value (requests × multiplier). 
+	If the original limits are already higher than the calculated value, they remain unchanged.
+	
+	This flag prevents reducing existing limits and ensures limits only increase when beneficial.
+	
+	Only applicable when the type is set to multiplier.
 
 
 
@@ -306,8 +316,18 @@ Required:
 Optional:
 
 - `multiplier` (Number) Multiplier used to calculate the resource limit. It must be defined for the MULTIPLIER strategy.
-- `only_if_original_exist` (Boolean) Apply the strategy only when the original resource has limits defined.
-- `only_if_original_lower` (Boolean) Use the original resource limits if they are higher than recommended values.
+- `only_if_original_exist` (Boolean) When set to true, limits will only be set if the workload originally had limits defined in its manifest. 
+	If the original workload has no limits specified, no limits will be added.
+	
+	This flag allows conditional limit management based on the original workload configuration.
+	
+	Only applicable when the type is set to multiplier.
+- `only_if_original_lower` (Boolean) When set to true, limits will only be updated if the original limits are lower than the calculated value (requests × multiplier). 
+	If the original limits are already higher than the calculated value, they remain unchanged.
+	
+	This flag prevents reducing existing limits and ensures limits only increase when beneficial.
+	
+	Only applicable when the type is set to multiplier.
 
 
 
@@ -494,6 +514,73 @@ Optional:
 - `delete` (String)
 - `read` (String)
 - `update` (String)
+
+## Resource limit mapping
+
+The CAST AI console exposes simplified options such as **Automatic** and **Semi-automatic**. Terraform does not provide these labels directly. Instead, the same behavior is configured by explicitly setting the `limit` block or omitting it.
+
+Use the Terraform attributes `only_if_original_exist` and `only_if_original_lower` inside the `limit` block when configuring conditional limit updates.
+
+### CPU: Semi-automatic
+
+To configure **CPU: Semi-automatic**, define an explicit multiplier and enable both conditional flags:
+
+```terraform
+cpu {
+  function                 = "QUANTILE"
+  args                     = ["0.9"]
+  look_back_period_seconds = 86400
+  min                      = 0.1
+  max                      = 6
+  overhead                 = 0.1
+
+  limit {
+    type                   = "MULTIPLIER"
+    multiplier             = 100
+    only_if_original_exist = true
+    only_if_original_lower = true
+  }
+}
+```
+
+This configuration updates an existing CPU limit only when it is lower than `100` times the recommended request. Workloads without an existing CPU limit are left unchanged.
+
+### Memory: Automatic
+
+To configure **Memory: Automatic**, you can either:
+
+- Omit the `memory.limit` block:
+ 
+   ```terraform
+   memory {
+     function                 = "MAX"
+     look_back_period_seconds = 86400
+     min                      = 1024
+     max                      = 15360
+     overhead                 = 0.1
+   }
+   ```
+
+- Or configure it explicitly using the default multiplier and conditional flags:
+
+   ```terraform
+   memory {
+     function                 = "MAX"
+     look_back_period_seconds = 86400
+     min                      = 1024
+     max                      = 15360
+     overhead                 = 0.1
+   
+     limit {
+       type                   = "MULTIPLIER"
+       multiplier             = 1.5
+       only_if_original_exist = true
+       only_if_original_lower = true
+     }
+   }
+   ```
+
+Both configurations result in the same **Automatic** behavior shown in the CAST AI console. The second form makes the underlying behavior explicit: update an existing memory limit only when it is lower than `1.5` times the recommended request, while leaving workloads without an existing memory limit unchanged.
 
 ## Importing
 
