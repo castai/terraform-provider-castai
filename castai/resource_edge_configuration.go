@@ -45,6 +45,7 @@ type edgeConfigurationModel struct {
 	GCP            *gcpConfigurationModel    `tfsdk:"gcp"`
 	AWS            *awsConfigurationModel    `tfsdk:"aws"`
 	OCI            *ociConfigurationModel    `tfsdk:"oci"`
+	Nebius         *nebiusConfigurationModel `tfsdk:"nebius"`
 	Custom         *customConfigurationModel `tfsdk:"custom"`
 	CRI            *criConfigurationModel    `tfsdk:"cri"`
 }
@@ -67,6 +68,12 @@ type ociConfigurationModel struct {
 	BootDiskSizeGiB types.Int64  `tfsdk:"boot_disk_size_gib"`
 }
 
+type nebiusConfigurationModel struct {
+	Labels          types.Map    `tfsdk:"labels"`
+	ImageID         types.String `tfsdk:"image_id"`
+	BootDiskSizeGiB types.Int64  `tfsdk:"boot_disk_size_gib"`
+}
+
 type customConfigurationModel struct {
 	Custom types.Map `tfsdk:"custom"`
 }
@@ -85,6 +92,7 @@ func (r *edgeConfigurationResource) ConfigValidators(_ context.Context) []resour
 			path.MatchRoot("gcp"),
 			path.MatchRoot("aws"),
 			path.MatchRoot("oci"),
+			path.MatchRoot("nebius"),
 			path.MatchRoot("custom"),
 		),
 	}
@@ -199,6 +207,25 @@ func (r *edgeConfigurationResource) Schema(_ context.Context, _ resource.SchemaR
 					},
 				},
 			},
+			"nebius": schema.SingleNestedAttribute{
+				Optional:    true,
+				Description: "Nebius specific configuration",
+				Attributes: map[string]schema.Attribute{
+					"labels": schema.MapAttribute{
+						Optional:    true,
+						ElementType: types.StringType,
+						Description: "Instance/VM labels",
+					},
+					"image_id": schema.StringAttribute{
+						Optional:    true,
+						Description: "ImageID to be used for edge creation. It can be an image ID or a name filter",
+					},
+					"boot_disk_size_gib": schema.Int64Attribute{
+						Optional:    true,
+						Description: "Boot disk size in GiB",
+					},
+				},
+			},
 			"custom": schema.SingleNestedAttribute{
 				Optional:    true,
 				Description: "Custom cloud specific configuration",
@@ -271,6 +298,9 @@ func (r *edgeConfigurationResource) Create(ctx context.Context, req resource.Cre
 	ociConfig, d := r.toOCIConfiguration(ctx, plan.OCI)
 	resp.Diagnostics.Append(d...)
 
+	nebiusConfig, d := r.toNebiusConfiguration(ctx, plan.Nebius)
+	resp.Diagnostics.Append(d...)
+
 	customConfig, d := r.toCustomConfiguration(ctx, plan.Custom)
 	resp.Diagnostics.Append(d...)
 
@@ -288,6 +318,7 @@ func (r *edgeConfigurationResource) Create(ctx context.Context, req resource.Cre
 		Gcp:            gcpConfig,
 		Aws:            awsConfig,
 		Oci:            ociConfig,
+		Nebius:         nebiusConfig,
 		Custom:         customConfig,
 		Cri:            criConfig,
 	}
@@ -406,6 +437,9 @@ func (r *edgeConfigurationResource) Update(ctx context.Context, req resource.Upd
 	ociConfig, d := r.toOCIConfiguration(ctx, plan.OCI)
 	resp.Diagnostics.Append(d...)
 
+	nebiusConfig, d := r.toNebiusConfiguration(ctx, plan.Nebius)
+	resp.Diagnostics.Append(d...)
+
 	customConfig, d := r.toCustomConfiguration(ctx, plan.Custom)
 	resp.Diagnostics.Append(d...)
 
@@ -422,6 +456,7 @@ func (r *edgeConfigurationResource) Update(ctx context.Context, req resource.Upd
 		Gcp:            gcpConfig,
 		Aws:            awsConfig,
 		Oci:            ociConfig,
+		Nebius:         nebiusConfig,
 		Custom:         customConfig,
 		Cri:            criConfig,
 	}
@@ -595,6 +630,7 @@ func (r *edgeConfigurationResource) edgeConfigurationToTFModel(ctx context.Conte
 		GCP:            r.toGCPConfigurationModel(ctx, config.Gcp),
 		AWS:            r.toAWSConfigurationModel(ctx, config.Aws),
 		OCI:            r.toOCIConfigurationModel(ctx, config.Oci),
+		Nebius:         r.toNebiusConfigurationModel(ctx, config.Nebius),
 		Custom:         r.toCustomConfigurationModel(ctx, config.Custom),
 		CRI:            r.toCRIConfigurationModel(ctx, config.Cri),
 	}
@@ -771,6 +807,64 @@ func (r *edgeConfigurationResource) toOCIConfigurationModel(ctx context.Context,
 			return model
 		}
 		model.Tags = tags
+	}
+
+	return model
+}
+
+func (r *edgeConfigurationResource) toNebiusConfiguration(ctx context.Context, plan *nebiusConfigurationModel) (*omni.NebiusConfiguration, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	if plan == nil {
+		return nil, diags
+	}
+
+	config := &omni.NebiusConfiguration{}
+
+	if !plan.ImageID.IsNull() && plan.ImageID.ValueString() != "" {
+		config.ImageId = lo.ToPtr(plan.ImageID.ValueString())
+	}
+
+	if !plan.BootDiskSizeGiB.IsNull() {
+		config.BootDiskSizeGib = lo.ToPtr(int32(plan.BootDiskSizeGiB.ValueInt64()))
+	}
+
+	if !plan.Labels.IsNull() {
+		labels := make(map[string]string)
+		diags.Append(plan.Labels.ElementsAs(ctx, &labels, false)...)
+		if !diags.HasError() {
+			config.Labels = &labels
+		}
+	}
+
+	return config, diags
+}
+
+func (r *edgeConfigurationResource) toNebiusConfigurationModel(ctx context.Context, config *omni.NebiusConfiguration) *nebiusConfigurationModel {
+	if config == nil {
+		return nil
+	}
+
+	model := &nebiusConfigurationModel{
+		Labels:          types.MapNull(types.StringType),
+		ImageID:         types.StringNull(),
+		BootDiskSizeGiB: types.Int64Null(),
+	}
+
+	if config.ImageId != nil && *config.ImageId != "" {
+		model.ImageID = types.StringValue(*config.ImageId)
+	}
+
+	if config.BootDiskSizeGib != nil {
+		model.BootDiskSizeGiB = types.Int64Value(int64(*config.BootDiskSizeGib))
+	}
+
+	if config.Labels != nil && len(*config.Labels) > 0 {
+		labels, diags := types.MapValueFrom(ctx, types.StringType, *config.Labels)
+		if diags.HasError() {
+			return model
+		}
+		model.Labels = labels
 	}
 
 	return model

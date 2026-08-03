@@ -26,18 +26,19 @@ type edgeConfigurationDataSource struct {
 
 // edgeConfigurationSingleDataModel describes a single edge configuration data source.
 type edgeConfigurationSingleDataModel struct {
-	ID             types.String           `tfsdk:"id"`
-	OrganizationID types.String           `tfsdk:"organization_id"`
-	ClusterID      types.String           `tfsdk:"cluster_id"`
-	EdgeLocationID types.String           `tfsdk:"edge_location_id"`
-	Name           types.String           `tfsdk:"name"`
-	Default        types.Bool             `tfsdk:"default"`
-	UserDataBase64 types.String           `tfsdk:"user_data_base64"`
-	Aws            *awsConfigurationModel `tfsdk:"aws"`
-	Gcp            *gcpConfigurationModel `tfsdk:"gcp"`
-	Oci            *ociConfigurationModel `tfsdk:"oci"`
-	Custom         types.Map              `tfsdk:"custom"`
-	CRI            *criConfigurationModel `tfsdk:"cri"`
+	ID             types.String              `tfsdk:"id"`
+	OrganizationID types.String              `tfsdk:"organization_id"`
+	ClusterID      types.String              `tfsdk:"cluster_id"`
+	EdgeLocationID types.String              `tfsdk:"edge_location_id"`
+	Name           types.String              `tfsdk:"name"`
+	Default        types.Bool                `tfsdk:"default"`
+	UserDataBase64 types.String              `tfsdk:"user_data_base64"`
+	Aws            *awsConfigurationModel    `tfsdk:"aws"`
+	Gcp            *gcpConfigurationModel    `tfsdk:"gcp"`
+	Oci            *ociConfigurationModel    `tfsdk:"oci"`
+	Nebius         *nebiusConfigurationModel `tfsdk:"nebius"`
+	Custom         types.Map                 `tfsdk:"custom"`
+	CRI            *criConfigurationModel    `tfsdk:"cri"`
 }
 
 // findEdgeConfigurationByName searches for an edge configuration by name in the list response.
@@ -157,6 +158,25 @@ func (d *edgeConfigurationDataSource) Schema(_ context.Context, _ datasource.Sch
 				Computed:    true,
 				Description: "Custom cloud specific configuration tags",
 				ElementType: types.StringType,
+			},
+			"nebius": schema.SingleNestedAttribute{
+				Computed:    true,
+				Description: "Nebius specific configuration",
+				Attributes: map[string]schema.Attribute{
+					"image_id": schema.StringAttribute{
+						Computed:    true,
+						Description: "Nebius image ID or name filter for edge creation",
+					},
+					"boot_disk_size_gib": schema.Int64Attribute{
+						Computed:    true,
+						Description: "Boot disk size in GiB",
+					},
+					"labels": schema.MapAttribute{
+						Computed:    true,
+						Description: "Instance/VM labels",
+						ElementType: types.StringType,
+					},
+				},
 			},
 			"cri": schema.SingleNestedAttribute{
 				Computed:    true,
@@ -294,6 +314,20 @@ func (d *edgeConfigurationDataSource) Read(ctx context.Context, req datasource.R
 		}
 		if config.Oci.Tags != nil && len(*config.Oci.Tags) > 0 {
 			data.Oci.Tags, diags = types.MapValueFrom(ctx, types.StringType, *config.Oci.Tags)
+		}
+	}
+
+	if config.Nebius != nil {
+		data.Nebius = &nebiusConfigurationModel{
+			ImageID:         types.StringPointerValue(config.Nebius.ImageId),
+			BootDiskSizeGiB: types.Int64Null(),
+			Labels:          types.MapNull(types.StringType),
+		}
+		if config.Nebius.BootDiskSizeGib != nil {
+			data.Nebius.BootDiskSizeGiB = types.Int64Value(int64(*config.Nebius.BootDiskSizeGib))
+		}
+		if config.Nebius.Labels != nil && len(*config.Nebius.Labels) > 0 {
+			data.Nebius.Labels, diags = types.MapValueFrom(ctx, types.StringType, *config.Nebius.Labels)
 		}
 	}
 
