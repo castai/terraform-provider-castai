@@ -12,10 +12,6 @@ import (
 	"github.com/castai/terraform-provider-castai/castai/sdk/pricing"
 )
 
-// ---------------------------------------------------------------------------
-// toCreateInput: table-driven tests for all 9 detail-block types.
-// ---------------------------------------------------------------------------
-
 func TestCommitmentModel_ToCreateInput_AllDetailBlocks(t *testing.T) {
 	tests := []struct {
 		name      string
@@ -210,8 +206,8 @@ func TestCommitmentModel_ToCreateInput_AllDetailBlocks(t *testing.T) {
 					InstanceType:           types.StringValue("p4d.24xlarge"),
 					InstancePlatform:       types.StringValue("Linux/UNIX"),
 					TotalInstanceCount:     types.Int64Value(2),
-					AvailableInstanceCount:  types.Int64Value(1),
-					State:                   types.StringValue("active"),
+					AvailableInstanceCount: types.Int64Value(1),
+					State:                  types.StringValue("active"),
 				},
 			},
 			checkFunc: func(t *testing.T, input pricing.CreateCommitmentInput) {
@@ -243,11 +239,11 @@ func TestCommitmentModel_ToCreateInput_AllDetailBlocks(t *testing.T) {
 					InstancePlatform:       types.StringValue("Linux/UNIX"),
 					Tenancy:                types.StringValue("default"),
 					TotalInstanceCount:     types.Int64Value(4),
-					AvailableInstanceCount:  types.Int64Value(2),
-					State:                   types.StringValue("active"),
-					EndDateType:             types.StringValue("unlimited"),
-					InstanceMatchCriteria:   types.StringValue("open"),
-					Interruptible:           types.BoolValue(false),
+					AvailableInstanceCount: types.Int64Value(2),
+					State:                  types.StringValue("active"),
+					EndDateType:            types.StringValue("unlimited"),
+					InstanceMatchCriteria:  types.StringValue("open"),
+					Interruptible:          types.BoolValue(false),
 				},
 			},
 			checkFunc: func(t *testing.T, input pricing.CreateCommitmentInput) {
@@ -435,10 +431,6 @@ func TestCommitmentModel_ToCreateInput_InvalidStartTime(t *testing.T) {
 	require.True(t, diags.HasError())
 }
 
-// ---------------------------------------------------------------------------
-// toUpdateInput
-// ---------------------------------------------------------------------------
-
 func TestCommitmentModel_ToUpdateInput(t *testing.T) {
 	m := &commitmentModel{
 		AutoscalingStatus: types.StringValue("ACTIVE"),
@@ -478,19 +470,15 @@ func TestCommitmentModel_ToUpdateInput_NullsOmitted(t *testing.T) {
 	assert.Nil(t, input.AutoAssignment)
 }
 
-// ---------------------------------------------------------------------------
-// applyCommitment: table-driven round-trip tests for all 9 detail-block types.
-// ---------------------------------------------------------------------------
-
 func TestCommitmentModel_ApplyDetails_AllDetailBlocks(t *testing.T) {
 	start := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
 	end := time.Date(2027, 1, 1, 0, 0, 0, 0, time.UTC)
 
 	tests := []struct {
-		name        string
-		commitment  *pricing.Commitment
+		name         string
+		commitment   *pricing.Commitment
 		initialState *commitmentModel // pre-populated state to test sync preservation
-		checkFunc   func(t *testing.T, m *commitmentModel)
+		checkFunc    func(t *testing.T, m *commitmentModel)
 	}{
 		{
 			name: "GCP Resource CUD",
@@ -680,7 +668,7 @@ func TestCommitmentModel_ApplyDetails_AllDetailBlocks(t *testing.T) {
 					InstancePlatform:       ptr("Linux/UNIX"),
 					TotalInstanceCount:     ptr("2"),
 					AvailableInstanceCount: ptr("1"),
-					State:                   ptr("active"),
+					State:                  ptr("active"),
 				},
 			},
 			checkFunc: func(t *testing.T, m *commitmentModel) {
@@ -714,10 +702,10 @@ func TestCommitmentModel_ApplyDetails_AllDetailBlocks(t *testing.T) {
 					Tenancy:                ptr("default"),
 					TotalInstanceCount:     ptr("4"),
 					AvailableInstanceCount: ptr("2"),
-					State:                   ptr("active"),
-					EndDateType:             ptr("unlimited"),
-					InstanceMatchCriteria:   ptr("open"),
-					Interruptible:           ptr(false),
+					State:                  ptr("active"),
+					EndDateType:            ptr("unlimited"),
+					InstanceMatchCriteria:  ptr("open"),
+					Interruptible:          ptr(false),
 				},
 			},
 			checkFunc: func(t *testing.T, m *commitmentModel) {
@@ -884,10 +872,6 @@ func TestCommitmentModel_ApplyDetails_AllDetailBlocks(t *testing.T) {
 		})
 	}
 }
-
-// ---------------------------------------------------------------------------
-// Change detection (upsert vs patch path).
-// ---------------------------------------------------------------------------
 
 func TestUpsertAndPatchChangeDetection(t *testing.T) {
 	base := func() commitmentModel {
