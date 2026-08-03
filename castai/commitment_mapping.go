@@ -817,7 +817,8 @@ func (m *gcpCapacityReservationDetailsModel) toSDK(ctx context.Context, diags di
 
 // applyCommitment maps an API commitment onto the model, preserving state
 // representations where they are semantically equal to the API values.
-func (m *commitmentModel) applyCommitment(ctx context.Context, c *pricing.Commitment) {
+func (m *commitmentModel) applyCommitment(ctx context.Context, c *pricing.Commitment) diag.Diagnostics {
+	var diags diag.Diagnostics
 	m.ID = strOrNull(c.Id)
 	m.Name = syncStr(m.Name, c.Name)
 	if c.Cloud != nil {
@@ -842,10 +843,12 @@ func (m *commitmentModel) applyCommitment(ctx context.Context, c *pricing.Commit
 	m.CreateTime = syncTime(m.CreateTime, c.CreateTime)
 	m.UpdateTime = syncTime(m.UpdateTime, c.UpdateTime)
 
-	m.applyDetails(ctx, c)
+	diags.Append(m.applyDetails(ctx, c)...)
+	return diags
 }
 
-func (m *commitmentModel) applyDetails(ctx context.Context, c *pricing.Commitment) {
+func (m *commitmentModel) applyDetails(ctx context.Context, c *pricing.Commitment) diag.Diagnostics {
+	var diags diag.Diagnostics
 	if d := c.AwsReservedInstancesDetails; d != nil {
 		prev := m.AWSReservedInstancesDetails
 		m.AWSReservedInstancesDetails = &awsReservedInstancesDetailsModel{
@@ -1014,8 +1017,9 @@ func (m *commitmentModel) applyDetails(ctx context.Context, c *pricing.Commitmen
 			if d.ShareSettings != nil {
 				ss.ShareType = syncEnumStr(prevShareType, (*string)(d.ShareSettings.ShareType), "GCP_RESERVATION_SHARE_TYPE_UNSPECIFIED")
 				if d.ShareSettings.ProjectIds != nil && len(*d.ShareSettings.ProjectIds) > 0 {
-					elems, diags := types.ListValueFrom(ctx, types.StringType, *d.ShareSettings.ProjectIds)
-					if !diags.HasError() {
+					elems, listDiags := types.ListValueFrom(ctx, types.StringType, *d.ShareSettings.ProjectIds)
+					diags.Append(listDiags...)
+					if !listDiags.HasError() {
 						ss.ProjectIDs = elems
 					}
 				} else {
@@ -1054,4 +1058,5 @@ func (m *commitmentModel) applyDetails(ctx context.Context, c *pricing.Commitmen
 		}
 		m.GCPCapacityReservationDetails = out
 	}
+	return diags
 }

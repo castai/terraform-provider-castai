@@ -44,6 +44,21 @@ var commitmentTypeToDetailsField = map[string][]string{
 	string(pricing.CommitmentTypeFLEXCUD):                     {"gcp_flex_cud_details"},
 }
 
+// detailsFieldToCloud maps each details block attribute name to the cloud
+// provider it belongs to. Used to validate that the details block matches
+// both the commitment type and the cloud.
+var detailsFieldToCloud = map[string]string{
+	"aws_reserved_instances_details":   string(pricing.CommitmentCloudAWS),
+	"azure_reservation_details":        string(pricing.CommitmentCloudAZURE),
+	"gcp_resource_cud_details":         string(pricing.CommitmentCloudGCP),
+	"aws_savings_plan_details":         string(pricing.CommitmentCloudAWS),
+	"aws_capacity_block_details":       string(pricing.CommitmentCloudAWS),
+	"aws_odcr_details":                 string(pricing.CommitmentCloudAWS),
+	"gcp_flex_cud_details":             string(pricing.CommitmentCloudGCP),
+	"azure_savings_plan_details":       string(pricing.CommitmentCloudAZURE),
+	"gcp_capacity_reservation_details": string(pricing.CommitmentCloudGCP),
+}
+
 type genericCommitmentResource struct {
 	client *ProviderConfig
 }
@@ -768,6 +783,23 @@ func (r *genericCommitmentResource) ValidateConfig(ctx context.Context, req reso
 		}
 	}
 
+	// Validate that the details block matches the configured cloud.
+	if !config.Cloud.IsNull() && !config.Cloud.IsUnknown() {
+		for field, isSet := range setDetails {
+			if !isSet {
+				continue
+			}
+			requiredCloud, ok := detailsFieldToCloud[field]
+			if ok && config.Cloud.ValueString() != requiredCloud {
+				resp.Diagnostics.AddAttributeError(
+					path.Root(field),
+					"Details block does not match cloud",
+					fmt.Sprintf("%q requires cloud %q, but cloud is set to %q", field, requiredCloud, config.Cloud.ValueString()),
+				)
+			}
+		}
+	}
+
 	// Validate that end_time is after start_time.
 	if !config.StartTime.IsNull() && !config.StartTime.IsUnknown() &&
 		!config.EndTime.IsNull() && !config.EndTime.IsUnknown() {
@@ -913,7 +945,7 @@ func (r *genericCommitmentResource) Read(ctx context.Context, req resource.ReadR
 	}
 
 	state.OrganizationID = types.StringValue(organizationID)
-	state.applyCommitment(ctx, apiResp.JSON200)
+	resp.Diagnostics.Append(state.applyCommitment(ctx, apiResp.JSON200)...)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
 }
 
@@ -1034,7 +1066,7 @@ func (r *genericCommitmentResource) Update(ctx context.Context, req resource.Upd
 	}
 
 	plan.OrganizationID = types.StringValue(organizationID)
-	plan.applyCommitment(ctx, getResp.JSON200)
+	resp.Diagnostics.Append(plan.applyCommitment(ctx, getResp.JSON200)...)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
