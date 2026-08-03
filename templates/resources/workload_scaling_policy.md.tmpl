@@ -39,14 +39,14 @@ cpu {
 
   limit {
     type                   = "MULTIPLIER"
-    multiplier             = 1.5
+    multiplier             = 100
     only_if_original_exist = true
     only_if_original_lower = true
   }
 }
 ```
 
-This configuration updates an existing CPU limit only when it is lower than `1.5` times the recommended request. Workloads without an existing CPU limit are left unchanged.
+This configuration updates an existing CPU limit only when it is lower than `100` times the recommended request. Workloads without an existing CPU limit are left unchanged.
 
 ### Memory: Automatic
 
