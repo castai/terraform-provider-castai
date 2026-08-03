@@ -851,6 +851,9 @@ func (m *commitmentModel) applyDetails(ctx context.Context, c *pricing.Commitmen
 	var diags diag.Diagnostics
 	if d := c.AwsReservedInstancesDetails; d != nil {
 		prev := m.AWSReservedInstancesDetails
+		if prev == nil {
+			prev = &awsReservedInstancesDetailsModel{}
+		}
 		m.AWSReservedInstancesDetails = &awsReservedInstancesDetailsModel{
 			ID:                   strOrNull(d.Id),
 			Scope:                syncStr(prev.Scope, d.Scope),
