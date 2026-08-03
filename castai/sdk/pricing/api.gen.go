@@ -252,6 +252,15 @@ const (
 	SAVINGSPLAN                 CommitmentsAPIGetUsageSummaryParamsCommitmentTypes = "SAVINGS_PLAN"
 )
 
+// Defines values for CommitmentsAPIGetCommitmentAssignedClustersParamsCloud.
+const (
+	AWS              CommitmentsAPIGetCommitmentAssignedClustersParamsCloud = "AWS"
+	AZURE            CommitmentsAPIGetCommitmentAssignedClustersParamsCloud = "AZURE"
+	CLOUDUNSPECIFIED CommitmentsAPIGetCommitmentAssignedClustersParamsCloud = "CLOUD_UNSPECIFIED"
+	GCP              CommitmentsAPIGetCommitmentAssignedClustersParamsCloud = "GCP"
+	ORACLE           CommitmentsAPIGetCommitmentAssignedClustersParamsCloud = "ORACLE"
+)
+
 // Defines values for CommitmentsAPIImportAzureReservationsParamsMode.
 const (
 	APPEND          CommitmentsAPIImportAzureReservationsParamsMode = "APPEND"
@@ -512,6 +521,12 @@ type BatchDeleteCommitmentsRequest struct {
 type BatchGetCommitmentUsageBreakdownsResponse struct {
 	// Items Breakdowns in the same order as the requested ids.
 	Items *[]CommitmentUsageBreakdown `json:"items,omitempty"`
+}
+
+// Cluster Minimal Cluster message used by GetCommitmentAssignedClustersResponse.
+type Cluster struct {
+	// Id Cluster ID
+	Id *string `json:"id,omitempty"`
 }
 
 // Commitment Commitment resource
@@ -964,10 +979,10 @@ type GetAzureReservationsImportCommandResponse struct {
 	Command *string `json:"command,omitempty"`
 }
 
-// GetAzureReservationsImportScriptResponse Azure reservation import script response
-type GetAzureReservationsImportScriptResponse struct {
-	// Script Raw script body
-	Script *string `json:"script,omitempty"`
+// GetCommitmentAssignedClustersResponse Response message for GetCommitmentAssignedClusters.
+type GetCommitmentAssignedClustersResponse struct {
+	// Clusters Clusters.
+	Clusters *[]Cluster `json:"clusters,omitempty"`
 }
 
 // GoogleProtobufAny Contains an arbitrary serialized message along with a @type that describes the type of the serialized message.
@@ -1253,6 +1268,21 @@ type CommitmentsAPIGetUsageSummaryParamsCommitmentType string
 
 // CommitmentsAPIGetUsageSummaryParamsCommitmentTypes defines parameters for CommitmentsAPIGetUsageSummary.
 type CommitmentsAPIGetUsageSummaryParamsCommitmentTypes string
+
+// CommitmentsAPIGetCommitmentAssignedClustersParams defines parameters for CommitmentsAPIGetCommitmentAssignedClusters.
+type CommitmentsAPIGetCommitmentAssignedClustersParams struct {
+	// CommitmentIds Filter to clusters assigned to ALL of these commitment IDs.
+	//  A cluster is returned only if it has an assignment for every commitment_id
+	//  in this list.
+	//  Required: at least one commitment_id; at most 100.
+	CommitmentIds *[]string `form:"commitmentIds,omitempty" json:"commitmentIds,omitempty"`
+
+	// Cloud Required: filter by cloud service provider.
+	Cloud *CommitmentsAPIGetCommitmentAssignedClustersParamsCloud `form:"cloud,omitempty" json:"cloud,omitempty"`
+}
+
+// CommitmentsAPIGetCommitmentAssignedClustersParamsCloud defines parameters for CommitmentsAPIGetCommitmentAssignedClusters.
+type CommitmentsAPIGetCommitmentAssignedClustersParamsCloud string
 
 // CommitmentsAPIImportAzureReservationsJSONBody defines parameters for CommitmentsAPIImportAzureReservations.
 type CommitmentsAPIImportAzureReservationsJSONBody = map[string]interface{}

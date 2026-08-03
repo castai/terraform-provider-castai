@@ -137,6 +137,9 @@ type ClientInterface interface {
 	// CommitmentsAPIGetAzureReservationsImportScript request
 	CommitmentsAPIGetAzureReservationsImportScript(ctx context.Context, organizationId string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// CommitmentsAPIGetCommitmentAssignedClusters request
+	CommitmentsAPIGetCommitmentAssignedClusters(ctx context.Context, organizationId string, params *CommitmentsAPIGetCommitmentAssignedClustersParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// CommitmentsAPIImportAzureReservationsWithBody request with any body
 	CommitmentsAPIImportAzureReservationsWithBody(ctx context.Context, organizationId string, params *CommitmentsAPIImportAzureReservationsParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -337,6 +340,18 @@ func (c *Client) CommitmentsAPIGetAzureReservationsImportCommand(ctx context.Con
 
 func (c *Client) CommitmentsAPIGetAzureReservationsImportScript(ctx context.Context, organizationId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewCommitmentsAPIGetAzureReservationsImportScriptRequest(c.Server, organizationId)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) CommitmentsAPIGetCommitmentAssignedClusters(ctx context.Context, organizationId string, params *CommitmentsAPIGetCommitmentAssignedClustersParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCommitmentsAPIGetCommitmentAssignedClustersRequest(c.Server, organizationId, params)
 	if err != nil {
 		return nil, err
 	}
@@ -1219,6 +1234,78 @@ func NewCommitmentsAPIGetAzureReservationsImportScriptRequest(server string, org
 	return req, nil
 }
 
+// NewCommitmentsAPIGetCommitmentAssignedClustersRequest generates requests for CommitmentsAPIGetCommitmentAssignedClusters
+func NewCommitmentsAPIGetCommitmentAssignedClustersRequest(server string, organizationId string, params *CommitmentsAPIGetCommitmentAssignedClustersParams) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "organizationId", runtime.ParamLocationPath, organizationId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/pricing/v1beta/organizations/%s/commitments:getCommitmentAssignedClusters", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if params.CommitmentIds != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "commitmentIds", runtime.ParamLocationQuery, *params.CommitmentIds); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.Cloud != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "cloud", runtime.ParamLocationQuery, *params.Cloud); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
 // NewCommitmentsAPIImportAzureReservationsRequest calls the generic CommitmentsAPIImportAzureReservations builder with application/json body
 func NewCommitmentsAPIImportAzureReservationsRequest(server string, organizationId string, params *CommitmentsAPIImportAzureReservationsParams, body CommitmentsAPIImportAzureReservationsJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
@@ -1378,6 +1465,9 @@ type ClientWithResponsesInterface interface {
 
 	// CommitmentsAPIGetAzureReservationsImportScript request
 	CommitmentsAPIGetAzureReservationsImportScriptWithResponse(ctx context.Context, organizationId string) (*CommitmentsAPIGetAzureReservationsImportScriptResponse, error)
+
+	// CommitmentsAPIGetCommitmentAssignedClusters request
+	CommitmentsAPIGetCommitmentAssignedClustersWithResponse(ctx context.Context, organizationId string, params *CommitmentsAPIGetCommitmentAssignedClustersParams) (*CommitmentsAPIGetCommitmentAssignedClustersResponse, error)
 
 	// CommitmentsAPIImportAzureReservations request  with any body
 	CommitmentsAPIImportAzureReservationsWithBodyWithResponse(ctx context.Context, organizationId string, params *CommitmentsAPIImportAzureReservationsParams, contentType string, body io.Reader) (*CommitmentsAPIImportAzureReservationsResponse, error)
@@ -1767,7 +1857,6 @@ func (r CommitmentsAPIGetAzureReservationsImportCommandResponse) GetBody() []byt
 type CommitmentsAPIGetAzureReservationsImportScriptResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON200      *GetAzureReservationsImportScriptResponse
 	JSONDefault  *Status
 }
 
@@ -1790,6 +1879,37 @@ func (r CommitmentsAPIGetAzureReservationsImportScriptResponse) StatusCode() int
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
 func (r CommitmentsAPIGetAzureReservationsImportScriptResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type CommitmentsAPIGetCommitmentAssignedClustersResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *GetCommitmentAssignedClustersResponse
+	JSONDefault  *Status
+}
+
+// Status returns HTTPResponse.Status
+func (r CommitmentsAPIGetCommitmentAssignedClustersResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r CommitmentsAPIGetCommitmentAssignedClustersResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r CommitmentsAPIGetCommitmentAssignedClustersResponse) GetBody() []byte {
 	return r.Body
 }
 
@@ -1972,6 +2092,15 @@ func (c *ClientWithResponses) CommitmentsAPIGetAzureReservationsImportScriptWith
 		return nil, err
 	}
 	return ParseCommitmentsAPIGetAzureReservationsImportScriptResponse(rsp)
+}
+
+// CommitmentsAPIGetCommitmentAssignedClustersWithResponse request returning *CommitmentsAPIGetCommitmentAssignedClustersResponse
+func (c *ClientWithResponses) CommitmentsAPIGetCommitmentAssignedClustersWithResponse(ctx context.Context, organizationId string, params *CommitmentsAPIGetCommitmentAssignedClustersParams) (*CommitmentsAPIGetCommitmentAssignedClustersResponse, error) {
+	rsp, err := c.CommitmentsAPIGetCommitmentAssignedClusters(ctx, organizationId, params)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCommitmentsAPIGetCommitmentAssignedClustersResponse(rsp)
 }
 
 // CommitmentsAPIImportAzureReservationsWithBodyWithResponse request with arbitrary body returning *CommitmentsAPIImportAzureReservationsResponse
@@ -2387,8 +2516,34 @@ func ParseCommitmentsAPIGetAzureReservationsImportScriptResponse(rsp *http.Respo
 	}
 
 	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
+		var dest Status
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSONDefault = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseCommitmentsAPIGetCommitmentAssignedClustersResponse parses an HTTP response from a CommitmentsAPIGetCommitmentAssignedClustersWithResponse call
+func ParseCommitmentsAPIGetCommitmentAssignedClustersResponse(rsp *http.Response) (*CommitmentsAPIGetCommitmentAssignedClustersResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &CommitmentsAPIGetCommitmentAssignedClustersResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest GetAzureReservationsImportScriptResponse
+		var dest GetCommitmentAssignedClustersResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}

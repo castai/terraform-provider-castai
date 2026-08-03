@@ -295,6 +295,26 @@ func (mr *MockClientInterfaceMockRecorder) CommitmentsAPIGetCommitment(ctx, orga
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIGetCommitment", reflect.TypeOf((*MockClientInterface)(nil).CommitmentsAPIGetCommitment), varargs...)
 }
 
+// CommitmentsAPIGetCommitmentAssignedClusters mocks base method.
+func (m *MockClientInterface) CommitmentsAPIGetCommitmentAssignedClusters(ctx context.Context, organizationId string, params *pricing.CommitmentsAPIGetCommitmentAssignedClustersParams, reqEditors ...pricing.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "CommitmentsAPIGetCommitmentAssignedClusters", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CommitmentsAPIGetCommitmentAssignedClusters indicates an expected call of CommitmentsAPIGetCommitmentAssignedClusters.
+func (mr *MockClientInterfaceMockRecorder) CommitmentsAPIGetCommitmentAssignedClusters(ctx, organizationId, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIGetCommitmentAssignedClusters", reflect.TypeOf((*MockClientInterface)(nil).CommitmentsAPIGetCommitmentAssignedClusters), varargs...)
+}
+
 // CommitmentsAPIGetCommitmentUsageBreakdown mocks base method.
 func (m *MockClientInterface) CommitmentsAPIGetCommitmentUsageBreakdown(ctx context.Context, organizationId, commitmentId string, reqEditors ...pricing.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
@@ -846,6 +866,41 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) CommitmentsAPIGetCommitm
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{ctx, organizationId, id}, reqEditors...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIGetCommitment", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).CommitmentsAPIGetCommitment), varargs...)
+}
+
+// CommitmentsAPIGetCommitmentAssignedClusters mocks base method.
+func (m *MockClientWithResponsesInterface) CommitmentsAPIGetCommitmentAssignedClusters(ctx context.Context, organizationId string, params *pricing.CommitmentsAPIGetCommitmentAssignedClustersParams, reqEditors ...pricing.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "CommitmentsAPIGetCommitmentAssignedClusters", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CommitmentsAPIGetCommitmentAssignedClusters indicates an expected call of CommitmentsAPIGetCommitmentAssignedClusters.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) CommitmentsAPIGetCommitmentAssignedClusters(ctx, organizationId, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIGetCommitmentAssignedClusters", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).CommitmentsAPIGetCommitmentAssignedClusters), varargs...)
+}
+
+// CommitmentsAPIGetCommitmentAssignedClustersWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) CommitmentsAPIGetCommitmentAssignedClustersWithResponse(ctx context.Context, organizationId string, params *pricing.CommitmentsAPIGetCommitmentAssignedClustersParams) (*pricing.CommitmentsAPIGetCommitmentAssignedClustersResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CommitmentsAPIGetCommitmentAssignedClustersWithResponse", ctx, organizationId, params)
+	ret0, _ := ret[0].(*pricing.CommitmentsAPIGetCommitmentAssignedClustersResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CommitmentsAPIGetCommitmentAssignedClustersWithResponse indicates an expected call of CommitmentsAPIGetCommitmentAssignedClustersWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) CommitmentsAPIGetCommitmentAssignedClustersWithResponse(ctx, organizationId, params interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIGetCommitmentAssignedClustersWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).CommitmentsAPIGetCommitmentAssignedClustersWithResponse), ctx, organizationId, params)
 }
 
 // CommitmentsAPIGetCommitmentUsageBreakdown mocks base method.
