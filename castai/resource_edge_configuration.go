@@ -605,9 +605,12 @@ func (r *edgeConfigurationResource) toGCPConfiguration(ctx context.Context, plan
 		return nil, diags
 	}
 
-	config := &omni.GCPConfiguration{}
+	config := &omni.GCPConfiguration{
+		ImageId:         lo.ToPtr(""),
+		BootDiskSizeGib: lo.ToPtr(int32(0)),
+	}
 
-	if !plan.ImageID.IsNull() && plan.ImageID.ValueString() != "" {
+	if !plan.ImageID.IsNull() {
 		config.ImageId = lo.ToPtr(plan.ImageID.ValueString())
 	}
 
