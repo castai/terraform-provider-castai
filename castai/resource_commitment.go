@@ -16,6 +16,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/float64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
@@ -194,10 +195,15 @@ func (r *genericCommitmentResource) Schema(_ context.Context, _ resource.SchemaR
 				},
 			},
 			"auto_assignment": schema.BoolAttribute{
-				Optional:    true,
-				Computed:    true,
-				Default:     booldefault.StaticBool(false),
-				Description: "Auto-assign the commitment to all matching clusters in the commitment's region.",
+				Optional: true,
+				Computed: true,
+				PlanModifiers: []planmodifier.Bool{
+					boolplanmodifier.UseStateForUnknown(),
+				},
+				Description: "Auto-assign the commitment to all matching clusters in the commitment's region. " +
+					"If not set, the server's auto-assignment logic determines the value at creation time. " +
+					"Set to false to explicitly disable auto-assignment. " +
+					"Not supported for CAPACITY_BLOCK or targeted ON_DEMAND_CAPACITY_RESERVATION commitments.",
 			},
 			"state": schema.StringAttribute{
 				Computed:    true,
@@ -846,6 +852,12 @@ func (r *genericCommitmentResource) Create(ctx context.Context, req resource.Cre
 		return
 	}
 
+	var config commitmentModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	organizationID, err := r.resolveOrganizationID(ctx, &plan)
 	if err != nil {
 		resp.Diagnostics.AddError("Failed to resolve organization ID", err.Error())
@@ -877,17 +889,22 @@ func (r *genericCommitmentResource) Create(ctx context.Context, req resource.Cre
 		commitmentID = *created.Id
 	}
 
-	// The server's enableAutoAssignments business rule may flip operational
-	// fields (e.g. auto_assignment) from the values the user planned. Enforce
-	// the planned operational settings via PATCH so state matches plan.
-	if commitmentID != "" {
+	// PATCH only when the user explicitly set auto_assignment=false, to override
+	// the server's enableAutoAssignments flip. If not set or set to true, the
+	// POST response is authoritative.
+	needsPatch := !config.AutoAssignment.IsNull() && !config.AutoAssignment.IsUnknown() &&
+		!config.AutoAssignment.ValueBool()
+
+	if commitmentID != "" && needsPatch {
 		patchInput := plan.toUpdateInput()
 		patchResp, patchErr := r.client.pricingClient.CommitmentsAPIUpdateCommitmentWithResponse(ctx, organizationID, commitmentID, patchInput)
 		if patchErr != nil {
+			saveCreatedState(ctx, resp, &plan, organizationID, created)
 			resp.Diagnostics.AddError("Failed to enforce commitment settings after create", patchErr.Error())
 			return
 		}
 		if patchResp.StatusCode() != http.StatusOK {
+			saveCreatedState(ctx, resp, &plan, organizationID, created)
 			resp.Diagnostics.AddError(
 				"Failed to enforce commitment settings after create",
 				fmt.Sprintf("unexpected status code: %d, body: %s", patchResp.StatusCode(), string(patchResp.Body)),
@@ -897,21 +914,25 @@ func (r *genericCommitmentResource) Create(ctx context.Context, req resource.Cre
 		created = patchResp.JSON200
 	}
 
+	saveCreatedState(ctx, resp, &plan, organizationID, created)
+}
+
+// saveCreatedState writes the commitment ID and computed fields from the
+// API response into Terraform state. Auto-assignment is also synced from
+// the API response so that the server-decided value is captured when the
+// user did not set it explicitly.
+func saveCreatedState(ctx context.Context, resp *resource.CreateResponse, plan *commitmentModel, organizationID string, created *pricing.Commitment) {
 	plan.OrganizationID = types.StringValue(organizationID)
-	// In Create, only set computed fields from the API response. All
-	// user-configurable fields keep their plan values — the framework
-	// validates that the written state matches the plan, so overwriting
-	// plan values with API representations (null vs "", UNSPECIFIED enums,
-	// server-flipped booleans) would trigger "inconsistent result" errors.
 	plan.ID = types.StringPointerValue(created.Id)
 	if created.State != nil {
 		plan.State = types.StringValue(string(*created.State))
 	} else {
 		plan.State = types.StringNull()
 	}
+	plan.AutoAssignment = syncBool(plan.AutoAssignment, created.AutoAssignment)
 	plan.CreateTime = syncTime(plan.CreateTime, created.CreateTime)
 	plan.UpdateTime = syncTime(plan.UpdateTime, created.UpdateTime)
-	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, plan)...)
 }
 
 func (r *genericCommitmentResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -994,6 +1015,12 @@ func (r *genericCommitmentResource) Update(ctx context.Context, req resource.Upd
 		return
 	}
 
+	var config commitmentModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	organizationID, err := r.resolveOrganizationID(ctx, &plan)
 	if err != nil {
 		resp.Diagnostics.AddError("Failed to resolve organization ID", err.Error())
@@ -1001,10 +1028,15 @@ func (r *genericCommitmentResource) Update(ctx context.Context, req resource.Upd
 	}
 	commitmentID := state.ID.ValueString()
 
+	// User explicitly set auto_assignment=false in config.
+	autoAssignmentExplicitlyFalse := !config.AutoAssignment.IsNull() && !config.AutoAssignment.IsUnknown() &&
+		!config.AutoAssignment.ValueBool()
+
 	// Identity-adjacent fields (name, region, dates, details content) are updated
 	// by re-upserting via CreateCommitment; the server matches the existing row on
 	// (organization, type, identifier) and preserves the commitment ID.
-	if upsertPathChanged(&plan, &state) {
+	upsertChanged := upsertPathChanged(&plan, &state)
+	if upsertChanged {
 		input, diags := plan.toCreateInput(ctx)
 		resp.Diagnostics.Append(diags...)
 		if resp.Diagnostics.HasError() {
@@ -1032,10 +1064,10 @@ func (r *genericCommitmentResource) Update(ctx context.Context, req resource.Upd
 		}
 	}
 
-	// Operational settings go through the PATCH endpoint, which is the only
-	// path that updates allowed_usage, prioritization, scaling_strategy and
-	// autoscaling_status.
-	if patchPathChanged(&plan, &state) {
+	// Send PATCH when operational fields changed, or when the upsert path ran
+	// and the user explicitly set auto_assignment=false (to counter
+	// enableAutoAssignments' potential false→true flip).
+	if patchPathChanged(&plan, &state) || (upsertChanged && autoAssignmentExplicitlyFalse) {
 		input := plan.toUpdateInput()
 		apiResp, err := r.client.pricingClient.CommitmentsAPIUpdateCommitmentWithResponse(ctx, organizationID, commitmentID, input)
 		if err != nil {

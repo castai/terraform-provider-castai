@@ -19,7 +19,8 @@ func TestAccCloudAgnostic_Commitment(t *testing.T) {
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCommitmentConfig(rName, cudID, "INACTIVE", 1.0),
+				// Create with auto_assignment not set — server decides.
+				Config: testAccCommitmentConfig(rName, cudID, "INACTIVE", 1.0, false, false),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet(resourceName, "id"),
 					resource.TestCheckResourceAttrSet(resourceName, "organization_id"),
@@ -30,6 +31,7 @@ func TestAccCloudAgnostic_Commitment(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "autoscaling_status", "INACTIVE"),
 					resource.TestCheckResourceAttr(resourceName, "allowed_usage", "1"),
 					resource.TestCheckResourceAttr(resourceName, "scaling_strategy", "DEFAULT"),
+					resource.TestCheckResourceAttr(resourceName, "auto_assignment", "true"),
 					resource.TestCheckResourceAttr(resourceName, "gcp_resource_cud_details.cud_id", cudID),
 					resource.TestCheckResourceAttr(resourceName, "gcp_resource_cud_details.plan", "TWELVE_MONTH"),
 					resource.TestCheckResourceAttr(resourceName, "gcp_resource_cud_details.cpu", "32"),
@@ -39,7 +41,7 @@ func TestAccCloudAgnostic_Commitment(t *testing.T) {
 			},
 			{
 				// Patch-path update: operational settings only.
-				Config: testAccCommitmentConfig(rName, cudID, "ACTIVE", 0.75),
+				Config: testAccCommitmentConfig(rName, cudID, "ACTIVE", 0.75, false, false),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "autoscaling_status", "ACTIVE"),
 					resource.TestCheckResourceAttr(resourceName, "allowed_usage", "0.75"),
@@ -47,9 +49,24 @@ func TestAccCloudAgnostic_Commitment(t *testing.T) {
 			},
 			{
 				// Upsert-path update: rename. ID must be preserved.
-				Config: testAccCommitmentConfig(rName+"-renamed", cudID, "ACTIVE", 0.75),
+				Config: testAccCommitmentConfig(rName+"-renamed", cudID, "ACTIVE", 0.75, false, false),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "name", rName+"-renamed"),
+				),
+			},
+			{
+				// Switch to explicit auto_assignment=false.
+				Config: testAccCommitmentConfig(rName+"-renamed", cudID, "ACTIVE", 0.75, true, false),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "auto_assignment", "false"),
+				),
+			},
+			{
+				// Upsert-path update with explicit false: auto_assignment must stay false.
+				Config: testAccCommitmentConfig(rName+"-renamed-2", cudID, "ACTIVE", 0.75, true, false),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "name", rName+"-renamed-2"),
+					resource.TestCheckResourceAttr(resourceName, "auto_assignment", "false"),
 				),
 			},
 			{
@@ -68,7 +85,11 @@ func TestAccCloudAgnostic_Commitment(t *testing.T) {
 	})
 }
 
-func testAccCommitmentConfig(name, cudID, autoscalingStatus string, allowedUsage float64) string {
+func testAccCommitmentConfig(name, cudID, autoscalingStatus string, allowedUsage float64, setAutoAssignment bool, autoAssignment bool) string {
+	autoAssignmentLine := ""
+	if setAutoAssignment {
+		autoAssignmentLine = fmt.Sprintf("auto_assignment = %v", autoAssignment)
+	}
 	return fmt.Sprintf(`
 resource "castai_commitment" "test" {
   name               = %[1]q
@@ -79,6 +100,7 @@ resource "castai_commitment" "test" {
   end_time           = "2027-01-01T00:00:00Z"
   autoscaling_status = %[3]q
   allowed_usage      = %[4]v
+  %[5]s
 
   gcp_resource_cud_details = {
     cud_id    = %[2]q
@@ -89,5 +111,5 @@ resource "castai_commitment" "test" {
     status    = "ACTIVE"
   }
 }
-`, name, cudID, autoscalingStatus, allowedUsage)
+`, name, cudID, autoscalingStatus, allowedUsage, autoAssignmentLine)
 }

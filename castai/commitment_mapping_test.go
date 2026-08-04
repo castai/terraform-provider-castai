@@ -984,3 +984,70 @@ func TestDetailsEqual_NestedListChanges(t *testing.T) {
 	}
 	assert.True(t, upsertPathChanged(&a, &b))
 }
+
+func TestAutoAssignmentPatchDecision(t *testing.T) {
+	// Simulates the config check used in Create and Update to decide whether
+	// a follow-up PATCH is needed to counter enableAutoAssignments.
+	needsPatch := func(configAutoAssignment types.Bool) bool {
+		return !configAutoAssignment.IsNull() && !configAutoAssignment.IsUnknown() &&
+			!configAutoAssignment.ValueBool()
+	}
+
+	assert.False(t, needsPatch(types.BoolNull()), "not set → no PATCH")
+	assert.False(t, needsPatch(types.BoolUnknown()), "unknown → no PATCH")
+	assert.True(t, needsPatch(types.BoolValue(false)), "explicit false → PATCH")
+	assert.False(t, needsPatch(types.BoolValue(true)), "explicit true → no PATCH")
+}
+
+func TestUpdatePatchCondition_AutoAssignmentFalseWithUpsert(t *testing.T) {
+	base := func() commitmentModel {
+		return commitmentModel{
+			Name:              types.StringValue("n"),
+			Region:            types.StringValue("r"),
+			StartTime:         types.StringValue("2026-01-01T00:00:00Z"),
+			EndTime:           types.StringNull(),
+			AutoscalingStatus: types.StringValue("INACTIVE"),
+			AllowedUsage:      types.Float64Value(1.0),
+			Prioritization:    types.BoolValue(false),
+			ScalingStrategy:   types.StringValue("DEFAULT"),
+			AutoAssignment:    types.BoolValue(false),
+			GCPResourceCUDDetails: &gcpResourceCUDDetailsModel{
+				CUDID: types.StringValue("1"),
+				CPU:   types.Int64Value(32),
+			},
+		}
+	}
+
+	configExplicitFalse := base()
+	configExplicitFalse.AutoAssignment = types.BoolValue(false)
+
+	configNotSet := base()
+	configNotSet.AutoAssignment = types.BoolNull()
+
+	// Upsert change (rename) + explicit false → PATCH should fire.
+	plan, state := base(), base()
+	plan.Name = types.StringValue("renamed")
+	upsertChanged := upsertPathChanged(&plan, &state)
+	autoAssignmentExplicitlyFalse := !configExplicitFalse.AutoAssignment.IsNull() && !configExplicitFalse.AutoAssignment.IsUnknown() &&
+		!configExplicitFalse.AutoAssignment.ValueBool()
+	assert.True(t, upsertChanged)
+	assert.True(t, autoAssignmentExplicitlyFalse)
+	assert.True(t, patchPathChanged(&plan, &state) || (upsertChanged && autoAssignmentExplicitlyFalse))
+
+	// Upsert change (rename) + not set → PATCH should NOT fire (no patchPathChanged either).
+	plan, state = base(), base()
+	plan.Name = types.StringValue("renamed")
+	autoAssignmentNotSet := !configNotSet.AutoAssignment.IsNull() && !configNotSet.AutoAssignment.IsUnknown() &&
+		!configNotSet.AutoAssignment.ValueBool()
+	assert.True(t, upsertChanged)
+	assert.False(t, autoAssignmentNotSet)
+	assert.False(t, patchPathChanged(&plan, &state) || (upsertChanged && autoAssignmentNotSet))
+
+	// No upsert change, no patch change → no PATCH.
+	plan, state = base(), base()
+	upsertChanged = upsertPathChanged(&plan, &state)
+	autoAssignmentExplicitlyFalse = !configExplicitFalse.AutoAssignment.IsNull() && !configExplicitFalse.AutoAssignment.IsUnknown() &&
+		!configExplicitFalse.AutoAssignment.ValueBool()
+	assert.False(t, upsertChanged)
+	assert.False(t, patchPathChanged(&plan, &state) || (upsertChanged && autoAssignmentExplicitlyFalse))
+}
