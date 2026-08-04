@@ -1518,6 +1518,32 @@ func Test_toHpaConverters(t *testing.T) {
 				{Type: sdk.WorkloadoptimizationV1HPAConverterType(FieldHpaConverterTypeAverageValueFromOriginalRequests)},
 			},
 		},
+		"should skip entries that are not a map[string]any": {
+			args: []any{
+				"not-a-map",
+				map[string]any{FieldHpaConverterType: FieldHpaConverterTypeAverageValueFromOriginalRequests},
+			},
+			exp: &[]sdk.WorkloadoptimizationV1HPAConverters{
+				{Type: sdk.WorkloadoptimizationV1HPAConverterType(FieldHpaConverterTypeAverageValueFromOriginalRequests)},
+			},
+		},
+		"should skip entries where type field is not a string": {
+			args: []any{
+				map[string]any{FieldHpaConverterType: 123},
+				map[string]any{FieldHpaConverterType: FieldHpaConverterTypeAverageValueFromOriginalRequests},
+			},
+			exp: &[]sdk.WorkloadoptimizationV1HPAConverters{
+				{Type: sdk.WorkloadoptimizationV1HPAConverterType(FieldHpaConverterTypeAverageValueFromOriginalRequests)},
+			},
+		},
+		"should return nil when all entries are invalid": {
+			args: []any{
+				"not-a-map",
+				map[string]any{FieldHpaConverterType: 123},
+				map[string]any{"other": "value"},
+			},
+			exp: nil,
+		},
 	}
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {

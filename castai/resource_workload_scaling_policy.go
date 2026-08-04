@@ -1839,8 +1839,8 @@ func toHpaConverters(in []any) *[]sdk.WorkloadoptimizationV1HPAConverters {
 	if len(in) == 0 {
 		return nil
 	}
-	out := make([]sdk.WorkloadoptimizationV1HPAConverters, len(in))
-	for i, v := range in {
+	out := make([]sdk.WorkloadoptimizationV1HPAConverters, 0, len(in))
+	for _, v := range in {
 		m, ok := v.(map[string]any)
 		if !ok {
 			continue
@@ -1849,9 +1849,12 @@ func toHpaConverters(in []any) *[]sdk.WorkloadoptimizationV1HPAConverters {
 		if !ok {
 			continue
 		}
-		out[i] = sdk.WorkloadoptimizationV1HPAConverters{
+		out = append(out, sdk.WorkloadoptimizationV1HPAConverters{
 			Type: sdk.WorkloadoptimizationV1HPAConverterType(converterType),
-		}
+		})
+	}
+	if len(out) == 0 {
+		return nil
 	}
 	return &out
 }
