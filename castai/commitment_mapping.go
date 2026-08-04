@@ -812,7 +812,7 @@ func (m *gcpCapacityReservationDetailsModel) toSDK(ctx context.Context, diags di
 }
 
 // ---------------------------------------------------------------------------
-// SDK → model (read-back).
+// SDK → model.
 // ---------------------------------------------------------------------------
 
 // applyCommitment maps an API commitment onto the model, preserving state

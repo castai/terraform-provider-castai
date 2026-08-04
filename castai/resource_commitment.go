@@ -82,10 +82,7 @@ func (r *genericCommitmentResource) Schema(_ context.Context, _ resource.SchemaR
 	resp.Schema = schema.Schema{
 		Description: "Manages a single CAST AI commitment (reserved instance, savings plan, CUD, " +
 			"capacity block or capacity reservation) via the pricing v1beta Commitments API. " +
-			"For bulk management, use for_each over a decoded JSON/CSV file. " +
-			"Note: the underlying API is in beta. Do not manage commitments with Terraform in " +
-			"organizations where the same commitments are synced automatically via cloud integrations, " +
-			"as the sync will overwrite Terraform-managed values.",
+			"For bulk management, use for_each — see the examples/ directory.",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Computed:    true,
