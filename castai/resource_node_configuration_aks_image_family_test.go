@@ -49,6 +49,10 @@ func TestToAKSImageFamily(t *testing.T) {
 			input:    aksImageFamilyWindows2022,
 			expected: sdk.NodeconfigV1AKSConfigImageFamilyFAMILYWINDOWS2022,
 		},
+		"windows2025": {
+			input:    aksImageFamilyWindows2025,
+			expected: sdk.NodeconfigV1AKSConfigImageFamilyFAMILYWINDOWS2025,
+		},
 	}
 
 	for name, tc := range tests {
@@ -130,6 +134,14 @@ func TestFromAKSImageFamily(t *testing.T) {
 			input:    sdk.NodeconfigV1AKSConfigImageFamilyFamilyWindows2022,
 			expected: aksImageFamilyWindows2022,
 		},
+		"windows2025 upper": {
+			input:    sdk.NodeconfigV1AKSConfigImageFamilyFAMILYWINDOWS2025,
+			expected: aksImageFamilyWindows2025,
+		},
+		"windows2025 lower": {
+			input:    sdk.NodeconfigV1AKSConfigImageFamilyFamilyWindows2025,
+			expected: aksImageFamilyWindows2025,
+		},
 	}
 
 	for name, tc := range tests {
@@ -160,6 +172,7 @@ func TestAKSImageFamily_RoundTrip(t *testing.T) {
 		aksImageFamilyAzureLinux,
 		aksImageFamilyWindows2019,
 		aksImageFamilyWindows2022,
+		aksImageFamilyWindows2025,
 	}
 
 	for _, family := range families {
