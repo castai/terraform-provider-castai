@@ -24,6 +24,11 @@ resource "castai_workload_scaling_policy" "services" {
       }
     }
   }
+
+  hpa_converters {
+    type = "AVERAGE_VALUE_FROM_ORIGINAL_REQUESTS"
+  }
+
   cpu {
     function = "QUANTILE"
     overhead = 0.15
