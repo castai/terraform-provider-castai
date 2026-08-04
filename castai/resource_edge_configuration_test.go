@@ -20,7 +20,7 @@ func TestAccCloudAgnostic_ResourceEdgeConfigurationGCP(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
-		CheckDestroy:             testAccCheckEdgeConfigurationDestroy,
+		CheckDestroy:             testAccCheckEdgeResourcesDestroy(testAccCheckEdgeConfigurationDestroy),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccEdgeConfigurationGCPConfig(rName, clusterName),

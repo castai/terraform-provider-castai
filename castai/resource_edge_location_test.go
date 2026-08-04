@@ -192,7 +192,7 @@ func TestAccCloudAgnostic_ResourceEdgeLocationGCPImpersonation(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
-		CheckDestroy:             testAccCheckEdgeLocationDestroy,
+		CheckDestroy:             testAccCheckEdgeResourcesDestroy(testAccCheckEdgeLocationDestroy),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccEdgeLocationGCPImpersonationConfig(rName, clusterName),
@@ -443,7 +443,7 @@ func TestAccCloudAgnostic_ResourceEdgeLocationCustom(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
-		CheckDestroy:             testAccCheckEdgeLocationDestroy,
+		CheckDestroy:             testAccCheckEdgeResourcesDestroy(testAccCheckEdgeLocationDestroy),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccEdgeLocationCustomConfig(rName, clusterName),

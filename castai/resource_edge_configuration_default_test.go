@@ -17,7 +17,7 @@ func TestAccCloudAgnostic_ResourceEdgeConfigurationDefault(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
-		CheckDestroy:             nil,
+		CheckDestroy:             testAccCheckEdgeResourcesDestroy(nil),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccEdgeConfigurationDefaultConfig(rName, clusterName),
