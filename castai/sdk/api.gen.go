@@ -7875,6 +7875,9 @@ type NodetemplatesV1TemplateConstraintsDedicatedNodeAffinity struct {
 	// MaxCpu Maximum number of CPUs that can be provisioned from this dedicated/sole-tenant node group
 	// across all nodes for the specific node template. If not set, no CPU cap is applied.
 	// If cpus_per_gpu is set, max_cpu must be a multiple of cpus_per_gpu.
+	// If both cpus_per_gpu and min_gpus_per_node are set (and min_gpus_per_node > 0),
+	// max_cpu must be a multiple of cpus_per_gpu * min_gpus_per_node, since the smallest
+	// valid node has min_gpus_per_node * cpus_per_gpu CPUs.
 	MaxCpu *int32 `json:"maxCpu"`
 
 	// MinGpusPerNode Minimum number of GPUs per node for this dedicated/sole-tenant node group.
