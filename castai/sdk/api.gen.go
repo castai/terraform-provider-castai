@@ -972,6 +972,33 @@ const (
 	VALUE                       WorkloadoptimizationV1MetricTargetType = "VALUE"
 )
 
+// Defines values for WorkloadoptimizationV1MetricsBinaryOpType.
+const (
+	METRICSBINARYOPADD             WorkloadoptimizationV1MetricsBinaryOpType = "METRICS_BINARY_OP_ADD"
+	METRICSBINARYOPDIV             WorkloadoptimizationV1MetricsBinaryOpType = "METRICS_BINARY_OP_DIV"
+	METRICSBINARYOPMUL             WorkloadoptimizationV1MetricsBinaryOpType = "METRICS_BINARY_OP_MUL"
+	METRICSBINARYOPSUB             WorkloadoptimizationV1MetricsBinaryOpType = "METRICS_BINARY_OP_SUB"
+	METRICSBINARYOPTYPEUNSPECIFIED WorkloadoptimizationV1MetricsBinaryOpType = "METRICS_BINARY_OP_TYPE_UNSPECIFIED"
+)
+
+// Defines values for WorkloadoptimizationV1MetricsGroupByDimension.
+const (
+	DIMENSIONCONTAINER   WorkloadoptimizationV1MetricsGroupByDimension = "DIMENSION_CONTAINER"
+	DIMENSIONISCUSTOM    WorkloadoptimizationV1MetricsGroupByDimension = "DIMENSION_IS_CUSTOM"
+	DIMENSIONKIND        WorkloadoptimizationV1MetricsGroupByDimension = "DIMENSION_KIND"
+	DIMENSIONNAME        WorkloadoptimizationV1MetricsGroupByDimension = "DIMENSION_NAME"
+	DIMENSIONNAMESPACE   WorkloadoptimizationV1MetricsGroupByDimension = "DIMENSION_NAMESPACE"
+	DIMENSIONUNSPECIFIED WorkloadoptimizationV1MetricsGroupByDimension = "DIMENSION_UNSPECIFIED"
+)
+
+// Defines values for WorkloadoptimizationV1MetricsScalarOpType.
+const (
+	METRICSSCALAROPADD             WorkloadoptimizationV1MetricsScalarOpType = "METRICS_SCALAR_OP_ADD"
+	METRICSSCALAROPDIV             WorkloadoptimizationV1MetricsScalarOpType = "METRICS_SCALAR_OP_DIV"
+	METRICSSCALAROPMUL             WorkloadoptimizationV1MetricsScalarOpType = "METRICS_SCALAR_OP_MUL"
+	METRICSSCALAROPTYPEUNSPECIFIED WorkloadoptimizationV1MetricsScalarOpType = "METRICS_SCALAR_OP_TYPE_UNSPECIFIED"
+)
+
 // Defines values for WorkloadoptimizationV1PodStatus.
 const (
 	FAILED           WorkloadoptimizationV1PodStatus = "FAILED"
@@ -1597,6 +1624,29 @@ type WorkloadOptimizationAPIPatchWorkloadV2Request struct {
 	// UpdateMask The update mask specifying which fields to update.
 	UpdateMask *string                                `json:"updateMask,omitempty"`
 	Workload   *WorkloadoptimizationV1PatchWorkloadV2 `json:"workload,omitempty"`
+}
+
+// WorkloadOptimizationAPIQueryWorkloadMetricsRequest QueryWorkloadMetricsRequest is the request for querying workload metrics time series.
+type WorkloadOptimizationAPIQueryWorkloadMetricsRequest struct {
+	// Attributes MetricsAttributes defines how results are bucketed and grouped.
+	Attributes *WorkloadoptimizationV1MetricsAttributes `json:"attributes,omitempty"`
+
+	// Filter MetricsFilter narrows the query scope.
+	// Time range constraints: the window [from_time, to_time) must not exceed 168h (7 days).
+	// from_time must not be more than 30 days in the past.
+	// When from_time is unset, defaults to (now - default lookback of 24h).
+	// When to_time is unset, defaults to now.
+	//
+	// Filter resolution: some fields (namespace, kind, name, container, is_custom) are
+	// pushed down to ClickHouse directly. Other fields (scaling_policy_name, label,
+	// workload_id) are resolved in PostgreSQL first, and the resulting workload list is
+	// passed to ClickHouse. OR branches that mix PG-only fields with CH-pushable fields
+	// are rejected because the two-stage pipeline would incorrectly rewrite them as AND.
+	Filter *WorkloadoptimizationV1MetricsFilter `json:"filter,omitempty"`
+
+	// Metrics metrics is a list of named metric expressions. Each expression must have at least one
+	// metric reference, and every metric reference must carry a rollup (e.g. avg, p95).
+	Metrics []WorkloadoptimizationV1MetricsNamedExpr `json:"metrics"`
 }
 
 // WorkloadOptimizationAPIResetSystemOverridesRequest defines model for WorkloadOptimizationAPI_ResetSystemOverrides_request.
@@ -8942,6 +8992,12 @@ type WorkloadoptimizationV1ApplyType string
 // WorkloadoptimizationV1AssignScalingPolicyWorkloadsResponse defines model for workloadoptimization.v1.AssignScalingPolicyWorkloadsResponse.
 type WorkloadoptimizationV1AssignScalingPolicyWorkloadsResponse = map[string]interface{}
 
+// WorkloadoptimizationV1BoolMatch BoolMatch matches a boolean workload field (currently only is_custom).
+// Set eq to match the desired boolean value.
+type WorkloadoptimizationV1BoolMatch struct {
+	Eq bool `json:"eq"`
+}
+
 // WorkloadoptimizationV1CPUPressureContainer defines model for workloadoptimization.v1.CPUPressureContainer.
 type WorkloadoptimizationV1CPUPressureContainer struct {
 	// EligiblePodCount Pod count where container was experiencing CPU pressure above threshold.
@@ -10297,6 +10353,15 @@ type WorkloadoptimizationV1KubernetesWorkloadMatcher struct {
 	LabelsExpressions *[]WorkloadoptimizationV1KubernetesLabelExpressionMatcher `json:"labelsExpressions,omitempty"`
 }
 
+// WorkloadoptimizationV1LabelMatch LabelMatch selects workloads by Kubernetes label key and value.
+type WorkloadoptimizationV1LabelMatch struct {
+	Key string `json:"key"`
+
+	// Value value is the label value to match. When empty, matches any workload
+	// that has the label key (label-existence filter).
+	Value *string `json:"value,omitempty"`
+}
+
 // WorkloadoptimizationV1LimitRange defines model for workloadoptimization.v1.LimitRange.
 type WorkloadoptimizationV1LimitRange struct {
 	ClusterId       string                                    `json:"clusterId"`
@@ -10434,6 +10499,208 @@ type WorkloadoptimizationV1MetricTarget struct {
 // AVERAGE_VALUE - A metric value averaged across all pods (e.g., 200Mi).
 // UTILIZATION - A percentage of the requested resource utilization (e.g., 80).
 type WorkloadoptimizationV1MetricTargetType string
+
+// WorkloadoptimizationV1MetricsAttributes MetricsAttributes defines how results are bucketed and grouped.
+type WorkloadoptimizationV1MetricsAttributes struct {
+	// GroupBy group_by selects which workload identity dimensions to group by.
+	// When empty, all workloads are aggregated into a single series (no per-workload breakdown).
+	GroupBy *[]WorkloadoptimizationV1MetricsGroupByDimension `json:"groupBy,omitempty"`
+
+	// StartupPeriod startup_period excludes data points that fall within the first N seconds after
+	// pod startup. Useful to filter out noise from container initialization.
+	// Supported only for pod and PSI metrics; ignored for others.
+	StartupPeriod *string `json:"startupPeriod"`
+
+	// Step step controls the time-bucket size. Defaults to 3600s (1 hour).
+	// Named for consistency with GetAggregatedWorkloadCustomMetricsV1BetaRequest.
+	Step *string `json:"step"`
+
+	// Timezone IANA timezone name (e.g. "America/New_York", "Europe/Berlin"). Defaults to "UTC" when absent or empty.
+	// Affects time-bucket alignment: from_time is floored to the granularity boundary in the specified timezone.
+	Timezone *string `json:"timezone"`
+}
+
+// WorkloadoptimizationV1MetricsBinaryOp MetricsBinaryOp composes two sub-expressions with an arithmetic operator.
+type WorkloadoptimizationV1MetricsBinaryOp struct {
+	// Left MetricsExpr is a recursive expression node. Exactly one of the oneof fields must be set.
+	Left WorkloadoptimizationV1MetricsExpr `json:"left"`
+
+	// Op MetricsBinaryOpType enumerates arithmetic operators for binary metric expressions.
+	Op WorkloadoptimizationV1MetricsBinaryOpType `json:"op"`
+
+	// Right MetricsExpr is a recursive expression node. Exactly one of the oneof fields must be set.
+	Right WorkloadoptimizationV1MetricsExpr `json:"right"`
+}
+
+// WorkloadoptimizationV1MetricsBinaryOpType MetricsBinaryOpType enumerates arithmetic operators for binary metric expressions.
+type WorkloadoptimizationV1MetricsBinaryOpType string
+
+// WorkloadoptimizationV1MetricsExpr MetricsExpr is a recursive expression node. Exactly one of the oneof fields must be set.
+type WorkloadoptimizationV1MetricsExpr struct {
+	// BinaryOp MetricsBinaryOp composes two sub-expressions with an arithmetic operator.
+	BinaryOp *WorkloadoptimizationV1MetricsBinaryOp `json:"binaryOp,omitempty"`
+
+	// MetricRef MetricsMetricRef references one metric with one rollup function.
+	MetricRef *WorkloadoptimizationV1MetricsMetricRef `json:"metricRef,omitempty"`
+
+	// ScalarOp MetricsScalarOp applies a constant scalar to a sub-expression.
+	ScalarOp *WorkloadoptimizationV1MetricsScalarOp `json:"scalarOp,omitempty"`
+}
+
+// WorkloadoptimizationV1MetricsFilter MetricsFilter narrows the query scope.
+// Time range constraints: the window [from_time, to_time) must not exceed 168h (7 days).
+// from_time must not be more than 30 days in the past.
+// When from_time is unset, defaults to (now - default lookback of 24h).
+// When to_time is unset, defaults to now.
+//
+// Filter resolution: some fields (namespace, kind, name, container, is_custom) are
+// pushed down to ClickHouse directly. Other fields (scaling_policy_name, label,
+// workload_id) are resolved in PostgreSQL first, and the resulting workload list is
+// passed to ClickHouse. OR branches that mix PG-only fields with CH-pushable fields
+// are rejected because the two-stage pipeline would incorrectly rewrite them as AND.
+type WorkloadoptimizationV1MetricsFilter struct {
+	// Expr MetricsFilterExpr is a recursive filter expression node. Exactly one of the oneof
+	// fields must be set. Logical operators (and/or/not) compose sub-expressions; the
+	// typed leaf matchers compare a single workload field, which lets the API enforce
+	// value/field compatibility at the schema level.
+	Expr     *WorkloadoptimizationV1MetricsFilterExpr `json:"expr,omitempty"`
+	FromTime *time.Time                               `json:"fromTime"`
+	ToTime   *time.Time                               `json:"toTime"`
+}
+
+// WorkloadoptimizationV1MetricsFilterAnd defines model for workloadoptimization.v1.MetricsFilterAnd.
+type WorkloadoptimizationV1MetricsFilterAnd struct {
+	Children []WorkloadoptimizationV1MetricsFilterExpr `json:"children"`
+}
+
+// WorkloadoptimizationV1MetricsFilterExpr MetricsFilterExpr is a recursive filter expression node. Exactly one of the oneof
+// fields must be set. Logical operators (and/or/not) compose sub-expressions; the
+// typed leaf matchers compare a single workload field, which lets the API enforce
+// value/field compatibility at the schema level.
+type WorkloadoptimizationV1MetricsFilterExpr struct {
+	And *WorkloadoptimizationV1MetricsFilterAnd `json:"and,omitempty"`
+
+	// Container StringMatch matches a string workload field. Exactly one operator must be set.
+	Container *WorkloadoptimizationV1StringMatch `json:"container,omitempty"`
+
+	// IsCustom BoolMatch matches a boolean workload field (currently only is_custom).
+	// Set eq to match the desired boolean value.
+	IsCustom *WorkloadoptimizationV1BoolMatch `json:"isCustom,omitempty"`
+
+	// Kind StringMatch matches a string workload field. Exactly one operator must be set.
+	Kind *WorkloadoptimizationV1StringMatch `json:"kind,omitempty"`
+
+	// Label LabelMatch selects workloads by Kubernetes label key and value.
+	Label *WorkloadoptimizationV1LabelMatch `json:"label,omitempty"`
+
+	// Name StringMatch matches a string workload field. Exactly one operator must be set.
+	Name *WorkloadoptimizationV1StringMatch `json:"name,omitempty"`
+
+	// Namespace StringMatch matches a string workload field. Exactly one operator must be set.
+	Namespace *WorkloadoptimizationV1StringMatch      `json:"namespace,omitempty"`
+	Not       *WorkloadoptimizationV1MetricsFilterNot `json:"not,omitempty"`
+	Or        *WorkloadoptimizationV1MetricsFilterOr  `json:"or,omitempty"`
+
+	// ScalingPolicyName StringMatch matches a string workload field. Exactly one operator must be set.
+	ScalingPolicyName *WorkloadoptimizationV1StringMatch `json:"scalingPolicyName,omitempty"`
+
+	// WorkloadId WorkloadIDMatch matches a CAST AI workload UUID (equality only).
+	WorkloadId *WorkloadoptimizationV1WorkloadIDMatch `json:"workloadId,omitempty"`
+}
+
+// WorkloadoptimizationV1MetricsFilterNot defines model for workloadoptimization.v1.MetricsFilterNot.
+type WorkloadoptimizationV1MetricsFilterNot struct {
+	// Child MetricsFilterExpr is a recursive filter expression node. Exactly one of the oneof
+	// fields must be set. Logical operators (and/or/not) compose sub-expressions; the
+	// typed leaf matchers compare a single workload field, which lets the API enforce
+	// value/field compatibility at the schema level.
+	Child WorkloadoptimizationV1MetricsFilterExpr `json:"child"`
+}
+
+// WorkloadoptimizationV1MetricsFilterOr defines model for workloadoptimization.v1.MetricsFilterOr.
+type WorkloadoptimizationV1MetricsFilterOr struct {
+	Children []WorkloadoptimizationV1MetricsFilterExpr `json:"children"`
+}
+
+// WorkloadoptimizationV1MetricsGroupByDimension MetricsGroupByDimension enumerates the workload identity dimensions available for grouping results.
+type WorkloadoptimizationV1MetricsGroupByDimension string
+
+// WorkloadoptimizationV1MetricsMetricRef MetricsMetricRef references one metric with one rollup function.
+type WorkloadoptimizationV1MetricsMetricRef struct {
+	// Metric metric is the metric name. Supported values are not enforced as an enum so
+	// new internal or custom metrics can be added without proto changes. Send an
+	// unknown name and the server returns an InvalidArgument error.
+	//
+	// Pod metrics:
+	//   cpu_usage, memory_usage, cpu_request, memory_request, pod_count
+	// Recommendation metrics:
+	//   cpu_recommendation, memory_recommendation
+	// Probe metrics:
+	//   probe_success_rate, probe_failure_rate
+	// PSI metrics:
+	//   psi_cpu, psi_memory, psi_io
+	// JVM metrics:
+	//   jvm.memory.heap.used, jvm.memory.heap.committed,
+	//   jvm.memory.non_heap.used, jvm.memory.heap.allocated,
+	//   jvm.gc.pause_count, jvm.gc.pause_seconds, jvm.threads.live_threads,
+	//   jvm.heap_recommendation
+	// GPU metrics:
+	//   gpu.sm_active, gpu.framebuffer_used, gpu.memory_util,
+	//   gpu.dram_active, gpu.power_usage, gpu.temperature, gpu.tensor_active
+	Metric string `json:"metric"`
+
+	// Rollup rollup is the aggregation function to apply. Valid values:
+	//   Named aggregates: avg, min, max, sum
+	//   Percentiles:      p00–p99  (exactly two digits, e.g. p50, p90, p95, p99)
+	//   p100 is accepted as an alias for max.
+	Rollup string `json:"rollup"`
+}
+
+// WorkloadoptimizationV1MetricsNamedExpr MetricsNamedExpr is a named top-level metric expression.
+type WorkloadoptimizationV1MetricsNamedExpr struct {
+	// Expr MetricsExpr is a recursive expression node. Exactly one of the oneof fields must be set.
+	Expr WorkloadoptimizationV1MetricsExpr `json:"expr"`
+
+	// Name name is an optional alias for this expression used in the response series label.
+	Name *string `json:"name,omitempty"`
+}
+
+// WorkloadoptimizationV1MetricsPoint defines model for workloadoptimization.v1.MetricsPoint.
+type WorkloadoptimizationV1MetricsPoint struct {
+	Timestamp time.Time `json:"timestamp"`
+	Value     float64   `json:"value"`
+}
+
+// WorkloadoptimizationV1MetricsScalarOp MetricsScalarOp applies a constant scalar to a sub-expression.
+type WorkloadoptimizationV1MetricsScalarOp struct {
+	// Op MetricsScalarOpType enumerates operators for applying a scalar constant to a metric expression.
+	Op WorkloadoptimizationV1MetricsScalarOpType `json:"op"`
+
+	// Operand MetricsExpr is a recursive expression node. Exactly one of the oneof fields must be set.
+	Operand WorkloadoptimizationV1MetricsExpr `json:"operand"`
+	Scalar  float64                           `json:"scalar"`
+}
+
+// WorkloadoptimizationV1MetricsScalarOpType MetricsScalarOpType enumerates operators for applying a scalar constant to a metric expression.
+type WorkloadoptimizationV1MetricsScalarOpType string
+
+// WorkloadoptimizationV1MetricsSeries defines model for workloadoptimization.v1.MetricsSeries.
+type WorkloadoptimizationV1MetricsSeries struct {
+	// Dimensions dimensions holds the grouped field values in the same order as attributes.group_by.
+	Dimensions []WorkloadoptimizationV1MetricsSeriesDimension `json:"dimensions"`
+
+	// ExprName expr_name echoes the MetricsNamedExpr.name for this series.
+	// If the request expression is empty or unnamed, this field returns an empty string.
+	ExprName string                               `json:"exprName"`
+	Points   []WorkloadoptimizationV1MetricsPoint `json:"points"`
+}
+
+// WorkloadoptimizationV1MetricsSeriesDimension defines model for workloadoptimization.v1.MetricsSeriesDimension.
+type WorkloadoptimizationV1MetricsSeriesDimension struct {
+	// Dimension MetricsGroupByDimension enumerates the workload identity dimensions available for grouping results.
+	Dimension WorkloadoptimizationV1MetricsGroupByDimension `json:"dimension"`
+	Value     string                                        `json:"value"`
+}
 
 // WorkloadoptimizationV1MigrateClusterToHPAV2Response defines model for workloadoptimization.v1.MigrateClusterToHPAV2Response.
 type WorkloadoptimizationV1MigrateClusterToHPAV2Response = map[string]interface{}
@@ -10577,6 +10844,11 @@ type WorkloadoptimizationV1PredictiveScaling struct {
 // WorkloadoptimizationV1PredictiveScalingSettings defines model for workloadoptimization.v1.PredictiveScalingSettings.
 type WorkloadoptimizationV1PredictiveScalingSettings struct {
 	Cpu *WorkloadoptimizationV1PredictiveScaling `json:"cpu,omitempty"`
+}
+
+// WorkloadoptimizationV1QueryWorkloadMetricsResponse defines model for workloadoptimization.v1.QueryWorkloadMetricsResponse.
+type WorkloadoptimizationV1QueryWorkloadMetricsResponse struct {
+	Series []WorkloadoptimizationV1MetricsSeries `json:"series"`
 }
 
 // WorkloadoptimizationV1RecommendationError defines model for workloadoptimization.v1.RecommendationError.
@@ -11146,6 +11418,23 @@ type WorkloadoptimizationV1StartupSettings struct {
 	TwoPhaseRecommendations *WorkloadoptimizationV1TwoPhaseRecommendations `json:"twoPhaseRecommendations,omitempty"`
 }
 
+// WorkloadoptimizationV1StringList StringList is a list of string values used for IN / NOT_IN operators.
+type WorkloadoptimizationV1StringList struct {
+	Values []string `json:"values"`
+}
+
+// WorkloadoptimizationV1StringMatch StringMatch matches a string workload field. Exactly one operator must be set.
+type WorkloadoptimizationV1StringMatch struct {
+	Eq *string `json:"eq,omitempty"`
+
+	// In StringList is a list of string values used for IN / NOT_IN operators.
+	In *WorkloadoptimizationV1StringList `json:"in,omitempty"`
+	Ne *string                           `json:"ne,omitempty"`
+
+	// NotIn StringList is a list of string values used for IN / NOT_IN operators.
+	NotIn *WorkloadoptimizationV1StringList `json:"notIn,omitempty"`
+}
+
 // WorkloadoptimizationV1SummaryConfidence defines model for workloadoptimization.v1.SummaryConfidence.
 type WorkloadoptimizationV1SummaryConfidence struct {
 	Threshold *float64 `json:"threshold,omitempty"`
@@ -11462,6 +11751,11 @@ type WorkloadoptimizationV1WorkloadEventWorkload struct {
 	Kind      string `json:"kind"`
 	Name      string `json:"name"`
 	Namespace string `json:"namespace"`
+}
+
+// WorkloadoptimizationV1WorkloadIDMatch WorkloadIDMatch matches a CAST AI workload UUID (equality only).
+type WorkloadoptimizationV1WorkloadIDMatch struct {
+	Eq string `json:"eq"`
 }
 
 // WorkloadoptimizationV1WorkloadMetricContainer defines model for workloadoptimization.v1.WorkloadMetricContainer.
@@ -13288,6 +13582,9 @@ type WorkloadOptimizationAPIAssignScalingPolicyWorkloadsJSONRequestBody = Worklo
 
 // WorkloadOptimizationAPIResetSystemOverridesJSONRequestBody defines body for WorkloadOptimizationAPIResetSystemOverrides for application/json ContentType.
 type WorkloadOptimizationAPIResetSystemOverridesJSONRequestBody = WorkloadOptimizationAPIResetSystemOverridesRequest
+
+// WorkloadOptimizationAPIQueryWorkloadMetricsJSONRequestBody defines body for WorkloadOptimizationAPIQueryWorkloadMetrics for application/json ContentType.
+type WorkloadOptimizationAPIQueryWorkloadMetricsJSONRequestBody = WorkloadOptimizationAPIQueryWorkloadMetricsRequest
 
 // WorkloadOptimizationAPIPatchWorkloadV2JSONRequestBody defines body for WorkloadOptimizationAPIPatchWorkloadV2 for application/json ContentType.
 type WorkloadOptimizationAPIPatchWorkloadV2JSONRequestBody = WorkloadOptimizationAPIPatchWorkloadV2Request

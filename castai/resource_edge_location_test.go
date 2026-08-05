@@ -15,7 +15,7 @@ import (
 
 func TestAccCloudAgnostic_ResourceEdgeLocationOCI(t *testing.T) {
 	rName := fmt.Sprintf("%v-edge-loc-%v", ResourcePrefix, acctest.RandString(8))
-	clusterName := "test-oci-cluster"
+	clusterName := fmt.Sprintf("omni-tf-oci-%v", acctest.RandString(6))
 	resourceName := "castai_edge_location.test"
 
 	resource.Test(t, resource.TestCase{
@@ -113,7 +113,7 @@ resource "castai_edge_location" "test" {
 func TestAccCloudAgnostic_ResourceEdgeLocationAWSImpersonation(t *testing.T) {
 	rName := fmt.Sprintf("%v-edge-loc-%v", ResourcePrefix, acctest.RandString(8))
 	resourceName := "castai_edge_location.test"
-	clusterName := "omni-tf-acc-aws-imp"
+	clusterName := fmt.Sprintf("omni-tf-acc-aws-imp-%v", acctest.RandString(6))
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
@@ -187,12 +187,12 @@ func TestAccCloudAgnostic_ResourceEdgeLocationAWSImpersonation(t *testing.T) {
 func TestAccCloudAgnostic_ResourceEdgeLocationGCPImpersonation(t *testing.T) {
 	rName := fmt.Sprintf("%v-edge-loc-%v", ResourcePrefix, acctest.RandString(8))
 	resourceName := "castai_edge_location.test"
-	clusterName := "omni-tf-acc-el-gcp"
+	clusterName := fmt.Sprintf("omni-tf-acc-el-gcp-%v", acctest.RandString(6))
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
-		CheckDestroy:             testAccCheckEdgeLocationDestroy,
+		CheckDestroy:             testAccCheckEdgeResourcesDestroy(testAccCheckEdgeLocationDestroy),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccEdgeLocationGCPImpersonationConfig(rName, clusterName),
@@ -443,7 +443,7 @@ func TestAccCloudAgnostic_ResourceEdgeLocationCustom(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
-		CheckDestroy:             testAccCheckEdgeLocationDestroy,
+		CheckDestroy:             testAccCheckEdgeResourcesDestroy(testAccCheckEdgeLocationDestroy),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccEdgeLocationCustomConfig(rName, clusterName),
