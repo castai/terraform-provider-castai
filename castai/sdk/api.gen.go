@@ -8408,6 +8408,11 @@ type RuntimeV1GetAnomalyResponse struct {
 	Ticket  *RuntimeV1Ticket         `json:"ticket,omitempty"`
 }
 
+// RuntimeV1GetClusterKvisorVersionResponse defines model for runtime.v1.GetClusterKvisorVersionResponse.
+type RuntimeV1GetClusterKvisorVersionResponse struct {
+	Version *string `json:"version,omitempty"`
+}
+
 // RuntimeV1GetClusterWorkloadsNetflowResponse defines model for runtime.v1.GetClusterWorkloadsNetflowResponse.
 type RuntimeV1GetClusterWorkloadsNetflowResponse struct {
 	Items *[]RuntimeV1WorkloadNetflow `json:"items,omitempty"`

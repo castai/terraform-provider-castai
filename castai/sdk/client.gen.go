@@ -814,6 +814,9 @@ type ClientInterface interface {
 	// RuntimeSecurityAPIGetRuntimeEventsProcessTree request
 	RuntimeSecurityAPIGetRuntimeEventsProcessTree(ctx context.Context, clusterId string, params *RuntimeSecurityAPIGetRuntimeEventsProcessTreeParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// RuntimeSecurityAPIGetClusterKvisorVersion request
+	RuntimeSecurityAPIGetClusterKvisorVersion(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// RuntimeSecurityAPIGetLists request
 	RuntimeSecurityAPIGetLists(ctx context.Context, params *RuntimeSecurityAPIGetListsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -4200,6 +4203,18 @@ func (c *Client) RuntimeSecurityAPIGetRuntimeEventGroups(ctx context.Context, pa
 
 func (c *Client) RuntimeSecurityAPIGetRuntimeEventsProcessTree(ctx context.Context, clusterId string, params *RuntimeSecurityAPIGetRuntimeEventsProcessTreeParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewRuntimeSecurityAPIGetRuntimeEventsProcessTreeRequest(c.Server, clusterId, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) RuntimeSecurityAPIGetClusterKvisorVersion(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewRuntimeSecurityAPIGetClusterKvisorVersionRequest(c.Server, clusterId)
 	if err != nil {
 		return nil, err
 	}
@@ -17450,6 +17465,40 @@ func NewRuntimeSecurityAPIGetRuntimeEventsProcessTreeRequest(server string, clus
 	return req, nil
 }
 
+// NewRuntimeSecurityAPIGetClusterKvisorVersionRequest generates requests for RuntimeSecurityAPIGetClusterKvisorVersion
+func NewRuntimeSecurityAPIGetClusterKvisorVersionRequest(server string, clusterId string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "clusterId", runtime.ParamLocationPath, clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/security/runtime/kvisor-version/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
 // NewRuntimeSecurityAPIGetListsRequest generates requests for RuntimeSecurityAPIGetLists
 func NewRuntimeSecurityAPIGetListsRequest(server string, params *RuntimeSecurityAPIGetListsParams) (*http.Request, error) {
 	var err error
@@ -22591,6 +22640,9 @@ type ClientWithResponsesInterface interface {
 
 	// RuntimeSecurityAPIGetRuntimeEventsProcessTree request
 	RuntimeSecurityAPIGetRuntimeEventsProcessTreeWithResponse(ctx context.Context, clusterId string, params *RuntimeSecurityAPIGetRuntimeEventsProcessTreeParams) (*RuntimeSecurityAPIGetRuntimeEventsProcessTreeResponse, error)
+
+	// RuntimeSecurityAPIGetClusterKvisorVersion request
+	RuntimeSecurityAPIGetClusterKvisorVersionWithResponse(ctx context.Context, clusterId string) (*RuntimeSecurityAPIGetClusterKvisorVersionResponse, error)
 
 	// RuntimeSecurityAPIGetLists request
 	RuntimeSecurityAPIGetListsWithResponse(ctx context.Context, params *RuntimeSecurityAPIGetListsParams) (*RuntimeSecurityAPIGetListsResponse, error)
@@ -28779,6 +28831,36 @@ func (r RuntimeSecurityAPIGetRuntimeEventsProcessTreeResponse) GetBody() []byte 
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
+type RuntimeSecurityAPIGetClusterKvisorVersionResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *RuntimeV1GetClusterKvisorVersionResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r RuntimeSecurityAPIGetClusterKvisorVersionResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r RuntimeSecurityAPIGetClusterKvisorVersionResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r RuntimeSecurityAPIGetClusterKvisorVersionResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
 type RuntimeSecurityAPIGetListsResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -33029,6 +33111,15 @@ func (c *ClientWithResponses) RuntimeSecurityAPIGetRuntimeEventsProcessTreeWithR
 		return nil, err
 	}
 	return ParseRuntimeSecurityAPIGetRuntimeEventsProcessTreeResponse(rsp)
+}
+
+// RuntimeSecurityAPIGetClusterKvisorVersionWithResponse request returning *RuntimeSecurityAPIGetClusterKvisorVersionResponse
+func (c *ClientWithResponses) RuntimeSecurityAPIGetClusterKvisorVersionWithResponse(ctx context.Context, clusterId string) (*RuntimeSecurityAPIGetClusterKvisorVersionResponse, error) {
+	rsp, err := c.RuntimeSecurityAPIGetClusterKvisorVersion(ctx, clusterId)
+	if err != nil {
+		return nil, err
+	}
+	return ParseRuntimeSecurityAPIGetClusterKvisorVersionResponse(rsp)
 }
 
 // RuntimeSecurityAPIGetListsWithResponse request returning *RuntimeSecurityAPIGetListsResponse
@@ -38901,6 +38992,32 @@ func ParseRuntimeSecurityAPIGetRuntimeEventsProcessTreeResponse(rsp *http.Respon
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest RuntimeV1GetRuntimeEventsProcessTreeResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseRuntimeSecurityAPIGetClusterKvisorVersionResponse parses an HTTP response from a RuntimeSecurityAPIGetClusterKvisorVersionWithResponse call
+func ParseRuntimeSecurityAPIGetClusterKvisorVersionResponse(rsp *http.Response) (*RuntimeSecurityAPIGetClusterKvisorVersionResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &RuntimeSecurityAPIGetClusterKvisorVersionResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest RuntimeV1GetClusterKvisorVersionResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
