@@ -3,6 +3,7 @@ package castai
 import (
 	"context"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"net/http"
 	"testing"
 	"time"
@@ -16,7 +17,7 @@ import (
 
 func TestAccCloudAgnostic_ResourceOmniCluster(t *testing.T) {
 	resourceName := "castai_omni_cluster.test"
-	clusterName := "omni-tf-acc-cluster"
+	clusterName := fmt.Sprintf("omni-tf-acc-cluster-%v", acctest.RandString(6))
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
