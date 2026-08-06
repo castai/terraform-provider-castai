@@ -121,6 +121,9 @@ func TestAccGKE_ResourceWorkloadScalingPolicy(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "memory.0.limit.0.type", "NO_LIMIT"),
 					resource.TestCheckResourceAttr(resourceName, "memory.0.management_option", "READ_ONLY"),
 					resource.TestCheckResourceAttr(resourceName, "startup.0.period_seconds", "123"),
+					resource.TestCheckResourceAttr(resourceName, "startup.0.two_phase_recommendations.0.enabled", "true"),
+					resource.TestCheckResourceAttr(resourceName, "startup.0.two_phase_recommendations.0.requests_on_startup.0.cpu_cores", "0.5"),
+					resource.TestCheckResourceAttr(resourceName, "startup.0.two_phase_recommendations.0.requests_on_startup.0.memory_gib", "0.5"),
 					resource.TestCheckResourceAttr(resourceName, "downscaling.0.apply_type", "DEFERRED"),
 					resource.TestCheckResourceAttr(resourceName, "memory_event.0.apply_type", "DEFERRED"),
 					resource.TestCheckResourceAttr(resourceName, "confidence.0.threshold", "0.6"),
@@ -421,6 +424,13 @@ func scalingPolicyConfigUpdated(clusterName, projectID, name string) string {
 		}
 		startup {
 			period_seconds = 123
+			two_phase_recommendations {
+				enabled = true
+				requests_on_startup {
+					cpu_cores  = 0.5
+					memory_gib = 0.5
+				}
+			}
 		}
 	    downscaling {
 		    apply_type = "DEFERRED"
@@ -1270,6 +1280,234 @@ func Test_toRolloutBehaviorMap(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			r := require.New(t)
 			got := toRolloutBehaviorMap(tt.args)
+			r.Equal(tt.exp, got)
+		})
+	}
+}
+
+func Test_toStartup(t *testing.T) {
+	tests := map[string]struct {
+		args map[string]any
+		exp  *sdk.WorkloadoptimizationV1StartupSettings
+	}{
+		"should return startup settings when only period_seconds is set": {
+			args: map[string]any{
+				"period_seconds": 300,
+			},
+			exp: &sdk.WorkloadoptimizationV1StartupSettings{
+				PeriodSeconds: lo.ToPtr(int32(300)),
+			},
+		},
+		"should return startup settings when two_phase_recommendations is enabled": {
+			args: map[string]any{
+				FieldStartupTwoPhaseRecommendations: []any{
+					map[string]any{
+						FieldStartupTwoPhaseRecommendationsEnabled: true,
+					},
+				},
+			},
+			exp: &sdk.WorkloadoptimizationV1StartupSettings{
+				TwoPhaseRecommendations: &sdk.WorkloadoptimizationV1TwoPhaseRecommendations{
+					Enabled: true,
+				},
+			},
+		},
+		"should return startup settings when two_phase_recommendations is disabled": {
+			args: map[string]any{
+				FieldStartupTwoPhaseRecommendations: []any{
+					map[string]any{
+						FieldStartupTwoPhaseRecommendationsEnabled: false,
+					},
+				},
+			},
+			exp: &sdk.WorkloadoptimizationV1StartupSettings{
+				TwoPhaseRecommendations: &sdk.WorkloadoptimizationV1TwoPhaseRecommendations{
+					Enabled: false,
+				},
+			},
+		},
+		"should return startup settings when two_phase_recommendations has requests_on_startup": {
+			args: map[string]any{
+				FieldStartupTwoPhaseRecommendations: []any{
+					map[string]any{
+						FieldStartupTwoPhaseRecommendationsEnabled: true,
+						FieldStartupTwoPhaseRecommendationsRequestsOnStartup: []any{
+							map[string]any{
+								FieldStartupTwoPhaseRecommendationsCpuCores:  0.5,
+								FieldStartupTwoPhaseRecommendationsMemoryGib: 1.5,
+							},
+						},
+					},
+				},
+			},
+			exp: &sdk.WorkloadoptimizationV1StartupSettings{
+				TwoPhaseRecommendations: &sdk.WorkloadoptimizationV1TwoPhaseRecommendations{
+					Enabled: true,
+					RequestsOnStartup: &sdk.WorkloadoptimizationV1ResourceQuantity{
+						CpuCores:  lo.ToPtr(0.5),
+						MemoryGib: lo.ToPtr(1.5),
+					},
+				},
+			},
+		},
+		"should return startup settings when period_seconds and two_phase_recommendations are set": {
+			args: map[string]any{
+				"period_seconds": 600,
+				FieldStartupTwoPhaseRecommendations: []any{
+					map[string]any{
+						FieldStartupTwoPhaseRecommendationsEnabled: true,
+						FieldStartupTwoPhaseRecommendationsRequestsOnStartup: []any{
+							map[string]any{
+								FieldStartupTwoPhaseRecommendationsCpuCores:  2.0,
+								FieldStartupTwoPhaseRecommendationsMemoryGib: 4.0,
+							},
+						},
+					},
+				},
+			},
+			exp: &sdk.WorkloadoptimizationV1StartupSettings{
+				PeriodSeconds: lo.ToPtr(int32(600)),
+				TwoPhaseRecommendations: &sdk.WorkloadoptimizationV1TwoPhaseRecommendations{
+					Enabled: true,
+					RequestsOnStartup: &sdk.WorkloadoptimizationV1ResourceQuantity{
+						CpuCores:  lo.ToPtr(2.0),
+						MemoryGib: lo.ToPtr(4.0),
+					},
+				},
+			},
+		},
+		"should return nil when map is empty": {
+			args: map[string]any{},
+			exp:  nil,
+		},
+		"should return nil when map is nil": {
+			args: nil,
+			exp:  nil,
+		},
+	}
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			r := require.New(t)
+			got := toStartup(tt.args)
+			r.Equal(tt.exp, got)
+		})
+	}
+}
+
+func Test_toStartupMap(t *testing.T) {
+	tests := map[string]struct {
+		args *sdk.WorkloadoptimizationV1StartupSettings
+		exp  []map[string]any
+	}{
+		"should return startup map when period_seconds is set": {
+			args: &sdk.WorkloadoptimizationV1StartupSettings{
+				PeriodSeconds: lo.ToPtr(int32(300)),
+			},
+			exp: []map[string]any{
+				{
+					"period_seconds": 300,
+				},
+			},
+		},
+		"should return startup map when two_phase_recommendations is enabled": {
+			args: &sdk.WorkloadoptimizationV1StartupSettings{
+				TwoPhaseRecommendations: &sdk.WorkloadoptimizationV1TwoPhaseRecommendations{
+					Enabled: true,
+				},
+			},
+			exp: []map[string]any{
+				{
+					FieldStartupTwoPhaseRecommendations: []map[string]any{
+						{
+							FieldStartupTwoPhaseRecommendationsEnabled: true,
+						},
+					},
+				},
+			},
+		},
+		"should return startup map when two_phase_recommendations is disabled": {
+			args: &sdk.WorkloadoptimizationV1StartupSettings{
+				TwoPhaseRecommendations: &sdk.WorkloadoptimizationV1TwoPhaseRecommendations{
+					Enabled: false,
+				},
+			},
+			exp: []map[string]any{
+				{
+					FieldStartupTwoPhaseRecommendations: []map[string]any{
+						{
+							FieldStartupTwoPhaseRecommendationsEnabled: false,
+						},
+					},
+				},
+			},
+		},
+		"should return startup map when two_phase_recommendations has requests_on_startup": {
+			args: &sdk.WorkloadoptimizationV1StartupSettings{
+				TwoPhaseRecommendations: &sdk.WorkloadoptimizationV1TwoPhaseRecommendations{
+					Enabled: true,
+					RequestsOnStartup: &sdk.WorkloadoptimizationV1ResourceQuantity{
+						CpuCores:  lo.ToPtr(0.5),
+						MemoryGib: lo.ToPtr(1.5),
+					},
+				},
+			},
+			exp: []map[string]any{
+				{
+					FieldStartupTwoPhaseRecommendations: []map[string]any{
+						{
+							FieldStartupTwoPhaseRecommendationsEnabled: true,
+							FieldStartupTwoPhaseRecommendationsRequestsOnStartup: []map[string]any{
+								{
+									FieldStartupTwoPhaseRecommendationsCpuCores:  0.5,
+									FieldStartupTwoPhaseRecommendationsMemoryGib: 1.5,
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		"should return startup map when period_seconds and two_phase_recommendations are set": {
+			args: &sdk.WorkloadoptimizationV1StartupSettings{
+				PeriodSeconds: lo.ToPtr(int32(600)),
+				TwoPhaseRecommendations: &sdk.WorkloadoptimizationV1TwoPhaseRecommendations{
+					Enabled: true,
+					RequestsOnStartup: &sdk.WorkloadoptimizationV1ResourceQuantity{
+						CpuCores:  lo.ToPtr(2.0),
+						MemoryGib: lo.ToPtr(4.0),
+					},
+				},
+			},
+			exp: []map[string]any{
+				{
+					"period_seconds": 600,
+					FieldStartupTwoPhaseRecommendations: []map[string]any{
+						{
+							FieldStartupTwoPhaseRecommendationsEnabled: true,
+							FieldStartupTwoPhaseRecommendationsRequestsOnStartup: []map[string]any{
+								{
+									FieldStartupTwoPhaseRecommendationsCpuCores:  2.0,
+									FieldStartupTwoPhaseRecommendationsMemoryGib: 4.0,
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		"should return nil when input is nil": {
+			args: nil,
+			exp:  nil,
+		},
+		"should return nil when settings are empty": {
+			args: &sdk.WorkloadoptimizationV1StartupSettings{},
+			exp:  nil,
+		},
+	}
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			r := require.New(t)
+			got := toStartupMap(tt.args)
 			r.Equal(tt.exp, got)
 		})
 	}

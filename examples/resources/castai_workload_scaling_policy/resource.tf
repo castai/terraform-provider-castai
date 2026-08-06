@@ -60,6 +60,13 @@ resource "castai_workload_scaling_policy" "services" {
   }
   startup {
     period_seconds = 240
+    two_phase_recommendations {
+      enabled = true
+      requests_on_startup {
+        cpu_cores  = 0.5
+        memory_gib = 1.5
+      }
+    }
   }
   downscaling {
     apply_type = "DEFERRED"
