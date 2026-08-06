@@ -510,12 +510,12 @@ func workloadScalingPolicyResourceSchema(resource, function string, overhead, mi
 				Optional: true,
 				MaxItems: 1,
 				Description: "Resource apply threshold strategy settings. " +
-					"The default strategy is `PERCENTAGE` with percentage value set to 0.1.",
+					"The default strategy is `PERCENTAGE` with percentage value set to 0.1. " +
+					"When both apply_threshold and apply_threshold_strategy are set, apply_threshold_strategy takes precedence.",
 				Elem: workloadScalingPolicyResourceApplyThresholdStrategySchema(),
 				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 					return suppressThresholdStrategyDefaultValueDiff(resource, old, new, d)
 				},
-				ConflictsWith: []string{fmt.Sprintf("%s.0.%s", resource, DeprecatedFieldApplyThreshold)},
 			},
 			"look_back_period_seconds": {
 				Type:             schema.TypeInt,
@@ -1253,15 +1253,19 @@ func toConstraintStrategy(obj map[string]any) (*sdk.WorkloadoptimizationV1Constr
 }
 
 func resolveApplyThresholdStrategy(obj map[string]any) (*sdk.WorkloadoptimizationV1ApplyThresholdStrategy, error) {
-	if v, ok := obj[DeprecatedFieldApplyThreshold].(float64); ok && v > 0 {
-		return toWorkloadResourcePercentageThresholdStrategy(v), nil
-	}
+	// Prefer apply_threshold_strategy when present. The eks-cluster module historically always
+	// sets deprecated apply_threshold (default 0.1); if strategy is also set, strategy wins.
 	if v, ok := obj[FieldApplyThresholdStrategy].([]any); ok && len(v) > 0 {
 		out, err := toWorkloadResourceApplyThresholdStrategy(v[0].(map[string]any))
 		if err != nil {
 			return nil, fmt.Errorf("field %q: %w", FieldApplyThresholdStrategy, err)
 		}
-		return out, nil
+		if out != nil {
+			return out, nil
+		}
+	}
+	if v, ok := obj[DeprecatedFieldApplyThreshold].(float64); ok && v > 0 {
+		return toWorkloadResourcePercentageThresholdStrategy(v), nil
 	}
 
 	return toWorkloadResourcePercentageThresholdStrategy(defaultApplyThresholdPercentage), nil
