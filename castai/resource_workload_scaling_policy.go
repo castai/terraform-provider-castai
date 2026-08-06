@@ -1860,7 +1860,7 @@ func toHpaConverters(in []any) *[]sdk.WorkloadoptimizationV1HPAConverters {
 }
 
 func toHpaConvertersMap(s *[]sdk.WorkloadoptimizationV1HPAConverters) []map[string]any {
-	if s == nil {
+	if s == nil || len(*s) == 0 {
 		return nil
 	}
 	result := make([]map[string]any, len(*s))

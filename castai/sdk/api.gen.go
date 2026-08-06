@@ -2930,6 +2930,7 @@ type CastaiInventoryV1beta1Region struct {
 	Csp                *string                             `json:"csp,omitempty"`
 	DisplayName        *string                             `json:"displayName,omitempty"`
 	Id                 *string                             `json:"id,omitempty"`
+	Key                *string                             `json:"key"`
 	Name               *string                             `json:"name,omitempty"`
 	UnavailabilityTime *time.Time                          `json:"unavailabilityTime"`
 	UpdateTime         *time.Time                          `json:"updateTime,omitempty"`
@@ -7818,6 +7819,7 @@ type NodetemplatesV1TemplateConstraints struct {
 
 	// FallbackRestoreRateSeconds Fallback restore rate in seconds: defines how much time should pass before spot fallback should be attempted to be restored to real spot.
 	FallbackRestoreRateSeconds *int32                                                       `json:"fallbackRestoreRateSeconds"`
+	Gcp                        *NodetemplatesV1TemplateConstraintsGCPConstraints            `json:"gcp,omitempty"`
 	Gpu                        *NodetemplatesV1TemplateConstraintsGPUConstraints            `json:"gpu,omitempty"`
 	InstanceFamilies           *NodetemplatesV1TemplateConstraintsInstanceFamilyConstraints `json:"instanceFamilies,omitempty"`
 
@@ -7934,6 +7936,13 @@ type NodetemplatesV1TemplateConstraintsDedicatedNodeAffinity struct {
 	// If not set, no minimum GPU count filtering is applied.
 	MinGpusPerNode *int32  `json:"minGpusPerNode"`
 	Name           *string `json:"name,omitempty"`
+}
+
+// NodetemplatesV1TemplateConstraintsGCPConstraints defines model for nodetemplates.v1.TemplateConstraints.GCPConstraints.
+type NodetemplatesV1TemplateConstraintsGCPConstraints struct {
+	// CapacityReservationIds GCP capacity reservation IDs (numeric) that this template is allowed to use.
+	// Only applies to specific (targeted) reservations; automatic reservations are always available.
+	CapacityReservationIds *[]string `json:"capacityReservationIds,omitempty"`
 }
 
 // NodetemplatesV1TemplateConstraintsGPUConstraints defines model for nodetemplates.v1.TemplateConstraints.GPUConstraints.
@@ -8406,6 +8415,11 @@ type RuntimeV1GetAnomalyResponse struct {
 	Anomaly *RuntimeV1Anomaly        `json:"anomaly,omitempty"`
 	Events  *[]RuntimeV1AnomalyEvent `json:"events,omitempty"`
 	Ticket  *RuntimeV1Ticket         `json:"ticket,omitempty"`
+}
+
+// RuntimeV1GetClusterKvisorVersionResponse defines model for runtime.v1.GetClusterKvisorVersionResponse.
+type RuntimeV1GetClusterKvisorVersionResponse struct {
+	Version *string `json:"version,omitempty"`
 }
 
 // RuntimeV1GetClusterWorkloadsNetflowResponse defines model for runtime.v1.GetClusterWorkloadsNetflowResponse.
