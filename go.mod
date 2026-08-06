@@ -132,6 +132,3 @@ require (
 )
 
 exclude github.com/satori/go.uuid v1.2.0
-
-// go-getter pulls mock v1.6, which makes DoAndReturn enforce variadic RequestEditorFn arity and breaks existing unit tests.
-replace github.com/golang/mock => github.com/golang/mock v1.5.0
