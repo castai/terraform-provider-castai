@@ -15,6 +15,7 @@ import (
 	"github.com/castai/terraform-provider-castai/castai/sdk/omni"
 	"github.com/castai/terraform-provider-castai/castai/sdk/organization_management"
 	"github.com/castai/terraform-provider-castai/castai/sdk/patching_engine"
+	"github.com/castai/terraform-provider-castai/castai/sdk/pricing"
 )
 
 type ProviderConfig struct {
@@ -24,6 +25,7 @@ type ProviderConfig struct {
 	omniAPI                      *omni.ClientWithResponses
 	aiOptimizerClient            ai_optimizer.ClientWithResponsesInterface
 	patchingEngineClient         patching_engine.ClientWithResponsesInterface
+	pricingClient                pricing.ClientWithResponsesInterface
 	organizationID               string
 }
 
@@ -158,6 +160,11 @@ func providerConfigure(version string) schema.ConfigureContextFunc {
 			return nil, diag.FromErr(err)
 		}
 
+		pricingClient, err := pricing.CreateClient(apiURL, apiToken, agent)
+		if err != nil {
+			return nil, diag.FromErr(err)
+		}
+
 		return &ProviderConfig{
 			api:                          client,
 			clusterAutoscalerClient:      clusterAutoscalerClient,
@@ -165,6 +172,7 @@ func providerConfigure(version string) schema.ConfigureContextFunc {
 			omniAPI:                      omniClient,
 			aiOptimizerClient:            aiOptimizerClient,
 			patchingEngineClient:         patchingEngineClient,
+			pricingClient:                pricingClient,
 			organizationID:               organizationID,
 		}, nil
 	}

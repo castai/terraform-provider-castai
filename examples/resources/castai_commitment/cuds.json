@@ -1,0 +1,26 @@
+[
+  {
+    "cud_id": "123456789",
+    "name": "prod-cud-us-central1-e2",
+    "region": "us-central1",
+    "plan": "TWELVE_MONTH",
+    "type": "GENERAL_PURPOSE_E2",
+    "cpu": 32,
+    "memory_mb": 131072,
+    "status": "ACTIVE",
+    "start_time": "2026-01-01T00:00:00Z",
+    "end_time": "2027-01-01T00:00:00Z"
+  },
+  {
+    "cud_id": "987654321",
+    "name": "prod-cud-us-east1-c2d",
+    "region": "us-east1",
+    "plan": "THIRTY_SIX_MONTH",
+    "type": "COMPUTE_OPTIMIZED_C2D",
+    "cpu": 64,
+    "memory_mb": 262144,
+    "status": "ACTIVE",
+    "start_time": "2026-01-01T00:00:00Z",
+    "end_time": "2029-01-01T00:00:00Z"
+  }
+]
