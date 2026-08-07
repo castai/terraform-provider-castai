@@ -86,6 +86,12 @@ const (
 	FieldCpuStallThresholdPercentage                      = "cpu_stall_threshold_percentage"
 	FieldMinPressuredPodPercentage                        = "min_pressured_pod_percentage"
 	FieldConstraints                                      = "constraints"
+
+	FieldStartupTwoPhaseRecommendations                  = "two_phase_recommendations"
+	FieldStartupTwoPhaseRecommendationsEnabled           = "enabled"
+	FieldStartupTwoPhaseRecommendationsRequestsOnStartup = "requests_on_startup"
+	FieldStartupTwoPhaseRecommendationsCpuCores          = "cpu_cores"
+	FieldStartupTwoPhaseRecommendationsMemoryGib         = "memory_gib"
 )
 
 const (
@@ -242,6 +248,41 @@ It can be either:
 							Optional:         true,
 							Description:      "Defines the duration (in seconds) during which elevated resource usage is expected at startup.\nWhen set, recommendations will be adjusted to disregard resource spikes within this period.\nIf not specified, the workload will receive standard recommendations without startup considerations.",
 							ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(120, 3600)),
+						},
+						FieldStartupTwoPhaseRecommendations: {
+							Type:        schema.TypeList,
+							Optional:    true,
+							MaxItems:    1,
+							Description: "Defines two-phase recommendations settings for the startup period.",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									FieldStartupTwoPhaseRecommendationsEnabled: {
+										Type:        schema.TypeBool,
+										Required:    true,
+										Description: "Defines whether two-phase recommendations are enabled during startup.",
+									},
+									FieldStartupTwoPhaseRecommendationsRequestsOnStartup: {
+										Type:        schema.TypeList,
+										Optional:    true,
+										MaxItems:    1,
+										Description: "Defines the resource requests to use during startup.",
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												FieldStartupTwoPhaseRecommendationsCpuCores: {
+													Type:        schema.TypeFloat,
+													Optional:    true,
+													Description: "CPU cores to request during startup.",
+												},
+												FieldStartupTwoPhaseRecommendationsMemoryGib: {
+													Type:        schema.TypeFloat,
+													Optional:    true,
+													Description: "Memory in GiB to request during startup.",
+												},
+											},
+										},
+									},
+								},
+							},
 						},
 					},
 				},
@@ -1718,7 +1759,40 @@ func toStartup(startup map[string]any) *sdk.WorkloadoptimizationV1StartupSetting
 		result.PeriodSeconds = lo.ToPtr(int32(v))
 	}
 
+	if v, ok := startup[FieldStartupTwoPhaseRecommendations].([]any); ok && len(v) > 0 {
+		if tpr, ok := v[0].(map[string]any); ok && len(tpr) > 0 {
+			result.TwoPhaseRecommendations = toTwoPhaseRecommendations(tpr)
+		}
+	}
+
 	return result
+}
+
+func toTwoPhaseRecommendations(obj map[string]any) *sdk.WorkloadoptimizationV1TwoPhaseRecommendations {
+	out := &sdk.WorkloadoptimizationV1TwoPhaseRecommendations{}
+
+	if v, ok := obj[FieldStartupTwoPhaseRecommendationsEnabled].(bool); ok {
+		out.Enabled = v
+	}
+
+	if v, ok := obj[FieldStartupTwoPhaseRecommendationsRequestsOnStartup].([]any); ok && len(v) > 0 {
+		if rq, ok := v[0].(map[string]any); ok && len(rq) > 0 {
+			out.RequestsOnStartup = toResourceQuantity(rq)
+		}
+	}
+
+	return out
+}
+
+func toResourceQuantity(obj map[string]any) *sdk.WorkloadoptimizationV1ResourceQuantity {
+	out := &sdk.WorkloadoptimizationV1ResourceQuantity{}
+	if v, ok := obj[FieldStartupTwoPhaseRecommendationsCpuCores].(float64); ok {
+		out.CpuCores = lo.ToPtr(v)
+	}
+	if v, ok := obj[FieldStartupTwoPhaseRecommendationsMemoryGib].(float64); ok {
+		out.MemoryGib = lo.ToPtr(v)
+	}
+	return out
 }
 
 func toStartupMap(s *sdk.WorkloadoptimizationV1StartupSettings) []map[string]any {
@@ -1730,6 +1804,46 @@ func toStartupMap(s *sdk.WorkloadoptimizationV1StartupSettings) []map[string]any
 
 	if s.PeriodSeconds != nil {
 		m["period_seconds"] = int(*s.PeriodSeconds)
+	}
+
+	if s.TwoPhaseRecommendations != nil {
+		m[FieldStartupTwoPhaseRecommendations] = toTwoPhaseRecommendationsMap(s.TwoPhaseRecommendations)
+	}
+
+	if len(m) == 0 {
+		return nil
+	}
+
+	return []map[string]any{m}
+}
+
+func toTwoPhaseRecommendationsMap(tpr *sdk.WorkloadoptimizationV1TwoPhaseRecommendations) []map[string]any {
+	if tpr == nil {
+		return nil
+	}
+
+	m := map[string]any{
+		FieldStartupTwoPhaseRecommendationsEnabled: tpr.Enabled,
+	}
+
+	if tpr.RequestsOnStartup != nil {
+		m[FieldStartupTwoPhaseRecommendationsRequestsOnStartup] = toResourceQuantityMap(tpr.RequestsOnStartup)
+	}
+
+	return []map[string]any{m}
+}
+
+func toResourceQuantityMap(rq *sdk.WorkloadoptimizationV1ResourceQuantity) []map[string]any {
+	if rq == nil {
+		return nil
+	}
+
+	m := map[string]any{}
+	if rq.CpuCores != nil {
+		m[FieldStartupTwoPhaseRecommendationsCpuCores] = *rq.CpuCores
+	}
+	if rq.MemoryGib != nil {
+		m[FieldStartupTwoPhaseRecommendationsMemoryGib] = *rq.MemoryGib
 	}
 
 	if len(m) == 0 {

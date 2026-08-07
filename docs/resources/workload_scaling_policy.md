@@ -77,6 +77,13 @@ resource "castai_workload_scaling_policy" "services" {
   }
   startup {
     period_seconds = 240
+    two_phase_recommendations {
+      enabled = true
+      requests_on_startup {
+        cpu_cores  = 0.5
+        memory_gib = 1.5
+      }
+    }
   }
   downscaling {
     apply_type = "DEFERRED"
@@ -517,6 +524,28 @@ Optional:
 - `period_seconds` (Number) Defines the duration (in seconds) during which elevated resource usage is expected at startup.
 When set, recommendations will be adjusted to disregard resource spikes within this period.
 If not specified, the workload will receive standard recommendations without startup considerations.
+- `two_phase_recommendations` (Block List, Max: 1) Defines two-phase recommendations settings for the startup period. (see [below for nested schema](#nestedblock--startup--two_phase_recommendations))
+
+<a id="nestedblock--startup--two_phase_recommendations"></a>
+### Nested Schema for `startup.two_phase_recommendations`
+
+Required:
+
+- `enabled` (Boolean) Defines whether two-phase recommendations are enabled during startup.
+
+Optional:
+
+- `requests_on_startup` (Block List, Max: 1) Defines the resource requests to use during startup. (see [below for nested schema](#nestedblock--startup--two_phase_recommendations--requests_on_startup))
+
+<a id="nestedblock--startup--two_phase_recommendations--requests_on_startup"></a>
+### Nested Schema for `startup.two_phase_recommendations.requests_on_startup`
+
+Optional:
+
+- `cpu_cores` (Number) CPU cores to request during startup.
+- `memory_gib` (Number) Memory in GiB to request during startup.
+
+
 
 
 <a id="nestedblock--timeouts"></a>
