@@ -4415,6 +4415,26 @@ func (mr *MockClientInterfaceMockRecorder) RuntimeSecurityAPIGetAnomalyEvents(ct
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPIGetAnomalyEvents", reflect.TypeOf((*MockClientInterface)(nil).RuntimeSecurityAPIGetAnomalyEvents), varargs...)
 }
 
+// RuntimeSecurityAPIGetClusterKvisorVersion mocks base method.
+func (m *MockClientInterface) RuntimeSecurityAPIGetClusterKvisorVersion(ctx context.Context, clusterId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPIGetClusterKvisorVersion", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPIGetClusterKvisorVersion indicates an expected call of RuntimeSecurityAPIGetClusterKvisorVersion.
+func (mr *MockClientInterfaceMockRecorder) RuntimeSecurityAPIGetClusterKvisorVersion(ctx, clusterId interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPIGetClusterKvisorVersion", reflect.TypeOf((*MockClientInterface)(nil).RuntimeSecurityAPIGetClusterKvisorVersion), varargs...)
+}
+
 // RuntimeSecurityAPIGetClusterWorkloadsNetflow mocks base method.
 func (m *MockClientInterface) RuntimeSecurityAPIGetClusterWorkloadsNetflow(ctx context.Context, clusterId string, params *sdk.RuntimeSecurityAPIGetClusterWorkloadsNetflowParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
@@ -14691,6 +14711,41 @@ func (m *MockClientWithResponsesInterface) RuntimeSecurityAPIGetAnomalyWithRespo
 func (mr *MockClientWithResponsesInterfaceMockRecorder) RuntimeSecurityAPIGetAnomalyWithResponse(ctx, id interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPIGetAnomalyWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RuntimeSecurityAPIGetAnomalyWithResponse), ctx, id)
+}
+
+// RuntimeSecurityAPIGetClusterKvisorVersion mocks base method.
+func (m *MockClientWithResponsesInterface) RuntimeSecurityAPIGetClusterKvisorVersion(ctx context.Context, clusterId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPIGetClusterKvisorVersion", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPIGetClusterKvisorVersion indicates an expected call of RuntimeSecurityAPIGetClusterKvisorVersion.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RuntimeSecurityAPIGetClusterKvisorVersion(ctx, clusterId interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPIGetClusterKvisorVersion", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RuntimeSecurityAPIGetClusterKvisorVersion), varargs...)
+}
+
+// RuntimeSecurityAPIGetClusterKvisorVersionWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) RuntimeSecurityAPIGetClusterKvisorVersionWithResponse(ctx context.Context, clusterId string) (*sdk.RuntimeSecurityAPIGetClusterKvisorVersionResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPIGetClusterKvisorVersionWithResponse", ctx, clusterId)
+	ret0, _ := ret[0].(*sdk.RuntimeSecurityAPIGetClusterKvisorVersionResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPIGetClusterKvisorVersionWithResponse indicates an expected call of RuntimeSecurityAPIGetClusterKvisorVersionWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RuntimeSecurityAPIGetClusterKvisorVersionWithResponse(ctx, clusterId interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPIGetClusterKvisorVersionWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RuntimeSecurityAPIGetClusterKvisorVersionWithResponse), ctx, clusterId)
 }
 
 // RuntimeSecurityAPIGetClusterWorkloadsNetflow mocks base method.

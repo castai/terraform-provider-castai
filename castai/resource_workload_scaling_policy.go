@@ -49,40 +49,43 @@ const (
 )
 
 const (
-	FieldLimitStrategy                             = "limit"
-	FieldLimitStrategyType                         = "type"
-	FieldLimitStrategyMultiplier                   = "multiplier"
-	FieldLimitStrategyOnlyIfOriginalExist          = "only_if_original_exist"
-	FieldLimitStrategyOnlyIfOriginalLower          = "only_if_original_lower"
-	FieldConfidence                                = "confidence"
-	FieldExcludedContainers                        = "excluded_containers"
-	FieldRolloutBehavior                           = "rollout_behavior"
-	FieldRolloutBehaviorType                       = "type"
-	FieldRolloutBehaviorNoDisruptionType           = "NO_DISRUPTION"
-	FieldRolloutBehaviorUnspecifiedType            = "UNSPECIFIED"
-	FieldRolloutBehaviorPreferOneByOneType         = "prefer_one_by_one"
-	FieldRolloutBehaviorDelaySeconds               = "delay_seconds"
-	FieldJVM                                       = "jvm"
-	FieldPredictiveScaling                         = "predictive_scaling"
-	FieldMemoryEvent                               = "memory_event"
-	FieldApplyType                                 = "apply_type"
-	FieldConfidenceThreshold                       = "threshold"
-	DeprecatedFieldApplyThreshold                  = "apply_threshold"
-	FieldApplyThresholdStrategy                    = "apply_threshold_strategy"
-	FieldApplyThresholdStrategyType                = "type"
-	FieldApplyThresholdStrategyPercentage          = "percentage"
-	FieldApplyThresholdStrategyNumerator           = "numerator"
-	FieldApplyThresholdStrategyDenominator         = "denominator"
-	FieldApplyThresholdStrategyExponent            = "exponent"
-	FieldApplyThresholdStrategyPercentageType      = "PERCENTAGE"
-	FieldApplyThresholdStrategyDefaultAdaptiveType = "DEFAULT_ADAPTIVE"
-	FieldApplyThresholdStrategyCustomAdaptiveType  = "CUSTOM_ADAPTIVE"
-	FieldAssignmentRules                           = "assignment_rules"
-	FieldAnomalyDetection                          = "anomaly_detection"
-	FieldAnomalyDetectionCpuPressure               = "cpu_pressure"
-	FieldCpuStallThresholdPercentage               = "cpu_stall_threshold_percentage"
-	FieldMinPressuredPodPercentage                 = "min_pressured_pod_percentage"
-	FieldConstraints                               = "constraints"
+	FieldLimitStrategy                                    = "limit"
+	FieldLimitStrategyType                                = "type"
+	FieldLimitStrategyMultiplier                          = "multiplier"
+	FieldLimitStrategyOnlyIfOriginalExist                 = "only_if_original_exist"
+	FieldLimitStrategyOnlyIfOriginalLower                 = "only_if_original_lower"
+	FieldConfidence                                       = "confidence"
+	FieldExcludedContainers                               = "excluded_containers"
+	FieldHpaConverters                                    = "hpa_converters"
+	FieldHpaConverterType                                 = "type"
+	FieldHpaConverterTypeAverageValueFromOriginalRequests = "AVERAGE_VALUE_FROM_ORIGINAL_REQUESTS"
+	FieldRolloutBehavior                                  = "rollout_behavior"
+	FieldRolloutBehaviorType                              = "type"
+	FieldRolloutBehaviorNoDisruptionType                  = "NO_DISRUPTION"
+	FieldRolloutBehaviorUnspecifiedType                   = "UNSPECIFIED"
+	FieldRolloutBehaviorPreferOneByOneType                = "prefer_one_by_one"
+	FieldRolloutBehaviorDelaySeconds                      = "delay_seconds"
+	FieldJVM                                              = "jvm"
+	FieldPredictiveScaling                                = "predictive_scaling"
+	FieldMemoryEvent                                      = "memory_event"
+	FieldApplyType                                        = "apply_type"
+	FieldConfidenceThreshold                              = "threshold"
+	DeprecatedFieldApplyThreshold                         = "apply_threshold"
+	FieldApplyThresholdStrategy                           = "apply_threshold_strategy"
+	FieldApplyThresholdStrategyType                       = "type"
+	FieldApplyThresholdStrategyPercentage                 = "percentage"
+	FieldApplyThresholdStrategyNumerator                  = "numerator"
+	FieldApplyThresholdStrategyDenominator                = "denominator"
+	FieldApplyThresholdStrategyExponent                   = "exponent"
+	FieldApplyThresholdStrategyPercentageType             = "PERCENTAGE"
+	FieldApplyThresholdStrategyDefaultAdaptiveType        = "DEFAULT_ADAPTIVE"
+	FieldApplyThresholdStrategyCustomAdaptiveType         = "CUSTOM_ADAPTIVE"
+	FieldAssignmentRules                                  = "assignment_rules"
+	FieldAnomalyDetection                                 = "anomaly_detection"
+	FieldAnomalyDetectionCpuPressure                      = "cpu_pressure"
+	FieldCpuStallThresholdPercentage                      = "cpu_stall_threshold_percentage"
+	FieldMinPressuredPodPercentage                        = "min_pressured_pod_percentage"
+	FieldConstraints                                      = "constraints"
 )
 
 const (
@@ -212,6 +215,21 @@ It can be either:
 				Optional:    true,
 				Description: "Defines containers to be excluded from receiving recommendations. The containers are matched by exact name.",
 				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
+			FieldHpaConverters: {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Description: "Configuration for converting existing HPAs when VPA is the sole optimization. If HPA management is enabled, it takes precedence over this setting.",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						FieldHpaConverterType: {
+							Type:             schema.TypeString,
+							Required:         true,
+							Description:      "HPA converter type. AVERAGE_VALUE_FROM_ORIGINAL_REQUESTS converts HPA utilization (%) targets to AverageValue using workload container requests.",
+							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{FieldHpaConverterTypeAverageValueFromOriginalRequests}, false)),
+						},
+					},
+				},
 			},
 			"startup": {
 				Type:     schema.TypeList,
@@ -775,6 +793,8 @@ func resourceWorkloadScalingPolicyCreate(ctx context.Context, d *schema.Resource
 
 	req.RecommendationPolicies.ExcludedContainers = toExcludedContainers(d)
 
+	req.RecommendationPolicies.HpaConverters = toHpaConverters(d.Get(FieldHpaConverters).([]any))
+
 	ar, err := toAssignmentRules(toSection(d, FieldAssignmentRules))
 	if err != nil {
 		return diag.FromErr(err)
@@ -895,6 +915,9 @@ func fetchScalingPolicy(ctx context.Context, d *schema.ResourceData, meta any) (
 	if err := d.Set(FieldExcludedContainers, sp.RecommendationPolicies.ExcludedContainers); err != nil {
 		return nil, fmt.Errorf("setting excluded containers: %w", err)
 	}
+	if err := d.Set(FieldHpaConverters, toHpaConvertersMap(sp.RecommendationPolicies.HpaConverters)); err != nil {
+		return nil, fmt.Errorf("setting hpa converters: %w", err)
+	}
 	if err := d.Set(FieldConfidence, toConfidenceMap(sp.RecommendationPolicies.Confidence)); err != nil {
 		return nil, fmt.Errorf("setting confidence: %w", err)
 	}
@@ -959,6 +982,7 @@ func updateScalingPolicy(ctx context.Context, d *schema.ResourceData, meta any) 
 		FieldJVM,
 		FieldAnomalyDetection,
 		FieldExcludedContainers,
+		FieldHpaConverters,
 	) {
 		tflog.Info(ctx, "scaling policy up to date")
 		return nil, nil
@@ -997,6 +1021,7 @@ func updateScalingPolicy(ctx context.Context, d *schema.ResourceData, meta any) 
 			Jvm:                toJvm(toSection(d, FieldJVM)),
 			AnomalyDetection:   toAnomalyDetection(toSection(d, FieldAnomalyDetection)),
 			ExcludedContainers: toExcludedContainers(d),
+			HpaConverters:      toHpaConverters(d.Get(FieldHpaConverters).([]any)),
 		},
 	}
 
@@ -1808,6 +1833,43 @@ func toAntiAffinityMap(s *sdk.WorkloadoptimizationV1AntiAffinitySettings) []map[
 	}
 
 	return []map[string]any{m}
+}
+
+func toHpaConverters(in []any) *[]sdk.WorkloadoptimizationV1HPAConverters {
+	if len(in) == 0 {
+		return nil
+	}
+	out := make([]sdk.WorkloadoptimizationV1HPAConverters, 0, len(in))
+	for _, v := range in {
+		m, ok := v.(map[string]any)
+		if !ok {
+			continue
+		}
+		converterType, ok := m[FieldHpaConverterType].(string)
+		if !ok {
+			continue
+		}
+		out = append(out, sdk.WorkloadoptimizationV1HPAConverters{
+			Type: sdk.WorkloadoptimizationV1HPAConverterType(converterType),
+		})
+	}
+	if len(out) == 0 {
+		return nil
+	}
+	return &out
+}
+
+func toHpaConvertersMap(s *[]sdk.WorkloadoptimizationV1HPAConverters) []map[string]any {
+	if s == nil || len(*s) == 0 {
+		return nil
+	}
+	result := make([]map[string]any, len(*s))
+	for i, elem := range *s {
+		result[i] = map[string]any{
+			FieldHpaConverterType: string(elem.Type),
+		}
+	}
+	return result
 }
 
 func toPredictiveScalingMap(s *sdk.WorkloadoptimizationV1PredictiveScalingSettings) []map[string]any {

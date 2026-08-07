@@ -80,6 +80,7 @@ func TestAccGKE_ResourceWorkloadScalingPolicy(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "assignment_rules.0.rules.1.workload.0.labels_expressions.0.values.1", "eu-west-2"),
 					resource.TestCheckResourceAttr(resourceName, "assignment_rules.0.rules.1.workload.0.labels_expressions.1.key", "helm.sh/chart"),
 					resource.TestCheckResourceAttr(resourceName, "assignment_rules.0.rules.1.workload.0.labels_expressions.1.operator", "Exists"),
+					resource.TestCheckResourceAttr(resourceName, "hpa_converters.0.type", FieldHpaConverterTypeAverageValueFromOriginalRequests),
 				),
 			},
 			{
@@ -135,6 +136,7 @@ func TestAccGKE_ResourceWorkloadScalingPolicy(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "jvm.0.memory.0.optimization", "true"),
 					resource.TestCheckResourceAttr(resourceName, "anomaly_detection.0.cpu_pressure.0.cpu_stall_threshold_percentage", "50"),
 					resource.TestCheckResourceAttr(resourceName, "anomaly_detection.0.cpu_pressure.0.min_pressured_pod_percentage", "30"),
+					resource.TestCheckResourceAttr(resourceName, "hpa_converters.0.type", FieldHpaConverterTypeAverageValueFromOriginalRequests),
 				),
 			},
 			// Final step: verify legacy fields still work by creating a new policy
@@ -280,6 +282,9 @@ func scalingPolicyConfig(clusterName, projectID, name string) string {
 		apply_type			= "IMMEDIATE"
 		management_option	= "READ_ONLY"
 		excluded_containers = ["a", "b"]
+		hpa_converters {
+			type = "AVERAGE_VALUE_FROM_ORIGINAL_REQUESTS"
+		}
 		confidence {
 			threshold = 0.4
 		}
@@ -356,6 +361,9 @@ func scalingPolicyConfigUpdated(clusterName, projectID, name string) string {
 		apply_type			= "IMMEDIATE"
 		management_option	= "MANAGED"
 		excluded_containers = ["a", "b"]
+		hpa_converters {
+			type = "AVERAGE_VALUE_FROM_ORIGINAL_REQUESTS"
+		}
 		assignment_rules {
 			rules {
 				namespace {
@@ -1476,6 +1484,101 @@ func Test_toJvmMap(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			r := require.New(t)
 			got := toJvmMap(tt.args)
+			r.Equal(tt.exp, got)
+		})
+	}
+}
+
+func Test_toHpaConverters(t *testing.T) {
+	tests := map[string]struct {
+		args []any
+		exp  *[]sdk.WorkloadoptimizationV1HPAConverters
+	}{
+		"should return nil for empty input": {
+			args: []any{},
+			exp:  nil,
+		},
+		"should return hpa converters with AVERAGE_VALUE_FROM_ORIGINAL_REQUESTS type": {
+			args: []any{
+				map[string]any{
+					FieldHpaConverterType: FieldHpaConverterTypeAverageValueFromOriginalRequests,
+				},
+			},
+			exp: &[]sdk.WorkloadoptimizationV1HPAConverters{
+				{Type: sdk.WorkloadoptimizationV1HPAConverterType(FieldHpaConverterTypeAverageValueFromOriginalRequests)},
+			},
+		},
+		"should return multiple hpa converters": {
+			args: []any{
+				map[string]any{FieldHpaConverterType: FieldHpaConverterTypeAverageValueFromOriginalRequests},
+				map[string]any{FieldHpaConverterType: FieldHpaConverterTypeAverageValueFromOriginalRequests},
+			},
+			exp: &[]sdk.WorkloadoptimizationV1HPAConverters{
+				{Type: sdk.WorkloadoptimizationV1HPAConverterType(FieldHpaConverterTypeAverageValueFromOriginalRequests)},
+				{Type: sdk.WorkloadoptimizationV1HPAConverterType(FieldHpaConverterTypeAverageValueFromOriginalRequests)},
+			},
+		},
+		"should skip entries that are not a map[string]any": {
+			args: []any{
+				"not-a-map",
+				map[string]any{FieldHpaConverterType: FieldHpaConverterTypeAverageValueFromOriginalRequests},
+			},
+			exp: &[]sdk.WorkloadoptimizationV1HPAConverters{
+				{Type: sdk.WorkloadoptimizationV1HPAConverterType(FieldHpaConverterTypeAverageValueFromOriginalRequests)},
+			},
+		},
+		"should skip entries where type field is not a string": {
+			args: []any{
+				map[string]any{FieldHpaConverterType: 123},
+				map[string]any{FieldHpaConverterType: FieldHpaConverterTypeAverageValueFromOriginalRequests},
+			},
+			exp: &[]sdk.WorkloadoptimizationV1HPAConverters{
+				{Type: sdk.WorkloadoptimizationV1HPAConverterType(FieldHpaConverterTypeAverageValueFromOriginalRequests)},
+			},
+		},
+		"should return nil when all entries are invalid": {
+			args: []any{
+				"not-a-map",
+				map[string]any{FieldHpaConverterType: 123},
+				map[string]any{"other": "value"},
+			},
+			exp: nil,
+		},
+	}
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			r := require.New(t)
+			got := toHpaConverters(tt.args)
+			r.Equal(tt.exp, got)
+			if tt.exp != nil {
+				r.Len(*got, len(*tt.exp))
+			}
+		})
+	}
+}
+
+func Test_toHpaConvertersMap(t *testing.T) {
+	tests := map[string]struct {
+		args *[]sdk.WorkloadoptimizationV1HPAConverters
+		exp  []map[string]any
+	}{
+		"should return nil for nil input": {
+			args: nil,
+			exp:  nil,
+		},
+		"should return hpa converters map with AVERAGE_VALUE_FROM_ORIGINAL_REQUESTS type": {
+			args: &[]sdk.WorkloadoptimizationV1HPAConverters{
+				{Type: sdk.WorkloadoptimizationV1HPAConverterType(FieldHpaConverterTypeAverageValueFromOriginalRequests)},
+			},
+			exp: []map[string]any{
+				{FieldHpaConverterType: FieldHpaConverterTypeAverageValueFromOriginalRequests},
+			},
+		},
+	}
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			r := require.New(t)
+			got := toHpaConvertersMap(tt.args)
 			r.Equal(tt.exp, got)
 		})
 	}

@@ -41,6 +41,11 @@ resource "castai_workload_scaling_policy" "services" {
       }
     }
   }
+
+  hpa_converters {
+    type = "AVERAGE_VALUE_FROM_ORIGINAL_REQUESTS"
+  }
+
   cpu {
     function = "QUANTILE"
     overhead = 0.15
@@ -127,6 +132,7 @@ resource "castai_workload_scaling_policy" "services" {
 - `confidence` (Block List, Max: 1) Defines the confidence settings for applying recommendations. (see [below for nested schema](#nestedblock--confidence))
 - `downscaling` (Block List, Max: 1) (see [below for nested schema](#nestedblock--downscaling))
 - `excluded_containers` (List of String) Defines containers to be excluded from receiving recommendations. The containers are matched by exact name.
+- `hpa_converters` (Block List) Configuration for converting existing HPAs when VPA is the sole optimization. If HPA management is enabled, it takes precedence over this setting. (see [below for nested schema](#nestedblock--hpa_converters))
 - `jvm` (Block List, Max: 1) JVM optimization settings. (see [below for nested schema](#nestedblock--jvm))
 - `memory_event` (Block List, Max: 1) (see [below for nested schema](#nestedblock--memory_event))
 - `predictive_scaling` (Block List, Max: 1) (see [below for nested schema](#nestedblock--predictive_scaling))
@@ -438,6 +444,14 @@ Optional:
 - `apply_type` (String) Defines the apply type to be used when downscaling.
 	- IMMEDIATE - pods are restarted immediately when new recommendation is generated.
 	- DEFERRED - pods are not restarted and recommendation values are applied during natural restarts only (new deployment, etc.)
+
+
+<a id="nestedblock--hpa_converters"></a>
+### Nested Schema for `hpa_converters`
+
+Required:
+
+- `type` (String) HPA converter type. AVERAGE_VALUE_FROM_ORIGINAL_REQUESTS converts HPA utilization (%) targets to AverageValue using workload container requests.
 
 
 <a id="nestedblock--jvm"></a>
