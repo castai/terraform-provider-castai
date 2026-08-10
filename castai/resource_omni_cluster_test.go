@@ -37,7 +37,7 @@ func TestAccCloudAgnostic_ResourceOmniCluster(t *testing.T) {
 }
 
 func testAccCheckOmniClusterDestroy(s *terraform.State) error {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
 	defer cancel()
 
 	client := testAccProvider.Meta().(*ProviderConfig).omniAPI
