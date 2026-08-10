@@ -125,6 +125,9 @@ func TestNodeTemplateResourceReadContext(t *testing.T) {
 	              "resourceLimits": {
                     "cpuLimitEnabled": true,
                     "cpuLimitMaxCores": 20
+                  },
+				  "gcp": {
+                    "capacityReservationIds": ["123", "456"]
                   }
 				},
 				"version": "3",
@@ -255,6 +258,10 @@ constraints.0.storage_optimized = false
 constraints.0.storage_optimized_state = enabled
 constraints.0.use_spot_fallbacks = false
 constraints.0.aws.# = 0
+constraints.0.gcp.# = 1
+constraints.0.gcp.0.capacity_reservation_ids.# = 2
+constraints.0.gcp.0.capacity_reservation_ids.0 = 123
+constraints.0.gcp.0.capacity_reservation_ids.1 = 456
 constraints.0.bare_metal = unspecified
 custom_instances_enabled = true
 custom_instances_with_extended_memory_enabled = true
@@ -1799,6 +1806,87 @@ func Test_toTemplateConstraintsAWSConstraints(t *testing.T) {
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
 			got := toTemplateConstraintsAWSConstraints(tt.input)
+			require.Equal(t, tt.want, got)
+		})
+	}
+}
+
+func Test_flattenGCPConstraints(t *testing.T) {
+	tests := []struct {
+		name  string
+		input *sdk.NodetemplatesV1TemplateConstraintsGCPConstraints
+		want  []map[string]any
+	}{
+		{
+			name:  "nil input returns nil",
+			input: nil,
+			want:  nil,
+		},
+		{
+			name:  "empty constraints",
+			input: &sdk.NodetemplatesV1TemplateConstraintsGCPConstraints{},
+			want:  []map[string]any{{}},
+		},
+		{
+			name: "single capacity reservation id",
+			input: &sdk.NodetemplatesV1TemplateConstraintsGCPConstraints{
+				CapacityReservationIds: &[]string{"1234567890"},
+			},
+			want: []map[string]any{{
+				FieldNodeTemplateGCPCapacityReservationIds: []any{"1234567890"},
+			}},
+		},
+		{
+			name: "multiple capacity reservation ids",
+			input: &sdk.NodetemplatesV1TemplateConstraintsGCPConstraints{
+				CapacityReservationIds: &[]string{"1234567890", "9876543210"},
+			},
+			want: []map[string]any{{
+				FieldNodeTemplateGCPCapacityReservationIds: []any{"1234567890", "9876543210"},
+			}},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := flattenGCPConstraints(tt.input)
+			require.Equal(t, tt.want, got)
+		})
+	}
+}
+
+func Test_toTemplateConstraintsGCPConstraints(t *testing.T) {
+	tests := map[string]struct {
+		input map[string]any
+		want  *sdk.NodetemplatesV1TemplateConstraintsGCPConstraints
+	}{
+		"nil input": {
+			input: nil,
+			want:  nil,
+		},
+		"empty constraints": {
+			input: map[string]any{},
+			want:  &sdk.NodetemplatesV1TemplateConstraintsGCPConstraints{},
+		},
+		"single capacity reservation id": {
+			input: map[string]any{
+				FieldNodeTemplateGCPCapacityReservationIds: []any{"1234567890"},
+			},
+			want: &sdk.NodetemplatesV1TemplateConstraintsGCPConstraints{
+				CapacityReservationIds: &[]string{"1234567890"},
+			},
+		},
+		"multiple capacity reservation ids": {
+			input: map[string]any{
+				FieldNodeTemplateGCPCapacityReservationIds: []any{"1234567890", "9876543210"},
+			},
+			want: &sdk.NodetemplatesV1TemplateConstraintsGCPConstraints{
+				CapacityReservationIds: &[]string{"1234567890", "9876543210"},
+			},
+		},
+	}
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			got := toTemplateConstraintsGCPConstraints(tt.input)
 			require.Equal(t, tt.want, got)
 		})
 	}
