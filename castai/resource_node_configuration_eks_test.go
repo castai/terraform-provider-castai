@@ -57,6 +57,10 @@ func TestAccEKS_ResourceNodeConfiguration(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "gke.#", "0"),
 					resource.TestCheckResourceAttr(resourceName, "eks.0.node_group_arn", "arn:aws:iam::000000000000:role/aws_node_group"),
 					resource.TestCheckResourceAttr(resourceName, "eks.0.threads_per_cpu", "1"),
+					resource.TestCheckResourceAttr(resourceName, "eks.0.local_storage.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "eks.0.local_storage.0.customer_managed.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "eks.0.local_storage.0.customer_managed.0.usable_percent", "100"),
+					resource.TestCheckResourceAttr(resourceName, "eks.0.local_storage.0.customer_managed.0.description", "all local NVMe"),
 				),
 			},
 			{
@@ -148,6 +152,12 @@ resource "castai_node_configuration" "test" {
 	    arn = "arn:aws:test"
     }
 		threads_per_cpu = 1
+		local_storage {
+		  customer_managed {
+		    usable_percent = 100
+		    description    = "all local NVMe"
+		  }
+		}
   }
 }
 
