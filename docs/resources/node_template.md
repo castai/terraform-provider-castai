@@ -121,6 +121,7 @@ Optional:
  the sole tenancy or dedicated node (example: setting min CPU to 16). (see [below for nested schema](#nestedblock--constraints--dedicated_node_affinity))
 - `enable_spot_diversity` (Boolean) Enable/disable spot diversity policy. When enabled, autoscaler will try to balance between diverse and cost optimal instance types.
 - `fallback_restore_rate_seconds` (Number) Fallback restore rate in seconds: defines how much time should pass before spot fallback should be attempted to be restored to real spot.
+- `gcp` (Block List, Max: 1) GCP-specific constraints for the node template. (see [below for nested schema](#nestedblock--constraints--gcp))
 - `gpu` (Block List, Max: 1) (see [below for nested schema](#nestedblock--constraints--gpu))
 - `instance_families` (Block List, Max: 1) (see [below for nested schema](#nestedblock--constraints--instance_families))
 - `is_gpu_only` (Boolean) GPU instance constraint - will only pick nodes with GPU if true
@@ -195,6 +196,14 @@ Required:
 - `operator` (String) Operator of the node affinity selector. Allowed values: In, NotIn, Exists, DoesNotExist, Gt, Lt.
 - `values` (List of String) Values of the node affinity selector.
 
+
+
+<a id="nestedblock--constraints--gcp"></a>
+### Nested Schema for `constraints.gcp`
+
+Optional:
+
+- `capacity_reservation_ids` (List of String) GCP capacity reservation IDs (numeric) that this template is allowed to use.
 
 
 <a id="nestedblock--constraints--gpu"></a>

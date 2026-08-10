@@ -100,6 +100,8 @@ const (
 	FieldNodeTemplateCapacityReservationId                    = "id"
 	FieldNodeTemplateCapacityResourceGroupArn                 = "capacity_resource_group_arn"
 	FieldNodeTemplateCapacityReservationType                  = "type"
+	FieldNodeTemplateGCPConstraints                           = "gcp"
+	FieldNodeTemplateGCPCapacityReservationIds                = "capacity_reservation_ids"
 )
 
 const (
@@ -686,6 +688,24 @@ func resourceNodeTemplate() *schema.Resource {
 							},
 							Description: "AWS-specific constraints for the node template.",
 						},
+						FieldNodeTemplateGCPConstraints: {
+							Type:     schema.TypeList,
+							MaxItems: 1,
+							Optional: true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									FieldNodeTemplateGCPCapacityReservationIds: {
+										Type:     schema.TypeList,
+										Optional: true,
+										Elem: &schema.Schema{
+											Type: schema.TypeString,
+										},
+										Description: "GCP capacity reservation IDs (numeric) that this template is allowed to use.",
+									},
+								},
+							},
+							Description: "GCP-specific constraints for the node template.",
+						},
 					},
 				},
 			},
@@ -1127,6 +1147,9 @@ func flattenConstraints(c *sdk.NodetemplatesV1TemplateConstraints) ([]map[string
 	if c.Aws != nil {
 		out[FieldNodeTemplateAWSConstraints] = flattenAWSConstraints(c.Aws)
 	}
+	if c.Gcp != nil {
+		out[FieldNodeTemplateGCPConstraints] = flattenGCPConstraints(c.Gcp)
+	}
 	if c.BareMetal != nil {
 		if lo.FromPtr(c.BareMetal) {
 			out[FieldNodeTemplateBareMetal] = True
@@ -1210,6 +1233,21 @@ func flattenAWSConstraints(aws *sdk.NodetemplatesV1TemplateConstraintsAWSConstra
 		reservations = append(reservations, m)
 	}
 	out[FieldNodeTemplateCapacityReservations] = reservations
+	return []map[string]any{out}
+}
+
+func flattenGCPConstraints(gcp *sdk.NodetemplatesV1TemplateConstraintsGCPConstraints) []map[string]any {
+	if gcp == nil {
+		return nil
+	}
+	out := map[string]any{}
+	if gcp.CapacityReservationIds != nil {
+		ids := make([]any, len(*gcp.CapacityReservationIds))
+		for i, id := range *gcp.CapacityReservationIds {
+			ids[i] = id
+		}
+		out[FieldNodeTemplateGCPCapacityReservationIds] = ids
+	}
 	return []map[string]any{out}
 }
 
@@ -1842,6 +1880,11 @@ func toTemplateConstraints(obj map[string]any) *sdk.NodetemplatesV1TemplateConst
 			out.Aws = toTemplateConstraintsAWSConstraints(val)
 		}
 	}
+	if v, ok := obj[FieldNodeTemplateGCPConstraints].([]any); ok && len(v) > 0 {
+		if val, ok := v[0].(map[string]any); ok {
+			out.Gcp = toTemplateConstraintsGCPConstraints(val)
+		}
+	}
 
 	if v, ok := obj[FieldNodeTemplateBareMetal].(string); ok {
 		switch v {
@@ -1988,6 +2031,18 @@ func toTemplateConstraintsAWSConstraints(o map[string]any) *sdk.NodetemplatesV1T
 		return r, true
 	})
 	out.CapacityReservations = &reservations
+	return out
+}
+
+func toTemplateConstraintsGCPConstraints(o map[string]any) *sdk.NodetemplatesV1TemplateConstraintsGCPConstraints {
+	if o == nil {
+		return nil
+	}
+	out := &sdk.NodetemplatesV1TemplateConstraintsGCPConstraints{}
+	if v, ok := o[FieldNodeTemplateGCPCapacityReservationIds].([]any); ok && len(v) > 0 {
+		ids := toStringList(v)
+		out.CapacityReservationIds = &ids
+	}
 	return out
 }
 
