@@ -3687,6 +3687,72 @@ type CastaiServiceaccountsV1beta1GetServiceAccountResponse struct {
 	ServiceAccount CastaiServiceaccountsV1beta1ServiceAccount `json:"serviceAccount"`
 }
 
+// CastaiServiceaccountsV1beta1ListOrganizationServiceAccountKeysResponse ListOrganizationServiceAccountKeysResponse is the response for listing all service account keys for an organization.
+type CastaiServiceaccountsV1beta1ListOrganizationServiceAccountKeysResponse struct {
+	// Keys Keys is the list of service account keys.
+	Keys *[]CastaiServiceaccountsV1beta1ListOrganizationServiceAccountKeysResponseKey `json:"keys,omitempty"`
+
+	// NextPage Page defines how many and which fields should be returned.
+	NextPage CastaiPaginationV1beta1Page `json:"nextPage"`
+
+	// TotalCount TotalCount is the total number of service account keys in the dataset.
+	TotalCount *string `json:"totalCount,omitempty"`
+}
+
+// CastaiServiceaccountsV1beta1ListOrganizationServiceAccountKeysResponseKey Key is a service account key with its parent service account context.
+type CastaiServiceaccountsV1beta1ListOrganizationServiceAccountKeysResponseKey struct {
+	// Active Active determines if the key is active.
+	Active *bool `json:"active,omitempty"`
+
+	// CreatedAt CreatedAt is the creation time of the key.
+	CreatedAt *time.Time `json:"createdAt,omitempty"`
+
+	// CreatedBy Author is the author of the service account.
+	CreatedBy *CastaiServiceaccountsV1beta1ServiceAccountAuthor `json:"createdBy,omitempty"`
+
+	// ExpiresAt ExpiresAt is the expiration time of the key.
+	ExpiresAt *time.Time `json:"expiresAt,omitempty"`
+
+	// Id ID is the unique identifier of the key.
+	Id *string `json:"id,omitempty"`
+
+	// LastUsedAt LastUsedAt is the last time the key was used.
+	LastUsedAt *time.Time `json:"lastUsedAt,omitempty"`
+
+	// Name Name is the name of the key.
+	Name *string `json:"name,omitempty"`
+
+	// Prefix Prefix is the prefix of the key.
+	Prefix *string `json:"prefix,omitempty"`
+
+	// ServiceAccount ServiceAccount is a summary of the parent service account for a key.
+	ServiceAccount *CastaiServiceaccountsV1beta1ListOrganizationServiceAccountKeysResponseServiceAccount `json:"serviceAccount,omitempty"`
+}
+
+// CastaiServiceaccountsV1beta1ListOrganizationServiceAccountKeysResponseServiceAccount ServiceAccount is a summary of the parent service account for a key.
+type CastaiServiceaccountsV1beta1ListOrganizationServiceAccountKeysResponseServiceAccount struct {
+	// Author Author is the author of the service account.
+	Author *CastaiServiceaccountsV1beta1ServiceAccountAuthor `json:"author,omitempty"`
+
+	// CreatedAt CreatedAt is the creation time of the service account.
+	CreatedAt *time.Time `json:"createdAt,omitempty"`
+
+	// Description Description is the description of the service account.
+	Description *string `json:"description,omitempty"`
+
+	// Email Email is the email of the service account.
+	Email *string `json:"email,omitempty"`
+
+	// Id ID is the unique identifier of the service account.
+	Id *string `json:"id,omitempty"`
+
+	// ManagedBy ManagedBy is the method used to create the service account, eg.: console, terraform.
+	ManagedBy *string `json:"managedBy,omitempty"`
+
+	// Name Name is the name of the service account.
+	Name *string `json:"name,omitempty"`
+}
+
 // CastaiServiceaccountsV1beta1ListServiceAccountKeysResponse ListServiceAccountKeysResponse is the response for listing service account keys.
 type CastaiServiceaccountsV1beta1ListServiceAccountKeysResponse struct {
 	// Keys Keys is the list of service account keys.
@@ -12732,6 +12798,15 @@ type ServiceAccountsAPIDeleteServiceAccountsParams struct {
 
 // ServiceAccountsAPIListServiceAccountsParams defines parameters for ServiceAccountsAPIListServiceAccounts.
 type ServiceAccountsAPIListServiceAccountsParams struct {
+	PageLimit *string `form:"page.limit,omitempty" json:"page.limit,omitempty"`
+
+	// PageCursor Cursor that defines token indicating where to start the next page.
+	// Empty value indicates to start from beginning of the dataset.
+	PageCursor *string `form:"page.cursor,omitempty" json:"page.cursor,omitempty"`
+}
+
+// ServiceAccountsAPIListOrganizationServiceAccountKeysParams defines parameters for ServiceAccountsAPIListOrganizationServiceAccountKeys.
+type ServiceAccountsAPIListOrganizationServiceAccountKeysParams struct {
 	PageLimit *string `form:"page.limit,omitempty" json:"page.limit,omitempty"`
 
 	// PageCursor Cursor that defines token indicating where to start the next page.

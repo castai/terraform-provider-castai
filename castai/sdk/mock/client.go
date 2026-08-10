@@ -5595,6 +5595,26 @@ func (mr *MockClientInterfaceMockRecorder) ServiceAccountsAPIGetServiceAccountKe
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ServiceAccountsAPIGetServiceAccountKey", reflect.TypeOf((*MockClientInterface)(nil).ServiceAccountsAPIGetServiceAccountKey), varargs...)
 }
 
+// ServiceAccountsAPIListOrganizationServiceAccountKeys mocks base method.
+func (m *MockClientInterface) ServiceAccountsAPIListOrganizationServiceAccountKeys(ctx context.Context, organizationId string, params *sdk.ServiceAccountsAPIListOrganizationServiceAccountKeysParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ServiceAccountsAPIListOrganizationServiceAccountKeys", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ServiceAccountsAPIListOrganizationServiceAccountKeys indicates an expected call of ServiceAccountsAPIListOrganizationServiceAccountKeys.
+func (mr *MockClientInterfaceMockRecorder) ServiceAccountsAPIListOrganizationServiceAccountKeys(ctx, organizationId, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ServiceAccountsAPIListOrganizationServiceAccountKeys", reflect.TypeOf((*MockClientInterface)(nil).ServiceAccountsAPIListOrganizationServiceAccountKeys), varargs...)
+}
+
 // ServiceAccountsAPIListServiceAccountKeys mocks base method.
 func (m *MockClientInterface) ServiceAccountsAPIListServiceAccountKeys(ctx context.Context, organizationId, serviceAccountId string, params *sdk.ServiceAccountsAPIListServiceAccountKeysParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
@@ -16776,6 +16796,41 @@ func (m *MockClientWithResponsesInterface) ServiceAccountsAPIGetServiceAccountWi
 func (mr *MockClientWithResponsesInterfaceMockRecorder) ServiceAccountsAPIGetServiceAccountWithResponse(ctx, organizationId, serviceAccountId interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ServiceAccountsAPIGetServiceAccountWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ServiceAccountsAPIGetServiceAccountWithResponse), ctx, organizationId, serviceAccountId)
+}
+
+// ServiceAccountsAPIListOrganizationServiceAccountKeys mocks base method.
+func (m *MockClientWithResponsesInterface) ServiceAccountsAPIListOrganizationServiceAccountKeys(ctx context.Context, organizationId string, params *sdk.ServiceAccountsAPIListOrganizationServiceAccountKeysParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ServiceAccountsAPIListOrganizationServiceAccountKeys", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ServiceAccountsAPIListOrganizationServiceAccountKeys indicates an expected call of ServiceAccountsAPIListOrganizationServiceAccountKeys.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ServiceAccountsAPIListOrganizationServiceAccountKeys(ctx, organizationId, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ServiceAccountsAPIListOrganizationServiceAccountKeys", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ServiceAccountsAPIListOrganizationServiceAccountKeys), varargs...)
+}
+
+// ServiceAccountsAPIListOrganizationServiceAccountKeysWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) ServiceAccountsAPIListOrganizationServiceAccountKeysWithResponse(ctx context.Context, organizationId string, params *sdk.ServiceAccountsAPIListOrganizationServiceAccountKeysParams) (*sdk.ServiceAccountsAPIListOrganizationServiceAccountKeysResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ServiceAccountsAPIListOrganizationServiceAccountKeysWithResponse", ctx, organizationId, params)
+	ret0, _ := ret[0].(*sdk.ServiceAccountsAPIListOrganizationServiceAccountKeysResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ServiceAccountsAPIListOrganizationServiceAccountKeysWithResponse indicates an expected call of ServiceAccountsAPIListOrganizationServiceAccountKeysWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ServiceAccountsAPIListOrganizationServiceAccountKeysWithResponse(ctx, organizationId, params interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ServiceAccountsAPIListOrganizationServiceAccountKeysWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ServiceAccountsAPIListOrganizationServiceAccountKeysWithResponse), ctx, organizationId, params)
 }
 
 // ServiceAccountsAPIListServiceAccountKeys mocks base method.
