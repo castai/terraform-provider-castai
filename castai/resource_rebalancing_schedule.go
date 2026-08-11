@@ -104,8 +104,8 @@ func resourceRebalancingSchedule() *schema.Resource {
 						"num_targeted_nodes": {
 							Type:             schema.TypeInt,
 							Optional:         true,
-							ValidateDiagFunc: validation.ToDiagFunc(validation.IntAtLeast(1)),
-							Description:      "Maximum number of nodes that will be selected for rebalancing.",
+							ValidateDiagFunc: validation.ToDiagFunc(validation.IntAtLeast(0)),
+							Description:      "Maximum number of nodes that will be selected for rebalancing. 0 means all nodes in the cluster can be selected.",
 						},
 						"rebalancing_min_nodes": {
 							Type:             schema.TypeInt,

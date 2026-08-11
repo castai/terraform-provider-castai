@@ -88,7 +88,7 @@ Optional:
 - `execution_conditions` (Block List, Max: 1) (see [below for nested schema](#nestedblock--launch_configuration--execution_conditions))
 - `keep_drain_timeout_nodes` (Boolean) Defines whether the nodes that failed to get drained until a predefined timeout, will be kept with a rebalancing.cast.ai/status=drain-failed annotation instead of forcefully drained.
 - `node_ttl_seconds` (Number) Specifies amount of time since node creation before the node is allowed to be considered for automated rebalancing.
-- `num_targeted_nodes` (Number) Maximum number of nodes that will be selected for rebalancing.
+- `num_targeted_nodes` (Number) Maximum number of nodes that will be selected for rebalancing. 0 means all nodes in the cluster can be selected.
 - `rebalancing_min_nodes` (Number) Minimum number of nodes that should be kept in the cluster after rebalancing.
 - `selector` (String) Node selector in JSON format.
 - `target_node_selection_algorithm` (String) Defines the algorithm used to select the target nodes for rebalancing.
