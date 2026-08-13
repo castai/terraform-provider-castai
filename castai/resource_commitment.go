@@ -24,6 +24,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
+	"github.com/cenkalti/backoff/v4"
+
 	"github.com/castai/terraform-provider-castai/castai/sdk/pricing"
 )
 
@@ -871,7 +873,7 @@ func (r *genericCommitmentResource) Create(ctx context.Context, req resource.Cre
 		return
 	}
 
-	apiResp, err := r.client.pricingClient.CommitmentsAPICreateCommitmentWithResponse(ctx, organizationID, input)
+	apiResp, err := r.createCommitmentWithRetry(ctx, organizationID, input)
 	if err != nil {
 		resp.Diagnostics.AddError("Failed to create commitment", err.Error())
 		return
@@ -936,6 +938,66 @@ func saveCreatedState(ctx context.Context, resp *resource.CreateResponse, plan *
 	resp.Diagnostics.Append(resp.State.Set(ctx, plan)...)
 }
 
+// getCommitmentWithRetry wraps the GetCommitment API call with exponential
+// backoff to handle transient 5xx errors that the backend occasionally
+// returns under concurrent load (e.g. during terraform refresh/destroy
+// which reads multiple commitments in parallel).
+func (r *genericCommitmentResource) getCommitmentWithRetry(ctx context.Context, organizationID, commitmentID string) (*pricing.CommitmentsAPIGetCommitmentResponse, error) {
+	b := backoff.WithContext(backoff.NewExponentialBackOff(), ctx)
+	var apiResp *pricing.CommitmentsAPIGetCommitmentResponse
+	err := backoff.Retry(func() error {
+		resp, err := r.client.pricingClient.CommitmentsAPIGetCommitmentWithResponse(ctx, organizationID, commitmentID)
+		if err != nil {
+			return err
+		}
+		// Retry on transient server errors (500, 502, 503, 504).
+		if resp.StatusCode() >= 500 {
+			return fmt.Errorf("transient server error: status=%d body=%s", resp.StatusCode(), string(resp.Body))
+		}
+		apiResp = resp
+		return nil
+	}, b)
+	return apiResp, err
+}
+
+// createCommitmentWithRetry wraps the CreateCommitment API call with
+// exponential backoff for the same transient 5xx reason.
+func (r *genericCommitmentResource) createCommitmentWithRetry(ctx context.Context, organizationID string, input pricing.CreateCommitmentInput) (*pricing.CommitmentsAPICreateCommitmentResponse, error) {
+	b := backoff.WithContext(backoff.NewExponentialBackOff(), ctx)
+	var apiResp *pricing.CommitmentsAPICreateCommitmentResponse
+	err := backoff.Retry(func() error {
+		resp, err := r.client.pricingClient.CommitmentsAPICreateCommitmentWithResponse(ctx, organizationID, input)
+		if err != nil {
+			return err
+		}
+		if resp.StatusCode() >= 500 {
+			return fmt.Errorf("transient server error: status=%d body=%s", resp.StatusCode(), string(resp.Body))
+		}
+		apiResp = resp
+		return nil
+	}, b)
+	return apiResp, err
+}
+
+// deleteCommitmentWithRetry wraps the DeleteCommitment API call with
+// exponential backoff for the same transient 5xx reason.
+func (r *genericCommitmentResource) deleteCommitmentWithRetry(ctx context.Context, organizationID, commitmentID string) (*pricing.CommitmentsAPIDeleteCommitmentResponse, error) {
+	b := backoff.WithContext(backoff.NewExponentialBackOff(), ctx)
+	var apiResp *pricing.CommitmentsAPIDeleteCommitmentResponse
+	err := backoff.Retry(func() error {
+		resp, err := r.client.pricingClient.CommitmentsAPIDeleteCommitmentWithResponse(ctx, organizationID, commitmentID)
+		if err != nil {
+			return err
+		}
+		if resp.StatusCode() >= 500 {
+			return fmt.Errorf("transient server error: status=%d body=%s", resp.StatusCode(), string(resp.Body))
+		}
+		apiResp = resp
+		return nil
+	}, b)
+	return apiResp, err
+}
+
 func (r *genericCommitmentResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var state commitmentModel
 	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
@@ -949,7 +1011,7 @@ func (r *genericCommitmentResource) Read(ctx context.Context, req resource.ReadR
 		return
 	}
 
-	apiResp, err := r.client.pricingClient.CommitmentsAPIGetCommitmentWithResponse(ctx, organizationID, state.ID.ValueString())
+	apiResp, err := r.getCommitmentWithRetry(ctx, organizationID, state.ID.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Failed to read commitment", err.Error())
 		return
@@ -1043,7 +1105,7 @@ func (r *genericCommitmentResource) Update(ctx context.Context, req resource.Upd
 		if resp.Diagnostics.HasError() {
 			return
 		}
-		apiResp, err := r.client.pricingClient.CommitmentsAPICreateCommitmentWithResponse(ctx, organizationID, input)
+		apiResp, err := r.createCommitmentWithRetry(ctx, organizationID, input)
 		if err != nil {
 			resp.Diagnostics.AddError("Failed to update commitment", err.Error())
 			return
@@ -1085,7 +1147,7 @@ func (r *genericCommitmentResource) Update(ctx context.Context, req resource.Upd
 	}
 
 	// Read back for authoritative state.
-	getResp, err := r.client.pricingClient.CommitmentsAPIGetCommitmentWithResponse(ctx, organizationID, commitmentID)
+	getResp, err := r.getCommitmentWithRetry(ctx, organizationID, commitmentID)
 	if err != nil {
 		resp.Diagnostics.AddError("Failed to read commitment after update", err.Error())
 		return
@@ -1116,7 +1178,7 @@ func (r *genericCommitmentResource) Delete(ctx context.Context, req resource.Del
 		return
 	}
 
-	apiResp, err := r.client.pricingClient.CommitmentsAPIDeleteCommitmentWithResponse(ctx, organizationID, state.ID.ValueString())
+	apiResp, err := r.deleteCommitmentWithRetry(ctx, organizationID, state.ID.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Failed to delete commitment", err.Error())
 		return
