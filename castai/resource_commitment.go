@@ -938,12 +938,20 @@ func saveCreatedState(ctx context.Context, resp *resource.CreateResponse, plan *
 	resp.Diagnostics.Append(resp.State.Set(ctx, plan)...)
 }
 
+// newCommitmentBackoff creates an exponential backoff capped at 1 minute and
+// bound to the supplied context.
+func newCommitmentBackoff(ctx context.Context) backoff.BackOff {
+	b := backoff.NewExponentialBackOff()
+	b.MaxElapsedTime = time.Minute
+	return backoff.WithContext(b, ctx)
+}
+
 // getCommitmentWithRetry wraps the GetCommitment API call with exponential
 // backoff to handle transient 5xx errors that the backend occasionally
 // returns under concurrent load (e.g. during terraform refresh/destroy
 // which reads multiple commitments in parallel).
 func (r *genericCommitmentResource) getCommitmentWithRetry(ctx context.Context, organizationID, commitmentID string) (*pricing.CommitmentsAPIGetCommitmentResponse, error) {
-	b := backoff.WithContext(backoff.NewExponentialBackOff(), ctx)
+	b := newCommitmentBackoff(ctx)
 	var apiResp *pricing.CommitmentsAPIGetCommitmentResponse
 	err := backoff.Retry(func() error {
 		resp, err := r.client.pricingClient.CommitmentsAPIGetCommitmentWithResponse(ctx, organizationID, commitmentID)
@@ -963,7 +971,7 @@ func (r *genericCommitmentResource) getCommitmentWithRetry(ctx context.Context, 
 // createCommitmentWithRetry wraps the CreateCommitment API call with
 // exponential backoff for the same transient 5xx reason.
 func (r *genericCommitmentResource) createCommitmentWithRetry(ctx context.Context, organizationID string, input pricing.CreateCommitmentInput) (*pricing.CommitmentsAPICreateCommitmentResponse, error) {
-	b := backoff.WithContext(backoff.NewExponentialBackOff(), ctx)
+	b := newCommitmentBackoff(ctx)
 	var apiResp *pricing.CommitmentsAPICreateCommitmentResponse
 	err := backoff.Retry(func() error {
 		resp, err := r.client.pricingClient.CommitmentsAPICreateCommitmentWithResponse(ctx, organizationID, input)
@@ -982,7 +990,7 @@ func (r *genericCommitmentResource) createCommitmentWithRetry(ctx context.Contex
 // deleteCommitmentWithRetry wraps the DeleteCommitment API call with
 // exponential backoff for the same transient 5xx reason.
 func (r *genericCommitmentResource) deleteCommitmentWithRetry(ctx context.Context, organizationID, commitmentID string) (*pricing.CommitmentsAPIDeleteCommitmentResponse, error) {
-	b := backoff.WithContext(backoff.NewExponentialBackOff(), ctx)
+	b := newCommitmentBackoff(ctx)
 	var apiResp *pricing.CommitmentsAPIDeleteCommitmentResponse
 	err := backoff.Retry(func() error {
 		resp, err := r.client.pricingClient.CommitmentsAPIDeleteCommitmentWithResponse(ctx, organizationID, commitmentID)
