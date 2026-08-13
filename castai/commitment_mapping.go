@@ -760,6 +760,7 @@ func (m *gcpCapacityReservationDetailsModel) toSDK(ctx context.Context, diags di
 	}
 	out := &pricing.GCPCapacityReservationDetails{
 		Id:                   optStr(m.ID),
+		SelfLink:             optStr(m.SelfLink),
 		ProjectId:            optStr(m.ProjectID),
 		Zone:                 optStr(m.Zone),
 		InstanceType:         optStr(m.InstanceType),
