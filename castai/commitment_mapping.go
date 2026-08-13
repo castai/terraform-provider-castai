@@ -138,19 +138,20 @@ type azureSavingsPlanDetailsModel struct {
 }
 
 type gcpCapacityReservationDetailsModel struct {
-	ID                          types.String                          `tfsdk:"id"`
-	ProjectID                   types.String                          `tfsdk:"project_id"`
-	Zone                        types.String                          `tfsdk:"zone"`
-	InstanceType                types.String                          `tfsdk:"instance_type"`
-	TotalInstanceCount          types.Int64                           `tfsdk:"total_instance_count"`
-	InUseInstanceCount          types.Int64                           `tfsdk:"in_use_instance_count"`
-	AssuredInstanceCount        types.Int64                           `tfsdk:"assured_instance_count"`
-	State                       types.String                          `tfsdk:"state"`
-	SpecificReservationRequired types.Bool                            `tfsdk:"specific_reservation_required"`
-	MinCPUPlatform              types.String                          `tfsdk:"min_cpu_platform"`
-	ShareSettings               *gcpReservationShareSettingsModel     `tfsdk:"share_settings"`
-	Accelerators                []gcpReservationAcceleratorModel      `tfsdk:"accelerators"`
-	LocalSsds                   []gcpReservationLocalSsdModel         `tfsdk:"local_ssds"`
+	ID                          types.String                      `tfsdk:"id"`
+	SelfLink                    types.String                      `tfsdk:"self_link"`
+	ProjectID                   types.String                      `tfsdk:"project_id"`
+	Zone                        types.String                      `tfsdk:"zone"`
+	InstanceType                types.String                      `tfsdk:"instance_type"`
+	TotalInstanceCount          types.Int64                       `tfsdk:"total_instance_count"`
+	InUseInstanceCount          types.Int64                       `tfsdk:"in_use_instance_count"`
+	AssuredInstanceCount        types.Int64                       `tfsdk:"assured_instance_count"`
+	State                       types.String                      `tfsdk:"state"`
+	SpecificReservationRequired types.Bool                        `tfsdk:"specific_reservation_required"`
+	MinCPUPlatform              types.String                      `tfsdk:"min_cpu_platform"`
+	ShareSettings               *gcpReservationShareSettingsModel `tfsdk:"share_settings"`
+	Accelerators                []gcpReservationAcceleratorModel  `tfsdk:"accelerators"`
+	LocalSsds                   []gcpReservationLocalSsdModel     `tfsdk:"local_ssds"`
 }
 
 type gcpReservationShareSettingsModel struct {
@@ -475,6 +476,7 @@ func (m *gcpCapacityReservationDetailsModel) equal(o *gcpCapacityReservationDeta
 		return m == nil && o == nil
 	}
 	if !m.ID.Equal(o.ID) ||
+		!m.SelfLink.Equal(o.SelfLink) ||
 		!m.ProjectID.Equal(o.ProjectID) ||
 		!m.Zone.Equal(o.Zone) ||
 		!m.InstanceType.Equal(o.InstanceType) ||
@@ -997,6 +999,7 @@ func (m *commitmentModel) applyDetails(ctx context.Context, c *pricing.Commitmen
 		}
 		out := &gcpCapacityReservationDetailsModel{
 			ID:                          strOrNull(d.Id),
+			SelfLink:                    syncStr(prev.SelfLink, d.SelfLink),
 			ProjectID:                   syncStr(prev.ProjectID, d.ProjectId),
 			Zone:                        syncStr(prev.Zone, d.Zone),
 			InstanceType:                strOrNull(d.InstanceType),

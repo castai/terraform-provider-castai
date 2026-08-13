@@ -618,6 +618,10 @@ func (r *genericCommitmentResource) Schema(_ context.Context, _ resource.SchemaR
 						Description:   "Reservation ID.",
 						PlanModifiers: requiresReplaceString(),
 					},
+					"self_link": schema.StringAttribute{
+						Optional:    true,
+						Description: "Server-defined URL for the reservation (e.g. https://www.googleapis.com/compute/v1/projects/my-project/zones/us-central1-a/reservations/my-reservation).",
+					},
 					"project_id": schema.StringAttribute{
 						Optional:    true,
 						Description: "GCP project ID that owns the reservation.",
