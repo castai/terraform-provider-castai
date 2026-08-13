@@ -122,8 +122,7 @@ resource "castai_commitment" "test" {
 }
 
 // ---------------------------------------------------------------------------
-// Retry unit tests — mock-based tests for getCommitmentWithRetry,
-// createCommitmentWithRetry, and deleteCommitmentWithRetry.
+// Retry unit tests
 // ---------------------------------------------------------------------------
 func newCommitmentResourceWithMock(mockClient *mock_pricing.MockClientWithResponsesInterface) *genericCommitmentResource {
 	return &genericCommitmentResource{
@@ -139,10 +138,6 @@ func httpResp(status int) *http.Response {
 		Status:     fmt.Sprintf("%d %s", status, http.StatusText(status)),
 	}
 }
-
-// ---------------------------------------------------------------------------
-// getCommitmentWithRetry
-// ---------------------------------------------------------------------------
 
 func TestGetCommitmentWithRetry_Retries5xxThenSucceeds(t *testing.T) {
 	t.Parallel()
@@ -233,10 +228,6 @@ func TestGetCommitmentWithRetry_ContextCancellationStopsRetries(t *testing.T) {
 	_ = apiResp
 }
 
-// ---------------------------------------------------------------------------
-// createCommitmentWithRetry
-// ---------------------------------------------------------------------------
-
 func TestCreateCommitmentWithRetry_Retries5xxThenSucceeds(t *testing.T) {
 	t.Parallel()
 	r := require.New(t)
@@ -322,10 +313,6 @@ func TestCreateCommitmentWithRetry_ContextCancellationStopsRetries(t *testing.T)
 
 	r.Error(err)
 }
-
-// ---------------------------------------------------------------------------
-// deleteCommitmentWithRetry
-// ---------------------------------------------------------------------------
 
 func TestDeleteCommitmentWithRetry_Retries5xxThenSucceeds(t *testing.T) {
 	t.Parallel()
