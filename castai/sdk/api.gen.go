@@ -1776,6 +1776,7 @@ type CastaiEvictorV1NodeSelector struct {
 
 // CastaiEvictorV1PodSelector defines model for castai.evictor.v1.PodSelector.
 type CastaiEvictorV1PodSelector struct {
+	// Kind The kind of the owner, e.g. ReplicaSet, DaemonSet, Node, etc.
 	Kind *string `json:"kind,omitempty"`
 
 	// LabelSelector LabelSelector is a proto mirror of the metav1.LabelSelector K8s API object. Properties `match_labels` and

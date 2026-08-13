@@ -851,7 +851,8 @@ type GCPCapacityReservationDetails struct {
 	// ProjectId GCP project ID that owns the reservation
 	ProjectId *string `json:"projectId,omitempty"`
 
-	// SelfLink Server-defined URL for the reservation.
+	// SelfLink Full GCP SelfLink URL of the reservation, e.g.
+	//  "https://www.googleapis.com/compute/v1/projects/<project>/zones/<zone>/reservations/<name>".
 	SelfLink *string `json:"selfLink,omitempty"`
 
 	// ShareSettings Reservation sharing settings.
@@ -867,7 +868,8 @@ type GCPCapacityReservationDetails struct {
 	TotalInstanceCount *string `json:"totalInstanceCount,omitempty"`
 
 	// Zone GCP zone of the reservation
-	Zone *string `json:"zone,omitempty"`}
+	Zone *string `json:"zone,omitempty"`
+}
 
 // GCPFlexCUDDetails GCP Flex CUD cloud details
 type GCPFlexCUDDetails struct {
