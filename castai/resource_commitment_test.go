@@ -1,12 +1,19 @@
 package castai
 
 import (
+	"context"
 	"fmt"
+	"net/http"
 	"testing"
 
+	"github.com/golang/mock/gomock"
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
+	"github.com/stretchr/testify/require"
+
+	"github.com/castai/terraform-provider-castai/castai/sdk/pricing"
+	mock_pricing "github.com/castai/terraform-provider-castai/castai/sdk/pricing/mock"
 )
 
 func TestAccCloudAgnostic_Commitment(t *testing.T) {
@@ -113,3 +120,294 @@ resource "castai_commitment" "test" {
 }
 `, name, cudID, autoscalingStatus, allowedUsage, autoAssignmentLine)
 }
+
+// ---------------------------------------------------------------------------
+// Retry unit tests — mock-based tests for getCommitmentWithRetry,
+// createCommitmentWithRetry, and deleteCommitmentWithRetry.
+// ---------------------------------------------------------------------------
+
+// newCommitmentResourceWithMock creates a genericCommitmentResource whose
+// pricingClient is the supplied mock. All other ProviderConfig fields are
+// left zero — the retry helpers only touch pricingClient.
+func newCommitmentResourceWithMock(mockClient *mock_pricing.MockClientWithResponsesInterface) *genericCommitmentResource {
+	return &genericCommitmentResource{
+		client: &ProviderConfig{
+			pricingClient: mockClient,
+		},
+	}
+}
+
+func httpResp(status int) *http.Response {
+	return &http.Response{
+		StatusCode: status,
+		Status:     fmt.Sprintf("%d %s", status, http.StatusText(status)),
+	}
+}
+
+// ---------------------------------------------------------------------------
+// getCommitmentWithRetry
+// ---------------------------------------------------------------------------
+
+func TestGetCommitmentWithRetry_Retries5xxThenSucceeds(t *testing.T) {
+	t.Parallel()
+	r := require.New(t)
+	ctrl := gomock.NewController(t)
+	mockClient := mock_pricing.NewMockClientWithResponsesInterface(ctrl)
+
+	orgID, commitmentID := "org-1", "commit-1"
+	commitment := &pricing.Commitment{Id: &commitmentID}
+
+	gomock.InOrder(
+		mockClient.EXPECT().
+			CommitmentsAPIGetCommitmentWithResponse(gomock.Any(), orgID, commitmentID).
+			Return(&pricing.CommitmentsAPIGetCommitmentResponse{
+				HTTPResponse: httpResp(http.StatusInternalServerError),
+				Body:         []byte("server error"),
+			}, nil),
+		mockClient.EXPECT().
+			CommitmentsAPIGetCommitmentWithResponse(gomock.Any(), orgID, commitmentID).
+			Return(&pricing.CommitmentsAPIGetCommitmentResponse{
+				HTTPResponse: httpResp(http.StatusOK),
+				JSON200:      commitment,
+			}, nil),
+	)
+
+	res := newCommitmentResourceWithMock(mockClient)
+	apiResp, err := res.getCommitmentWithRetry(context.Background(), orgID, commitmentID)
+
+	r.NoError(err)
+	r.NotNil(apiResp)
+	r.Equal(http.StatusOK, apiResp.StatusCode())
+	r.Equal(commitment, apiResp.JSON200)
+}
+
+func TestGetCommitmentWithRetry_4xxStopsImmediately(t *testing.T) {
+	t.Parallel()
+	r := require.New(t)
+	ctrl := gomock.NewController(t)
+	mockClient := mock_pricing.NewMockClientWithResponsesInterface(ctrl)
+
+	orgID, commitmentID := "org-1", "commit-1"
+
+	// 404 must NOT be retried — exactly one call.
+	mockClient.EXPECT().
+		CommitmentsAPIGetCommitmentWithResponse(gomock.Any(), orgID, commitmentID).
+		Return(&pricing.CommitmentsAPIGetCommitmentResponse{
+			HTTPResponse: httpResp(http.StatusNotFound),
+			Body:         []byte("not found"),
+		}, nil)
+
+	res := newCommitmentResourceWithMock(mockClient)
+	apiResp, err := res.getCommitmentWithRetry(context.Background(), orgID, commitmentID)
+
+	r.NoError(err)
+	r.NotNil(apiResp)
+	r.Equal(http.StatusNotFound, apiResp.StatusCode())
+}
+
+func TestGetCommitmentWithRetry_ContextCancellationStopsRetries(t *testing.T) {
+	t.Parallel()
+	r := require.New(t)
+	ctrl := gomock.NewController(t)
+	mockClient := mock_pricing.NewMockClientWithResponsesInterface(ctrl)
+
+	orgID, commitmentID := "org-1", "commit-1"
+
+	// Return 500 on every call so the retry loop would be infinite without
+	// context cancellation.
+	mockClient.EXPECT().
+		CommitmentsAPIGetCommitmentWithResponse(gomock.Any(), orgID, commitmentID).
+		Return(&pricing.CommitmentsAPIGetCommitmentResponse{
+			HTTPResponse: httpResp(http.StatusInternalServerError),
+			Body:         []byte("server error"),
+		}, nil).
+		AnyTimes()
+
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel() // cancel immediately so backoff exits on the first check
+
+	res := newCommitmentResourceWithMock(mockClient)
+	apiResp, err := res.getCommitmentWithRetry(ctx, orgID, commitmentID)
+
+	// The error should be the context cancellation or the last 500 error
+	// wrapped by backoff — either way, the function must return.
+	r.Error(err)
+	// apiResp may be nil (if the retry function never ran) or the last 500
+	// response — the key invariant is that we returned and did not hang.
+	_ = apiResp
+}
+
+// ---------------------------------------------------------------------------
+// createCommitmentWithRetry
+// ---------------------------------------------------------------------------
+
+func TestCreateCommitmentWithRetry_Retries5xxThenSucceeds(t *testing.T) {
+	t.Parallel()
+	r := require.New(t)
+	ctrl := gomock.NewController(t)
+	mockClient := mock_pricing.NewMockClientWithResponsesInterface(ctrl)
+
+	orgID := "org-1"
+	input := pricing.CreateCommitmentInput{}
+	commitmentID := "commit-1"
+	commitment := &pricing.Commitment{Id: &commitmentID}
+
+	gomock.InOrder(
+		mockClient.EXPECT().
+			CommitmentsAPICreateCommitmentWithResponse(gomock.Any(), orgID, input).
+			Return(&pricing.CommitmentsAPICreateCommitmentResponse{
+				HTTPResponse: httpResp(http.StatusBadGateway),
+				Body:         []byte("bad gateway"),
+			}, nil),
+		mockClient.EXPECT().
+			CommitmentsAPICreateCommitmentWithResponse(gomock.Any(), orgID, input).
+			Return(&pricing.CommitmentsAPICreateCommitmentResponse{
+				HTTPResponse: httpResp(http.StatusOK),
+				JSON200:      commitment,
+			}, nil),
+	)
+
+	res := newCommitmentResourceWithMock(mockClient)
+	apiResp, err := res.createCommitmentWithRetry(context.Background(), orgID, input)
+
+	r.NoError(err)
+	r.NotNil(apiResp)
+	r.Equal(http.StatusOK, apiResp.StatusCode())
+	r.Equal(commitment, apiResp.JSON200)
+}
+
+func TestCreateCommitmentWithRetry_4xxStopsImmediately(t *testing.T) {
+	t.Parallel()
+	r := require.New(t)
+	ctrl := gomock.NewController(t)
+	mockClient := mock_pricing.NewMockClientWithResponsesInterface(ctrl)
+
+	orgID := "org-1"
+	input := pricing.CreateCommitmentInput{}
+
+	// 400 must NOT be retried.
+	mockClient.EXPECT().
+		CommitmentsAPICreateCommitmentWithResponse(gomock.Any(), orgID, input).
+		Return(&pricing.CommitmentsAPICreateCommitmentResponse{
+			HTTPResponse: httpResp(http.StatusBadRequest),
+			Body:         []byte("bad request"),
+		}, nil)
+
+	res := newCommitmentResourceWithMock(mockClient)
+	apiResp, err := res.createCommitmentWithRetry(context.Background(), orgID, input)
+
+	r.NoError(err)
+	r.NotNil(apiResp)
+	r.Equal(http.StatusBadRequest, apiResp.StatusCode())
+}
+
+func TestCreateCommitmentWithRetry_ContextCancellationStopsRetries(t *testing.T) {
+	t.Parallel()
+	r := require.New(t)
+	ctrl := gomock.NewController(t)
+	mockClient := mock_pricing.NewMockClientWithResponsesInterface(ctrl)
+
+	orgID := "org-1"
+	input := pricing.CreateCommitmentInput{}
+
+	mockClient.EXPECT().
+		CommitmentsAPICreateCommitmentWithResponse(gomock.Any(), orgID, input).
+		Return(&pricing.CommitmentsAPICreateCommitmentResponse{
+			HTTPResponse: httpResp(http.StatusServiceUnavailable),
+			Body:         []byte("unavailable"),
+		}, nil).
+		AnyTimes()
+
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+
+	res := newCommitmentResourceWithMock(mockClient)
+	_, err := res.createCommitmentWithRetry(ctx, orgID, input)
+
+	r.Error(err)
+}
+
+// ---------------------------------------------------------------------------
+// deleteCommitmentWithRetry
+// ---------------------------------------------------------------------------
+
+func TestDeleteCommitmentWithRetry_Retries5xxThenSucceeds(t *testing.T) {
+	t.Parallel()
+	r := require.New(t)
+	ctrl := gomock.NewController(t)
+	mockClient := mock_pricing.NewMockClientWithResponsesInterface(ctrl)
+
+	orgID, commitmentID := "org-1", "commit-1"
+
+	gomock.InOrder(
+		mockClient.EXPECT().
+			CommitmentsAPIDeleteCommitmentWithResponse(gomock.Any(), orgID, commitmentID).
+			Return(&pricing.CommitmentsAPIDeleteCommitmentResponse{
+				HTTPResponse: httpResp(http.StatusServiceUnavailable),
+				Body:         []byte("unavailable"),
+			}, nil),
+		mockClient.EXPECT().
+			CommitmentsAPIDeleteCommitmentWithResponse(gomock.Any(), orgID, commitmentID).
+			Return(&pricing.CommitmentsAPIDeleteCommitmentResponse{
+				HTTPResponse: httpResp(http.StatusOK),
+			}, nil),
+	)
+
+	res := newCommitmentResourceWithMock(mockClient)
+	apiResp, err := res.deleteCommitmentWithRetry(context.Background(), orgID, commitmentID)
+
+	r.NoError(err)
+	r.NotNil(apiResp)
+	r.Equal(http.StatusOK, apiResp.StatusCode())
+}
+
+func TestDeleteCommitmentWithRetry_4xxStopsImmediately(t *testing.T) {
+	t.Parallel()
+	r := require.New(t)
+	ctrl := gomock.NewController(t)
+	mockClient := mock_pricing.NewMockClientWithResponsesInterface(ctrl)
+
+	orgID, commitmentID := "org-1", "commit-1"
+
+	// 404 must NOT be retried — exactly one call.
+	mockClient.EXPECT().
+		CommitmentsAPIDeleteCommitmentWithResponse(gomock.Any(), orgID, commitmentID).
+		Return(&pricing.CommitmentsAPIDeleteCommitmentResponse{
+			HTTPResponse: httpResp(http.StatusNotFound),
+			Body:         []byte("not found"),
+		}, nil)
+
+	res := newCommitmentResourceWithMock(mockClient)
+	apiResp, err := res.deleteCommitmentWithRetry(context.Background(), orgID, commitmentID)
+
+	r.NoError(err)
+	r.NotNil(apiResp)
+	r.Equal(http.StatusNotFound, apiResp.StatusCode())
+}
+
+func TestDeleteCommitmentWithRetry_ContextCancellationStopsRetries(t *testing.T) {
+	t.Parallel()
+	r := require.New(t)
+	ctrl := gomock.NewController(t)
+	mockClient := mock_pricing.NewMockClientWithResponsesInterface(ctrl)
+
+	orgID, commitmentID := "org-1", "commit-1"
+
+	mockClient.EXPECT().
+		CommitmentsAPIDeleteCommitmentWithResponse(gomock.Any(), orgID, commitmentID).
+		Return(&pricing.CommitmentsAPIDeleteCommitmentResponse{
+			HTTPResponse: httpResp(http.StatusGatewayTimeout),
+			Body:         []byte("gateway timeout"),
+		}, nil).
+		AnyTimes()
+
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+
+	res := newCommitmentResourceWithMock(mockClient)
+	_, err := res.deleteCommitmentWithRetry(ctx, orgID, commitmentID)
+
+	r.Error(err)
+}
+
+
