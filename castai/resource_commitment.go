@@ -899,8 +899,7 @@ func (r *genericCommitmentResource) Create(ctx context.Context, req resource.Cre
 		!config.AutoAssignment.ValueBool()
 
 	if commitmentID != "" && needsPatch {
-		patchInput := plan.toUpdateInput()
-		patchResp, patchErr := r.client.pricingClient.CommitmentsAPIUpdateCommitmentWithResponse(ctx, organizationID, commitmentID, patchInput)
+		patchResp, patchErr := r.updateCommitmentWithRetry(ctx, organizationID, commitmentID, plan.toUpdateInput())
 		if patchErr != nil {
 			saveCreatedState(ctx, resp, &plan, organizationID, created)
 			resp.Diagnostics.AddError("Failed to enforce commitment settings after create", patchErr.Error())
@@ -946,10 +945,6 @@ func newCommitmentBackoff(ctx context.Context) backoff.BackOff {
 	return backoff.WithContext(b, ctx)
 }
 
-// getCommitmentWithRetry wraps the GetCommitment API call with exponential
-// backoff to handle transient 5xx errors that the backend occasionally
-// returns under concurrent load (e.g. during terraform refresh/destroy
-// which reads multiple commitments in parallel).
 func (r *genericCommitmentResource) getCommitmentWithRetry(ctx context.Context, organizationID, commitmentID string) (*pricing.CommitmentsAPIGetCommitmentResponse, error) {
 	b := newCommitmentBackoff(ctx)
 	var apiResp *pricing.CommitmentsAPIGetCommitmentResponse
@@ -968,8 +963,6 @@ func (r *genericCommitmentResource) getCommitmentWithRetry(ctx context.Context, 
 	return apiResp, err
 }
 
-// createCommitmentWithRetry wraps the CreateCommitment API call with
-// exponential backoff for the same transient 5xx reason.
 func (r *genericCommitmentResource) createCommitmentWithRetry(ctx context.Context, organizationID string, input pricing.CreateCommitmentInput) (*pricing.CommitmentsAPICreateCommitmentResponse, error) {
 	b := newCommitmentBackoff(ctx)
 	var apiResp *pricing.CommitmentsAPICreateCommitmentResponse
@@ -987,13 +980,28 @@ func (r *genericCommitmentResource) createCommitmentWithRetry(ctx context.Contex
 	return apiResp, err
 }
 
-// deleteCommitmentWithRetry wraps the DeleteCommitment API call with
-// exponential backoff for the same transient 5xx reason.
 func (r *genericCommitmentResource) deleteCommitmentWithRetry(ctx context.Context, organizationID, commitmentID string) (*pricing.CommitmentsAPIDeleteCommitmentResponse, error) {
 	b := newCommitmentBackoff(ctx)
 	var apiResp *pricing.CommitmentsAPIDeleteCommitmentResponse
 	err := backoff.Retry(func() error {
 		resp, err := r.client.pricingClient.CommitmentsAPIDeleteCommitmentWithResponse(ctx, organizationID, commitmentID)
+		if err != nil {
+			return err
+		}
+		if resp.StatusCode() >= 500 {
+			return fmt.Errorf("transient server error: status=%d body=%s", resp.StatusCode(), string(resp.Body))
+		}
+		apiResp = resp
+		return nil
+	}, b)
+	return apiResp, err
+}
+
+func (r *genericCommitmentResource) updateCommitmentWithRetry(ctx context.Context, organizationID, commitmentID string, input pricing.UpdateCommitmentInput) (*pricing.CommitmentsAPIUpdateCommitmentResponse, error) {
+	b := newCommitmentBackoff(ctx)
+	var apiResp *pricing.CommitmentsAPIUpdateCommitmentResponse
+	err := backoff.Retry(func() error {
+		resp, err := r.client.pricingClient.CommitmentsAPIUpdateCommitmentWithResponse(ctx, organizationID, commitmentID, input)
 		if err != nil {
 			return err
 		}
@@ -1139,8 +1147,7 @@ func (r *genericCommitmentResource) Update(ctx context.Context, req resource.Upd
 	// and the user explicitly set auto_assignment=false (to counter
 	// enableAutoAssignments' potential false→true flip).
 	if patchPathChanged(&plan, &state) || (upsertChanged && autoAssignmentExplicitlyFalse) {
-		input := plan.toUpdateInput()
-		apiResp, err := r.client.pricingClient.CommitmentsAPIUpdateCommitmentWithResponse(ctx, organizationID, commitmentID, input)
+		apiResp, err := r.updateCommitmentWithRetry(ctx, organizationID, commitmentID, plan.toUpdateInput())
 		if err != nil {
 			resp.Diagnostics.AddError("Failed to update commitment settings", err.Error())
 			return
