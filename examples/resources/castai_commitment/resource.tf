@@ -67,6 +67,7 @@ resource "castai_commitment" "gcp_capacity_reservation" {
 
   gcp_capacity_reservation_details = {
     id                   = "my-reservation"
+    self_link            = "https://www.googleapis.com/compute/v1/projects/my-project/zones/us-central1-a/reservations/my-reservation"
     project_id           = "my-project"
     zone                 = "us-central1-a"
     instance_type        = "a2-highgpu-1g"
@@ -79,6 +80,31 @@ resource "castai_commitment" "gcp_capacity_reservation" {
         accelerator_count = 1
       }
     ]
+  }
+}
+
+# AWS on-demand capacity reservation (ODCR).
+resource "castai_commitment" "aws_odcr" {
+  name               = "prod-odcr-us-east-1"
+  cloud              = "AWS"
+  region             = "us-east-1"
+  type               = "ON_DEMAND_CAPACITY_RESERVATION"
+  start_time         = "2026-01-01T00:00:00Z"
+  autoscaling_status = "ACTIVE"
+  allowed_usage      = 1.0
+
+  aws_odcr_details = {
+    id                       = "cr-abcdef01234567890"
+    availability_zone        = "us-east-1a"
+    instance_type            = "m5.xlarge"
+    instance_platform        = "Linux/UNIX"
+    tenancy                  = "default"
+    total_instance_count     = 10
+    available_instance_count = 10
+    state                    = "active"
+    end_date_type            = "unlimited"
+    instance_match_criteria  = "open"
+    interruptible            = false
   }
 }
 
