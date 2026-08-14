@@ -109,17 +109,17 @@ resource "castai_commitment" "aws_odcr" {
   allowed_usage      = 1.0
 
   aws_odcr_details = {
-    id                      = "cr-abcdef01234567890"
-    availability_zone       = "us-east-1a"
-    instance_type           = "m5.xlarge"
-    instance_platform       = "Linux/UNIX"
-    tenancy                 = "default"
-    total_instance_count    = 10
+    id                       = "cr-abcdef01234567890"
+    availability_zone        = "us-east-1a"
+    instance_type            = "m5.xlarge"
+    instance_platform        = "Linux/UNIX"
+    tenancy                  = "default"
+    total_instance_count     = 10
     available_instance_count = 10
-    state                   = "active"
-    end_date_type           = "unlimited"
-    instance_match_criteria = "open"
-    interruptible           = false
+    state                    = "active"
+    end_date_type            = "unlimited"
+    instance_match_criteria  = "open"
+    interruptible            = false
   }
 }
 
