@@ -3,12 +3,12 @@
 page_title: "castai_commitment Resource - terraform-provider-castai"
 subcategory: ""
 description: |-
-  Manages a single CAST AI commitment (reserved instance, savings plan, CUD, capacity block or capacity reservation) via the pricing v1beta Commitments API. For bulk management, use for_each over a decoded JSON/CSV file. Note: the underlying API is in beta. Do not manage commitments with Terraform in organizations where the same commitments are synced automatically via cloud integrations, as the sync will overwrite Terraform-managed values.
+  Manages a single CAST AI commitment (reserved instance, savings plan, CUD, capacity block or capacity reservation) via the pricing v1beta Commitments API. For bulk management, use for_each — see the examples/ directory.
 ---
 
 # castai_commitment (Resource)
 
-Manages a single CAST AI commitment (reserved instance, savings plan, CUD, capacity block or capacity reservation) via the pricing v1beta Commitments API. For bulk management, use for_each over a decoded JSON/CSV file. Note: the underlying API is in beta. Do not manage commitments with Terraform in organizations where the same commitments are synced automatically via cloud integrations, as the sync will overwrite Terraform-managed values.
+Manages a single CAST AI commitment (reserved instance, savings plan, CUD, capacity block or capacity reservation) via the pricing v1beta Commitments API. For bulk management, use for_each — see the examples/ directory.
 
 ## Example Usage
 
@@ -139,7 +139,7 @@ resource "castai_commitment" "bulk_gcp_cuds" {
 ### Optional
 
 - `allowed_usage` (Number) Allowed usage of the commitment (0.0-1.0). 1.0 means 100%. Defaults to 1.0.
-- `auto_assignment` (Boolean) Auto-assign the commitment to all matching clusters in the commitment's region.
+- `auto_assignment` (Boolean) Auto-assign the commitment to all matching clusters in the commitment's region. If not set, the server's auto-assignment logic determines the value at creation time. Set to false to explicitly disable auto-assignment. Not supported for CAPACITY_BLOCK or targeted ON_DEMAND_CAPACITY_RESERVATION commitments.
 - `autoscaling_status` (String) Controls whether the autoscaler can use this commitment. One of: ACTIVE, INACTIVE. Defaults to INACTIVE (matches the API default); set to ACTIVE for the autoscaler to use the commitment.
 - `aws_capacity_block_details` (Attributes) AWS Capacity Block details. Required when type is CAPACITY_BLOCK. (see [below for nested schema](#nestedatt--aws_capacity_block_details))
 - `aws_odcr_details` (Attributes) AWS On-Demand Capacity Reservation details. Required when type is ON_DEMAND_CAPACITY_RESERVATION on AWS. (see [below for nested schema](#nestedatt--aws_odcr_details))
@@ -296,6 +296,7 @@ Optional:
 - `local_ssds` (Attributes List) Local SSD disks reserved VMs must match exactly. (see [below for nested schema](#nestedatt--gcp_capacity_reservation_details--local_ssds))
 - `min_cpu_platform` (String) Minimum CPU platform the reserved VMs require (e.g. Intel Cascade Lake).
 - `project_id` (String) GCP project ID that owns the reservation.
+- `self_link` (String) Server-defined URL for the reservation (e.g. https://www.googleapis.com/compute/v1/projects/my-project/zones/us-central1-a/reservations/my-reservation).
 - `share_settings` (Attributes) Reservation sharing settings. (see [below for nested schema](#nestedatt--gcp_capacity_reservation_details--share_settings))
 - `specific_reservation_required` (Boolean) Whether the reservation requires specific reservation affinity.
 - `state` (String) Runtime state of the reservation (e.g. READY).
