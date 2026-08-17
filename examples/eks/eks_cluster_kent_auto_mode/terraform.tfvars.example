@@ -1,0 +1,4 @@
+cluster_name    = "my-kent-auto-mode"
+cluster_region  = "eu-central-1"
+castai_api_url  = "https://api.cast.ai"
+castai_grpc_url = "grpc.cast.ai:443"
