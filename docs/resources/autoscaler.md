@@ -6,6 +6,8 @@ description: |-
   CAST AI autoscaler resource to manage autoscaler settings
 ---
 
+> **DEPRECATED:** Use `castai_autoscaler_policies` and `castai_evictor` instead. This resource will be removed in the next major version.
+
 # castai_autoscaler (Resource)
 
 CAST AI autoscaler resource to manage autoscaler settings

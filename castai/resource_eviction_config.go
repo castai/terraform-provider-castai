@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"net/http"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -13,7 +14,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/samber/lo"
 
-	"github.com/castai/terraform-provider-castai/castai/sdk"
+	"github.com/castai/terraform-provider-castai/castai/sdk/workload_eviction"
 )
 
 const (
@@ -168,12 +169,18 @@ func readAdvancedEvictorConfig(ctx context.Context, data *schema.ResourceData, m
 		log.Print("[INFO] ClusterId is missing. Will skip operation.")
 		return nil
 	}
-	client := meta.(*ProviderConfig).api
+	client := meta.(*ProviderConfig).workloadEvictionClient
 
-	resp, err := client.EvictorAPIGetAdvancedConfigWithResponse(ctx, clusterId)
+	resp, err := client.EvictorAPIGetEvictorAdvancedConfigWithResponse(ctx, clusterId)
 	if err != nil {
 		log.Printf("[ERROR] Failed to set read evictor advanced config: %v", err)
 		return err
+	}
+	if resp.StatusCode() != http.StatusOK {
+		return fmt.Errorf("expected status code %d, received: status=%d body=%s", http.StatusOK, resp.StatusCode(), string(resp.Body))
+	}
+	if resp.JSON200 == nil {
+		return fmt.Errorf("received empty evictor advanced config response for cluster %s", clusterId)
 	}
 	err = data.Set(FieldEvictorAdvancedConfig, flattenEvictionConfig(resp.JSON200.EvictionConfig))
 	if err != nil {
@@ -203,7 +210,7 @@ func getEvictorAdvancedConfigAsJson(data *schema.ResourceData) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	ccd := sdk.CastaiEvictorV1AdvancedConfig{EvictionConfig: evictionConfigs}
+	ccd := workload_eviction.AdvancedConfig{EvictionConfig: evictionConfigs}
 	return json.Marshal(ccd)
 }
 
@@ -218,16 +225,19 @@ func upsertEvictionConfigs(ctx context.Context, data *schema.ResourceData, meta 
 		log.Printf("[ERROR] Failed to extract evictor advanced config: %v", err)
 		return err
 	}
-	client := meta.(*ProviderConfig).api
-	resp, err := client.EvictorAPIUpsertAdvancedConfigWithBodyWithResponse(
+	client := meta.(*ProviderConfig).workloadEvictionClient
+	resp, err := client.EvictorAPIUpdateEvictorAdvancedConfigWithBodyWithResponse(
 		ctx,
 		clusterId,
 		"application/json",
 		bytes.NewReader(evictorAdvancedConfigJson),
 	)
-	if checkErr := sdk.CheckOKResponse(resp, err); checkErr != nil {
+	if err != nil {
 		log.Printf("[ERROR] Failed to upsert evictor advanced config: %v", err)
-		return checkErr
+		return err
+	}
+	if resp.JSON200 == nil {
+		return fmt.Errorf("failed to upsert evictor advanced config, status code: %d", resp.StatusCode())
 	}
 	err = data.Set(FieldEvictorAdvancedConfig, flattenEvictionConfig(resp.JSON200.EvictionConfig))
 	if err != nil {
@@ -254,7 +264,7 @@ func resourceEvictionConfigDelete(ctx context.Context, data *schema.ResourceData
 		return diag.FromErr(err)
 	}
 
-	data.SetId(getClusterId(data))
+	data.SetId("")
 	return nil
 }
 
@@ -265,16 +275,19 @@ func deleteEvictionConfigs(ctx context.Context, data *schema.ResourceData, meta 
 		log.Print("[INFO] ClusterId is missing. Will skip operation.")
 		return nil
 	}
-	client := meta.(*ProviderConfig).api
-	resp, err := client.EvictorAPIUpsertAdvancedConfigWithBodyWithResponse(
+	client := meta.(*ProviderConfig).workloadEvictionClient
+	resp, err := client.EvictorAPIUpdateEvictorAdvancedConfigWithBodyWithResponse(
 		ctx,
 		clusterId,
 		"application/json",
 		bytes.NewReader([]byte("{}")),
 	)
-	if err != nil || resp.JSON200 == nil {
-		log.Printf("[ERROR] Failed to upsert evictor advanced config: %v", err)
+	if err != nil {
+		log.Printf("[ERROR] Failed to delete evictor advanced config: %v", err)
 		return err
+	}
+	if resp.JSON200 == nil {
+		return fmt.Errorf("failed to delete evictor advanced config, status code: %d", resp.StatusCode())
 	}
 	err = data.Set(FieldEvictorAdvancedConfig, flattenEvictionConfig(resp.JSON200.EvictionConfig))
 	if err != nil {
@@ -285,7 +298,7 @@ func deleteEvictionConfigs(ctx context.Context, data *schema.ResourceData, meta 
 	return nil
 }
 
-func toEvictionConfig(ii interface{}) ([]sdk.CastaiEvictorV1EvictionConfig, error) {
+func toEvictionConfig(ii interface{}) ([]workload_eviction.EvictionConfig, error) {
 	in, ok := ii.([]interface{})
 	if !ok {
 		return nil, fmt.Errorf("expecting []interface, got %T", ii)
@@ -293,11 +306,11 @@ func toEvictionConfig(ii interface{}) ([]sdk.CastaiEvictorV1EvictionConfig, erro
 	if len(in) < 1 {
 		return nil, nil
 	}
-	out := make([]sdk.CastaiEvictorV1EvictionConfig, len(in))
+	out := make([]workload_eviction.EvictionConfig, len(in))
 	var err error
 	for i, c := range in {
 
-		ec := sdk.CastaiEvictorV1EvictionConfig{}
+		ec := workload_eviction.EvictionConfig{}
 		cc, ok := c.(map[string]interface{})
 		if !ok {
 			return nil, fmt.Errorf("mapping evictionConfig expecting map[string]interface, got %T, %+v", c, c)
@@ -322,7 +335,7 @@ func toEvictionConfig(ii interface{}) ([]sdk.CastaiEvictorV1EvictionConfig, erro
 					return nil, fmt.Errorf("mapping eviction aggressive expecing bool, got %T, %+v", v, v)
 				}
 				if enabled {
-					ec.Settings.Aggressive = &sdk.CastaiEvictorV1EvictionSettingsSettingEnabled{Enabled: enabled}
+					ec.Settings.Aggressive = &workload_eviction.EvictionSettingsSettingEnabled{Enabled: enabled}
 
 				}
 			case FieldEvictionOptionDisabled:
@@ -331,7 +344,7 @@ func toEvictionConfig(ii interface{}) ([]sdk.CastaiEvictorV1EvictionConfig, erro
 					return nil, fmt.Errorf("mapping eviction disabled expecing bool, got %T, %+v", v, v)
 				}
 				if enabled {
-					ec.Settings.RemovalDisabled = &sdk.CastaiEvictorV1EvictionSettingsSettingEnabled{Enabled: enabled}
+					ec.Settings.RemovalDisabled = &workload_eviction.EvictionSettingsSettingEnabled{Enabled: enabled}
 				}
 			case FieldEvictionOptionDisposable:
 				enabled, ok := v.(bool)
@@ -339,7 +352,7 @@ func toEvictionConfig(ii interface{}) ([]sdk.CastaiEvictorV1EvictionConfig, erro
 					return nil, fmt.Errorf("mapping eviction aggressive expecing bool, got %T, %+v", v, v)
 				}
 				if enabled {
-					ec.Settings.Disposable = &sdk.CastaiEvictorV1EvictionSettingsSettingEnabled{Enabled: enabled}
+					ec.Settings.Disposable = &workload_eviction.EvictionSettingsSettingEnabled{Enabled: enabled}
 				}
 			default:
 				return nil, fmt.Errorf("unexpected field %s, %T, %+v", k, v, v)
@@ -349,7 +362,7 @@ func toEvictionConfig(ii interface{}) ([]sdk.CastaiEvictorV1EvictionConfig, erro
 	}
 	return out, nil
 }
-func flattenEvictionConfig(ecs []sdk.CastaiEvictorV1EvictionConfig) []map[string]any {
+func flattenEvictionConfig(ecs []workload_eviction.EvictionConfig) []map[string]any {
 	if ecs == nil {
 		return nil
 	}
@@ -379,7 +392,7 @@ func flattenEvictionConfig(ecs []sdk.CastaiEvictorV1EvictionConfig) []map[string
 	return res
 }
 
-func toPodSelector(in interface{}) (*sdk.CastaiEvictorV1PodSelector, error) {
+func toPodSelector(in interface{}) (*workload_eviction.PodSelector, error) {
 	iii, ok := in.([]interface{})
 	if !ok {
 		return nil, fmt.Errorf("mapping podselector expecting []interface, got %T, %+v", in, in)
@@ -391,7 +404,7 @@ func toPodSelector(in interface{}) (*sdk.CastaiEvictorV1PodSelector, error) {
 	if !ok {
 		return nil, fmt.Errorf("mapping podselector expecting map[string]interface, got %T, %+v", in, in)
 	}
-	out := sdk.CastaiEvictorV1PodSelector{}
+	out := workload_eviction.PodSelector{}
 	for k, v := range ii {
 		switch k {
 		case FieldPodSelectorKind:
@@ -431,7 +444,7 @@ func toPodSelector(in interface{}) (*sdk.CastaiEvictorV1PodSelector, error) {
 				}
 
 				if out.LabelSelector == nil {
-					out.LabelSelector = &sdk.CastaiEvictorV1LabelSelector{}
+					out.LabelSelector = &workload_eviction.LabelSelector{}
 				}
 				out.LabelSelector.MatchExpressions = &me
 			} else {
@@ -448,7 +461,7 @@ func toPodSelector(in interface{}) (*sdk.CastaiEvictorV1PodSelector, error) {
 			}
 
 			if out.LabelSelector == nil {
-				out.LabelSelector = &sdk.CastaiEvictorV1LabelSelector{}
+				out.LabelSelector = &workload_eviction.LabelSelector{}
 			}
 			out.LabelSelector.MatchLabels = mls
 		}
@@ -456,7 +469,7 @@ func toPodSelector(in interface{}) (*sdk.CastaiEvictorV1PodSelector, error) {
 	return &out, nil
 }
 
-func toNodeSelector(in interface{}) (*sdk.CastaiEvictorV1NodeSelector, error) {
+func toNodeSelector(in interface{}) (*workload_eviction.NodeSelector, error) {
 	iii, ok := in.([]interface{})
 	if !ok {
 		return nil, fmt.Errorf("mapping nodeselector expecting []interface, got %T, %+v", in, in)
@@ -468,7 +481,7 @@ func toNodeSelector(in interface{}) (*sdk.CastaiEvictorV1NodeSelector, error) {
 	if !ok {
 		return nil, fmt.Errorf("mapping podselector expecting map[string]interface, got %T, %+v", in, in)
 	}
-	out := sdk.CastaiEvictorV1NodeSelector{}
+	out := workload_eviction.NodeSelector{}
 	for k, v := range ii {
 		switch k {
 
@@ -513,7 +526,7 @@ func toMatchLabels(in interface{}) (*map[string]string, error) {
 	return &out, nil
 }
 
-func flattenPodSelector(ps *sdk.CastaiEvictorV1PodSelector) []map[string]any {
+func flattenPodSelector(ps *workload_eviction.PodSelector) []map[string]any {
 	if ps == nil {
 		return nil
 	}
@@ -538,7 +551,7 @@ func flattenPodSelector(ps *sdk.CastaiEvictorV1PodSelector) []map[string]any {
 	return []map[string]any{out}
 }
 
-func flattenNodeSelector(ns *sdk.CastaiEvictorV1NodeSelector) []map[string]any {
+func flattenNodeSelector(ns *workload_eviction.NodeSelector) []map[string]any {
 	if ns == nil {
 		return nil
 	}
@@ -553,7 +566,7 @@ func flattenNodeSelector(ns *sdk.CastaiEvictorV1NodeSelector) []map[string]any {
 	return []map[string]any{out}
 }
 
-func flattenMatchExpressions(mes []sdk.CastaiEvictorV1LabelSelectorExpression) []map[string]any {
+func flattenMatchExpressions(mes []workload_eviction.LabelSelectorExpression) []map[string]any {
 	if mes == nil {
 		return nil
 	}
@@ -572,11 +585,11 @@ func flattenMatchExpressions(mes []sdk.CastaiEvictorV1LabelSelectorExpression) [
 	return out
 }
 
-func toMatchExpressions(in []interface{}) ([]sdk.CastaiEvictorV1LabelSelectorExpression, error) {
-	out := make([]sdk.CastaiEvictorV1LabelSelectorExpression, len(in))
+func toMatchExpressions(in []interface{}) ([]workload_eviction.LabelSelectorExpression, error) {
+	out := make([]workload_eviction.LabelSelectorExpression, len(in))
 	for i, mei := range in {
 		if me, ok := mei.(map[string]interface{}); ok {
-			out[i] = sdk.CastaiEvictorV1LabelSelectorExpression{}
+			out[i] = workload_eviction.LabelSelectorExpression{}
 			for k, v := range me {
 				switch k {
 				case FieldMatchExpressionKey:
@@ -587,7 +600,7 @@ func toMatchExpressions(in []interface{}) ([]sdk.CastaiEvictorV1LabelSelectorExp
 					}
 				case FieldMatchExpressionOp:
 					if op, ok := v.(string); ok {
-						out[i].Operator = sdk.CastaiEvictorV1LabelSelectorExpressionOperator(op)
+						out[i].Operator = workload_eviction.LabelSelectorExpressionOperator(op)
 					} else {
 						return nil, fmt.Errorf("mapping match_expression operator expecting string, got %T %+v", v, v)
 					}
