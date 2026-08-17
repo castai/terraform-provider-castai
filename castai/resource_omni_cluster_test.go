@@ -24,6 +24,7 @@ func Test_ResourceOmniCluster_Cleanup(t *testing.T) {
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			{
+				Config: `provider "castai" {}`,
 				Check: func(s *terraform.State) error {
 					ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
 					defer cancel()
