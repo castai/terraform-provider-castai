@@ -83,7 +83,6 @@ func TestAKSClusterResourceReadContext(t *testing.T) {
 		r.Nil(result)
 		r.False(result.HasError())
 		r.Equal(`ID = b6bfc074-a267-400f-b8f1-db0850c369b1
-ca_cert_config.# = 0
 credentials_id = 9b8d0456-177b-4a3d-b162-e68030d656aa
 http_proxy_config.# = 1
 http_proxy_config.0.http_proxy = http-proxy
@@ -152,7 +151,6 @@ Tainted = false
 		r.False(result.HasError())
 		// Note: even if the array for proxy is nil, terraform saves the length so we still have _some_ state about it below.
 		r.Equal(`ID = b6bfc074-a267-400f-b8f1-db0850c369b1
-ca_cert_config.# = 0
 credentials_id = 9b8d0456-177b-4a3d-b162-e68030d656aa
 http_proxy_config.# = 0
 organization_id = 2836f775-aaaa-eeee-bbbb-3d3c29512692

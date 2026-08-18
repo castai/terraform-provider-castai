@@ -26,7 +26,7 @@ const (
 	FieldAKSHttpProxyConfig          = "http_proxy_config"
 	FieldAKSHttpProxyDestination     = "http_proxy"
 	FieldAKSHttpsProxyDestination    = "https_proxy"
-	FieldAKSNoProxyDestinations       = "no_proxy"
+	FieldAKSNoProxyDestinations      = "no_proxy"
 	FieldAKSCaCertConfig             = "ca_cert_config"
 	FieldAKSCaCerts                  = "ca_certs"
 )
@@ -229,16 +229,15 @@ func resourceCastaiAKSClusterRead(ctx context.Context, data *schema.ResourceData
 			return diag.FromErr(fmt.Errorf("setting http proxy config: %w", err))
 		}
 
-		caCertConfig := []any{}
-		if aks.CaCertConfig != nil && aks.CaCertConfig.CaCerts != nil {
-			caCertConfig = []any{
+		if aks.CaCertConfig != nil && aks.CaCertConfig.CaCerts != nil && len(*aks.CaCertConfig.CaCerts) > 0 {
+			caCertConfig := []any{
 				map[string]any{
 					FieldAKSCaCerts: *aks.CaCertConfig.CaCerts,
 				},
 			}
-		}
-		if err := data.Set(FieldAKSCaCertConfig, caCertConfig); err != nil {
-			return diag.FromErr(fmt.Errorf("setting ca cert config: %w", err))
+			if err := data.Set(FieldAKSCaCertConfig, caCertConfig); err != nil {
+				return diag.FromErr(fmt.Errorf("setting ca cert config: %w", err))
+			}
 		}
 	}
 
