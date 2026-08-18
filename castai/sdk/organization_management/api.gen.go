@@ -908,6 +908,9 @@ type ListEnterpriseServiceAccountsResponseServiceAccount struct {
 	// Id ID is the unique identifier of the service account.
 	Id *string `json:"id,omitempty"`
 
+	// KeysCount KeysCount is the number of keys for this service account.
+	KeysCount *uint32 `json:"keysCount,omitempty"`
+
 	// ManagedBy Method used to create the service account, e.g.: console, terraform.
 	ManagedBy *string `json:"managedBy,omitempty"`
 
@@ -1511,6 +1514,9 @@ type EnterpriseAPIListEnterpriseServiceAccountsParams struct {
 
 	// SortOrder The order of returned items. Default is ASC.
 	SortOrder *EnterpriseAPIListEnterpriseServiceAccountsParamsSortOrder `form:"sort.order,omitempty" json:"sort.order,omitempty"`
+
+	// Name Filter by name. Performs case-insensitive partial matching.
+	Name *string `form:"name,omitempty" json:"name,omitempty"`
 }
 
 // EnterpriseAPIListEnterpriseServiceAccountsParamsSortOrder defines parameters for EnterpriseAPIListEnterpriseServiceAccounts.
