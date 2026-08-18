@@ -1733,6 +1733,7 @@ type CastaiEvictorV1EvictionConfig struct {
 type CastaiEvictorV1EvictionSettings struct {
 	Aggressive      *CastaiEvictorV1EvictionSettingsSettingEnabled `json:"aggressive,omitempty"`
 	Disposable      *CastaiEvictorV1EvictionSettingsSettingEnabled `json:"disposable,omitempty"`
+	ForceDisposable *CastaiEvictorV1EvictionSettingsSettingEnabled `json:"forceDisposable,omitempty"`
 	RemovalDisabled *CastaiEvictorV1EvictionSettingsSettingEnabled `json:"removalDisabled,omitempty"`
 }
 
@@ -10758,6 +10759,11 @@ type WorkloadoptimizationV1MetricsMetricRef struct {
 	// GPU metrics:
 	//   gpu.sm_active, gpu.framebuffer_used, gpu.memory_util,
 	//   gpu.dram_active, gpu.power_usage, gpu.temperature, gpu.tensor_active
+	// Cost rate metrics:
+	//   cost_per_cpu_requested_per_hour, cost_per_memory_per_hour
+	// Workload resource metrics (sourced from PG, per-container per-pod constants):
+	//   cpu_first_seen_request, memory_first_seen_request,
+	//   cpu_original_request, memory_original_request
 	Metric string `json:"metric"`
 
 	// Rollup rollup is the bucket-level aggregation function. Valid values:
