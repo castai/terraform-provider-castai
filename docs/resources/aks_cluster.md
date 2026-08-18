@@ -42,6 +42,7 @@ resource "castai_aks_cluster" "this" {
 
 ### Optional
 
+- `ca_cert_config` (Block List, Max: 1) Custom CA certificates for clusters behind TLS-intercepting proxies. (see [below for nested schema](#nestedblock--ca_cert_config))
 - `client_secret` (String, Sensitive) Azure AD application password that will be used by CAST AI.
 - `delete_nodes_on_disconnect` (Boolean) Should CAST AI remove nodes managed by CAST.AI on disconnect.
 - `federation_id` (String) Azure federation used by CAST AI for secretless auth via impersonation.
@@ -54,6 +55,14 @@ resource "castai_aks_cluster" "this" {
 - `credentials_id` (String) CAST AI internal credentials ID
 - `id` (String) The ID of this resource.
 - `organization_id` (String) CAST AI organization ID
+
+<a id="nestedblock--ca_cert_config"></a>
+### Nested Schema for `ca_cert_config`
+
+Optional:
+
+- `ca_certs` (List of String) List of PEM-encoded CA certificates.
+
 
 <a id="nestedblock--http_proxy_config"></a>
 ### Nested Schema for `http_proxy_config`

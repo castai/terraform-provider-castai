@@ -229,7 +229,7 @@ func resourceCastaiAKSClusterRead(ctx context.Context, data *schema.ResourceData
 			return diag.FromErr(fmt.Errorf("setting http proxy config: %w", err))
 		}
 
-		var caCertConfig []any = []any{}
+		caCertConfig := []any{}
 		if aks.CaCertConfig != nil && aks.CaCertConfig.CaCerts != nil {
 			caCertConfig = []any{
 				map[string]any{
