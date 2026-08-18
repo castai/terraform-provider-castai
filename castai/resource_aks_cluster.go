@@ -150,7 +150,7 @@ func resourceAKSCluster() *schema.Resource {
 				Type:        schema.TypeList,
 				Optional:    true,
 				MaxItems:    1,
-				Description: "Custom CA certificates for clusters behind TLS-intercepting proxies.",
+				Description: "CA certificates to add to the node's trust store.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						FieldAKSCaCerts: {
