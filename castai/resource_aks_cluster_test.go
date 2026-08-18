@@ -413,6 +413,65 @@ func TestAKSClusterResourceUpdateContext(t *testing.T) {
 		r.Equal(proxyConfigElem[FieldAKSHttpsProxyDestination], *expectedHttpProxySettings.Aks.HttpProxyConfig.HttpsProxy)
 		r.ElementsMatch(proxyConfigElem[FieldAKSNoProxyDestinations], *expectedHttpProxySettings.Aks.HttpProxyConfig.NoProxy)
 	})
+
+	t.Run("Saves CA cert config correctly", func(t *testing.T) {
+		r := require.New(t)
+		mockctrl := gomock.NewController(t)
+		mockClient := mock_sdk.NewMockClientInterface(mockctrl)
+		provider := &ProviderConfig{
+			api: &sdk.ClientWithResponses{
+				ClientInterface: mockClient,
+			},
+		}
+
+		caCert := "-----BEGIN CERTIFICATE-----\nMIIBxTCCAW6gAwIBAgIRAO/3k3BZ6Dx5qQ==\n-----END CERTIFICATE-----"
+		expectedCaCertSettings := &sdk.ExternalClusterAPIUpdateClusterJSONRequestBody{
+			Aks: &sdk.ExternalclusterV1UpdateAKSClusterParams{
+				CaCertConfig: &sdk.ExternalclusterV1CACertConfig{
+					CaCerts: lo.ToPtr([]string{caCert}),
+				},
+			},
+		}
+		jsonCaCert, err := json.Marshal(expectedCaCertSettings)
+		r.NoError(err)
+
+		readResponse := io.NopCloser(bytes.NewReader([]byte(`{"credentialsId": ""}`)))
+		updateResponse := io.NopCloser(bytes.NewReader(jsonCaCert))
+		mockClient.EXPECT().
+			ExternalClusterAPIGetCluster(gomock.Any(), clusterID).
+			Return(&http.Response{StatusCode: 200, Body: readResponse, Header: map[string][]string{"Content-Type": {"json"}}}, nil)
+		mockClient.EXPECT().
+			ExternalClusterAPIUpdateCluster(gomock.Any(), clusterID, gomock.Any()).
+			DoAndReturn(func(_ context.Context, _ string, body sdk.ExternalClusterAPIUpdateClusterJSONRequestBody) (*http.Response, error) {
+				r.NotNil(body.Aks.CaCertConfig)
+				r.ElementsMatch(*expectedCaCertSettings.Aks.CaCertConfig.CaCerts, *body.Aks.CaCertConfig.CaCerts)
+				return &http.Response{StatusCode: 200, Body: updateResponse, Header: map[string][]string{"Content-Type": {"json"}}}, nil
+			})
+
+		aksResource := resourceAKSCluster()
+
+		diff := map[string]any{
+			FieldAKSCaCertConfig: []any{
+				map[string]any{
+					FieldAKSCaCerts: []any{caCert},
+				},
+			},
+			FieldClusterCredentialsId: "",
+		}
+		data := schema.TestResourceDataRaw(t, aksResource.Schema, diff)
+		data.SetId(clusterID)
+		diagnostics := aksResource.UpdateContext(ctx, data, provider)
+
+		r.Empty(diagnostics)
+
+		stateCaCertConfig := data.Get(FieldAKSCaCertConfig).([]any)
+		r.NotNil(stateCaCertConfig)
+		r.Len(stateCaCertConfig, 1)
+		caCertConfigElem := stateCaCertConfig[0].(map[string]any)
+		stateCaCerts := caCertConfigElem[FieldAKSCaCerts].([]any)
+		r.Len(stateCaCerts, 1)
+		r.Equal(caCert, stateCaCerts[0])
+	})
 }
 
 func TestAccAKS_ResourceAKSCluster(t *testing.T) {
