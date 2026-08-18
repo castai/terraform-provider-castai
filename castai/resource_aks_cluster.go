@@ -229,7 +229,7 @@ func resourceCastaiAKSClusterRead(ctx context.Context, data *schema.ResourceData
 			return diag.FromErr(fmt.Errorf("setting http proxy config: %w", err))
 		}
 
-		var caCertConfig []any
+		var caCertConfig []any = []any{}
 		if aks.CaCertConfig != nil && aks.CaCertConfig.CaCerts != nil {
 			caCertConfig = []any{
 				map[string]any{
@@ -348,6 +348,7 @@ func updateAKSClusterSettings(ctx context.Context, data *schema.ResourceData, cl
 	}
 
 	caCertConfigBlocks := data.Get(FieldAKSCaCertConfig).([]any)
+	var reqCaCertConfig *sdk.ExternalclusterV1CACertConfig
 	if len(caCertConfigBlocks) > 0 {
 		caCertConfig := caCertConfigBlocks[0].(map[string]any)
 		caCerts := make([]string, 0)
@@ -355,11 +356,15 @@ func updateAKSClusterSettings(ctx context.Context, data *schema.ResourceData, cl
 			caCerts = append(caCerts, c.(string))
 		}
 		if len(caCerts) > 0 {
-			req.Aks.CaCertConfig = &sdk.ExternalclusterV1CACertConfig{
+			reqCaCertConfig = &sdk.ExternalclusterV1CACertConfig{
 				CaCerts: lo.ToPtr(caCerts),
 			}
 		}
+	} else {
+		// Block removed — send empty config to clear existing CA certs.
+		reqCaCertConfig = &sdk.ExternalclusterV1CACertConfig{}
 	}
+	req.Aks.CaCertConfig = reqCaCertConfig
 
 	return resourceCastaiClusterUpdate(ctx, client, data, &req)
 }
