@@ -26,7 +26,9 @@ const (
 	FieldAKSHttpProxyConfig          = "http_proxy_config"
 	FieldAKSHttpProxyDestination     = "http_proxy"
 	FieldAKSHttpsProxyDestination    = "https_proxy"
-	FieldAKSNoProxyDestinations      = "no_proxy"
+	FieldAKSNoProxyDestinations       = "no_proxy"
+	FieldAKSCaCertConfig             = "ca_cert_config"
+	FieldAKSCaCerts                  = "ca_certs"
 )
 
 func resourceAKSCluster() *schema.Resource {
@@ -144,6 +146,25 @@ func resourceAKSCluster() *schema.Resource {
 					},
 				},
 			},
+			FieldAKSCaCertConfig: {
+				Type:        schema.TypeList,
+				Optional:    true,
+				MaxItems:    1,
+				Description: "Custom CA certificates for clusters behind TLS-intercepting proxies.",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						FieldAKSCaCerts: {
+							Type:        schema.TypeList,
+							Optional:    true,
+							Description: "List of PEM-encoded CA certificates.",
+							Elem: &schema.Schema{
+								Type:      schema.TypeString,
+								Sensitive: true,
+							},
+						},
+					},
+				},
+			},
 			FieldClusterOrganizationId: {
 				Type:        schema.TypeString,
 				Computed:    true,
@@ -206,6 +227,18 @@ func resourceCastaiAKSClusterRead(ctx context.Context, data *schema.ResourceData
 
 		if err := data.Set(FieldAKSHttpProxyConfig, proxyConfig); err != nil {
 			return diag.FromErr(fmt.Errorf("setting http proxy config: %w", err))
+		}
+
+		var caCertConfig []any
+		if aks.CaCertConfig != nil && aks.CaCertConfig.CaCerts != nil {
+			caCertConfig = []any{
+				map[string]any{
+					FieldAKSCaCerts: *aks.CaCertConfig.CaCerts,
+				},
+			}
+		}
+		if err := data.Set(FieldAKSCaCertConfig, caCertConfig); err != nil {
+			return diag.FromErr(fmt.Errorf("setting ca cert config: %w", err))
 		}
 	}
 
@@ -271,6 +304,8 @@ func updateAKSClusterSettings(ctx context.Context, data *schema.ResourceData, cl
 		FieldAKSHttpProxyDestination,
 		FieldAKSHttpsProxyDestination,
 		FieldAKSNoProxyDestinations,
+		FieldAKSCaCertConfig,
+		FieldAKSCaCerts,
 		FieldClusterCredentialsId,
 	) {
 		log.Printf("[INFO] Nothing to update in cluster setttings.")
@@ -310,6 +345,20 @@ func updateAKSClusterSettings(ctx context.Context, data *schema.ResourceData, cl
 	req.Credentials = &credentials
 	req.Aks = &sdk.ExternalclusterV1UpdateAKSClusterParams{
 		HttpProxyConfig: reqHttpProxyConfig,
+	}
+
+	caCertConfigBlocks := data.Get(FieldAKSCaCertConfig).([]any)
+	if len(caCertConfigBlocks) > 0 {
+		caCertConfig := caCertConfigBlocks[0].(map[string]any)
+		caCerts := make([]string, 0)
+		for _, c := range caCertConfig[FieldAKSCaCerts].([]any) {
+			caCerts = append(caCerts, c.(string))
+		}
+		if len(caCerts) > 0 {
+			req.Aks.CaCertConfig = &sdk.ExternalclusterV1CACertConfig{
+				CaCerts: lo.ToPtr(caCerts),
+			}
+		}
 	}
 
 	return resourceCastaiClusterUpdate(ctx, client, data, &req)

@@ -1733,6 +1733,7 @@ type CastaiEvictorV1EvictionConfig struct {
 type CastaiEvictorV1EvictionSettings struct {
 	Aggressive      *CastaiEvictorV1EvictionSettingsSettingEnabled `json:"aggressive,omitempty"`
 	Disposable      *CastaiEvictorV1EvictionSettingsSettingEnabled `json:"disposable,omitempty"`
+	ForceDisposable *CastaiEvictorV1EvictionSettingsSettingEnabled `json:"forceDisposable,omitempty"`
 	RemovalDisabled *CastaiEvictorV1EvictionSettingsSettingEnabled `json:"removalDisabled,omitempty"`
 }
 
@@ -5776,6 +5777,9 @@ type DboV1UninstallDBAgentParams struct {
 
 // ExternalclusterV1AKSClusterParams AKSClusterParams defines AKS-specific arguments.
 type ExternalclusterV1AKSClusterParams struct {
+	// CaCertConfig CACertConfig holds CA certificates to add to the node's trust store.
+	CaCertConfig *ExternalclusterV1CACertConfig `json:"caCertConfig,omitempty"`
+
 	// ClusterResourceGroup Azure cluster resource group.
 	ClusterResourceGroup *string `json:"clusterResourceGroup,omitempty"`
 
@@ -5858,6 +5862,12 @@ type ExternalclusterV1AnywhereClusterParams struct {
 
 	// KubeSystemNamespaceId NamespaceID as unique identifier for the cluster.
 	KubeSystemNamespaceId string `json:"kubeSystemNamespaceId"`
+}
+
+// ExternalclusterV1CACertConfig CACertConfig holds CA certificates to add to the node's trust store.
+type ExternalclusterV1CACertConfig struct {
+	// CaCerts PEM-encoded CA certificates. Each entry may contain one or more concatenated PEM blocks.
+	CaCerts *[]string `json:"caCerts,omitempty"`
 }
 
 // ExternalclusterV1CloudEvent CloudEvent represents a remote event that happened in the cloud, e.g. "node added".
@@ -6827,6 +6837,9 @@ type ExternalclusterV1TriggerResumeClusterResponse struct {
 
 // ExternalclusterV1UpdateAKSClusterParams UpdateAKSClusterParams defines updatable AKS cluster configuration.
 type ExternalclusterV1UpdateAKSClusterParams struct {
+	// CaCertConfig CACertConfig holds CA certificates to add to the node's trust store.
+	CaCertConfig *ExternalclusterV1CACertConfig `json:"caCertConfig,omitempty"`
+
 	// HttpProxyConfig HttpProxyConfig holds settings when HTTP/S communication is required.
 	HttpProxyConfig *ExternalclusterV1HttpProxyConfig `json:"httpProxyConfig,omitempty"`
 }
@@ -10621,7 +10634,12 @@ type WorkloadoptimizationV1MetricsExpr struct {
 	// BinaryOp MetricsBinaryOp composes two sub-expressions with an arithmetic operator.
 	BinaryOp *WorkloadoptimizationV1MetricsBinaryOp `json:"binaryOp,omitempty"`
 
-	// MetricRef MetricsMetricRef references one metric with one rollup function.
+	// MetricRef MetricsMetricRef references one metric with a bucket rollup and an optional
+	// group rollup. The smallest unit is the container identity
+	// (namespace, kind, name, is_custom, container). The group rollup combines
+	// container-level values into the requested group_by; the bucket rollup reduces
+	// those group totals inside each time step. When group_rollup is omitted, the
+	// metric family's default is used.
 	MetricRef *WorkloadoptimizationV1MetricsMetricRef `json:"metricRef,omitempty"`
 
 	// ScalarOp MetricsScalarOp applies a constant scalar to a sub-expression.
@@ -10706,8 +10724,21 @@ type WorkloadoptimizationV1MetricsFilterOr struct {
 // WorkloadoptimizationV1MetricsGroupByDimension MetricsGroupByDimension enumerates the workload identity dimensions available for grouping results.
 type WorkloadoptimizationV1MetricsGroupByDimension string
 
-// WorkloadoptimizationV1MetricsMetricRef MetricsMetricRef references one metric with one rollup function.
+// WorkloadoptimizationV1MetricsMetricRef MetricsMetricRef references one metric with a bucket rollup and an optional
+// group rollup. The smallest unit is the container identity
+// (namespace, kind, name, is_custom, container). The group rollup combines
+// container-level values into the requested group_by; the bucket rollup reduces
+// those group totals inside each time step. When group_rollup is omitted, the
+// metric family's default is used.
 type WorkloadoptimizationV1MetricsMetricRef struct {
+	// GroupRollup group_rollup is the container-to-group aggregation function. Valid values:
+	//   Named aggregates: sum, avg, min, max, count
+	//   Family-specific defaults: sum for usage/request/gpu/jvm/probe/psi/recommendation/custom,
+	//     dedup-then-sum for pod_count, broadcast for cost rates.
+	// Percentiles are not allowed as group rollups because they do not compose
+	// across containers. Cost rates only accept broadcast.
+	GroupRollup *string `json:"groupRollup"`
+
 	// Metric metric is the metric name. Supported values are not enforced as an enum so
 	// new internal or custom metrics can be added without proto changes. Send an
 	// unknown name and the server returns an InvalidArgument error.
@@ -10728,10 +10759,15 @@ type WorkloadoptimizationV1MetricsMetricRef struct {
 	// GPU metrics:
 	//   gpu.sm_active, gpu.framebuffer_used, gpu.memory_util,
 	//   gpu.dram_active, gpu.power_usage, gpu.temperature, gpu.tensor_active
+	// Cost rate metrics:
+	//   cost_per_cpu_requested_per_hour, cost_per_memory_per_hour
+	// Workload resource metrics (sourced from PG, per-container per-pod constants):
+	//   cpu_first_seen_request, memory_first_seen_request,
+	//   cpu_original_request, memory_original_request
 	Metric string `json:"metric"`
 
-	// Rollup rollup is the aggregation function to apply. Valid values:
-	//   Named aggregates: avg, min, max, sum
+	// Rollup rollup is the bucket-level aggregation function. Valid values:
+	//   Named aggregates: avg, min, max, sum, count
 	//   Percentiles:      p00–p99  (exactly two digits, e.g. p50, p90, p95, p99)
 	//   p100 is accepted as an alias for max.
 	Rollup string `json:"rollup"`
