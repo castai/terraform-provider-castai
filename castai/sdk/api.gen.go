@@ -5866,7 +5866,7 @@ type ExternalclusterV1AnywhereClusterParams struct {
 
 // ExternalclusterV1CACertConfig CACertConfig holds CA certificates to add to the node's trust store.
 type ExternalclusterV1CACertConfig struct {
-	// CaCerts PEM-encoded CA certificates. Each entry may contain one or more concatenated PEM blocks.
+	// CaCerts Base64-encoded CA certificates.
 	CaCerts *[]string `json:"caCerts,omitempty"`
 }
 
