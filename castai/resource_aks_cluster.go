@@ -231,22 +231,13 @@ func resourceCastaiAKSClusterRead(ctx context.Context, data *schema.ResourceData
 		}
 
 		if aks.CaCertConfig != nil && aks.CaCertConfig.CaCerts != nil && len(*aks.CaCertConfig.CaCerts) > 0 {
-			decodedCerts := make([]string, 0, len(*aks.CaCertConfig.CaCerts))
-			for _, cert := range *aks.CaCertConfig.CaCerts {
-				decoded, err := base64.StdEncoding.DecodeString(cert)
-				if err == nil {
-					decodedCerts = append(decodedCerts, string(decoded))
-				}
+			caCertConfig := []any{
+				map[string]any{
+					FieldAKSCaCerts: lo.FromPtr(aks.CaCertConfig.CaCerts),
+				},
 			}
-			if len(decodedCerts) > 0 {
-				caCertConfig := []any{
-					map[string]any{
-						FieldAKSCaCerts: decodedCerts,
-					},
-				}
-				if err := data.Set(FieldAKSCaCertConfig, caCertConfig); err != nil {
-					return diag.FromErr(fmt.Errorf("setting ca cert config: %w", err))
-				}
+			if err := data.Set(FieldAKSCaCertConfig, caCertConfig); err != nil {
+				return diag.FromErr(fmt.Errorf("setting ca cert config: %w", err))
 			}
 		}
 	}

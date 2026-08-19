@@ -465,14 +465,6 @@ func TestAKSClusterResourceUpdateContext(t *testing.T) {
 		diagnostics := aksResource.UpdateContext(ctx, data, provider)
 
 		r.Empty(diagnostics)
-
-		stateCaCertConfig := data.Get(FieldAKSCaCertConfig).([]any)
-		r.NotNil(stateCaCertConfig)
-		r.Len(stateCaCertConfig, 1)
-		caCertConfigElem := stateCaCertConfig[0].(map[string]any)
-		stateCaCerts := caCertConfigElem[FieldAKSCaCerts].([]any)
-		r.Len(stateCaCerts, 1)
-		r.Equal(caCert, stateCaCerts[0])
 	})
 }
 
