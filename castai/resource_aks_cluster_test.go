@@ -466,6 +466,66 @@ func TestAKSClusterResourceUpdateContext(t *testing.T) {
 
 		r.Empty(diagnostics)
 	})
+
+	t.Run("Rejects invalid base64 CA cert", func(t *testing.T) {
+		r := require.New(t)
+		mockctrl := gomock.NewController(t)
+		mockClient := mock_sdk.NewMockClientInterface(mockctrl)
+		provider := &ProviderConfig{
+			api: &sdk.ClientWithResponses{
+				ClientInterface: mockClient,
+			},
+		}
+
+		// No API calls expected — validation fails before reaching the API.
+		aksResource := resourceAKSCluster()
+
+		diff := map[string]any{
+			FieldAKSCaCertConfig: []any{
+				map[string]any{
+					FieldAKSCaCerts: []any{"!!!not-valid-base64!!!"},
+				},
+			},
+			FieldClusterCredentialsId: "",
+		}
+		data := schema.TestResourceDataRaw(t, aksResource.Schema, diff)
+		data.SetId(clusterID)
+		diagnostics := aksResource.UpdateContext(ctx, data, provider)
+
+		r.NotEmpty(diagnostics)
+		r.Contains(diagnostics[0].Summary, "invalid base64")
+	})
+
+	t.Run("Rejects valid base64 but invalid PEM CA cert", func(t *testing.T) {
+		r := require.New(t)
+		mockctrl := gomock.NewController(t)
+		mockClient := mock_sdk.NewMockClientInterface(mockctrl)
+		provider := &ProviderConfig{
+			api: &sdk.ClientWithResponses{
+				ClientInterface: mockClient,
+			},
+		}
+
+		invalidPem := base64.StdEncoding.EncodeToString([]byte("not-a-certificate"))
+
+		// No API calls expected — validation fails before reaching the API.
+		aksResource := resourceAKSCluster()
+
+		diff := map[string]any{
+			FieldAKSCaCertConfig: []any{
+				map[string]any{
+					FieldAKSCaCerts: []any{invalidPem},
+				},
+			},
+			FieldClusterCredentialsId: "",
+		}
+		data := schema.TestResourceDataRaw(t, aksResource.Schema, diff)
+		data.SetId(clusterID)
+		diagnostics := aksResource.UpdateContext(ctx, data, provider)
+
+		r.NotEmpty(diagnostics)
+		r.Contains(diagnostics[0].Summary, "not a valid PEM")
+	})
 }
 
 func TestAccAKS_ResourceAKSCluster(t *testing.T) {
