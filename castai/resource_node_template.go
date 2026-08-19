@@ -235,6 +235,7 @@ func resourceNodeTemplate() *schema.Resource {
 				Optional:    true,
 				Default:     nil,
 				Computed:    true,
+				Deprecated:  "is_default is derived from the template name ('default-by-castai' => true, otherwise false) and cannot be set independently. Remove it from your config; it will be removed as a user-settable field in a future release.",
 				Description: "Flag whether the node template is default. It's is always set to 'true' on 'default-by-castai' node template and 'false' otherwise.",
 			},
 			FieldNodeTemplateConfigurationId: {
