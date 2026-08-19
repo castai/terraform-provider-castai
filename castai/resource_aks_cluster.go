@@ -2,6 +2,7 @@ package castai
 
 import (
 	"context"
+	"encoding/base64"
 	"fmt"
 	"log"
 	"time"
@@ -230,13 +231,22 @@ func resourceCastaiAKSClusterRead(ctx context.Context, data *schema.ResourceData
 		}
 
 		if aks.CaCertConfig != nil && aks.CaCertConfig.CaCerts != nil && len(*aks.CaCertConfig.CaCerts) > 0 {
-			caCertConfig := []any{
-				map[string]any{
-					FieldAKSCaCerts: lo.FromPtr(aks.CaCertConfig.CaCerts),
-				},
+			decodedCerts := make([]string, 0, len(*aks.CaCertConfig.CaCerts))
+			for _, cert := range *aks.CaCertConfig.CaCerts {
+				decoded, err := base64.StdEncoding.DecodeString(cert)
+				if err == nil {
+					decodedCerts = append(decodedCerts, string(decoded))
+				}
 			}
-			if err := data.Set(FieldAKSCaCertConfig, caCertConfig); err != nil {
-				return diag.FromErr(fmt.Errorf("setting ca cert config: %w", err))
+			if len(decodedCerts) > 0 {
+				caCertConfig := []any{
+					map[string]any{
+						FieldAKSCaCerts: decodedCerts,
+					},
+				}
+				if err := data.Set(FieldAKSCaCertConfig, caCertConfig); err != nil {
+					return diag.FromErr(fmt.Errorf("setting ca cert config: %w", err))
+				}
 			}
 		}
 	}
@@ -352,7 +362,7 @@ func updateAKSClusterSettings(ctx context.Context, data *schema.ResourceData, cl
 		caCertConfig := caCertConfigBlocks[0].(map[string]any)
 		caCerts := make([]string, 0)
 		for _, c := range caCertConfig[FieldAKSCaCerts].([]any) {
-			caCerts = append(caCerts, c.(string))
+			caCerts = append(caCerts, base64.StdEncoding.EncodeToString([]byte(c.(string))))
 		}
 		if len(caCerts) > 0 {
 			reqCaCertConfig = &sdk.ExternalclusterV1CACertConfig{

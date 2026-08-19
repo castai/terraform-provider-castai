@@ -3,6 +3,7 @@ package castai
 import (
 	"bytes"
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -425,10 +426,11 @@ func TestAKSClusterResourceUpdateContext(t *testing.T) {
 		}
 
 		caCert := "-----BEGIN CERTIFICATE-----\nMIIBxTCCAW6gAwIBAgIRAO/3k3BZ6Dx5qQ==\n-----END CERTIFICATE-----"
+		encodedCaCert := base64.StdEncoding.EncodeToString([]byte(caCert))
 		expectedCaCertSettings := &sdk.ExternalClusterAPIUpdateClusterJSONRequestBody{
 			Aks: &sdk.ExternalclusterV1UpdateAKSClusterParams{
 				CaCertConfig: &sdk.ExternalclusterV1CACertConfig{
-					CaCerts: lo.ToPtr([]string{caCert}),
+					CaCerts: lo.ToPtr([]string{encodedCaCert}),
 				},
 			},
 		}
