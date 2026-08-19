@@ -61,7 +61,7 @@ resource "castai_aks_cluster" "this" {
 
 Optional:
 
-- `ca_certs` (List of String) List of PEM-encoded CA certificates.
+- `ca_certs` (List of String) List of base64-encoded CA certificates.
 
 
 <a id="nestedblock--http_proxy_config"></a>

@@ -455,7 +455,7 @@ func TestAKSClusterResourceUpdateContext(t *testing.T) {
 		diff := map[string]any{
 			FieldAKSCaCertConfig: []any{
 				map[string]any{
-					FieldAKSCaCerts: []any{caCert},
+					FieldAKSCaCerts: []any{encodedCaCert},
 				},
 			},
 			FieldClusterCredentialsId: "",

@@ -3,6 +3,7 @@ package castai
 import (
 	"context"
 	"encoding/base64"
+	"encoding/pem"
 	"fmt"
 	"log"
 	"time"
@@ -157,7 +158,7 @@ func resourceAKSCluster() *schema.Resource {
 						FieldAKSCaCerts: {
 							Type:        schema.TypeList,
 							Optional:    true,
-							Description: "List of PEM-encoded CA certificates.",
+							Description: "List of base64-encoded CA certificates.",
 							Elem: &schema.Schema{
 								Type:      schema.TypeString,
 								Sensitive: true,
@@ -353,7 +354,17 @@ func updateAKSClusterSettings(ctx context.Context, data *schema.ResourceData, cl
 		caCertConfig := caCertConfigBlocks[0].(map[string]any)
 		caCerts := make([]string, 0)
 		for _, c := range caCertConfig[FieldAKSCaCerts].([]any) {
-			caCerts = append(caCerts, base64.StdEncoding.EncodeToString([]byte(c.(string))))
+			cert := c.(string)
+			// Validate base64 and PEM certificate content.
+			decoded, err := base64.StdEncoding.DecodeString(cert)
+			if err != nil {
+				return fmt.Errorf("invalid base64-encoded CA certificate: %w", err)
+			}
+			block, _ := pem.Decode(decoded)
+			if block == nil {
+				return fmt.Errorf("decoded CA certificate is not a valid PEM certificate")
+			}
+			caCerts = append(caCerts, cert)
 		}
 		if len(caCerts) > 0 {
 			reqCaCertConfig = &sdk.ExternalclusterV1CACertConfig{
