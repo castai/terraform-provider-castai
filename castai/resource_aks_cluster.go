@@ -232,7 +232,7 @@ func resourceCastaiAKSClusterRead(ctx context.Context, data *schema.ResourceData
 		if aks.CaCertConfig != nil && aks.CaCertConfig.CaCerts != nil && len(*aks.CaCertConfig.CaCerts) > 0 {
 			caCertConfig := []any{
 				map[string]any{
-					FieldAKSCaCerts: *aks.CaCertConfig.CaCerts,
+					FieldAKSCaCerts: lo.FromPtr(aks.CaCertConfig.CaCerts),
 				},
 			}
 			if err := data.Set(FieldAKSCaCertConfig, caCertConfig); err != nil {
