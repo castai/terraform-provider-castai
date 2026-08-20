@@ -74,7 +74,7 @@ func TestAccEKS_ResourceNodeConfiguration(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "disk_cpu_ratio", "0"),
 					resource.TestCheckResourceAttr(resourceName, "drain_timeout_sec", "120"),
 					resource.TestCheckResourceAttr(resourceName, "min_disk_size", "100"),
-					resource.TestCheckResourceAttr(resourceName, "image", "amazon-eks-node-1.23-v20240817"),
+					resource.TestCheckResourceAttr(resourceName, "image", "amazon-eks-node-1.36-v20260810"),
 					resource.TestCheckResourceAttr(resourceName, "init_script", ""),
 					resource.TestCheckResourceAttr(resourceName, "container_runtime", "CONTAINERD"),
 					resource.TestCheckResourceAttr(resourceName, "docker_config", ""),
@@ -165,7 +165,7 @@ resource "castai_node_configuration" "test" {
   cluster_id        = castai_eks_cluster.test.id
   drain_timeout_sec = 120
   subnets   	    = data.aws_subnets.core.ids
-  image             = "amazon-eks-node-1.23-v20240817" 
+  image             = "amazon-eks-node-1.36-v20260810" 
   container_runtime = "containerd"
   kubelet_config     = jsonencode({
     "eventRecordQPS": 10
