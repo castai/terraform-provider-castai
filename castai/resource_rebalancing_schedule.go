@@ -406,7 +406,7 @@ func stateToSchedule(d *schema.ResourceData) (*sdk.ScheduledrebalancingV1Rebalan
 				MinNodes:              readOptionalNumber[int, int32](launchConfigurationData, "rebalancing_min_nodes"),
 				KeepDrainTimeoutNodes: keepDrainTimeoutNodes,
 				ExecutionConditions:   executionConditions,
-				AggressiveMode:        aggressiveMode,
+				AggressiveMode:        aggressiveMode, //nolint:staticcheck // SA1019: deprecated but still used for backward compatibility
 				AggressiveModeConfig:  aggressiveModeConfig,
 				DrainFailureConfig:    drainFailureConfig,
 			},
