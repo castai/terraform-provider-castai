@@ -317,8 +317,6 @@ func (r *edgeConfigurationResource) Create(ctx context.Context, req resource.Cre
 	state := r.edgeConfigurationToTFModel(ctx, apiResp.JSON200, plan.OrganizationID, plan.ClusterID)
 	state.EdgeLocationID = plan.EdgeLocationID
 
-	r.normalizeCRIState(&state, plan.CRI)
-
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
 }
 
@@ -449,8 +447,6 @@ func (r *edgeConfigurationResource) Update(ctx context.Context, req resource.Upd
 	}
 
 	state := r.edgeConfigurationToTFModel(ctx, apiResp.JSON200, plan.OrganizationID, plan.ClusterID)
-
-	r.normalizeCRIState(&state, plan.CRI)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
 }
@@ -609,7 +605,11 @@ func (r *edgeConfigurationResource) toGCPConfiguration(ctx context.Context, plan
 		return nil, diags
 	}
 
-	config := &omni.GCPConfiguration{}
+	config := &omni.GCPConfiguration{
+		ImageId:         lo.ToPtr(""),
+		BootDiskSizeGib: lo.ToPtr(int32(0)),
+		Labels:          lo.ToPtr(map[string]string{}),
+	}
 
 	if !plan.ImageID.IsNull() {
 		config.ImageId = lo.ToPtr(plan.ImageID.ValueString())
@@ -645,11 +645,11 @@ func (r *edgeConfigurationResource) toGCPConfigurationModel(ctx context.Context,
 		model.ImageID = types.StringValue(*config.ImageId)
 	}
 
-	if config.BootDiskSizeGib != nil {
+	if config.BootDiskSizeGib != nil && *config.BootDiskSizeGib != 0 {
 		model.BootDiskSizeGiB = types.Int64Value(int64(*config.BootDiskSizeGib))
 	}
 
-	if config.Labels != nil && len(*config.Labels) > 0 {
+	if config.Labels != nil {
 		labels, diags := types.MapValueFrom(ctx, types.StringType, *config.Labels)
 		if diags.HasError() {
 			return model
@@ -667,7 +667,11 @@ func (r *edgeConfigurationResource) toAWSConfiguration(ctx context.Context, plan
 		return nil, diags
 	}
 
-	config := &omni.AWSConfiguration{}
+	config := &omni.AWSConfiguration{
+		ImageId:         lo.ToPtr(""),
+		BootDiskSizeGib: lo.ToPtr(int32(0)),
+		Tags:            lo.ToPtr(map[string]string{}),
+	}
 
 	if !plan.ImageID.IsNull() {
 		config.ImageId = lo.ToPtr(plan.ImageID.ValueString())
@@ -703,11 +707,11 @@ func (r *edgeConfigurationResource) toAWSConfigurationModel(ctx context.Context,
 		model.ImageID = types.StringValue(*config.ImageId)
 	}
 
-	if config.BootDiskSizeGib != nil {
+	if config.BootDiskSizeGib != nil && *config.BootDiskSizeGib != 0 {
 		model.BootDiskSizeGiB = types.Int64Value(int64(*config.BootDiskSizeGib))
 	}
 
-	if config.Tags != nil && len(*config.Tags) > 0 {
+	if config.Tags != nil {
 		tags, diags := types.MapValueFrom(ctx, types.StringType, *config.Tags)
 		if diags.HasError() {
 			return model
@@ -725,7 +729,11 @@ func (r *edgeConfigurationResource) toOCIConfiguration(ctx context.Context, plan
 		return nil, diags
 	}
 
-	config := &omni.OCIConfiguration{}
+	config := &omni.OCIConfiguration{
+		ImageId:         lo.ToPtr(""),
+		BootDiskSizeGib: lo.ToPtr(int32(0)),
+		Tags:            lo.ToPtr(map[string]string{}),
+	}
 
 	if !plan.ImageID.IsNull() {
 		config.ImageId = lo.ToPtr(plan.ImageID.ValueString())
@@ -761,11 +769,11 @@ func (r *edgeConfigurationResource) toOCIConfigurationModel(ctx context.Context,
 		model.ImageID = types.StringValue(*config.ImageId)
 	}
 
-	if config.BootDiskSizeGib != nil {
+	if config.BootDiskSizeGib != nil && *config.BootDiskSizeGib != 0 {
 		model.BootDiskSizeGiB = types.Int64Value(int64(*config.BootDiskSizeGib))
 	}
 
-	if config.Tags != nil && len(*config.Tags) > 0 {
+	if config.Tags != nil {
 		tags, diags := types.MapValueFrom(ctx, types.StringType, *config.Tags)
 		if diags.HasError() {
 			return model
@@ -779,11 +787,7 @@ func (r *edgeConfigurationResource) toOCIConfigurationModel(ctx context.Context,
 func (r *edgeConfigurationResource) toCustomConfiguration(ctx context.Context, plan *customConfigurationModel) (*omni.CustomCloudConfiguration, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
-	if plan == nil {
-		return nil, diags
-	}
-
-	if plan.Custom.IsNull() {
+	if plan == nil || plan.Custom.IsNull() {
 		return nil, diags
 	}
 
@@ -836,19 +840,6 @@ func (r *edgeConfigurationResource) toCustomConfigurationModel(ctx context.Conte
 	}
 }
 
-func (r *edgeConfigurationResource) normalizeCRIState(state *edgeConfigurationModel, planCRI *criConfigurationModel) {
-	// Normalize CRI state to prevent spurious diffs when the API returns
-	// a non-nil CRI object with an empty string socket.
-	if state.CRI != nil && state.CRI.Socket.ValueString() == "" {
-		state.CRI.Socket = types.StringNull()
-	}
-
-	// If the entire cri block was removed; match by returning nil.
-	if planCRI == nil {
-		state.CRI = nil
-	}
-}
-
 func (r *edgeConfigurationResource) toCRIConfiguration(_ context.Context, plan *criConfigurationModel) (*omni.EdgeConfigurationCRIConfiguration, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
@@ -877,7 +868,7 @@ func (r *edgeConfigurationResource) toCRIConfigurationModel(_ context.Context, c
 		Socket: types.StringNull(),
 	}
 
-	if config.Socket != nil {
+	if config.Socket != nil && *config.Socket != "" {
 		model.Socket = types.StringValue(*config.Socket)
 	}
 

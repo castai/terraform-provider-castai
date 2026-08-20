@@ -599,6 +599,9 @@ type ClientInterface interface {
 	// RbacServiceAPIGetGroup request
 	RbacServiceAPIGetGroup(ctx context.Context, organizationId string, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// UsersAPILeaveOrganization request
+	UsersAPILeaveOrganization(ctx context.Context, organizationId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// InventoryAPIGetReservations request
 	InventoryAPIGetReservations(ctx context.Context, organizationId string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -3270,6 +3273,18 @@ func (c *Client) RbacServiceAPIDeleteGroup(ctx context.Context, organizationId s
 
 func (c *Client) RbacServiceAPIGetGroup(ctx context.Context, organizationId string, id string, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewRbacServiceAPIGetGroupRequest(c.Server, organizationId, id)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) UsersAPILeaveOrganization(ctx context.Context, organizationId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUsersAPILeaveOrganizationRequest(c.Server, organizationId)
 	if err != nil {
 		return nil, err
 	}
@@ -13876,6 +13891,40 @@ func NewRbacServiceAPIGetGroupRequest(server string, organizationId string, id s
 	return req, nil
 }
 
+// NewUsersAPILeaveOrganizationRequest generates requests for UsersAPILeaveOrganization
+func NewUsersAPILeaveOrganizationRequest(server string, organizationId string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "organizationId", runtime.ParamLocationPath, organizationId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/organizations/%s/me", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("DELETE", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
 // NewInventoryAPIGetReservationsRequest generates requests for InventoryAPIGetReservations
 func NewInventoryAPIGetReservationsRequest(server string, organizationId string) (*http.Request, error) {
 	var err error
@@ -22513,6 +22562,9 @@ type ClientWithResponsesInterface interface {
 	// RbacServiceAPIGetGroup request
 	RbacServiceAPIGetGroupWithResponse(ctx context.Context, organizationId string, id string) (*RbacServiceAPIGetGroupResponse, error)
 
+	// UsersAPILeaveOrganization request
+	UsersAPILeaveOrganizationWithResponse(ctx context.Context, organizationId string) (*UsersAPILeaveOrganizationResponse, error)
+
 	// InventoryAPIGetReservations request
 	InventoryAPIGetReservationsWithResponse(ctx context.Context, organizationId string) (*InventoryAPIGetReservationsResponse, error)
 
@@ -27146,6 +27198,36 @@ func (r RbacServiceAPIGetGroupResponse) StatusCode() int {
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
 func (r RbacServiceAPIGetGroupResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type UsersAPILeaveOrganizationResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *CastaiUsersV1beta1LeaveOrganizationResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r UsersAPILeaveOrganizationResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r UsersAPILeaveOrganizationResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r UsersAPILeaveOrganizationResponse) GetBody() []byte {
 	return r.Body
 }
 
@@ -32550,6 +32632,15 @@ func (c *ClientWithResponses) RbacServiceAPIGetGroupWithResponse(ctx context.Con
 	return ParseRbacServiceAPIGetGroupResponse(rsp)
 }
 
+// UsersAPILeaveOrganizationWithResponse request returning *UsersAPILeaveOrganizationResponse
+func (c *ClientWithResponses) UsersAPILeaveOrganizationWithResponse(ctx context.Context, organizationId string) (*UsersAPILeaveOrganizationResponse, error) {
+	rsp, err := c.UsersAPILeaveOrganization(ctx, organizationId)
+	if err != nil {
+		return nil, err
+	}
+	return ParseUsersAPILeaveOrganizationResponse(rsp)
+}
+
 // InventoryAPIGetReservationsWithResponse request returning *InventoryAPIGetReservationsResponse
 func (c *ClientWithResponses) InventoryAPIGetReservationsWithResponse(ctx context.Context, organizationId string) (*InventoryAPIGetReservationsResponse, error) {
 	rsp, err := c.InventoryAPIGetReservations(ctx, organizationId)
@@ -37596,6 +37687,32 @@ func ParseRbacServiceAPIGetGroupResponse(rsp *http.Response) (*RbacServiceAPIGet
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest CastaiRbacV1beta1Group
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseUsersAPILeaveOrganizationResponse parses an HTTP response from a UsersAPILeaveOrganizationWithResponse call
+func ParseUsersAPILeaveOrganizationResponse(rsp *http.Response) (*UsersAPILeaveOrganizationResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &UsersAPILeaveOrganizationResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest CastaiUsersV1beta1LeaveOrganizationResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
