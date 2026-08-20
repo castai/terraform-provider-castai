@@ -64,7 +64,11 @@ func TestAccCloudAgnostic_ResourceSSOConnection(t *testing.T) {
 
 			ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 			defer cancel()
-			client := testAccProvider.Meta().(*ProviderConfig).api
+			meta := testAccProvider.Meta()
+			if meta == nil {
+				return
+			}
+			client := meta.(*ProviderConfig).api
 			if err := sweepSSOConnection(ctx, client); err != nil {
 				t.Logf("warning: failed to sweep SSO connection before test: %v", err)
 			}
@@ -92,7 +96,7 @@ func TestAccCloudAgnostic_ResourceSSOConnection(t *testing.T) {
 // run and is removed to avoid exhausting the quota.
 func sweepSSOConnection(ctx context.Context, client sdk.ClientWithResponsesInterface) error {
 	resp, err := client.SSOAPIListSSOConnectionsWithResponse(ctx)
-	if err != nil {
+	if err := sdk.CheckOKResponse(resp, err); err != nil {
 		return err
 	}
 	if resp.JSON200 == nil || len(resp.JSON200.Connections) == 0 {
