@@ -4167,6 +4167,9 @@ type CastaiUsersV1beta1InvitationRoleBindingScope struct {
 	Type *CastaiRbacV1beta1ScopeType `json:"type,omitempty"`
 }
 
+// CastaiUsersV1beta1LeaveOrganizationResponse Defines the empty response to leaving an organization.
+type CastaiUsersV1beta1LeaveOrganizationResponse = map[string]interface{}
+
 // CastaiUsersV1beta1ListInvitationsResponse Defines container for the organization's pending invitations.
 type CastaiUsersV1beta1ListInvitationsResponse struct {
 	// Invitations Array of organization's pending invitations.
