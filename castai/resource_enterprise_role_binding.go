@@ -470,12 +470,8 @@ func buildRoleBindingDefinition(roleBinding EnterpriseRoleBinding, enterpriseID 
 
 	// When the role binding targets a child organization, set ChildOrganizationId so the
 	// API validates role_id against the child org's roles instead of the enterprise's roles.
-	if roleBinding.OrganizationID == enterpriseID {
-		if len(scopes) > 0 {
-			if scopes[0].Organization != nil {
-				definition.ChildOrganizationId = lo.ToPtr(scopes[0].Organization.Id)
-			}
-		}
+	if roleBinding.OrganizationID == enterpriseID && len(scopes) > 0 && scopes[0].Organization != nil {
+		definition.ChildOrganizationId = lo.ToPtr(scopes[0].Organization.Id)
 	}
 
 	if len(subjects) > 0 {
