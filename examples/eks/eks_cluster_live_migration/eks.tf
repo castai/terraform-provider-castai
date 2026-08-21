@@ -47,7 +47,11 @@ module "eks" {
       min_size      = 2
       desired_size  = 2
 
-      # Allow pods to access IMDS (required for castai-agent)
+      # IMDS access for the castai-agent is avoided by passing account ID,
+      # region, and cluster name as env vars (EKS_ACCOUNT_ID, EKS_REGION,
+      # EKS_CLUSTER_NAME) via the Helm chart, so the agent no longer falls
+      # back to IMDS for cluster discovery. Other pods on the node may still
+      # need IMDS, so it remains enabled.
       metadata_options = {
         http_endpoint               = "enabled"
         http_tokens                 = "required"
