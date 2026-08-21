@@ -439,6 +439,155 @@ func TestResourceEnterpriseGroupCreateContext(t *testing.T) {
 		r.Equal("", scopeList2[0].(map[string]any)[FieldEnterpriseGroupScopeCluster])
 		r.Equal(organizationID, scopeList2[0].(map[string]any)[FieldEnterpriseGroupScopeOrganization])
 	})
+
+	t.Run("when organization_id equals enterprise_id and scope has child org then ChildOrganizationId is set in create request", func(t *testing.T) {
+		t.Parallel()
+		r := require.New(t)
+		mockClient := mockOrganizationManagement.NewMockClientWithResponsesInterface(gomock.NewController(t))
+
+		ctx := context.Background()
+		provider := &ProviderConfig{
+			organizationManagementClient: mockClient,
+		}
+
+		enterpriseID := uuid.NewString()
+		childOrgID := uuid.NewString()
+		groupID := uuid.NewString()
+		memberID := uuid.NewString()
+		roleBindingID := uuid.NewString()
+		roleID := uuid.NewString()
+
+		createTime := time.Now()
+
+		expectedCreateRequest := organization_management.BatchCreateEnterpriseGroupsRequest{
+			EnterpriseId: enterpriseID,
+			Requests: []organization_management.BatchCreateEnterpriseGroupsRequestGroup{
+				{
+					OrganizationId: enterpriseID,
+					Name:           "child-org-group",
+					Description:    lo.ToPtr("Group with child org role binding"),
+					Members: []organization_management.BatchCreateEnterpriseGroupsRequestMember{
+						{
+							Kind: lo.ToPtr(organization_management.BatchCreateEnterpriseGroupsRequestMemberKindSUBJECTKINDUSER),
+							Id:   lo.ToPtr(memberID),
+						},
+					},
+					RoleBindings: &[]organization_management.BatchCreateEnterpriseGroupsRequestRoleBinding{
+						{
+							Name:                "child-org-viewer",
+							RoleId:              roleID,
+							ChildOrganizationId: lo.ToPtr(childOrgID),
+							Scopes: []organization_management.Scope{
+								{
+									Organization: &organization_management.OrganizationScope{
+										Id: childOrgID,
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		}
+
+		apiResponse := &organization_management.BatchCreateEnterpriseGroupsResponse{
+			Groups: &[]organization_management.BatchCreateEnterpriseGroupsResponseGroup{
+				{
+					Id:             lo.ToPtr(groupID),
+					Name:           lo.ToPtr("child-org-group"),
+					OrganizationId: lo.ToPtr(enterpriseID),
+					Description:    lo.ToPtr("Group with child org role binding"),
+					CreateTime:     lo.ToPtr(createTime),
+					ManagedBy:      lo.ToPtr("terraform"),
+					Definition: &organization_management.GroupDefinition{
+						Members: &[]organization_management.DefinitionMember{
+							{
+								Id:        lo.ToPtr(memberID),
+								Email:     lo.ToPtr("member@example.com"),
+								AddedTime: lo.ToPtr(createTime),
+								Kind:      lo.ToPtr(organization_management.DefinitionMemberKindSUBJECTKINDUSER),
+							},
+						},
+					},
+					RoleBindings: &[]organization_management.GroupRoleBinding{
+						{
+							Id:             roleBindingID,
+							Name:           "child-org-viewer",
+							Description:    "Child org viewer role binding",
+							ManagedBy:      "terraform",
+							CreateTime:     createTime,
+							OrganizationId: enterpriseID,
+							Definition: organization_management.RoleBindingRoleBindingDefinition{
+								RoleId: roleID,
+								Scopes: &[]organization_management.Scope{
+									{
+										Organization: &organization_management.OrganizationScope{
+											Id: childOrgID,
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		}
+
+		mockClient.EXPECT().
+			EnterpriseAPIBatchCreateEnterpriseGroupsWithResponse(gomock.Any(), enterpriseID, expectedCreateRequest).
+			Return(&organization_management.EnterpriseAPIBatchCreateEnterpriseGroupsResponse{
+				Body:         nil,
+				HTTPResponse: &http.Response{StatusCode: http.StatusOK},
+				JSON200:      apiResponse,
+			}, nil)
+
+		stateValue := cty.ObjectVal(map[string]cty.Value{
+			FieldEnterpriseGroupEnterpriseID:   cty.StringVal(enterpriseID),
+			FieldEnterpriseGroupOrganizationID: cty.StringVal(enterpriseID),
+			FieldEnterpriseGroupName:           cty.StringVal("child-org-group"),
+			FieldEnterpriseGroupDescription:    cty.StringVal("Group with child org role binding"),
+			FieldEnterpriseGroupMembers: cty.ListVal([]cty.Value{
+				cty.ObjectVal(map[string]cty.Value{
+					FieldEnterpriseGroupsMember: cty.ListVal([]cty.Value{
+						cty.ObjectVal(map[string]cty.Value{
+							FieldEnterpriseGroupMemberKind: cty.StringVal("user"),
+							FieldEnterpriseGroupMemberID:   cty.StringVal(memberID),
+						}),
+					}),
+				}),
+			}),
+			FieldEnterpriseGroupRoleBindings: cty.ListVal([]cty.Value{
+				cty.ObjectVal(map[string]cty.Value{
+					FieldEnterpriseGroupRoleBinding: cty.ListVal([]cty.Value{
+						cty.ObjectVal(map[string]cty.Value{
+							FieldEnterpriseGroupRoleBindingName:   cty.StringVal("child-org-viewer"),
+							FieldEnterpriseGroupRoleBindingRoleID: cty.StringVal(roleID),
+							FieldEnterpriseGroupRoleBindingScopes: cty.ListVal([]cty.Value{
+								cty.ObjectVal(map[string]cty.Value{
+									FieldEnterpriseGroupScope: cty.ListVal([]cty.Value{
+										cty.ObjectVal(map[string]cty.Value{
+											FieldEnterpriseGroupScopeCluster:      cty.StringVal(""),
+											FieldEnterpriseGroupScopeOrganization: cty.StringVal(childOrgID),
+										}),
+									}),
+								}),
+							}),
+						}),
+					}),
+				}),
+			}),
+		})
+		state := terraform.NewInstanceStateShimmedFromValue(stateValue, 0)
+
+		resource := resourceEnterpriseGroup()
+		data := resource.Data(state)
+
+		result := resource.CreateContext(ctx, data, provider)
+
+		r.Nil(result)
+		r.False(result.HasError())
+		r.Equal(groupID, data.Id())
+	})
 }
 
 func TestResourceEnterpriseGroupReadContext(t *testing.T) {
@@ -1263,5 +1412,150 @@ func TestResourceEnterpriseGroupUpdateContext(t *testing.T) {
 		scope2a1 := scopeList2a[0].(map[string]any)
 		r.Equal("", scope2a1[FieldEnterpriseGroupScopeCluster])
 		r.Equal(organizationID, scope2a1[FieldEnterpriseGroupScopeOrganization])
+	})
+
+	t.Run("when organization_id equals enterprise_id and scope has child org then ChildOrganizationId is set in update request", func(t *testing.T) {
+		t.Parallel()
+		r := require.New(t)
+		mockClient := mockOrganizationManagement.NewMockClientWithResponsesInterface(gomock.NewController(t))
+
+		provider := &ProviderConfig{
+			organizationManagementClient: mockClient,
+		}
+
+		entID := uuid.NewString()
+		childOrgID := uuid.NewString()
+		groupID := uuid.NewString()
+		memberID := uuid.NewString()
+		roleBindingID := uuid.NewString()
+		roleID := uuid.NewString()
+
+		expectedRequest := organization_management.BatchUpdateEnterpriseGroupsRequest{
+			EnterpriseId: entID,
+			Requests: []organization_management.BatchUpdateEnterpriseGroupsRequestUpdateGroupRequest{
+				{
+					Id:             groupID,
+					OrganizationId: entID,
+					Name:           "child-org-group",
+					Description:    "Group with child org role binding",
+					Members: []organization_management.BatchUpdateEnterpriseGroupsRequestMember{
+						{
+							Id:   memberID,
+							Kind: organization_management.BatchUpdateEnterpriseGroupsRequestMemberKindUSER,
+						},
+					},
+					RoleBindings: []organization_management.BatchUpdateEnterpriseGroupsRequestRoleBinding{
+						{
+							Name:                "child-org-viewer",
+							RoleId:              roleID,
+							ChildOrganizationId: lo.ToPtr(childOrgID),
+							Scopes: []organization_management.Scope{
+								{
+									Organization: &organization_management.OrganizationScope{
+										Id: childOrgID,
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		}
+
+		mockClient.EXPECT().
+			EnterpriseAPIBatchUpdateEnterpriseGroupsWithResponse(gomock.Any(), entID, gomock.Any()).
+			Do(func(ctx context.Context, eid string, req organization_management.BatchUpdateEnterpriseGroupsRequest) {
+				r.Equal(expectedRequest, req)
+			}).
+			Return(&organization_management.EnterpriseAPIBatchUpdateEnterpriseGroupsResponse{
+				Body:         nil,
+				HTTPResponse: &http.Response{StatusCode: http.StatusOK},
+				JSON200: &organization_management.BatchUpdateEnterpriseGroupsResponse{
+					Groups: &[]organization_management.BatchUpdateEnterpriseGroupsResponseGroup{
+						{
+							Id:             lo.ToPtr(groupID),
+							OrganizationId: lo.ToPtr(entID),
+							Name:           lo.ToPtr("child-org-group"),
+							Description:    lo.ToPtr("Group with child org role binding"),
+							ManagedBy:      lo.ToPtr("terraform"),
+							Definition: &organization_management.GroupDefinition{
+								Members: &[]organization_management.DefinitionMember{
+									{
+										Id:        lo.ToPtr(memberID),
+										Email:     lo.ToPtr("member@example.com"),
+										AddedTime: lo.ToPtr(time.Now()),
+										Kind:      lo.ToPtr(organization_management.DefinitionMemberKind("USER")),
+									},
+								},
+							},
+							RoleBindings: &[]organization_management.GroupRoleBinding{
+								{
+									Id:             roleBindingID,
+									Name:           "child-org-viewer",
+									CreateTime:     time.Now(),
+									ManagedBy:      "terraform",
+									OrganizationId: entID,
+									Definition: organization_management.RoleBindingRoleBindingDefinition{
+										RoleId: roleID,
+										Scopes: &[]organization_management.Scope{
+											{
+												Organization: &organization_management.OrganizationScope{
+													Id: childOrgID,
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			}, nil)
+
+		resource := resourceEnterpriseGroup()
+
+		diff := map[string]any{
+			FieldEnterpriseGroupEnterpriseID:   entID,
+			FieldEnterpriseGroupOrganizationID: entID,
+			FieldEnterpriseGroupName:           "child-org-group",
+			FieldEnterpriseGroupDescription:    "Group with child org role binding",
+			FieldEnterpriseGroupMembers: []any{
+				map[string]any{
+					FieldEnterpriseGroupsMember: []any{
+						map[string]any{
+							FieldEnterpriseGroupMemberID:   memberID,
+							FieldEnterpriseGroupMemberKind: "user",
+						},
+					},
+				},
+			},
+			FieldEnterpriseGroupRoleBindings: []any{
+				map[string]any{
+					FieldEnterpriseGroupRoleBinding: []any{
+						map[string]any{
+							FieldEnterpriseGroupRoleBindingName:   "child-org-viewer",
+							FieldEnterpriseGroupRoleBindingRoleID: roleID,
+							FieldEnterpriseGroupRoleBindingScopes: []any{
+								map[string]any{
+									FieldEnterpriseGroupScope: []any{
+										map[string]any{
+											FieldEnterpriseGroupScopeCluster:      "",
+											FieldEnterpriseGroupScopeOrganization: childOrgID,
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		}
+		data := schema.TestResourceDataRaw(t, resource.Schema, diff)
+		data.SetId(groupID)
+
+		result := resource.UpdateContext(ctx, data, provider)
+		r.Nil(result)
+		r.False(result.HasError())
+		r.Equal(groupID, data.Id())
 	})
 }
