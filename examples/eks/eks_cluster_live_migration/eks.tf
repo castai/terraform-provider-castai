@@ -46,17 +46,6 @@ module "eks" {
       max_size      = 5
       min_size      = 2
       desired_size  = 2
-
-      # IMDS access for the castai-agent is avoided by passing account ID,
-      # region, and cluster name as env vars (EKS_ACCOUNT_ID, EKS_REGION,
-      # EKS_CLUSTER_NAME) via the Helm chart, so the agent no longer falls
-      # back to IMDS for cluster discovery. Other pods on the node may still
-      # need IMDS, so it remains enabled.
-      metadata_options = {
-        http_endpoint               = "enabled"
-        http_tokens                 = "required"
-        http_put_response_hop_limit = 2
-      }
     }
   }
 
@@ -66,12 +55,6 @@ module "eks" {
       min_size     = 1
       max_size     = 10
       desired_size = 1
-
-      metadata_options = {
-        http_endpoint               = "enabled"
-        http_tokens                 = "required"
-        http_put_response_hop_limit = 2
-      }
 
       instance_types = ["t3.large"]
       capacity_type  = "SPOT"
