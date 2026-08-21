@@ -6015,6 +6015,26 @@ func (mr *MockClientInterfaceMockRecorder) UsersAPIGetOrganization(ctx, id inter
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UsersAPIGetOrganization", reflect.TypeOf((*MockClientInterface)(nil).UsersAPIGetOrganization), varargs...)
 }
 
+// UsersAPILeaveOrganization mocks base method.
+func (m *MockClientInterface) UsersAPILeaveOrganization(ctx context.Context, organizationId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "UsersAPILeaveOrganization", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UsersAPILeaveOrganization indicates an expected call of UsersAPILeaveOrganization.
+func (mr *MockClientInterfaceMockRecorder) UsersAPILeaveOrganization(ctx, organizationId interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UsersAPILeaveOrganization", reflect.TypeOf((*MockClientInterface)(nil).UsersAPILeaveOrganization), varargs...)
+}
+
 // UsersAPIListInvitations mocks base method.
 func (m *MockClientInterface) UsersAPIListInvitations(ctx context.Context, params *sdk.UsersAPIListInvitationsParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
@@ -17531,6 +17551,41 @@ func (m *MockClientWithResponsesInterface) UsersAPIGetOrganizationWithResponse(c
 func (mr *MockClientWithResponsesInterfaceMockRecorder) UsersAPIGetOrganizationWithResponse(ctx, id interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UsersAPIGetOrganizationWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).UsersAPIGetOrganizationWithResponse), ctx, id)
+}
+
+// UsersAPILeaveOrganization mocks base method.
+func (m *MockClientWithResponsesInterface) UsersAPILeaveOrganization(ctx context.Context, organizationId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "UsersAPILeaveOrganization", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UsersAPILeaveOrganization indicates an expected call of UsersAPILeaveOrganization.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) UsersAPILeaveOrganization(ctx, organizationId interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UsersAPILeaveOrganization", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).UsersAPILeaveOrganization), varargs...)
+}
+
+// UsersAPILeaveOrganizationWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) UsersAPILeaveOrganizationWithResponse(ctx context.Context, organizationId string) (*sdk.UsersAPILeaveOrganizationResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UsersAPILeaveOrganizationWithResponse", ctx, organizationId)
+	ret0, _ := ret[0].(*sdk.UsersAPILeaveOrganizationResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UsersAPILeaveOrganizationWithResponse indicates an expected call of UsersAPILeaveOrganizationWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) UsersAPILeaveOrganizationWithResponse(ctx, organizationId interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UsersAPILeaveOrganizationWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).UsersAPILeaveOrganizationWithResponse), ctx, organizationId)
 }
 
 // UsersAPIListInvitations mocks base method.
