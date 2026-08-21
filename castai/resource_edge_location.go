@@ -181,14 +181,13 @@ type ociModel struct {
 type customModel struct{}
 
 type nebiusModel struct {
-	ParentID           types.String `tfsdk:"parent_id"`
-	ServiceAccountID   types.String `tfsdk:"service_account_id"`
-	AuthorizedKeyIDWO  types.String `tfsdk:"authorized_key_id_wo"`
-	PrivateKeyBase64WO types.String `tfsdk:"private_key_base64_wo"`
-	NetworkID          types.String `tfsdk:"network_id"`
-	SubnetID           types.String `tfsdk:"subnet_id"`
-	SubnetCidr         types.String `tfsdk:"subnet_cidr"`
-	SecurityGroupID    types.String `tfsdk:"security_group_id"`
+	ParentID               types.String `tfsdk:"parent_id"`
+	ServiceAccountID       types.String `tfsdk:"service_account_id"`
+	TargetServiceAccountID types.String `tfsdk:"target_service_account_id"`
+	NetworkID              types.String `tfsdk:"network_id"`
+	SubnetID               types.String `tfsdk:"subnet_id"`
+	SubnetCidr             types.String `tfsdk:"subnet_cidr"`
+	SecurityGroupID        types.String `tfsdk:"security_group_id"`
 }
 
 func (m customModel) credentials() types.String {
@@ -260,7 +259,7 @@ func (m ociModel) Equal(other *ociModel) bool {
 }
 
 func (m nebiusModel) credentials() types.String {
-	return types.StringValue(m.AuthorizedKeyIDWO.String() + m.PrivateKeyBase64WO.String())
+	return types.StringNull()
 }
 
 func (m nebiusModel) Equal(other *nebiusModel) bool {
@@ -269,6 +268,7 @@ func (m nebiusModel) Equal(other *nebiusModel) bool {
 	}
 	return m.ParentID.Equal(other.ParentID) &&
 		m.ServiceAccountID.Equal(other.ServiceAccountID) &&
+		m.TargetServiceAccountID.Equal(other.TargetServiceAccountID) &&
 		m.NetworkID.Equal(other.NetworkID) &&
 		m.SubnetID.Equal(other.SubnetID) &&
 		m.SecurityGroupID.Equal(other.SecurityGroupID)
@@ -630,20 +630,9 @@ func (r *edgeLocationResource) Schema(_ context.Context, _ resource.SchemaReques
 						Required:    true,
 						Description: "Nebius service account ID to be impersonated by CAST AI",
 					},
-					"authorized_key_id_wo": schema.StringAttribute{
+					"target_service_account_id": schema.StringAttribute{
 						Required:    true,
-						Sensitive:   true,
-						WriteOnly:   true,
-						Description: "ID of the authorized public key uploaded to the service account",
-					},
-					"private_key_base64_wo": schema.StringAttribute{
-						Required:    true,
-						Sensitive:   true,
-						WriteOnly:   true,
-						Description: "Base64 encoded private key for the service account",
-						Validators: []validator.String{
-							validators.ValidBase64(),
-						},
+						Description: "The target service account ID for Workload Identity Federation (WIF). The provider authenticates via WIF (OIDC token exchange) instead of static authorized-key credentials.",
 					},
 					"network_id": schema.StringAttribute{
 						Required:    true,
@@ -1485,17 +1474,14 @@ func (r *edgeLocationResource) toNebius(plan, config *nebiusModel) *omni.NebiusP
 	}
 
 	out := &omni.NebiusParam{
-		ParentId:         toPtr(plan.ParentID.ValueString()),
-		ServiceAccountId: toPtr(plan.ServiceAccountID.ValueString()),
+		ParentId:               toPtr(plan.ParentID.ValueString()),
+		ServiceAccountId:       toPtr(plan.ServiceAccountID.ValueString()),
+		TargetServiceAccountId: toPtr(plan.TargetServiceAccountID.ValueString()),
 		Networking: &omni.NebiusParamNetworking{
 			NetworkId:       toPtr(plan.NetworkID.ValueString()),
 			SubnetId:        toPtr(plan.SubnetID.ValueString()),
 			SubnetCidr:      plan.SubnetCidr.ValueStringPointer(),
 			SecurityGroupId: plan.SecurityGroupID.ValueStringPointer(),
-		},
-		Credentials: &omni.NebiusParamCredentials{
-			AuthorizedKeyId:  toPtr(config.AuthorizedKeyIDWO.ValueString()),
-			PrivateKeyBase64: toPtr(config.PrivateKeyBase64WO.ValueString()),
 		},
 	}
 
@@ -1508,14 +1494,13 @@ func (r *edgeLocationResource) toNebiusModel(config *omni.NebiusParam) *nebiusMo
 	}
 
 	nebius := &nebiusModel{
-		ParentID:           types.StringValue(lo.FromPtr(config.ParentId)),
-		ServiceAccountID:   types.StringValue(lo.FromPtr(config.ServiceAccountId)),
-		NetworkID:          types.StringNull(),
-		SubnetID:           types.StringNull(),
-		SubnetCidr:         types.StringNull(),
-		SecurityGroupID:    types.StringNull(),
-		AuthorizedKeyIDWO:  types.StringNull(),
-		PrivateKeyBase64WO: types.StringNull(),
+		ParentID:               types.StringValue(lo.FromPtr(config.ParentId)),
+		ServiceAccountID:       types.StringValue(lo.FromPtr(config.ServiceAccountId)),
+		TargetServiceAccountID: types.StringValue(lo.FromPtr(config.TargetServiceAccountId)),
+		NetworkID:              types.StringNull(),
+		SubnetID:               types.StringNull(),
+		SubnetCidr:             types.StringNull(),
+		SecurityGroupID:        types.StringNull(),
 	}
 
 	if config.Networking != nil {

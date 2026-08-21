@@ -599,3 +599,102 @@ resource "castai_omni_cluster" "test" {
 }
 `, organizationID, clusterName)
 }
+
+func TestAccCloudAgnostic_ResourceEdgeLocationNebiusWIF(t *testing.T) {
+	rName := fmt.Sprintf("%v-edge-loc-%v", ResourcePrefix, acctest.RandString(8))
+	resourceName := "castai_edge_location.test"
+	clusterName := fmt.Sprintf("omni-tf-acc-el-nebius-%v", acctest.RandString(6))
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		CheckDestroy:             testAccCheckEdgeResourcesDestroy(testAccCheckEdgeLocationDestroy),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccEdgeLocationNebiusWIFConfig(rName, clusterName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "name", rName),
+					resource.TestCheckResourceAttr(resourceName, "description", "Test Nebius edge location WIF"),
+					resource.TestCheckResourceAttr(resourceName, "region", "eu-north1"),
+					resource.TestCheckResourceAttr(resourceName, "zones.#", "2"),
+					resource.TestCheckResourceAttr(resourceName, "zones.0.id", "eu-north1-a"),
+					resource.TestCheckResourceAttr(resourceName, "zones.0.name", "eu-north1-a"),
+					resource.TestCheckResourceAttr(resourceName, "zones.1.id", "eu-north1-b"),
+					resource.TestCheckResourceAttr(resourceName, "zones.1.name", "eu-north1-b"),
+					resource.TestCheckResourceAttrSet(resourceName, "nebius.parent_id"),
+					resource.TestCheckResourceAttr(resourceName, "nebius.target_service_account_id", "serviceaccount-nebius-wif"),
+					resource.TestCheckResourceAttrSet(resourceName, "id"),
+					resource.TestCheckResourceAttr(resourceName, "credentials_revision", "1"),
+				),
+			},
+			{
+				ResourceName: resourceName,
+				ImportStateIdFunc: func(s *terraform.State) (string, error) {
+					organizationID := testAccGetOrganizationID()
+					clusterID := s.RootModule().Resources["castai_omni_cluster.test"].Primary.ID
+					edgeLocationID := s.RootModule().Resources[resourceName].Primary.ID
+					return fmt.Sprintf("%v/%v/%v", organizationID, clusterID, edgeLocationID), nil
+				},
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccEdgeLocationNebiusWIFUpdated(rName, clusterName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "description", "Updated Nebius edge location WIF"),
+					resource.TestCheckResourceAttr(resourceName, "nebius.target_service_account_id", "serviceaccount-nebius-wif-updated"),
+				),
+			},
+		},
+	})
+}
+
+func testAccEdgeLocationNebiusWIFConfig(rName, clusterName string) string {
+	return testAccEdgeLocationNebiusWIFConfigWithParams(rName, clusterName,
+		"Test Nebius edge location WIF",
+		"serviceaccount-nebius-wif")
+}
+
+func testAccEdgeLocationNebiusWIFUpdated(rName, clusterName string) string {
+	return testAccEdgeLocationNebiusWIFConfigWithParams(rName, clusterName,
+		"Updated Nebius edge location WIF",
+		"serviceaccount-nebius-wif-updated")
+}
+
+func testAccEdgeLocationNebiusWIFConfigWithParams(rName, clusterName, description, targetSAID string) string {
+	organizationID := testAccGetOrganizationID()
+
+	return ConfigCompose(testOmniClusterConfig(clusterName), fmt.Sprintf(`
+resource "castai_edge_location" "test" {
+  organization_id   = %[5]q
+  cluster_id        = castai_omni_cluster.test.id
+  name              = %[1]q
+  description       = %[2]q
+  region            = "eu-north1"
+  control_plane_mode = "SHARED"
+  zones = [
+    {
+      id   = "eu-north1-a"
+      name = "eu-north1-a"
+    }, {
+      id   = "eu-north1-b"
+      name = "eu-north1-b"
+    }
+  ]
+
+  networking = {
+    tunneled_cidrs = []
+  }
+
+  nebius = {
+    parent_id                = "project-nebius-123456"
+    service_account_id       = "serviceaccount-nebius"
+    target_service_account_id = "%[6]s"
+    network_id               = "test-network"
+    subnet_id               = "test-subnet"
+    subnet_cidr             = "10.0.0.0/20"
+    security_group_id        = "test-sg"
+  }
+}
+`, rName, description, clusterName, organizationID, organizationID, targetSAID))
+}

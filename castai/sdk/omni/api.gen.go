@@ -798,9 +798,6 @@ type NebiusConfiguration struct {
 
 // NebiusParam Nebius cloud provider params.
 type NebiusParam struct {
-	// Credentials The credentials used to authenticate Nebius API.
-	Credentials *NebiusParamCredentials `json:"credentials,omitempty"`
-
 	// Networking The networking configuration details.
 	Networking *NebiusParamNetworking `json:"networking,omitempty"`
 
@@ -809,15 +806,11 @@ type NebiusParam struct {
 
 	// ServiceAccountId The service account ID to be impersonated by CAST AI.
 	ServiceAccountId *string `json:"serviceAccountId,omitempty"`
-}
 
-// NebiusParamCredentials NebiusParamCredentials Nebius credentials.
-type NebiusParamCredentials struct {
-	// AuthorizedKeyId The authorized key ID uploaded to the service account.
-	AuthorizedKeyId *string `json:"authorizedKeyId,omitempty"`
-
-	// PrivateKeyBase64 The private key (base64-encoded) for the service account.
-	PrivateKeyBase64 *string `json:"privateKeyBase64,omitempty"`
+	// TargetServiceAccountId The target service account ID for Workload Identity Federation.
+	//  When set, the provider authenticates via WIF (OIDC token exchange)
+	//  instead of static authorized-key credentials.
+	TargetServiceAccountId *string `json:"targetServiceAccountId,omitempty"`
 }
 
 // NebiusParamNetworking NebiusParamNetworking Networking configuration of Nebius edge location.
@@ -828,7 +821,7 @@ type NebiusParamNetworking struct {
 	// SecurityGroupId The security group ID to be used in the selected region.
 	SecurityGroupId *string `json:"securityGroupId,omitempty"`
 
-	// SubnetCidr The IPv4 CIDR block of the subnet.
+	// SubnetCidr The subnet CIDR used for allocating IP's inside the subnet.
 	SubnetCidr *string `json:"subnetCidr,omitempty"`
 
 	// SubnetId The subnet ID of the subnet to be used in the selected region.
