@@ -23,14 +23,6 @@ const (
 	CastaiEvictorV1LabelSelectorExpressionOperatorNotIn        CastaiEvictorV1LabelSelectorExpressionOperator = "NotIn"
 )
 
-// Defines values for CastaiFeaturesV1EntityType.
-const (
-	ClusterId      CastaiFeaturesV1EntityType = "clusterId"
-	Environment    CastaiFeaturesV1EntityType = "environment"
-	OrganizationId CastaiFeaturesV1EntityType = "organizationId"
-	UserId         CastaiFeaturesV1EntityType = "userId"
-)
-
 // Defines values for CastaiFeaturesV1LogicalOperator.
 const (
 	And                CastaiFeaturesV1LogicalOperator = "and"
@@ -403,6 +395,7 @@ const (
 	PhaseOneOnboarding DboV1RegistrationType = "PhaseOneOnboarding"
 	UninstallCache     DboV1RegistrationType = "UninstallCache"
 	UninstallDBAgent   DboV1RegistrationType = "UninstallDBAgent"
+	UninstallDBO       DboV1RegistrationType = "UninstallDBO"
 )
 
 // Defines values for DboV1RuleType.
@@ -1790,15 +1783,8 @@ type CastaiEvictorV1PodSelector struct {
 // CastaiFeaturesV1Comparison Comparison represents a entity to entity ID comparison.
 type CastaiFeaturesV1Comparison struct {
 	// EntityId The entity ID to compare against (e.g., "da7a9f8d-ed18-40c3-89a7-93a81283af62").
-	EntityId *string `json:"entityId,omitempty"`
-
-	// EntityType EntityType defines available entity types for feature flag enablement.
-	//
-	//  - organizationId: Represents the main identifier(organization_id) for organization in Cast AI.
-	//  - clusterId: Represents the main identifier(cluster_id) for cluster in Cast AI.
-	//  - userId: Represents the user identifier(username) which is used to identify a user in users service.
-	//  - environment: Represents the identifier which is used to identify an environment in Cast AI.
-	EntityType *CastaiFeaturesV1EntityType `json:"entityType,omitempty"`
+	EntityId   *string `json:"entityId,omitempty"`
+	EntityType *string `json:"entityType,omitempty"`
 
 	// Operator Operator defines available operators for targeting rules.
 	//
@@ -1816,14 +1802,6 @@ type CastaiFeaturesV1Condition struct {
 	// NestedQuery QueryExpression represents a logical operation with conditions.
 	NestedQuery *CastaiFeaturesV1QueryExpression `json:"nestedQuery,omitempty"`
 }
-
-// CastaiFeaturesV1EntityType EntityType defines available entity types for feature flag enablement.
-//
-//   - organizationId: Represents the main identifier(organization_id) for organization in Cast AI.
-//   - clusterId: Represents the main identifier(cluster_id) for cluster in Cast AI.
-//   - userId: Represents the user identifier(username) which is used to identify a user in users service.
-//   - environment: Represents the identifier which is used to identify an environment in Cast AI.
-type CastaiFeaturesV1EntityType string
 
 // CastaiFeaturesV1LogicalOperator LogicalOperator defines available logical operators for targeting rules.
 type CastaiFeaturesV1LogicalOperator string
@@ -5714,6 +5692,7 @@ type DboV1Registration struct {
 	Type             *DboV1RegistrationType       `json:"type,omitempty"`
 	UninstallCache   *DboV1UninstallCacheParams   `json:"uninstallCache,omitempty"`
 	UninstallDbAgent *DboV1UninstallDBAgentParams `json:"uninstallDbAgent,omitempty"`
+	UninstallDbo     *DboV1UninstallDBOParams     `json:"uninstallDbo,omitempty"`
 }
 
 // DboV1RegistrationStatus - InProgress: Arbitrary number of InProgress states can be emitted
@@ -5776,6 +5755,11 @@ type DboV1UninstallCacheParams struct {
 // DboV1UninstallDBAgentParams defines model for dbo.v1.UninstallDBAgentParams.
 type DboV1UninstallDBAgentParams struct {
 	CacheGroupId string `json:"cacheGroupId"`
+}
+
+// DboV1UninstallDBOParams defines model for dbo.v1.UninstallDBOParams.
+type DboV1UninstallDBOParams struct {
+	DatabaseInstanceId string `json:"databaseInstanceId"`
 }
 
 // ExternalclusterV1AKSClusterParams AKSClusterParams defines AKS-specific arguments.
