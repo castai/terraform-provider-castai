@@ -157,6 +157,29 @@ func (m nodeSelectorOperatorsSlice) Get(k sdk.K8sSelectorV1Operator) (string, bo
 	return "", false
 }
 
+func resourceNodeTemplateCustomizeDiff(_ context.Context, d *schema.ResourceDiff, _ any) error {
+	name := d.Get(FieldNodeTemplateName).(string)
+	isDefault, isDefaultSet := d.GetOk(FieldNodeTemplateIsDefault)
+	if !isDefaultSet {
+		return nil
+	}
+	return validateNodeTemplateIsDefault(name, isDefault.(bool))
+}
+
+func validateNodeTemplateIsDefault(name string, isDefault bool) error {
+	expected := name == "default-by-castai"
+	if isDefault != expected {
+		return fmt.Errorf(
+			"is_default = %t is invalid for node template %q: it must be %t. "+
+				"The default node template is always 'default-by-castai' - this flag is "+
+				"derived from the template name and cannot be set independently. "+
+				"Remove it from your config; it is computed",
+			isDefault, name, expected,
+		)
+	}
+	return nil
+}
+
 func resourceNodeTemplate() *schema.Resource {
 	supportedArchitectures := []string{ArchAMD64, ArchARM64}
 	supportedOs := []string{OsLinux, OsWindows}
@@ -177,7 +200,8 @@ func resourceNodeTemplate() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: nodeTemplateStateImporter,
 		},
-		Description: "CAST AI node template resource to manage node templates",
+		CustomizeDiff: resourceNodeTemplateCustomizeDiff,
+		Description:   "CAST AI node template resource to manage node templates",
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(1 * time.Minute),
@@ -211,6 +235,7 @@ func resourceNodeTemplate() *schema.Resource {
 				Optional:    true,
 				Default:     nil,
 				Computed:    true,
+				Deprecated:  "is_default is derived from the template name ('default-by-castai' => true, otherwise false) and cannot be set independently. Remove it from your config; it will be removed as a user-settable field in a future release.",
 				Description: "Flag whether the node template is default. It's is always set to 'true' on 'default-by-castai' node template and 'false' otherwise.",
 			},
 			FieldNodeTemplateConfigurationId: {

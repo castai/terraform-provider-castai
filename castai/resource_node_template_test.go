@@ -1918,3 +1918,47 @@ func Test_toNodeTemplateConstraints_persistsSpotInterruptionPredictionsType(t *t
 		})
 	}
 }
+
+func TestValidateNodeTemplateIsDefault(t *testing.T) {
+	tests := map[string]struct {
+		name      string
+		isDefault bool
+		expectErr bool
+		errSubstr string
+	}{
+		"custom template with is_default=false passes": {
+			name:      "custom-template",
+			isDefault: false,
+			expectErr: false,
+		},
+		"custom template with is_default=true fails": {
+			name:      "custom-template",
+			isDefault: true,
+			expectErr: true,
+			errSubstr: "is_default = true is invalid for node template",
+		},
+		"default-by-castai with is_default=true passes": {
+			name:      "default-by-castai",
+			isDefault: true,
+			expectErr: false,
+		},
+		"default-by-castai with is_default=false fails": {
+			name:      "default-by-castai",
+			isDefault: false,
+			expectErr: true,
+			errSubstr: "is_default = false is invalid for node template",
+		},
+	}
+
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			err := validateNodeTemplateIsDefault(tt.name, tt.isDefault)
+			if tt.expectErr {
+				require.Error(t, err)
+				require.Contains(t, err.Error(), tt.errSubstr)
+			} else {
+				require.NoError(t, err)
+			}
+		})
+	}
+}

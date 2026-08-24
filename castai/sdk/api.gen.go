@@ -278,7 +278,7 @@ const (
 // Defines values for CastaiRbacV1beta1ProductType.
 const (
 	CastaiRbacV1beta1ProductTypePRODUCTTYPEBOTH        CastaiRbacV1beta1ProductType = "PRODUCT_TYPE_BOTH"
-	CastaiRbacV1beta1ProductTypePRODUCTTYPECAST        CastaiRbacV1beta1ProductType = "PRODUCT_TYPE_CAST"
+	CastaiRbacV1beta1ProductTypePRODUCTTYPECASTAI      CastaiRbacV1beta1ProductType = "PRODUCT_TYPE_CASTAI"
 	CastaiRbacV1beta1ProductTypePRODUCTTYPEKIMCHI      CastaiRbacV1beta1ProductType = "PRODUCT_TYPE_KIMCHI"
 	CastaiRbacV1beta1ProductTypePRODUCTTYPEUNSPECIFIED CastaiRbacV1beta1ProductType = "PRODUCT_TYPE_UNSPECIFIED"
 )
@@ -1143,7 +1143,7 @@ const (
 // Defines values for RbacServiceAPIListPermissionGroupsParamsProduct.
 const (
 	RbacServiceAPIListPermissionGroupsParamsProductPRODUCTTYPEBOTH        RbacServiceAPIListPermissionGroupsParamsProduct = "PRODUCT_TYPE_BOTH"
-	RbacServiceAPIListPermissionGroupsParamsProductPRODUCTTYPECAST        RbacServiceAPIListPermissionGroupsParamsProduct = "PRODUCT_TYPE_CAST"
+	RbacServiceAPIListPermissionGroupsParamsProductPRODUCTTYPECASTAI      RbacServiceAPIListPermissionGroupsParamsProduct = "PRODUCT_TYPE_CASTAI"
 	RbacServiceAPIListPermissionGroupsParamsProductPRODUCTTYPEKIMCHI      RbacServiceAPIListPermissionGroupsParamsProduct = "PRODUCT_TYPE_KIMCHI"
 	RbacServiceAPIListPermissionGroupsParamsProductPRODUCTTYPEUNSPECIFIED RbacServiceAPIListPermissionGroupsParamsProduct = "PRODUCT_TYPE_UNSPECIFIED"
 )
@@ -1722,6 +1722,7 @@ type CastaiEvictorV1EvictionConfig struct {
 type CastaiEvictorV1EvictionSettings struct {
 	Aggressive      *CastaiEvictorV1EvictionSettingsSettingEnabled `json:"aggressive,omitempty"`
 	Disposable      *CastaiEvictorV1EvictionSettingsSettingEnabled `json:"disposable,omitempty"`
+	ForceDisposable *CastaiEvictorV1EvictionSettingsSettingEnabled `json:"forceDisposable,omitempty"`
 	RemovalDisabled *CastaiEvictorV1EvictionSettingsSettingEnabled `json:"removalDisabled,omitempty"`
 }
 
@@ -1765,6 +1766,7 @@ type CastaiEvictorV1NodeSelector struct {
 
 // CastaiEvictorV1PodSelector defines model for castai.evictor.v1.PodSelector.
 type CastaiEvictorV1PodSelector struct {
+	// Kind The kind of the owner, e.g. ReplicaSet, DaemonSet, Node, etc.
 	Kind *string `json:"kind,omitempty"`
 
 	// LabelSelector LabelSelector is a proto mirror of the metav1.LabelSelector K8s API object. Properties `match_labels` and
@@ -3960,6 +3962,72 @@ type CastaiServiceaccountsV1beta1GetServiceAccountResponse struct {
 	ServiceAccount CastaiServiceaccountsV1beta1ServiceAccount `json:"serviceAccount"`
 }
 
+// CastaiServiceaccountsV1beta1ListOrganizationServiceAccountKeysResponse ListOrganizationServiceAccountKeysResponse is the response for listing all service account keys for an organization.
+type CastaiServiceaccountsV1beta1ListOrganizationServiceAccountKeysResponse struct {
+	// Keys Keys is the list of service account keys.
+	Keys *[]CastaiServiceaccountsV1beta1ListOrganizationServiceAccountKeysResponseKey `json:"keys,omitempty"`
+
+	// NextPage Page defines how many and which fields should be returned.
+	NextPage CastaiPaginationV1beta1Page `json:"nextPage"`
+
+	// TotalCount TotalCount is the total number of service account keys in the dataset.
+	TotalCount *string `json:"totalCount,omitempty"`
+}
+
+// CastaiServiceaccountsV1beta1ListOrganizationServiceAccountKeysResponseKey Key is a service account key with its parent service account context.
+type CastaiServiceaccountsV1beta1ListOrganizationServiceAccountKeysResponseKey struct {
+	// Active Active determines if the key is active.
+	Active *bool `json:"active,omitempty"`
+
+	// CreatedAt CreatedAt is the creation time of the key.
+	CreatedAt *time.Time `json:"createdAt,omitempty"`
+
+	// CreatedBy Author is the author of the service account.
+	CreatedBy *CastaiServiceaccountsV1beta1ServiceAccountAuthor `json:"createdBy,omitempty"`
+
+	// ExpiresAt ExpiresAt is the expiration time of the key.
+	ExpiresAt *time.Time `json:"expiresAt,omitempty"`
+
+	// Id ID is the unique identifier of the key.
+	Id *string `json:"id,omitempty"`
+
+	// LastUsedAt LastUsedAt is the last time the key was used.
+	LastUsedAt *time.Time `json:"lastUsedAt,omitempty"`
+
+	// Name Name is the name of the key.
+	Name *string `json:"name,omitempty"`
+
+	// Prefix Prefix is the prefix of the key.
+	Prefix *string `json:"prefix,omitempty"`
+
+	// ServiceAccount ServiceAccount is a summary of the parent service account for a key.
+	ServiceAccount *CastaiServiceaccountsV1beta1ListOrganizationServiceAccountKeysResponseServiceAccount `json:"serviceAccount,omitempty"`
+}
+
+// CastaiServiceaccountsV1beta1ListOrganizationServiceAccountKeysResponseServiceAccount ServiceAccount is a summary of the parent service account for a key.
+type CastaiServiceaccountsV1beta1ListOrganizationServiceAccountKeysResponseServiceAccount struct {
+	// Author Author is the author of the service account.
+	Author *CastaiServiceaccountsV1beta1ServiceAccountAuthor `json:"author,omitempty"`
+
+	// CreatedAt CreatedAt is the creation time of the service account.
+	CreatedAt *time.Time `json:"createdAt,omitempty"`
+
+	// Description Description is the description of the service account.
+	Description *string `json:"description,omitempty"`
+
+	// Email Email is the email of the service account.
+	Email *string `json:"email,omitempty"`
+
+	// Id ID is the unique identifier of the service account.
+	Id *string `json:"id,omitempty"`
+
+	// ManagedBy ManagedBy is the method used to create the service account, eg.: console, terraform.
+	ManagedBy *string `json:"managedBy,omitempty"`
+
+	// Name Name is the name of the service account.
+	Name *string `json:"name,omitempty"`
+}
+
 // CastaiServiceaccountsV1beta1ListServiceAccountKeysResponse ListServiceAccountKeysResponse is the response for listing service account keys.
 type CastaiServiceaccountsV1beta1ListServiceAccountKeysResponse struct {
 	// Keys Keys is the list of service account keys.
@@ -4432,6 +4500,9 @@ type CastaiUsersV1beta1InvitationRoleBindingScope struct {
 	//  - CLUSTER: Cluster scope represents the cluster level authentication (Organization -> Cluster -> ResourceID)
 	Type *CastaiRbacV1beta1ScopeType `json:"type,omitempty"`
 }
+
+// CastaiUsersV1beta1LeaveOrganizationResponse Defines the empty response to leaving an organization.
+type CastaiUsersV1beta1LeaveOrganizationResponse = map[string]interface{}
 
 // CastaiUsersV1beta1ListInvitationsResponse Defines container for the organization's pending invitations.
 type CastaiUsersV1beta1ListInvitationsResponse struct {
@@ -6052,6 +6123,9 @@ type DboV1UninstallDBAgentParams struct {
 
 // ExternalclusterV1AKSClusterParams AKSClusterParams defines AKS-specific arguments.
 type ExternalclusterV1AKSClusterParams struct {
+	// CaCertConfig CACertConfig holds CA certificates to add to the node's trust store.
+	CaCertConfig *ExternalclusterV1CACertConfig `json:"caCertConfig,omitempty"`
+
 	// ClusterResourceGroup Azure cluster resource group.
 	ClusterResourceGroup *string `json:"clusterResourceGroup,omitempty"`
 
@@ -6134,6 +6208,12 @@ type ExternalclusterV1AnywhereClusterParams struct {
 
 	// KubeSystemNamespaceId NamespaceID as unique identifier for the cluster.
 	KubeSystemNamespaceId string `json:"kubeSystemNamespaceId"`
+}
+
+// ExternalclusterV1CACertConfig CACertConfig holds CA certificates to add to the node's trust store.
+type ExternalclusterV1CACertConfig struct {
+	// CaCerts Base64-encoded CA certificates.
+	CaCerts *[]string `json:"caCerts,omitempty"`
 }
 
 // ExternalclusterV1CloudEvent CloudEvent represents a remote event that happened in the cloud, e.g. "node added".
@@ -7103,6 +7183,9 @@ type ExternalclusterV1TriggerResumeClusterResponse struct {
 
 // ExternalclusterV1UpdateAKSClusterParams UpdateAKSClusterParams defines updatable AKS cluster configuration.
 type ExternalclusterV1UpdateAKSClusterParams struct {
+	// CaCertConfig CACertConfig holds CA certificates to add to the node's trust store.
+	CaCertConfig *ExternalclusterV1CACertConfig `json:"caCertConfig,omitempty"`
+
 	// HttpProxyConfig HttpProxyConfig holds settings when HTTP/S communication is required.
 	HttpProxyConfig *ExternalclusterV1HttpProxyConfig `json:"httpProxyConfig,omitempty"`
 }
@@ -10889,6 +10972,231 @@ type WorkloadoptimizationV1MetricTarget struct {
 // UTILIZATION - A percentage of the requested resource utilization (e.g., 80).
 type WorkloadoptimizationV1MetricTargetType string
 
+// WorkloadoptimizationV1MetricsAttributes MetricsAttributes defines how results are bucketed and grouped.
+type WorkloadoptimizationV1MetricsAttributes struct {
+	// GroupBy group_by selects which workload identity dimensions to group by.
+	// When empty, all workloads are aggregated into a single series (no per-workload breakdown).
+	GroupBy *[]WorkloadoptimizationV1MetricsGroupByDimension `json:"groupBy,omitempty"`
+
+	// StartupPeriod startup_period excludes data points that fall within the first N seconds after
+	// pod startup. Useful to filter out noise from container initialization.
+	// Supported only for pod and PSI metrics; ignored for others.
+	StartupPeriod *string `json:"startupPeriod"`
+
+	// Step step controls the time-bucket size. Defaults to 3600s (1 hour).
+	// Named for consistency with GetAggregatedWorkloadCustomMetricsV1BetaRequest.
+	Step *string `json:"step"`
+
+	// Timezone IANA timezone name (e.g. "America/New_York", "Europe/Berlin"). Defaults to "UTC" when absent or empty.
+	// Affects time-bucket alignment: from_time is floored to the granularity boundary in the specified timezone.
+	Timezone *string `json:"timezone"`
+}
+
+// WorkloadoptimizationV1MetricsBinaryOp MetricsBinaryOp composes two sub-expressions with an arithmetic operator.
+type WorkloadoptimizationV1MetricsBinaryOp struct {
+	// Left MetricsExpr is a recursive expression node. Exactly one of the oneof fields must be set.
+	Left WorkloadoptimizationV1MetricsExpr `json:"left"`
+
+	// Op MetricsBinaryOpType enumerates arithmetic operators for binary metric expressions.
+	Op WorkloadoptimizationV1MetricsBinaryOpType `json:"op"`
+
+	// Right MetricsExpr is a recursive expression node. Exactly one of the oneof fields must be set.
+	Right WorkloadoptimizationV1MetricsExpr `json:"right"`
+}
+
+// WorkloadoptimizationV1MetricsBinaryOpType MetricsBinaryOpType enumerates arithmetic operators for binary metric expressions.
+type WorkloadoptimizationV1MetricsBinaryOpType string
+
+// WorkloadoptimizationV1MetricsExpr MetricsExpr is a recursive expression node. Exactly one of the oneof fields must be set.
+type WorkloadoptimizationV1MetricsExpr struct {
+	// BinaryOp MetricsBinaryOp composes two sub-expressions with an arithmetic operator.
+	BinaryOp *WorkloadoptimizationV1MetricsBinaryOp `json:"binaryOp,omitempty"`
+
+	// MetricRef MetricsMetricRef references one metric with a bucket rollup and an optional
+	// group rollup. The smallest unit is the container identity
+	// (namespace, kind, name, is_custom, container). The group rollup combines
+	// container-level values into the requested group_by; the bucket rollup reduces
+	// those group totals inside each time step. When group_rollup is omitted, the
+	// metric family's default is used.
+	MetricRef *WorkloadoptimizationV1MetricsMetricRef `json:"metricRef,omitempty"`
+
+	// ScalarOp MetricsScalarOp applies a constant scalar to a sub-expression.
+	ScalarOp *WorkloadoptimizationV1MetricsScalarOp `json:"scalarOp,omitempty"`
+}
+
+// WorkloadoptimizationV1MetricsFilter MetricsFilter narrows the query scope.
+// Time range constraints: the window [from_time, to_time) must not exceed 168h (7 days).
+// from_time must not be more than 30 days in the past.
+// When from_time is unset, defaults to (now - default lookback of 24h).
+// When to_time is unset, defaults to now.
+//
+// Filter resolution: some fields (namespace, kind, name, container, is_custom) are
+// pushed down to ClickHouse directly. Other fields (scaling_policy_name, label,
+// workload_id) are resolved in PostgreSQL first, and the resulting workload list is
+// passed to ClickHouse. OR branches that mix PG-only fields with CH-pushable fields
+// are rejected because the two-stage pipeline would incorrectly rewrite them as AND.
+type WorkloadoptimizationV1MetricsFilter struct {
+	// Expr MetricsFilterExpr is a recursive filter expression node. Exactly one of the oneof
+	// fields must be set. Logical operators (and/or/not) compose sub-expressions; the
+	// typed leaf matchers compare a single workload field, which lets the API enforce
+	// value/field compatibility at the schema level.
+	Expr     *WorkloadoptimizationV1MetricsFilterExpr `json:"expr,omitempty"`
+	FromTime *time.Time                               `json:"fromTime"`
+	ToTime   *time.Time                               `json:"toTime"`
+}
+
+// WorkloadoptimizationV1MetricsFilterAnd defines model for workloadoptimization.v1.MetricsFilterAnd.
+type WorkloadoptimizationV1MetricsFilterAnd struct {
+	Children []WorkloadoptimizationV1MetricsFilterExpr `json:"children"`
+}
+
+// WorkloadoptimizationV1MetricsFilterExpr MetricsFilterExpr is a recursive filter expression node. Exactly one of the oneof
+// fields must be set. Logical operators (and/or/not) compose sub-expressions; the
+// typed leaf matchers compare a single workload field, which lets the API enforce
+// value/field compatibility at the schema level.
+type WorkloadoptimizationV1MetricsFilterExpr struct {
+	And *WorkloadoptimizationV1MetricsFilterAnd `json:"and,omitempty"`
+
+	// Container StringMatch matches a string workload field. Exactly one operator must be set.
+	Container *WorkloadoptimizationV1StringMatch `json:"container,omitempty"`
+
+	// IsCustom BoolMatch matches a boolean workload field (currently only is_custom).
+	// Set eq to match the desired boolean value.
+	IsCustom *WorkloadoptimizationV1BoolMatch `json:"isCustom,omitempty"`
+
+	// Kind StringMatch matches a string workload field. Exactly one operator must be set.
+	Kind *WorkloadoptimizationV1StringMatch `json:"kind,omitempty"`
+
+	// Label LabelMatch selects workloads by Kubernetes label key and value.
+	Label *WorkloadoptimizationV1LabelMatch `json:"label,omitempty"`
+
+	// Name StringMatch matches a string workload field. Exactly one operator must be set.
+	Name *WorkloadoptimizationV1StringMatch `json:"name,omitempty"`
+
+	// Namespace StringMatch matches a string workload field. Exactly one operator must be set.
+	Namespace *WorkloadoptimizationV1StringMatch      `json:"namespace,omitempty"`
+	Not       *WorkloadoptimizationV1MetricsFilterNot `json:"not,omitempty"`
+	Or        *WorkloadoptimizationV1MetricsFilterOr  `json:"or,omitempty"`
+
+	// ScalingPolicyName StringMatch matches a string workload field. Exactly one operator must be set.
+	ScalingPolicyName *WorkloadoptimizationV1StringMatch `json:"scalingPolicyName,omitempty"`
+
+	// WorkloadId WorkloadIDMatch matches a CAST AI workload UUID (equality only).
+	WorkloadId *WorkloadoptimizationV1WorkloadIDMatch `json:"workloadId,omitempty"`
+}
+
+// WorkloadoptimizationV1MetricsFilterNot defines model for workloadoptimization.v1.MetricsFilterNot.
+type WorkloadoptimizationV1MetricsFilterNot struct {
+	// Child MetricsFilterExpr is a recursive filter expression node. Exactly one of the oneof
+	// fields must be set. Logical operators (and/or/not) compose sub-expressions; the
+	// typed leaf matchers compare a single workload field, which lets the API enforce
+	// value/field compatibility at the schema level.
+	Child WorkloadoptimizationV1MetricsFilterExpr `json:"child"`
+}
+
+// WorkloadoptimizationV1MetricsFilterOr defines model for workloadoptimization.v1.MetricsFilterOr.
+type WorkloadoptimizationV1MetricsFilterOr struct {
+	Children []WorkloadoptimizationV1MetricsFilterExpr `json:"children"`
+}
+
+// WorkloadoptimizationV1MetricsGroupByDimension MetricsGroupByDimension enumerates the workload identity dimensions available for grouping results.
+type WorkloadoptimizationV1MetricsGroupByDimension string
+
+// WorkloadoptimizationV1MetricsMetricRef MetricsMetricRef references one metric with a bucket rollup and an optional
+// group rollup. The smallest unit is the container identity
+// (namespace, kind, name, is_custom, container). The group rollup combines
+// container-level values into the requested group_by; the bucket rollup reduces
+// those group totals inside each time step. When group_rollup is omitted, the
+// metric family's default is used.
+type WorkloadoptimizationV1MetricsMetricRef struct {
+	// GroupRollup group_rollup is the container-to-group aggregation function. Valid values:
+	//   Named aggregates: sum, avg, min, max, count
+	//   Family-specific defaults: sum for usage/request/gpu/jvm/probe/psi/recommendation/custom,
+	//     dedup-then-sum for pod_count, broadcast for cost rates.
+	// Percentiles are not allowed as group rollups because they do not compose
+	// across containers. Cost rates only accept broadcast.
+	GroupRollup *string `json:"groupRollup"`
+
+	// Metric metric is the metric name. Supported values are not enforced as an enum so
+	// new internal or custom metrics can be added without proto changes. Send an
+	// unknown name and the server returns an InvalidArgument error.
+	//
+	// Pod metrics:
+	//   cpu_usage, memory_usage, cpu_request, memory_request, pod_count
+	// Recommendation metrics:
+	//   cpu_recommendation, memory_recommendation
+	// Probe metrics:
+	//   probe_success_rate, probe_failure_rate
+	// PSI metrics:
+	//   psi_cpu, psi_memory, psi_io
+	// JVM metrics:
+	//   jvm.memory.heap.used, jvm.memory.heap.committed,
+	//   jvm.memory.non_heap.used, jvm.memory.heap.allocated,
+	//   jvm.gc.pause_count, jvm.gc.pause_seconds, jvm.threads.live_threads,
+	//   jvm.heap_recommendation
+	// GPU metrics:
+	//   gpu.sm_active, gpu.framebuffer_used, gpu.memory_util,
+	//   gpu.dram_active, gpu.power_usage, gpu.temperature, gpu.tensor_active
+	// Cost rate metrics:
+	//   cost_per_cpu_requested_per_hour, cost_per_memory_per_hour
+	// Workload resource metrics (sourced from PG, per-container per-pod constants):
+	//   cpu_first_seen_request, memory_first_seen_request,
+	//   cpu_original_request, memory_original_request
+	Metric string `json:"metric"`
+
+	// Rollup rollup is the bucket-level aggregation function. Valid values:
+	//   Named aggregates: avg, min, max, sum, count
+	//   Percentiles:      p00–p99  (exactly two digits, e.g. p50, p90, p95, p99)
+	//   p100 is accepted as an alias for max.
+	Rollup string `json:"rollup"`
+}
+
+// WorkloadoptimizationV1MetricsNamedExpr MetricsNamedExpr is a named top-level metric expression.
+type WorkloadoptimizationV1MetricsNamedExpr struct {
+	// Expr MetricsExpr is a recursive expression node. Exactly one of the oneof fields must be set.
+	Expr WorkloadoptimizationV1MetricsExpr `json:"expr"`
+
+	// Name name is an optional alias for this expression used in the response series label.
+	Name *string `json:"name,omitempty"`
+}
+
+// WorkloadoptimizationV1MetricsPoint defines model for workloadoptimization.v1.MetricsPoint.
+type WorkloadoptimizationV1MetricsPoint struct {
+	Timestamp time.Time `json:"timestamp"`
+	Value     float64   `json:"value"`
+}
+
+// WorkloadoptimizationV1MetricsScalarOp MetricsScalarOp applies a constant scalar to a sub-expression.
+type WorkloadoptimizationV1MetricsScalarOp struct {
+	// Op MetricsScalarOpType enumerates operators for applying a scalar constant to a metric expression.
+	Op WorkloadoptimizationV1MetricsScalarOpType `json:"op"`
+
+	// Operand MetricsExpr is a recursive expression node. Exactly one of the oneof fields must be set.
+	Operand WorkloadoptimizationV1MetricsExpr `json:"operand"`
+	Scalar  float64                           `json:"scalar"`
+}
+
+// WorkloadoptimizationV1MetricsScalarOpType MetricsScalarOpType enumerates operators for applying a scalar constant to a metric expression.
+type WorkloadoptimizationV1MetricsScalarOpType string
+
+// WorkloadoptimizationV1MetricsSeries defines model for workloadoptimization.v1.MetricsSeries.
+type WorkloadoptimizationV1MetricsSeries struct {
+	// Dimensions dimensions holds the grouped field values in the same order as attributes.group_by.
+	Dimensions []WorkloadoptimizationV1MetricsSeriesDimension `json:"dimensions"`
+
+	// ExprName expr_name echoes the MetricsNamedExpr.name for this series.
+	// If the request expression is empty or unnamed, this field returns an empty string.
+	ExprName string                               `json:"exprName"`
+	Points   []WorkloadoptimizationV1MetricsPoint `json:"points"`
+}
+
+// WorkloadoptimizationV1MetricsSeriesDimension defines model for workloadoptimization.v1.MetricsSeriesDimension.
+type WorkloadoptimizationV1MetricsSeriesDimension struct {
+	// Dimension MetricsGroupByDimension enumerates the workload identity dimensions available for grouping results.
+	Dimension WorkloadoptimizationV1MetricsGroupByDimension `json:"dimension"`
+	Value     string                                        `json:"value"`
+}
+
 // WorkloadoptimizationV1MigrateClusterToHPAV2Response defines model for workloadoptimization.v1.MigrateClusterToHPAV2Response.
 type WorkloadoptimizationV1MigrateClusterToHPAV2Response = map[string]interface{}
 
@@ -12916,6 +13224,15 @@ type ServiceAccountsAPIDeleteServiceAccountsParams struct {
 
 // ServiceAccountsAPIListServiceAccountsParams defines parameters for ServiceAccountsAPIListServiceAccounts.
 type ServiceAccountsAPIListServiceAccountsParams struct {
+	PageLimit *string `form:"page.limit,omitempty" json:"page.limit,omitempty"`
+
+	// PageCursor Cursor that defines token indicating where to start the next page.
+	// Empty value indicates to start from beginning of the dataset.
+	PageCursor *string `form:"page.cursor,omitempty" json:"page.cursor,omitempty"`
+}
+
+// ServiceAccountsAPIListOrganizationServiceAccountKeysParams defines parameters for ServiceAccountsAPIListOrganizationServiceAccountKeys.
+type ServiceAccountsAPIListOrganizationServiceAccountKeysParams struct {
 	PageLimit *string `form:"page.limit,omitempty" json:"page.limit,omitempty"`
 
 	// PageCursor Cursor that defines token indicating where to start the next page.
