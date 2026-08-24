@@ -21,42 +21,42 @@ import (
 )
 
 const (
-	FieldNodeConfigurationName                                  = "name"
-	FieldNodeConfigurationDiskCpuRatio                          = "disk_cpu_ratio"
-	FieldNodeConfigurationMinDiskSize                           = "min_disk_size"
-	FieldNodeConfigurationDrainTimeoutSec                       = "drain_timeout_sec"
-	FieldNodeConfigurationSubnets                               = "subnets"
-	FieldNodeConfigurationSSHPublicKey                          = "ssh_public_key"
-	FieldNodeConfigurationImage                                 = "image"
-	FieldNodeConfigurationTags                                  = "tags"
-	FieldNodeConfigurationInitScript                            = "init_script"
-	FieldNodeConfigurationContainerRuntime                      = "container_runtime"
-	FieldNodeConfigurationDockerConfig                          = "docker_config"
-	FieldNodeConfigurationKubeletConfig                         = "kubelet_config"
-	FieldNodeConfigurationAKS                                   = "aks"
-	FieldNodeConfigurationEKS                                   = "eks"
-	FieldNodeConfigurationKOPS                                  = "kops"
-	FieldNodeConfigurationGKE                                   = "gke"
-	FieldNodeConfigurationEKSTargetGroup                        = "target_group"
-	FieldNodeConfigurationAKSImageFamily                        = "aks_image_family"
-	FieldNodeConfigurationAKSEphemeralOSDisk                    = "ephemeral_os_disk"
-	FieldNodeConfigurationEKSImageFamily                        = "eks_image_family"
-	FieldNodeConfigurationLoadbalancers                         = "loadbalancers"
-	FieldNodeConfigurationAKSLoadbalancerIPPools                = "ip_based_backend_pools"
-	FieldNodeConfigurationAKSLoadbalancerNICPools               = "nic_based_backend_pools"
-	FieldNodeConfigurationAKSNetworkSecurityGroup               = "network_security_group"
-	FieldNodeConfigurationAKSApplicationSecurityGroups          = "application_security_groups"
-	FieldNodeConfigurationAKSPublicIP                           = "public_ip"
-	FieldNodeConfigurationAKSPodSubnetID                        = "pod_subnet_id"
-	FieldNodeConfigurationAKSEncryptionAtHost                   = "enable_encryption_at_host"
-	FieldNodeConfigurationAKSAcceleratedNetworking              = "accelerated_networking"
-	FieldNodeConfigurationEKSLocalStorage                       = "local_storage"
-	FieldNodeConfigurationEKSCustomerManaged                    = "customer_managed"
-	FieldNodeConfigurationSelfHostedWithEC2NodesLocalStorage    = "local_storage"
-	FieldNodeConfigurationSelfHostedWithEC2NodesCustomerManaged = "customer_managed"
-	FieldNodeConfigurationCustomerManagedUsablePercent          = "usable_percent"
-	FieldNodeConfigurationCustomerManagedReservedGib            = "reserved_gib"
-	FieldNodeConfigurationCustomerManagedDescription            = "description"
+	FieldNodeConfigurationName                                   = "name"
+	FieldNodeConfigurationDiskCpuRatio                           = "disk_cpu_ratio"
+	FieldNodeConfigurationMinDiskSize                            = "min_disk_size"
+	FieldNodeConfigurationDrainTimeoutSec                        = "drain_timeout_sec"
+	FieldNodeConfigurationSubnets                                = "subnets"
+	FieldNodeConfigurationSSHPublicKey                           = "ssh_public_key"
+	FieldNodeConfigurationImage                                  = "image"
+	FieldNodeConfigurationTags                                   = "tags"
+	FieldNodeConfigurationInitScript                             = "init_script"
+	FieldNodeConfigurationContainerRuntime                       = "container_runtime"
+	FieldNodeConfigurationDockerConfig                           = "docker_config"
+	FieldNodeConfigurationKubeletConfig                          = "kubelet_config"
+	FieldNodeConfigurationAKS                                    = "aks"
+	FieldNodeConfigurationEKS                                    = "eks"
+	FieldNodeConfigurationKOPS                                   = "kops"
+	FieldNodeConfigurationGKE                                    = "gke"
+	FieldNodeConfigurationEKSTargetGroup                         = "target_group"
+	FieldNodeConfigurationAKSImageFamily                         = "aks_image_family"
+	FieldNodeConfigurationAKSEphemeralOSDisk                     = "ephemeral_os_disk"
+	FieldNodeConfigurationEKSImageFamily                         = "eks_image_family"
+	FieldNodeConfigurationLoadbalancers                          = "loadbalancers"
+	FieldNodeConfigurationAKSLoadbalancerIPPools                 = "ip_based_backend_pools"
+	FieldNodeConfigurationAKSLoadbalancerNICPools                = "nic_based_backend_pools"
+	FieldNodeConfigurationAKSNetworkSecurityGroup                = "network_security_group"
+	FieldNodeConfigurationAKSApplicationSecurityGroups           = "application_security_groups"
+	FieldNodeConfigurationAKSPublicIP                            = "public_ip"
+	FieldNodeConfigurationAKSPodSubnetID                         = "pod_subnet_id"
+	FieldNodeConfigurationAKSEncryptionAtHost                    = "enable_encryption_at_host"
+	FieldNodeConfigurationAKSAcceleratedNetworking               = "accelerated_networking"
+	FieldNodeConfigurationEKSLocalStorage                        = "local_storage"
+	FieldNodeConfigurationEKSCustomerManaged                     = "customer_managed"
+	FieldNodeConfigurationSelfHostedWithEC2NodesLocalStorage     = "local_storage"
+	FieldNodeConfigurationSelfHostedWithEC2NodesCustomerManaged  = "customer_managed"
+	FieldNodeConfigurationCustomerManagedEphemeralStoragePercent = "ephemeral_storage_percent"
+	FieldNodeConfigurationCustomerManagedReservedGib             = "reserved_gib"
+	FieldNodeConfigurationCustomerManagedDescription             = "description"
 )
 
 const (
@@ -988,11 +988,11 @@ func resourceNodeConfigurationDelete(ctx context.Context, d *schema.ResourceData
 
 func customerManagedLocalStorageFields() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
-		FieldNodeConfigurationCustomerManagedUsablePercent: {
+		FieldNodeConfigurationCustomerManagedEphemeralStoragePercent: {
 			Type:             schema.TypeInt,
 			Required:         true,
 			ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(0, 100)),
-			Description:      "Percentage of local storage that is usable for workloads, in the range 0..100.",
+			Description:      "Percentage of local storage exposed as ephemeral-storage, in the range 0..100.",
 		},
 		FieldNodeConfigurationCustomerManagedReservedGib: {
 			Type:             schema.TypeInt,
@@ -1014,8 +1014,8 @@ func toCustomerManagedLocalStorage(obj map[string]interface{}) *sdk.NodeconfigV1
 	}
 
 	out := &sdk.NodeconfigV1CustomerManagedLocalStorage{}
-	if v, ok := obj[FieldNodeConfigurationCustomerManagedUsablePercent].(int); ok {
-		out.UsablePercent = toPtr(int32(v))
+	if v, ok := obj[FieldNodeConfigurationCustomerManagedEphemeralStoragePercent].(int); ok {
+		out.EphemeralStoragePercent = toPtr(int32(v))
 	}
 	if v, ok := obj[FieldNodeConfigurationCustomerManagedReservedGib].(int); ok && v > 0 {
 		out.ReservedGib = toPtr(int64(v))
@@ -1031,7 +1031,7 @@ func flattenCustomerManagedLocalStorage(config *sdk.NodeconfigV1CustomerManagedL
 	if config == nil {
 		return m
 	}
-	m[FieldNodeConfigurationCustomerManagedUsablePercent] = config.UsablePercent
+	m[FieldNodeConfigurationCustomerManagedEphemeralStoragePercent] = config.EphemeralStoragePercent
 	if v := config.ReservedGib; v != nil {
 		m[FieldNodeConfigurationCustomerManagedReservedGib] = *v
 	}

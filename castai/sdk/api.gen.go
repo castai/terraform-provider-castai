@@ -7564,8 +7564,8 @@ type NodeconfigV1CustomerManagedLocalStorage struct {
 	// ReservedGib Reserved local storage in GiB that is not available for workloads.
 	ReservedGib *int64 `json:"reservedGib"`
 
-	// UsablePercent Percentage of local storage that is usable for workloads, in the range 0..100.
-	UsablePercent *int32 `json:"usablePercent"`
+	// EphemeralStoragePercent Percentage of local storage exposed as ephemeral-storage, in the range 0..100.
+	EphemeralStoragePercent *int32 `json:"ephemeralStoragePercent"`
 }
 
 // NodeconfigV1DeleteConfigurationResponse defines model for nodeconfig.v1.DeleteConfigurationResponse.

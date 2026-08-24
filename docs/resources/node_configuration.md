@@ -185,7 +185,7 @@ Optional:
 
 Required:
 
-- `usable_percent` (Number) Percentage of local storage that is usable for workloads, in the range 0..100.
+- `ephemeral_storage_percent` (Number) Percentage of local storage exposed as ephemeral-storage, in the range 0..100.
 
 Optional:
 
