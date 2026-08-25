@@ -169,6 +169,10 @@ type EvictionSettings struct {
 	// Disposable Marks node/pod as disposable
 	Disposable *EvictionSettingsSettingEnabled `json:"disposable,omitempty"`
 
+	// ForceDisposable Forcibly treats matched pods as disposable, overriding protection annotations
+	//  (removal-disabled, safe-to-evict=false, do-not-disrupt, eviction-disabled).
+	ForceDisposable *EvictionSettingsSettingEnabled `json:"forceDisposable,omitempty"`
+
 	// RemovalDisabled Pod should not be removed
 	RemovalDisabled *EvictionSettingsSettingEnabled `json:"removalDisabled,omitempty"`
 }

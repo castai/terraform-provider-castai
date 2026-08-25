@@ -23,9 +23,10 @@ const (
 	FieldNodeSelector             = "node_selector"
 	FieldPodSelector              = "pod_selector"
 	FieldEvictionSettings         = "settings"
-	FieldEvictionOptionDisabled   = "removal_disabled"
-	FieldEvictionOptionAggressive = "aggressive"
-	FieldEvictionOptionDisposable = "disposable"
+	FieldEvictionOptionDisabled       = "removal_disabled"
+	FieldEvictionOptionAggressive     = "aggressive"
+	FieldEvictionOptionDisposable     = "disposable"
+	FieldEvictionOptionForceDisposable = "force_disposable"
 	FieldPodSelectorKind          = "kind"
 	FieldPodSelectorNamespace     = "namespace"
 	FieldPodSelectorReplicasMin   = "replicas_min"
@@ -146,6 +147,11 @@ func resourceEvictionConfig() *schema.Resource {
 							Type:        schema.TypeBool,
 							Optional:    true,
 							Description: "Mark node as disposable",
+						},
+						FieldEvictionOptionForceDisposable: {
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Description: "Forcibly treat matched pods as disposable, overriding protection annotations (removal-disabled, safe-to-evict=false, do-not-disrupt, eviction-disabled).",
 						},
 					},
 				},
@@ -349,10 +355,18 @@ func toEvictionConfig(ii interface{}) ([]workload_eviction.EvictionConfig, error
 			case FieldEvictionOptionDisposable:
 				enabled, ok := v.(bool)
 				if !ok {
-					return nil, fmt.Errorf("mapping eviction aggressive expecing bool, got %T, %+v", v, v)
+					return nil, fmt.Errorf("mapping eviction disposable expecting bool, got %T, %+v", v, v)
 				}
 				if enabled {
 					ec.Settings.Disposable = &workload_eviction.EvictionSettingsSettingEnabled{Enabled: enabled}
+				}
+			case FieldEvictionOptionForceDisposable:
+				enabled, ok := v.(bool)
+				if !ok {
+					return nil, fmt.Errorf("mapping eviction force_disposable expecting bool, got %T, %+v", v, v)
+				}
+				if enabled {
+					ec.Settings.ForceDisposable = &workload_eviction.EvictionSettingsSettingEnabled{Enabled: enabled}
 				}
 			default:
 				return nil, fmt.Errorf("unexpected field %s, %T, %+v", k, v, v)
@@ -381,6 +395,10 @@ func flattenEvictionConfig(ecs []workload_eviction.EvictionConfig) []map[string]
 
 		if c.Settings.Disposable != nil {
 			out[FieldEvictionOptionDisposable] = c.Settings.Disposable.Enabled
+		}
+
+		if c.Settings.ForceDisposable != nil {
+			out[FieldEvictionOptionForceDisposable] = c.Settings.ForceDisposable.Enabled
 		}
 
 		if c.Settings.RemovalDisabled != nil {
