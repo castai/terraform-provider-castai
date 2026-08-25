@@ -371,7 +371,7 @@ type EdgeConfiguration struct {
 	// Name The name of the edge configuration.
 	Name string `json:"name"`
 
-	// Nebius OCI specific configuration.
+	// Nebius Nebius specific configuration.
 	Nebius *NebiusConfiguration `json:"nebius,omitempty"`
 
 	// Oci OCI specific configuration.
@@ -804,13 +804,8 @@ type NebiusParam struct {
 	// ParentId The parent ID (project ID) that owns the edge location resources.
 	ParentId *string `json:"parentId,omitempty"`
 
-	// ServiceAccountId The service account ID to be impersonated by CAST AI.
+	// ServiceAccountId The Nebius service account ID which has a trust established with CAST AI identity.
 	ServiceAccountId *string `json:"serviceAccountId,omitempty"`
-
-	// TargetServiceAccountId The target service account ID for Workload Identity Federation.
-	//  When set, the provider authenticates via WIF (OIDC token exchange)
-	//  instead of static authorized-key credentials.
-	TargetServiceAccountId *string `json:"targetServiceAccountId,omitempty"`
 }
 
 // NebiusParamNetworking NebiusParamNetworking Networking configuration of Nebius edge location.

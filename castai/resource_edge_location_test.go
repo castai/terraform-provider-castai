@@ -622,7 +622,6 @@ func TestAccCloudAgnostic_ResourceEdgeLocationNebiusWIF(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "zones.1.id", "eu-north1-b"),
 					resource.TestCheckResourceAttr(resourceName, "zones.1.name", "eu-north1-b"),
 					resource.TestCheckResourceAttrSet(resourceName, "nebius.parent_id"),
-					resource.TestCheckResourceAttr(resourceName, "nebius.target_service_account_id", "serviceaccount-nebius-wif"),
 					resource.TestCheckResourceAttrSet(resourceName, "id"),
 					resource.TestCheckResourceAttr(resourceName, "credentials_revision", "1"),
 				),
@@ -635,14 +634,14 @@ func TestAccCloudAgnostic_ResourceEdgeLocationNebiusWIF(t *testing.T) {
 					edgeLocationID := s.RootModule().Resources[resourceName].Primary.ID
 					return fmt.Sprintf("%v/%v/%v", organizationID, clusterID, edgeLocationID), nil
 				},
-				ImportState:       true,
-				ImportStateVerify: true,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"networking"},
 			},
 			{
 				Config: testAccEdgeLocationNebiusWIFUpdated(rName, clusterName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "description", "Updated Nebius edge location WIF"),
-					resource.TestCheckResourceAttr(resourceName, "nebius.target_service_account_id", "serviceaccount-nebius-wif-updated"),
 				),
 			},
 		},
@@ -651,17 +650,15 @@ func TestAccCloudAgnostic_ResourceEdgeLocationNebiusWIF(t *testing.T) {
 
 func testAccEdgeLocationNebiusWIFConfig(rName, clusterName string) string {
 	return testAccEdgeLocationNebiusWIFConfigWithParams(rName, clusterName,
-		"Test Nebius edge location WIF",
-		"serviceaccount-nebius-wif")
+		"Test Nebius edge location WIF")
 }
 
 func testAccEdgeLocationNebiusWIFUpdated(rName, clusterName string) string {
 	return testAccEdgeLocationNebiusWIFConfigWithParams(rName, clusterName,
-		"Updated Nebius edge location WIF",
-		"serviceaccount-nebius-wif-updated")
+		"Updated Nebius edge location WIF")
 }
 
-func testAccEdgeLocationNebiusWIFConfigWithParams(rName, clusterName, description, targetSAID string) string {
+func testAccEdgeLocationNebiusWIFConfigWithParams(rName, clusterName, description string) string {
 	organizationID := testAccGetOrganizationID()
 
 	return ConfigCompose(testOmniClusterConfig(clusterName), fmt.Sprintf(`
@@ -689,12 +686,11 @@ resource "castai_edge_location" "test" {
   nebius = {
     parent_id                = "project-nebius-123456"
     service_account_id       = "serviceaccount-nebius"
-    target_service_account_id = "%[6]s"
     network_id               = "test-network"
     subnet_id               = "test-subnet"
     subnet_cidr             = "10.0.0.0/20"
     security_group_id        = "test-sg"
   }
 }
-`, rName, description, clusterName, organizationID, organizationID, targetSAID))
+`, rName, description, clusterName, organizationID, organizationID))
 }

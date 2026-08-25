@@ -198,7 +198,6 @@ Required:
 - `parent_id` (String) Nebius project ID that owns the edge location resources
 - `service_account_id` (String) Nebius service account ID to be impersonated by CAST AI
 - `subnet_id` (String) The ID of the subnet to be used in the selected region
-- `target_service_account_id` (String) The target service account ID for Workload Identity Federation (WIF). The provider authenticates via WIF (OIDC token exchange) instead of static authorized-key credentials.
 
 Optional:
 
