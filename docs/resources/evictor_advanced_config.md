@@ -52,6 +52,7 @@ Optional:
 
 - `aggressive` (Boolean) Apply Aggressive mode to Evictor
 - `disposable` (Boolean) Mark node as disposable
+- `force_disposable` (Boolean) Forcibly treat matched pods as disposable, overriding protection annotations (removal-disabled, safe-to-evict=false, do-not-disrupt, eviction-disabled).
 - `node_selector` (Block List) node selector (see [below for nested schema](#nestedblock--evictor_advanced_config--node_selector))
 - `pod_selector` (Block List) pod selector (see [below for nested schema](#nestedblock--evictor_advanced_config--pod_selector))
 - `removal_disabled` (Boolean) Mark pods as removal disabled

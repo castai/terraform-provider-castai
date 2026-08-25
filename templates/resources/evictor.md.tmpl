@@ -1,0 +1,24 @@
+---
+page_title: "{{.Name}} {{.Type}} - {{.ProviderName}}"
+subcategory: ""
+description: |-
+{{ .Description | plainmarkdown | trimspace | prefixlines "  " }}
+---
+
+# {{.Name}} ({{.Type}})
+
+{{ .Description | trimspace }}
+
+## Example Usage
+
+{{ tffile "examples/resources/castai_evictor/resource.tf" }}
+
+> **Note:** Fields `drain_timeout` through `arm64_supported` (13 fields) exist in the V2 API proto but may not be active in the backend yet. They are included for forward compatibility and will become functional as the backend wires them.
+
+## V1 migration
+
+The V1 `castai_autoscaler` resource had evictor settings nested under `node_downscaler.evictor` with only 3 fields (`enabled`, `dry_run`, `aggressive_mode`). The new `castai_evictor` resource exposes all 24 evictor config fields via the standalone workload-eviction API.
+
+See [`castai_autoscaler_policies`](autoscaler_policies.md) for the full V1→V2 migration guide.
+
+{{ .SchemaMarkdown | trimspace }}
