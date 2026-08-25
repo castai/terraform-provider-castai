@@ -12850,6 +12850,9 @@ type ServiceAccountsAPIListServiceAccountsParams struct {
 	// PageCursor Cursor that defines token indicating where to start the next page.
 	// Empty value indicates to start from beginning of the dataset.
 	PageCursor *string `form:"page.cursor,omitempty" json:"page.cursor,omitempty"`
+
+	// ServiceAccountName Service account name filter.
+	ServiceAccountName *string `form:"serviceAccountName,omitempty" json:"serviceAccountName,omitempty"`
 }
 
 // ServiceAccountsAPIListOrganizationServiceAccountKeysParams defines parameters for ServiceAccountsAPIListOrganizationServiceAccountKeys.

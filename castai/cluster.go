@@ -52,7 +52,7 @@ func resourceCastaiClusterDelete(ctx context.Context, data *schema.ResourceData,
 				KeepKubernetesResources: toPtr(true),
 			})
 			if checkErr := sdk.CheckOKResponse(response, err); checkErr != nil {
-				return retry.NonRetryableError(err)
+				return retry.NonRetryableError(checkErr)
 			}
 
 			return retry.RetryableError(fmt.Errorf("triggered agent disconnection cluster status %s agent status %s", clusterStatus, agentStatus))
@@ -66,7 +66,7 @@ func resourceCastaiClusterDelete(ctx context.Context, data *schema.ResourceData,
 			}
 
 			if checkErr := sdk.CheckResponseNoContent(res, err); checkErr != nil {
-				return retry.NonRetryableError(fmt.Errorf("error when deleting cluster status %s agent status %s error: %w", clusterStatus, agentStatus, err))
+				return retry.NonRetryableError(fmt.Errorf("error when deleting cluster status %s agent status %s error: %w", clusterStatus, agentStatus, checkErr))
 			}
 			return retry.RetryableError(fmt.Errorf("triggered cluster deletion"))
 		}
