@@ -11,13 +11,13 @@ import (
 
 func TestAccCloudAgnostic_ResourceEdgeConfigurationDefault(t *testing.T) {
 	rName := fmt.Sprintf("%v-edgecfg-%v", ResourcePrefix, acctest.RandString(8))
-	clusterName := "omni-tf-acc-gcp-dflt"
+	clusterName := fmt.Sprintf("omni-tf-acc-gcp-dflt-%v", acctest.RandString(6))
 	resourceName := "castai_edge_configuration_default.test"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
-		CheckDestroy:             nil,
+		CheckDestroy:             testAccCheckEdgeResourcesDestroy(nil),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccEdgeConfigurationDefaultConfig(rName, clusterName),
@@ -69,6 +69,7 @@ resource "castai_edge_configuration" "test" {
 
   gcp = {
     image_id = "projects/castai/global/images/castai-edge-v1"
+    labels  = {}
   }
 
   cri = {
@@ -100,6 +101,7 @@ resource "castai_edge_configuration" "test" {
 
   gcp = {
     image_id = "projects/castai/global/images/castai-edge-v1"
+    labels  = {}
   }
 
   cri = {
@@ -115,6 +117,7 @@ resource "castai_edge_configuration" "test2" {
 
   gcp = {
     image_id = "projects/castai/global/images/castai-edge-v2"
+    labels  = {}
   }
 
   cri = {

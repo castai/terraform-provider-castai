@@ -8,6 +8,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"os/exec"
 	"testing"
 	"time"
 
@@ -32,7 +33,10 @@ func TestAccGKE_ResourceWorkloadScalingPolicy(t *testing.T) {
 	projectID := os.Getenv("GOOGLE_PROJECT_ID")
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			cleanupLeftoverHelmReleases(t)
+		},
 		ProviderFactories: providerFactories,
 		CheckDestroy:      testAccCheckScalingPolicyDestroy,
 		Steps: []resource.TestStep{
@@ -80,6 +84,7 @@ func TestAccGKE_ResourceWorkloadScalingPolicy(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "assignment_rules.0.rules.1.workload.0.labels_expressions.0.values.1", "eu-west-2"),
 					resource.TestCheckResourceAttr(resourceName, "assignment_rules.0.rules.1.workload.0.labels_expressions.1.key", "helm.sh/chart"),
 					resource.TestCheckResourceAttr(resourceName, "assignment_rules.0.rules.1.workload.0.labels_expressions.1.operator", "Exists"),
+					resource.TestCheckResourceAttr(resourceName, "hpa_converters.0.type", FieldHpaConverterTypeAverageValueFromOriginalRequests),
 				),
 			},
 			{
@@ -120,6 +125,9 @@ func TestAccGKE_ResourceWorkloadScalingPolicy(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "memory.0.limit.0.type", "NO_LIMIT"),
 					resource.TestCheckResourceAttr(resourceName, "memory.0.management_option", "READ_ONLY"),
 					resource.TestCheckResourceAttr(resourceName, "startup.0.period_seconds", "123"),
+					resource.TestCheckResourceAttr(resourceName, "startup.0.two_phase_recommendations.0.enabled", "true"),
+					resource.TestCheckResourceAttr(resourceName, "startup.0.two_phase_recommendations.0.requests_on_startup.0.cpu_cores", "0.5"),
+					resource.TestCheckResourceAttr(resourceName, "startup.0.two_phase_recommendations.0.requests_on_startup.0.memory_gib", "0.5"),
 					resource.TestCheckResourceAttr(resourceName, "downscaling.0.apply_type", "DEFERRED"),
 					resource.TestCheckResourceAttr(resourceName, "memory_event.0.apply_type", "DEFERRED"),
 					resource.TestCheckResourceAttr(resourceName, "confidence.0.threshold", "0.6"),
@@ -135,6 +143,7 @@ func TestAccGKE_ResourceWorkloadScalingPolicy(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "jvm.0.memory.0.optimization", "true"),
 					resource.TestCheckResourceAttr(resourceName, "anomaly_detection.0.cpu_pressure.0.cpu_stall_threshold_percentage", "50"),
 					resource.TestCheckResourceAttr(resourceName, "anomaly_detection.0.cpu_pressure.0.min_pressured_pod_percentage", "30"),
+					resource.TestCheckResourceAttr(resourceName, "hpa_converters.0.type", FieldHpaConverterTypeAverageValueFromOriginalRequests),
 				),
 			},
 			// Final step: verify legacy fields still work by creating a new policy
@@ -280,6 +289,9 @@ func scalingPolicyConfig(clusterName, projectID, name string) string {
 		apply_type			= "IMMEDIATE"
 		management_option	= "READ_ONLY"
 		excluded_containers = ["a", "b"]
+		hpa_converters {
+			type = "AVERAGE_VALUE_FROM_ORIGINAL_REQUESTS"
+		}
 		confidence {
 			threshold = 0.4
 		}
@@ -356,6 +368,9 @@ func scalingPolicyConfigUpdated(clusterName, projectID, name string) string {
 		apply_type			= "IMMEDIATE"
 		management_option	= "MANAGED"
 		excluded_containers = ["a", "b"]
+		hpa_converters {
+			type = "AVERAGE_VALUE_FROM_ORIGINAL_REQUESTS"
+		}
 		assignment_rules {
 			rules {
 				namespace {
@@ -413,6 +428,13 @@ func scalingPolicyConfigUpdated(clusterName, projectID, name string) string {
 		}
 		startup {
 			period_seconds = 123
+			two_phase_recommendations {
+				enabled = true
+				requests_on_startup {
+					cpu_cores  = 0.5
+					memory_gib = 0.5
+				}
+			}
 		}
 	    downscaling {
 		    apply_type = "DEFERRED"
@@ -510,6 +532,31 @@ func getAPIUrl() string {
 		return "https://api.dev-master.cast.ai"
 	}
 	return apiUrl
+}
+
+// cleanupLeftoverHelmReleases uninstalls any leftover CAST AI Helm releases from
+// previous (possibly failed) test runs. The acceptance tests share a single GKE
+// cluster and install Helm releases with hardcoded names (castai-agent,
+// castai-cluster-controller, castai-workload-autoscaler). When a previous run
+// fails or is cancelled mid-install, the releases can be left in a pending or
+// failed state, causing "cannot re-use a name that is still in use" errors on
+// the next run. The replace = true flag in the helm_release resource only works
+// when the existing release is in a deployed state, so we explicitly uninstall
+// stale releases here before the test begins.
+func cleanupLeftoverHelmReleases(t *testing.T) {
+	t.Helper()
+
+	releases := []string{"castai-agent", "castai-cluster-controller", "castai-workload-autoscaler"}
+
+	for _, release := range releases {
+		// Uninstall the release if it exists in any state. We use --ignore-not-found so
+		// the command succeeds even when the release doesn't exist yet (clean run).
+		cmd := exec.Command("helm", "uninstall", release, "--namespace", "castai-agent", "--ignore-not-found", "--wait", "--timeout", "2m")
+		output, err := cmd.CombinedOutput()
+		if err != nil {
+			t.Logf("helm uninstall %s: %s", release, string(output))
+		}
+	}
 }
 
 func Test_validateResourcePolicy(t *testing.T) {
@@ -1267,6 +1314,234 @@ func Test_toRolloutBehaviorMap(t *testing.T) {
 	}
 }
 
+func Test_toStartup(t *testing.T) {
+	tests := map[string]struct {
+		args map[string]any
+		exp  *sdk.WorkloadoptimizationV1StartupSettings
+	}{
+		"should return startup settings when only period_seconds is set": {
+			args: map[string]any{
+				"period_seconds": 300,
+			},
+			exp: &sdk.WorkloadoptimizationV1StartupSettings{
+				PeriodSeconds: lo.ToPtr(int32(300)),
+			},
+		},
+		"should return startup settings when two_phase_recommendations is enabled": {
+			args: map[string]any{
+				FieldStartupTwoPhaseRecommendations: []any{
+					map[string]any{
+						FieldStartupTwoPhaseRecommendationsEnabled: true,
+					},
+				},
+			},
+			exp: &sdk.WorkloadoptimizationV1StartupSettings{
+				TwoPhaseRecommendations: &sdk.WorkloadoptimizationV1TwoPhaseRecommendations{
+					Enabled: true,
+				},
+			},
+		},
+		"should return startup settings when two_phase_recommendations is disabled": {
+			args: map[string]any{
+				FieldStartupTwoPhaseRecommendations: []any{
+					map[string]any{
+						FieldStartupTwoPhaseRecommendationsEnabled: false,
+					},
+				},
+			},
+			exp: &sdk.WorkloadoptimizationV1StartupSettings{
+				TwoPhaseRecommendations: &sdk.WorkloadoptimizationV1TwoPhaseRecommendations{
+					Enabled: false,
+				},
+			},
+		},
+		"should return startup settings when two_phase_recommendations has requests_on_startup": {
+			args: map[string]any{
+				FieldStartupTwoPhaseRecommendations: []any{
+					map[string]any{
+						FieldStartupTwoPhaseRecommendationsEnabled: true,
+						FieldStartupTwoPhaseRecommendationsRequestsOnStartup: []any{
+							map[string]any{
+								FieldStartupTwoPhaseRecommendationsCpuCores:  0.5,
+								FieldStartupTwoPhaseRecommendationsMemoryGib: 1.5,
+							},
+						},
+					},
+				},
+			},
+			exp: &sdk.WorkloadoptimizationV1StartupSettings{
+				TwoPhaseRecommendations: &sdk.WorkloadoptimizationV1TwoPhaseRecommendations{
+					Enabled: true,
+					RequestsOnStartup: &sdk.WorkloadoptimizationV1ResourceQuantity{
+						CpuCores:  lo.ToPtr(0.5),
+						MemoryGib: lo.ToPtr(1.5),
+					},
+				},
+			},
+		},
+		"should return startup settings when period_seconds and two_phase_recommendations are set": {
+			args: map[string]any{
+				"period_seconds": 600,
+				FieldStartupTwoPhaseRecommendations: []any{
+					map[string]any{
+						FieldStartupTwoPhaseRecommendationsEnabled: true,
+						FieldStartupTwoPhaseRecommendationsRequestsOnStartup: []any{
+							map[string]any{
+								FieldStartupTwoPhaseRecommendationsCpuCores:  2.0,
+								FieldStartupTwoPhaseRecommendationsMemoryGib: 4.0,
+							},
+						},
+					},
+				},
+			},
+			exp: &sdk.WorkloadoptimizationV1StartupSettings{
+				PeriodSeconds: lo.ToPtr(int32(600)),
+				TwoPhaseRecommendations: &sdk.WorkloadoptimizationV1TwoPhaseRecommendations{
+					Enabled: true,
+					RequestsOnStartup: &sdk.WorkloadoptimizationV1ResourceQuantity{
+						CpuCores:  lo.ToPtr(2.0),
+						MemoryGib: lo.ToPtr(4.0),
+					},
+				},
+			},
+		},
+		"should return nil when map is empty": {
+			args: map[string]any{},
+			exp:  nil,
+		},
+		"should return nil when map is nil": {
+			args: nil,
+			exp:  nil,
+		},
+	}
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			r := require.New(t)
+			got := toStartup(tt.args)
+			r.Equal(tt.exp, got)
+		})
+	}
+}
+
+func Test_toStartupMap(t *testing.T) {
+	tests := map[string]struct {
+		args *sdk.WorkloadoptimizationV1StartupSettings
+		exp  []map[string]any
+	}{
+		"should return startup map when period_seconds is set": {
+			args: &sdk.WorkloadoptimizationV1StartupSettings{
+				PeriodSeconds: lo.ToPtr(int32(300)),
+			},
+			exp: []map[string]any{
+				{
+					"period_seconds": 300,
+				},
+			},
+		},
+		"should return startup map when two_phase_recommendations is enabled": {
+			args: &sdk.WorkloadoptimizationV1StartupSettings{
+				TwoPhaseRecommendations: &sdk.WorkloadoptimizationV1TwoPhaseRecommendations{
+					Enabled: true,
+				},
+			},
+			exp: []map[string]any{
+				{
+					FieldStartupTwoPhaseRecommendations: []map[string]any{
+						{
+							FieldStartupTwoPhaseRecommendationsEnabled: true,
+						},
+					},
+				},
+			},
+		},
+		"should return startup map when two_phase_recommendations is disabled": {
+			args: &sdk.WorkloadoptimizationV1StartupSettings{
+				TwoPhaseRecommendations: &sdk.WorkloadoptimizationV1TwoPhaseRecommendations{
+					Enabled: false,
+				},
+			},
+			exp: []map[string]any{
+				{
+					FieldStartupTwoPhaseRecommendations: []map[string]any{
+						{
+							FieldStartupTwoPhaseRecommendationsEnabled: false,
+						},
+					},
+				},
+			},
+		},
+		"should return startup map when two_phase_recommendations has requests_on_startup": {
+			args: &sdk.WorkloadoptimizationV1StartupSettings{
+				TwoPhaseRecommendations: &sdk.WorkloadoptimizationV1TwoPhaseRecommendations{
+					Enabled: true,
+					RequestsOnStartup: &sdk.WorkloadoptimizationV1ResourceQuantity{
+						CpuCores:  lo.ToPtr(0.5),
+						MemoryGib: lo.ToPtr(1.5),
+					},
+				},
+			},
+			exp: []map[string]any{
+				{
+					FieldStartupTwoPhaseRecommendations: []map[string]any{
+						{
+							FieldStartupTwoPhaseRecommendationsEnabled: true,
+							FieldStartupTwoPhaseRecommendationsRequestsOnStartup: []map[string]any{
+								{
+									FieldStartupTwoPhaseRecommendationsCpuCores:  0.5,
+									FieldStartupTwoPhaseRecommendationsMemoryGib: 1.5,
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		"should return startup map when period_seconds and two_phase_recommendations are set": {
+			args: &sdk.WorkloadoptimizationV1StartupSettings{
+				PeriodSeconds: lo.ToPtr(int32(600)),
+				TwoPhaseRecommendations: &sdk.WorkloadoptimizationV1TwoPhaseRecommendations{
+					Enabled: true,
+					RequestsOnStartup: &sdk.WorkloadoptimizationV1ResourceQuantity{
+						CpuCores:  lo.ToPtr(2.0),
+						MemoryGib: lo.ToPtr(4.0),
+					},
+				},
+			},
+			exp: []map[string]any{
+				{
+					"period_seconds": 600,
+					FieldStartupTwoPhaseRecommendations: []map[string]any{
+						{
+							FieldStartupTwoPhaseRecommendationsEnabled: true,
+							FieldStartupTwoPhaseRecommendationsRequestsOnStartup: []map[string]any{
+								{
+									FieldStartupTwoPhaseRecommendationsCpuCores:  2.0,
+									FieldStartupTwoPhaseRecommendationsMemoryGib: 4.0,
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		"should return nil when input is nil": {
+			args: nil,
+			exp:  nil,
+		},
+		"should return nil when settings are empty": {
+			args: &sdk.WorkloadoptimizationV1StartupSettings{},
+			exp:  nil,
+		},
+	}
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			r := require.New(t)
+			got := toStartupMap(tt.args)
+			r.Equal(tt.exp, got)
+		})
+	}
+}
+
 func Test_toAnomalyDetection(t *testing.T) {
 	tests := map[string]struct {
 		args map[string]any
@@ -1476,6 +1751,101 @@ func Test_toJvmMap(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			r := require.New(t)
 			got := toJvmMap(tt.args)
+			r.Equal(tt.exp, got)
+		})
+	}
+}
+
+func Test_toHpaConverters(t *testing.T) {
+	tests := map[string]struct {
+		args []any
+		exp  *[]sdk.WorkloadoptimizationV1HPAConverters
+	}{
+		"should return nil for empty input": {
+			args: []any{},
+			exp:  nil,
+		},
+		"should return hpa converters with AVERAGE_VALUE_FROM_ORIGINAL_REQUESTS type": {
+			args: []any{
+				map[string]any{
+					FieldHpaConverterType: FieldHpaConverterTypeAverageValueFromOriginalRequests,
+				},
+			},
+			exp: &[]sdk.WorkloadoptimizationV1HPAConverters{
+				{Type: sdk.WorkloadoptimizationV1HPAConverterType(FieldHpaConverterTypeAverageValueFromOriginalRequests)},
+			},
+		},
+		"should return multiple hpa converters": {
+			args: []any{
+				map[string]any{FieldHpaConverterType: FieldHpaConverterTypeAverageValueFromOriginalRequests},
+				map[string]any{FieldHpaConverterType: FieldHpaConverterTypeAverageValueFromOriginalRequests},
+			},
+			exp: &[]sdk.WorkloadoptimizationV1HPAConverters{
+				{Type: sdk.WorkloadoptimizationV1HPAConverterType(FieldHpaConverterTypeAverageValueFromOriginalRequests)},
+				{Type: sdk.WorkloadoptimizationV1HPAConverterType(FieldHpaConverterTypeAverageValueFromOriginalRequests)},
+			},
+		},
+		"should skip entries that are not a map[string]any": {
+			args: []any{
+				"not-a-map",
+				map[string]any{FieldHpaConverterType: FieldHpaConverterTypeAverageValueFromOriginalRequests},
+			},
+			exp: &[]sdk.WorkloadoptimizationV1HPAConverters{
+				{Type: sdk.WorkloadoptimizationV1HPAConverterType(FieldHpaConverterTypeAverageValueFromOriginalRequests)},
+			},
+		},
+		"should skip entries where type field is not a string": {
+			args: []any{
+				map[string]any{FieldHpaConverterType: 123},
+				map[string]any{FieldHpaConverterType: FieldHpaConverterTypeAverageValueFromOriginalRequests},
+			},
+			exp: &[]sdk.WorkloadoptimizationV1HPAConverters{
+				{Type: sdk.WorkloadoptimizationV1HPAConverterType(FieldHpaConverterTypeAverageValueFromOriginalRequests)},
+			},
+		},
+		"should return nil when all entries are invalid": {
+			args: []any{
+				"not-a-map",
+				map[string]any{FieldHpaConverterType: 123},
+				map[string]any{"other": "value"},
+			},
+			exp: nil,
+		},
+	}
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			r := require.New(t)
+			got := toHpaConverters(tt.args)
+			r.Equal(tt.exp, got)
+			if tt.exp != nil {
+				r.Len(*got, len(*tt.exp))
+			}
+		})
+	}
+}
+
+func Test_toHpaConvertersMap(t *testing.T) {
+	tests := map[string]struct {
+		args *[]sdk.WorkloadoptimizationV1HPAConverters
+		exp  []map[string]any
+	}{
+		"should return nil for nil input": {
+			args: nil,
+			exp:  nil,
+		},
+		"should return hpa converters map with AVERAGE_VALUE_FROM_ORIGINAL_REQUESTS type": {
+			args: &[]sdk.WorkloadoptimizationV1HPAConverters{
+				{Type: sdk.WorkloadoptimizationV1HPAConverterType(FieldHpaConverterTypeAverageValueFromOriginalRequests)},
+			},
+			exp: []map[string]any{
+				{FieldHpaConverterType: FieldHpaConverterTypeAverageValueFromOriginalRequests},
+			},
+		},
+	}
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			r := require.New(t)
+			got := toHpaConvertersMap(tt.args)
 			r.Equal(tt.exp, got)
 		})
 	}

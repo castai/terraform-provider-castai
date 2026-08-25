@@ -49,40 +49,49 @@ const (
 )
 
 const (
-	FieldLimitStrategy                             = "limit"
-	FieldLimitStrategyType                         = "type"
-	FieldLimitStrategyMultiplier                   = "multiplier"
-	FieldLimitStrategyOnlyIfOriginalExist          = "only_if_original_exist"
-	FieldLimitStrategyOnlyIfOriginalLower          = "only_if_original_lower"
-	FieldConfidence                                = "confidence"
-	FieldExcludedContainers                        = "excluded_containers"
-	FieldRolloutBehavior                           = "rollout_behavior"
-	FieldRolloutBehaviorType                       = "type"
-	FieldRolloutBehaviorNoDisruptionType           = "NO_DISRUPTION"
-	FieldRolloutBehaviorUnspecifiedType            = "UNSPECIFIED"
-	FieldRolloutBehaviorPreferOneByOneType         = "prefer_one_by_one"
-	FieldRolloutBehaviorDelaySeconds               = "delay_seconds"
-	FieldJVM                                       = "jvm"
-	FieldPredictiveScaling                         = "predictive_scaling"
-	FieldMemoryEvent                               = "memory_event"
-	FieldApplyType                                 = "apply_type"
-	FieldConfidenceThreshold                       = "threshold"
-	DeprecatedFieldApplyThreshold                  = "apply_threshold"
-	FieldApplyThresholdStrategy                    = "apply_threshold_strategy"
-	FieldApplyThresholdStrategyType                = "type"
-	FieldApplyThresholdStrategyPercentage          = "percentage"
-	FieldApplyThresholdStrategyNumerator           = "numerator"
-	FieldApplyThresholdStrategyDenominator         = "denominator"
-	FieldApplyThresholdStrategyExponent            = "exponent"
-	FieldApplyThresholdStrategyPercentageType      = "PERCENTAGE"
-	FieldApplyThresholdStrategyDefaultAdaptiveType = "DEFAULT_ADAPTIVE"
-	FieldApplyThresholdStrategyCustomAdaptiveType  = "CUSTOM_ADAPTIVE"
-	FieldAssignmentRules                           = "assignment_rules"
-	FieldAnomalyDetection                          = "anomaly_detection"
-	FieldAnomalyDetectionCpuPressure               = "cpu_pressure"
-	FieldCpuStallThresholdPercentage               = "cpu_stall_threshold_percentage"
-	FieldMinPressuredPodPercentage                 = "min_pressured_pod_percentage"
-	FieldConstraints                               = "constraints"
+	FieldLimitStrategy                                    = "limit"
+	FieldLimitStrategyType                                = "type"
+	FieldLimitStrategyMultiplier                          = "multiplier"
+	FieldLimitStrategyOnlyIfOriginalExist                 = "only_if_original_exist"
+	FieldLimitStrategyOnlyIfOriginalLower                 = "only_if_original_lower"
+	FieldConfidence                                       = "confidence"
+	FieldExcludedContainers                               = "excluded_containers"
+	FieldHpaConverters                                    = "hpa_converters"
+	FieldHpaConverterType                                 = "type"
+	FieldHpaConverterTypeAverageValueFromOriginalRequests = "AVERAGE_VALUE_FROM_ORIGINAL_REQUESTS"
+	FieldRolloutBehavior                                  = "rollout_behavior"
+	FieldRolloutBehaviorType                              = "type"
+	FieldRolloutBehaviorNoDisruptionType                  = "NO_DISRUPTION"
+	FieldRolloutBehaviorUnspecifiedType                   = "UNSPECIFIED"
+	FieldRolloutBehaviorPreferOneByOneType                = "prefer_one_by_one"
+	FieldRolloutBehaviorDelaySeconds                      = "delay_seconds"
+	FieldJVM                                              = "jvm"
+	FieldPredictiveScaling                                = "predictive_scaling"
+	FieldMemoryEvent                                      = "memory_event"
+	FieldApplyType                                        = "apply_type"
+	FieldConfidenceThreshold                              = "threshold"
+	DeprecatedFieldApplyThreshold                         = "apply_threshold"
+	FieldApplyThresholdStrategy                           = "apply_threshold_strategy"
+	FieldApplyThresholdStrategyType                       = "type"
+	FieldApplyThresholdStrategyPercentage                 = "percentage"
+	FieldApplyThresholdStrategyNumerator                  = "numerator"
+	FieldApplyThresholdStrategyDenominator                = "denominator"
+	FieldApplyThresholdStrategyExponent                   = "exponent"
+	FieldApplyThresholdStrategyPercentageType             = "PERCENTAGE"
+	FieldApplyThresholdStrategyDefaultAdaptiveType        = "DEFAULT_ADAPTIVE"
+	FieldApplyThresholdStrategyCustomAdaptiveType         = "CUSTOM_ADAPTIVE"
+	FieldAssignmentRules                                  = "assignment_rules"
+	FieldAnomalyDetection                                 = "anomaly_detection"
+	FieldAnomalyDetectionCpuPressure                      = "cpu_pressure"
+	FieldCpuStallThresholdPercentage                      = "cpu_stall_threshold_percentage"
+	FieldMinPressuredPodPercentage                        = "min_pressured_pod_percentage"
+	FieldConstraints                                      = "constraints"
+
+	FieldStartupTwoPhaseRecommendations                  = "two_phase_recommendations"
+	FieldStartupTwoPhaseRecommendationsEnabled           = "enabled"
+	FieldStartupTwoPhaseRecommendationsRequestsOnStartup = "requests_on_startup"
+	FieldStartupTwoPhaseRecommendationsCpuCores          = "cpu_cores"
+	FieldStartupTwoPhaseRecommendationsMemoryGib         = "memory_gib"
 )
 
 const (
@@ -213,6 +222,21 @@ It can be either:
 				Description: "Defines containers to be excluded from receiving recommendations. The containers are matched by exact name.",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
+			FieldHpaConverters: {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Description: "Configuration for converting existing HPAs when VPA is the sole optimization. If HPA management is enabled, it takes precedence over this setting.",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						FieldHpaConverterType: {
+							Type:             schema.TypeString,
+							Required:         true,
+							Description:      "HPA converter type. AVERAGE_VALUE_FROM_ORIGINAL_REQUESTS converts HPA utilization (%) targets to AverageValue using workload container requests.",
+							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{FieldHpaConverterTypeAverageValueFromOriginalRequests}, false)),
+						},
+					},
+				},
+			},
 			"startup": {
 				Type:     schema.TypeList,
 				Optional: true,
@@ -224,6 +248,41 @@ It can be either:
 							Optional:         true,
 							Description:      "Defines the duration (in seconds) during which elevated resource usage is expected at startup.\nWhen set, recommendations will be adjusted to disregard resource spikes within this period.\nIf not specified, the workload will receive standard recommendations without startup considerations.",
 							ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(120, 3600)),
+						},
+						FieldStartupTwoPhaseRecommendations: {
+							Type:        schema.TypeList,
+							Optional:    true,
+							MaxItems:    1,
+							Description: "Defines two-phase recommendations settings for the startup period.",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									FieldStartupTwoPhaseRecommendationsEnabled: {
+										Type:        schema.TypeBool,
+										Required:    true,
+										Description: "Defines whether two-phase recommendations are enabled during startup.",
+									},
+									FieldStartupTwoPhaseRecommendationsRequestsOnStartup: {
+										Type:        schema.TypeList,
+										Optional:    true,
+										MaxItems:    1,
+										Description: "Defines the resource requests to use during startup.",
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												FieldStartupTwoPhaseRecommendationsCpuCores: {
+													Type:        schema.TypeFloat,
+													Optional:    true,
+													Description: "CPU cores to request during startup.",
+												},
+												FieldStartupTwoPhaseRecommendationsMemoryGib: {
+													Type:        schema.TypeFloat,
+													Optional:    true,
+													Description: "Memory in GiB to request during startup.",
+												},
+											},
+										},
+									},
+								},
+							},
 						},
 					},
 				},
@@ -589,14 +648,24 @@ func workloadScalingPolicyResourceLimitSchema() *schema.Resource {
 				ValidateDiagFunc: validation.ToDiagFunc(validation.FloatAtLeast(minResourceMultiplierValue)),
 			},
 			FieldLimitStrategyOnlyIfOriginalExist: {
-				Type:        schema.TypeBool,
-				Optional:    true,
-				Description: "Apply the strategy only when the original resource has limits defined.",
+				Type:     schema.TypeBool,
+				Optional: true,
+				Description: `When set to true, limits will only be set if the workload originally had limits defined in its manifest. 
+	If the original workload has no limits specified, no limits will be added.
+	
+	This flag allows conditional limit management based on the original workload configuration.
+	
+	Only applicable when the type is set to multiplier.`,
 			},
 			FieldLimitStrategyOnlyIfOriginalLower: {
-				Type:        schema.TypeBool,
-				Optional:    true,
-				Description: "Use the original resource limits if they are higher than recommended values.",
+				Type:     schema.TypeBool,
+				Optional: true,
+				Description: `When set to true, limits will only be updated if the original limits are lower than the calculated value (requests × multiplier). 
+	If the original limits are already higher than the calculated value, they remain unchanged.
+	
+	This flag prevents reducing existing limits and ensures limits only increase when beneficial.
+	
+	Only applicable when the type is set to multiplier.`,
 			},
 		},
 	}
@@ -765,6 +834,8 @@ func resourceWorkloadScalingPolicyCreate(ctx context.Context, d *schema.Resource
 
 	req.RecommendationPolicies.ExcludedContainers = toExcludedContainers(d)
 
+	req.RecommendationPolicies.HpaConverters = toHpaConverters(d.Get(FieldHpaConverters).([]any))
+
 	ar, err := toAssignmentRules(toSection(d, FieldAssignmentRules))
 	if err != nil {
 		return diag.FromErr(err)
@@ -885,6 +956,9 @@ func fetchScalingPolicy(ctx context.Context, d *schema.ResourceData, meta any) (
 	if err := d.Set(FieldExcludedContainers, sp.RecommendationPolicies.ExcludedContainers); err != nil {
 		return nil, fmt.Errorf("setting excluded containers: %w", err)
 	}
+	if err := d.Set(FieldHpaConverters, toHpaConvertersMap(sp.RecommendationPolicies.HpaConverters)); err != nil {
+		return nil, fmt.Errorf("setting hpa converters: %w", err)
+	}
 	if err := d.Set(FieldConfidence, toConfidenceMap(sp.RecommendationPolicies.Confidence)); err != nil {
 		return nil, fmt.Errorf("setting confidence: %w", err)
 	}
@@ -949,6 +1023,7 @@ func updateScalingPolicy(ctx context.Context, d *schema.ResourceData, meta any) 
 		FieldJVM,
 		FieldAnomalyDetection,
 		FieldExcludedContainers,
+		FieldHpaConverters,
 	) {
 		tflog.Info(ctx, "scaling policy up to date")
 		return nil, nil
@@ -987,6 +1062,7 @@ func updateScalingPolicy(ctx context.Context, d *schema.ResourceData, meta any) 
 			Jvm:                toJvm(toSection(d, FieldJVM)),
 			AnomalyDetection:   toAnomalyDetection(toSection(d, FieldAnomalyDetection)),
 			ExcludedContainers: toExcludedContainers(d),
+			HpaConverters:      toHpaConverters(d.Get(FieldHpaConverters).([]any)),
 		},
 	}
 
@@ -1683,7 +1759,40 @@ func toStartup(startup map[string]any) *sdk.WorkloadoptimizationV1StartupSetting
 		result.PeriodSeconds = lo.ToPtr(int32(v))
 	}
 
+	if v, ok := startup[FieldStartupTwoPhaseRecommendations].([]any); ok && len(v) > 0 {
+		if tpr, ok := v[0].(map[string]any); ok && len(tpr) > 0 {
+			result.TwoPhaseRecommendations = toTwoPhaseRecommendations(tpr)
+		}
+	}
+
 	return result
+}
+
+func toTwoPhaseRecommendations(obj map[string]any) *sdk.WorkloadoptimizationV1TwoPhaseRecommendations {
+	out := &sdk.WorkloadoptimizationV1TwoPhaseRecommendations{}
+
+	if v, ok := obj[FieldStartupTwoPhaseRecommendationsEnabled].(bool); ok {
+		out.Enabled = v
+	}
+
+	if v, ok := obj[FieldStartupTwoPhaseRecommendationsRequestsOnStartup].([]any); ok && len(v) > 0 {
+		if rq, ok := v[0].(map[string]any); ok && len(rq) > 0 {
+			out.RequestsOnStartup = toResourceQuantity(rq)
+		}
+	}
+
+	return out
+}
+
+func toResourceQuantity(obj map[string]any) *sdk.WorkloadoptimizationV1ResourceQuantity {
+	out := &sdk.WorkloadoptimizationV1ResourceQuantity{}
+	if v, ok := obj[FieldStartupTwoPhaseRecommendationsCpuCores].(float64); ok {
+		out.CpuCores = lo.ToPtr(v)
+	}
+	if v, ok := obj[FieldStartupTwoPhaseRecommendationsMemoryGib].(float64); ok {
+		out.MemoryGib = lo.ToPtr(v)
+	}
+	return out
 }
 
 func toStartupMap(s *sdk.WorkloadoptimizationV1StartupSettings) []map[string]any {
@@ -1695,6 +1804,46 @@ func toStartupMap(s *sdk.WorkloadoptimizationV1StartupSettings) []map[string]any
 
 	if s.PeriodSeconds != nil {
 		m["period_seconds"] = int(*s.PeriodSeconds)
+	}
+
+	if s.TwoPhaseRecommendations != nil {
+		m[FieldStartupTwoPhaseRecommendations] = toTwoPhaseRecommendationsMap(s.TwoPhaseRecommendations)
+	}
+
+	if len(m) == 0 {
+		return nil
+	}
+
+	return []map[string]any{m}
+}
+
+func toTwoPhaseRecommendationsMap(tpr *sdk.WorkloadoptimizationV1TwoPhaseRecommendations) []map[string]any {
+	if tpr == nil {
+		return nil
+	}
+
+	m := map[string]any{
+		FieldStartupTwoPhaseRecommendationsEnabled: tpr.Enabled,
+	}
+
+	if tpr.RequestsOnStartup != nil {
+		m[FieldStartupTwoPhaseRecommendationsRequestsOnStartup] = toResourceQuantityMap(tpr.RequestsOnStartup)
+	}
+
+	return []map[string]any{m}
+}
+
+func toResourceQuantityMap(rq *sdk.WorkloadoptimizationV1ResourceQuantity) []map[string]any {
+	if rq == nil {
+		return nil
+	}
+
+	m := map[string]any{}
+	if rq.CpuCores != nil {
+		m[FieldStartupTwoPhaseRecommendationsCpuCores] = *rq.CpuCores
+	}
+	if rq.MemoryGib != nil {
+		m[FieldStartupTwoPhaseRecommendationsMemoryGib] = *rq.MemoryGib
 	}
 
 	if len(m) == 0 {
@@ -1798,6 +1947,43 @@ func toAntiAffinityMap(s *sdk.WorkloadoptimizationV1AntiAffinitySettings) []map[
 	}
 
 	return []map[string]any{m}
+}
+
+func toHpaConverters(in []any) *[]sdk.WorkloadoptimizationV1HPAConverters {
+	if len(in) == 0 {
+		return nil
+	}
+	out := make([]sdk.WorkloadoptimizationV1HPAConverters, 0, len(in))
+	for _, v := range in {
+		m, ok := v.(map[string]any)
+		if !ok {
+			continue
+		}
+		converterType, ok := m[FieldHpaConverterType].(string)
+		if !ok {
+			continue
+		}
+		out = append(out, sdk.WorkloadoptimizationV1HPAConverters{
+			Type: sdk.WorkloadoptimizationV1HPAConverterType(converterType),
+		})
+	}
+	if len(out) == 0 {
+		return nil
+	}
+	return &out
+}
+
+func toHpaConvertersMap(s *[]sdk.WorkloadoptimizationV1HPAConverters) []map[string]any {
+	if s == nil || len(*s) == 0 {
+		return nil
+	}
+	result := make([]map[string]any, len(*s))
+	for i, elem := range *s {
+		result[i] = map[string]any{
+			FieldHpaConverterType: string(elem.Type),
+		}
+	}
+	return result
 }
 
 func toPredictiveScalingMap(s *sdk.WorkloadoptimizationV1PredictiveScalingSettings) []map[string]any {

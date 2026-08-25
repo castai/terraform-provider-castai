@@ -116,7 +116,8 @@ func TestNodeTemplateResourceReadContext(t *testing.T) {
 						  }
 						],
 						"cpusPerGpu": 4,
-              			"minGpusPerNode": 2
+              			"minGpusPerNode": 2,
+					    "maxCpu": 96
 					}
 				  ],
 				  "cpuManufacturers": ["INTEL", "AMD"],
@@ -124,6 +125,9 @@ func TestNodeTemplateResourceReadContext(t *testing.T) {
 	              "resourceLimits": {
                     "cpuLimitEnabled": true,
                     "cpuLimitMaxCores": 20
+                  },
+				  "gcp": {
+                    "capacityReservationIds": ["123", "456"]
                   }
 				},
 				"version": "3",
@@ -233,6 +237,7 @@ constraints.0.dedicated_node_affinity.0.affinity.0.values.# = 1
 constraints.0.dedicated_node_affinity.0.affinity.0.values.0 = foo
 constraints.0.dedicated_node_affinity.0.az_name = eu-central-1a
 constraints.0.dedicated_node_affinity.0.cpus_per_gpu = 4
+constraints.0.dedicated_node_affinity.0.max_cpu = 96
 constraints.0.dedicated_node_affinity.0.instance_types.# = 1
 constraints.0.dedicated_node_affinity.0.instance_types.0 = m5.24xlarge
 constraints.0.dedicated_node_affinity.0.min_gpus_per_node = 2
@@ -253,6 +258,10 @@ constraints.0.storage_optimized = false
 constraints.0.storage_optimized_state = enabled
 constraints.0.use_spot_fallbacks = false
 constraints.0.aws.# = 0
+constraints.0.gcp.# = 1
+constraints.0.gcp.0.capacity_reservation_ids.# = 2
+constraints.0.gcp.0.capacity_reservation_ids.0 = 123
+constraints.0.gcp.0.capacity_reservation_ids.1 = 456
 constraints.0.bare_metal = unspecified
 custom_instances_enabled = true
 custom_instances_with_extended_memory_enabled = true
@@ -302,6 +311,7 @@ func Test_flattenNodeAffinity(t *testing.T) {
 				InstanceTypes:  &[]string{"e2"},
 				Name:           lo.ToPtr("linux-only"),
 				CpusPerGpu:     lo.ToPtr(int32(4)),
+				MaxCpu:         lo.ToPtr(int32(96)),
 				MinGpusPerNode: lo.ToPtr(int32(2)),
 			},
 		}
@@ -314,6 +324,7 @@ func Test_flattenNodeAffinity(t *testing.T) {
 				FieldNodeTemplateAzName:         "us-central1-c",
 				FieldNodeTemplateName:           "linux-only",
 				FieldNodeTemplateCpusPerGpu:     int32(4),
+				FieldNodeTemplateMaxCpu:         int32(96),
 				FieldNodeTemplateMinGpusPerNode: int32(2),
 				FieldNodeTemplateAffinityName: []map[string]any{
 					{
@@ -389,6 +400,7 @@ func Test_toTemplateConstraintsDedicatedAffinity(t *testing.T) {
 				FieldNodeTemplateAzName:         "us-central1-c",
 				FieldNodeTemplateInstanceTypes:  []any{"e2"},
 				FieldNodeTemplateCpusPerGpu:     4,
+				FieldNodeTemplateMaxCpu:         96,
 				FieldNodeTemplateMinGpusPerNode: 2,
 			},
 			want: &sdk.NodetemplatesV1TemplateConstraintsDedicatedNodeAffinity{
@@ -396,6 +408,7 @@ func Test_toTemplateConstraintsDedicatedAffinity(t *testing.T) {
 				AzName:         lo.ToPtr("us-central1-c"),
 				InstanceTypes:  &[]string{"e2"},
 				CpusPerGpu:     lo.ToPtr(int32(4)),
+				MaxCpu:         lo.ToPtr(int32(96)),
 				MinGpusPerNode: lo.ToPtr(int32(2)),
 			},
 		},
@@ -1798,6 +1811,87 @@ func Test_toTemplateConstraintsAWSConstraints(t *testing.T) {
 	}
 }
 
+func Test_flattenGCPConstraints(t *testing.T) {
+	tests := []struct {
+		name  string
+		input *sdk.NodetemplatesV1TemplateConstraintsGCPConstraints
+		want  []map[string]any
+	}{
+		{
+			name:  "nil input returns nil",
+			input: nil,
+			want:  nil,
+		},
+		{
+			name:  "empty constraints",
+			input: &sdk.NodetemplatesV1TemplateConstraintsGCPConstraints{},
+			want:  []map[string]any{{}},
+		},
+		{
+			name: "single capacity reservation id",
+			input: &sdk.NodetemplatesV1TemplateConstraintsGCPConstraints{
+				CapacityReservationIds: &[]string{"1234567890"},
+			},
+			want: []map[string]any{{
+				FieldNodeTemplateGCPCapacityReservationIds: []any{"1234567890"},
+			}},
+		},
+		{
+			name: "multiple capacity reservation ids",
+			input: &sdk.NodetemplatesV1TemplateConstraintsGCPConstraints{
+				CapacityReservationIds: &[]string{"1234567890", "9876543210"},
+			},
+			want: []map[string]any{{
+				FieldNodeTemplateGCPCapacityReservationIds: []any{"1234567890", "9876543210"},
+			}},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := flattenGCPConstraints(tt.input)
+			require.Equal(t, tt.want, got)
+		})
+	}
+}
+
+func Test_toTemplateConstraintsGCPConstraints(t *testing.T) {
+	tests := map[string]struct {
+		input map[string]any
+		want  *sdk.NodetemplatesV1TemplateConstraintsGCPConstraints
+	}{
+		"nil input": {
+			input: nil,
+			want:  nil,
+		},
+		"empty constraints": {
+			input: map[string]any{},
+			want:  &sdk.NodetemplatesV1TemplateConstraintsGCPConstraints{},
+		},
+		"single capacity reservation id": {
+			input: map[string]any{
+				FieldNodeTemplateGCPCapacityReservationIds: []any{"1234567890"},
+			},
+			want: &sdk.NodetemplatesV1TemplateConstraintsGCPConstraints{
+				CapacityReservationIds: &[]string{"1234567890"},
+			},
+		},
+		"multiple capacity reservation ids": {
+			input: map[string]any{
+				FieldNodeTemplateGCPCapacityReservationIds: []any{"1234567890", "9876543210"},
+			},
+			want: &sdk.NodetemplatesV1TemplateConstraintsGCPConstraints{
+				CapacityReservationIds: &[]string{"1234567890", "9876543210"},
+			},
+		},
+	}
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			got := toTemplateConstraintsGCPConstraints(tt.input)
+			require.Equal(t, tt.want, got)
+		})
+	}
+}
+
 func Test_toNodeTemplateConstraints_persistsSpotInterruptionPredictionsType(t *testing.T) {
 	tests := map[string]struct {
 		inputType string
@@ -1821,6 +1915,50 @@ func Test_toNodeTemplateConstraints_persistsSpotInterruptionPredictionsType(t *t
 			result := toTemplateConstraints(obj)
 			require.NotNil(t, result.SpotInterruptionPredictionsType)
 			require.Equal(t, tt.wantType, *result.SpotInterruptionPredictionsType)
+		})
+	}
+}
+
+func TestValidateNodeTemplateIsDefault(t *testing.T) {
+	tests := map[string]struct {
+		name      string
+		isDefault bool
+		expectErr bool
+		errSubstr string
+	}{
+		"custom template with is_default=false passes": {
+			name:      "custom-template",
+			isDefault: false,
+			expectErr: false,
+		},
+		"custom template with is_default=true fails": {
+			name:      "custom-template",
+			isDefault: true,
+			expectErr: true,
+			errSubstr: "is_default = true is invalid for node template",
+		},
+		"default-by-castai with is_default=true passes": {
+			name:      "default-by-castai",
+			isDefault: true,
+			expectErr: false,
+		},
+		"default-by-castai with is_default=false fails": {
+			name:      "default-by-castai",
+			isDefault: false,
+			expectErr: true,
+			errSubstr: "is_default = false is invalid for node template",
+		},
+	}
+
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			err := validateNodeTemplateIsDefault(tt.name, tt.isDefault)
+			if tt.expectErr {
+				require.Error(t, err)
+				require.Contains(t, err.Error(), tt.errSubstr)
+			} else {
+				require.NoError(t, err)
+			}
 		})
 	}
 }

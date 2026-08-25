@@ -41,6 +41,11 @@ resource "castai_workload_scaling_policy" "services" {
       }
     }
   }
+
+  hpa_converters {
+    type = "AVERAGE_VALUE_FROM_ORIGINAL_REQUESTS"
+  }
+
   cpu {
     function = "QUANTILE"
     overhead = 0.15
@@ -72,6 +77,13 @@ resource "castai_workload_scaling_policy" "services" {
   }
   startup {
     period_seconds = 240
+    two_phase_recommendations {
+      enabled = true
+      requests_on_startup {
+        cpu_cores  = 0.5
+        memory_gib = 1.5
+      }
+    }
   }
   downscaling {
     apply_type = "DEFERRED"
@@ -127,6 +139,7 @@ resource "castai_workload_scaling_policy" "services" {
 - `confidence` (Block List, Max: 1) Defines the confidence settings for applying recommendations. (see [below for nested schema](#nestedblock--confidence))
 - `downscaling` (Block List, Max: 1) (see [below for nested schema](#nestedblock--downscaling))
 - `excluded_containers` (List of String) Defines containers to be excluded from receiving recommendations. The containers are matched by exact name.
+- `hpa_converters` (Block List) Configuration for converting existing HPAs when VPA is the sole optimization. If HPA management is enabled, it takes precedence over this setting. (see [below for nested schema](#nestedblock--hpa_converters))
 - `jvm` (Block List, Max: 1) JVM optimization settings. (see [below for nested schema](#nestedblock--jvm))
 - `memory_event` (Block List, Max: 1) (see [below for nested schema](#nestedblock--memory_event))
 - `predictive_scaling` (Block List, Max: 1) (see [below for nested schema](#nestedblock--predictive_scaling))
@@ -222,8 +235,18 @@ Required:
 Optional:
 
 - `multiplier` (Number) Multiplier used to calculate the resource limit. It must be defined for the MULTIPLIER strategy.
-- `only_if_original_exist` (Boolean) Apply the strategy only when the original resource has limits defined.
-- `only_if_original_lower` (Boolean) Use the original resource limits if they are higher than recommended values.
+- `only_if_original_exist` (Boolean) When set to true, limits will only be set if the workload originally had limits defined in its manifest. 
+	If the original workload has no limits specified, no limits will be added.
+	
+	This flag allows conditional limit management based on the original workload configuration.
+	
+	Only applicable when the type is set to multiplier.
+- `only_if_original_lower` (Boolean) When set to true, limits will only be updated if the original limits are lower than the calculated value (requests × multiplier). 
+	If the original limits are already higher than the calculated value, they remain unchanged.
+	
+	This flag prevents reducing existing limits and ensures limits only increase when beneficial.
+	
+	Only applicable when the type is set to multiplier.
 
 
 
@@ -306,8 +329,18 @@ Required:
 Optional:
 
 - `multiplier` (Number) Multiplier used to calculate the resource limit. It must be defined for the MULTIPLIER strategy.
-- `only_if_original_exist` (Boolean) Apply the strategy only when the original resource has limits defined.
-- `only_if_original_lower` (Boolean) Use the original resource limits if they are higher than recommended values.
+- `only_if_original_exist` (Boolean) When set to true, limits will only be set if the workload originally had limits defined in its manifest. 
+	If the original workload has no limits specified, no limits will be added.
+	
+	This flag allows conditional limit management based on the original workload configuration.
+	
+	Only applicable when the type is set to multiplier.
+- `only_if_original_lower` (Boolean) When set to true, limits will only be updated if the original limits are lower than the calculated value (requests × multiplier). 
+	If the original limits are already higher than the calculated value, they remain unchanged.
+	
+	This flag prevents reducing existing limits and ensures limits only increase when beneficial.
+	
+	Only applicable when the type is set to multiplier.
 
 
 
@@ -420,6 +453,14 @@ Optional:
 	- DEFERRED - pods are not restarted and recommendation values are applied during natural restarts only (new deployment, etc.)
 
 
+<a id="nestedblock--hpa_converters"></a>
+### Nested Schema for `hpa_converters`
+
+Required:
+
+- `type` (String) HPA converter type. AVERAGE_VALUE_FROM_ORIGINAL_REQUESTS converts HPA utilization (%) targets to AverageValue using workload container requests.
+
+
 <a id="nestedblock--jvm"></a>
 ### Nested Schema for `jvm`
 
@@ -483,6 +524,28 @@ Optional:
 - `period_seconds` (Number) Defines the duration (in seconds) during which elevated resource usage is expected at startup.
 When set, recommendations will be adjusted to disregard resource spikes within this period.
 If not specified, the workload will receive standard recommendations without startup considerations.
+- `two_phase_recommendations` (Block List, Max: 1) Defines two-phase recommendations settings for the startup period. (see [below for nested schema](#nestedblock--startup--two_phase_recommendations))
+
+<a id="nestedblock--startup--two_phase_recommendations"></a>
+### Nested Schema for `startup.two_phase_recommendations`
+
+Required:
+
+- `enabled` (Boolean) Defines whether two-phase recommendations are enabled during startup.
+
+Optional:
+
+- `requests_on_startup` (Block List, Max: 1) Defines the resource requests to use during startup. (see [below for nested schema](#nestedblock--startup--two_phase_recommendations--requests_on_startup))
+
+<a id="nestedblock--startup--two_phase_recommendations--requests_on_startup"></a>
+### Nested Schema for `startup.two_phase_recommendations.requests_on_startup`
+
+Optional:
+
+- `cpu_cores` (Number) CPU cores to request during startup.
+- `memory_gib` (Number) Memory in GiB to request during startup.
+
+
 
 
 <a id="nestedblock--timeouts"></a>
@@ -494,6 +557,73 @@ Optional:
 - `delete` (String)
 - `read` (String)
 - `update` (String)
+
+## Resource limit mapping
+
+The CAST AI console exposes simplified options such as **Automatic** and **Semi-automatic**. Terraform does not provide these labels directly. Instead, the same behavior is configured by explicitly setting the `limit` block or omitting it.
+
+Use the Terraform attributes `only_if_original_exist` and `only_if_original_lower` inside the `limit` block when configuring conditional limit updates.
+
+### CPU: Semi-automatic
+
+To configure **CPU: Semi-automatic**, define an explicit multiplier and enable both conditional flags:
+
+```terraform
+cpu {
+  function                 = "QUANTILE"
+  args                     = ["0.9"]
+  look_back_period_seconds = 86400
+  min                      = 0.1
+  max                      = 6
+  overhead                 = 0.1
+
+  limit {
+    type                   = "MULTIPLIER"
+    multiplier             = 100
+    only_if_original_exist = true
+    only_if_original_lower = true
+  }
+}
+```
+
+This configuration updates an existing CPU limit only when it is lower than `100` times the recommended request. Workloads without an existing CPU limit are left unchanged.
+
+### Memory: Automatic
+
+To configure **Memory: Automatic**, you can either:
+
+- Omit the `memory.limit` block:
+ 
+   ```terraform
+   memory {
+     function                 = "MAX"
+     look_back_period_seconds = 86400
+     min                      = 1024
+     max                      = 15360
+     overhead                 = 0.1
+   }
+   ```
+
+- Or configure it explicitly using the default multiplier and conditional flags:
+
+   ```terraform
+   memory {
+     function                 = "MAX"
+     look_back_period_seconds = 86400
+     min                      = 1024
+     max                      = 15360
+     overhead                 = 0.1
+   
+     limit {
+       type                   = "MULTIPLIER"
+       multiplier             = 1.5
+       only_if_original_exist = true
+       only_if_original_lower = true
+     }
+   }
+   ```
+
+Both configurations result in the same **Automatic** behavior shown in the CAST AI console. The second form makes the underlying behavior explicit: update an existing memory limit only when it is lower than `1.5` times the recommended request, while leaving workloads without an existing memory limit unchanged.
 
 ## Importing
 

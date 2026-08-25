@@ -100,6 +100,8 @@ const (
 	FieldNodeTemplateCapacityReservationId                    = "id"
 	FieldNodeTemplateCapacityResourceGroupArn                 = "capacity_resource_group_arn"
 	FieldNodeTemplateCapacityReservationType                  = "type"
+	FieldNodeTemplateGCPConstraints                           = "gcp"
+	FieldNodeTemplateGCPCapacityReservationIds                = "capacity_reservation_ids"
 )
 
 const (
@@ -155,6 +157,29 @@ func (m nodeSelectorOperatorsSlice) Get(k sdk.K8sSelectorV1Operator) (string, bo
 	return "", false
 }
 
+func resourceNodeTemplateCustomizeDiff(_ context.Context, d *schema.ResourceDiff, _ any) error {
+	name := d.Get(FieldNodeTemplateName).(string)
+	isDefault, isDefaultSet := d.GetOk(FieldNodeTemplateIsDefault)
+	if !isDefaultSet {
+		return nil
+	}
+	return validateNodeTemplateIsDefault(name, isDefault.(bool))
+}
+
+func validateNodeTemplateIsDefault(name string, isDefault bool) error {
+	expected := name == "default-by-castai"
+	if isDefault != expected {
+		return fmt.Errorf(
+			"is_default = %t is invalid for node template %q: it must be %t. "+
+				"The default node template is always 'default-by-castai' - this flag is "+
+				"derived from the template name and cannot be set independently. "+
+				"Remove it from your config; it is computed",
+			isDefault, name, expected,
+		)
+	}
+	return nil
+}
+
 func resourceNodeTemplate() *schema.Resource {
 	supportedArchitectures := []string{ArchAMD64, ArchARM64}
 	supportedOs := []string{OsLinux, OsWindows}
@@ -175,7 +200,8 @@ func resourceNodeTemplate() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: nodeTemplateStateImporter,
 		},
-		Description: "CAST AI node template resource to manage node templates",
+		CustomizeDiff: resourceNodeTemplateCustomizeDiff,
+		Description:   "CAST AI node template resource to manage node templates",
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(1 * time.Minute),
@@ -209,6 +235,7 @@ func resourceNodeTemplate() *schema.Resource {
 				Optional:    true,
 				Default:     nil,
 				Computed:    true,
+				Deprecated:  "is_default is derived from the template name ('default-by-castai' => true, otherwise false) and cannot be set independently. Remove it from your config; it will be removed as a user-settable field in a future release.",
 				Description: "Flag whether the node template is default. It's is always set to 'true' on 'default-by-castai' node template and 'false' otherwise.",
 			},
 			FieldNodeTemplateConfigurationId: {
@@ -576,6 +603,11 @@ func resourceNodeTemplate() *schema.Resource {
 										Type:        schema.TypeInt,
 										Description: "Number of CPUs per GPU on the node.",
 									},
+									FieldNodeTemplateMaxCpu: {
+										Optional:    true,
+										Type:        schema.TypeInt,
+										Description: "Maximum number of CPUs that can be provisioned from this dedicated node affinity across all nodes for the specific node template. If not set, no CPU cap is applied. If cpus_per_gpu is set, max_cpu must be a multiple of cpus_per_gpu.",
+									},
 									FieldNodeTemplateMinGpusPerNode: {
 										Optional:    true,
 										Type:        schema.TypeInt,
@@ -680,6 +712,24 @@ func resourceNodeTemplate() *schema.Resource {
 								},
 							},
 							Description: "AWS-specific constraints for the node template.",
+						},
+						FieldNodeTemplateGCPConstraints: {
+							Type:     schema.TypeList,
+							MaxItems: 1,
+							Optional: true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									FieldNodeTemplateGCPCapacityReservationIds: {
+										Type:     schema.TypeList,
+										Optional: true,
+										Elem: &schema.Schema{
+											Type: schema.TypeString,
+										},
+										Description: "GCP capacity reservation IDs (numeric) that this template is allowed to use.",
+									},
+								},
+							},
+							Description: "GCP-specific constraints for the node template.",
 						},
 					},
 				},
@@ -1122,6 +1172,9 @@ func flattenConstraints(c *sdk.NodetemplatesV1TemplateConstraints) ([]map[string
 	if c.Aws != nil {
 		out[FieldNodeTemplateAWSConstraints] = flattenAWSConstraints(c.Aws)
 	}
+	if c.Gcp != nil {
+		out[FieldNodeTemplateGCPConstraints] = flattenGCPConstraints(c.Gcp)
+	}
 	if c.BareMetal != nil {
 		if lo.FromPtr(c.BareMetal) {
 			out[FieldNodeTemplateBareMetal] = True
@@ -1208,6 +1261,21 @@ func flattenAWSConstraints(aws *sdk.NodetemplatesV1TemplateConstraintsAWSConstra
 	return []map[string]any{out}
 }
 
+func flattenGCPConstraints(gcp *sdk.NodetemplatesV1TemplateConstraintsGCPConstraints) []map[string]any {
+	if gcp == nil {
+		return nil
+	}
+	out := map[string]any{}
+	if gcp.CapacityReservationIds != nil {
+		ids := make([]any, len(*gcp.CapacityReservationIds))
+		for i, id := range *gcp.CapacityReservationIds {
+			ids[i] = id
+		}
+		out[FieldNodeTemplateGCPCapacityReservationIds] = ids
+	}
+	return []map[string]any{out}
+}
+
 func flattenGpu(gpu *sdk.NodetemplatesV1TemplateConstraintsGPUConstraints) []map[string]any {
 	if gpu == nil {
 		return nil
@@ -1259,6 +1327,9 @@ func flattenNodeAffinity(affinities []sdk.NodetemplatesV1TemplateConstraintsDedi
 
 		if item.CpusPerGpu != nil {
 			result[FieldNodeTemplateCpusPerGpu] = lo.FromPtr(item.CpusPerGpu)
+		}
+		if item.MaxCpu != nil {
+			result[FieldNodeTemplateMaxCpu] = lo.FromPtr(item.MaxCpu)
 		}
 		if item.MinGpusPerNode != nil {
 			result[FieldNodeTemplateMinGpusPerNode] = lo.FromPtr(item.MinGpusPerNode)
@@ -1834,6 +1905,11 @@ func toTemplateConstraints(obj map[string]any) *sdk.NodetemplatesV1TemplateConst
 			out.Aws = toTemplateConstraintsAWSConstraints(val)
 		}
 	}
+	if v, ok := obj[FieldNodeTemplateGCPConstraints].([]any); ok && len(v) > 0 {
+		if val, ok := v[0].(map[string]any); ok {
+			out.Gcp = toTemplateConstraintsGCPConstraints(val)
+		}
+	}
 
 	if v, ok := obj[FieldNodeTemplateBareMetal].(string); ok {
 		switch v {
@@ -1983,6 +2059,18 @@ func toTemplateConstraintsAWSConstraints(o map[string]any) *sdk.NodetemplatesV1T
 	return out
 }
 
+func toTemplateConstraintsGCPConstraints(o map[string]any) *sdk.NodetemplatesV1TemplateConstraintsGCPConstraints {
+	if o == nil {
+		return nil
+	}
+	out := &sdk.NodetemplatesV1TemplateConstraintsGCPConstraints{}
+	if v, ok := o[FieldNodeTemplateGCPCapacityReservationIds].([]any); ok && len(v) > 0 {
+		ids := toStringList(v)
+		out.CapacityReservationIds = &ids
+	}
+	return out
+}
+
 func toTemplateConstraintsGpuConstraints(o map[string]any) *sdk.NodetemplatesV1TemplateConstraintsGPUConstraints {
 	if o == nil {
 		return nil
@@ -2073,6 +2161,9 @@ func toTemplateConstraintsNodeAffinity(o map[string]any) *sdk.NodetemplatesV1Tem
 	}
 	if v, ok := o[FieldNodeTemplateCpusPerGpu].(int); ok && v != 0 {
 		out.CpusPerGpu = toPtr(int32(v))
+	}
+	if v, ok := o[FieldNodeTemplateMaxCpu].(int); ok && v != 0 {
+		out.MaxCpu = toPtr(int32(v))
 	}
 	if v, ok := o[FieldNodeTemplateMinGpusPerNode].(int); ok && v != 0 {
 		out.MinGpusPerNode = toPtr(int32(v))

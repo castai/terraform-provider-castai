@@ -16,6 +16,7 @@ import (
 	"github.com/castai/terraform-provider-castai/castai/sdk/cluster_autoscaler"
 	omnisdk "github.com/castai/terraform-provider-castai/castai/sdk/omni"
 	"github.com/castai/terraform-provider-castai/castai/sdk/organization_management"
+	"github.com/castai/terraform-provider-castai/castai/sdk/pricing"
 )
 
 var _ tfprovider.Provider = (*frameworkProvider)(nil)
@@ -125,6 +126,12 @@ func (p *frameworkProvider) Configure(ctx context.Context, req tfprovider.Config
 		return
 	}
 
+	pricingClient, err := pricing.CreateClient(apiURL, apiToken, agent)
+	if err != nil {
+		resp.Diagnostics.AddError("Failed to create pricing client", err.Error())
+		return
+	}
+
 	organizationID := config.OrganizationID.ValueString()
 	if organizationID == "" {
 		organizationID = os.Getenv("CASTAI_ORGANIZATION_ID")
@@ -136,6 +143,7 @@ func (p *frameworkProvider) Configure(ctx context.Context, req tfprovider.Config
 		organizationManagementClient: organizationManagementClient,
 		omniAPI:                      omniClient,
 		aiOptimizerClient:            aiOptimizerClient,
+		pricingClient:                pricingClient,
 		organizationID:               organizationID,
 	}
 
@@ -149,6 +157,7 @@ func (p *frameworkProvider) Resources(_ context.Context) []func() resource.Resou
 		newOmniClusterResource,
 		newEdgeConfigurationResource,
 		newEdgeConfigurationDefaultResource,
+		newCommitmentResource,
 	}
 }
 

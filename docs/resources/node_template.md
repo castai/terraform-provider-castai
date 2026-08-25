@@ -86,7 +86,7 @@ resource "castai_node_template" "default_by_castai" {
 - `custom_taints` (Block List) Custom taints to be added to the nodes created from this template. `shouldTaint` has to be `true` in order to create/update the node template with custom taints. If `shouldTaint` is `true`, but no custom taints are provided, the nodes will be tainted with the default node template taint. (see [below for nested schema](#nestedblock--custom_taints))
 - `edge_location_ids` (List of String) List of edge location IDs to associate with this node template. Must be valid UUIDs referencing castai_edge_location resources.
 - `gpu` (Block List, Max: 1) GPU configuration. (see [below for nested schema](#nestedblock--gpu))
-- `is_default` (Boolean) Flag whether the node template is default. It's is always set to 'true' on 'default-by-castai' node template and 'false' otherwise.
+- `is_default` (Boolean, Deprecated) Flag whether the node template is default. It's is always set to 'true' on 'default-by-castai' node template and 'false' otherwise.
 - `is_enabled` (Boolean) Flag whether the node template is enabled and considered for autoscaling.
 - `price_adjustment_configuration` (Block List, Max: 1) Configuration for adjusting instance type prices during autoscaling. Adjustments only affect placement decisions, not cost reporting. (see [below for nested schema](#nestedblock--price_adjustment_configuration))
 - `rebalancing_config_min_nodes` (Number) Minimum nodes that will be kept when rebalancing nodes using this node template.
@@ -121,6 +121,7 @@ Optional:
  the sole tenancy or dedicated node (example: setting min CPU to 16). (see [below for nested schema](#nestedblock--constraints--dedicated_node_affinity))
 - `enable_spot_diversity` (Boolean) Enable/disable spot diversity policy. When enabled, autoscaler will try to balance between diverse and cost optimal instance types.
 - `fallback_restore_rate_seconds` (Number) Fallback restore rate in seconds: defines how much time should pass before spot fallback should be attempted to be restored to real spot.
+- `gcp` (Block List, Max: 1) GCP-specific constraints for the node template. (see [below for nested schema](#nestedblock--constraints--gcp))
 - `gpu` (Block List, Max: 1) (see [below for nested schema](#nestedblock--constraints--gpu))
 - `instance_families` (Block List, Max: 1) (see [below for nested schema](#nestedblock--constraints--instance_families))
 - `is_gpu_only` (Boolean) GPU instance constraint - will only pick nodes with GPU if true
@@ -183,6 +184,7 @@ Optional:
 
 - `affinity` (Block List) (see [below for nested schema](#nestedblock--constraints--dedicated_node_affinity--affinity))
 - `cpus_per_gpu` (Number) Number of CPUs per GPU on the node.
+- `max_cpu` (Number) Maximum number of CPUs that can be provisioned from this dedicated node affinity across all nodes for the specific node template. If not set, no CPU cap is applied. If cpus_per_gpu is set, max_cpu must be a multiple of cpus_per_gpu.
 - `min_gpus_per_node` (Number) Minimal number of GPUs per node.
 
 <a id="nestedblock--constraints--dedicated_node_affinity--affinity"></a>
@@ -194,6 +196,14 @@ Required:
 - `operator` (String) Operator of the node affinity selector. Allowed values: In, NotIn, Exists, DoesNotExist, Gt, Lt.
 - `values` (List of String) Values of the node affinity selector.
 
+
+
+<a id="nestedblock--constraints--gcp"></a>
+### Nested Schema for `constraints.gcp`
+
+Optional:
+
+- `capacity_reservation_ids` (List of String) GCP capacity reservation IDs (numeric) that this template is allowed to use.
 
 
 <a id="nestedblock--constraints--gpu"></a>
