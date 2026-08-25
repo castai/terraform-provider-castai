@@ -258,6 +258,11 @@ func resourceCastaiEvictorRead(ctx context.Context, data *schema.ResourceData, m
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("getting evictor config for cluster %s: %w", clusterId, err))
 	}
+	if resp.StatusCode() == http.StatusNotFound {
+		log.Printf("[INFO] Evictor config for cluster %s not found, removing from state", clusterId)
+		data.SetId("")
+		return nil
+	}
 	if resp.StatusCode() != http.StatusOK {
 		return diag.FromErr(fmt.Errorf("getting evictor config for cluster %s: expected status code %d, received: status=%d body=%s", clusterId, http.StatusOK, resp.StatusCode(), string(resp.Body)))
 	}

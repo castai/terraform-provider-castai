@@ -172,6 +172,11 @@ func resourceAutoscalerPoliciesRead(ctx context.Context, data *schema.ResourceDa
 	if err != nil {
 		return diag.FromErr(err)
 	}
+	if resp.StatusCode() == http.StatusNotFound {
+		log.Printf("[INFO] Autoscaler policies for cluster %s not found, removing from state", clusterId)
+		data.SetId("")
+		return nil
+	}
 	if resp.StatusCode() != http.StatusOK {
 		return diag.FromErr(fmt.Errorf("expected status code %d, received: status=%d body=%s", http.StatusOK, resp.StatusCode(), string(resp.Body)))
 	}

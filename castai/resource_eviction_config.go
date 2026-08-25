@@ -242,8 +242,11 @@ func upsertEvictionConfigs(ctx context.Context, data *schema.ResourceData, meta 
 		log.Printf("[ERROR] Failed to upsert evictor advanced config: %v", err)
 		return err
 	}
+	if resp.StatusCode() != http.StatusOK {
+		return fmt.Errorf("failed to upsert evictor advanced config, expected status code %d, received: status=%d body=%s", http.StatusOK, resp.StatusCode(), string(resp.Body))
+	}
 	if resp.JSON200 == nil {
-		return fmt.Errorf("failed to upsert evictor advanced config, status code: %d", resp.StatusCode())
+		return fmt.Errorf("received empty evictor advanced config response for cluster %s", clusterId)
 	}
 	err = data.Set(FieldEvictorAdvancedConfig, flattenEvictionConfig(resp.JSON200.EvictionConfig))
 	if err != nil {
