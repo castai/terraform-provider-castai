@@ -15,6 +15,10 @@ resource "azurerm_kubernetes_cluster" "this" {
     vnet_subnet_id = azurerm_subnet.internal.id
   }
 
+  node_provisioning_profile {
+    default_node_pools = "Auto"
+  }
+
   network_profile {
     network_plugin = var.cluster_network_plugin
   }
