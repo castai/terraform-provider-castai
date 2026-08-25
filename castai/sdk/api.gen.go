@@ -403,6 +403,7 @@ const (
 	PhaseOneOnboarding DboV1RegistrationType = "PhaseOneOnboarding"
 	UninstallCache     DboV1RegistrationType = "UninstallCache"
 	UninstallDBAgent   DboV1RegistrationType = "UninstallDBAgent"
+	UninstallDBO       DboV1RegistrationType = "UninstallDBO"
 )
 
 // Defines values for DboV1RuleType.
@@ -5714,6 +5715,7 @@ type DboV1Registration struct {
 	Type             *DboV1RegistrationType       `json:"type,omitempty"`
 	UninstallCache   *DboV1UninstallCacheParams   `json:"uninstallCache,omitempty"`
 	UninstallDbAgent *DboV1UninstallDBAgentParams `json:"uninstallDbAgent,omitempty"`
+	UninstallDbo     *DboV1UninstallDBOParams     `json:"uninstallDbo,omitempty"`
 }
 
 // DboV1RegistrationStatus - InProgress: Arbitrary number of InProgress states can be emitted
@@ -5776,6 +5778,11 @@ type DboV1UninstallCacheParams struct {
 // DboV1UninstallDBAgentParams defines model for dbo.v1.UninstallDBAgentParams.
 type DboV1UninstallDBAgentParams struct {
 	CacheGroupId string `json:"cacheGroupId"`
+}
+
+// DboV1UninstallDBOParams defines model for dbo.v1.UninstallDBOParams.
+type DboV1UninstallDBOParams struct {
+	DatabaseInstanceId string `json:"databaseInstanceId"`
 }
 
 // ExternalclusterV1AKSClusterParams AKSClusterParams defines AKS-specific arguments.
@@ -12843,6 +12850,9 @@ type ServiceAccountsAPIListServiceAccountsParams struct {
 	// PageCursor Cursor that defines token indicating where to start the next page.
 	// Empty value indicates to start from beginning of the dataset.
 	PageCursor *string `form:"page.cursor,omitempty" json:"page.cursor,omitempty"`
+
+	// ServiceAccountName Service account name filter.
+	ServiceAccountName *string `form:"serviceAccountName,omitempty" json:"serviceAccountName,omitempty"`
 }
 
 // ServiceAccountsAPIListOrganizationServiceAccountKeysParams defines parameters for ServiceAccountsAPIListOrganizationServiceAccountKeys.
