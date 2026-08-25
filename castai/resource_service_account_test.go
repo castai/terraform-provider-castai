@@ -209,7 +209,7 @@ func TestServiceAccount_CreateContext(t *testing.T) {
 
 		mockClient.EXPECT().
 			ServiceAccountsAPICreateServiceAccount(gomock.Any(), organizationID, gomock.Any()).
-			DoAndReturn(func(_ context.Context, orgID string, req sdk.ServiceAccountsAPICreateServiceAccountJSONRequestBody) (*http.Response, error) {
+			DoAndReturn(func(_ context.Context, orgID string, req sdk.ServiceAccountsAPICreateServiceAccountJSONRequestBody, _ ...sdk.RequestEditorFn) (*http.Response, error) {
 				r.Equal(organizationID, orgID)
 				r.Equal(name, req.Name)
 				r.Equal(description, *req.Description)
@@ -232,7 +232,7 @@ func TestServiceAccount_CreateContext(t *testing.T) {
 			})
 		mockClient.EXPECT().
 			ServiceAccountsAPIGetServiceAccount(gomock.Any(), organizationID, serviceAccountID).
-			DoAndReturn(func(_ context.Context, orgID string, serviceAccountID string) (*http.Response, error) {
+			DoAndReturn(func(_ context.Context, orgID string, serviceAccountID string, _ ...sdk.RequestEditorFn) (*http.Response, error) {
 				resp := &sdk.CastaiServiceaccountsV1beta1GetServiceAccountResponse{
 					ServiceAccount: sdk.CastaiServiceaccountsV1beta1ServiceAccount{
 						Id:          &serviceAccountID,

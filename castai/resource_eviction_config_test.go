@@ -205,7 +205,7 @@ func TestEvictionConfig_CreateContext(t *testing.T) {
 	data := resource.Data(state)
 
 	mockClient.EXPECT().EvictorAPIUpsertAdvancedConfigWithBody(gomock.Any(), clusterId, "application/json", gomock.Any()).
-		DoAndReturn(func(ctx context.Context, clusterId string, contentType string, body io.Reader) (*http.Response, error) {
+		DoAndReturn(func(ctx context.Context, clusterId string, contentType string, body io.Reader, _ ...sdk.RequestEditorFn) (*http.Response, error) {
 
 			got, _ := io.ReadAll(body)
 			expected := []byte(evictionConfigResponse)
@@ -291,7 +291,7 @@ func TestEvictionConfig_CreateContext_ReplicasMin(t *testing.T) {
 	data := resource.Data(state)
 
 	mockClient.EXPECT().EvictorAPIUpsertAdvancedConfigWithBody(gomock.Any(), clusterId, "application/json", gomock.Any()).
-		DoAndReturn(func(ctx context.Context, clusterId string, contentType string, body io.Reader) (*http.Response, error) {
+		DoAndReturn(func(ctx context.Context, clusterId string, contentType string, body io.Reader, _ ...sdk.RequestEditorFn) (*http.Response, error) {
 
 			got, _ := io.ReadAll(body)
 			expected := []byte(evictionConfigResponse)
@@ -428,7 +428,7 @@ func TestEvictionConfig_UpdateContext(t *testing.T) {
 	r.False(result.HasError())
 
 	mockClient.EXPECT().EvictorAPIUpsertAdvancedConfigWithBody(gomock.Any(), clusterId, "application/json", gomock.Any()).
-		DoAndReturn(func(ctx context.Context, clusterId string, contentType string, body io.Reader) (*http.Response, error) {
+		DoAndReturn(func(ctx context.Context, clusterId string, contentType string, body io.Reader, _ ...sdk.RequestEditorFn) (*http.Response, error) {
 			got, _ := io.ReadAll(body)
 			expected := []byte(evictionConfigJson)
 
@@ -489,7 +489,7 @@ func TestEvictionConfig_DeleteContext(t *testing.T) {
 	data := resource.Data(state)
 
 	mockClient.EXPECT().EvictorAPIUpsertAdvancedConfigWithBody(gomock.Any(), clusterId, "application/json", gomock.Any()).
-		DoAndReturn(func(ctx context.Context, clusterId string, contentType string, body io.Reader) (*http.Response, error) {
+		DoAndReturn(func(ctx context.Context, clusterId string, contentType string, body io.Reader, _ ...sdk.RequestEditorFn) (*http.Response, error) {
 			return &http.Response{
 				StatusCode: 200,
 				Header:     map[string][]string{"Content-Type": {"json"}},

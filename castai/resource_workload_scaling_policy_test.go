@@ -1882,13 +1882,13 @@ func Test_resourceWorkloadScalingPolicyCreate(t *testing.T) {
 
 				mockClient.EXPECT().
 					WorkloadOptimizationAPICreateWorkloadScalingPolicy(gomock.Any(), clusterId, gomock.Any()).
-					DoAndReturn(func(_ context.Context, cID string, req sdk.WorkloadOptimizationAPICreateWorkloadScalingPolicyJSONRequestBody) (*http.Response, error) {
+					DoAndReturn(func(_ context.Context, cID string, req sdk.WorkloadOptimizationAPICreateWorkloadScalingPolicyJSONRequestBody, _ ...sdk.RequestEditorFn) (*http.Response, error) {
 						r.Equal(clusterId, cID)
 						return toResponse(r, policy, http.StatusOK)
 					})
 				mockClient.EXPECT().
 					WorkloadOptimizationAPIGetWorkloadScalingPolicy(gomock.Any(), clusterId, policyId).
-					DoAndReturn(func(_ context.Context, cID string, pID string) (*http.Response, error) {
+					DoAndReturn(func(_ context.Context, cID string, pID string, _ ...sdk.RequestEditorFn) (*http.Response, error) {
 						r.Equal(clusterId, cID)
 						r.Equal(policyId, pID)
 						return toResponse(r, policy, http.StatusOK)
@@ -1915,7 +1915,7 @@ func Test_resourceWorkloadScalingPolicyCreate(t *testing.T) {
 				cnt := 0
 				mockClient.EXPECT().
 					WorkloadOptimizationAPICreateWorkloadScalingPolicy(gomock.Any(), clusterId, gomock.Any()).
-					DoAndReturn(func(_ context.Context, cID string, req sdk.WorkloadOptimizationAPICreateWorkloadScalingPolicyJSONRequestBody) (*http.Response, error) {
+					DoAndReturn(func(_ context.Context, cID string, req sdk.WorkloadOptimizationAPICreateWorkloadScalingPolicyJSONRequestBody, _ ...sdk.RequestEditorFn) (*http.Response, error) {
 						r.Equal(clusterId, cID)
 						cnt++
 						if cnt < 2 {
@@ -1925,7 +1925,7 @@ func Test_resourceWorkloadScalingPolicyCreate(t *testing.T) {
 					}).Times(2)
 				mockClient.EXPECT().
 					WorkloadOptimizationAPIGetWorkloadScalingPolicy(gomock.Any(), clusterId, policyId).
-					DoAndReturn(func(_ context.Context, cID string, pID string) (*http.Response, error) {
+					DoAndReturn(func(_ context.Context, cID string, pID string, _ ...sdk.RequestEditorFn) (*http.Response, error) {
 						r.Equal(clusterId, cID)
 						r.Equal(policyId, pID)
 						return toResponse(r, policy, http.StatusOK)
@@ -1942,7 +1942,7 @@ func Test_resourceWorkloadScalingPolicyCreate(t *testing.T) {
 			setup: func(r *require.Assertions, mockClient *mock_sdk.MockClientInterface) {
 				mockClient.EXPECT().
 					WorkloadOptimizationAPICreateWorkloadScalingPolicy(gomock.Any(), clusterId, gomock.Any()).
-					DoAndReturn(func(_ context.Context, cID string, req sdk.WorkloadOptimizationAPICreateWorkloadScalingPolicyJSONRequestBody) (*http.Response, error) {
+					DoAndReturn(func(_ context.Context, cID string, req sdk.WorkloadOptimizationAPICreateWorkloadScalingPolicyJSONRequestBody, _ ...sdk.RequestEditorFn) (*http.Response, error) {
 						r.Equal(clusterId, cID)
 						return toResponse(r, nil, http.StatusBadRequest)
 					})
