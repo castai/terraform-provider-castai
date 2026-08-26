@@ -28,6 +28,7 @@ Manage CAST AI Edge Configuration for edge computing deployments
 - `cri` (Attributes) CRI (Container Runtime Interface) configuration for the edge node. Set this when you want kubelet to connect to a container runtime you have set up explicitly on the node. Currently only containerd is officially supported. (see [below for nested schema](#nestedatt--cri))
 - `custom` (Attributes) Custom cloud specific configuration (see [below for nested schema](#nestedatt--custom))
 - `gcp` (Attributes) GCP specific configuration (see [below for nested schema](#nestedatt--gcp))
+- `nebius` (Attributes) Nebius specific configuration (see [below for nested schema](#nestedatt--nebius))
 - `oci` (Attributes) OCI specific configuration (see [below for nested schema](#nestedatt--oci))
 - `user_data_base64` (String) Base64 encoded user data to run on the edge as part of bootstrap. The payload must start with either `#cloud-config` (cloud-init YAML) or `#!` (shell script with a shebang)
 
@@ -69,6 +70,16 @@ Optional:
 
 - `boot_disk_size_gib` (Number) Boot disk size in GiB
 - `image_id` (String) Exact image ID (for example 'projects/castai-public-339919/global/images/ubuntu-2404-lts-amd64-cuda') or image family (for example `projects/ubuntu-os-cloud/global/images/family/ubuntu-2404-lts-amd64`) to be used for edge creation
+- `labels` (Map of String) Instance/VM labels
+
+
+<a id="nestedatt--nebius"></a>
+### Nested Schema for `nebius`
+
+Optional:
+
+- `boot_disk_size_gib` (Number) Boot disk size in GiB
+- `image_id` (String) ImageID to be used for edge creation. It can be an image ID or a name filter
 - `labels` (Map of String) Instance/VM labels
 
 

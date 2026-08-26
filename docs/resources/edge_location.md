@@ -115,6 +115,7 @@ resource "castai_edge_location" "aws_example_no_addons" {
 - `custom` (Attributes) Custom cloud provider configuration for the edge location (see [below for nested schema](#nestedatt--custom))
 - `description` (String) Description of the edge location
 - `gcp` (Attributes) GCP configuration for the edge location (see [below for nested schema](#nestedatt--gcp))
+- `nebius` (Attributes) Nebius configuration for the edge location (see [below for nested schema](#nestedatt--nebius))
 - `networking` (Attributes) Edge cluster networking configuration. (see [below for nested schema](#nestedatt--networking))
 - `oci` (Attributes) OCI configuration for the edge location (see [below for nested schema](#nestedatt--oci))
 - `region` (String) The region where the edge location is deployed. Required for AWS, GCP and OCI providers.
@@ -186,6 +187,22 @@ Optional:
 - `instance_service_account` (String) GCP service account email to be attached to edge instances. It can be used to grant permissions to access other GCP resources.
 - `subnet_cidr` (String) VPC Subnet IPv4 CIDR block
 - `target_service_account_email` (String) Target service account email to be used for impersonation
+
+
+<a id="nestedatt--nebius"></a>
+### Nested Schema for `nebius`
+
+Required:
+
+- `network_id` (String) The ID of the VPC network to be used in the selected region
+- `parent_id` (String) Nebius project ID that owns the edge location resources
+- `service_account_id` (String) Nebius service account ID to be impersonated by CAST AI
+- `subnet_id` (String) The ID of the subnet to be used in the selected region
+
+Optional:
+
+- `security_group_id` (String) The ID of the security group to be used in the selected region
+- `subnet_cidr` (String) The IPv4 CIDR block of the subnet
 
 
 <a id="nestedatt--networking"></a>
