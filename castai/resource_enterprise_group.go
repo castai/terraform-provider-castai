@@ -322,10 +322,19 @@ func buildBatchCreateRequest(
 				return scope
 			})
 
+			var childOrganizationId *string
+
+			if groupWithRBs.Group.OrganizationID == enterpriseID && len(scopes) > 0 {
+				if scopes[0].Organization != nil {
+					childOrganizationId = lo.ToPtr(scopes[0].Organization.Id)
+				}
+			}
+
 			return organization_management.BatchCreateEnterpriseGroupsRequestRoleBinding{
-				Name:   rb.Name,
-				RoleId: rb.RoleID,
-				Scopes: scopes,
+				Name:                rb.Name,
+				RoleId:              rb.RoleID,
+				Scopes:              scopes,
+				ChildOrganizationId: childOrganizationId,
 			}
 		},
 	)
@@ -805,11 +814,20 @@ func resourceEnterpriseGroupUpdate(ctx context.Context, data *schema.ResourceDat
 			return scope
 		})
 
+		var childOrganizationId *string
+
+		if groupWithRBs.Group.OrganizationID == enterpriseID && len(scopes) > 0 {
+			if scopes[0].Organization != nil {
+				childOrganizationId = lo.ToPtr(scopes[0].Organization.Id)
+			}
+		}
+
 		return organization_management.BatchUpdateEnterpriseGroupsRequestRoleBinding{
-			Id:     rb.ID,
-			Name:   rb.Name,
-			RoleId: rb.RoleID,
-			Scopes: scopes,
+			Id:                  rb.ID,
+			Name:                rb.Name,
+			RoleId:              rb.RoleID,
+			Scopes:              scopes,
+			ChildOrganizationId: childOrganizationId,
 		}
 	})
 
