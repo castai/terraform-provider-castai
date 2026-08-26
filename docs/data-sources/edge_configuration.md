@@ -30,6 +30,7 @@ Retrieve information about a CAST AI edge configuration
 - `default` (Boolean) Whether this is the default configuration
 - `gcp` (Attributes) GCP specific configuration (see [below for nested schema](#nestedatt--gcp))
 - `id` (String) The ID of the edge configuration
+- `nebius` (Attributes) Nebius specific configuration (see [below for nested schema](#nestedatt--nebius))
 - `oci` (Attributes) OCI specific configuration (see [below for nested schema](#nestedatt--oci))
 - `user_data_base64` (String) Base64 encoded user data for edge bootstrap
 
@@ -58,6 +59,16 @@ Read-Only:
 
 - `boot_disk_size_gib` (Number) Boot disk size in GiB
 - `image_id` (String) GCP image ID or family for edge creation
+- `labels` (Map of String) Instance/VM labels
+
+
+<a id="nestedatt--nebius"></a>
+### Nested Schema for `nebius`
+
+Read-Only:
+
+- `boot_disk_size_gib` (Number) Boot disk size in GiB
+- `image_id` (String) Nebius image ID or name filter for edge creation
 - `labels` (Map of String) Instance/VM labels
 
 
