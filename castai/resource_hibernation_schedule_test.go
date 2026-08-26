@@ -52,7 +52,7 @@ func TestHibernationSchedule_CreateContext(t *testing.T) {
 
 		clusterAutoscalerClient.EXPECT().
 			HibernationSchedulesAPICreateHibernationSchedule(gomock.Any(), organizationID, gomock.Any()).
-			DoAndReturn(func(_ context.Context, organizationId string, req cluster_autoscaler.HibernationSchedulesAPICreateHibernationScheduleJSONRequestBody) (*http.Response, error) {
+			DoAndReturn(func(_ context.Context, organizationId string, req cluster_autoscaler.HibernationSchedulesAPICreateHibernationScheduleJSONRequestBody, _ ...cluster_autoscaler.RequestEditorFn) (*http.Response, error) {
 				r.Equal(name, req.Name)
 				r.Equal(true, req.Enabled)
 				r.Equal("* * * * *", req.PauseConfig.Schedule.CronExpression)
@@ -104,7 +104,7 @@ func TestHibernationSchedule_CreateContext(t *testing.T) {
 
 		clusterAutoscalerClient.EXPECT().
 			HibernationSchedulesAPIGetHibernationSchedule(gomock.Any(), organizationID, scheduleID).
-			DoAndReturn(func(_ context.Context, organizationID, scheduleID string) (*http.Response, error) {
+			DoAndReturn(func(_ context.Context, organizationID, scheduleID string, _ ...cluster_autoscaler.RequestEditorFn) (*http.Response, error) {
 				body := bytes.NewBuffer([]byte(""))
 				err := json.NewEncoder(body).Encode(schedule)
 				r.NoError(err)

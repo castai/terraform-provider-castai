@@ -345,7 +345,7 @@ func TestOrganizationGroupUpdateContext(t *testing.T) {
 
 		mockClient.EXPECT().
 			RbacServiceAPIUpdateGroup(gomock.Any(), organizationID, groupID, gomock.Any()).
-			DoAndReturn(func(ctx context.Context, reqOrgID string, reqGroupID string, req sdk.RbacServiceAPIUpdateGroupJSONRequestBody) (*http.Response, error) {
+			DoAndReturn(func(ctx context.Context, reqOrgID string, reqGroupID string, req sdk.RbacServiceAPIUpdateGroupJSONRequestBody, _ ...sdk.RequestEditorFn) (*http.Response, error) {
 				r.Equal(organizationID, reqOrgID)
 				r.Equal(groupID, reqGroupID)
 
@@ -415,7 +415,7 @@ func TestOrganizationGroupUpdateContext(t *testing.T) {
 
 		mockClient.EXPECT().
 			RbacServiceAPIUpdateGroup(gomock.Any(), organizationID, groupID, gomock.Any()).
-			DoAndReturn(func(ctx context.Context, reqOrgID string, reqGroupID string, req sdk.RbacServiceAPIUpdateGroupJSONRequestBody) (*http.Response, error) {
+			DoAndReturn(func(ctx context.Context, reqOrgID string, reqGroupID string, req sdk.RbacServiceAPIUpdateGroupJSONRequestBody, _ ...sdk.RequestEditorFn) (*http.Response, error) {
 				r.Equal(organizationID, reqOrgID)
 				r.Equal(groupID, reqGroupID)
 
@@ -460,7 +460,7 @@ func TestOrganizationGroupCreateContext(t *testing.T) {
 
 		mockClient.EXPECT().
 			RbacServiceAPICreateGroup(gomock.Any(), organizationID, gomock.Any()).
-			DoAndReturn(func(ctx context.Context, reqOrgID string, req sdk.RbacServiceAPICreateGroupJSONRequestBody) (*http.Response, error) {
+			DoAndReturn(func(ctx context.Context, reqOrgID string, req sdk.RbacServiceAPICreateGroupJSONRequestBody, _ ...sdk.RequestEditorFn) (*http.Response, error) {
 				r.Equal(organizationID, reqOrgID)
 
 				body := &bytes.Buffer{}
@@ -528,7 +528,7 @@ func TestOrganizationGroupCreateContext(t *testing.T) {
 
 		mockClient.EXPECT().
 			RbacServiceAPICreateGroup(gomock.Any(), organizationID, gomock.Any()).
-			DoAndReturn(func(ctx context.Context, reqOrgID string, req sdk.RbacServiceAPICreateGroupJSONRequestBody) (*http.Response, error) {
+			DoAndReturn(func(ctx context.Context, reqOrgID string, req sdk.RbacServiceAPICreateGroupJSONRequestBody, _ ...sdk.RequestEditorFn) (*http.Response, error) {
 				r.Equal(organizationID, reqOrgID)
 
 				body := bytes.NewBuffer([]byte(""))
@@ -596,7 +596,7 @@ func TestOrganizationGroupDeleteContext(t *testing.T) {
 
 		mockClient.EXPECT().
 			RbacServiceAPIDeleteGroup(gomock.Any(), organizationID, groupID, gomock.Any()).
-			DoAndReturn(func(ctx context.Context, reqOrgID string, reqGroupID string) (*http.Response, error) {
+			DoAndReturn(func(ctx context.Context, reqOrgID string, reqGroupID string, _ ...sdk.RequestEditorFn) (*http.Response, error) {
 				r.Equal(organizationID, reqOrgID)
 				r.Equal(groupID, reqGroupID)
 
@@ -640,7 +640,7 @@ func TestOrganizationGroupDeleteContext(t *testing.T) {
 
 		mockClient.EXPECT().
 			RbacServiceAPIDeleteGroup(gomock.Any(), organizationID, groupID, gomock.Any()).
-			DoAndReturn(func(ctx context.Context, reqOrgID string, reqGroupID string) (*http.Response, error) {
+			DoAndReturn(func(ctx context.Context, reqOrgID string, reqGroupID string, _ ...sdk.RequestEditorFn) (*http.Response, error) {
 				r.Equal(organizationID, reqOrgID)
 				r.Equal(groupID, reqGroupID)
 
