@@ -1,6 +1,6 @@
 module "castai-aks-cluster" {
   source  = "castai/aks/castai"
-  version = "~> 10.3"
+  version = "~> 11.0"
 
   api_url                = var.castai_api_url
   castai_api_token       = var.castai_api_token
