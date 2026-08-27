@@ -23,14 +23,6 @@ const (
 	CastaiEvictorV1LabelSelectorExpressionOperatorNotIn        CastaiEvictorV1LabelSelectorExpressionOperator = "NotIn"
 )
 
-// Defines values for CastaiFeaturesV1EntityType.
-const (
-	ClusterId      CastaiFeaturesV1EntityType = "clusterId"
-	Environment    CastaiFeaturesV1EntityType = "environment"
-	OrganizationId CastaiFeaturesV1EntityType = "organizationId"
-	UserId         CastaiFeaturesV1EntityType = "userId"
-)
-
 // Defines values for CastaiFeaturesV1LogicalOperator.
 const (
 	And                CastaiFeaturesV1LogicalOperator = "and"
@@ -1791,15 +1783,8 @@ type CastaiEvictorV1PodSelector struct {
 // CastaiFeaturesV1Comparison Comparison represents a entity to entity ID comparison.
 type CastaiFeaturesV1Comparison struct {
 	// EntityId The entity ID to compare against (e.g., "da7a9f8d-ed18-40c3-89a7-93a81283af62").
-	EntityId *string `json:"entityId,omitempty"`
-
-	// EntityType EntityType defines available entity types for feature flag enablement.
-	//
-	//  - organizationId: Represents the main identifier(organization_id) for organization in Cast AI.
-	//  - clusterId: Represents the main identifier(cluster_id) for cluster in Cast AI.
-	//  - userId: Represents the user identifier(username) which is used to identify a user in users service.
-	//  - environment: Represents the identifier which is used to identify an environment in Cast AI.
-	EntityType *CastaiFeaturesV1EntityType `json:"entityType,omitempty"`
+	EntityId   *string `json:"entityId,omitempty"`
+	EntityType *string `json:"entityType,omitempty"`
 
 	// Operator Operator defines available operators for targeting rules.
 	//
@@ -1817,14 +1802,6 @@ type CastaiFeaturesV1Condition struct {
 	// NestedQuery QueryExpression represents a logical operation with conditions.
 	NestedQuery *CastaiFeaturesV1QueryExpression `json:"nestedQuery,omitempty"`
 }
-
-// CastaiFeaturesV1EntityType EntityType defines available entity types for feature flag enablement.
-//
-//   - organizationId: Represents the main identifier(organization_id) for organization in Cast AI.
-//   - clusterId: Represents the main identifier(cluster_id) for cluster in Cast AI.
-//   - userId: Represents the user identifier(username) which is used to identify a user in users service.
-//   - environment: Represents the identifier which is used to identify an environment in Cast AI.
-type CastaiFeaturesV1EntityType string
 
 // CastaiFeaturesV1LogicalOperator LogicalOperator defines available logical operators for targeting rules.
 type CastaiFeaturesV1LogicalOperator string
@@ -7689,6 +7666,12 @@ type NodetemplatesV1AvailableInstanceTypeStorageOptimizedOption string
 // NodetemplatesV1DeleteNodeTemplateResponse defines model for nodetemplates.v1.DeleteNodeTemplateResponse.
 type NodetemplatesV1DeleteNodeTemplateResponse = map[string]interface{}
 
+// NodetemplatesV1EdgeLocationConfig EdgeLocationConfig pairs an edge location with an optional edge configuration.
+type NodetemplatesV1EdgeLocationConfig struct {
+	EdgeConfigId   *string `json:"edgeConfigId"`
+	EdgeLocationId *string `json:"edgeLocationId,omitempty"`
+}
+
 // NodetemplatesV1FilterInstanceTypesResponse defines model for nodetemplates.v1.FilterInstanceTypesResponse.
 type NodetemplatesV1FilterInstanceTypesResponse struct {
 	AvailableInstanceTypes *[]NodetemplatesV1AvailableInstanceType `json:"availableInstanceTypes,omitempty"`
@@ -7741,7 +7724,11 @@ type NodetemplatesV1NewNodeTemplate struct {
 	// CustomTaints Custom taints for the template.
 	CustomTaints *[]NodetemplatesV1TaintWithOptionalEffect `json:"customTaints,omitempty"`
 
-	// EdgeLocationIds List of associated edge location IDs.
+	// EdgeLocationConfigs Edge location configurations associated with this template.
+	EdgeLocationConfigs *[]NodetemplatesV1EdgeLocationConfig `json:"edgeLocationConfigs,omitempty"`
+
+	// EdgeLocationIds Deprecated: use edge_location_configs instead.
+	// Deprecated:
 	EdgeLocationIds *[]string           `json:"edgeLocationIds,omitempty"`
 	Gpu             *NodetemplatesV1GPU `json:"gpu,omitempty"`
 
@@ -7781,7 +7768,11 @@ type NodetemplatesV1NodeTemplate struct {
 	// CustomTaints Custom taints for the template.
 	CustomTaints *[]NodetemplatesV1Taint `json:"customTaints,omitempty"`
 
-	// EdgeLocationIds List of associated edge location IDs.
+	// EdgeLocationConfigs Edge location configurations associated with this template.
+	EdgeLocationConfigs *[]NodetemplatesV1EdgeLocationConfig `json:"edgeLocationConfigs,omitempty"`
+
+	// EdgeLocationIds Deprecated: use edge_location_configs instead.
+	// Deprecated:
 	EdgeLocationIds *[]string           `json:"edgeLocationIds,omitempty"`
 	Gpu             *NodetemplatesV1GPU `json:"gpu,omitempty"`
 
@@ -8079,7 +8070,11 @@ type NodetemplatesV1UpdateNodeTemplate struct {
 	// CustomTaints Custom taints for the template.
 	CustomTaints *[]NodetemplatesV1TaintWithOptionalEffect `json:"customTaints,omitempty"`
 
-	// EdgeLocationIds List of associated edge location IDs.
+	// EdgeLocationConfigs Edge location configurations associated with this template.
+	EdgeLocationConfigs *[]NodetemplatesV1EdgeLocationConfig `json:"edgeLocationConfigs,omitempty"`
+
+	// EdgeLocationIds Deprecated: use edge_location_configs instead.
+	// Deprecated:
 	EdgeLocationIds *[]string           `json:"edgeLocationIds,omitempty"`
 	Gpu             *NodetemplatesV1GPU `json:"gpu,omitempty"`
 
@@ -9642,16 +9637,16 @@ type WorkloadoptimizationV1GPUDeviceRecommendation struct {
 // WorkloadoptimizationV1GPUMetrics defines model for workloadoptimization.v1.GPUMetrics.
 type WorkloadoptimizationV1GPUMetrics struct {
 	// DeviceCount Effective GPU device count, accounting for cross-workload sharing (fractional).
-	DeviceCount *float64 `json:"deviceCount,omitempty"`
+	DeviceCount *float64 `json:"deviceCount"`
 
 	// GpuUtilization Average SM active utilization as a fraction (0.0–1.0).
-	GpuUtilization *float64 `json:"gpuUtilization,omitempty"`
+	GpuUtilization *float64 `json:"gpuUtilization"`
 
 	// MemoryTotalMib Max GPU memory total (capacity) in MiB across devices in this bucket.
-	MemoryTotalMib *float64 `json:"memoryTotalMib,omitempty"`
+	MemoryTotalMib *float64 `json:"memoryTotalMib"`
 
 	// MemoryUsedMib Average GPU memory used in MiB.
-	MemoryUsedMib *float64 `json:"memoryUsedMib,omitempty"`
+	MemoryUsedMib *float64 `json:"memoryUsedMib"`
 
 	// OriginalDeviceCount Original requested GPU device count before optimization.
 	OriginalDeviceCount *float64 `json:"originalDeviceCount"`
