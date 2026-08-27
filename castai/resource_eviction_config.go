@@ -18,23 +18,23 @@ import (
 )
 
 const (
-	FieldEvictorAdvancedConfig    = "evictor_advanced_config"
-	FieldEvictionConfig           = "eviction_config"
-	FieldNodeSelector             = "node_selector"
-	FieldPodSelector              = "pod_selector"
-	FieldEvictionSettings         = "settings"
-	FieldEvictionOptionDisabled       = "removal_disabled"
-	FieldEvictionOptionAggressive     = "aggressive"
-	FieldEvictionOptionDisposable     = "disposable"
+	FieldEvictorAdvancedConfig         = "evictor_advanced_config"
+	FieldEvictionConfig                = "eviction_config"
+	FieldNodeSelector                  = "node_selector"
+	FieldPodSelector                   = "pod_selector"
+	FieldEvictionSettings              = "settings"
+	FieldEvictionOptionDisabled        = "removal_disabled"
+	FieldEvictionOptionAggressive      = "aggressive"
+	FieldEvictionOptionDisposable      = "disposable"
 	FieldEvictionOptionForceDisposable = "force_disposable"
-	FieldPodSelectorKind          = "kind"
-	FieldPodSelectorNamespace     = "namespace"
-	FieldPodSelectorReplicasMin   = "replicas_min"
-	FieldMatchLabels              = "match_labels"
-	FieldMatchExpressions         = "match_expressions"
-	FieldMatchExpressionKey       = "key"
-	FieldMatchExpressionOp        = "operator"
-	FieldMatchExpressionVal       = "values"
+	FieldPodSelectorKind               = "kind"
+	FieldPodSelectorNamespace          = "namespace"
+	FieldPodSelectorReplicasMin        = "replicas_min"
+	FieldMatchLabels                   = "match_labels"
+	FieldMatchExpressions              = "match_expressions"
+	FieldMatchExpressionKey            = "key"
+	FieldMatchExpressionOp             = "operator"
+	FieldMatchExpressionVal            = "values"
 )
 
 func resourceEvictionConfig() *schema.Resource {
@@ -181,6 +181,11 @@ func readAdvancedEvictorConfig(ctx context.Context, data *schema.ResourceData, m
 	if err != nil {
 		log.Printf("[ERROR] Failed to set read evictor advanced config: %v", err)
 		return err
+	}
+	if resp.StatusCode() == http.StatusNotFound {
+		log.Printf("[INFO] Evictor advanced config for cluster %s not found, removing from state", clusterId)
+		data.SetId("")
+		return nil
 	}
 	if resp.StatusCode() != http.StatusOK {
 		return fmt.Errorf("expected status code %d, received: status=%d body=%s", http.StatusOK, resp.StatusCode(), string(resp.Body))
@@ -421,9 +426,9 @@ func toPodSelector(in interface{}) (*workload_eviction.PodSelector, error) {
 	if len(iii) < 1 {
 		return nil, nil
 	}
-	ii := iii[0].(map[string]interface{})
+	ii, ok := iii[0].(map[string]interface{})
 	if !ok {
-		return nil, fmt.Errorf("mapping podselector expecting map[string]interface, got %T, %+v", in, in)
+		return nil, fmt.Errorf("mapping podselector expecting map[string]interface, got %T, %+v", iii[0], iii[0])
 	}
 	out := workload_eviction.PodSelector{}
 	for k, v := range ii {
@@ -498,9 +503,9 @@ func toNodeSelector(in interface{}) (*workload_eviction.NodeSelector, error) {
 	if len(iii) < 1 {
 		return nil, nil
 	}
-	ii := iii[0].(map[string]interface{})
+	ii, ok := iii[0].(map[string]interface{})
 	if !ok {
-		return nil, fmt.Errorf("mapping podselector expecting map[string]interface, got %T, %+v", in, in)
+		return nil, fmt.Errorf("mapping nodeselector expecting map[string]interface, got %T, %+v", iii[0], iii[0])
 	}
 	out := workload_eviction.NodeSelector{}
 	for k, v := range ii {

@@ -14,22 +14,22 @@ import (
 )
 
 const (
-	FieldAutoscalerPoliciesVersion = "version"
-	FieldAutoscalerPoliciesEnabled = "enabled"
-	FieldAutoscalerPoliciesScopedMode = "scoped_mode"
-	FieldAutoscalerPoliciesClusterLimits = "cluster_limits"
-	FieldAutoscalerPoliciesNodeDownscaler = "node_downscaler"
+	FieldAutoscalerPoliciesVersion           = "version"
+	FieldAutoscalerPoliciesEnabled           = "enabled"
+	FieldAutoscalerPoliciesScopedMode        = "scoped_mode"
+	FieldAutoscalerPoliciesClusterLimits     = "cluster_limits"
+	FieldAutoscalerPoliciesNodeDownscaler    = "node_downscaler"
 	FieldAutoscalerPoliciesUnschedulablePods = "unschedulable_pods"
 
-	FieldClusterLimitsEnabled = "enabled"
-	FieldClusterLimitsCPU = "cpu"
+	FieldClusterLimitsEnabled     = "enabled"
+	FieldClusterLimitsCPU         = "cpu"
 	FieldClusterLimitsCPUMaxCores = "max_cores"
 	FieldClusterLimitsCPUMinCores = "min_cores"
 
-	FieldNodeDownscalerEmptyNodesDelay = "empty_nodes_delay"
+	FieldNodeDownscalerEmptyNodesDelay   = "empty_nodes_delay"
 	FieldNodeDownscalerEmptyNodesEnabled = "empty_nodes_enabled"
 
-	FieldUnschedulablePodsEnabled = "enabled"
+	FieldUnschedulablePodsEnabled   = "enabled"
 	FieldUnschedulablePodsPodPinner = "pod_pinner"
 
 	FieldPodPinnerEnabled = "enabled"
@@ -385,46 +385,50 @@ func toUnschedulablePodsPolicy(in []interface{}) (*cluster_autoscaler_v2.Unsched
 }
 
 func setAutoscalerPoliciesState(data *schema.ResourceData, policies *cluster_autoscaler_v2.PoliciesV2) error {
+	// Always call data.Set to prevent state drift when API omits fields.
+	var enabled bool
 	if policies.Enabled != nil {
-		if err := data.Set(FieldAutoscalerPoliciesEnabled, *policies.Enabled); err != nil {
-			return err
-		}
+		enabled = *policies.Enabled
+	}
+	if err := data.Set(FieldAutoscalerPoliciesEnabled, enabled); err != nil {
+		return err
 	}
 
+	var scopedMode bool
 	if policies.ScopedMode != nil {
-		if err := data.Set(FieldAutoscalerPoliciesScopedMode, *policies.ScopedMode); err != nil {
-			return err
-		}
+		scopedMode = *policies.ScopedMode
+	}
+	if err := data.Set(FieldAutoscalerPoliciesScopedMode, scopedMode); err != nil {
+		return err
 	}
 
+	var version string
 	if policies.Version != nil {
-		if err := data.Set(FieldAutoscalerPoliciesVersion, *policies.Version); err != nil {
-			return err
-		}
+		version = *policies.Version
+	}
+	if err := data.Set(FieldAutoscalerPoliciesVersion, version); err != nil {
+		return err
 	}
 
-	if policies.ClusterLimits != nil {
-		if err := data.Set(FieldAutoscalerPoliciesClusterLimits, flattenClusterLimitsPolicy(policies.ClusterLimits)); err != nil {
-			return err
-		}
+	if err := data.Set(FieldAutoscalerPoliciesClusterLimits, flattenClusterLimitsPolicy(policies.ClusterLimits)); err != nil {
+		return err
 	}
 
-	if policies.NodeDownscaler != nil {
-		if err := data.Set(FieldAutoscalerPoliciesNodeDownscaler, flattenNodeDownscalerPolicy(policies.NodeDownscaler)); err != nil {
-			return err
-		}
+	if err := data.Set(FieldAutoscalerPoliciesNodeDownscaler, flattenNodeDownscalerPolicy(policies.NodeDownscaler)); err != nil {
+		return err
 	}
 
-	if policies.UnschedulablePods != nil {
-		if err := data.Set(FieldAutoscalerPoliciesUnschedulablePods, flattenUnschedulablePodsPolicy(policies.UnschedulablePods)); err != nil {
-			return err
-		}
+	if err := data.Set(FieldAutoscalerPoliciesUnschedulablePods, flattenUnschedulablePodsPolicy(policies.UnschedulablePods)); err != nil {
+		return err
 	}
 
 	return nil
 }
 
 func flattenClusterLimitsPolicy(in *cluster_autoscaler_v2.ClusterLimitsPolicy) []map[string]interface{} {
+	if in == nil {
+		return nil
+	}
 	out := map[string]interface{}{}
 
 	if in.Enabled != nil {
@@ -449,6 +453,9 @@ func flattenClusterLimitsPolicy(in *cluster_autoscaler_v2.ClusterLimitsPolicy) [
 }
 
 func flattenNodeDownscalerPolicy(in *cluster_autoscaler_v2.NodeDownscalerPolicy) []map[string]interface{} {
+	if in == nil {
+		return nil
+	}
 	out := map[string]interface{}{}
 
 	if in.EmptyNodesDelay != nil {
@@ -467,6 +474,9 @@ func flattenNodeDownscalerPolicy(in *cluster_autoscaler_v2.NodeDownscalerPolicy)
 }
 
 func flattenUnschedulablePodsPolicy(in *cluster_autoscaler_v2.UnschedulablePodsPolicy) []map[string]interface{} {
+	if in == nil {
+		return nil
+	}
 	out := map[string]interface{}{}
 
 	if in.Enabled != nil {
@@ -485,6 +495,9 @@ func flattenUnschedulablePodsPolicy(in *cluster_autoscaler_v2.UnschedulablePodsP
 }
 
 func flattenPodPinner(in *cluster_autoscaler_v2.PodPinner) []map[string]interface{} {
+	if in == nil {
+		return nil
+	}
 	out := map[string]interface{}{}
 
 	if in.Enabled != nil {
@@ -497,4 +510,3 @@ func flattenPodPinner(in *cluster_autoscaler_v2.PodPinner) []map[string]interfac
 
 	return []map[string]interface{}{out}
 }
-

@@ -510,3 +510,55 @@ func TestEvictionConfig_ReadContext_Error(t *testing.T) {
 		})
 	}
 }
+
+func TestEvictionConfig_ReadContext_NotFound(t *testing.T) {
+	clusterId := "b6bfc074-a267-400f-b8f1-db0850c369b1"
+
+	mockClient := mock_workload_eviction.NewMockClientWithResponsesInterface(t)
+	provider := &ProviderConfig{workloadEvictionClient: mockClient}
+	resource := resourceEvictionConfig()
+
+	initialState := terraform.NewInstanceStateShimmedFromValue(cty.ObjectVal(map[string]cty.Value{
+		FieldClusterId: cty.StringVal(clusterId),
+	}), 0)
+	data := resource.Data(initialState)
+	data.SetId(clusterId)
+
+	mockClient.EXPECT().
+		EvictorAPIGetEvictorAdvancedConfigWithResponse(mock.Anything, clusterId).
+		Return(&workload_eviction.EvictorAPIGetEvictorAdvancedConfigResponse{
+			HTTPResponse: &http.Response{StatusCode: http.StatusNotFound, Header: map[string][]string{"Content-Type": {"application/json"}}},
+			JSON200:      nil,
+		}, nil)
+
+	result := resource.ReadContext(context.Background(), data, provider)
+
+	r := require.New(t)
+	r.Nil(result)
+	r.False(result.HasError())
+	r.Empty(data.Id())
+}
+
+func TestToPodSelector_MalformedInput(t *testing.T) {
+	t.Parallel()
+
+	badInput := []interface{}{"not-a-map"}
+
+	_, err := toPodSelector(badInput)
+
+	r := require.New(t)
+	r.Error(err)
+	r.Contains(err.Error(), "expecting map[string]interface")
+}
+
+func TestToNodeSelector_MalformedInput(t *testing.T) {
+	t.Parallel()
+
+	badInput := []interface{}{"not-a-map"}
+
+	_, err := toNodeSelector(badInput)
+
+	r := require.New(t)
+	r.Error(err)
+	r.Contains(err.Error(), "expecting map[string]interface")
+}

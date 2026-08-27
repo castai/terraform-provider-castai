@@ -16,26 +16,26 @@ import (
 )
 
 const (
-	FieldEvictorEnabled                      = "enabled"
-	FieldEvictorArm64Supported               = "arm64_supported"
-	FieldEvictorDrainRollbackTimeout         = "drain_rollback_timeout"
-	FieldEvictorDrainTimeout                 = "drain_timeout"
-	FieldEvictorEmitNodeRelatedPodEvents     = "emit_node_related_pod_events"
-	FieldEvictorForceDisableKarpenterMode    = "force_disable_karpenter_mode"
-	FieldEvictorForceDisableLiveMigration    = "force_disable_live_migration"
-	FieldEvictorForceDisablePodMutations     = "force_disable_pod_mutations"
-	FieldEvictorForceDisableWoop             = "force_disable_woop"
-	FieldEvictorMaxTargetNodesPerCycle       = "max_target_nodes_per_cycle"
-	FieldEvictorMinTargetNodesPerCycle       = "min_target_nodes_per_cycle"
-	FieldEvictorPricingAwarenessEnabled      = "pricing_awareness_enabled"
-	FieldEvictorPricingModel                 = "pricing_model"
-	FieldEvictorBaseCpuCost                  = "base_cpu_cost"
-	FieldEvictorBaseMemCost                  = "base_mem_cost"
-	FieldEvictorSpotDiscount                 = "spot_discount"
-	FieldEvictorSoftTainting                 = "soft_tainting"
-	FieldEvictorStatus                       = "status"
-	FieldEvictorTargetNodePercentage         = "target_node_percentage"
-	FieldEvictorWindows                      = "windows"
+	FieldEvictorEnabled                   = "enabled"
+	FieldEvictorArm64Supported            = "arm64_supported"
+	FieldEvictorDrainRollbackTimeout      = "drain_rollback_timeout"
+	FieldEvictorDrainTimeout              = "drain_timeout"
+	FieldEvictorEmitNodeRelatedPodEvents  = "emit_node_related_pod_events"
+	FieldEvictorForceDisableKarpenterMode = "force_disable_karpenter_mode"
+	FieldEvictorForceDisableLiveMigration = "force_disable_live_migration"
+	FieldEvictorForceDisablePodMutations  = "force_disable_pod_mutations"
+	FieldEvictorForceDisableWoop          = "force_disable_woop"
+	FieldEvictorMaxTargetNodesPerCycle    = "max_target_nodes_per_cycle"
+	FieldEvictorMinTargetNodesPerCycle    = "min_target_nodes_per_cycle"
+	FieldEvictorPricingAwarenessEnabled   = "pricing_awareness_enabled"
+	FieldEvictorPricingModel              = "pricing_model"
+	FieldEvictorBaseCpuCost               = "base_cpu_cost"
+	FieldEvictorBaseMemCost               = "base_mem_cost"
+	FieldEvictorSpotDiscount              = "spot_discount"
+	FieldEvictorSoftTainting              = "soft_tainting"
+	FieldEvictorStatus                    = "status"
+	FieldEvictorTargetNodePercentage      = "target_node_percentage"
+	FieldEvictorWindows                   = "windows"
 )
 
 func resourceEvictor() *schema.Resource {
@@ -88,11 +88,11 @@ func resourceEvictor() *schema.Resource {
 				Description: "Enable/disable scoped mode. By default, Evictor targets all nodes in the cluster. This mode will constrain it to just the nodes which were created by CAST AI.",
 			},
 			FieldEvictorCycleInterval: {
-				Type:             schema.TypeString,
-				Optional:         true,
-				Default:          "1m",
-				ValidateFunc:     validateDuration,
-				Description:      "Configure the interval duration between Evictor operations. This property can be used to lower or raise the frequency of the Evictor's find-and-drain operations.",
+				Type:         schema.TypeString,
+				Optional:     true,
+				Default:      "1m",
+				ValidateFunc: validateDuration,
+				Description:  "Configure the interval duration between Evictor operations. This property can be used to lower or raise the frequency of the Evictor's find-and-drain operations.",
 			},
 			FieldEvictorNodeGracePeriodMinutes: {
 				Type:        schema.TypeInt,
@@ -101,11 +101,11 @@ func resourceEvictor() *schema.Resource {
 				Description: "Configure the node grace period which controls the duration which must pass after a node has been created before Evictor starts considering that node.",
 			},
 			FieldEvictorPodEvictionFailureBackOffInterval: {
-				Type:             schema.TypeString,
-				Optional:         true,
-				Default:          "5s",
-				ValidateFunc:     validateDuration,
-				Description:      "Configure the pod eviction failure back off interval. If pod eviction fails then Evictor will attempt to evict it again after the amount of time specified here.",
+				Type:         schema.TypeString,
+				Optional:     true,
+				Default:      "5s",
+				ValidateFunc: validateDuration,
+				Description:  "Configure the pod eviction failure back off interval. If pod eviction fails then Evictor will attempt to evict it again after the amount of time specified here.",
 			},
 			FieldEvictorIgnorePodDisruptionBudgets: {
 				Type:        schema.TypeBool,
@@ -131,18 +131,18 @@ func resourceEvictor() *schema.Resource {
 				Description: "If enabled, Evictor emits Kubernetes events on pods when they are evicted as part of a node drain.",
 			},
 			FieldEvictorDrainTimeout: {
-				Type:             schema.TypeString,
-				Optional:         true,
-				Default:          "10m",
-				ValidateFunc:     validateDuration,
-				Description:      "Maximum time the evictor waits for a node to fully drain before giving up.",
+				Type:         schema.TypeString,
+				Optional:     true,
+				Default:      "10m",
+				ValidateFunc: validateDuration,
+				Description:  "Maximum time the evictor waits for a node to fully drain before giving up.",
 			},
 			FieldEvictorDrainRollbackTimeout: {
-				Type:             schema.TypeString,
-				Optional:         true,
-				Default:          "1m",
-				ValidateFunc:     validateDuration,
-				Description:      "How long the evictor waits before rolling back a cordon when a drain attempt fails.",
+				Type:         schema.TypeString,
+				Optional:     true,
+				Default:      "1m",
+				ValidateFunc: validateDuration,
+				Description:  "How long the evictor waits before rolling back a cordon when a drain attempt fails.",
 			},
 			FieldEvictorWindows: {
 				Type:        schema.TypeBool,
@@ -433,30 +433,52 @@ func flattenEvictorConfig(data *schema.ResourceData, cfg *workload_eviction.Conf
 	}
 
 	setters := map[string]func() error{
-		FieldEvictorEnabled:                      func() error { return data.Set(FieldEvictorEnabled, boolValue(cfg.Enabled)) },
-		FieldEvictorDryRun:                       func() error { return data.Set(FieldEvictorDryRun, boolValue(cfg.DryRun)) },
-		FieldEvictorAggressiveMode:               func() error { return data.Set(FieldEvictorAggressiveMode, boolValue(cfg.AggressiveMode)) },
-		FieldEvictorScopedMode:                   func() error { return data.Set(FieldEvictorScopedMode, boolValue(cfg.ScopedMode)) },
-		FieldEvictorCycleInterval:                func() error { return data.Set(FieldEvictorCycleInterval, evictorStringValue(cfg.CycleInterval)) },
-		FieldEvictorNodeGracePeriodMinutes:       func() error { return data.Set(FieldEvictorNodeGracePeriodMinutes, intValue(cfg.NodeGracePeriodMinutes)) },
-		FieldEvictorPodEvictionFailureBackOffInterval: func() error { return data.Set(FieldEvictorPodEvictionFailureBackOffInterval, evictorStringValue(cfg.PodEvictionFailureBackOffInterval)) },
-		FieldEvictorIgnorePodDisruptionBudgets:   func() error { return data.Set(FieldEvictorIgnorePodDisruptionBudgets, boolValue(cfg.IgnorePodDisruptionBudgets)) },
-		FieldEvictorSoftTainting:                 func() error { return data.Set(FieldEvictorSoftTainting, boolValue(cfg.SoftTainting)) },
-		FieldEvictorEmitNodeRelatedPodEvents:     func() error { return data.Set(FieldEvictorEmitNodeRelatedPodEvents, boolValue(cfg.EmitNodeRelatedPodEvents)) },
-		FieldEvictorDrainTimeout:                 func() error { return data.Set(FieldEvictorDrainTimeout, evictorStringValue(cfg.DrainTimeout)) },
-		FieldEvictorDrainRollbackTimeout:         func() error { return data.Set(FieldEvictorDrainRollbackTimeout, evictorStringValue(cfg.DrainRollbackTimeout)) },
-		FieldEvictorWindows:                      func() error { return data.Set(FieldEvictorWindows, boolValue(cfg.Windows)) },
-		FieldEvictorForceDisableLiveMigration:    func() error { return data.Set(FieldEvictorForceDisableLiveMigration, boolValue(cfg.ForceDisableLiveMigration)) },
-		FieldEvictorForceDisableWoop:             func() error { return data.Set(FieldEvictorForceDisableWoop, boolValue(cfg.ForceDisableWoop)) },
-		FieldEvictorForceDisablePodMutations:     func() error { return data.Set(FieldEvictorForceDisablePodMutations, boolValue(cfg.ForceDisablePodMutations)) },
-		FieldEvictorForceDisableKarpenterMode:    func() error { return data.Set(FieldEvictorForceDisableKarpenterMode, boolValue(cfg.ForceDisableKarpenterMode)) },
-		FieldEvictorMaxTargetNodesPerCycle:       func() error { return data.Set(FieldEvictorMaxTargetNodesPerCycle, intValue(cfg.MaxTargetNodesPerCycle)) },
-		FieldEvictorMinTargetNodesPerCycle:       func() error { return data.Set(FieldEvictorMinTargetNodesPerCycle, intValue(cfg.MinTargetNodesPerCycle)) },
-		FieldEvictorTargetNodePercentage:         func() error { return data.Set(FieldEvictorTargetNodePercentage, intValue(cfg.TargetNodePercentage)) },
-		FieldEvictorPricingAwarenessEnabled:      func() error { return data.Set(FieldEvictorPricingAwarenessEnabled, boolValue(cfg.PricingAwarenessEnabled)) },
-		FieldEvictorArm64Supported:               func() error { return data.Set(FieldEvictorArm64Supported, boolValue(cfg.Arm64Supported)) },
-		FieldEvictorStatus:                       func() error { return data.Set(FieldEvictorStatus, statusValue(cfg.Status)) },
-		FieldEvictorPricingModel:                 func() error { return data.Set(FieldEvictorPricingModel, flattenPricingModel(cfg.PricingModel)) },
+		FieldEvictorEnabled:        func() error { return data.Set(FieldEvictorEnabled, boolValue(cfg.Enabled)) },
+		FieldEvictorDryRun:         func() error { return data.Set(FieldEvictorDryRun, boolValue(cfg.DryRun)) },
+		FieldEvictorAggressiveMode: func() error { return data.Set(FieldEvictorAggressiveMode, boolValue(cfg.AggressiveMode)) },
+		FieldEvictorScopedMode:     func() error { return data.Set(FieldEvictorScopedMode, boolValue(cfg.ScopedMode)) },
+		FieldEvictorCycleInterval:  func() error { return data.Set(FieldEvictorCycleInterval, evictorStringValue(cfg.CycleInterval)) },
+		FieldEvictorNodeGracePeriodMinutes: func() error {
+			return data.Set(FieldEvictorNodeGracePeriodMinutes, intValue(cfg.NodeGracePeriodMinutes))
+		},
+		FieldEvictorPodEvictionFailureBackOffInterval: func() error {
+			return data.Set(FieldEvictorPodEvictionFailureBackOffInterval, evictorStringValue(cfg.PodEvictionFailureBackOffInterval))
+		},
+		FieldEvictorIgnorePodDisruptionBudgets: func() error {
+			return data.Set(FieldEvictorIgnorePodDisruptionBudgets, boolValue(cfg.IgnorePodDisruptionBudgets))
+		},
+		FieldEvictorSoftTainting: func() error { return data.Set(FieldEvictorSoftTainting, boolValue(cfg.SoftTainting)) },
+		FieldEvictorEmitNodeRelatedPodEvents: func() error {
+			return data.Set(FieldEvictorEmitNodeRelatedPodEvents, boolValue(cfg.EmitNodeRelatedPodEvents))
+		},
+		FieldEvictorDrainTimeout: func() error { return data.Set(FieldEvictorDrainTimeout, evictorStringValue(cfg.DrainTimeout)) },
+		FieldEvictorDrainRollbackTimeout: func() error {
+			return data.Set(FieldEvictorDrainRollbackTimeout, evictorStringValue(cfg.DrainRollbackTimeout))
+		},
+		FieldEvictorWindows: func() error { return data.Set(FieldEvictorWindows, boolValue(cfg.Windows)) },
+		FieldEvictorForceDisableLiveMigration: func() error {
+			return data.Set(FieldEvictorForceDisableLiveMigration, boolValue(cfg.ForceDisableLiveMigration))
+		},
+		FieldEvictorForceDisableWoop: func() error { return data.Set(FieldEvictorForceDisableWoop, boolValue(cfg.ForceDisableWoop)) },
+		FieldEvictorForceDisablePodMutations: func() error {
+			return data.Set(FieldEvictorForceDisablePodMutations, boolValue(cfg.ForceDisablePodMutations))
+		},
+		FieldEvictorForceDisableKarpenterMode: func() error {
+			return data.Set(FieldEvictorForceDisableKarpenterMode, boolValue(cfg.ForceDisableKarpenterMode))
+		},
+		FieldEvictorMaxTargetNodesPerCycle: func() error {
+			return data.Set(FieldEvictorMaxTargetNodesPerCycle, intValue(cfg.MaxTargetNodesPerCycle))
+		},
+		FieldEvictorMinTargetNodesPerCycle: func() error {
+			return data.Set(FieldEvictorMinTargetNodesPerCycle, intValue(cfg.MinTargetNodesPerCycle))
+		},
+		FieldEvictorTargetNodePercentage: func() error { return data.Set(FieldEvictorTargetNodePercentage, intValue(cfg.TargetNodePercentage)) },
+		FieldEvictorPricingAwarenessEnabled: func() error {
+			return data.Set(FieldEvictorPricingAwarenessEnabled, boolValue(cfg.PricingAwarenessEnabled))
+		},
+		FieldEvictorArm64Supported: func() error { return data.Set(FieldEvictorArm64Supported, boolValue(cfg.Arm64Supported)) },
+		FieldEvictorStatus:         func() error { return data.Set(FieldEvictorStatus, statusValue(cfg.Status)) },
+		FieldEvictorPricingModel:   func() error { return data.Set(FieldEvictorPricingModel, flattenPricingModel(cfg.PricingModel)) },
 	}
 
 	for field, setter := range setters {

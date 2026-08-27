@@ -133,8 +133,8 @@ func TestResourceAutoscalerPolicies_CreateContext(t *testing.T) {
 
 	resource := resourceAutoscalerPolicies()
 	stateValue := cty.ObjectVal(map[string]cty.Value{
-		FieldClusterId:                   cty.StringVal(clusterId),
-		FieldAutoscalerPoliciesEnabled:   cty.BoolVal(enabled),
+		FieldClusterId:                 cty.StringVal(clusterId),
+		FieldAutoscalerPoliciesEnabled: cty.BoolVal(enabled),
 		FieldAutoscalerPoliciesClusterLimits: cty.ListVal([]cty.Value{
 			cty.ObjectVal(map[string]cty.Value{
 				FieldClusterLimitsEnabled: cty.BoolVal(true),
@@ -214,8 +214,8 @@ func TestResourceAutoscalerPolicies_UpdateContext(t *testing.T) {
 
 	resource := resourceAutoscalerPolicies()
 	stateValue := cty.ObjectVal(map[string]cty.Value{
-		FieldClusterId:                   cty.StringVal(clusterId),
-		FieldAutoscalerPoliciesVersion:   cty.StringVal(version),
+		FieldClusterId:                 cty.StringVal(clusterId),
+		FieldAutoscalerPoliciesVersion: cty.StringVal(version),
 		FieldAutoscalerPoliciesNodeDownscaler: cty.ListVal([]cty.Value{
 			cty.ObjectVal(map[string]cty.Value{
 				FieldNodeDownscalerEmptyNodesDelay: cty.StringVal(emptyNodesDelay),
@@ -310,7 +310,7 @@ func TestResourceAutoscalerPolicies_toPoliciesV2(t *testing.T) {
 		}),
 		FieldAutoscalerPoliciesNodeDownscaler: cty.ListVal([]cty.Value{
 			cty.ObjectVal(map[string]cty.Value{
-				FieldNodeDownscalerEmptyNodesDelay:  cty.StringVal("3m"),
+				FieldNodeDownscalerEmptyNodesDelay:   cty.StringVal("3m"),
 				FieldNodeDownscalerEmptyNodesEnabled: cty.BoolVal(false),
 			}),
 		}),
@@ -434,6 +434,73 @@ func TestResourceAutoscalerPolicies_ReadContext_Error(t *testing.T) {
 // policiesV2ToJSON is a test helper to serialize PoliciesV2 to JSON bytes.
 func policiesV2ToJSON(policies *cluster_autoscaler_v2.PoliciesV2) ([]byte, error) {
 	return json.Marshal(policies)
+}
+
+func TestResourceAutoscalerPolicies_ReadContext_NilNestedFields(t *testing.T) {
+	t.Parallel()
+
+	clusterId := "b6bfc074-a267-400f-b8f1-db0850c369b1"
+	version := "v1"
+	enabled := true
+
+	policies := &cluster_autoscaler_v2.PoliciesV2{
+		Enabled: &enabled,
+		Version: &version,
+	}
+
+	mockClient := mock_cluster_autoscaler_v2.NewMockClientWithResponsesInterface(t)
+	provider := newAutoscalerPoliciesProvider(mockClient)
+
+	mockClient.EXPECT().
+		PoliciesV2APIGetClusterPoliciesWithResponse(mock.Anything, clusterId).
+		Return(&cluster_autoscaler_v2.PoliciesV2APIGetClusterPoliciesResponse{
+			HTTPResponse: &http.Response{StatusCode: http.StatusOK, Header: map[string][]string{"Content-Type": {"application/json"}}},
+			JSON200:      policies,
+		}, nil)
+
+	resource := resourceAutoscalerPolicies()
+	stateValue := cty.ObjectVal(map[string]cty.Value{
+		FieldClusterId:                 cty.StringVal(clusterId),
+		FieldAutoscalerPoliciesEnabled: cty.BoolVal(true),
+		FieldAutoscalerPoliciesClusterLimits: cty.ListVal([]cty.Value{
+			cty.ObjectVal(map[string]cty.Value{
+				FieldClusterLimitsEnabled: cty.BoolVal(true),
+				FieldClusterLimitsCPU: cty.ListVal([]cty.Value{
+					cty.ObjectVal(map[string]cty.Value{
+						FieldClusterLimitsCPUMaxCores: cty.NumberIntVal(20),
+					}),
+				}),
+			}),
+		}),
+		FieldAutoscalerPoliciesNodeDownscaler: cty.ListVal([]cty.Value{
+			cty.ObjectVal(map[string]cty.Value{
+				FieldNodeDownscalerEmptyNodesEnabled: cty.BoolVal(true),
+			}),
+		}),
+		FieldAutoscalerPoliciesUnschedulablePods: cty.ListVal([]cty.Value{
+			cty.ObjectVal(map[string]cty.Value{
+				FieldUnschedulablePodsEnabled: cty.BoolVal(true),
+				FieldUnschedulablePodsPodPinner: cty.ListVal([]cty.Value{
+					cty.ObjectVal(map[string]cty.Value{
+						FieldPodPinnerEnabled: cty.BoolVal(true),
+					}),
+				}),
+			}),
+		}),
+	})
+	state := terraform.NewInstanceStateShimmedFromValue(stateValue, 0)
+	data := resource.Data(state)
+
+	diags := resource.ReadContext(context.Background(), data, provider)
+
+	r := require.New(t)
+	r.False(diags.HasError())
+	r.Equal(clusterId, data.Id())
+	r.Equal(enabled, data.Get(FieldAutoscalerPoliciesEnabled))
+	r.Equal(version, data.Get(FieldAutoscalerPoliciesVersion))
+	r.Empty(data.Get(FieldAutoscalerPoliciesClusterLimits))
+	r.Empty(data.Get(FieldAutoscalerPoliciesNodeDownscaler))
+	r.Empty(data.Get(FieldAutoscalerPoliciesUnschedulablePods))
 }
 
 func TestAccResourceAutoscalerPolicies(t *testing.T) {
