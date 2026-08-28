@@ -62,8 +62,31 @@ func init() {
 }
 
 func TestProvider(t *testing.T) {
-	if err := Provider("v1.0.0").InternalValidate(); err != nil {
+	p := Provider("v1.0.0")
+	if err := p.InternalValidate(); err != nil {
 		t.Fatalf("internal consistency validation failed: %v", err)
+	}
+
+	// Verify the 5 new external connection types are registered.
+	expectedResources := []string{
+		"castai_external_connection",
+		"castai_external_connection_principals",
+	}
+	for _, key := range expectedResources {
+		if _, ok := p.ResourcesMap[key]; !ok {
+			t.Errorf("resource %q not found in ResourcesMap", key)
+		}
+	}
+
+	expectedDataSources := []string{
+		"castai_external_connections",
+		"castai_external_connection_features",
+		"castai_external_connection_permissions",
+	}
+	for _, key := range expectedDataSources {
+		if _, ok := p.DataSourcesMap[key]; !ok {
+			t.Errorf("data source %q not found in DataSourcesMap", key)
+		}
 	}
 }
 

@@ -12,6 +12,7 @@ import (
 	"github.com/castai/terraform-provider-castai/castai/sdk"
 	"github.com/castai/terraform-provider-castai/castai/sdk/ai_optimizer"
 	"github.com/castai/terraform-provider-castai/castai/sdk/cluster_autoscaler"
+	"github.com/castai/terraform-provider-castai/castai/sdk/external_connections"
 	"github.com/castai/terraform-provider-castai/castai/sdk/omni"
 	"github.com/castai/terraform-provider-castai/castai/sdk/organization_management"
 	"github.com/castai/terraform-provider-castai/castai/sdk/patching_engine"
@@ -22,6 +23,7 @@ type ProviderConfig struct {
 	api                          sdk.ClientWithResponsesInterface
 	clusterAutoscalerClient      cluster_autoscaler.ClientWithResponsesInterface
 	organizationManagementClient organization_management.ClientWithResponsesInterface
+	externalConnectionsClient    external_connections.ClientWithResponsesInterface
 	omniAPI                      *omni.ClientWithResponses
 	aiOptimizerClient            ai_optimizer.ClientWithResponsesInterface
 	patchingEngineClient         patching_engine.ClientWithResponsesInterface
@@ -95,6 +97,9 @@ func Provider(version string) *schema.Provider {
 			"castai_ai_optimizer_model_specs":    resourceAIModelSpecs(),
 			"castai_ai_optimizer_hosted_model":   resourceAIHostedModel(),
 			"castai_pod_mutation":                resourcePodMutation(),
+
+			"castai_external_connection":          resourceExternalConnection(),
+			"castai_external_connection_principals": resourceExternalConnectionPrincipals(),
 		},
 
 		DataSourcesMap: map[string]*schema.Resource{
@@ -107,6 +112,10 @@ func Provider(version string) *schema.Provider {
 			"castai_workload_scaling_policy_order": dataSourceWorkloadScalingPolicyOrder(),
 			"castai_cache_group":                   dataSourceCacheGroup(),
 			"castai_impersonation_service_account": dataSourceImpersonationServiceAccount(),
+
+			"castai_external_connections":           dataSourceExternalConnections(),
+			"castai_external_connection_features":   dataSourceExternalConnectionFeatures(),
+			"castai_external_connection_permissions": dataSourceExternalConnectionPermissions(),
 		},
 
 		ConfigureContextFunc: providerConfigure(version),
@@ -145,6 +154,11 @@ func providerConfigure(version string) schema.ConfigureContextFunc {
 			return nil, diag.FromErr(err)
 		}
 
+		externalConnectionsClient, err := external_connections.CreateClient(apiURL, apiToken, agent)
+		if err != nil {
+			return nil, diag.FromErr(err)
+		}
+
 		omniClient, err := omni.CreateClient(apiURL, apiToken, agent)
 		if err != nil {
 			return nil, diag.FromErr(err)
@@ -169,6 +183,7 @@ func providerConfigure(version string) schema.ConfigureContextFunc {
 			api:                          client,
 			clusterAutoscalerClient:      clusterAutoscalerClient,
 			organizationManagementClient: organizationManagementClient,
+			externalConnectionsClient:    externalConnectionsClient,
 			omniAPI:                      omniClient,
 			aiOptimizerClient:            aiOptimizerClient,
 			patchingEngineClient:         patchingEngineClient,
