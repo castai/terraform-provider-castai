@@ -162,7 +162,7 @@ resource "castai_workload_scaling_policy" "services" {
 Optional:
 
 - `apply_threshold` (Number, Deprecated) The threshold of when to apply the recommendation. Recommendation will be applied when diff of current requests and new recommendation is greater than set value
-- `apply_threshold_strategy` (Block List, Max: 1) Resource apply threshold strategy settings. The default strategy is `PERCENTAGE` with percentage value set to 0.1. (see [below for nested schema](#nestedblock--cpu--apply_threshold_strategy))
+- `apply_threshold_strategy` (Block List, Max: 1) Resource apply threshold strategy settings. The default strategy is `PERCENTAGE` with percentage value set to 0.1. When both apply_threshold and apply_threshold_strategy are set, apply_threshold_strategy takes precedence. (see [below for nested schema](#nestedblock--cpu--apply_threshold_strategy))
 - `args` (List of String) The arguments for the function - i.e. for `QUANTILE` this should be a [0, 1] float. `MAX` doesn't accept any args
 - `constraints` (Block List, Max: 1) Defines min/max bounds for the recommendation using constraint strategies. (see [below for nested schema](#nestedblock--cpu--constraints))
 - `function` (String) The function used to calculate the resource recommendation. Supported values: `QUANTILE`, `MAX`
@@ -256,7 +256,7 @@ Optional:
 Optional:
 
 - `apply_threshold` (Number, Deprecated) The threshold of when to apply the recommendation. Recommendation will be applied when diff of current requests and new recommendation is greater than set value
-- `apply_threshold_strategy` (Block List, Max: 1) Resource apply threshold strategy settings. The default strategy is `PERCENTAGE` with percentage value set to 0.1. (see [below for nested schema](#nestedblock--memory--apply_threshold_strategy))
+- `apply_threshold_strategy` (Block List, Max: 1) Resource apply threshold strategy settings. The default strategy is `PERCENTAGE` with percentage value set to 0.1. When both apply_threshold and apply_threshold_strategy are set, apply_threshold_strategy takes precedence. (see [below for nested schema](#nestedblock--memory--apply_threshold_strategy))
 - `args` (List of String) The arguments for the function - i.e. for `QUANTILE` this should be a [0, 1] float. `MAX` doesn't accept any args
 - `constraints` (Block List, Max: 1) Defines min/max bounds for the recommendation using constraint strategies. (see [below for nested schema](#nestedblock--memory--constraints))
 - `function` (String) The function used to calculate the resource recommendation. Supported values: `QUANTILE`, `MAX`

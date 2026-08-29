@@ -744,6 +744,67 @@ func Test_validateResourcePolicy(t *testing.T) {
 	}
 }
 
+func Test_resolveApplyThresholdStrategy(t *testing.T) {
+	tests := map[string]struct {
+		args map[string]any
+		want func(t *testing.T, got *sdk.WorkloadoptimizationV1ApplyThresholdStrategy)
+	}{
+		"defaults to percentage 0.1 when neither is set": {
+			args: map[string]any{},
+			want: func(t *testing.T, got *sdk.WorkloadoptimizationV1ApplyThresholdStrategy) {
+				t.Helper()
+				require.NotNil(t, got.PercentageThreshold)
+				require.Equal(t, defaultApplyThresholdPercentage, got.PercentageThreshold.Percentage)
+				require.Nil(t, got.DefaultAdaptiveThreshold)
+			},
+		},
+		"uses deprecated apply_threshold when strategy is absent": {
+			args: map[string]any{
+				"apply_threshold": 0.25,
+			},
+			want: func(t *testing.T, got *sdk.WorkloadoptimizationV1ApplyThresholdStrategy) {
+				t.Helper()
+				require.NotNil(t, got.PercentageThreshold)
+				require.Equal(t, 0.25, got.PercentageThreshold.Percentage)
+			},
+		},
+		"uses DEFAULT_ADAPTIVE strategy when only strategy is set": {
+			args: map[string]any{
+				"apply_threshold_strategy": []any{
+					map[string]any{"type": "DEFAULT_ADAPTIVE"},
+				},
+			},
+			want: func(t *testing.T, got *sdk.WorkloadoptimizationV1ApplyThresholdStrategy) {
+				t.Helper()
+				require.NotNil(t, got.DefaultAdaptiveThreshold)
+				require.Nil(t, got.PercentageThreshold)
+			},
+		},
+		"prefers apply_threshold_strategy when both are set": {
+			args: map[string]any{
+				"apply_threshold": 0.1,
+				"apply_threshold_strategy": []any{
+					map[string]any{"type": "DEFAULT_ADAPTIVE"},
+				},
+			},
+			want: func(t *testing.T, got *sdk.WorkloadoptimizationV1ApplyThresholdStrategy) {
+				t.Helper()
+				require.NotNil(t, got.DefaultAdaptiveThreshold)
+				require.Nil(t, got.PercentageThreshold)
+			},
+		},
+	}
+
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			got, err := resolveApplyThresholdStrategy(tt.args)
+			require.NoError(t, err)
+			require.NotNil(t, got)
+			tt.want(t, got)
+		})
+	}
+}
+
 func Test_toWorkloadScalingPolicies_limit(t *testing.T) {
 	tests := map[string]struct {
 		args map[string]any
