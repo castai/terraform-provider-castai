@@ -12,8 +12,10 @@ import (
 	"github.com/castai/terraform-provider-castai/castai/sdk"
 	"github.com/castai/terraform-provider-castai/castai/sdk/ai_optimizer"
 	"github.com/castai/terraform-provider-castai/castai/sdk/cluster_autoscaler"
+	"github.com/castai/terraform-provider-castai/castai/sdk/cluster_autoscaler_v2"
 	"github.com/castai/terraform-provider-castai/castai/sdk/omni"
 	"github.com/castai/terraform-provider-castai/castai/sdk/organization_management"
+	"github.com/castai/terraform-provider-castai/castai/sdk/workload_eviction"
 	"github.com/castai/terraform-provider-castai/castai/sdk/patching_engine"
 	"github.com/castai/terraform-provider-castai/castai/sdk/pricing"
 )
@@ -21,6 +23,8 @@ import (
 type ProviderConfig struct {
 	api                          sdk.ClientWithResponsesInterface
 	clusterAutoscalerClient      cluster_autoscaler.ClientWithResponsesInterface
+	clusterAutoscalerV2Client    cluster_autoscaler_v2.ClientWithResponsesInterface
+	workloadEvictionClient       workload_eviction.ClientWithResponsesInterface
 	organizationManagementClient organization_management.ClientWithResponsesInterface
 	omniAPI                      *omni.ClientWithResponses
 	aiOptimizerClient            ai_optimizer.ClientWithResponsesInterface
@@ -62,6 +66,8 @@ func Provider(version string) *schema.Provider {
 			"castai_gke_cluster_id":             resourceGKEClusterId(),
 			"castai_aks_cluster":                resourceAKSCluster(),
 			"castai_autoscaler":                 resourceAutoscaler(),
+			"castai_autoscaler_policies":        resourceAutoscalerPolicies(),
+			"castai_evictor":                    resourceEvictor(),
 			"castai_evictor_advanced_config":    resourceEvictionConfig(),
 			"castai_node_template":              resourceNodeTemplate(),
 			"castai_rebalancing_schedule":       resourceRebalancingSchedule(),
@@ -140,6 +146,16 @@ func providerConfigure(version string) schema.ConfigureContextFunc {
 			return nil, diag.FromErr(err)
 		}
 
+		clusterAutoscalerV2Client, err := cluster_autoscaler_v2.CreateClient(apiURL, apiToken, agent)
+		if err != nil {
+			return nil, diag.FromErr(err)
+		}
+
+		workloadEvictionClient, err := workload_eviction.CreateClient(apiURL, apiToken, agent)
+		if err != nil {
+			return nil, diag.FromErr(err)
+		}
+
 		organizationManagementClient, err := organization_management.CreateClient(apiURL, apiToken, agent)
 		if err != nil {
 			return nil, diag.FromErr(err)
@@ -168,6 +184,8 @@ func providerConfigure(version string) schema.ConfigureContextFunc {
 		return &ProviderConfig{
 			api:                          client,
 			clusterAutoscalerClient:      clusterAutoscalerClient,
+			clusterAutoscalerV2Client:    clusterAutoscalerV2Client,
+			workloadEvictionClient:       workloadEvictionClient,
 			organizationManagementClient: organizationManagementClient,
 			omniAPI:                      omniClient,
 			aiOptimizerClient:            aiOptimizerClient,

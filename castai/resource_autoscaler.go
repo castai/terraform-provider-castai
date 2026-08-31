@@ -70,11 +70,12 @@ const (
 
 func resourceAutoscaler() *schema.Resource {
 	return &schema.Resource{
-		ReadContext:   resourceCastaiAutoscalerRead,
-		CreateContext: resourceCastaiAutoscalerCreate,
-		UpdateContext: resourceCastaiAutoscalerUpdate,
-		DeleteContext: resourceCastaiAutoscalerDelete,
-		CustomizeDiff: resourceCastaiAutoscalerDiff,
+		DeprecationMessage: "Use castai_autoscaler_policies and castai_evictor instead. This resource will be removed in the next major version.",
+		ReadContext:       resourceCastaiAutoscalerRead,
+		CreateContext:     resourceCastaiAutoscalerCreate,
+		UpdateContext:     resourceCastaiAutoscalerUpdate,
+		DeleteContext:     resourceCastaiAutoscalerDelete,
+		CustomizeDiff:     resourceCastaiAutoscalerDiff,
 		Importer: &schema.ResourceImporter{
 			StateContext: autoscalerStateImporter,
 		},
