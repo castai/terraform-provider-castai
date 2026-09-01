@@ -143,6 +143,7 @@ func TestAccGKE_ResourceWorkloadScalingPolicy(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "jvm.0.memory.0.optimization", "true"),
 					resource.TestCheckResourceAttr(resourceName, "anomaly_detection.0.cpu_pressure.0.cpu_stall_threshold_percentage", "50"),
 					resource.TestCheckResourceAttr(resourceName, "anomaly_detection.0.cpu_pressure.0.min_pressured_pod_percentage", "30"),
+					resource.TestCheckResourceAttr(resourceName, "anomaly_detection.0.infinite_memory_scaling.0.enabled", "false"),
 					resource.TestCheckResourceAttr(resourceName, "hpa_converters.0.type", FieldHpaConverterTypeAverageValueFromOriginalRequests),
 				),
 			},
@@ -452,6 +453,9 @@ func scalingPolicyConfigUpdated(clusterName, projectID, name string) string {
 			cpu_pressure {
 				cpu_stall_threshold_percentage = 50
 				min_pressured_pod_percentage   = 30
+			}
+			infinite_memory_scaling {
+				enabled = false
 			}
 		}
 		jvm {
@@ -1567,6 +1571,58 @@ func Test_toAnomalyDetection(t *testing.T) {
 				},
 			},
 		},
+		"should return anomaly detection settings with infinite_memory_scaling enabled": {
+			args: map[string]any{
+				FieldAnomalyDetectionInfiniteMemoryScaling: []any{
+					map[string]any{
+						FieldInfiniteMemoryScalingEnabled: true,
+					},
+				},
+			},
+			exp: &sdk.WorkloadoptimizationV1AnomalyDetectionSettings{
+				InfiniteMemoryScaling: &sdk.WorkloadoptimizationV1InfiniteMemoryScalingSettings{
+					Enabled: true,
+				},
+			},
+		},
+		"should return anomaly detection settings with infinite_memory_scaling disabled": {
+			args: map[string]any{
+				FieldAnomalyDetectionInfiniteMemoryScaling: []any{
+					map[string]any{
+						FieldInfiniteMemoryScalingEnabled: false,
+					},
+				},
+			},
+			exp: &sdk.WorkloadoptimizationV1AnomalyDetectionSettings{
+				InfiniteMemoryScaling: &sdk.WorkloadoptimizationV1InfiniteMemoryScalingSettings{
+					Enabled: false,
+				},
+			},
+		},
+		"should return anomaly detection settings with both cpu_pressure and infinite_memory_scaling": {
+			args: map[string]any{
+				FieldAnomalyDetectionCpuPressure: []any{
+					map[string]any{
+						FieldCpuStallThresholdPercentage: float64(50),
+						FieldMinPressuredPodPercentage:   float64(30),
+					},
+				},
+				FieldAnomalyDetectionInfiniteMemoryScaling: []any{
+					map[string]any{
+						FieldInfiniteMemoryScalingEnabled: false,
+					},
+				},
+			},
+			exp: &sdk.WorkloadoptimizationV1AnomalyDetectionSettings{
+				CpuPressure: &sdk.WorkloadoptimizationV1CPUPressureSettings{
+					CpuStallThresholdPercentage: 50,
+					MinPressuredPodPercentage:   30,
+				},
+				InfiniteMemoryScaling: &sdk.WorkloadoptimizationV1InfiniteMemoryScalingSettings{
+					Enabled: false,
+				},
+			},
+		},
 	}
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
@@ -1604,6 +1660,64 @@ func Test_toAnomalyDetectionMap(t *testing.T) {
 				},
 			},
 		},
+		"should return anomaly detection map with infinite_memory_scaling enabled": {
+			args: &sdk.WorkloadoptimizationV1AnomalyDetectionSettings{
+				InfiniteMemoryScaling: &sdk.WorkloadoptimizationV1InfiniteMemoryScalingSettings{
+					Enabled: true,
+				},
+			},
+			exp: []map[string]any{
+				{
+					FieldAnomalyDetectionInfiniteMemoryScaling: []map[string]any{
+						{
+							FieldInfiniteMemoryScalingEnabled: true,
+						},
+					},
+				},
+			},
+		},
+		"should return anomaly detection map with infinite_memory_scaling disabled": {
+			args: &sdk.WorkloadoptimizationV1AnomalyDetectionSettings{
+				InfiniteMemoryScaling: &sdk.WorkloadoptimizationV1InfiniteMemoryScalingSettings{
+					Enabled: false,
+				},
+			},
+			exp: []map[string]any{
+				{
+					FieldAnomalyDetectionInfiniteMemoryScaling: []map[string]any{
+						{
+							FieldInfiniteMemoryScalingEnabled: false,
+						},
+					},
+				},
+			},
+		},
+		"should return anomaly detection map with both cpu_pressure and infinite_memory_scaling": {
+			args: &sdk.WorkloadoptimizationV1AnomalyDetectionSettings{
+				CpuPressure: &sdk.WorkloadoptimizationV1CPUPressureSettings{
+					CpuStallThresholdPercentage: 50,
+					MinPressuredPodPercentage:   30,
+				},
+				InfiniteMemoryScaling: &sdk.WorkloadoptimizationV1InfiniteMemoryScalingSettings{
+					Enabled: false,
+				},
+			},
+			exp: []map[string]any{
+				{
+					FieldAnomalyDetectionCpuPressure: []map[string]any{
+						{
+							FieldCpuStallThresholdPercentage: float64(50),
+							FieldMinPressuredPodPercentage:   float64(30),
+						},
+					},
+					FieldAnomalyDetectionInfiniteMemoryScaling: []map[string]any{
+						{
+							FieldInfiniteMemoryScalingEnabled: false,
+						},
+					},
+				},
+			},
+		},
 		"should return nil for empty settings": {
 			args: &sdk.WorkloadoptimizationV1AnomalyDetectionSettings{},
 			exp:  nil,
@@ -1617,6 +1731,7 @@ func Test_toAnomalyDetectionMap(t *testing.T) {
 		})
 	}
 }
+
 
 func Test_toJvm(t *testing.T) {
 	tests := map[string]struct {

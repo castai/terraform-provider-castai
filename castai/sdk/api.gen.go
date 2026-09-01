@@ -253,6 +253,12 @@ const (
 	CastaiRbacV1beta1LabelSelectorOperatorNOTIN        CastaiRbacV1beta1LabelSelectorOperator = "NOT_IN"
 )
 
+// Defines values for CastaiRbacV1beta1MemberActions.
+const (
+	ADD    CastaiRbacV1beta1MemberActions = "ADD"
+	REMOVE CastaiRbacV1beta1MemberActions = "REMOVE"
+)
+
 // Defines values for CastaiRbacV1beta1PoliciesState.
 const (
 	CastaiRbacV1beta1PoliciesStateACCEPTED CastaiRbacV1beta1PoliciesState = "ACCEPTED"
@@ -835,6 +841,8 @@ const (
 	WorkloadoptimizationV1EventTypeEVENTTYPESYSTEMOVERRIDERESET           WorkloadoptimizationV1EventType = "EVENT_TYPE_SYSTEM_OVERRIDE_RESET"
 	WorkloadoptimizationV1EventTypeEVENTTYPESYSTEMOVERRIDETRIGGERED       WorkloadoptimizationV1EventType = "EVENT_TYPE_SYSTEM_OVERRIDE_TRIGGERED"
 	WorkloadoptimizationV1EventTypeEVENTTYPEUNBOUNDMEMORYGROWTH           WorkloadoptimizationV1EventType = "EVENT_TYPE_UNBOUND_MEMORY_GROWTH"
+	WorkloadoptimizationV1EventTypeEVENTTYPEWORKLOADAUTOSCALERINSTALLED   WorkloadoptimizationV1EventType = "EVENT_TYPE_WORKLOAD_AUTOSCALER_INSTALLED"
+	WorkloadoptimizationV1EventTypeEVENTTYPEWORKLOADAUTOSCALERUNINSTALLED WorkloadoptimizationV1EventType = "EVENT_TYPE_WORKLOAD_AUTOSCALER_UNINSTALLED"
 )
 
 // Defines values for WorkloadoptimizationV1GetAgentStatusResponseAgentStatus.
@@ -1429,6 +1437,8 @@ const (
 	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPESYSTEMOVERRIDERESET           WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_SYSTEM_OVERRIDE_RESET"
 	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPESYSTEMOVERRIDETRIGGERED       WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_SYSTEM_OVERRIDE_TRIGGERED"
 	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPEUNBOUNDMEMORYGROWTH           WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_UNBOUND_MEMORY_GROWTH"
+	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPEWORKLOADAUTOSCALERINSTALLED   WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_WORKLOAD_AUTOSCALER_INSTALLED"
+	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPEWORKLOADAUTOSCALERUNINSTALLED WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_WORKLOAD_AUTOSCALER_UNINSTALLED"
 )
 
 // Defines values for WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType.
@@ -1456,6 +1466,8 @@ const (
 	EVENTTYPESYSTEMOVERRIDERESET           WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_SYSTEM_OVERRIDE_RESET"
 	EVENTTYPESYSTEMOVERRIDETRIGGERED       WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_SYSTEM_OVERRIDE_TRIGGERED"
 	EVENTTYPEUNBOUNDMEMORYGROWTH           WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_UNBOUND_MEMORY_GROWTH"
+	EVENTTYPEWORKLOADAUTOSCALERINSTALLED   WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_WORKLOAD_AUTOSCALER_INSTALLED"
+	EVENTTYPEWORKLOADAUTOSCALERUNINSTALLED WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_WORKLOAD_AUTOSCALER_UNINSTALLED"
 )
 
 // Defines values for WorkloadOptimizationAPIListWorkloadsParamsManagementOptions.
@@ -3290,6 +3302,21 @@ type CastaiRbacV1beta1GroupSubject struct {
 	Name *string `json:"name,omitempty"`
 }
 
+// CastaiRbacV1beta1GroupUpdate defines model for castai.rbac.v1beta1.GroupUpdate.
+type CastaiRbacV1beta1GroupUpdate struct {
+	// Description Description is the description of the group.
+	Description *string `json:"description,omitempty"`
+
+	// Id ID is the unique identifier of the group.
+	Id string `json:"id"`
+
+	// Members Members is a list of members.
+	Members *[]CastaiRbacV1beta1MemberUpdate `json:"members,omitempty"`
+
+	// Name Name is the name of the group.
+	Name string `json:"name"`
+}
+
 // CastaiRbacV1beta1Kind Kind represents the type of the member.
 type CastaiRbacV1beta1Kind string
 
@@ -3318,6 +3345,15 @@ type CastaiRbacV1beta1LabelSelectorRequirement struct {
 
 	// Values Values is the list of label values that the requirement applies to.
 	Values *[]string `json:"values,omitempty"`
+}
+
+// CastaiRbacV1beta1ListGroupsResponse defines model for castai.rbac.v1beta1.ListGroupsResponse.
+type CastaiRbacV1beta1ListGroupsResponse struct {
+	Groups *[]CastaiRbacV1beta1Group `json:"groups,omitempty"`
+
+	// NextPage Page defines how many and which fields should be returned.
+	NextPage   *CastaiPaginationV1beta1Page `json:"nextPage,omitempty"`
+	TotalCount *string                      `json:"totalCount,omitempty"`
 }
 
 // CastaiRbacV1beta1ListPermissionGroupsResponse ListPermissionGroupsResponse is the response message for listing available permission groups.
@@ -3361,6 +3397,24 @@ type CastaiRbacV1beta1Member struct {
 
 	// LastLoginAt LastLoginAt is the timestamp of the time when the user last time logged in.
 	LastLoginAt *time.Time `json:"lastLoginAt,omitempty"`
+}
+
+// CastaiRbacV1beta1MemberActions MemberActions represents the action that can be performed on a member.
+type CastaiRbacV1beta1MemberActions string
+
+// CastaiRbacV1beta1MemberUpdate defines model for castai.rbac.v1beta1.MemberUpdate.
+type CastaiRbacV1beta1MemberUpdate struct {
+	// Action MemberActions represents the action that can be performed on a member.
+	Action CastaiRbacV1beta1MemberActions `json:"action"`
+
+	// Email Email is the email of the member.
+	Email *string `json:"email,omitempty"`
+
+	// Id ID is the unique identifier of the member.
+	Id string `json:"id"`
+
+	// Kind Kind represents the type of the member.
+	Kind CastaiRbacV1beta1Kind `json:"kind"`
 }
 
 // CastaiRbacV1beta1OrganizationScope OrganizationScope represents the organization scope.
@@ -9576,8 +9630,10 @@ type WorkloadoptimizationV1Event struct {
 	SystemOverrideReset *WorkloadoptimizationV1SystemOverrideResetEvent `json:"systemOverrideReset,omitempty"`
 
 	// SystemOverrideTriggered SystemOverrideTriggeredEvent is emitted when CAST AI activates a system override on a workload.
-	SystemOverrideTriggered *WorkloadoptimizationV1SystemOverrideTriggeredEvent `json:"systemOverrideTriggered,omitempty"`
-	UnboundMemoryGrowth     *WorkloadoptimizationV1UnboundMemoryGrowthEvent     `json:"unboundMemoryGrowth,omitempty"`
+	SystemOverrideTriggered       *WorkloadoptimizationV1SystemOverrideTriggeredEvent       `json:"systemOverrideTriggered,omitempty"`
+	UnboundMemoryGrowth           *WorkloadoptimizationV1UnboundMemoryGrowthEvent           `json:"unboundMemoryGrowth,omitempty"`
+	WorkloadAutoscalerInstalled   *WorkloadoptimizationV1WorkloadAutoscalerInstalledEvent   `json:"workloadAutoscalerInstalled,omitempty"`
+	WorkloadAutoscalerUninstalled *WorkloadoptimizationV1WorkloadAutoscalerUninstalledEvent `json:"workloadAutoscalerUninstalled,omitempty"`
 }
 
 // WorkloadoptimizationV1EventContainer defines model for workloadoptimization.v1.EventContainer.
@@ -11840,6 +11896,16 @@ type WorkloadoptimizationV1Workload struct {
 	WorkloadOverrides        *WorkloadoptimizationV1WorkloadOverrides `json:"workloadOverrides,omitempty"`
 }
 
+// WorkloadoptimizationV1WorkloadAutoscalerInstalledEvent defines model for workloadoptimization.v1.WorkloadAutoscalerInstalledEvent.
+type WorkloadoptimizationV1WorkloadAutoscalerInstalledEvent struct {
+	Timestamp time.Time `json:"timestamp"`
+}
+
+// WorkloadoptimizationV1WorkloadAutoscalerUninstalledEvent defines model for workloadoptimization.v1.WorkloadAutoscalerUninstalledEvent.
+type WorkloadoptimizationV1WorkloadAutoscalerUninstalledEvent struct {
+	Timestamp time.Time `json:"timestamp"`
+}
+
 // WorkloadoptimizationV1WorkloadConfigUpdateV2 defines model for workloadoptimization.v1.WorkloadConfigUpdateV2.
 type WorkloadoptimizationV1WorkloadConfigUpdateV2 struct {
 	HpaConfig *WorkloadoptimizationV1HPAConfigUpdate `json:"hpaConfig,omitempty"`
@@ -12770,6 +12836,24 @@ type ExternalClusterAPITriggerResumeClusterParamsMode string
 // ExternalClusterAPIUpdateClusterTagsJSONBody defines parameters for ExternalClusterAPIUpdateClusterTags.
 type ExternalClusterAPIUpdateClusterTagsJSONBody map[string]string
 
+// RbacServiceAPIListGroupsParams defines parameters for RbacServiceAPIListGroups.
+type RbacServiceAPIListGroupsParams struct {
+	PageLimit *string `form:"page.limit,omitempty" json:"page.limit,omitempty"`
+
+	// PageCursor Cursor that defines token indicating where to start the next page.
+	// Empty value indicates to start from beginning of the dataset.
+	PageCursor *string `form:"page.cursor,omitempty" json:"page.cursor,omitempty"`
+	MemberId   *string `form:"memberId,omitempty" json:"memberId,omitempty"`
+
+	// ManagedBy managed_by filters groups by how they are managed.
+	// Valid filter values are: "console", "terraform", "idp-sync", "sso-default" and "" (empty string).
+	// Empty string matches legacy groups created before the managed_by column was introduced.
+	ManagedBy *[]string `form:"managedBy,omitempty" json:"managedBy,omitempty"`
+}
+
+// RbacServiceAPIUpdateGroupsJSONBody defines parameters for RbacServiceAPIUpdateGroups.
+type RbacServiceAPIUpdateGroupsJSONBody = []CastaiRbacV1beta1GroupUpdate
+
 // RbacServiceAPIListRoleBindingsParams defines parameters for RbacServiceAPIListRoleBindings.
 type RbacServiceAPIListRoleBindingsParams struct {
 	PageLimit *string `form:"page.limit,omitempty" json:"page.limit,omitempty"`
@@ -13596,6 +13680,9 @@ type UsersAPICreateOrganizationJSONRequestBody = CastaiUsersV1beta1Organization
 
 // UsersAPIEditOrganizationJSONRequestBody defines body for UsersAPIEditOrganization for application/json ContentType.
 type UsersAPIEditOrganizationJSONRequestBody = CastaiUsersV1beta1Organization
+
+// RbacServiceAPIUpdateGroupsJSONRequestBody defines body for RbacServiceAPIUpdateGroups for application/json ContentType.
+type RbacServiceAPIUpdateGroupsJSONRequestBody = RbacServiceAPIUpdateGroupsJSONBody
 
 // RbacServiceAPICreateGroupJSONRequestBody defines body for RbacServiceAPICreateGroup for application/json ContentType.
 type RbacServiceAPICreateGroupJSONRequestBody = CastaiRbacV1beta1CreateGroupRequestGroup
