@@ -83,6 +83,8 @@ const (
 	FieldAssignmentRules                                  = "assignment_rules"
 	FieldAnomalyDetection                                 = "anomaly_detection"
 	FieldAnomalyDetectionCpuPressure                      = "cpu_pressure"
+	FieldAnomalyDetectionInfiniteMemoryScaling            = "infinite_memory_scaling"
+	FieldInfiniteMemoryScalingEnabled                     = "enabled"
 	FieldCpuStallThresholdPercentage                      = "cpu_stall_threshold_percentage"
 	FieldMinPressuredPodPercentage                        = "min_pressured_pod_percentage"
 	FieldConstraints                                      = "constraints"
@@ -462,6 +464,22 @@ It can be either:
 										Required:         true,
 										Description:      "Percentage (0-100) of pods that must be experiencing pressure for the detector to trigger.",
 										ValidateDiagFunc: validation.ToDiagFunc(validation.FloatBetween(0, 100)),
+									},
+								},
+							},
+						},
+						FieldAnomalyDetectionInfiniteMemoryScaling: {
+							Type:        schema.TypeList,
+							Optional:    true,
+							MaxItems:    1,
+							Description: "Configures the infinite memory scaling detector. When enabled, the detection is performed for workloads using this scaling policy.",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									FieldInfiniteMemoryScalingEnabled: {
+										Type:        schema.TypeBool,
+										Optional:    true,
+										Default:     true,
+										Description: "Opts the workload into infinite memory scaling detection. When false, the detector skips this workload. Defaults to true.",
 									},
 								},
 							},
@@ -2097,6 +2115,11 @@ func toAnomalyDetection(m map[string]any) *sdk.WorkloadoptimizationV1AnomalyDete
 			MinPressuredPodPercentage:   cpuPressure[FieldMinPressuredPodPercentage].(float64),
 		}
 	}
+	if ims := getFirstElem(m, FieldAnomalyDetectionInfiniteMemoryScaling); ims != nil {
+		result.InfiniteMemoryScaling = &sdk.WorkloadoptimizationV1InfiniteMemoryScalingSettings{
+			Enabled: ims[FieldInfiniteMemoryScalingEnabled].(bool),
+		}
+	}
 	return result
 }
 
@@ -2110,6 +2133,13 @@ func toAnomalyDetectionMap(s *sdk.WorkloadoptimizationV1AnomalyDetectionSettings
 			{
 				FieldCpuStallThresholdPercentage: s.CpuPressure.CpuStallThresholdPercentage,
 				FieldMinPressuredPodPercentage:   s.CpuPressure.MinPressuredPodPercentage,
+			},
+		}
+	}
+	if s.InfiniteMemoryScaling != nil {
+		m[FieldAnomalyDetectionInfiniteMemoryScaling] = []map[string]any{
+			{
+				FieldInfiniteMemoryScalingEnabled: s.InfiniteMemoryScaling.Enabled,
 			},
 		}
 	}

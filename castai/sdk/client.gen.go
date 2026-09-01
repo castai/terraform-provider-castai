@@ -583,6 +583,14 @@ type ClientInterface interface {
 	// InventoryAPISyncClusterResources request
 	InventoryAPISyncClusterResources(ctx context.Context, organizationId string, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// RbacServiceAPIListGroups request
+	RbacServiceAPIListGroups(ctx context.Context, organizationId string, params *RbacServiceAPIListGroupsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// RbacServiceAPIUpdateGroupsWithBody request with any body
+	RbacServiceAPIUpdateGroupsWithBody(ctx context.Context, organizationId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	RbacServiceAPIUpdateGroups(ctx context.Context, organizationId string, body RbacServiceAPIUpdateGroupsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// RbacServiceAPICreateGroupWithBody request with any body
 	RbacServiceAPICreateGroupWithBody(ctx context.Context, organizationId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -3201,6 +3209,42 @@ func (c *Client) UsersAPIEditOrganization(ctx context.Context, id string, body U
 
 func (c *Client) InventoryAPISyncClusterResources(ctx context.Context, organizationId string, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewInventoryAPISyncClusterResourcesRequest(c.Server, organizationId, clusterId)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) RbacServiceAPIListGroups(ctx context.Context, organizationId string, params *RbacServiceAPIListGroupsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewRbacServiceAPIListGroupsRequest(c.Server, organizationId, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) RbacServiceAPIUpdateGroupsWithBody(ctx context.Context, organizationId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewRbacServiceAPIUpdateGroupsRequestWithBody(c.Server, organizationId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) RbacServiceAPIUpdateGroups(ctx context.Context, organizationId string, body RbacServiceAPIUpdateGroupsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewRbacServiceAPIUpdateGroupsRequest(c.Server, organizationId, body)
 	if err != nil {
 		return nil, err
 	}
@@ -13708,6 +13752,157 @@ func NewInventoryAPISyncClusterResourcesRequest(server string, organizationId st
 	return req, nil
 }
 
+// NewRbacServiceAPIListGroupsRequest generates requests for RbacServiceAPIListGroups
+func NewRbacServiceAPIListGroupsRequest(server string, organizationId string, params *RbacServiceAPIListGroupsParams) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "organizationId", runtime.ParamLocationPath, organizationId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/organizations/%s/groups", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if params.PageLimit != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "page.limit", runtime.ParamLocationQuery, *params.PageLimit); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.PageCursor != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "page.cursor", runtime.ParamLocationQuery, *params.PageCursor); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.MemberId != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "memberId", runtime.ParamLocationQuery, *params.MemberId); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.ManagedBy != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "managedBy", runtime.ParamLocationQuery, *params.ManagedBy); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewRbacServiceAPIUpdateGroupsRequest calls the generic RbacServiceAPIUpdateGroups builder with application/json body
+func NewRbacServiceAPIUpdateGroupsRequest(server string, organizationId string, body RbacServiceAPIUpdateGroupsJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewRbacServiceAPIUpdateGroupsRequestWithBody(server, organizationId, "application/json", bodyReader)
+}
+
+// NewRbacServiceAPIUpdateGroupsRequestWithBody generates requests for RbacServiceAPIUpdateGroups with any type of body
+func NewRbacServiceAPIUpdateGroupsRequestWithBody(server string, organizationId string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "organizationId", runtime.ParamLocationPath, organizationId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/organizations/%s/groups", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("PATCH", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
 // NewRbacServiceAPICreateGroupRequest calls the generic RbacServiceAPICreateGroup builder with application/json body
 func NewRbacServiceAPICreateGroupRequest(server string, organizationId string, body RbacServiceAPICreateGroupJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
@@ -22562,6 +22757,14 @@ type ClientWithResponsesInterface interface {
 	// InventoryAPISyncClusterResources request
 	InventoryAPISyncClusterResourcesWithResponse(ctx context.Context, organizationId string, clusterId string) (*InventoryAPISyncClusterResourcesResponse, error)
 
+	// RbacServiceAPIListGroups request
+	RbacServiceAPIListGroupsWithResponse(ctx context.Context, organizationId string, params *RbacServiceAPIListGroupsParams) (*RbacServiceAPIListGroupsResponse, error)
+
+	// RbacServiceAPIUpdateGroups request  with any body
+	RbacServiceAPIUpdateGroupsWithBodyWithResponse(ctx context.Context, organizationId string, contentType string, body io.Reader) (*RbacServiceAPIUpdateGroupsResponse, error)
+
+	RbacServiceAPIUpdateGroupsWithResponse(ctx context.Context, organizationId string, body RbacServiceAPIUpdateGroupsJSONRequestBody) (*RbacServiceAPIUpdateGroupsResponse, error)
+
 	// RbacServiceAPICreateGroup request  with any body
 	RbacServiceAPICreateGroupWithBodyWithResponse(ctx context.Context, organizationId string, contentType string, body io.Reader) (*RbacServiceAPICreateGroupResponse, error)
 
@@ -27094,6 +27297,66 @@ func (r InventoryAPISyncClusterResourcesResponse) StatusCode() int {
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
 func (r InventoryAPISyncClusterResourcesResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type RbacServiceAPIListGroupsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *CastaiRbacV1beta1ListGroupsResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r RbacServiceAPIListGroupsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r RbacServiceAPIListGroupsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r RbacServiceAPIListGroupsResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type RbacServiceAPIUpdateGroupsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *[]CastaiRbacV1beta1Group
+}
+
+// Status returns HTTPResponse.Status
+func (r RbacServiceAPIUpdateGroupsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r RbacServiceAPIUpdateGroupsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r RbacServiceAPIUpdateGroupsResponse) GetBody() []byte {
 	return r.Body
 }
 
@@ -32596,6 +32859,32 @@ func (c *ClientWithResponses) InventoryAPISyncClusterResourcesWithResponse(ctx c
 	return ParseInventoryAPISyncClusterResourcesResponse(rsp)
 }
 
+// RbacServiceAPIListGroupsWithResponse request returning *RbacServiceAPIListGroupsResponse
+func (c *ClientWithResponses) RbacServiceAPIListGroupsWithResponse(ctx context.Context, organizationId string, params *RbacServiceAPIListGroupsParams) (*RbacServiceAPIListGroupsResponse, error) {
+	rsp, err := c.RbacServiceAPIListGroups(ctx, organizationId, params)
+	if err != nil {
+		return nil, err
+	}
+	return ParseRbacServiceAPIListGroupsResponse(rsp)
+}
+
+// RbacServiceAPIUpdateGroupsWithBodyWithResponse request with arbitrary body returning *RbacServiceAPIUpdateGroupsResponse
+func (c *ClientWithResponses) RbacServiceAPIUpdateGroupsWithBodyWithResponse(ctx context.Context, organizationId string, contentType string, body io.Reader) (*RbacServiceAPIUpdateGroupsResponse, error) {
+	rsp, err := c.RbacServiceAPIUpdateGroupsWithBody(ctx, organizationId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseRbacServiceAPIUpdateGroupsResponse(rsp)
+}
+
+func (c *ClientWithResponses) RbacServiceAPIUpdateGroupsWithResponse(ctx context.Context, organizationId string, body RbacServiceAPIUpdateGroupsJSONRequestBody) (*RbacServiceAPIUpdateGroupsResponse, error) {
+	rsp, err := c.RbacServiceAPIUpdateGroups(ctx, organizationId, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseRbacServiceAPIUpdateGroupsResponse(rsp)
+}
+
 // RbacServiceAPICreateGroupWithBodyWithResponse request with arbitrary body returning *RbacServiceAPICreateGroupResponse
 func (c *ClientWithResponses) RbacServiceAPICreateGroupWithBodyWithResponse(ctx context.Context, organizationId string, contentType string, body io.Reader) (*RbacServiceAPICreateGroupResponse, error) {
 	rsp, err := c.RbacServiceAPICreateGroupWithBody(ctx, organizationId, contentType, body)
@@ -37599,6 +37888,58 @@ func ParseInventoryAPISyncClusterResourcesResponse(rsp *http.Response) (*Invento
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest map[string]interface{}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseRbacServiceAPIListGroupsResponse parses an HTTP response from a RbacServiceAPIListGroupsWithResponse call
+func ParseRbacServiceAPIListGroupsResponse(rsp *http.Response) (*RbacServiceAPIListGroupsResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &RbacServiceAPIListGroupsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest CastaiRbacV1beta1ListGroupsResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseRbacServiceAPIUpdateGroupsResponse parses an HTTP response from a RbacServiceAPIUpdateGroupsWithResponse call
+func ParseRbacServiceAPIUpdateGroupsResponse(rsp *http.Response) (*RbacServiceAPIUpdateGroupsResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &RbacServiceAPIUpdateGroupsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest []CastaiRbacV1beta1Group
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
