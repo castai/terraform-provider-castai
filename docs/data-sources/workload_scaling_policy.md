@@ -97,6 +97,7 @@ data "castai_workload_scaling_policy" "all" {
 Read-Only:
 
 - `cpu_pressure` (List of Object) (see [below for nested schema](#nestedobjatt--anomaly_detection--cpu_pressure))
+- `infinite_memory_scaling` (List of Object) (see [below for nested schema](#nestedobjatt--anomaly_detection--infinite_memory_scaling))
 
 <a id="nestedobjatt--anomaly_detection--cpu_pressure"></a>
 ### Nested Schema for `anomaly_detection.cpu_pressure`
@@ -105,6 +106,14 @@ Read-Only:
 
 - `cpu_stall_threshold_percentage` (Number)
 - `min_pressured_pod_percentage` (Number)
+
+
+<a id="nestedobjatt--anomaly_detection--infinite_memory_scaling"></a>
+### Nested Schema for `anomaly_detection.infinite_memory_scaling`
+
+Read-Only:
+
+- `enabled` (Boolean)
 
 
 
