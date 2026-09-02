@@ -163,6 +163,7 @@ Optional:
 - `imds_v1` (Boolean) When the value is true both IMDSv1 and IMDSv2 are enabled. Setting the value to false disables permanently IMDSv1 and might affect legacy workloads running on the node created with this configuration. The default is true if the flag isn't provided
 - `ips_per_prefix` (Number) Number of IPs per prefix to be used for calculating max pods. For IPv4 it should be 16. More info: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-prefix-eni.html#ec2-prefix-basics
 - `key_pair_id` (String) AWS key pair ID to be used for CAST provisioned nodes. Has priority over ssh_public_key
+- `local_storage` (Block List, Max: 1) Local storage configuration for CAST provisioned nodes (see [below for nested schema](#nestedblock--eks--local_storage))
 - `max_pods_per_node_formula` (String) Formula to calculate the maximum number of pods that can be run on a node. The following list of variables will be bound to a number before evaluating and can be used in the formula: NUM_MAX_NET_INTERFACES, NUM_IP_PER_INTERFACE, NUM_IP_PER_PREFIX, NUM_CPU, NUM_RAM_GB .
 - `node_group_arn` (String) Cluster's node group ARN used for CAST provisioned node pools. Required for hibernate/resume functionality
 - `target_group` (Block List) AWS target groups configuration for CAST provisioned nodes (see [below for nested schema](#nestedblock--eks--target_group))
@@ -171,6 +172,27 @@ Optional:
 - `volume_kms_key_arn` (String) AWS KMS key ARN for encrypting EBS volume attached to the node
 - `volume_throughput` (Number) AWS EBS volume throughput in MiB/s to be used for CAST provisioned nodes
 - `volume_type` (String) AWS EBS volume type to be used for CAST provisioned nodes. One of: gp3, gp2, io1, io2
+
+<a id="nestedblock--eks--local_storage"></a>
+### Nested Schema for `eks.local_storage`
+
+Optional:
+
+- `customer_managed` (Block List, Max: 1) Customer managed local storage configuration (see [below for nested schema](#nestedblock--eks--local_storage--customer_managed))
+
+<a id="nestedblock--eks--local_storage--customer_managed"></a>
+### Nested Schema for `eks.local_storage.customer_managed`
+
+Required:
+
+- `ephemeral_storage_percent` (Number) Percentage of local storage exposed as ephemeral-storage, in the range 0..100.
+
+Optional:
+
+- `description` (String) Human readable description of the customer managed storage configuration.
+- `reserved_gib` (Number) Reserved local storage in GiB that is not available for workloads.
+
+
 
 <a id="nestedblock--eks--target_group"></a>
 ### Nested Schema for `eks.target_group`

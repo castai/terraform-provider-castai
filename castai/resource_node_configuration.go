@@ -21,35 +21,42 @@ import (
 )
 
 const (
-	FieldNodeConfigurationName                         = "name"
-	FieldNodeConfigurationDiskCpuRatio                 = "disk_cpu_ratio"
-	FieldNodeConfigurationMinDiskSize                  = "min_disk_size"
-	FieldNodeConfigurationDrainTimeoutSec              = "drain_timeout_sec"
-	FieldNodeConfigurationSubnets                      = "subnets"
-	FieldNodeConfigurationSSHPublicKey                 = "ssh_public_key"
-	FieldNodeConfigurationImage                        = "image"
-	FieldNodeConfigurationTags                         = "tags"
-	FieldNodeConfigurationInitScript                   = "init_script"
-	FieldNodeConfigurationContainerRuntime             = "container_runtime"
-	FieldNodeConfigurationDockerConfig                 = "docker_config"
-	FieldNodeConfigurationKubeletConfig                = "kubelet_config"
-	FieldNodeConfigurationAKS                          = "aks"
-	FieldNodeConfigurationEKS                          = "eks"
-	FieldNodeConfigurationKOPS                         = "kops"
-	FieldNodeConfigurationGKE                          = "gke"
-	FieldNodeConfigurationEKSTargetGroup               = "target_group"
-	FieldNodeConfigurationAKSImageFamily               = "aks_image_family"
-	FieldNodeConfigurationAKSEphemeralOSDisk           = "ephemeral_os_disk"
-	FieldNodeConfigurationEKSImageFamily               = "eks_image_family"
-	FieldNodeConfigurationLoadbalancers                = "loadbalancers"
-	FieldNodeConfigurationAKSLoadbalancerIPPools       = "ip_based_backend_pools"
-	FieldNodeConfigurationAKSLoadbalancerNICPools      = "nic_based_backend_pools"
-	FieldNodeConfigurationAKSNetworkSecurityGroup      = "network_security_group"
-	FieldNodeConfigurationAKSApplicationSecurityGroups = "application_security_groups"
-	FieldNodeConfigurationAKSPublicIP                  = "public_ip"
-	FieldNodeConfigurationAKSPodSubnetID               = "pod_subnet_id"
-	FieldNodeConfigurationAKSEncryptionAtHost          = "enable_encryption_at_host"
-	FieldNodeConfigurationAKSAcceleratedNetworking     = "accelerated_networking"
+	FieldNodeConfigurationName                                   = "name"
+	FieldNodeConfigurationDiskCpuRatio                           = "disk_cpu_ratio"
+	FieldNodeConfigurationMinDiskSize                            = "min_disk_size"
+	FieldNodeConfigurationDrainTimeoutSec                        = "drain_timeout_sec"
+	FieldNodeConfigurationSubnets                                = "subnets"
+	FieldNodeConfigurationSSHPublicKey                           = "ssh_public_key"
+	FieldNodeConfigurationImage                                  = "image"
+	FieldNodeConfigurationTags                                   = "tags"
+	FieldNodeConfigurationInitScript                             = "init_script"
+	FieldNodeConfigurationContainerRuntime                       = "container_runtime"
+	FieldNodeConfigurationDockerConfig                           = "docker_config"
+	FieldNodeConfigurationKubeletConfig                          = "kubelet_config"
+	FieldNodeConfigurationAKS                                    = "aks"
+	FieldNodeConfigurationEKS                                    = "eks"
+	FieldNodeConfigurationKOPS                                   = "kops"
+	FieldNodeConfigurationGKE                                    = "gke"
+	FieldNodeConfigurationEKSTargetGroup                         = "target_group"
+	FieldNodeConfigurationAKSImageFamily                         = "aks_image_family"
+	FieldNodeConfigurationAKSEphemeralOSDisk                     = "ephemeral_os_disk"
+	FieldNodeConfigurationEKSImageFamily                         = "eks_image_family"
+	FieldNodeConfigurationLoadbalancers                          = "loadbalancers"
+	FieldNodeConfigurationAKSLoadbalancerIPPools                 = "ip_based_backend_pools"
+	FieldNodeConfigurationAKSLoadbalancerNICPools                = "nic_based_backend_pools"
+	FieldNodeConfigurationAKSNetworkSecurityGroup                = "network_security_group"
+	FieldNodeConfigurationAKSApplicationSecurityGroups           = "application_security_groups"
+	FieldNodeConfigurationAKSPublicIP                            = "public_ip"
+	FieldNodeConfigurationAKSPodSubnetID                         = "pod_subnet_id"
+	FieldNodeConfigurationAKSEncryptionAtHost                    = "enable_encryption_at_host"
+	FieldNodeConfigurationAKSAcceleratedNetworking               = "accelerated_networking"
+	FieldNodeConfigurationEKSLocalStorage                        = "local_storage"
+	FieldNodeConfigurationEKSCustomerManaged                     = "customer_managed"
+	FieldNodeConfigurationSelfHostedWithEC2NodesLocalStorage     = "local_storage"
+	FieldNodeConfigurationSelfHostedWithEC2NodesCustomerManaged  = "customer_managed"
+	FieldNodeConfigurationCustomerManagedEphemeralStoragePercent = "ephemeral_storage_percent"
+	FieldNodeConfigurationCustomerManagedReservedGib             = "reserved_gib"
+	FieldNodeConfigurationCustomerManagedDescription             = "description"
 )
 
 const (
@@ -327,6 +334,25 @@ func resourceNodeConfiguration() *schema.Resource {
 							Optional:         true,
 							Description:      "Number of ENA queues per network interface.",
 							ValidateDiagFunc: validation.ToDiagFunc(validation.IntAtLeast(1)),
+						},
+						FieldNodeConfigurationEKSLocalStorage: {
+							Type:        schema.TypeList,
+							Optional:    true,
+							MaxItems:    1,
+							Description: "Local storage configuration for CAST provisioned nodes",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									FieldNodeConfigurationEKSCustomerManaged: {
+										Type:        schema.TypeList,
+										Optional:    true,
+										MaxItems:    1,
+										Description: "Customer managed local storage configuration",
+										Elem: &schema.Resource{
+											Schema: customerManagedLocalStorageFields(),
+										},
+									},
+								},
+							},
 						},
 					},
 				},
@@ -960,6 +986,61 @@ func resourceNodeConfigurationDelete(ctx context.Context, d *schema.ResourceData
 	return nil
 }
 
+func customerManagedLocalStorageFields() map[string]*schema.Schema {
+	return map[string]*schema.Schema{
+		FieldNodeConfigurationCustomerManagedEphemeralStoragePercent: {
+			Type:             schema.TypeInt,
+			Required:         true,
+			ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(0, 100)),
+			Description:      "Percentage of local storage exposed as ephemeral-storage, in the range 0..100.",
+		},
+		FieldNodeConfigurationCustomerManagedReservedGib: {
+			Type:             schema.TypeInt,
+			Optional:         true,
+			ValidateDiagFunc: validation.ToDiagFunc(validation.IntAtLeast(0)),
+			Description:      "Reserved local storage in GiB that is not available for workloads.",
+		},
+		FieldNodeConfigurationCustomerManagedDescription: {
+			Type:        schema.TypeString,
+			Optional:    true,
+			Description: "Human readable description of the customer managed storage configuration.",
+		},
+	}
+}
+
+func toCustomerManagedLocalStorage(obj map[string]interface{}) *sdk.NodeconfigV1CustomerManagedLocalStorage {
+	if obj == nil {
+		return nil
+	}
+
+	out := &sdk.NodeconfigV1CustomerManagedLocalStorage{}
+	if v, ok := obj[FieldNodeConfigurationCustomerManagedEphemeralStoragePercent].(int); ok {
+		out.EphemeralStoragePercent = toPtr(int32(v))
+	}
+	if v, ok := obj[FieldNodeConfigurationCustomerManagedReservedGib].(int); ok && v > 0 {
+		out.ReservedGib = toPtr(int64(v))
+	}
+	if v, ok := obj[FieldNodeConfigurationCustomerManagedDescription].(string); ok && v != "" {
+		out.Description = toPtr(v)
+	}
+	return out
+}
+
+func flattenCustomerManagedLocalStorage(config *sdk.NodeconfigV1CustomerManagedLocalStorage) map[string]interface{} {
+	m := map[string]interface{}{}
+	if config == nil {
+		return m
+	}
+	m[FieldNodeConfigurationCustomerManagedEphemeralStoragePercent] = config.EphemeralStoragePercent
+	if v := config.ReservedGib; v != nil {
+		m[FieldNodeConfigurationCustomerManagedReservedGib] = *v
+	}
+	if v := config.Description; v != nil {
+		m[FieldNodeConfigurationCustomerManagedDescription] = *v
+	}
+	return m
+}
+
 func toEKSConfig(obj map[string]interface{}) *sdk.NodeconfigV1EKSConfig {
 	if obj == nil {
 		return nil
@@ -1036,6 +1117,15 @@ func toEKSConfig(obj map[string]interface{}) *sdk.NodeconfigV1EKSConfig {
 
 	if v, ok := obj["ena_queue_count_per_interface"].(int); ok && v != 0 {
 		out.EnaQueueCountPerInterface = toPtr(int32(v))
+	}
+
+	if v, ok := obj[FieldNodeConfigurationEKSLocalStorage].([]interface{}); ok && len(v) > 0 && v[0] != nil {
+		ls := v[0].(map[string]interface{})
+		if cm, ok := ls[FieldNodeConfigurationEKSCustomerManaged].([]interface{}); ok && len(cm) > 0 && cm[0] != nil {
+			if c := toCustomerManagedLocalStorage(cm[0].(map[string]interface{})); c != nil {
+				out.LocalStorage = &sdk.NodeconfigV1LocalStorageTopology{CustomerManaged: c}
+			}
+		}
 	}
 
 	return out
@@ -1136,6 +1226,14 @@ func flattenEKSConfig(config *sdk.NodeconfigV1EKSConfig) []map[string]interface{
 
 	if v := config.EnaQueueCountPerInterface; v != nil {
 		m["ena_queue_count_per_interface"] = *config.EnaQueueCountPerInterface
+	}
+
+	if ls := config.LocalStorage; ls != nil {
+		lsMap := map[string]interface{}{}
+		if cm := ls.CustomerManaged; cm != nil {
+			lsMap[FieldNodeConfigurationEKSCustomerManaged] = []map[string]interface{}{flattenCustomerManagedLocalStorage(cm)}
+		}
+		m[FieldNodeConfigurationEKSLocalStorage] = []map[string]interface{}{lsMap}
 	}
 
 	return []map[string]interface{}{m}
