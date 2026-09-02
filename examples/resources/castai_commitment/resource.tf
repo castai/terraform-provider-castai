@@ -66,13 +66,14 @@ resource "castai_commitment" "gcp_capacity_reservation" {
   start_time = "2026-01-01T00:00:00Z"
 
   gcp_capacity_reservation_details = {
-    id                   = "my-reservation"
-    self_link            = "https://www.googleapis.com/compute/v1/projects/my-project/zones/us-central1-a/reservations/my-reservation"
-    project_id           = "my-project"
-    zone                 = "us-central1-a"
-    instance_type        = "a2-highgpu-1g"
-    total_instance_count = 4
-    state                = "READY"
+    id                              = "my-reservation"
+    self_link                       = "https://www.googleapis.com/compute/v1/projects/my-project/zones/us-central1-a/reservations/my-reservation"
+    project_id                      = "my-project"
+    zone                            = "us-central1-a"
+    instance_type                   = "a2-highgpu-1g"
+    total_instance_count            = 4
+    specific_reservation_required   = true
+    state                           = "READY"
 
     accelerators = [
       {
