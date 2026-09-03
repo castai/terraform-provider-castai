@@ -32,12 +32,6 @@ module "eks" {
       max_size      = 5
       min_size      = 2
       desired_size  = 2
-
-      metadata_options = {
-        http_endpoint               = "enabled"
-        http_tokens                 = "required"
-        http_put_response_hop_limit = 2
-      }
     }
   }
 
@@ -47,12 +41,6 @@ module "eks" {
       min_size     = 1
       max_size     = 10
       desired_size = 1
-
-      metadata_options = {
-        http_endpoint               = "enabled"
-        http_tokens                 = "required"
-        http_put_response_hop_limit = 2
-      }
 
       instance_types = ["t3.large"]
       capacity_type  = "SPOT"
