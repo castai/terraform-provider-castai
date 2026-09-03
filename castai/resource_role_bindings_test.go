@@ -291,7 +291,7 @@ func TestRoleBindingsUpdateContext(t *testing.T) {
 
 		mockClient.EXPECT().
 			RbacServiceAPIUpdateRoleBinding(gomock.Any(), organizationID, roleBindingID, gomock.Any()).
-			DoAndReturn(func(ctx context.Context, reqOrgID string, reqRoleBindingID string, req sdk.RbacServiceAPIUpdateRoleBindingJSONRequestBody) (*http.Response, error) {
+			DoAndReturn(func(ctx context.Context, reqOrgID string, reqRoleBindingID string, req sdk.RbacServiceAPIUpdateRoleBindingJSONRequestBody, _ ...sdk.RequestEditorFn) (*http.Response, error) {
 				r.Equal(organizationID, reqOrgID)
 				r.Equal(roleBindingID, reqRoleBindingID)
 
@@ -386,7 +386,7 @@ func TestRoleBindingsUpdateContext(t *testing.T) {
 
 		mockClient.EXPECT().
 			RbacServiceAPIUpdateRoleBinding(gomock.Any(), organizationID, roleBindingID, gomock.Any()).
-			DoAndReturn(func(ctx context.Context, reqOrgID string, reqRoleBindingID string, req sdk.RbacServiceAPIUpdateRoleBindingJSONRequestBody) (*http.Response, error) {
+			DoAndReturn(func(ctx context.Context, reqOrgID string, reqRoleBindingID string, req sdk.RbacServiceAPIUpdateRoleBindingJSONRequestBody, _ ...sdk.RequestEditorFn) (*http.Response, error) {
 				r.Equal(organizationID, reqOrgID)
 				r.Equal(roleBindingID, reqRoleBindingID)
 
@@ -467,7 +467,7 @@ func TestRoleBindingsCreateContext(t *testing.T) {
 
 		mockClient.EXPECT().
 			RbacServiceAPICreateRoleBindings(gomock.Any(), organizationID, gomock.Any()).
-			DoAndReturn(func(ctx context.Context, reqOrgID string, req sdk.RbacServiceAPICreateRoleBindingsJSONRequestBody) (*http.Response, error) {
+			DoAndReturn(func(ctx context.Context, reqOrgID string, req sdk.RbacServiceAPICreateRoleBindingsJSONRequestBody, _ ...sdk.RequestEditorFn) (*http.Response, error) {
 				r.Equal(organizationID, reqOrgID)
 
 				return &http.Response{
@@ -531,7 +531,7 @@ func TestRoleBindingsCreateContext(t *testing.T) {
 
 		mockClient.EXPECT().
 			RbacServiceAPICreateRoleBindings(gomock.Any(), organizationID, gomock.Any()).
-			DoAndReturn(func(ctx context.Context, reqOrgID string, req sdk.RbacServiceAPICreateRoleBindingsJSONRequestBody) (*http.Response, error) {
+			DoAndReturn(func(ctx context.Context, reqOrgID string, req sdk.RbacServiceAPICreateRoleBindingsJSONRequestBody, _ ...sdk.RequestEditorFn) (*http.Response, error) {
 				r.Equal(organizationID, reqOrgID)
 
 				return &http.Response{
@@ -649,7 +649,7 @@ func TestRoleBindingsDeleteContext(t *testing.T) {
 
 		mockClient.EXPECT().
 			RbacServiceAPIDeleteRoleBinding(gomock.Any(), organizationID, roleBindingID, gomock.Any()).
-			DoAndReturn(func(ctx context.Context, reqOrgID string, reqRoleBindingID string) (*http.Response, error) {
+			DoAndReturn(func(ctx context.Context, reqOrgID string, reqRoleBindingID string, _ ...sdk.RequestEditorFn) (*http.Response, error) {
 				r.Equal(organizationID, reqOrgID)
 				r.Equal(roleBindingID, reqRoleBindingID)
 
@@ -693,7 +693,7 @@ func TestRoleBindingsDeleteContext(t *testing.T) {
 
 		mockClient.EXPECT().
 			RbacServiceAPIDeleteRoleBinding(gomock.Any(), organizationID, roleBindingID, gomock.Any()).
-			DoAndReturn(func(ctx context.Context, reqOrgID string, reqRoleBindingID string) (*http.Response, error) {
+			DoAndReturn(func(ctx context.Context, reqOrgID string, reqRoleBindingID string, _ ...sdk.RequestEditorFn) (*http.Response, error) {
 				r.Equal(organizationID, reqOrgID)
 				r.Equal(roleBindingID, reqRoleBindingID)
 
@@ -868,7 +868,7 @@ func TestRoleBindingsUpdateContext_MultipleScopes(t *testing.T) {
 
 		mockClient.EXPECT().
 			RbacServiceAPIUpdateRoleBinding(gomock.Any(), organizationID, roleBindingID, gomock.Any()).
-			DoAndReturn(func(ctx context.Context, reqOrgID string, reqRoleBindingID string, req sdk.RbacServiceAPIUpdateRoleBindingJSONRequestBody) (*http.Response, error) {
+			DoAndReturn(func(ctx context.Context, reqOrgID string, reqRoleBindingID string, req sdk.RbacServiceAPIUpdateRoleBindingJSONRequestBody, _ ...sdk.RequestEditorFn) (*http.Response, error) {
 				r.Equal(organizationID, reqOrgID)
 				r.Equal(roleBindingID, reqRoleBindingID)
 
@@ -976,7 +976,7 @@ func TestRoleBindingsCreateContext_MultipleScopes(t *testing.T) {
 
 		mockClient.EXPECT().
 			RbacServiceAPICreateRoleBindings(gomock.Any(), organizationID, gomock.Any()).
-			DoAndReturn(func(ctx context.Context, reqOrgID string, req sdk.RbacServiceAPICreateRoleBindingsJSONRequestBody) (*http.Response, error) {
+			DoAndReturn(func(ctx context.Context, reqOrgID string, req sdk.RbacServiceAPICreateRoleBindingsJSONRequestBody, _ ...sdk.RequestEditorFn) (*http.Response, error) {
 				r.Equal(organizationID, reqOrgID)
 
 				// Verify the request has 2 scopes

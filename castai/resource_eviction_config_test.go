@@ -1,187 +1,195 @@
 package castai
 
 import (
-	"bytes"
 	"context"
 	"fmt"
 	"io"
 	"net/http"
 	"testing"
 
-	"github.com/golang/mock/gomock"
 	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/samber/lo"
+	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 
-	"github.com/castai/terraform-provider-castai/castai/sdk"
-	mock_sdk "github.com/castai/terraform-provider-castai/castai/sdk/mock"
+	"github.com/castai/terraform-provider-castai/castai/sdk/workload_eviction"
+	mock_workload_eviction "github.com/castai/terraform-provider-castai/castai/sdk/workload_eviction/mock"
 )
 
 func TestEvictionConfig_ReadContext(t *testing.T) {
-
-	mockctrl := gomock.NewController(t)
-	mockClient := mock_sdk.NewMockClientInterface(mockctrl)
-
-	ctx := context.Background()
-	provider := &ProviderConfig{
-		api: &sdk.ClientWithResponses{
-			ClientInterface: mockClient,
-		},
-	}
 	clusterId := "b6bfc074-a267-400f-b8f1-db0850c369b1"
-
-	resource := resourceEvictionConfig()
-	val := cty.ObjectVal(map[string]cty.Value{
-		FieldClusterId: cty.StringVal(clusterId),
-	})
-	initialState := terraform.NewInstanceStateShimmedFromValue(val, 0)
+	ctx := context.Background()
 
 	tests := map[string]struct {
-		data     string
+		data     *workload_eviction.AdvancedConfig
 		testFunc func(*testing.T, diag.Diagnostics, *schema.ResourceData)
 	}{
 		"should work with empty config": {
-			data: `{"evictionConfig":[]}`,
+			data: &workload_eviction.AdvancedConfig{EvictionConfig: []workload_eviction.EvictionConfig{}},
 			testFunc: func(t *testing.T, res diag.Diagnostics, data *schema.ResourceData) {
 				r := require.New(t)
-				r.Nil(res)
+				r.Empty(res)
 				r.False(res.HasError())
-				eac, isOK := data.GetOk(FieldEvictorAdvancedConfig)
-				r.False(isOK)
-				fmt.Printf("is not %T, %+v", eac, eac)
+				eac := data.Get(FieldEvictorAdvancedConfig)
 				d, ok := eac.([]interface{})
 				r.True(ok)
 				r.Len(d, 0)
-
 			},
 		},
 		"should read config": {
-			data: `{"evictionConfig":[{"podSelector":{"kind":"Job","labelSelector":{"matchLabels":{"key1":"value1"}}},"settings":{"aggressive":{"enabled":true}}}]}`,
+			data: &workload_eviction.AdvancedConfig{EvictionConfig: []workload_eviction.EvictionConfig{
+				{
+					PodSelector: &workload_eviction.PodSelector{
+						Kind: lo.ToPtr("Job"),
+						LabelSelector: &workload_eviction.LabelSelector{
+							MatchLabels: &map[string]string{"key1": "value1"},
+						},
+					},
+					Settings: workload_eviction.EvictionSettings{
+						Aggressive: &workload_eviction.EvictionSettingsSettingEnabled{Enabled: true},
+					},
+				},
+			}},
 			testFunc: func(t *testing.T, res diag.Diagnostics, data *schema.ResourceData) {
 				r := require.New(t)
-				r.Nil(res)
+				r.Empty(res)
 				r.False(res.HasError())
-				eac, isOK := data.GetOk(FieldEvictorAdvancedConfig)
-				r.True(isOK)
+				eac := data.Get(FieldEvictorAdvancedConfig)
 				r.NotNil(eac)
-				podSelectorKind, isOK := data.GetOk(fmt.Sprintf("%s.0.%s.0.kind", FieldEvictorAdvancedConfig, FieldPodSelector))
-				r.True(isOK)
-				r.NotNil(podSelectorKind)
+				podSelectorKind := data.Get(fmt.Sprintf("%s.0.%s.0.kind", FieldEvictorAdvancedConfig, FieldPodSelector))
 				r.Equal("Job", podSelectorKind)
-				podSelectorLabelValue, isOK := data.GetOk(fmt.Sprintf("%s.0.%s.0.%s.key1", FieldEvictorAdvancedConfig, FieldPodSelector, FieldMatchLabels))
-				r.True(isOK)
-				r.NotNil(podSelectorLabelValue)
+				podSelectorLabelValue := data.Get(fmt.Sprintf("%s.0.%s.0.%s.key1", FieldEvictorAdvancedConfig, FieldPodSelector, FieldMatchLabels))
 				r.Equal("value1", podSelectorLabelValue)
 			},
 		},
 		"should handle multiple evictionConfig objects": {
-			data: `{"evictionConfig":[
-					{"podSelector":{"kind":"Job","labelSelector":{"matchLabels":{"key1":"value1"}}},"settings":{"aggressive":{"enabled":true}}}, 
-					{"nodeSelector":{"labelSelector":{"matchLabels":{"node-label":"value1"}}},"settings":{"disposable":{"enabled":true}}}]}`,
+			data: &workload_eviction.AdvancedConfig{EvictionConfig: []workload_eviction.EvictionConfig{
+				{
+					PodSelector: &workload_eviction.PodSelector{
+						Kind: lo.ToPtr("Job"),
+						LabelSelector: &workload_eviction.LabelSelector{
+							MatchLabels: &map[string]string{"key1": "value1"},
+						},
+					},
+					Settings: workload_eviction.EvictionSettings{
+						Aggressive: &workload_eviction.EvictionSettingsSettingEnabled{Enabled: true},
+					},
+				},
+				{
+					NodeSelector: &workload_eviction.NodeSelector{
+						LabelSelector: workload_eviction.LabelSelector{
+							MatchLabels: &map[string]string{"node-label": "value1"},
+						},
+					},
+					Settings: workload_eviction.EvictionSettings{
+						Disposable: &workload_eviction.EvictionSettingsSettingEnabled{Enabled: true},
+					},
+				},
+			}},
 			testFunc: func(t *testing.T, res diag.Diagnostics, data *schema.ResourceData) {
 				r := require.New(t)
-				r.Nil(res)
+				r.Empty(res)
 				r.False(res.HasError())
-				eac, isOK := data.GetOk(FieldEvictorAdvancedConfig)
-				r.True(isOK)
+				eac := data.Get(FieldEvictorAdvancedConfig)
 				r.NotNil(eac)
-				podSelectorKind, isOK := data.GetOk(fmt.Sprintf("%s.0.%s.0.kind", FieldEvictorAdvancedConfig, FieldPodSelector))
-				r.True(isOK)
-				r.NotNil(podSelectorKind)
+				podSelectorKind := data.Get(fmt.Sprintf("%s.0.%s.0.kind", FieldEvictorAdvancedConfig, FieldPodSelector))
 				r.Equal("Job", podSelectorKind)
-				podSelectorLabelValue, isOK := data.GetOk(fmt.Sprintf("%s.0.%s.0.%s.key1", FieldEvictorAdvancedConfig, FieldPodSelector, FieldMatchLabels))
-				r.True(isOK)
-				r.NotNil(podSelectorLabelValue)
+				podSelectorLabelValue := data.Get(fmt.Sprintf("%s.0.%s.0.%s.key1", FieldEvictorAdvancedConfig, FieldPodSelector, FieldMatchLabels))
 				r.Equal("value1", podSelectorLabelValue)
-				nodeSelectorLabelValue, isOK := data.GetOk(fmt.Sprintf("%s.1.%s.0.%s.node-label", FieldEvictorAdvancedConfig, FieldNodeSelector, FieldMatchLabels))
-				r.True(isOK)
-				r.NotNil(nodeSelectorLabelValue)
+				nodeSelectorLabelValue := data.Get(fmt.Sprintf("%s.1.%s.0.%s.node-label", FieldEvictorAdvancedConfig, FieldNodeSelector, FieldMatchLabels))
 				r.Equal("value1", nodeSelectorLabelValue)
 			},
 		},
 		"should read pod_selector replicas_min": {
-			data: `{"evictionConfig":[{"podSelector":{"kind":"Deployment","replicasMin":2,"labelSelector":{"matchLabels":{"key1":"value1"}}},"settings":{"aggressive":{"enabled":true}}}]}`,
+			data: &workload_eviction.AdvancedConfig{EvictionConfig: []workload_eviction.EvictionConfig{
+				{
+					PodSelector: &workload_eviction.PodSelector{
+						Kind:        lo.ToPtr("Deployment"),
+						ReplicasMin: lo.ToPtr(int32(2)),
+						LabelSelector: &workload_eviction.LabelSelector{
+							MatchLabels: &map[string]string{"key1": "value1"},
+						},
+					},
+					Settings: workload_eviction.EvictionSettings{
+						Aggressive: &workload_eviction.EvictionSettingsSettingEnabled{Enabled: true},
+					},
+				},
+			}},
 			testFunc: func(t *testing.T, res diag.Diagnostics, data *schema.ResourceData) {
 				r := require.New(t)
-				r.Nil(res)
+				r.Empty(res)
 				r.False(res.HasError())
-				replicasMin, isOK := data.GetOk(fmt.Sprintf("%s.0.%s.0.%s", FieldEvictorAdvancedConfig, FieldPodSelector, FieldPodSelectorReplicasMin))
-				r.True(isOK)
+				replicasMin := data.Get(fmt.Sprintf("%s.0.%s.0.%s", FieldEvictorAdvancedConfig, FieldPodSelector, FieldPodSelectorReplicasMin))
 				r.Equal(2, replicasMin)
 			},
 		},
 		"should handle label expressions": {
-			data: `{"evictionConfig":[ {"podSelector":{"kind":"Job","labelSelector":{"matchExpressions":[{"key":"value1", "operator":"In", "values":["v1", "v2"]}]}},"settings":{"aggressive":{"enabled":true}}} ]}`,
+			data: &workload_eviction.AdvancedConfig{EvictionConfig: []workload_eviction.EvictionConfig{
+				{
+					PodSelector: &workload_eviction.PodSelector{
+						Kind: lo.ToPtr("Job"),
+						LabelSelector: &workload_eviction.LabelSelector{
+							MatchExpressions: &[]workload_eviction.LabelSelectorExpression{{
+								Key:      "value1",
+								Operator: workload_eviction.LabelSelectorExpressionOperatorIN,
+								Values:   &[]string{"v1", "v2"},
+							}},
+						},
+					},
+					Settings: workload_eviction.EvictionSettings{
+						Aggressive: &workload_eviction.EvictionSettingsSettingEnabled{Enabled: true},
+					},
+				},
+			}},
 			testFunc: func(t *testing.T, res diag.Diagnostics, data *schema.ResourceData) {
 				r := require.New(t)
-				r.Nil(res)
+				r.Empty(res)
 				r.False(res.HasError())
-				eac, isOK := data.GetOk(FieldEvictorAdvancedConfig)
-				r.True(isOK)
+				eac := data.Get(FieldEvictorAdvancedConfig)
 				r.NotNil(eac)
-				podSelectorKeyValue, isOK := data.GetOk(fmt.Sprintf("%s.0.%s.0.%s.0.key", FieldEvictorAdvancedConfig, FieldPodSelector, FieldMatchExpressions))
-				r.True(isOK)
-				r.NotNil(podSelectorKeyValue)
+				podSelectorKeyValue := data.Get(fmt.Sprintf("%s.0.%s.0.%s.0.key", FieldEvictorAdvancedConfig, FieldPodSelector, FieldMatchExpressions))
 				r.Equal("value1", podSelectorKeyValue)
-				podSelectorValues, isOK := data.GetOk(fmt.Sprintf("%s.0.%s.0.%s.0.values", FieldEvictorAdvancedConfig, FieldPodSelector, FieldMatchExpressions))
-				r.True(isOK)
-				r.NotNil(podSelectorValues)
+				podSelectorValues := data.Get(fmt.Sprintf("%s.0.%s.0.%s.0.values", FieldEvictorAdvancedConfig, FieldPodSelector, FieldMatchExpressions))
 				r.Equal([]interface{}{"v1", "v2"}, podSelectorValues)
 			},
 		},
 	}
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			body := io.NopCloser(bytes.NewReader([]byte(test.data)))
+			mockClient := mock_workload_eviction.NewMockClientWithResponsesInterface(t)
+			provider := &ProviderConfig{workloadEvictionClient: mockClient}
+			resource := resourceEvictionConfig()
+			initialState := terraform.NewInstanceStateShimmedFromValue(cty.ObjectVal(map[string]cty.Value{
+				FieldClusterId: cty.StringVal(clusterId),
+			}), 0)
 
 			mockClient.EXPECT().
-				EvictorAPIGetAdvancedConfig(gomock.Any(), clusterId).
-				Return(&http.Response{StatusCode: 200, Body: body, Header: map[string][]string{"Content-Type": {"json"}}}, nil)
+				EvictorAPIGetEvictorAdvancedConfigWithResponse(mock.Anything, clusterId).
+				Return(&workload_eviction.EvictorAPIGetEvictorAdvancedConfigResponse{
+					HTTPResponse: &http.Response{StatusCode: 200, Header: map[string][]string{"Content-Type": {"json"}}},
+					JSON200:      test.data,
+				}, nil)
 			data := resource.Data(initialState)
 
 			result := resource.ReadContext(ctx, data, provider)
 			test.testFunc(t, result, data)
-
 		})
 	}
-
 }
 
 func TestEvictionConfig_CreateContext(t *testing.T) {
 	r := require.New(t)
-	mockctrl := gomock.NewController(t)
-	mockClient := mock_sdk.NewMockClientInterface(mockctrl)
+	mockClient := mock_workload_eviction.NewMockClientWithResponsesInterface(t)
 
 	ctx := context.Background()
 	provider := &ProviderConfig{
-		api: &sdk.ClientWithResponses{
-			ClientInterface: mockClient,
-		},
+		workloadEvictionClient: mockClient,
 	}
 	clusterId := "b6bfc074-a267-400f-b8f1-db0850c369b1"
-	evictionConfigResponse := `{
-  "evictionConfig": [
-    {
-      "podSelector": {
-        "kind": "Job",
-        "labelSelector": {
-          "matchLabels": {
-            "key1": "value1"
-          }
-        },
-		"replicasMin": null
-      },
-      "settings": {
-        "aggressive": {
-          "enabled": true
-        }
-      }
-    }
-  ]
-}`
+	evictionConfigResponse := `{"evictionConfig":[{"podSelector":{"kind":"Job","labelSelector":{"matchLabels":{"key1":"value1"}}},"settings":{"aggressive":{"enabled":true}}}]}`
 
 	resource := resourceEvictionConfig()
 
@@ -204,8 +212,8 @@ func TestEvictionConfig_CreateContext(t *testing.T) {
 	state := terraform.NewInstanceStateShimmedFromValue(val, 0)
 	data := resource.Data(state)
 
-	mockClient.EXPECT().EvictorAPIUpsertAdvancedConfigWithBody(gomock.Any(), clusterId, "application/json", gomock.Any()).
-		DoAndReturn(func(ctx context.Context, clusterId string, contentType string, body io.Reader) (*http.Response, error) {
+	mockClient.EXPECT().EvictorAPIUpdateEvictorAdvancedConfigWithBodyWithResponse(mock.Anything, clusterId, "application/json", mock.Anything).
+		RunAndReturn(func(ctx context.Context, clusterId string, contentType string, body io.Reader, reqEditors ...workload_eviction.RequestEditorFn) (*workload_eviction.EvictorAPIUpdateEvictorAdvancedConfigResponse, error) {
 
 			got, _ := io.ReadAll(body)
 			expected := []byte(evictionConfigResponse)
@@ -215,12 +223,23 @@ func TestEvictionConfig_CreateContext(t *testing.T) {
 			r.True(eq, fmt.Sprintf("got:      %v\n"+
 				"expected: %v\n", string(got), string(expected)))
 
-			return &http.Response{
-				StatusCode: 200,
-				Header:     map[string][]string{"Content-Type": {"json"}},
-				Body:       io.NopCloser(bytes.NewReader([]byte(evictionConfigResponse))),
+			return &workload_eviction.EvictorAPIUpdateEvictorAdvancedConfigResponse{
+				HTTPResponse: &http.Response{StatusCode: 200, Header: map[string][]string{"Content-Type": {"json"}}},
+				JSON200: &workload_eviction.AdvancedConfig{EvictionConfig: []workload_eviction.EvictionConfig{
+					{
+						PodSelector: &workload_eviction.PodSelector{
+							Kind: lo.ToPtr("Job"),
+							LabelSelector: &workload_eviction.LabelSelector{
+								MatchLabels: &map[string]string{"key1": "value1"},
+							},
+						},
+						Settings: workload_eviction.EvictionSettings{
+							Aggressive: &workload_eviction.EvictionSettingsSettingEnabled{Enabled: true},
+						},
+					},
+				}},
 			}, nil
-		}).Times(1)
+		}).Once()
 
 	result := resource.CreateContext(ctx, data, provider)
 
@@ -237,14 +256,11 @@ func TestEvictionConfig_CreateContext(t *testing.T) {
 
 func TestEvictionConfig_CreateContext_ReplicasMin(t *testing.T) {
 	r := require.New(t)
-	mockctrl := gomock.NewController(t)
-	mockClient := mock_sdk.NewMockClientInterface(mockctrl)
+	mockClient := mock_workload_eviction.NewMockClientWithResponsesInterface(t)
 
 	ctx := context.Background()
 	provider := &ProviderConfig{
-		api: &sdk.ClientWithResponses{
-			ClientInterface: mockClient,
-		},
+		workloadEvictionClient: mockClient,
 	}
 	clusterId := "b6bfc074-a267-400f-b8f1-db0850c369b1"
 	evictionConfigResponse := `{
@@ -290,8 +306,8 @@ func TestEvictionConfig_CreateContext_ReplicasMin(t *testing.T) {
 	state := terraform.NewInstanceStateShimmedFromValue(val, 0)
 	data := resource.Data(state)
 
-	mockClient.EXPECT().EvictorAPIUpsertAdvancedConfigWithBody(gomock.Any(), clusterId, "application/json", gomock.Any()).
-		DoAndReturn(func(ctx context.Context, clusterId string, contentType string, body io.Reader) (*http.Response, error) {
+	mockClient.EXPECT().EvictorAPIUpdateEvictorAdvancedConfigWithBodyWithResponse(mock.Anything, clusterId, "application/json", mock.Anything).
+		RunAndReturn(func(ctx context.Context, clusterId string, contentType string, body io.Reader, reqEditors ...workload_eviction.RequestEditorFn) (*workload_eviction.EvictorAPIUpdateEvictorAdvancedConfigResponse, error) {
 
 			got, _ := io.ReadAll(body)
 			expected := []byte(evictionConfigResponse)
@@ -301,12 +317,24 @@ func TestEvictionConfig_CreateContext_ReplicasMin(t *testing.T) {
 			r.True(eq, fmt.Sprintf("got:      %v\n"+
 				"expected: %v\n", string(got), string(expected)))
 
-			return &http.Response{
-				StatusCode: 200,
-				Header:     map[string][]string{"Content-Type": {"json"}},
-				Body:       io.NopCloser(bytes.NewReader([]byte(evictionConfigResponse))),
+			return &workload_eviction.EvictorAPIUpdateEvictorAdvancedConfigResponse{
+				HTTPResponse: &http.Response{StatusCode: 200, Header: map[string][]string{"Content-Type": {"json"}}},
+				JSON200: &workload_eviction.AdvancedConfig{EvictionConfig: []workload_eviction.EvictionConfig{
+					{
+						PodSelector: &workload_eviction.PodSelector{
+							Kind:        lo.ToPtr("Deployment"),
+							ReplicasMin: lo.ToPtr(int32(2)),
+							LabelSelector: &workload_eviction.LabelSelector{
+								MatchLabels: &map[string]string{"key1": "value1"},
+							},
+						},
+						Settings: workload_eviction.EvictionSettings{
+							Aggressive: &workload_eviction.EvictionSettingsSettingEnabled{Enabled: true},
+						},
+					},
+				}},
 			}, nil
-		}).Times(1)
+		}).Once()
 
 	result := resource.CreateContext(ctx, data, provider)
 
@@ -319,96 +347,33 @@ func TestEvictionConfig_CreateContext_ReplicasMin(t *testing.T) {
 
 func TestEvictionConfig_UpdateContext(t *testing.T) {
 	r := require.New(t)
-	mockctrl := gomock.NewController(t)
-	mockClient := mock_sdk.NewMockClientInterface(mockctrl)
+	mockClient := mock_workload_eviction.NewMockClientWithResponsesInterface(t)
 
 	ctx := context.Background()
 	provider := &ProviderConfig{
-		api: &sdk.ClientWithResponses{
-			ClientInterface: mockClient,
-		},
+		workloadEvictionClient: mockClient,
 	}
 	clusterId := "b6bfc074-a267-400f-b8f1-db0850c369b1"
-	initialConfigJson := `
-		{
-  "evictionConfig": [
-    {
-      "podSelector": {
-		"kind": "Job",
-        "labelSelector": {
-          "matchLabels": {
-            "key1":     "value1"
-          }
-        }
-      },
-		"settings": {
-            "aggressive": {
-              "enabled": true
-            }
-          }
-    }
-  ]
-}`
-	evictionConfigJson := `
-		{
-  "evictionConfig": [
-    {
-      "podSelector": {
-        "kind": "Job",
-        "labelSelector": {
-          "matchLabels": {
-            "key1": "value1"
-          }
-        },
-        "replicasMin": null
-      },
-      "settings": {
-        "aggressive": {
-          "enabled": true
-        }
-      }
-    },
-    {
-      "nodeSelector": {
-  "labelSelector": {
-        "matchExpressions": [
-          {
-            "key": "key1",
-            "operator": "In",
-            "values": [
-              "val1",
-              "val2"
-            ]
-          }
-        ]}
-      },
-      "settings": {
-        "disposable": {
-          "enabled": true
-        }
-      }
-    }
-  ]
-}`
+	evictionConfigJson := `{"evictionConfig":[{"podSelector":{"kind":"Job","labelSelector":{"matchLabels":{"key1":"value1"}}},"settings":{"aggressive":{"enabled":true}}},{"nodeSelector":{"labelSelector":{"matchExpressions":[{"key":"key1","operator":"IN","values":["val1","val2"]}]}},"settings":{"disposable":{"enabled":true}}}]}`
 
-	initialConfig := sdk.CastaiEvictorV1EvictionConfig{
-		Settings: sdk.CastaiEvictorV1EvictionSettings{Aggressive: &sdk.CastaiEvictorV1EvictionSettingsSettingEnabled{Enabled: true}},
-		PodSelector: &sdk.CastaiEvictorV1PodSelector{
+	initialConfig := workload_eviction.EvictionConfig{
+		Settings: workload_eviction.EvictionSettings{Aggressive: &workload_eviction.EvictionSettingsSettingEnabled{Enabled: true}},
+		PodSelector: &workload_eviction.PodSelector{
 			Kind: lo.ToPtr("Job"),
-			LabelSelector: &sdk.CastaiEvictorV1LabelSelector{
+			LabelSelector: &workload_eviction.LabelSelector{
 				MatchLabels: &map[string]string{
 					"key1": "value1",
 				}}}}
 
-	newConfig := sdk.CastaiEvictorV1EvictionConfig{
-		Settings: sdk.CastaiEvictorV1EvictionSettings{Disposable: &sdk.CastaiEvictorV1EvictionSettingsSettingEnabled{Enabled: true}},
-		NodeSelector: &sdk.CastaiEvictorV1NodeSelector{
-			LabelSelector: sdk.CastaiEvictorV1LabelSelector{MatchExpressions: &[]sdk.CastaiEvictorV1LabelSelectorExpression{{
+	newConfig := workload_eviction.EvictionConfig{
+		Settings: workload_eviction.EvictionSettings{Disposable: &workload_eviction.EvictionSettingsSettingEnabled{Enabled: true}},
+		NodeSelector: &workload_eviction.NodeSelector{
+			LabelSelector: workload_eviction.LabelSelector{MatchExpressions: &[]workload_eviction.LabelSelectorExpression{{
 				Key:      "key1",
-				Operator: "In",
+				Operator: workload_eviction.LabelSelectorExpressionOperatorIN,
 				Values:   &[]string{"val1", "val2"},
 			}}}}}
-	finalConfiuration := []sdk.CastaiEvictorV1EvictionConfig{initialConfig, newConfig}
+	finalConfiuration := []workload_eviction.EvictionConfig{initialConfig, newConfig}
 	resource := resourceEvictionConfig()
 
 	val := cty.ObjectVal(map[string]cty.Value{
@@ -418,17 +383,21 @@ func TestEvictionConfig_UpdateContext(t *testing.T) {
 	state := terraform.NewInstanceStateShimmedFromValue(val, 0)
 	data := resource.Data(state)
 
-	body := io.NopCloser(bytes.NewReader([]byte(initialConfigJson)))
 	mockClient.EXPECT().
-		EvictorAPIGetAdvancedConfig(gomock.Any(), clusterId).
-		Return(&http.Response{StatusCode: 200, Body: body, Header: map[string][]string{"Content-Type": {"json"}}}, nil)
+		EvictorAPIGetEvictorAdvancedConfigWithResponse(mock.Anything, clusterId).
+		Return(&workload_eviction.EvictorAPIGetEvictorAdvancedConfigResponse{
+			HTTPResponse: &http.Response{StatusCode: 200, Header: map[string][]string{"Content-Type": {"json"}}},
+			JSON200: &workload_eviction.AdvancedConfig{EvictionConfig: []workload_eviction.EvictionConfig{
+				initialConfig,
+			}},
+		}, nil)
 
 	result := resource.ReadContext(ctx, data, provider)
 	r.Nil(result)
 	r.False(result.HasError())
 
-	mockClient.EXPECT().EvictorAPIUpsertAdvancedConfigWithBody(gomock.Any(), clusterId, "application/json", gomock.Any()).
-		DoAndReturn(func(ctx context.Context, clusterId string, contentType string, body io.Reader) (*http.Response, error) {
+	mockClient.EXPECT().EvictorAPIUpdateEvictorAdvancedConfigWithBodyWithResponse(mock.Anything, clusterId, "application/json", mock.Anything).
+		RunAndReturn(func(ctx context.Context, clusterId string, contentType string, body io.Reader, reqEditors ...workload_eviction.RequestEditorFn) (*workload_eviction.EvictorAPIUpdateEvictorAdvancedConfigResponse, error) {
 			got, _ := io.ReadAll(body)
 			expected := []byte(evictionConfigJson)
 
@@ -437,36 +406,30 @@ func TestEvictionConfig_UpdateContext(t *testing.T) {
 			r.True(eq, fmt.Sprintf("got:      %v\n"+
 				"expected: %v\n", string(got), string(expected)))
 
-			return &http.Response{
-				StatusCode: 200,
-				Header:     map[string][]string{"Content-Type": {"json"}},
-				Body:       io.NopCloser(bytes.NewReader([]byte(evictionConfigJson))),
+			return &workload_eviction.EvictorAPIUpdateEvictorAdvancedConfigResponse{
+				HTTPResponse: &http.Response{StatusCode: 200, Header: map[string][]string{"Content-Type": {"json"}}},
+				JSON200:      &workload_eviction.AdvancedConfig{EvictionConfig: finalConfiuration},
 			}, nil
-		}).Times(1)
+		}).Once()
 	err := data.Set(FieldEvictorAdvancedConfig, flattenEvictionConfig(finalConfiuration))
 	r.NoError(err)
 	updateResult := resource.UpdateContext(ctx, data, provider)
 
 	r.Nil(updateResult)
-	r.False(result.HasError())
-	eac, isOK := data.GetOk(FieldEvictorAdvancedConfig)
-	r.True(isOK)
+	r.False(updateResult.HasError())
+	eac := data.Get(FieldEvictorAdvancedConfig)
 	r.NotNil(eac)
 }
 
 func TestEvictionConfig_DeleteContext(t *testing.T) {
 	r := require.New(t)
-	mockctrl := gomock.NewController(t)
-	mockClient := mock_sdk.NewMockClientInterface(mockctrl)
+	mockClient := mock_workload_eviction.NewMockClientWithResponsesInterface(t)
 
 	ctx := context.Background()
 	provider := &ProviderConfig{
-		api: &sdk.ClientWithResponses{
-			ClientInterface: mockClient,
-		},
+		workloadEvictionClient: mockClient,
 	}
 	clusterId := "b6bfc074-a267-400f-b8f1-db0850c369b1"
-	evictionConfigJson := `{"evictionConfig": []}`
 
 	resource := resourceEvictionConfig()
 
@@ -488,20 +451,114 @@ func TestEvictionConfig_DeleteContext(t *testing.T) {
 	state := terraform.NewInstanceStateShimmedFromValue(val, 0)
 	data := resource.Data(state)
 
-	mockClient.EXPECT().EvictorAPIUpsertAdvancedConfigWithBody(gomock.Any(), clusterId, "application/json", gomock.Any()).
-		DoAndReturn(func(ctx context.Context, clusterId string, contentType string, body io.Reader) (*http.Response, error) {
-			return &http.Response{
-				StatusCode: 200,
-				Header:     map[string][]string{"Content-Type": {"json"}},
-				Body:       io.NopCloser(bytes.NewReader([]byte(evictionConfigJson))),
+	mockClient.EXPECT().EvictorAPIUpdateEvictorAdvancedConfigWithBodyWithResponse(mock.Anything, clusterId, "application/json", mock.Anything).
+		RunAndReturn(func(ctx context.Context, clusterId string, contentType string, body io.Reader, reqEditors ...workload_eviction.RequestEditorFn) (*workload_eviction.EvictorAPIUpdateEvictorAdvancedConfigResponse, error) {
+			return &workload_eviction.EvictorAPIUpdateEvictorAdvancedConfigResponse{
+				HTTPResponse: &http.Response{StatusCode: 200, Header: map[string][]string{"Content-Type": {"json"}}},
+				JSON200:      &workload_eviction.AdvancedConfig{EvictionConfig: []workload_eviction.EvictionConfig{}},
 			}, nil
-		}).Times(1)
+		}).Once()
 
 	result := resource.DeleteContext(ctx, data, provider)
 
 	r.Nil(result)
 	r.False(result.HasError())
+	r.Empty(data.Id())
 	eac, isOK := data.GetOk(FieldEvictorAdvancedConfig)
 	r.False(isOK)
 	r.Equal([]interface{}{}, eac)
+}
+
+func TestEvictionConfig_ReadContext_Error(t *testing.T) {
+	tests := map[string]struct {
+		response *workload_eviction.EvictorAPIGetEvictorAdvancedConfigResponse
+	}{
+		"non-200 status": {
+			response: &workload_eviction.EvictorAPIGetEvictorAdvancedConfigResponse{
+				HTTPResponse: &http.Response{StatusCode: http.StatusInternalServerError, Header: map[string][]string{"Content-Type": {"application/json"}}},
+				JSON200:      nil,
+			},
+		},
+		"nil JSON200": {
+			response: &workload_eviction.EvictorAPIGetEvictorAdvancedConfigResponse{
+				HTTPResponse: &http.Response{StatusCode: http.StatusOK, Header: map[string][]string{"Content-Type": {"application/json"}}},
+				JSON200:      nil,
+			},
+		},
+	}
+
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			clusterId := "b6bfc074-a267-400f-b8f1-db0850c369b1"
+			mockClient := mock_workload_eviction.NewMockClientWithResponsesInterface(t)
+			provider := &ProviderConfig{workloadEvictionClient: mockClient}
+			resource := resourceEvictionConfig()
+			initialState := terraform.NewInstanceStateShimmedFromValue(cty.ObjectVal(map[string]cty.Value{
+				FieldClusterId: cty.StringVal(clusterId),
+			}), 0)
+
+			mockClient.EXPECT().
+				EvictorAPIGetEvictorAdvancedConfigWithResponse(mock.Anything, clusterId).
+				Return(tc.response, nil)
+			data := resource.Data(initialState)
+
+			result := resource.ReadContext(context.Background(), data, provider)
+
+			r := require.New(t)
+			r.NotNil(result)
+			r.True(result.HasError())
+		})
+	}
+}
+
+func TestEvictionConfig_ReadContext_NotFound(t *testing.T) {
+	clusterId := "b6bfc074-a267-400f-b8f1-db0850c369b1"
+
+	mockClient := mock_workload_eviction.NewMockClientWithResponsesInterface(t)
+	provider := &ProviderConfig{workloadEvictionClient: mockClient}
+	resource := resourceEvictionConfig()
+
+	initialState := terraform.NewInstanceStateShimmedFromValue(cty.ObjectVal(map[string]cty.Value{
+		FieldClusterId: cty.StringVal(clusterId),
+	}), 0)
+	data := resource.Data(initialState)
+	data.SetId(clusterId)
+
+	mockClient.EXPECT().
+		EvictorAPIGetEvictorAdvancedConfigWithResponse(mock.Anything, clusterId).
+		Return(&workload_eviction.EvictorAPIGetEvictorAdvancedConfigResponse{
+			HTTPResponse: &http.Response{StatusCode: http.StatusNotFound, Header: map[string][]string{"Content-Type": {"application/json"}}},
+			JSON200:      nil,
+		}, nil)
+
+	result := resource.ReadContext(context.Background(), data, provider)
+
+	r := require.New(t)
+	r.Nil(result)
+	r.False(result.HasError())
+	r.Empty(data.Id())
+}
+
+func TestToPodSelector_MalformedInput(t *testing.T) {
+	t.Parallel()
+
+	badInput := []interface{}{"not-a-map"}
+
+	_, err := toPodSelector(badInput)
+
+	r := require.New(t)
+	r.Error(err)
+	r.Contains(err.Error(), "expecting map[string]interface")
+}
+
+func TestToNodeSelector_MalformedInput(t *testing.T) {
+	t.Parallel()
+
+	badInput := []interface{}{"not-a-map"}
+
+	_, err := toNodeSelector(badInput)
+
+	r := require.New(t)
+	r.Error(err)
+	r.Contains(err.Error(), "expecting map[string]interface")
 }

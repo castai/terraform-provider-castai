@@ -81,13 +81,14 @@ resource "castai_commitment" "gcp_capacity_reservation" {
   start_time = "2026-01-01T00:00:00Z"
 
   gcp_capacity_reservation_details = {
-    id                   = "my-reservation"
-    self_link            = "https://www.googleapis.com/compute/v1/projects/my-project/zones/us-central1-a/reservations/my-reservation"
-    project_id           = "my-project"
-    zone                 = "us-central1-a"
-    instance_type        = "a2-highgpu-1g"
-    total_instance_count = 4
-    state                = "READY"
+    id                            = "my-reservation"
+    self_link                     = "https://www.googleapis.com/compute/v1/projects/my-project/zones/us-central1-a/reservations/my-reservation"
+    project_id                    = "my-project"
+    zone                          = "us-central1-a"
+    instance_type                 = "a2-highgpu-1g"
+    total_instance_count          = 4
+    specific_reservation_required = true
+    state                         = "READY"
 
     accelerators = [
       {
@@ -213,6 +214,7 @@ Required:
 
 - `id` (String) Capacity reservation ID.
 - `instance_type` (String) EC2 instance type.
+- `interruptible` (Boolean) Whether this reservation is interruptible. Set to true for interruptible ODCRs, false otherwise.
 - `total_instance_count` (Number) Total reserved instance count.
 
 Optional:
@@ -223,7 +225,6 @@ Optional:
 - `end_date_type` (String) End date type (unlimited, limited).
 - `instance_match_criteria` (String) Instance match criteria (open, targeted).
 - `instance_platform` (String) Instance platform (e.g. Linux/UNIX).
-- `interruptible` (Boolean) Whether this reservation is interruptible.
 - `state` (String) Capacity reservation state.
 - `tenancy` (String) Tenancy (default, dedicated).
 
@@ -312,6 +313,7 @@ Required:
 
 - `id` (String) Reservation ID.
 - `instance_type` (String) Instance type covered by the reservation.
+- `specific_reservation_required` (Boolean) Whether the reservation requires specific reservation affinity. Set to true for targeted reservations, false for automatic (open) reservations.
 - `total_instance_count` (Number) Total number of instances reserved.
 
 Optional:
@@ -324,7 +326,6 @@ Optional:
 - `project_id` (String) GCP project ID that owns the reservation.
 - `self_link` (String) Server-defined URL for the reservation (e.g. https://www.googleapis.com/compute/v1/projects/my-project/zones/us-central1-a/reservations/my-reservation).
 - `share_settings` (Attributes) Reservation sharing settings. (see [below for nested schema](#nestedatt--gcp_capacity_reservation_details--share_settings))
-- `specific_reservation_required` (Boolean) Whether the reservation requires specific reservation affinity.
 - `state` (String) Runtime state of the reservation (e.g. READY).
 - `zone` (String) GCP zone of the reservation.
 

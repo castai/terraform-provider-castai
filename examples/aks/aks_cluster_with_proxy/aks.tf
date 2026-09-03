@@ -52,6 +52,10 @@ resource "azurerm_kubernetes_cluster" "aks" {
     }
   }
 
+  node_provisioning_profile {
+    default_node_pools = "Auto"
+  }
+
   identity {
     type = "SystemAssigned"
   }

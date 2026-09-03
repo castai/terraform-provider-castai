@@ -8,6 +8,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"os/exec"
 	"testing"
 	"time"
 
@@ -32,7 +33,10 @@ func TestAccGKE_ResourceWorkloadScalingPolicy(t *testing.T) {
 	projectID := os.Getenv("GOOGLE_PROJECT_ID")
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			cleanupLeftoverHelmReleases(t)
+		},
 		ProviderFactories: providerFactories,
 		CheckDestroy:      testAccCheckScalingPolicyDestroy,
 		Steps: []resource.TestStep{
@@ -528,6 +532,31 @@ func getAPIUrl() string {
 		return "https://api.dev-master.cast.ai"
 	}
 	return apiUrl
+}
+
+// cleanupLeftoverHelmReleases uninstalls any leftover CAST AI Helm releases from
+// previous (possibly failed) test runs. The acceptance tests share a single GKE
+// cluster and install Helm releases with hardcoded names (castai-agent,
+// castai-cluster-controller, castai-workload-autoscaler). When a previous run
+// fails or is cancelled mid-install, the releases can be left in a pending or
+// failed state, causing "cannot re-use a name that is still in use" errors on
+// the next run. The replace = true flag in the helm_release resource only works
+// when the existing release is in a deployed state, so we explicitly uninstall
+// stale releases here before the test begins.
+func cleanupLeftoverHelmReleases(t *testing.T) {
+	t.Helper()
+
+	releases := []string{"castai-agent", "castai-cluster-controller", "castai-workload-autoscaler"}
+
+	for _, release := range releases {
+		// Uninstall the release if it exists in any state. We use --ignore-not-found so
+		// the command succeeds even when the release doesn't exist yet (clean run).
+		cmd := exec.Command("helm", "uninstall", release, "--namespace", "castai-agent", "--ignore-not-found", "--wait", "--timeout", "2m")
+		output, err := cmd.CombinedOutput()
+		if err != nil {
+			t.Logf("helm uninstall %s: %s", release, string(output))
+		}
+	}
 }
 
 func Test_validateResourcePolicy(t *testing.T) {
@@ -1853,13 +1882,13 @@ func Test_resourceWorkloadScalingPolicyCreate(t *testing.T) {
 
 				mockClient.EXPECT().
 					WorkloadOptimizationAPICreateWorkloadScalingPolicy(gomock.Any(), clusterId, gomock.Any()).
-					DoAndReturn(func(_ context.Context, cID string, req sdk.WorkloadOptimizationAPICreateWorkloadScalingPolicyJSONRequestBody) (*http.Response, error) {
+					DoAndReturn(func(_ context.Context, cID string, req sdk.WorkloadOptimizationAPICreateWorkloadScalingPolicyJSONRequestBody, _ ...sdk.RequestEditorFn) (*http.Response, error) {
 						r.Equal(clusterId, cID)
 						return toResponse(r, policy, http.StatusOK)
 					})
 				mockClient.EXPECT().
 					WorkloadOptimizationAPIGetWorkloadScalingPolicy(gomock.Any(), clusterId, policyId).
-					DoAndReturn(func(_ context.Context, cID string, pID string) (*http.Response, error) {
+					DoAndReturn(func(_ context.Context, cID string, pID string, _ ...sdk.RequestEditorFn) (*http.Response, error) {
 						r.Equal(clusterId, cID)
 						r.Equal(policyId, pID)
 						return toResponse(r, policy, http.StatusOK)
@@ -1886,7 +1915,7 @@ func Test_resourceWorkloadScalingPolicyCreate(t *testing.T) {
 				cnt := 0
 				mockClient.EXPECT().
 					WorkloadOptimizationAPICreateWorkloadScalingPolicy(gomock.Any(), clusterId, gomock.Any()).
-					DoAndReturn(func(_ context.Context, cID string, req sdk.WorkloadOptimizationAPICreateWorkloadScalingPolicyJSONRequestBody) (*http.Response, error) {
+					DoAndReturn(func(_ context.Context, cID string, req sdk.WorkloadOptimizationAPICreateWorkloadScalingPolicyJSONRequestBody, _ ...sdk.RequestEditorFn) (*http.Response, error) {
 						r.Equal(clusterId, cID)
 						cnt++
 						if cnt < 2 {
@@ -1896,7 +1925,7 @@ func Test_resourceWorkloadScalingPolicyCreate(t *testing.T) {
 					}).Times(2)
 				mockClient.EXPECT().
 					WorkloadOptimizationAPIGetWorkloadScalingPolicy(gomock.Any(), clusterId, policyId).
-					DoAndReturn(func(_ context.Context, cID string, pID string) (*http.Response, error) {
+					DoAndReturn(func(_ context.Context, cID string, pID string, _ ...sdk.RequestEditorFn) (*http.Response, error) {
 						r.Equal(clusterId, cID)
 						r.Equal(policyId, pID)
 						return toResponse(r, policy, http.StatusOK)
@@ -1913,7 +1942,7 @@ func Test_resourceWorkloadScalingPolicyCreate(t *testing.T) {
 			setup: func(r *require.Assertions, mockClient *mock_sdk.MockClientInterface) {
 				mockClient.EXPECT().
 					WorkloadOptimizationAPICreateWorkloadScalingPolicy(gomock.Any(), clusterId, gomock.Any()).
-					DoAndReturn(func(_ context.Context, cID string, req sdk.WorkloadOptimizationAPICreateWorkloadScalingPolicyJSONRequestBody) (*http.Response, error) {
+					DoAndReturn(func(_ context.Context, cID string, req sdk.WorkloadOptimizationAPICreateWorkloadScalingPolicyJSONRequestBody, _ ...sdk.RequestEditorFn) (*http.Response, error) {
 						r.Equal(clusterId, cID)
 						return toResponse(r, nil, http.StatusBadRequest)
 					})

@@ -156,7 +156,7 @@ func TestAutoscalerResource_PoliciesUpdateAction(t *testing.T) {
 
 	mockClient.EXPECT().PoliciesAPIGetClusterPolicies(gomock.Any(), clusterId, gomock.Any()).Return(response, nil).Times(1)
 	mockClient.EXPECT().PoliciesAPIUpsertClusterPoliciesWithBody(gomock.Any(), clusterId, "application/json", gomock.Any()).
-		DoAndReturn(func(ctx context.Context, clusterId string, contentType string, body io.Reader) (*http.Response, error) {
+		DoAndReturn(func(ctx context.Context, clusterId string, contentType string, body io.Reader, _ ...sdk.RequestEditorFn) (*http.Response, error) {
 			got, _ := io.ReadAll(body)
 			expected := []byte(updatedPolicies)
 
@@ -255,7 +255,7 @@ func TestAutoscalerResource_PoliciesUpdateAction_Fail(t *testing.T) {
 
 	mockClient.EXPECT().PoliciesAPIGetClusterPolicies(gomock.Any(), clusterId, gomock.Any()).Return(response, nil).Times(1)
 	mockClient.EXPECT().PoliciesAPIUpsertClusterPoliciesWithBody(gomock.Any(), clusterId, "application/json", gomock.Any()).
-		DoAndReturn(func(ctx context.Context, clusterId string, contentType string, body io.Reader) (*http.Response, error) {
+		DoAndReturn(func(ctx context.Context, clusterId string, contentType string, body io.Reader, _ ...sdk.RequestEditorFn) (*http.Response, error) {
 			return &http.Response{
 				StatusCode: 400,
 				Body:       io.NopCloser(bytes.NewReader([]byte(`{"message":"policies config: Evictor policy management is not allowed: Evictor installed externally. Uninstall Evictor first and try again.","fieldViolations":[]`))),
@@ -852,7 +852,7 @@ func TestAutoscalerResource_GetChangePolicies_ComparePolicyJsonAndDef(t *testing
 				PoliciesAPIGetClusterPolicies(gomock.Any(), gomock.Any(), gomock.Any()).
 				Times(2).
 				DoAndReturn(
-					func(_ context.Context, _ string) (*http.Response, error) {
+					func(_ context.Context, _ string, _ ...sdk.RequestEditorFn) (*http.Response, error) {
 						return &http.Response{StatusCode: 200, Body: io.NopCloser(bytes.NewReader(current))}, nil
 					},
 				)
@@ -934,7 +934,7 @@ func TestAutoscalerResource_GetChangePolicies_AdjustPolicyForDrift(t *testing.T)
 		PoliciesAPIGetClusterPolicies(gomock.Any(), gomock.Any(), gomock.Any()).
 		Times(1).
 		DoAndReturn(
-			func(_ context.Context, _ string) (*http.Response, error) {
+			func(_ context.Context, _ string, _ ...sdk.RequestEditorFn) (*http.Response, error) {
 				return &http.Response{StatusCode: 200, Body: io.NopCloser(bytes.NewReader(policyJSON))}, nil
 			},
 		)

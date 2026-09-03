@@ -1,0 +1,60 @@
+---
+page_title: "{{.Name}} {{.Type}} - {{.ProviderName}}"
+subcategory: ""
+description: |-
+{{ .Description | plainmarkdown | trimspace | prefixlines "  " }}
+---
+
+# {{.Name}} ({{.Type}})
+
+{{ .Description | trimspace }}
+
+## Example Usage
+
+{{ tffile "examples/resources/castai_autoscaler_policies/resource.tf" }}
+
+## Migrating from `castai_autoscaler` (V1)
+
+The V1 `castai_autoscaler` resource is deprecated. Use `castai_autoscaler_policies` together with [`castai_evictor`](evictor.md) instead.
+
+### V1 → V2 field mapping
+
+| V1 `castai_autoscaler` | V2 `castai_autoscaler_policies` | Notes |
+|---|---|---|
+| `enabled` | `enabled` | Same |
+| `is_scoped_mode` | `scoped_mode` | Renamed |
+| `cluster_limits` block | `cluster_limits` block | Same structure |
+| `node_downscaler` block | `node_downscaler` block | Simplified — `empty_nodes` flattened to `empty_nodes_enabled` + `empty_nodes_delay` |
+| `node_downscaler.evictor` | **Removed** | Now managed by `castai_evictor` resource |
+| `unschedulable_pods` block | `unschedulable_pods` block | Same structure |
+| `unschedulable_pods.pod_pinner` | `unschedulable_pods.pod_pinner` | Same |
+| `node_templates_partial_matching_enabled` | Not yet exposed | V2 API supports it under `unschedulable_pods`; TF schema will add it in a future release |
+| `spot_instances` | **Removed** | Manage via `castai_node_template` |
+| `headroom` / `headroom_spot` | **Removed** | Deprecated in V1; manage via Node Templates |
+| `node_constraints` | **Removed** | Manage via `castai_node_template` |
+| `custom_instances_enabled` | **Removed** | Manage via `castai_node_template` |
+
+### Dropped fields
+
+The following V1 fields have no V2 equivalent. If you depend on them, continue using `castai_autoscaler` (V1) until they are added to the V2 resources:
+
+- `spot_instances` (all nested fields) — manage via Node Templates
+- `unschedulable_pods.headroom` / `headroom_spot` — manage via Node Templates
+- `unschedulable_pods.node_constraints` — manage via Node Templates
+- `unschedulable_pods.custom_instances_enabled` — manage via Node Templates
+
+### Migration steps
+
+1. Remove the `castai_autoscaler` resource block from your Terraform configuration.
+2. Add `castai_autoscaler_policies` and `castai_evictor` resource blocks with the migrated fields.
+3. Run `terraform state rm castai_autoscaler.<name>` to remove the old resource from state.
+4. Run `terraform import castai_autoscaler_policies.<name> <cluster_id>` and `terraform import castai_evictor.<name> <cluster_id>`.
+5. Run `terraform plan` to verify the new resources match the existing cluster state.
+
+> **Warning:** V1 and V2 manage independent API stores. Do not run `castai_autoscaler` alongside `castai_autoscaler_policies` / `castai_evictor` on the same cluster.
+
+### CO-4291 note
+
+V1→V2 internal translation (CO-4291) was marked **Won't Do** — the V1 API will NOT auto-translate to V2. Users must manually migrate.
+
+{{ .SchemaMarkdown | trimspace }}

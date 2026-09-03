@@ -524,7 +524,7 @@ type PodMutation struct {
 	// PodEviction Eviction settings for enforcement of pod mutations.
 	PodEviction *PodEviction `json:"podEviction,omitempty"`
 
-	// RestartMatchingWorkloads Restart matching workloads when the pod mutation is applied.
+	// RestartMatchingWorkloads Deprecated: restart_matching_workloads is deprecated.
 	RestartMatchingWorkloads *bool `json:"restartMatchingWorkloads,omitempty"`
 
 	// Source The source of the pod mutation.

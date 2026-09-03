@@ -23,14 +23,6 @@ const (
 	CastaiEvictorV1LabelSelectorExpressionOperatorNotIn        CastaiEvictorV1LabelSelectorExpressionOperator = "NotIn"
 )
 
-// Defines values for CastaiFeaturesV1EntityType.
-const (
-	ClusterId      CastaiFeaturesV1EntityType = "clusterId"
-	Environment    CastaiFeaturesV1EntityType = "environment"
-	OrganizationId CastaiFeaturesV1EntityType = "organizationId"
-	UserId         CastaiFeaturesV1EntityType = "userId"
-)
-
 // Defines values for CastaiFeaturesV1LogicalOperator.
 const (
 	And                CastaiFeaturesV1LogicalOperator = "and"
@@ -261,6 +253,12 @@ const (
 	CastaiRbacV1beta1LabelSelectorOperatorNOTIN        CastaiRbacV1beta1LabelSelectorOperator = "NOT_IN"
 )
 
+// Defines values for CastaiRbacV1beta1MemberActions.
+const (
+	ADD    CastaiRbacV1beta1MemberActions = "ADD"
+	REMOVE CastaiRbacV1beta1MemberActions = "REMOVE"
+)
+
 // Defines values for CastaiRbacV1beta1PoliciesState.
 const (
 	CastaiRbacV1beta1PoliciesStateACCEPTED CastaiRbacV1beta1PoliciesState = "ACCEPTED"
@@ -403,6 +401,7 @@ const (
 	PhaseOneOnboarding DboV1RegistrationType = "PhaseOneOnboarding"
 	UninstallCache     DboV1RegistrationType = "UninstallCache"
 	UninstallDBAgent   DboV1RegistrationType = "UninstallDBAgent"
+	UninstallDBO       DboV1RegistrationType = "UninstallDBO"
 )
 
 // Defines values for DboV1RuleType.
@@ -842,6 +841,8 @@ const (
 	WorkloadoptimizationV1EventTypeEVENTTYPESYSTEMOVERRIDERESET           WorkloadoptimizationV1EventType = "EVENT_TYPE_SYSTEM_OVERRIDE_RESET"
 	WorkloadoptimizationV1EventTypeEVENTTYPESYSTEMOVERRIDETRIGGERED       WorkloadoptimizationV1EventType = "EVENT_TYPE_SYSTEM_OVERRIDE_TRIGGERED"
 	WorkloadoptimizationV1EventTypeEVENTTYPEUNBOUNDMEMORYGROWTH           WorkloadoptimizationV1EventType = "EVENT_TYPE_UNBOUND_MEMORY_GROWTH"
+	WorkloadoptimizationV1EventTypeEVENTTYPEWORKLOADAUTOSCALERINSTALLED   WorkloadoptimizationV1EventType = "EVENT_TYPE_WORKLOAD_AUTOSCALER_INSTALLED"
+	WorkloadoptimizationV1EventTypeEVENTTYPEWORKLOADAUTOSCALERUNINSTALLED WorkloadoptimizationV1EventType = "EVENT_TYPE_WORKLOAD_AUTOSCALER_UNINSTALLED"
 )
 
 // Defines values for WorkloadoptimizationV1GetAgentStatusResponseAgentStatus.
@@ -1436,6 +1437,8 @@ const (
 	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPESYSTEMOVERRIDERESET           WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_SYSTEM_OVERRIDE_RESET"
 	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPESYSTEMOVERRIDETRIGGERED       WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_SYSTEM_OVERRIDE_TRIGGERED"
 	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPEUNBOUNDMEMORYGROWTH           WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_UNBOUND_MEMORY_GROWTH"
+	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPEWORKLOADAUTOSCALERINSTALLED   WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_WORKLOAD_AUTOSCALER_INSTALLED"
+	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPEWORKLOADAUTOSCALERUNINSTALLED WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_WORKLOAD_AUTOSCALER_UNINSTALLED"
 )
 
 // Defines values for WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType.
@@ -1463,6 +1466,8 @@ const (
 	EVENTTYPESYSTEMOVERRIDERESET           WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_SYSTEM_OVERRIDE_RESET"
 	EVENTTYPESYSTEMOVERRIDETRIGGERED       WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_SYSTEM_OVERRIDE_TRIGGERED"
 	EVENTTYPEUNBOUNDMEMORYGROWTH           WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_UNBOUND_MEMORY_GROWTH"
+	EVENTTYPEWORKLOADAUTOSCALERINSTALLED   WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_WORKLOAD_AUTOSCALER_INSTALLED"
+	EVENTTYPEWORKLOADAUTOSCALERUNINSTALLED WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_WORKLOAD_AUTOSCALER_UNINSTALLED"
 )
 
 // Defines values for WorkloadOptimizationAPIListWorkloadsParamsManagementOptions.
@@ -1790,15 +1795,8 @@ type CastaiEvictorV1PodSelector struct {
 // CastaiFeaturesV1Comparison Comparison represents a entity to entity ID comparison.
 type CastaiFeaturesV1Comparison struct {
 	// EntityId The entity ID to compare against (e.g., "da7a9f8d-ed18-40c3-89a7-93a81283af62").
-	EntityId *string `json:"entityId,omitempty"`
-
-	// EntityType EntityType defines available entity types for feature flag enablement.
-	//
-	//  - organizationId: Represents the main identifier(organization_id) for organization in Cast AI.
-	//  - clusterId: Represents the main identifier(cluster_id) for cluster in Cast AI.
-	//  - userId: Represents the user identifier(username) which is used to identify a user in users service.
-	//  - environment: Represents the identifier which is used to identify an environment in Cast AI.
-	EntityType *CastaiFeaturesV1EntityType `json:"entityType,omitempty"`
+	EntityId   *string `json:"entityId,omitempty"`
+	EntityType *string `json:"entityType,omitempty"`
 
 	// Operator Operator defines available operators for targeting rules.
 	//
@@ -1816,14 +1814,6 @@ type CastaiFeaturesV1Condition struct {
 	// NestedQuery QueryExpression represents a logical operation with conditions.
 	NestedQuery *CastaiFeaturesV1QueryExpression `json:"nestedQuery,omitempty"`
 }
-
-// CastaiFeaturesV1EntityType EntityType defines available entity types for feature flag enablement.
-//
-//   - organizationId: Represents the main identifier(organization_id) for organization in Cast AI.
-//   - clusterId: Represents the main identifier(cluster_id) for cluster in Cast AI.
-//   - userId: Represents the user identifier(username) which is used to identify a user in users service.
-//   - environment: Represents the identifier which is used to identify an environment in Cast AI.
-type CastaiFeaturesV1EntityType string
 
 // CastaiFeaturesV1LogicalOperator LogicalOperator defines available logical operators for targeting rules.
 type CastaiFeaturesV1LogicalOperator string
@@ -3312,6 +3302,21 @@ type CastaiRbacV1beta1GroupSubject struct {
 	Name *string `json:"name,omitempty"`
 }
 
+// CastaiRbacV1beta1GroupUpdate defines model for castai.rbac.v1beta1.GroupUpdate.
+type CastaiRbacV1beta1GroupUpdate struct {
+	// Description Description is the description of the group.
+	Description *string `json:"description,omitempty"`
+
+	// Id ID is the unique identifier of the group.
+	Id string `json:"id"`
+
+	// Members Members is a list of members.
+	Members *[]CastaiRbacV1beta1MemberUpdate `json:"members,omitempty"`
+
+	// Name Name is the name of the group.
+	Name string `json:"name"`
+}
+
 // CastaiRbacV1beta1Kind Kind represents the type of the member.
 type CastaiRbacV1beta1Kind string
 
@@ -3340,6 +3345,15 @@ type CastaiRbacV1beta1LabelSelectorRequirement struct {
 
 	// Values Values is the list of label values that the requirement applies to.
 	Values *[]string `json:"values,omitempty"`
+}
+
+// CastaiRbacV1beta1ListGroupsResponse defines model for castai.rbac.v1beta1.ListGroupsResponse.
+type CastaiRbacV1beta1ListGroupsResponse struct {
+	Groups *[]CastaiRbacV1beta1Group `json:"groups,omitempty"`
+
+	// NextPage Page defines how many and which fields should be returned.
+	NextPage   *CastaiPaginationV1beta1Page `json:"nextPage,omitempty"`
+	TotalCount *string                      `json:"totalCount,omitempty"`
 }
 
 // CastaiRbacV1beta1ListPermissionGroupsResponse ListPermissionGroupsResponse is the response message for listing available permission groups.
@@ -3383,6 +3397,24 @@ type CastaiRbacV1beta1Member struct {
 
 	// LastLoginAt LastLoginAt is the timestamp of the time when the user last time logged in.
 	LastLoginAt *time.Time `json:"lastLoginAt,omitempty"`
+}
+
+// CastaiRbacV1beta1MemberActions MemberActions represents the action that can be performed on a member.
+type CastaiRbacV1beta1MemberActions string
+
+// CastaiRbacV1beta1MemberUpdate defines model for castai.rbac.v1beta1.MemberUpdate.
+type CastaiRbacV1beta1MemberUpdate struct {
+	// Action MemberActions represents the action that can be performed on a member.
+	Action CastaiRbacV1beta1MemberActions `json:"action"`
+
+	// Email Email is the email of the member.
+	Email *string `json:"email,omitempty"`
+
+	// Id ID is the unique identifier of the member.
+	Id string `json:"id"`
+
+	// Kind Kind represents the type of the member.
+	Kind CastaiRbacV1beta1Kind `json:"kind"`
 }
 
 // CastaiRbacV1beta1OrganizationScope OrganizationScope represents the organization scope.
@@ -5714,6 +5746,7 @@ type DboV1Registration struct {
 	Type             *DboV1RegistrationType       `json:"type,omitempty"`
 	UninstallCache   *DboV1UninstallCacheParams   `json:"uninstallCache,omitempty"`
 	UninstallDbAgent *DboV1UninstallDBAgentParams `json:"uninstallDbAgent,omitempty"`
+	UninstallDbo     *DboV1UninstallDBOParams     `json:"uninstallDbo,omitempty"`
 }
 
 // DboV1RegistrationStatus - InProgress: Arbitrary number of InProgress states can be emitted
@@ -5776,6 +5809,11 @@ type DboV1UninstallCacheParams struct {
 // DboV1UninstallDBAgentParams defines model for dbo.v1.UninstallDBAgentParams.
 type DboV1UninstallDBAgentParams struct {
 	CacheGroupId string `json:"cacheGroupId"`
+}
+
+// DboV1UninstallDBOParams defines model for dbo.v1.UninstallDBOParams.
+type DboV1UninstallDBOParams struct {
+	DatabaseInstanceId string `json:"databaseInstanceId"`
 }
 
 // ExternalclusterV1AKSClusterParams AKSClusterParams defines AKS-specific arguments.
@@ -7682,6 +7720,12 @@ type NodetemplatesV1AvailableInstanceTypeStorageOptimizedOption string
 // NodetemplatesV1DeleteNodeTemplateResponse defines model for nodetemplates.v1.DeleteNodeTemplateResponse.
 type NodetemplatesV1DeleteNodeTemplateResponse = map[string]interface{}
 
+// NodetemplatesV1EdgeLocationConfig EdgeLocationConfig pairs an edge location with an optional edge configuration.
+type NodetemplatesV1EdgeLocationConfig struct {
+	EdgeConfigId   *string `json:"edgeConfigId"`
+	EdgeLocationId *string `json:"edgeLocationId,omitempty"`
+}
+
 // NodetemplatesV1FilterInstanceTypesResponse defines model for nodetemplates.v1.FilterInstanceTypesResponse.
 type NodetemplatesV1FilterInstanceTypesResponse struct {
 	AvailableInstanceTypes *[]NodetemplatesV1AvailableInstanceType `json:"availableInstanceTypes,omitempty"`
@@ -7734,7 +7778,11 @@ type NodetemplatesV1NewNodeTemplate struct {
 	// CustomTaints Custom taints for the template.
 	CustomTaints *[]NodetemplatesV1TaintWithOptionalEffect `json:"customTaints,omitempty"`
 
-	// EdgeLocationIds List of associated edge location IDs.
+	// EdgeLocationConfigs Edge location configurations associated with this template.
+	EdgeLocationConfigs *[]NodetemplatesV1EdgeLocationConfig `json:"edgeLocationConfigs,omitempty"`
+
+	// EdgeLocationIds Deprecated: use edge_location_configs instead.
+	// Deprecated:
 	EdgeLocationIds *[]string           `json:"edgeLocationIds,omitempty"`
 	Gpu             *NodetemplatesV1GPU `json:"gpu,omitempty"`
 
@@ -7755,7 +7803,8 @@ type NodetemplatesV1NewNodeTemplate struct {
 	ShouldTaint *bool `json:"shouldTaint"`
 
 	// StopEnabled Nodes in this node-template have Storage Optimization (STOP) enabled.
-	StopEnabled *bool `json:"stopEnabled"`
+	StopEnabled                  *bool                                        `json:"stopEnabled"`
+	StuckPodResizeReconciliation *NodetemplatesV1StuckPodResizeReconciliation `json:"stuckPodResizeReconciliation,omitempty"`
 }
 
 // NodetemplatesV1NodeTemplate defines model for nodetemplates.v1.NodeTemplate.
@@ -7774,7 +7823,11 @@ type NodetemplatesV1NodeTemplate struct {
 	// CustomTaints Custom taints for the template.
 	CustomTaints *[]NodetemplatesV1Taint `json:"customTaints,omitempty"`
 
-	// EdgeLocationIds List of associated edge location IDs.
+	// EdgeLocationConfigs Edge location configurations associated with this template.
+	EdgeLocationConfigs *[]NodetemplatesV1EdgeLocationConfig `json:"edgeLocationConfigs,omitempty"`
+
+	// EdgeLocationIds Deprecated: use edge_location_configs instead.
+	// Deprecated:
 	EdgeLocationIds *[]string           `json:"edgeLocationIds,omitempty"`
 	Gpu             *NodetemplatesV1GPU `json:"gpu,omitempty"`
 
@@ -7793,8 +7846,9 @@ type NodetemplatesV1NodeTemplate struct {
 	ShouldTaint *bool `json:"shouldTaint,omitempty"`
 
 	// StopEnabled Nodes in this node-template have Storage Optimization (STOP) enabled.
-	StopEnabled *bool   `json:"stopEnabled,omitempty"`
-	Version     *string `json:"version,omitempty"`
+	StopEnabled                  *bool                                        `json:"stopEnabled,omitempty"`
+	StuckPodResizeReconciliation *NodetemplatesV1StuckPodResizeReconciliation `json:"stuckPodResizeReconciliation,omitempty"`
+	Version                      *string                                      `json:"version,omitempty"`
 }
 
 // NodetemplatesV1NodeTemplateListItem defines model for nodetemplates.v1.NodeTemplateListItem.
@@ -7826,6 +7880,13 @@ type NodetemplatesV1RebalancingConfiguration struct {
 // NodetemplatesV1SharedGPU defines model for nodetemplates.v1.SharedGPU.
 type NodetemplatesV1SharedGPU struct {
 	SharedClientsPerGpu *int32 `json:"sharedClientsPerGpu"`
+}
+
+// NodetemplatesV1StuckPodResizeReconciliation defines model for nodetemplates.v1.StuckPodResizeReconciliation.
+type NodetemplatesV1StuckPodResizeReconciliation struct {
+	// Enabled When enabled, the autoscaler discovers pods whose woop-initiated in-place resize failed or got stuck,
+	// protects them from woop's eviction fallback, and live-migrates them via a rebalancing plan.
+	Enabled *bool `json:"enabled"`
 }
 
 // NodetemplatesV1Taint Taint is used in responses.
@@ -8072,7 +8133,11 @@ type NodetemplatesV1UpdateNodeTemplate struct {
 	// CustomTaints Custom taints for the template.
 	CustomTaints *[]NodetemplatesV1TaintWithOptionalEffect `json:"customTaints,omitempty"`
 
-	// EdgeLocationIds List of associated edge location IDs.
+	// EdgeLocationConfigs Edge location configurations associated with this template.
+	EdgeLocationConfigs *[]NodetemplatesV1EdgeLocationConfig `json:"edgeLocationConfigs,omitempty"`
+
+	// EdgeLocationIds Deprecated: use edge_location_configs instead.
+	// Deprecated:
 	EdgeLocationIds *[]string           `json:"edgeLocationIds,omitempty"`
 	Gpu             *NodetemplatesV1GPU `json:"gpu,omitempty"`
 
@@ -8090,7 +8155,8 @@ type NodetemplatesV1UpdateNodeTemplate struct {
 	ShouldTaint *bool `json:"shouldTaint"`
 
 	// StopEnabled Nodes in this node-template have Storage Optimization (STOP) enabled.
-	StopEnabled *bool `json:"stopEnabled"`
+	StopEnabled                  *bool                                        `json:"stopEnabled"`
+	StuckPodResizeReconciliation *NodetemplatesV1StuckPodResizeReconciliation `json:"stuckPodResizeReconciliation,omitempty"`
 }
 
 // PoliciesV1ClusterLimitsCpu Defines the minimum and maximum amount of vCPUs for cluster's worker nodes.
@@ -9574,8 +9640,10 @@ type WorkloadoptimizationV1Event struct {
 	SystemOverrideReset *WorkloadoptimizationV1SystemOverrideResetEvent `json:"systemOverrideReset,omitempty"`
 
 	// SystemOverrideTriggered SystemOverrideTriggeredEvent is emitted when CAST AI activates a system override on a workload.
-	SystemOverrideTriggered *WorkloadoptimizationV1SystemOverrideTriggeredEvent `json:"systemOverrideTriggered,omitempty"`
-	UnboundMemoryGrowth     *WorkloadoptimizationV1UnboundMemoryGrowthEvent     `json:"unboundMemoryGrowth,omitempty"`
+	SystemOverrideTriggered       *WorkloadoptimizationV1SystemOverrideTriggeredEvent       `json:"systemOverrideTriggered,omitempty"`
+	UnboundMemoryGrowth           *WorkloadoptimizationV1UnboundMemoryGrowthEvent           `json:"unboundMemoryGrowth,omitempty"`
+	WorkloadAutoscalerInstalled   *WorkloadoptimizationV1WorkloadAutoscalerInstalledEvent   `json:"workloadAutoscalerInstalled,omitempty"`
+	WorkloadAutoscalerUninstalled *WorkloadoptimizationV1WorkloadAutoscalerUninstalledEvent `json:"workloadAutoscalerUninstalled,omitempty"`
 }
 
 // WorkloadoptimizationV1EventContainer defines model for workloadoptimization.v1.EventContainer.
@@ -9635,16 +9703,16 @@ type WorkloadoptimizationV1GPUDeviceRecommendation struct {
 // WorkloadoptimizationV1GPUMetrics defines model for workloadoptimization.v1.GPUMetrics.
 type WorkloadoptimizationV1GPUMetrics struct {
 	// DeviceCount Effective GPU device count, accounting for cross-workload sharing (fractional).
-	DeviceCount *float64 `json:"deviceCount,omitempty"`
+	DeviceCount *float64 `json:"deviceCount"`
 
 	// GpuUtilization Average SM active utilization as a fraction (0.0–1.0).
-	GpuUtilization *float64 `json:"gpuUtilization,omitempty"`
+	GpuUtilization *float64 `json:"gpuUtilization"`
 
 	// MemoryTotalMib Max GPU memory total (capacity) in MiB across devices in this bucket.
-	MemoryTotalMib *float64 `json:"memoryTotalMib,omitempty"`
+	MemoryTotalMib *float64 `json:"memoryTotalMib"`
 
 	// MemoryUsedMib Average GPU memory used in MiB.
-	MemoryUsedMib *float64 `json:"memoryUsedMib,omitempty"`
+	MemoryUsedMib *float64 `json:"memoryUsedMib"`
 
 	// OriginalDeviceCount Original requested GPU device count before optimization.
 	OriginalDeviceCount *float64 `json:"originalDeviceCount"`
@@ -11838,6 +11906,16 @@ type WorkloadoptimizationV1Workload struct {
 	WorkloadOverrides        *WorkloadoptimizationV1WorkloadOverrides `json:"workloadOverrides,omitempty"`
 }
 
+// WorkloadoptimizationV1WorkloadAutoscalerInstalledEvent defines model for workloadoptimization.v1.WorkloadAutoscalerInstalledEvent.
+type WorkloadoptimizationV1WorkloadAutoscalerInstalledEvent struct {
+	Timestamp time.Time `json:"timestamp"`
+}
+
+// WorkloadoptimizationV1WorkloadAutoscalerUninstalledEvent defines model for workloadoptimization.v1.WorkloadAutoscalerUninstalledEvent.
+type WorkloadoptimizationV1WorkloadAutoscalerUninstalledEvent struct {
+	Timestamp time.Time `json:"timestamp"`
+}
+
 // WorkloadoptimizationV1WorkloadConfigUpdateV2 defines model for workloadoptimization.v1.WorkloadConfigUpdateV2.
 type WorkloadoptimizationV1WorkloadConfigUpdateV2 struct {
 	HpaConfig *WorkloadoptimizationV1HPAConfigUpdate `json:"hpaConfig,omitempty"`
@@ -12768,6 +12846,24 @@ type ExternalClusterAPITriggerResumeClusterParamsMode string
 // ExternalClusterAPIUpdateClusterTagsJSONBody defines parameters for ExternalClusterAPIUpdateClusterTags.
 type ExternalClusterAPIUpdateClusterTagsJSONBody map[string]string
 
+// RbacServiceAPIListGroupsParams defines parameters for RbacServiceAPIListGroups.
+type RbacServiceAPIListGroupsParams struct {
+	PageLimit *string `form:"page.limit,omitempty" json:"page.limit,omitempty"`
+
+	// PageCursor Cursor that defines token indicating where to start the next page.
+	// Empty value indicates to start from beginning of the dataset.
+	PageCursor *string `form:"page.cursor,omitempty" json:"page.cursor,omitempty"`
+	MemberId   *string `form:"memberId,omitempty" json:"memberId,omitempty"`
+
+	// ManagedBy managed_by filters groups by how they are managed.
+	// Valid filter values are: "console", "terraform", "idp-sync", "sso-default" and "" (empty string).
+	// Empty string matches legacy groups created before the managed_by column was introduced.
+	ManagedBy *[]string `form:"managedBy,omitempty" json:"managedBy,omitempty"`
+}
+
+// RbacServiceAPIUpdateGroupsJSONBody defines parameters for RbacServiceAPIUpdateGroups.
+type RbacServiceAPIUpdateGroupsJSONBody = []CastaiRbacV1beta1GroupUpdate
+
 // RbacServiceAPIListRoleBindingsParams defines parameters for RbacServiceAPIListRoleBindings.
 type RbacServiceAPIListRoleBindingsParams struct {
 	PageLimit *string `form:"page.limit,omitempty" json:"page.limit,omitempty"`
@@ -12843,6 +12939,9 @@ type ServiceAccountsAPIListServiceAccountsParams struct {
 	// PageCursor Cursor that defines token indicating where to start the next page.
 	// Empty value indicates to start from beginning of the dataset.
 	PageCursor *string `form:"page.cursor,omitempty" json:"page.cursor,omitempty"`
+
+	// ServiceAccountName Service account name filter.
+	ServiceAccountName *string `form:"serviceAccountName,omitempty" json:"serviceAccountName,omitempty"`
 }
 
 // ServiceAccountsAPIListOrganizationServiceAccountKeysParams defines parameters for ServiceAccountsAPIListOrganizationServiceAccountKeys.
@@ -13591,6 +13690,9 @@ type UsersAPICreateOrganizationJSONRequestBody = CastaiUsersV1beta1Organization
 
 // UsersAPIEditOrganizationJSONRequestBody defines body for UsersAPIEditOrganization for application/json ContentType.
 type UsersAPIEditOrganizationJSONRequestBody = CastaiUsersV1beta1Organization
+
+// RbacServiceAPIUpdateGroupsJSONRequestBody defines body for RbacServiceAPIUpdateGroups for application/json ContentType.
+type RbacServiceAPIUpdateGroupsJSONRequestBody = RbacServiceAPIUpdateGroupsJSONBody
 
 // RbacServiceAPICreateGroupJSONRequestBody defines body for RbacServiceAPICreateGroup for application/json ContentType.
 type RbacServiceAPICreateGroupJSONRequestBody = CastaiRbacV1beta1CreateGroupRequestGroup

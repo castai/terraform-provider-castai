@@ -873,6 +873,170 @@ func TestCommitmentModel_ApplyDetails_AllDetailBlocks(t *testing.T) {
 	}
 }
 
+func TestApplyCommitment_ComputedFieldsPopulatedFromAPI(t *testing.T) {
+	start := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
+
+	tests := []struct {
+		name         string
+		commitment   *pricing.Commitment
+		initialState *commitmentModel // plan state with Computed fields null/unknown
+		checkFunc    func(t *testing.T, m *commitmentModel)
+	}{
+		{
+			name: "GCP capacity reservation: Computed fields null in plan, API returns zero",
+			commitment: &pricing.Commitment{
+				Id:        ptr("gcr-id"),
+				Name:      ptr("gcr"),
+				Cloud:     ptr(pricing.CommitmentCloudGCP),
+				Region:    ptr("us-central1"),
+				Type:      ptr(pricing.CommitmentTypeONDEMANDCAPACITYRESERVATION),
+				StartTime: &start,
+				GcpCapacityReservationDetails: &pricing.GCPCapacityReservationDetails{
+					Id:                          ptr("res-1"),
+					InstanceType:                ptr("n2-standard-8"),
+					TotalInstanceCount:          ptr("1"),
+					InUseInstanceCount:          ptr("0"),
+					AssuredInstanceCount:        ptr("0"),
+					State:                       ptr("READY"),
+					SpecificReservationRequired: ptr(false),
+				},
+			},
+			// Simulates the Create path: user omitted Computed fields,
+			// so they are null in the plan.
+			initialState: &commitmentModel{
+				GCPCapacityReservationDetails: &gcpCapacityReservationDetailsModel{
+					ID:                          types.StringValue("res-1"),
+					InstanceType:                types.StringValue("n2-standard-8"),
+					TotalInstanceCount:          types.Int64Value(1),
+					SpecificReservationRequired: types.BoolValue(false),
+					InUseInstanceCount:           types.Int64Null(),
+					AssuredInstanceCount:         types.Int64Null(),
+				},
+			},
+			checkFunc: func(t *testing.T, m *commitmentModel) {
+				require.NotNil(t, m.GCPCapacityReservationDetails)
+				d := m.GCPCapacityReservationDetails
+				// Computed fields must be populated from API, not left null.
+				assert.False(t, d.InUseInstanceCount.IsNull(), "in_use_instance_count should be populated from API")
+				assert.False(t, d.AssuredInstanceCount.IsNull(), "assured_instance_count should be populated from API")
+				assert.Equal(t, int64(0), d.InUseInstanceCount.ValueInt64())
+				assert.Equal(t, int64(0), d.AssuredInstanceCount.ValueInt64())
+			},
+		},
+		{
+			name: "GCP capacity reservation: Computed fields null in plan, API returns non-zero",
+			commitment: &pricing.Commitment{
+				Id:        ptr("gcr-id"),
+				Name:      ptr("gcr"),
+				Cloud:     ptr(pricing.CommitmentCloudGCP),
+				Region:    ptr("us-central1"),
+				Type:      ptr(pricing.CommitmentTypeONDEMANDCAPACITYRESERVATION),
+				StartTime: &start,
+				GcpCapacityReservationDetails: &pricing.GCPCapacityReservationDetails{
+					Id:                          ptr("res-1"),
+					InstanceType:                ptr("n2-standard-8"),
+					TotalInstanceCount:          ptr("4"),
+					InUseInstanceCount:          ptr("2"),
+					AssuredInstanceCount:        ptr("3"),
+					State:                       ptr("READY"),
+					SpecificReservationRequired: ptr(true),
+				},
+			},
+			initialState: &commitmentModel{
+				GCPCapacityReservationDetails: &gcpCapacityReservationDetailsModel{
+					ID:                          types.StringValue("res-1"),
+					InstanceType:                types.StringValue("n2-standard-8"),
+					TotalInstanceCount:          types.Int64Value(4),
+					SpecificReservationRequired: types.BoolValue(true),
+					InUseInstanceCount:           types.Int64Null(),
+					AssuredInstanceCount:         types.Int64Null(),
+				},
+			},
+			checkFunc: func(t *testing.T, m *commitmentModel) {
+				require.NotNil(t, m.GCPCapacityReservationDetails)
+				d := m.GCPCapacityReservationDetails
+				assert.Equal(t, int64(2), d.InUseInstanceCount.ValueInt64())
+				assert.Equal(t, int64(3), d.AssuredInstanceCount.ValueInt64())
+			},
+		},
+		{
+			name: "AWS capacity block: available_instance_count null in plan, API returns zero",
+			commitment: &pricing.Commitment{
+				Id:        ptr("cb-id"),
+				Name:      ptr("cb"),
+				Cloud:     ptr(pricing.CommitmentCloudAWS),
+				Region:    ptr("us-east-1"),
+				Type:      ptr(pricing.CommitmentTypeCAPACITYBLOCK),
+				StartTime: &start,
+				AwsCapacityBlockDetails: &pricing.AWSCapacityBlockDetails{
+					Id:                     ptr("cb-1"),
+					InstanceType:           ptr("p4d.24xlarge"),
+					TotalInstanceCount:     ptr("2"),
+					AvailableInstanceCount: ptr("0"),
+					State:                  ptr("active"),
+				},
+			},
+			initialState: &commitmentModel{
+				AWSCapacityBlockDetails: &awsCapacityBlockDetailsModel{
+					ID:                     types.StringValue("cb-1"),
+					InstanceType:           types.StringValue("p4d.24xlarge"),
+					TotalInstanceCount:     types.Int64Value(2),
+					AvailableInstanceCount: types.Int64Null(),
+				},
+			},
+			checkFunc: func(t *testing.T, m *commitmentModel) {
+				require.NotNil(t, m.AWSCapacityBlockDetails)
+				assert.False(t, m.AWSCapacityBlockDetails.AvailableInstanceCount.IsNull())
+				assert.Equal(t, int64(0), m.AWSCapacityBlockDetails.AvailableInstanceCount.ValueInt64())
+			},
+		},
+		{
+			name: "AWS ODCR: available_instance_count null in plan, API returns value",
+			commitment: &pricing.Commitment{
+				Id:        ptr("odcr-id"),
+				Name:      ptr("odcr"),
+				Cloud:     ptr(pricing.CommitmentCloudAWS),
+				Region:    ptr("us-east-1"),
+				Type:      ptr(pricing.CommitmentTypeONDEMANDCAPACITYRESERVATION),
+				StartTime: &start,
+				AwsOdcrDetails: &pricing.AWSODCRDetails{
+					Id:                     ptr("odcr-1"),
+					InstanceType:           ptr("m5.xlarge"),
+					TotalInstanceCount:     ptr("4"),
+					AvailableInstanceCount: ptr("2"),
+					Interruptible:          ptr(false),
+				},
+			},
+			initialState: &commitmentModel{
+				AWSODCRDetails: &awsODCRDetailsModel{
+					ID:                     types.StringValue("odcr-1"),
+					InstanceType:           types.StringValue("m5.xlarge"),
+					TotalInstanceCount:     types.Int64Value(4),
+					Interruptible:          types.BoolValue(false),
+					AvailableInstanceCount: types.Int64Null(),
+				},
+			},
+			checkFunc: func(t *testing.T, m *commitmentModel) {
+				require.NotNil(t, m.AWSODCRDetails)
+				assert.False(t, m.AWSODCRDetails.AvailableInstanceCount.IsNull())
+				assert.Equal(t, int64(2), m.AWSODCRDetails.AvailableInstanceCount.ValueInt64())
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			m := tt.initialState
+			if m == nil {
+				m = &commitmentModel{}
+			}
+			diags := m.applyCommitment(context.Background(), tt.commitment)
+			require.False(t, diags.HasError(), "unexpected diagnostics: %v", diags)
+			tt.checkFunc(t, m)
+		})
+	}
+}
+
 func TestUpsertAndPatchChangeDetection(t *testing.T) {
 	base := func() commitmentModel {
 		return commitmentModel{

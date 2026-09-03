@@ -381,7 +381,7 @@ func TestAKSClusterResourceUpdateContext(t *testing.T) {
 			Return(&http.Response{StatusCode: 200, Body: readResponse, Header: map[string][]string{"Content-Type": {"json"}}}, nil)
 		mockClient.EXPECT().
 			ExternalClusterAPIUpdateCluster(gomock.Any(), clusterID, gomock.Any()).
-			DoAndReturn(func(_ context.Context, _ string, body sdk.ExternalClusterAPIUpdateClusterJSONRequestBody) (*http.Response, error) {
+			DoAndReturn(func(_ context.Context, _ string, body sdk.ExternalClusterAPIUpdateClusterJSONRequestBody, _ ...sdk.RequestEditorFn) (*http.Response, error) {
 				r.Equal(expectedHttpProxySettings.Aks.HttpProxyConfig.HttpsProxy, body.Aks.HttpProxyConfig.HttpsProxy)
 				r.Equal(expectedHttpProxySettings.Aks.HttpProxyConfig.HttpProxy, body.Aks.HttpProxyConfig.HttpProxy)
 				r.ElementsMatch(*expectedHttpProxySettings.Aks.HttpProxyConfig.NoProxy, *body.Aks.HttpProxyConfig.NoProxy)
@@ -444,7 +444,7 @@ func TestAKSClusterResourceUpdateContext(t *testing.T) {
 			Return(&http.Response{StatusCode: 200, Body: readResponse, Header: map[string][]string{"Content-Type": {"json"}}}, nil)
 		mockClient.EXPECT().
 			ExternalClusterAPIUpdateCluster(gomock.Any(), clusterID, gomock.Any()).
-			DoAndReturn(func(_ context.Context, _ string, body sdk.ExternalClusterAPIUpdateClusterJSONRequestBody) (*http.Response, error) {
+			DoAndReturn(func(_ context.Context, _ string, body sdk.ExternalClusterAPIUpdateClusterJSONRequestBody, _ ...sdk.RequestEditorFn) (*http.Response, error) {
 				r.NotNil(body.Aks.CaCertConfig)
 				r.ElementsMatch(*expectedCaCertSettings.Aks.CaCertConfig.CaCerts, *body.Aks.CaCertConfig.CaCerts)
 				return &http.Response{StatusCode: 200, Body: updateResponse, Header: map[string][]string{"Content-Type": {"json"}}}, nil

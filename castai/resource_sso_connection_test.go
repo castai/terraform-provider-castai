@@ -36,8 +36,43 @@ func TestAccCloudAgnostic_ResourceSSOConnection(t *testing.T) {
 	clientSecret := os.Getenv("SSO_CLIENT_SECRET")
 	domain := os.Getenv("SSO_DOMAIN")
 
+	t.Cleanup(func() {
+		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+		defer cancel()
+		meta := testAccProvider.Meta()
+		if meta == nil {
+			return
+		}
+		client := meta.(*ProviderConfig).api
+		if err := sweepSSOConnection(ctx, client); err != nil {
+			t.Logf("warning: failed to sweep SSO connection after test: %v", err)
+		}
+	})
+
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:          func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			if clientID == "" {
+				t.Skipf("missing required env var: SSO_CLIENT_ID")
+			}
+			if clientSecret == "" {
+				t.Skipf("missing required env var: SSO_CLIENT_SECRET")
+			}
+			if domain == "" {
+				t.Skipf("missing required env var: SSO_DOMAIN")
+			}
+
+			ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+			defer cancel()
+			meta := testAccProvider.Meta()
+			if meta == nil {
+				return
+			}
+			client := meta.(*ProviderConfig).api
+			if err := sweepSSOConnection(ctx, client); err != nil {
+				t.Logf("warning: failed to sweep SSO connection before test: %v", err)
+			}
+		},
 		ProviderFactories: providerFactories,
 		CheckDestroy:      testAccSSOConnectionConfigurationDestroy,
 		Steps: []resource.TestStep{
@@ -53,6 +88,31 @@ func TestAccCloudAgnostic_ResourceSSOConnection(t *testing.T) {
 			},
 		},
 	})
+}
+
+// sweepSSOConnection lists SSO connections and deletes the first one found.
+// The CAST AI test org enforces a quota of 1 SSO connection, so at most one can
+// exist. Any connection present before the test runs is stale from a previous
+// run and is removed to avoid exhausting the quota.
+func sweepSSOConnection(ctx context.Context, client sdk.ClientWithResponsesInterface) error {
+	resp, err := client.SSOAPIListSSOConnectionsWithResponse(ctx)
+	if err := sdk.CheckOKResponse(resp, err); err != nil {
+		return err
+	}
+	if resp.JSON200 == nil || len(resp.JSON200.Connections) == 0 {
+		return nil
+	}
+
+	conn := resp.JSON200.Connections[0]
+	if conn.Id == nil {
+		return fmt.Errorf("sso connection has nil id")
+	}
+
+	delResp, err := client.SSOAPIDeleteSSOConnectionWithResponse(ctx, *conn.Id)
+	if err := sdk.CheckOKResponse(delResp, err); err != nil {
+		return err
+	}
+	return nil
 }
 
 func TestSSOConnection_ReadContext(t *testing.T) {
@@ -132,7 +192,7 @@ func TestSSOConnection_CreateADDConnector(t *testing.T) {
 
 		mockClient.EXPECT().
 			SSOAPICreateSSOConnection(gomock.Any(), gomock.Any()).
-			DoAndReturn(func(_ context.Context, body sdk.SSOAPICreateSSOConnectionJSONRequestBody) (*http.Response, error) {
+			DoAndReturn(func(_ context.Context, body sdk.SSOAPICreateSSOConnectionJSONRequestBody, _ ...sdk.RequestEditorFn) (*http.Response, error) {
 				got, err := json.Marshal(body)
 				r.NoError(err)
 
@@ -210,7 +270,7 @@ func TestSSOConnection_CreateADDConnector(t *testing.T) {
 
 		mockClient.EXPECT().
 			SSOAPICreateSSOConnection(gomock.Any(), gomock.Any()).
-			DoAndReturn(func(_ context.Context, body sdk.SSOAPICreateSSOConnectionJSONRequestBody) (*http.Response, error) {
+			DoAndReturn(func(_ context.Context, body sdk.SSOAPICreateSSOConnectionJSONRequestBody, _ ...sdk.RequestEditorFn) (*http.Response, error) {
 				got, err := json.Marshal(body)
 				r.NoError(err)
 
@@ -292,7 +352,7 @@ func TestSSOConnection_CreateOktaConnector(t *testing.T) {
 
 	mockClient.EXPECT().
 		SSOAPICreateSSOConnection(gomock.Any(), gomock.Any()).
-		DoAndReturn(func(_ context.Context, body sdk.SSOAPICreateSSOConnectionJSONRequestBody) (*http.Response, error) {
+		DoAndReturn(func(_ context.Context, body sdk.SSOAPICreateSSOConnectionJSONRequestBody, _ ...sdk.RequestEditorFn) (*http.Response, error) {
 			got, err := json.Marshal(body)
 			r.NoError(err)
 
@@ -391,7 +451,7 @@ func TestSSOConnection_UpdateADDConnector(t *testing.T) {
 		}))
 
 		mockClient.EXPECT().SSOAPIUpdateSSOConnection(gomock.Any(), gomock.Any(), gomock.Any()).
-			DoAndReturn(func(_ context.Context, _ string, body sdk.SSOAPIUpdateSSOConnectionJSONRequestBody) (*http.Response, error) {
+			DoAndReturn(func(_ context.Context, _ string, body sdk.SSOAPIUpdateSSOConnectionJSONRequestBody, _ ...sdk.RequestEditorFn) (*http.Response, error) {
 				got, err := json.Marshal(body)
 				r.NoError(err)
 
@@ -479,7 +539,7 @@ func TestSSOConnection_UpdateADDConnector(t *testing.T) {
 		r.NoError(data.Set(FieldSSOConnectionAdditionalEmailDomains, []interface{}{"updated_domain_one", "updated_domain_two"}))
 
 		mockClient.EXPECT().SSOAPIUpdateSSOConnection(gomock.Any(), gomock.Any(), gomock.Any()).
-			DoAndReturn(func(_ context.Context, _ string, body sdk.SSOAPIUpdateSSOConnectionJSONRequestBody) (*http.Response, error) {
+			DoAndReturn(func(_ context.Context, _ string, body sdk.SSOAPIUpdateSSOConnectionJSONRequestBody, _ ...sdk.RequestEditorFn) (*http.Response, error) {
 				got, err := json.Marshal(body)
 				r.NoError(err)
 
@@ -571,7 +631,7 @@ func TestSSOConnection_UpdateOktaConnector(t *testing.T) {
 	}))
 
 	mockClient.EXPECT().SSOAPIUpdateSSOConnection(gomock.Any(), gomock.Any(), gomock.Any()).
-		DoAndReturn(func(_ context.Context, _ string, body sdk.SSOAPIUpdateSSOConnectionJSONRequestBody) (*http.Response, error) {
+		DoAndReturn(func(_ context.Context, _ string, body sdk.SSOAPIUpdateSSOConnectionJSONRequestBody, _ ...sdk.RequestEditorFn) (*http.Response, error) {
 			got, err := json.Marshal(body)
 			r.NoError(err)
 
@@ -964,7 +1024,7 @@ func TestSSOConnection_CreateOIDCConnector(t *testing.T) {
 
 	mockClient.EXPECT().
 		SSOAPICreateSSOConnection(gomock.Any(), gomock.Any()).
-		DoAndReturn(func(_ context.Context, body sdk.SSOAPICreateSSOConnectionJSONRequestBody) (*http.Response, error) {
+		DoAndReturn(func(_ context.Context, body sdk.SSOAPICreateSSOConnectionJSONRequestBody, _ ...sdk.RequestEditorFn) (*http.Response, error) {
 			got, err := json.Marshal(body)
 			r.NoError(err)
 
@@ -1066,7 +1126,7 @@ func TestSSOConnection_UpdateOIDCConnector(t *testing.T) {
 	}))
 
 	mockClient.EXPECT().SSOAPIUpdateSSOConnection(gomock.Any(), gomock.Any(), gomock.Any()).
-		DoAndReturn(func(_ context.Context, _ string, body sdk.SSOAPIUpdateSSOConnectionJSONRequestBody) (*http.Response, error) {
+		DoAndReturn(func(_ context.Context, _ string, body sdk.SSOAPIUpdateSSOConnectionJSONRequestBody, _ ...sdk.RequestEditorFn) (*http.Response, error) {
 			got, err := json.Marshal(body)
 			r.NoError(err)
 
@@ -1209,7 +1269,7 @@ func TestSSOConnection_UpdateOIDCToAADConnector(t *testing.T) {
 	}))
 
 	mockClient.EXPECT().SSOAPIUpdateSSOConnection(gomock.Any(), gomock.Any(), gomock.Any()).
-		DoAndReturn(func(_ context.Context, _ string, body sdk.SSOAPIUpdateSSOConnectionJSONRequestBody) (*http.Response, error) {
+		DoAndReturn(func(_ context.Context, _ string, body sdk.SSOAPIUpdateSSOConnectionJSONRequestBody, _ ...sdk.RequestEditorFn) (*http.Response, error) {
 			got, err := json.Marshal(body)
 			r.NoError(err)
 

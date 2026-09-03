@@ -196,7 +196,7 @@ func TestSecurityRuntimeRule_DeleteContext(t *testing.T) {
 		// Expect DELETE with correct ID
 		mockClient.EXPECT().
 			RuntimeSecurityAPIDeleteRules(gomock.Any(), gomock.AssignableToTypeOf(sdk.RuntimeSecurityAPIDeleteRulesJSONRequestBody{})).
-			DoAndReturn(func(ctx context.Context, req sdk.RuntimeSecurityAPIDeleteRulesJSONRequestBody) (*http.Response, error) {
+			DoAndReturn(func(ctx context.Context, req sdk.RuntimeSecurityAPIDeleteRulesJSONRequestBody, _ ...sdk.RequestEditorFn) (*http.Response, error) {
 				r.Equal([]string{"uuid-123"}, req.Ids)
 				return httpResponse(200, `{}`), nil
 			})
@@ -230,7 +230,7 @@ func TestSecurityRuntimeRule_DeleteContext(t *testing.T) {
 		// Expect TOGGLE with correct ID
 		mockClient.EXPECT().
 			RuntimeSecurityAPIToggleRules(gomock.Any(), gomock.AssignableToTypeOf(sdk.RuntimeV1ToggleRulesRequest{})).
-			DoAndReturn(func(ctx context.Context, req sdk.RuntimeV1ToggleRulesRequest) (*http.Response, error) {
+			DoAndReturn(func(ctx context.Context, req sdk.RuntimeV1ToggleRulesRequest, _ ...sdk.RequestEditorFn) (*http.Response, error) {
 				r.False(req.Enabled)
 				r.Equal([]string{"uuid-456"}, req.Ids)
 				return httpResponse(200, `{}`), nil
@@ -381,7 +381,7 @@ func TestFindRuntimeRuleByName_Pagination(t *testing.T) {
 
 		mockClient.EXPECT().
 			RuntimeSecurityAPIGetRules(gomock.Any(), gomock.Any()).
-			DoAndReturn(func(_ context.Context, params *sdk.RuntimeSecurityAPIGetRulesParams) (*http.Response, error) {
+			DoAndReturn(func(_ context.Context, params *sdk.RuntimeSecurityAPIGetRulesParams, _ ...sdk.RequestEditorFn) (*http.Response, error) {
 				callCount++
 				if params.PageCursor == nil {
 					// Page 1: one unrelated rule
