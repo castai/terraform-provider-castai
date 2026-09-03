@@ -36,6 +36,16 @@ var (
 	_ resource.ResourceWithValidateConfig = (*genericCommitmentResource)(nil)
 )
 
+// regionRequiredCommitmentTypes lists commitment types that are always
+// region-scoped and therefore require the region attribute to be set.
+// SAVINGS_PLAN and FLEX_CUD are excluded because they can be region-agnostic.
+var regionRequiredCommitmentTypes = map[string]bool{
+	string(pricing.CommitmentTypeRESERVEDINSTANCE):            true,
+	string(pricing.CommitmentTypeRESOURCECUD):                 true,
+	string(pricing.CommitmentTypeCAPACITYBLOCK):               true,
+	string(pricing.CommitmentTypeONDEMANDCAPACITYRESERVATION): true,
+}
+
 // commitmentTypeToDetailsField maps the commitment type enum to the details
 // attribute that must be set for that type.
 var commitmentTypeToDetailsField = map[string][]string{
@@ -829,6 +839,18 @@ func (r *genericCommitmentResource) ValidateConfig(ctx context.Context, req reso
 				fmt.Sprintf("end_time %q is not after start_time %q", config.EndTime.ValueString(), config.StartTime.ValueString()),
 			)
 		}
+	}
+
+	// Validate that region is set for commitment types that are always
+	// region-scoped. SAVINGS_PLAN and FLEX_CUD can be region-agnostic and
+	// are excluded from this check.
+	if regionRequiredCommitmentTypes[config.Type.ValueString()] &&
+		(config.Region.IsNull() || config.Region.IsUnknown()) {
+		resp.Diagnostics.AddAttributeError(
+			path.Root("region"),
+			"region is required for this commitment type",
+			fmt.Sprintf("commitment type %q requires a region; it is only optional for SAVINGS_PLAN and FLEX_CUD", config.Type.ValueString()),
+		)
 	}
 }
 
