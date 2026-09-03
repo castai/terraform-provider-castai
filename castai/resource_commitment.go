@@ -446,6 +446,7 @@ func (r *genericCommitmentResource) Schema(_ context.Context, _ resource.SchemaR
 					},
 					"available_instance_count": schema.Int64Attribute{
 						Optional:    true,
+						Computed:    true,
 						Description: "Available (unused) instance count.",
 					},
 					"state": schema.StringAttribute{
@@ -489,6 +490,7 @@ func (r *genericCommitmentResource) Schema(_ context.Context, _ resource.SchemaR
 					},
 					"available_instance_count": schema.Int64Attribute{
 						Optional:    true,
+						Computed:    true,
 						Description: "Available (unused) instance count.",
 					},
 					"state": schema.StringAttribute{
@@ -504,8 +506,8 @@ func (r *genericCommitmentResource) Schema(_ context.Context, _ resource.SchemaR
 						Description: "Instance match criteria (open, targeted).",
 					},
 					"interruptible": schema.BoolAttribute{
-						Optional:    true,
-						Description: "Whether this reservation is interruptible.",
+						Required:    true,
+						Description: "Whether this reservation is interruptible. Set to true for interruptible ODCRs, false otherwise.",
 					},
 				},
 			},
@@ -642,10 +644,12 @@ func (r *genericCommitmentResource) Schema(_ context.Context, _ resource.SchemaR
 					},
 					"in_use_instance_count": schema.Int64Attribute{
 						Optional:    true,
+						Computed:    true,
 						Description: "Number of instances currently in use.",
 					},
 					"assured_instance_count": schema.Int64Attribute{
 						Optional:    true,
+						Computed:    true,
 						Description: "Assured count for the reservation.",
 					},
 					"state": schema.StringAttribute{
@@ -653,8 +657,8 @@ func (r *genericCommitmentResource) Schema(_ context.Context, _ resource.SchemaR
 						Description: "Runtime state of the reservation (e.g. READY).",
 					},
 					"specific_reservation_required": schema.BoolAttribute{
-						Optional:    true,
-						Description: "Whether the reservation requires specific reservation affinity.",
+						Required:    true,
+						Description: "Whether the reservation requires specific reservation affinity. Set to true for targeted reservations, false for automatic (open) reservations.",
 					},
 					"min_cpu_platform": schema.StringAttribute{
 						Optional:    true,
@@ -934,6 +938,10 @@ func saveCreatedState(ctx context.Context, resp *resource.CreateResponse, plan *
 	plan.AutoAssignment = syncBool(plan.AutoAssignment, created.AutoAssignment)
 	plan.CreateTime = syncTime(plan.CreateTime, created.CreateTime)
 	plan.UpdateTime = syncTime(plan.UpdateTime, created.UpdateTime)
+	// Sync detail fields from the API response so that Computed fields
+	// (which are unknown in the plan when omitted by the user) are
+	// populated with concrete values in state.
+	resp.Diagnostics.Append(plan.applyCommitment(ctx, created)...)
 	resp.Diagnostics.Append(resp.State.Set(ctx, plan)...)
 }
 
