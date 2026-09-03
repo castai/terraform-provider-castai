@@ -123,8 +123,12 @@ func (r *genericCommitmentResource) Schema(_ context.Context, _ resource.SchemaR
 				},
 			},
 			"region": schema.StringAttribute{
-				Required:    true,
-				Description: "Region where the commitment is applicable.",
+				Optional:    true,
+				Computed:    true,
+				Description: "Region where the commitment is applicable. Not required for region-agnostic commitment types such as Compute Savings Plans.",
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"type": schema.StringAttribute{
 				Required: true,
