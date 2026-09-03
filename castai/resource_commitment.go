@@ -845,7 +845,7 @@ func (r *genericCommitmentResource) ValidateConfig(ctx context.Context, req reso
 	// region-scoped. SAVINGS_PLAN and FLEX_CUD can be region-agnostic and
 	// are excluded from this check.
 	if regionRequiredCommitmentTypes[config.Type.ValueString()] &&
-		(config.Region.IsNull() || config.Region.IsUnknown()) {
+		(config.Region.IsNull() || config.Region.IsUnknown() || config.Region.ValueString() == "") {
 		resp.Diagnostics.AddAttributeError(
 			path.Root("region"),
 			"region is required for this commitment type",

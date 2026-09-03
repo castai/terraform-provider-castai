@@ -8,7 +8,10 @@ import (
 	"testing"
 
 	"github.com/golang/mock/gomock"
+	fwresource "github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
@@ -507,7 +510,39 @@ func TestRegionRequiredCommitmentTypes(t *testing.T) {
 	}
 }
 
+// validateConfigForTest builds a resource.ValidateConfigRequest from the
+// given commitmentModel and invokes ValidateConfig, returning whether the
+// diagnostics contain an error.
+func validateConfigForTest(t *testing.T, ctx context.Context, model commitmentModel) bool {
+	t.Helper()
+	r := newCommitmentResource().(*genericCommitmentResource)
+
+	schemaResp := fwresource.SchemaResponse{}
+	r.Schema(ctx, fwresource.SchemaRequest{}, &schemaResp)
+
+	objType := schemaResp.Schema.Type().(basetypes.ObjectType)
+	attrTypes := objType.AttrTypes
+
+	objVal, diags := types.ObjectValueFrom(ctx, attrTypes, &model)
+	require.False(t, diags.HasError(), "failed to build ObjectValueFrom from model")
+
+	rawVal, err := objVal.ToTerraformValue(ctx)
+	require.NoError(t, err)
+
+	req := fwresource.ValidateConfigRequest{
+		Config: tfsdk.Config{
+			Raw:    rawVal,
+			Schema: schemaResp.Schema,
+		},
+	}
+	resp := &fwresource.ValidateConfigResponse{}
+	r.ValidateConfig(ctx, req, resp)
+	return resp.Diagnostics.HasError()
+}
+
 func TestValidateConfig_RegionRequiredForRegionScopedTypes(t *testing.T) {
+	ctx := context.Background()
+
 	tests := []struct {
 		name        string
 		commitment  commitmentModel
@@ -623,12 +658,22 @@ func TestValidateConfig_RegionRequiredForRegionScopedTypes(t *testing.T) {
 			},
 			expectError: true,
 		},
+		{
+			name: "RESERVED_INSTANCE with empty string region → error",
+			commitment: commitmentModel{
+				Name:      types.StringValue("test-ri"),
+				Cloud:     types.StringValue("AWS"),
+				Region:    types.StringValue(""),
+				Type:      types.StringValue(string(pricing.CommitmentTypeRESERVEDINSTANCE)),
+				StartTime: types.StringValue("2026-01-01T00:00:00Z"),
+			},
+			expectError: true,
+		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			hasError := regionRequiredCommitmentTypes[tt.commitment.Type.ValueString()] &&
-				(tt.commitment.Region.IsNull() || tt.commitment.Region.IsUnknown())
+			hasError := validateConfigForTest(t, ctx, tt.commitment)
 			require.Equal(t, tt.expectError, hasError)
 		})
 	}
