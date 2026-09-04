@@ -1210,11 +1210,18 @@ func flattenInstanceFamilies(families *sdk.NodetemplatesV1TemplateConstraintsIns
 	if families == nil {
 		return nil
 	}
+	// Don't create a block with empty lists if both include and exclude are nil/empty —
+	// this causes perpetual drift against configs that omit the instance_families block.
+	hasInclude := families.Include != nil && len(lo.FromPtr(families.Include)) > 0
+	hasExclude := families.Exclude != nil && len(lo.FromPtr(families.Exclude)) > 0
+	if !hasInclude && !hasExclude {
+		return nil
+	}
 	out := map[string][]string{}
-	if families.Exclude != nil {
+	if hasExclude {
 		out[FieldNodeTemplateExclude] = lo.FromPtr(families.Exclude)
 	}
-	if families.Include != nil {
+	if hasInclude {
 		out[FieldNodeTemplateInclude] = lo.FromPtr(families.Include)
 	}
 	return []map[string][]string{out}

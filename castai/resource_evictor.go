@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"math"
 	"net/http"
 	"time"
 
@@ -92,6 +93,7 @@ func resourceEvictor() *schema.Resource {
 				Optional:     true,
 				Default:      "1m",
 				ValidateFunc: validateDuration,
+				DiffSuppressFunc: suppressDurationDiff,
 				Description:  "Configure the interval duration between Evictor operations. This property can be used to lower or raise the frequency of the Evictor's find-and-drain operations.",
 			},
 			FieldEvictorNodeGracePeriodMinutes: {
@@ -105,6 +107,7 @@ func resourceEvictor() *schema.Resource {
 				Optional:     true,
 				Default:      "5s",
 				ValidateFunc: validateDuration,
+				DiffSuppressFunc: suppressDurationDiff,
 				Description:  "Configure the pod eviction failure back off interval. If pod eviction fails then Evictor will attempt to evict it again after the amount of time specified here.",
 			},
 			FieldEvictorIgnorePodDisruptionBudgets: {
@@ -135,6 +138,7 @@ func resourceEvictor() *schema.Resource {
 				Optional:     true,
 				Default:      "10m",
 				ValidateFunc: validateDuration,
+				DiffSuppressFunc: suppressDurationDiff,
 				Description:  "Maximum time the evictor waits for a node to fully drain before giving up.",
 			},
 			FieldEvictorDrainRollbackTimeout: {
@@ -142,6 +146,7 @@ func resourceEvictor() *schema.Resource {
 				Optional:     true,
 				Default:      "1m",
 				ValidateFunc: validateDuration,
+				DiffSuppressFunc: suppressDurationDiff,
 				Description:  "How long the evictor waits before rolling back a cordon when a drain attempt fails.",
 			},
 			FieldEvictorWindows: {
@@ -243,6 +248,29 @@ func validateDuration(i interface{}, k string) (warnings []string, errors []erro
 		errors = append(errors, fmt.Errorf("expected %s to be a valid duration, got %q: %w", k, v, err))
 	}
 	return
+}
+
+// suppressDurationDiff prevents drift when the API returns a duration in seconds format
+// (e.g. "60s") but the Terraform schema default is in a different format (e.g. "1m").
+// Both are semantically equal but string-different.
+func suppressDurationDiff(k, oldValue, newValue string, d *schema.ResourceData) bool {
+	old, err1 := time.ParseDuration(oldValue)
+	new, err2 := time.ParseDuration(newValue)
+	if err1 != nil || err2 != nil {
+		return oldValue == newValue
+	}
+	return old == new
+}
+
+// normalizeDuration converts a human-readable duration string (e.g. "1m", "10m")
+// to seconds-based format (e.g. "60s", "600s"). The CAST AI API rejects
+// non-seconds formats like "1m" even though Go's time.ParseDuration accepts them.
+func normalizeDuration(s string) string {
+	d, err := time.ParseDuration(s)
+	if err != nil {
+		return s
+	}
+	return fmt.Sprintf("%ds", int(math.Ceil(d.Seconds())))
 }
 
 func resourceCastaiEvictorRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -369,14 +397,14 @@ func toEvictorConfig(data *schema.ResourceData) (*workload_eviction.Config, erro
 	cfg.DryRun = lo.ToPtr(data.Get(FieldEvictorDryRun).(bool))
 	cfg.AggressiveMode = lo.ToPtr(data.Get(FieldEvictorAggressiveMode).(bool))
 	cfg.ScopedMode = lo.ToPtr(data.Get(FieldEvictorScopedMode).(bool))
-	cfg.CycleInterval = lo.ToPtr(data.Get(FieldEvictorCycleInterval).(string))
+	cfg.CycleInterval = lo.ToPtr(normalizeDuration(data.Get(FieldEvictorCycleInterval).(string)))
 	cfg.NodeGracePeriodMinutes = lo.ToPtr(int32(data.Get(FieldEvictorNodeGracePeriodMinutes).(int)))
-	cfg.PodEvictionFailureBackOffInterval = lo.ToPtr(data.Get(FieldEvictorPodEvictionFailureBackOffInterval).(string))
+	cfg.PodEvictionFailureBackOffInterval = lo.ToPtr(normalizeDuration(data.Get(FieldEvictorPodEvictionFailureBackOffInterval).(string)))
 	cfg.IgnorePodDisruptionBudgets = lo.ToPtr(data.Get(FieldEvictorIgnorePodDisruptionBudgets).(bool))
 	cfg.SoftTainting = lo.ToPtr(data.Get(FieldEvictorSoftTainting).(bool))
 	cfg.EmitNodeRelatedPodEvents = lo.ToPtr(data.Get(FieldEvictorEmitNodeRelatedPodEvents).(bool))
-	cfg.DrainTimeout = lo.ToPtr(data.Get(FieldEvictorDrainTimeout).(string))
-	cfg.DrainRollbackTimeout = lo.ToPtr(data.Get(FieldEvictorDrainRollbackTimeout).(string))
+	cfg.DrainTimeout = lo.ToPtr(normalizeDuration(data.Get(FieldEvictorDrainTimeout).(string)))
+	cfg.DrainRollbackTimeout = lo.ToPtr(normalizeDuration(data.Get(FieldEvictorDrainRollbackTimeout).(string)))
 	cfg.Windows = lo.ToPtr(data.Get(FieldEvictorWindows).(bool))
 	cfg.ForceDisableLiveMigration = lo.ToPtr(data.Get(FieldEvictorForceDisableLiveMigration).(bool))
 	cfg.ForceDisableWoop = lo.ToPtr(data.Get(FieldEvictorForceDisableWoop).(bool))
