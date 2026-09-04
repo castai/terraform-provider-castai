@@ -159,7 +159,6 @@ resource "castai_commitment" "bulk_gcp_cuds" {
 
 - `cloud` (String) Cloud provider. One of: AWS, GCP, AZURE.
 - `name` (String) Commitment name.
-- `region` (String) Region where the commitment is applicable.
 - `start_time` (String) Start time of the commitment (RFC3339, e.g. 2026-01-01T00:00:00Z).
 - `type` (String) Commitment type. One of: RESERVED_INSTANCE, RESOURCE_CUD, SAVINGS_PLAN, CAPACITY_BLOCK, ON_DEMAND_CAPACITY_RESERVATION, FLEX_CUD. The matching details block must be set.
 
@@ -180,6 +179,7 @@ resource "castai_commitment" "bulk_gcp_cuds" {
 - `gcp_resource_cud_details` (Attributes) GCP Resource CUD details. Required when type is RESOURCE_CUD. (see [below for nested schema](#nestedatt--gcp_resource_cud_details))
 - `organization_id` (String) CAST AI organization ID. If not provided, the organization from the provider configuration is used.
 - `prioritization` (Boolean) If enabled, resources used by lower-priority clusters are ignored.
+- `region` (String) Region where the commitment is applicable. Not required for region-agnostic commitment types such as Compute Savings Plans.
 - `scaling_strategy` (String) Scaling strategy for the autoscaler. One of: DEFAULT, CPU_BASED, MEMORY_BASED.
 
 ### Read-Only

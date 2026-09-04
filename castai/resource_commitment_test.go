@@ -8,6 +8,10 @@ import (
 	"testing"
 
 	"github.com/golang/mock/gomock"
+	fwresource "github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
+	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
@@ -482,4 +486,195 @@ func TestUpdateCommitmentWithRetry_ContextCancellationStopsRetries(t *testing.T)
 	_, err := res.updateCommitmentWithRetry(ctx, orgID, commitmentID, input)
 
 	r.Error(err)
+}
+
+func TestRegionRequiredCommitmentTypes(t *testing.T) {
+	// Types that must always have a region set.
+	required := []string{
+		string(pricing.CommitmentTypeRESERVEDINSTANCE),
+		string(pricing.CommitmentTypeRESOURCECUD),
+		string(pricing.CommitmentTypeCAPACITYBLOCK),
+		string(pricing.CommitmentTypeONDEMANDCAPACITYRESERVATION),
+	}
+	for _, ct := range required {
+		require.True(t, regionRequiredCommitmentTypes[ct], "type %q should require region", ct)
+	}
+
+	// Types that may be region-agnostic.
+	optional := []string{
+		string(pricing.CommitmentTypeSAVINGSPLAN),
+		string(pricing.CommitmentTypeFLEXCUD),
+	}
+	for _, ct := range optional {
+		require.False(t, regionRequiredCommitmentTypes[ct], "type %q should NOT require region", ct)
+	}
+}
+
+// validateConfigForTest builds a resource.ValidateConfigRequest from the
+// given commitmentModel and invokes ValidateConfig, returning whether the
+// diagnostics contain an error.
+func validateConfigForTest(t *testing.T, ctx context.Context, model commitmentModel) bool {
+	t.Helper()
+	r := newCommitmentResource().(*genericCommitmentResource)
+
+	schemaResp := fwresource.SchemaResponse{}
+	r.Schema(ctx, fwresource.SchemaRequest{}, &schemaResp)
+
+	objType := schemaResp.Schema.Type().(basetypes.ObjectType)
+	attrTypes := objType.AttrTypes
+
+	objVal, diags := types.ObjectValueFrom(ctx, attrTypes, &model)
+	require.False(t, diags.HasError(), "failed to build ObjectValueFrom from model")
+
+	rawVal, err := objVal.ToTerraformValue(ctx)
+	require.NoError(t, err)
+
+	req := fwresource.ValidateConfigRequest{
+		Config: tfsdk.Config{
+			Raw:    rawVal,
+			Schema: schemaResp.Schema,
+		},
+	}
+	resp := &fwresource.ValidateConfigResponse{}
+	r.ValidateConfig(ctx, req, resp)
+	return resp.Diagnostics.HasError()
+}
+
+func TestValidateConfig_RegionRequiredForRegionScopedTypes(t *testing.T) {
+	ctx := context.Background()
+
+	tests := []struct {
+		name        string
+		commitment  commitmentModel
+		expectError bool
+	}{
+		{
+			name: "RESERVED_INSTANCE without region → error",
+			commitment: commitmentModel{
+				Name:      types.StringValue("test-ri"),
+				Cloud:     types.StringValue("AWS"),
+				Region:    types.StringNull(),
+				Type:      types.StringValue(string(pricing.CommitmentTypeRESERVEDINSTANCE)),
+				StartTime: types.StringValue("2026-01-01T00:00:00Z"),
+			},
+			expectError: true,
+		},
+		{
+			name: "RESERVED_INSTANCE with region → no error",
+			commitment: commitmentModel{
+				Name:      types.StringValue("test-ri"),
+				Cloud:     types.StringValue("AWS"),
+				Region:    types.StringValue("us-east-1"),
+				Type:      types.StringValue(string(pricing.CommitmentTypeRESERVEDINSTANCE)),
+				StartTime: types.StringValue("2026-01-01T00:00:00Z"),
+			},
+			expectError: false,
+		},
+		{
+			name: "RESOURCE_CUD without region → error",
+			commitment: commitmentModel{
+				Name:      types.StringValue("test-cud"),
+				Cloud:     types.StringValue("GCP"),
+				Region:    types.StringNull(),
+				Type:      types.StringValue(string(pricing.CommitmentTypeRESOURCECUD)),
+				StartTime: types.StringValue("2026-01-01T00:00:00Z"),
+			},
+			expectError: true,
+		},
+		{
+			name: "RESOURCE_CUD with region → no error",
+			commitment: commitmentModel{
+				Name:      types.StringValue("test-cud"),
+				Cloud:     types.StringValue("GCP"),
+				Region:    types.StringValue("us-central1"),
+				Type:      types.StringValue(string(pricing.CommitmentTypeRESOURCECUD)),
+				StartTime: types.StringValue("2026-01-01T00:00:00Z"),
+			},
+			expectError: false,
+		},
+		{
+			name: "CAPACITY_BLOCK without region → error",
+			commitment: commitmentModel{
+				Name:      types.StringValue("test-cb"),
+				Cloud:     types.StringValue("AWS"),
+				Region:    types.StringNull(),
+				Type:      types.StringValue(string(pricing.CommitmentTypeCAPACITYBLOCK)),
+				StartTime: types.StringValue("2026-01-01T00:00:00Z"),
+			},
+			expectError: true,
+		},
+		{
+			name: "ON_DEMAND_CAPACITY_RESERVATION without region → error",
+			commitment: commitmentModel{
+				Name:      types.StringValue("test-odcr"),
+				Cloud:     types.StringValue("AWS"),
+				Region:    types.StringNull(),
+				Type:      types.StringValue(string(pricing.CommitmentTypeONDEMANDCAPACITYRESERVATION)),
+				StartTime: types.StringValue("2026-01-01T00:00:00Z"),
+			},
+			expectError: true,
+		},
+		{
+			name: "SAVINGS_PLAN without region → no error",
+			commitment: commitmentModel{
+				Name:      types.StringValue("test-sp"),
+				Cloud:     types.StringValue("AWS"),
+				Region:    types.StringNull(),
+				Type:      types.StringValue(string(pricing.CommitmentTypeSAVINGSPLAN)),
+				StartTime: types.StringValue("2026-01-01T00:00:00Z"),
+			},
+			expectError: false,
+		},
+		{
+			name: "FLEX_CUD without region → no error",
+			commitment: commitmentModel{
+				Name:      types.StringValue("test-flex"),
+				Cloud:     types.StringValue("GCP"),
+				Region:    types.StringNull(),
+				Type:      types.StringValue(string(pricing.CommitmentTypeFLEXCUD)),
+				StartTime: types.StringValue("2026-01-01T00:00:00Z"),
+			},
+			expectError: false,
+		},
+		{
+			name: "SAVINGS_PLAN with region → no error",
+			commitment: commitmentModel{
+				Name:      types.StringValue("test-sp"),
+				Cloud:     types.StringValue("AWS"),
+				Region:    types.StringValue("us-east-1"),
+				Type:      types.StringValue(string(pricing.CommitmentTypeSAVINGSPLAN)),
+				StartTime: types.StringValue("2026-01-01T00:00:00Z"),
+			},
+			expectError: false,
+		},
+		{
+			name: "RESERVED_INSTANCE with unknown region → error",
+			commitment: commitmentModel{
+				Name:      types.StringValue("test-ri"),
+				Cloud:     types.StringValue("AWS"),
+				Region:    types.StringUnknown(),
+				Type:      types.StringValue(string(pricing.CommitmentTypeRESERVEDINSTANCE)),
+				StartTime: types.StringValue("2026-01-01T00:00:00Z"),
+			},
+			expectError: true,
+		},
+		{
+			name: "RESERVED_INSTANCE with empty string region → error",
+			commitment: commitmentModel{
+				Name:      types.StringValue("test-ri"),
+				Cloud:     types.StringValue("AWS"),
+				Region:    types.StringValue(""),
+				Type:      types.StringValue(string(pricing.CommitmentTypeRESERVEDINSTANCE)),
+				StartTime: types.StringValue("2026-01-01T00:00:00Z"),
+			},
+			expectError: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			hasError := validateConfigForTest(t, ctx, tt.commitment)
+			require.Equal(t, tt.expectError, hasError)
+		})
+	}
 }
