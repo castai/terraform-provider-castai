@@ -11,6 +11,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
+
+	"github.com/samber/lo"
 )
 
 func TestAccCloudAgnostic_ResourceEdgeLocationOCI(t *testing.T) {
@@ -180,6 +182,31 @@ func TestAccCloudAgnostic_ResourceEdgeLocationAWSImpersonation(t *testing.T) {
 					resource.TestCheckNoResourceAttr(resourceName, "control_plane"),
 				),
 			},
+			// Add liqo gateway_replicas.
+			{
+				Config: testAccEdgeLocationAWSImpersonationConfigWithParams(rName, clusterName, "Test edge location impersonation",
+					[]string{"us-east-1a", "us-east-1b"}, "arn:aws:iam::123456789012:role/castai-omni-edge", nil, nil, lo.ToPtr(int32(2))),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "liqo.gateway_replicas", "2"),
+				),
+			},
+			// Update liqo gateway_replicas.
+			{
+				Config: testAccEdgeLocationAWSImpersonationConfigWithParams(rName, clusterName, "Test edge location impersonation",
+					[]string{"us-east-1a", "us-east-1b"}, "arn:aws:iam::123456789012:role/castai-omni-edge", nil, nil, lo.ToPtr(int32(3))),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "liqo.gateway_replicas", "3"),
+				),
+			},
+			// Remove liqo block entirely.
+			{
+				Config: testAccEdgeLocationAWSImpersonationConfig(rName, clusterName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "networking.tunneled_cidrs.#", "0"),
+					resource.TestCheckNoResourceAttr(resourceName, "control_plane"),
+					resource.TestCheckNoResourceAttr(resourceName, "liqo"),
+				),
+			},
 		},
 	})
 }
@@ -280,17 +307,17 @@ func formatAWSZonesAndSubnets(zones []string) (zonesConfig string, subnetConfig 
 
 func testAccEdgeLocationAWSImpersonationConfig(rName, clusterName string) string {
 	return testAccEdgeLocationAWSImpersonationConfigWithParams(rName, clusterName, "Test edge location impersonation",
-		[]string{"us-east-1a", "us-east-1b"}, "arn:aws:iam::123456789012:role/castai-omni-edge", nil, nil)
+		[]string{"us-east-1a", "us-east-1b"}, "arn:aws:iam::123456789012:role/castai-omni-edge", nil, nil, nil)
 }
 
 func testAccEdgeLocationAWSImpersonationUpdated(rName, clusterName string) string {
 	ha := false
 	return testAccEdgeLocationAWSImpersonationConfigWithParams(rName, clusterName, "Updated edge location impersonation",
 		[]string{"us-east-1a", "us-east-1b", "us-east-1c"}, "arn:aws:iam::123456789012:role/castai-omni-edge-updated",
-		[]string{"10.10.0.0/16", "192.168.0.0/24"}, &ha)
+		[]string{"10.10.0.0/16", "192.168.0.0/24"}, &ha, nil)
 }
 
-func testAccEdgeLocationAWSImpersonationConfigWithParams(rName, clusterName, description string, zones []string, roleArn string, tunneledCIDRs []string, ha *bool) string {
+func testAccEdgeLocationAWSImpersonationConfigWithParams(rName, clusterName, description string, zones []string, roleArn string, tunneledCIDRs []string, ha *bool, gatewayReplicas *int32) string {
 	organizationID := testAccGetOrganizationID()
 
 	zonesConfig, subnetConfig := formatAWSZonesAndSubnets(zones)
@@ -318,6 +345,14 @@ func testAccEdgeLocationAWSImpersonationConfigWithParams(rName, clusterName, des
   }`, *ha)
 	}
 
+	liqoBlock := ""
+	if gatewayReplicas != nil {
+		liqoBlock = fmt.Sprintf(`
+  liqo = {
+    gateway_replicas = %d
+  }`, *gatewayReplicas)
+	}
+
 	return ConfigCompose(testOmniClusterConfig(clusterName), fmt.Sprintf(`
 resource "castai_edge_location" "test" {
   organization_id 	 = %[5]q
@@ -329,6 +364,7 @@ resource "castai_edge_location" "test" {
 %[3]s
 %[7]s
 %[8]s
+%[9]s
 
   aws = {
     account_id               = "123456789012"
@@ -342,7 +378,7 @@ resource "castai_edge_location" "test" {
     }
   }
 }
-`, rName, description, zonesConfig, subnetConfig, organizationID, roleArn, networkingBlock, controlPlaneBlock))
+`, rName, description, zonesConfig, subnetConfig, organizationID, roleArn, networkingBlock, controlPlaneBlock, liqoBlock))
 }
 
 func testAccEdgeLocationGCPImpersonationConfig(rName, clusterName string) string {

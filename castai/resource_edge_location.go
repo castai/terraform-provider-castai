@@ -52,6 +52,7 @@ type edgeLocationModel struct {
 	ControlPlaneMode types.String       `tfsdk:"control_plane_mode"`
 	ControlPlane     *controlPlaneModel `tfsdk:"control_plane"`
 	Networking       *networkingModel   `tfsdk:"networking"`
+	Liqo             *liqoModel         `tfsdk:"liqo"`
 	Addons           []addonModel       `tfsdk:"addons"`
 	Zones            []zoneModel        `tfsdk:"zones"`
 	AWS              *awsModel          `tfsdk:"aws"`
@@ -108,6 +109,17 @@ func (m *cniModel) Equal(other *cniModel) bool {
 		return m == other
 	}
 	return m.Overlay.Equal(other.Overlay) && m.OverlayEncap.Equal(other.OverlayEncap)
+}
+
+type liqoModel struct {
+	GatewayReplicas types.Int32 `tfsdk:"gateway_replicas"`
+}
+
+func (m *liqoModel) Equal(other *liqoModel) bool {
+	if m == nil || other == nil {
+		return m == other
+	}
+	return m.GatewayReplicas.Equal(other.GatewayReplicas)
 }
 
 type networkingModel struct {
@@ -405,6 +417,16 @@ func (r *edgeLocationResource) Schema(_ context.Context, _ resource.SchemaReques
 					},
 				},
 			},
+			"liqo": schema.SingleNestedAttribute{
+				Optional:    true,
+				Description: "Liqo configuration for the edge cluster.",
+				Attributes: map[string]schema.Attribute{
+					"gateway_replicas": schema.Int32Attribute{
+						Optional:    true,
+						Description: "Number of active replicas for the Liqo gateway servers and clients. Defaults to 1 when unset.",
+					},
+				},
+			},
 			"addons": schema.ListNestedAttribute{
 				Optional:    true,
 				Computed:    true,
@@ -693,7 +715,7 @@ func (r *edgeLocationResource) Create(ctx context.Context, req resource.CreateRe
 		createReq.Description = lo.ToPtr(plan.Description.ValueString())
 	}
 
-	createReq.EdgeClusterSpec, diags = r.toEdgeClusterSpec(ctx, plan.ControlPlane, plan.Networking, plan.Addons)
+	createReq.EdgeClusterSpec, diags = r.toEdgeClusterSpec(ctx, plan.ControlPlane, plan.Networking, plan.Addons, plan.Liqo)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -829,6 +851,17 @@ func (r *edgeLocationResource) Read(ctx context.Context, req resource.ReadReques
 					Overlay:      overlay,
 					OverlayEncap: overlayEncap,
 				}
+			}
+		}
+		// Only sync liqo from API if it was already managed in state.
+		// Otherwise, we'd cause perpetual drift for users who never set the block.
+		if state.Liqo != nil && edgeLocation.EdgeClusterSpec.Liqo != nil {
+			apiLiqo := edgeLocation.EdgeClusterSpec.Liqo
+			state.Liqo = &liqoModel{
+				GatewayReplicas: types.Int32Null(),
+			}
+			if apiLiqo.GatewayReplicas != nil {
+				state.Liqo.GatewayReplicas = types.Int32Value(*apiLiqo.GatewayReplicas)
 			}
 		}
 		if edgeLocation.EdgeClusterSpec.Addons != nil {
@@ -1072,13 +1105,14 @@ func (r *edgeLocationResource) ImportState(ctx context.Context, req resource.Imp
 // Returns nil when nothing changed so the field is omitted from the PATCH request.
 func (r *edgeLocationResource) edgeClusterSpecUpdate(ctx context.Context, plan, state edgeLocationModel) (*omni.EdgeClusterSpec, diag.Diagnostics) {
 	var (
-		diags      diag.Diagnostics
-		cpChanged  = !plan.ControlPlane.Equal(state.ControlPlane)
-		netChanged = !plan.Networking.Equal(state.Networking)
-		addonsChg  = !addonsEqual(plan.Addons, state.Addons)
+		diags       diag.Diagnostics
+		cpChanged   = !plan.ControlPlane.Equal(state.ControlPlane)
+		netChanged  = !plan.Networking.Equal(state.Networking)
+		liqoChanged = !plan.Liqo.Equal(state.Liqo)
+		addonsChg   = !addonsEqual(plan.Addons, state.Addons)
 	)
 
-	if !cpChanged && !netChanged && !addonsChg {
+	if !cpChanged && !netChanged && !liqoChanged && !addonsChg {
 		return nil, diags
 	}
 
@@ -1102,6 +1136,9 @@ func (r *edgeLocationResource) edgeClusterSpecUpdate(ctx context.Context, plan, 
 				spec.Networking.Cni = r.toCNI(plan.Networking.CNI)
 			}
 		}
+	}
+	if liqoChanged {
+		spec.Liqo = r.toLiqo(plan.Liqo)
 	}
 	if addonsChg {
 		converted, d := r.toAddons(plan.Addons)
@@ -1128,9 +1165,20 @@ func (r *edgeLocationResource) toCNI(cni *cniModel) *omni.EdgeClusterCNI {
 	return out
 }
 
-func (r *edgeLocationResource) toEdgeClusterSpec(ctx context.Context, cp *controlPlaneModel, net *networkingModel, addons []addonModel) (*omni.EdgeClusterSpec, diag.Diagnostics) {
+func (r *edgeLocationResource) toLiqo(liqo *liqoModel) *omni.EdgeClusterLiqoSpec {
+	if liqo == nil {
+		return nil
+	}
+	out := &omni.EdgeClusterLiqoSpec{}
+	if !liqo.GatewayReplicas.IsNull() && !liqo.GatewayReplicas.IsUnknown() {
+		out.GatewayReplicas = liqo.GatewayReplicas.ValueInt32Pointer()
+	}
+	return out
+}
+
+func (r *edgeLocationResource) toEdgeClusterSpec(ctx context.Context, cp *controlPlaneModel, net *networkingModel, addons []addonModel, liqo *liqoModel) (*omni.EdgeClusterSpec, diag.Diagnostics) {
 	var diags diag.Diagnostics
-	if cp == nil && net == nil && addons == nil {
+	if cp == nil && net == nil && addons == nil && liqo == nil {
 		return nil, diags
 	}
 
@@ -1153,6 +1201,10 @@ func (r *edgeLocationResource) toEdgeClusterSpec(ctx context.Context, cp *contro
 		if net.CNI != nil {
 			spec.Networking.Cni = r.toCNI(net.CNI)
 		}
+	}
+
+	if liqo != nil {
+		spec.Liqo = r.toLiqo(liqo)
 	}
 
 	converted, d := r.toAddons(addons)

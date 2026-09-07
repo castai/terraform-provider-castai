@@ -294,6 +294,10 @@ type EdgeClusterControlPlane struct {
 
 // EdgeClusterLiqoSpec EdgeClusterLiqoSpec contains configuration overrides for liqo.
 type EdgeClusterLiqoSpec struct {
+	// GatewayReplicas GatewayReplicas is the number of active replicas for the Liqo gateway servers and clients.
+	//  Defaults to 1 when unset.
+	GatewayReplicas *int32 `json:"gatewayReplicas,omitempty"`
+
 	// GatewayServer GatewayServerConfig contains overrides for the Gateway server.
 	GatewayServer *GatewayServerConfig `json:"gatewayServer,omitempty"`
 }
@@ -377,6 +381,10 @@ type EdgeConfiguration struct {
 	// Oci OCI specific configuration.
 	Oci *OCIConfiguration `json:"oci,omitempty"`
 
+	// SshPublicKey Base64 encoded ssh public key to be used for provisioned nodes.
+	//  Example how to encode public key: cat ~/.ssh/id_ed25519.pub | base64 | tr -d '\n'
+	SshPublicKey *string `json:"sshPublicKey,omitempty"`
+
 	// UpdateTime The last update timestamp.
 	UpdateTime *time.Time `json:"updateTime,omitempty"`
 
@@ -441,6 +449,9 @@ type EdgeConfigurationUpdate struct {
 
 	// Oci OCI specific configuration.
 	Oci *OCIConfiguration `json:"oci,omitempty"`
+
+	// SshPublicKey Base64 encoded ssh public key to be used for provisioned nodes.
+	SshPublicKey *string `json:"sshPublicKey,omitempty"`
 
 	// UserDataBase64 Base64 encoded user data to run on the edge as part of bootstrap. The payload
 	//  must start with either `#cloud-config` (cloud-init YAML) or `#!` (shell
@@ -794,6 +805,9 @@ type NebiusConfiguration struct {
 
 	// Labels Instance/VM labels.
 	Labels *map[string]string `json:"labels,omitempty"`
+
+	// ReservationIds Capacity block reservation ids.
+	ReservationIds *[]string `json:"reservationIds,omitempty"`
 }
 
 // NebiusParam Nebius cloud provider params.
