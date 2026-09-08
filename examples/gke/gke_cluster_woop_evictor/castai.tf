@@ -1,13 +1,9 @@
 # 3. Connect GKE cluster to CAST AI with WOOP (workload autoscaler) and evictor (V2 API).
 #
-# This example uses the CAST AI umbrella Helm chart (castai-helm/castai) with
-# tags.full=true instead of the castai/gke-cluster module for Helm releases.
-# Terraform manages the cluster registration, GCP IAM, node configurations,
-# autoscaler settings, evictor (V2), WOOP policy, and rebalancing schedule.
-# CAST AI does NOT auto-upgrade the umbrella chart, so there is no version
-# conflict with the Terraform-managed helm_release.
-
-# Configure data sources and providers required for CAST AI connection.
+# Uses the CAST AI umbrella Helm chart (castai-helm/castai, tags.full=true)
+# instead of the castai/gke-cluster module. CAST AI does not auto-upgrade
+# the umbrella chart, so there is no version conflict with the
+# Terraform-managed helm_release.
 
 locals {
   init_script = var.gke_img_type == "COS_CONTAINERD" ? "init_cos.sh" : "init_ubuntu.sh"
@@ -37,8 +33,6 @@ module "castai-gke-iam" {
   gke_cluster_name = var.cluster_name
 }
 
-# Register the GKE cluster with CAST AI. This replaces the castai/gke-cluster
-# module — it is a direct resource that returns cluster_id and cluster_token.
 resource "castai_gke_cluster" "this" {
   project_id                 = var.project_id
   location                   = module.gke.location
@@ -50,10 +44,6 @@ resource "castai_gke_cluster" "this" {
   depends_on = [module.gke, module.castai-gke-iam]
 }
 
-# Install the CAST AI umbrella Helm chart with tags.full=true.
-# This deploys agent, cluster-controller, evictor, pod-mutator, pod-pinner,
-# live, workload-autoscaler, spot-handler, kvisor, and
-# workload-autoscaler-exporter in a single release.
 resource "helm_release" "castai_umbrella" {
   name             = "castai"
   repository       = "https://castai.github.io/helm-charts"
@@ -93,8 +83,7 @@ resource "helm_release" "castai_umbrella" {
 }
 
 # ── Node configuration ──
-# Default node configuration: disk/cpu ratio, subnets, image, and the CLM
-# init script (cri-proxy) required for Live Migration.
+# init_script is the CLM cri-proxy script required for Live Migration.
 
 resource "castai_node_configuration" "default" {
   cluster_id     = castai_gke_cluster.this.id
@@ -108,7 +97,6 @@ resource "castai_node_configuration" "default" {
   depends_on = [castai_gke_cluster.this]
 }
 
-# Promote the node configuration as the default.
 resource "castai_node_configuration_default" "this" {
   cluster_id       = castai_gke_cluster.this.id
   configuration_id = castai_node_configuration.default.id
@@ -177,7 +165,7 @@ resource "castai_autoscaler" "this" {
     }
   }
 
-  depends_on = [castai_gke_cluster.this, castai_node_template.default_by_castai]
+  depends_on = [castai_gke_cluster.this, castai_node_template.default_by_castai, helm_release.castai_umbrella]
 }
 
 # ── Evictor config via V2 API ──
@@ -191,7 +179,7 @@ resource "castai_evictor" "this" {
   enabled         = true
   aggressive_mode = true
 
-  depends_on = [castai_gke_cluster.this]
+  depends_on = [helm_release.castai_umbrella]
 }
 
 # ── WOOP workload scaling policy ──
@@ -239,7 +227,7 @@ resource "castai_workload_scaling_policy" "default" {
     threshold = 0.9
   }
 
-  depends_on = [castai_gke_cluster.this]
+  depends_on = [helm_release.castai_umbrella]
 }
 
 # ── Rebalancing schedule ──
