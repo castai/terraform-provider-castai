@@ -1962,3 +1962,58 @@ func TestValidateNodeTemplateIsDefault(t *testing.T) {
 		})
 	}
 }
+
+func TestFlattenInstanceFamilies(t *testing.T) {
+	tests := map[string]struct {
+		input  *sdk.NodetemplatesV1TemplateConstraintsInstanceFamilyConstraints
+		expect []map[string][]string
+	}{
+		"nil input returns nil": {
+			input:  nil,
+			expect: nil,
+		},
+		"both nil returns nil": {
+			input:  &sdk.NodetemplatesV1TemplateConstraintsInstanceFamilyConstraints{},
+			expect: nil,
+		},
+		"both empty slices returns nil": {
+			input: &sdk.NodetemplatesV1TemplateConstraintsInstanceFamilyConstraints{
+				Include: lo.ToPtr([]string{}),
+				Exclude: lo.ToPtr([]string{}),
+			},
+			expect: nil,
+		},
+		"include only": {
+			input: &sdk.NodetemplatesV1TemplateConstraintsInstanceFamilyConstraints{
+				Include: lo.ToPtr([]string{"n2", "n2d"}),
+			},
+			expect: []map[string][]string{
+				{FieldNodeTemplateInclude: {"n2", "n2d"}},
+			},
+		},
+		"exclude only": {
+			input: &sdk.NodetemplatesV1TemplateConstraintsInstanceFamilyConstraints{
+				Exclude: lo.ToPtr([]string{"e2"}),
+			},
+			expect: []map[string][]string{
+				{FieldNodeTemplateExclude: {"e2"}},
+			},
+		},
+		"both populated": {
+			input: &sdk.NodetemplatesV1TemplateConstraintsInstanceFamilyConstraints{
+				Include: lo.ToPtr([]string{"n2"}),
+				Exclude: lo.ToPtr([]string{"e2"}),
+			},
+			expect: []map[string][]string{
+				{FieldNodeTemplateInclude: {"n2"}, FieldNodeTemplateExclude: {"e2"}},
+			},
+		},
+	}
+
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			result := flattenInstanceFamilies(tt.input)
+			require.Equal(t, tt.expect, result)
+		})
+	}
+}

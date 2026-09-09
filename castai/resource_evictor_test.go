@@ -154,7 +154,7 @@ func TestResourceEvictor_CreateContext(t *testing.T) {
 	r.NotNil(capturedBody.ScopedMode)
 	r.True(*capturedBody.ScopedMode)
 	r.NotNil(capturedBody.CycleInterval)
-	r.Equal("2m", *capturedBody.CycleInterval)
+	r.Equal("120s", *capturedBody.CycleInterval)
 	r.NotNil(capturedBody.NodeGracePeriodMinutes)
 	r.Equal(int32(10), *capturedBody.NodeGracePeriodMinutes)
 	r.NotNil(capturedBody.PodEvictionFailureBackOffInterval)
@@ -166,9 +166,9 @@ func TestResourceEvictor_CreateContext(t *testing.T) {
 	r.NotNil(capturedBody.EmitNodeRelatedPodEvents)
 	r.True(*capturedBody.EmitNodeRelatedPodEvents)
 	r.NotNil(capturedBody.DrainTimeout)
-	r.Equal("15m", *capturedBody.DrainTimeout)
+	r.Equal("900s", *capturedBody.DrainTimeout)
 	r.NotNil(capturedBody.DrainRollbackTimeout)
-	r.Equal("2m", *capturedBody.DrainRollbackTimeout)
+	r.Equal("120s", *capturedBody.DrainRollbackTimeout)
 	r.NotNil(capturedBody.Windows)
 	r.True(*capturedBody.Windows)
 	r.NotNil(capturedBody.ForceDisableLiveMigration)
@@ -412,14 +412,14 @@ func fullEvictorConfig(status *workload_eviction.ConfigStatus) *workload_evictio
 		DryRun:                            lo.ToPtr(true),
 		AggressiveMode:                    lo.ToPtr(true),
 		ScopedMode:                        lo.ToPtr(true),
-		CycleInterval:                     lo.ToPtr("2m"),
+		CycleInterval:                     lo.ToPtr("120s"),
 		NodeGracePeriodMinutes:            lo.ToPtr(int32(10)),
 		PodEvictionFailureBackOffInterval: lo.ToPtr("10s"),
 		IgnorePodDisruptionBudgets:        lo.ToPtr(true),
 		SoftTainting:                      lo.ToPtr(true),
 		EmitNodeRelatedPodEvents:          lo.ToPtr(true),
-		DrainTimeout:                      lo.ToPtr("15m"),
-		DrainRollbackTimeout:              lo.ToPtr("2m"),
+		DrainTimeout:                      lo.ToPtr("900s"),
+		DrainRollbackTimeout:              lo.ToPtr("120s"),
 		Windows:                           lo.ToPtr(true),
 		ForceDisableLiveMigration:         lo.ToPtr(true),
 		ForceDisableWoop:                  lo.ToPtr(true),
