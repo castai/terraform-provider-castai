@@ -11131,6 +11131,7 @@ type WorkloadoptimizationV1RecommendationStatusType string
 
 // WorkloadoptimizationV1RecommendationStep RecommendationStep captures a single transformation stage in the recommendation
 // pipeline. The args field contains unstructured step-specific parameters.
+// Deprecated: only used by the deprecated RecommendationSummary.
 type WorkloadoptimizationV1RecommendationStep struct {
 	Args      *map[string]interface{}                          `json:"args,omitempty"`
 	Labels    *[]WorkloadoptimizationV1RecommendationStepLabel `json:"labels,omitempty"`
@@ -11173,6 +11174,7 @@ type WorkloadoptimizationV1RecommendationStopReasonType string
 
 // WorkloadoptimizationV1RecommendationSummary RecommendationSummary describes the overall outcome and per-container calculation steps
 // for a workload recommendation event.
+// Deprecated: no longer populated, always empty. Use debug_data instead.
 type WorkloadoptimizationV1RecommendationSummary struct {
 	ActionType               *WorkloadoptimizationV1ActionType                                `json:"actionType,omitempty"`
 	ApplyType                *WorkloadoptimizationV1ApplyType                                 `json:"applyType,omitempty"`
@@ -11190,6 +11192,7 @@ type WorkloadoptimizationV1RecommendedPodCountChangedEvent struct {
 
 	// Summary RecommendationSummary describes the overall outcome and per-container calculation steps
 	// for a workload recommendation event.
+	// Deprecated: no longer populated, always empty. Use debug_data instead.
 	Summary *WorkloadoptimizationV1RecommendationSummary `json:"summary,omitempty"`
 }
 
@@ -11203,6 +11206,7 @@ type WorkloadoptimizationV1RecommendedRequestsChangedEvent struct {
 
 	// Summary RecommendationSummary describes the overall outcome and per-container calculation steps
 	// for a workload recommendation event.
+	// Deprecated: no longer populated, always empty. Use debug_data instead.
 	Summary *WorkloadoptimizationV1RecommendationSummary `json:"summary,omitempty"`
 }
 
@@ -11584,6 +11588,21 @@ type WorkloadoptimizationV1ScalingPolicyUpdated struct {
 	Previous WorkloadoptimizationV1WorkloadScalingPolicy `json:"previous"`
 }
 
+// WorkloadoptimizationV1SchedulerReasons SchedulerReasons is the parsed blocked-node reason breakdown from the
+// Kubernetes scheduler's PodScheduled condition message.
+type WorkloadoptimizationV1SchedulerReasons struct {
+	// BlockedNodesTotal blocked_nodes_total is the sum of all counters above.
+	BlockedNodesTotal    *int32 `json:"blockedNodesTotal,omitempty"`
+	InsufficientCpu      *int32 `json:"insufficientCpu,omitempty"`
+	InsufficientMemory   *int32 `json:"insufficientMemory,omitempty"`
+	NodeAffinityMismatch *int32 `json:"nodeAffinityMismatch,omitempty"`
+
+	// Other other counts nodes blocked by reasons not covered by the fields above.
+	Other             *int32 `json:"other,omitempty"`
+	TooManyPods       *int32 `json:"tooManyPods,omitempty"`
+	UntoleratedTaints *int32 `json:"untoleratedTaints,omitempty"`
+}
+
 // WorkloadoptimizationV1SetScalingPoliciesOrderResponse defines model for workloadoptimization.v1.SetScalingPoliciesOrderResponse.
 type WorkloadoptimizationV1SetScalingPoliciesOrderResponse = map[string]interface{}
 
@@ -11709,6 +11728,36 @@ type WorkloadoptimizationV1TwoPhaseRecommendations struct {
 
 // WorkloadoptimizationV1UnboundMemoryGrowthEvent defines model for workloadoptimization.v1.UnboundMemoryGrowthEvent.
 type WorkloadoptimizationV1UnboundMemoryGrowthEvent = map[string]interface{}
+
+// WorkloadoptimizationV1UnschedulableRecommendationEvent defines model for workloadoptimization.v1.UnschedulableRecommendationEvent.
+type WorkloadoptimizationV1UnschedulableRecommendationEvent struct {
+	// Pods Pods is the list of all unschedulable pods observed for the workload in a single
+	// detection pass. A single event covers every unschedulable pod in the workload,
+	// not a separate event per pod.
+	Pods []WorkloadoptimizationV1UnschedulableRecommendationEventUnschedulablePod `json:"pods"`
+
+	// Truncated truncated is set when the per-event pod cap stopped scanning before all
+	// pending pods were examined; more unschedulable pods may exist than listed.
+	Truncated *bool `json:"truncated"`
+}
+
+// WorkloadoptimizationV1UnschedulableRecommendationEventUnschedulablePod UnschedulablePod describes a single unschedulable pod observed for the workload.
+// Each pod carries original and current container requests keyed by container name,
+// so a single pod may be unschedulable due to CPU, memory, or both.
+type WorkloadoptimizationV1UnschedulableRecommendationEventUnschedulablePod struct {
+	// CurrentRequests current_requests maps container name to the current (inflated by VPA) resource requests.
+	CurrentRequests map[string]WorkloadoptimizationV1ResourceQuantity `json:"currentRequests"`
+
+	// OriginalRequests original_requests maps container name to the original (pre-VPA) resource requests.
+	OriginalRequests   map[string]WorkloadoptimizationV1ResourceQuantity `json:"originalRequests"`
+	PendingDuration    string                                            `json:"pendingDuration"`
+	PodName            string                                            `json:"podName"`
+	RecommendationHash string                                            `json:"recommendationHash"`
+
+	// SchedulerReasons SchedulerReasons is the parsed blocked-node reason breakdown from the
+	// Kubernetes scheduler's PodScheduled condition message.
+	SchedulerReasons *WorkloadoptimizationV1SchedulerReasons `json:"schedulerReasons,omitempty"`
+}
 
 // WorkloadoptimizationV1UnschedulableRecommendationEvent defines model for workloadoptimization.v1.UnschedulableRecommendationEvent.
 type WorkloadoptimizationV1UnschedulableRecommendationEvent struct {
