@@ -417,7 +417,9 @@ func (r *edgeConfigurationResource) Read(ctx context.Context, req resource.ReadR
 	}
 
 	state, stateDiags := r.edgeConfigurationToTFModel(ctx, apiResp.JSON200, state.OrganizationID, state.ClusterID)
-	resp.Diagnostics.Append(stateDiags...)
+	if stateDiags.HasError() {
+		resp.Diagnostics.Append(stateDiags...)
+	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, state)...)
 }
@@ -500,7 +502,9 @@ func (r *edgeConfigurationResource) Update(ctx context.Context, req resource.Upd
 	}
 
 	state, stateDiags := r.edgeConfigurationToTFModel(ctx, apiResp.JSON200, plan.OrganizationID, plan.ClusterID)
-	resp.Diagnostics.Append(stateDiags...)
+	if stateDiags.HasError() {
+		resp.Diagnostics.Append(stateDiags...)
+	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
 }
