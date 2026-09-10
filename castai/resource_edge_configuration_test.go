@@ -187,6 +187,63 @@ func TestAccCloudAgnostic_ResourceEdgeConfigurationOCI(t *testing.T) {
 	})
 }
 
+func TestAccCloudAgnostic_ResourceEdgeConfigurationNebius(t *testing.T) {
+	rName := fmt.Sprintf("%v-edgecfg-%v", ResourcePrefix, acctest.RandString(8))
+	clusterName := fmt.Sprintf("omni-tf-acc-nebius-cfg-%v", acctest.RandString(6))
+	resourceName := "castai_edge_configuration.test"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		CheckDestroy:             testAccCheckEdgeResourcesDestroy(testAccCheckEdgeConfigurationDestroy),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccEdgeConfigurationNebiusConfig(rName, clusterName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "name", rName),
+					resource.TestCheckResourceAttrSet(resourceName, "organization_id"),
+					resource.TestCheckResourceAttrSet(resourceName, "cluster_id"),
+					resource.TestCheckResourceAttrSet(resourceName, "edge_location_id"),
+					resource.TestCheckResourceAttrSet(resourceName, "id"),
+					resource.TestCheckResourceAttr(resourceName, "default", "false"),
+					resource.TestCheckResourceAttr(resourceName, "nebius.image_id", "projects/nebius/global/images/nebius-edge-v1"),
+					resource.TestCheckResourceAttr(resourceName, "nebius.boot_disk_size_gib", "100"),
+					resource.TestCheckResourceAttr(resourceName, "nebius.labels.key1", "value1"),
+					resource.TestCheckResourceAttr(resourceName, "nebius.reservation_ids.#", "2"),
+					resource.TestCheckResourceAttr(resourceName, "nebius.reservation_ids.0", "res-1"),
+					resource.TestCheckResourceAttr(resourceName, "nebius.reservation_ids.1", "res-2"),
+					resource.TestCheckResourceAttr(resourceName, "nebius.gpu_cluster", "gpu-cluster-a"),
+				),
+			},
+			{
+				ResourceName: resourceName,
+				ImportStateIdFunc: func(s *terraform.State) (string, error) {
+					organizationID := testAccGetOrganizationID()
+					clusterID := s.RootModule().Resources["castai_omni_cluster.test"].Primary.ID
+					edgeLocationID := s.RootModule().Resources["castai_edge_location.test"].Primary.ID
+					configID := s.RootModule().Resources["castai_edge_configuration.test"].Primary.ID
+					return fmt.Sprintf("%s/%s/%s/%s", organizationID, clusterID, edgeLocationID, configID), nil
+				},
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccEdgeConfigurationNebiusUpdated(rName, clusterName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "name", rName+"-updated"),
+					resource.TestCheckResourceAttr(resourceName, "nebius.image_id", "projects/nebius/global/images/nebius-edge-v2"),
+					resource.TestCheckResourceAttr(resourceName, "nebius.boot_disk_size_gib", "200"),
+					resource.TestCheckResourceAttr(resourceName, "nebius.labels.key1", "updated-value1"),
+					resource.TestCheckResourceAttr(resourceName, "nebius.labels.newkey", "newvalue"),
+					resource.TestCheckResourceAttr(resourceName, "nebius.reservation_ids.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "nebius.reservation_ids.0", "res-updated"),
+					resource.TestCheckResourceAttr(resourceName, "nebius.gpu_cluster", "gpu-cluster-updated"),
+				),
+			},
+		},
+	})
+}
+
 func TestEdgeConfigurationResource_toNebiusConfiguration_Conversions(t *testing.T) {
 	t.Parallel()
 
@@ -556,6 +613,59 @@ resource "castai_edge_configuration" "test" {
       key2   = "updated-value2"
       newkey = "newvalue"
     }
+  }
+}
+`, organizationID, rName),
+	)
+}
+
+func testAccEdgeConfigurationNebiusConfig(rName, clusterName string) string {
+	organizationID := testAccGetOrganizationID()
+
+	return ConfigCompose(
+		testAccEdgeLocationNebiusWIFConfig(rName, clusterName),
+		fmt.Sprintf(`
+resource "castai_edge_configuration" "test" {
+  organization_id  = %[1]q
+  cluster_id       = castai_omni_cluster.test.id
+  edge_location_id = castai_edge_location.test.id
+  name             = %[2]q
+
+  nebius = {
+    image_id           = "projects/nebius/global/images/nebius-edge-v1"
+    boot_disk_size_gib = 100
+    labels = {
+      key1 = "value1"
+    }
+    reservation_ids = ["res-1", "res-2"]
+    gpu_cluster     = "gpu-cluster-a"
+  }
+}
+`, organizationID, rName),
+	)
+}
+
+func testAccEdgeConfigurationNebiusUpdated(rName, clusterName string) string {
+	organizationID := testAccGetOrganizationID()
+
+	return ConfigCompose(
+		testAccEdgeLocationNebiusWIFConfig(rName, clusterName),
+		fmt.Sprintf(`
+resource "castai_edge_configuration" "test" {
+  organization_id  = %[1]q
+  cluster_id       = castai_omni_cluster.test.id
+  edge_location_id = castai_edge_location.test.id
+  name             = "%[2]s-updated"
+
+  nebius = {
+    image_id           = "projects/nebius/global/images/nebius-edge-v2"
+    boot_disk_size_gib = 200
+    labels = {
+      key1   = "updated-value1"
+      newkey = "newvalue"
+    }
+    reservation_ids = ["res-updated"]
+    gpu_cluster     = "gpu-cluster-updated"
   }
 }
 `, organizationID, rName),
