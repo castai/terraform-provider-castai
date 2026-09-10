@@ -4,12 +4,19 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"strings"
 	"testing"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
+	"github.com/samber/lo"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+
+	"github.com/castai/terraform-provider-castai/castai/sdk/omni"
 )
 
 func TestAccCloudAgnostic_ResourceEdgeConfigurationGCP(t *testing.T) {
@@ -178,6 +185,198 @@ func TestAccCloudAgnostic_ResourceEdgeConfigurationOCI(t *testing.T) {
 			},
 		},
 	})
+}
+
+func TestEdgeConfigurationResource_toNebiusConfiguration_Conversions(t *testing.T) {
+	t.Parallel()
+
+	r := &edgeConfigurationResource{}
+	ctx := context.Background()
+
+	labelsMap, diags := types.MapValueFrom(ctx, types.StringType, map[string]string{"env": "prod", "team": "platform"})
+	require.False(t, diags.HasError())
+
+	reservationList, diags := types.ListValueFrom(ctx, types.StringType, []string{"res-1", "res-2"})
+	require.False(t, diags.HasError())
+
+	tests := map[string]struct {
+		plan     *nebiusConfigurationModel
+		expected *omni.NebiusConfiguration
+		expError string
+	}{
+		"all fields populated": {
+			plan: &nebiusConfigurationModel{
+				ImageID:         types.StringValue("nebius-image-123"),
+				BootDiskSizeGiB: types.Int64Value(100),
+				Labels:          labelsMap,
+				ReservationIDs:  reservationList,
+				GpuCluster:      types.StringValue("gpu-cluster-a"),
+			},
+			expected: &omni.NebiusConfiguration{
+				ImageId:         lo.ToPtr("nebius-image-123"),
+				BootDiskSizeGib: lo.ToPtr(int32(100)),
+				Labels:          &map[string]string{"env": "prod", "team": "platform"},
+				ReservationIds:  &[]string{"res-1", "res-2"},
+				GpuCluster:      lo.ToPtr("gpu-cluster-a"),
+			},
+		},
+		"empty string ImageID is skipped": {
+			plan: &nebiusConfigurationModel{
+				ImageID:         types.StringValue(""),
+				BootDiskSizeGiB: types.Int64Value(50),
+			},
+			expected: &omni.NebiusConfiguration{
+				BootDiskSizeGib: lo.ToPtr(int32(50)),
+			},
+		},
+		"all null/zero values skipped": {
+			plan: &nebiusConfigurationModel{
+				ImageID:         types.StringNull(),
+				BootDiskSizeGiB: types.Int64Null(),
+				Labels:          types.MapNull(types.StringType),
+				ReservationIDs:  types.ListNull(types.StringType),
+				GpuCluster:      types.StringNull(),
+			},
+			expected: &omni.NebiusConfiguration{},
+		},
+		"labels with wrong element type produces diagnostics": {
+			plan: &nebiusConfigurationModel{
+				ImageID: types.StringValue("img"),
+				// Build a Map that declares StringType but holds Int64 values,
+				// forcing ElementsAs to fail.
+				Labels: func() types.Map {
+					m, _ := types.MapValueFrom(ctx, types.Int64Type, map[string]int64{"k": 1})
+					return m
+				}(),
+			},
+			expected: &omni.NebiusConfiguration{
+				ImageId: lo.ToPtr("img"),
+			},
+			expError: "can't unmarshal tftypes.Number into *string, expected string",
+		},
+	}
+
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+			config, diags := r.toNebiusConfiguration(ctx, tc.plan)
+			if tc.expError != "" {
+				require.True(t, diags.HasError(), "expected diagnostics on labels conversion failure")
+				var found bool
+				for _, d := range diags.Errors() {
+					msg := d.Summary() + ": " + d.Detail()
+					if strings.Contains(msg, tc.expError) {
+						found = true
+						break
+					}
+				}
+				assert.True(t, found, "expected diagnostic to contain %q, got %v", tc.expError, diags)
+			} else {
+				assert.False(t, diags.HasError(), "unexpected diagnostics: %v", diags)
+			}
+			assert.Equal(t, tc.expected, config)
+		})
+	}
+}
+
+func TestEdgeConfigurationResource_toNebiusConfigurationModel(t *testing.T) {
+	t.Parallel()
+
+	r := &edgeConfigurationResource{}
+	ctx := context.Background()
+
+	t.Run("nil config returns nil", func(t *testing.T) {
+		t.Parallel()
+		model, diag := r.toNebiusConfigurationModel(ctx, nil)
+		assert.Nil(t, model)
+		assert.False(t, diag.HasError())
+	})
+
+	expectedLabels, diags := types.MapValueFrom(ctx, types.StringType, map[string]string{"foo": "bar"})
+	require.False(t, diags.HasError())
+
+	expectedReservations, diags := types.ListValueFrom(ctx, types.StringType, []string{"r1", "r2", "r3"})
+	require.False(t, diags.HasError())
+
+	fullyNullModel := &nebiusConfigurationModel{
+		Labels:          types.MapNull(types.StringType),
+		ImageID:         types.StringNull(),
+		BootDiskSizeGiB: types.Int64Null(),
+		ReservationIDs:  types.ListNull(types.StringType),
+		GpuCluster:      types.StringNull(),
+	}
+
+	tests := map[string]struct {
+		config   *omni.NebiusConfiguration
+		expected *nebiusConfigurationModel
+	}{
+		"all fields populated": {
+			config: &omni.NebiusConfiguration{
+				ImageId:         lo.ToPtr("nebius-image-xyz"),
+				BootDiskSizeGib: lo.ToPtr(int32(200)),
+				Labels:          &map[string]string{"foo": "bar"},
+				ReservationIds:  &[]string{"r1", "r2", "r3"},
+				GpuCluster:      lo.ToPtr("gpu-cluster-z"),
+			},
+			expected: &nebiusConfigurationModel{
+				ImageID:         types.StringValue("nebius-image-xyz"),
+				BootDiskSizeGiB: types.Int64Value(200),
+				Labels:          expectedLabels,
+				ReservationIDs:  expectedReservations,
+				GpuCluster:      types.StringValue("gpu-cluster-z"),
+			},
+		},
+		"empty string ImageId becomes null": {
+			config: &omni.NebiusConfiguration{
+				ImageId: lo.ToPtr(""),
+			},
+			expected: fullyNullModel,
+		},
+		"nil Labels and ReservationIds produce null values": {
+			config: &omni.NebiusConfiguration{
+				ImageId: lo.ToPtr("img-only"),
+			},
+			expected: &nebiusConfigurationModel{
+				Labels:          types.MapNull(types.StringType),
+				ImageID:         types.StringValue("img-only"),
+				BootDiskSizeGiB: types.Int64Null(),
+				ReservationIDs:  types.ListNull(types.StringType),
+				GpuCluster:      types.StringNull(),
+			},
+		},
+		"empty Labels and ReservationIds produce null values": {
+			config: &omni.NebiusConfiguration{
+				Labels:         &map[string]string{},
+				ReservationIds: &[]string{},
+			},
+			expected: fullyNullModel,
+		},
+		"zero BootDiskSizeGib is preserved as non-null zero": {
+			config: &omni.NebiusConfiguration{
+				BootDiskSizeGib: lo.ToPtr(int32(0)),
+			},
+			expected: &nebiusConfigurationModel{
+				Labels:          types.MapNull(types.StringType),
+				ImageID:         types.StringNull(),
+				BootDiskSizeGiB: types.Int64Value(0),
+				ReservationIDs:  types.ListNull(types.StringType),
+				GpuCluster:      types.StringNull(),
+			},
+		},
+		"all fields missing produce fully-null model": {
+			config:   &omni.NebiusConfiguration{},
+			expected: fullyNullModel,
+		},
+	}
+
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+			model, diag := r.toNebiusConfigurationModel(ctx, tc.config)
+			assert.Equal(t, tc.expected, model)
+			assert.False(t, diag.HasError())
+		})
+	}
 }
 
 func testAccEdgeConfigurationGCPConfig(rName, clusterName string) string {

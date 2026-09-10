@@ -5,13 +5,14 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/castai/terraform-provider-castai/castai/sdk/omni"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+
+	"github.com/castai/terraform-provider-castai/castai/sdk/omni"
 )
 
 var (
@@ -176,6 +177,15 @@ func (d *edgeConfigurationDataSource) Schema(_ context.Context, _ datasource.Sch
 						Description: "Instance/VM labels",
 						ElementType: types.StringType,
 					},
+					"reservation_ids": schema.ListAttribute{
+						Computed:    true,
+						ElementType: types.StringType,
+						Description: "Capacity block reservation IDs",
+					},
+					"gpu_cluster": schema.StringAttribute{
+						Computed:    true,
+						Description: "GPU cluster info",
+					},
 				},
 			},
 			"cri": schema.SingleNestedAttribute{
@@ -328,6 +338,12 @@ func (d *edgeConfigurationDataSource) Read(ctx context.Context, req datasource.R
 		}
 		if config.Nebius.Labels != nil && len(*config.Nebius.Labels) > 0 {
 			data.Nebius.Labels, diags = types.MapValueFrom(ctx, types.StringType, *config.Nebius.Labels)
+		}
+		if config.Nebius.ReservationIds != nil && len(*config.Nebius.ReservationIds) > 0 {
+			data.Nebius.ReservationIDs, diags = types.ListValueFrom(ctx, types.StringType, *config.Nebius.ReservationIds)
+		}
+		if config.Nebius.GpuCluster != nil && *config.Nebius.GpuCluster != "" {
+			data.Nebius.GpuCluster = types.StringValue(*config.Nebius.GpuCluster)
 		}
 	}
 

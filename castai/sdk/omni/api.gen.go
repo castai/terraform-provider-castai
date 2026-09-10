@@ -800,6 +800,9 @@ type NebiusConfiguration struct {
 	// BootDiskSizeGib Boot disk size.
 	BootDiskSizeGib *int32 `json:"bootDiskSizeGib,omitempty"`
 
+	// GpuCluster GPU cluster info
+	GpuCluster *string `json:"gpuCluster,omitempty"`
+
 	// ImageId ImageID to be used for edge creation.
 	ImageId *string `json:"imageId,omitempty"`
 
