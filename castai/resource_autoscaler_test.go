@@ -1131,9 +1131,8 @@ func TestAutoscalerResource_UpdateAutoscalerPolicies_ContextCanceledWrapsTimeout
 
 	// When the Get call itself fails because the context was cancelled,
 	// updatePolicies() returns a non-retryable error wrapped with the context error.
-	// The implementation returns this wrapped context error directly (not via the
-	// "timeout waiting for autoscaler policy update..." path), which preserves
-	// the original behavior. We assert here that some error is returned.
+	// The implementation detects context cancellation/deadline-exceeded and wraps
+	// the error with the timeout message, which preserves the original behavior.
 	mockClient.EXPECT().
 		PoliciesAPIGetClusterPolicies(gomock.Any(), clusterId, gomock.Any()).
 		Return(nil, context.Canceled).
@@ -1141,6 +1140,7 @@ func TestAutoscalerResource_UpdateAutoscalerPolicies_ContextCanceledWrapsTimeout
 
 	err := updateAutoscalerPolicies(ctx, data, provider)
 	r.Error(err)
+	r.Contains(err.Error(), "timeout waiting for autoscaler policy update after version conflicts")
 }
 
 func JSONBytesEqual(a, b []byte) (bool, error) {

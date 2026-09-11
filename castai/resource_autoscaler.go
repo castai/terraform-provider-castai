@@ -1000,7 +1000,7 @@ func getChangedPolicies(ctx context.Context, data types.ResourceProvider, meta i
 	currentPolicies, err := getCurrentPolicies(ctx, client, clusterId)
 	if err != nil {
 		log.Printf("[WARN] Getting current policies: %v", err)
-		return nil, fmt.Errorf("failed to get policies from API: %v", err)
+		return nil, fmt.Errorf("failed to get policies from API: %w", err)
 	}
 
 	policies, err := jsonpatch.MergePatch(currentPolicies, policyChanges)
