@@ -33,12 +33,6 @@ module "eks" {
       max_size      = 5
       min_size      = 2
       desired_size  = 2
-
-      metadata_options = {
-        http_endpoint               = "enabled"
-        http_tokens                 = "required"
-        http_put_response_hop_limit = 2
-      }
     }
   }
 
@@ -51,12 +45,6 @@ module "eks" {
 
       instance_types = ["t3.large"]
       capacity_type  = "SPOT"
-
-      metadata_options = {
-        http_endpoint               = "enabled"
-        http_tokens                 = "required"
-        http_put_response_hop_limit = 2
-      }
 
       update_config = {
         max_unavailable_percentage = 50 # or set `max_unavailable`

@@ -110,6 +110,13 @@ resource "helm_release" "castai" {
   values = [yamlencode({
     kent = {
       enabled = true
+      "castai-agent" = {
+        additionalEnv = {
+          EKS_ACCOUNT_ID   = data.aws_caller_identity.current.account_id
+          EKS_CLUSTER_NAME = module.eks.cluster_name
+          EKS_REGION       = var.cluster_region
+        }
+      }
       # Disable kent subchart pre-delete hooks that deadlock `tofu destroy`.
       # Two distinct traps the umbrella ships, both surface only at uninstall:
       #
