@@ -29,6 +29,39 @@ resource "castai_workload_scaling_policy" "services" {
     type = "AVERAGE_VALUE_FROM_ORIGINAL_REQUESTS"
   }
 
+  hpa_settings {
+    management_option = "MANAGED"
+    take_ownership    = true
+
+    native_hpa_spec {
+      min_replicas = 2
+      max_replicas = 20
+
+      metrics {
+        type = "RESOURCE"
+        resource {
+          name = "cpu"
+          target {
+            type  = "UTILIZATION"
+            value = "80"
+          }
+        }
+      }
+
+      behavior {
+        scale_down {
+          stabilization_window_seconds = 300
+          select_policy                = "MAX_CHANGE_POLICY_SELECT"
+          policies {
+            type           = "PODS_SCALING_POLICY"
+            value          = 1
+            period_seconds = 60
+          }
+        }
+      }
+    }
+  }
+
   cpu {
     function = "QUANTILE"
     overhead = 0.15
