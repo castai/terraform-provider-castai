@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -12,13 +13,13 @@ import (
 	"time"
 
 	jsonpatch "github.com/evanphx/json-patch"
+	"github.com/cenkalti/backoff/v4"
 	"github.com/google/uuid"
 	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/mitchellh/mapstructure"
-	"k8s.io/apimachinery/pkg/util/wait"
 
 	"github.com/castai/terraform-provider-castai/castai/sdk"
 	"github.com/castai/terraform-provider-castai/castai/types"
@@ -831,32 +832,35 @@ func updateAutoscalerPolicies(ctx context.Context, data *schema.ResourceData, me
 		return upsertPolicies(ctx, meta, clusterId, changedPoliciesJSON)
 	}
 
-	// Exponential backoff configuration
-	backoff := wait.Backoff{
-		Duration: 100 * time.Millisecond,
-		Factor:   2.0,
-		Jitter:   0.1,
-		Steps:    5,
-		Cap:      2 * time.Second,
-	}
+	// Exponential backoff configuration: 100ms initial, 2.0 multiplier, 0.1 jitter,
+	// capped at 2s, max 5 total attempts (1 initial + 4 retries).
+	b := backoff.NewExponentialBackOff()
+	b.InitialInterval = 100 * time.Millisecond
+	b.Multiplier = 2.0
+	b.RandomizationFactor = 0.1
+	b.MaxInterval = 2 * time.Second
+	b.MaxElapsedTime = 0 // disable elapsed-time limit; rely on max retries
 
-	retryErr := wait.ExponentialBackoffWithContext(ctx, backoff, func(ctx context.Context) (done bool, err error) {
-		err = updatePolicies()
+	bWithCtx := backoff.WithContext(backoff.WithMaxRetries(b, 4), ctx)
+
+	retryErr := backoff.RetryNotify(func() error {
+		err := updatePolicies()
 		if err == nil {
-			return true, nil // Success - stop retrying
+			return nil // Success - stop retrying
 		}
 
-		// Check if error is retryable
+		// Check if error is retryable.
 		if !isNodeTemplateVersionConflict(err) {
-			return false, err // Non-retryable error - stop with error
+			return backoff.Permanent(err) // Non-retryable error - stop with error
 		}
 
+		return err // Retryable error - continue retrying
+	}, bWithCtx, func(err error, _ time.Duration) {
 		log.Printf("[DEBUG] Retry failed with version conflict: %v", err)
-		return false, nil // Retryable error - continue retrying
 	})
 
 	if retryErr != nil {
-		if wait.Interrupted(retryErr) {
+		if errors.Is(retryErr, context.Canceled) || errors.Is(retryErr, context.DeadlineExceeded) {
 			return fmt.Errorf("timeout waiting for autoscaler policy update after version conflicts: %w", retryErr)
 		}
 		return retryErr
@@ -996,7 +1000,7 @@ func getChangedPolicies(ctx context.Context, data types.ResourceProvider, meta i
 	currentPolicies, err := getCurrentPolicies(ctx, client, clusterId)
 	if err != nil {
 		log.Printf("[WARN] Getting current policies: %v", err)
-		return nil, fmt.Errorf("failed to get policies from API: %v", err)
+		return nil, fmt.Errorf("failed to get policies from API: %w", err)
 	}
 
 	policies, err := jsonpatch.MergePatch(currentPolicies, policyChanges)
