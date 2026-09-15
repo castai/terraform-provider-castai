@@ -213,6 +213,7 @@ func TestAccCloudAgnostic_ResourceEdgeConfigurationNebius(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "nebius.reservation_ids.0", "res-1"),
 					resource.TestCheckResourceAttr(resourceName, "nebius.reservation_ids.1", "res-2"),
 					resource.TestCheckResourceAttr(resourceName, "nebius.gpu_cluster", "gpu-cluster-a"),
+					resource.TestCheckResourceAttr(resourceName, "cri.socket", "unix:///run/containerd/containerd.sock"),
 				),
 			},
 			{
@@ -238,6 +239,7 @@ func TestAccCloudAgnostic_ResourceEdgeConfigurationNebius(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "nebius.reservation_ids.#", "1"),
 					resource.TestCheckResourceAttr(resourceName, "nebius.reservation_ids.0", "res-updated"),
 					resource.TestCheckResourceAttr(resourceName, "nebius.gpu_cluster", "gpu-cluster-updated"),
+					resource.TestCheckResourceAttr(resourceName, "cri.socket", "unix:///run/containerd/containerd-updated.sock"),
 				),
 			},
 		},
@@ -630,6 +632,11 @@ resource "castai_edge_configuration" "test" {
   cluster_id       = castai_omni_cluster.test.id
   edge_location_id = castai_edge_location.test.id
   name             = %[2]q
+  user_data_base64 = "I2Nsb3VkLWNvbmZpZwojIFVzZXIgZGF0YQ=="
+
+  cri = {
+    socket = "unix:///run/containerd/containerd.sock"
+  }
 
   nebius = {
     image_id           = "projects/nebius/global/images/nebius-edge-v1"
@@ -656,6 +663,11 @@ resource "castai_edge_configuration" "test" {
   cluster_id       = castai_omni_cluster.test.id
   edge_location_id = castai_edge_location.test.id
   name             = "%[2]s-updated"
+  user_data_base64 = "I2Nsb3VkLWNvbmZpZy11cGRhdGVkCg=="
+
+  cri = {
+    socket = "unix:///run/containerd/containerd-updated.sock"
+  }
 
   nebius = {
     image_id           = "projects/nebius/global/images/nebius-edge-v2"
