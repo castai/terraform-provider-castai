@@ -8254,10 +8254,15 @@ type PoliciesV1GetClusterNodeConstraintsResponseCpuRam struct {
 // PoliciesV1Headroom Defines Headroom for Unschedulable Pods.
 type PoliciesV1Headroom struct {
 	// CpuPercentage Defines percentage of additional CPU capacity to be added.
+	// Deprecated. Input only (for backwards-compatibility, ignored).
 	CpuPercentage *int32 `json:"cpuPercentage,omitempty"`
 
 	// Enabled Defines whether Headroom is enabled.
-	Enabled          *bool  `json:"enabled"`
+	// Deprecated. Input only (for backwards-compatibility, ignored).
+	Enabled *bool `json:"enabled"`
+
+	// MemoryPercentage Defines percentage of additional memory capacity to be added
+	// Deprecated. Input only (for backwards-compatibility, ignored).
 	MemoryPercentage *int32 `json:"memoryPercentage,omitempty"`
 }
 
