@@ -476,7 +476,14 @@ func (r *edgeConfigurationResource) Update(ctx context.Context, req resource.Upd
 		Cri:            criConfig,
 	}
 
-	apiResp, err := client.EdgeConfigurationsAPIUpdateEdgeConfigurationWithResponse(ctx, organizationID, clusterID, edgeLocationID, plan.ID.ValueString(), nil, updateReq)
+	apiResp, err := client.EdgeConfigurationsAPIUpdateEdgeConfigurationWithResponse(
+		ctx,
+		organizationID, clusterID, edgeLocationID, plan.ID.ValueString(),
+		&omni.EdgeConfigurationsAPIUpdateEdgeConfigurationParams{
+			UpdateMask: lo.ToPtr("nebius.gpu_cluster,nebius.reservation_ids"),
+		},
+		updateReq,
+	)
 	if err != nil {
 		resp.Diagnostics.AddError("Failed to update edge configuration", err.Error())
 		return

@@ -26,7 +26,7 @@ type ProviderConfig struct {
 	clusterAutoscalerV2Client    cluster_autoscaler_v2.ClientWithResponsesInterface
 	workloadEvictionClient       workload_eviction.ClientWithResponsesInterface
 	organizationManagementClient organization_management.ClientWithResponsesInterface
-	omniAPI                      *omni.ClientWithResponses
+	omniAPI                      omni.ClientWithResponsesInterface
 	aiOptimizerClient            ai_optimizer.ClientWithResponsesInterface
 	patchingEngineClient         patching_engine.ClientWithResponsesInterface
 	pricingClient                pricing.ClientWithResponsesInterface
