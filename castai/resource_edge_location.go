@@ -54,7 +54,7 @@ type edgeLocationModel struct {
 	Networking       *networkingModel   `tfsdk:"networking"`
 	Liqo             *liqoModel         `tfsdk:"liqo"`
 	Addons           []addonModel       `tfsdk:"addons"`
-	Zones            []zoneModel        `tfsdk:"zones"`
+	Zones            types.List         `tfsdk:"zones"`
 	AWS              *awsModel          `tfsdk:"aws"`
 	GCP              *gcpModel          `tfsdk:"gcp"`
 	OCI              *ociModel          `tfsdk:"oci"`
@@ -150,6 +150,13 @@ func addonsEqual(a, b []addonModel) bool {
 type zoneModel struct {
 	ID   types.String `tfsdk:"id"`
 	Name types.String `tfsdk:"name"`
+}
+
+var zoneObjectType = types.ObjectType{
+	AttrTypes: map[string]attr.Type{
+		"id":   types.StringType,
+		"name": types.StringType,
+	},
 }
 
 type awsModel struct {
@@ -704,10 +711,16 @@ func (r *edgeLocationResource) Create(ctx context.Context, req resource.CreateRe
 	organizationID := plan.OrganizationID.ValueString()
 	clusterID := plan.ClusterID.ValueString()
 
+	zones, zoneDiags := r.toZonesFromList(ctx, plan.Zones)
+	resp.Diagnostics.Append(zoneDiags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	createReq := omni.EdgeLocationsAPICreateEdgeLocationJSONRequestBody{
 		Name:             plan.Name.ValueString(),
 		Region:           plan.Region.ValueStringPointer(),
-		Zones:            lo.ToPtr(r.toZones(plan.Zones)),
+		Zones:            lo.ToPtr(zones),
 		ControlPlaneMode: lo.ToPtr(omni.EdgeLocationControlPlaneMode(plan.ControlPlaneMode.ValueString())),
 	}
 
@@ -870,7 +883,12 @@ func (r *edgeLocationResource) Read(ctx context.Context, req resource.ReadReques
 	}
 
 	if edgeLocation.Zones != nil {
-		state.Zones = r.toZoneModel(edgeLocation.Zones)
+		zoneList, zoneDiags := r.toZoneModel(edgeLocation.Zones)
+		resp.Diagnostics.Append(zoneDiags...)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+		state.Zones = zoneList
 	}
 
 	var diags diag.Diagnostics
@@ -922,8 +940,13 @@ func (r *edgeLocationResource) Update(ctx context.Context, req resource.UpdateRe
 		updateReq.Description = toPtr(plan.Description.ValueString())
 	}
 
-	if len(plan.Zones) > 0 {
-		updateReq.Zones = toPtr(r.toZones(plan.Zones))
+	zones, zoneDiags := r.toZonesFromList(ctx, plan.Zones)
+	resp.Diagnostics.Append(zoneDiags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	if len(zones) > 0 {
+		updateReq.Zones = toPtr(zones)
 	}
 
 	// Check if credentials have changed by comparing credentials revision
@@ -1263,6 +1286,19 @@ func (r *edgeLocationResource) toAddonsModel(apiAddons []omni.EdgeClusterAddon) 
 	return out
 }
 
+func (r *edgeLocationResource) toZonesFromList(ctx context.Context, zones types.List) ([]omni.Zone, diag.Diagnostics) {
+	var diags diag.Diagnostics
+	if zones.IsNull() || zones.IsUnknown() {
+		return nil, diags
+	}
+	var models []zoneModel
+	diags.Append(zones.ElementsAs(ctx, &models, false)...)
+	if diags.HasError() {
+		return nil, diags
+	}
+	return r.toZones(models), diags
+}
+
 func (r *edgeLocationResource) toZones(zones []zoneModel) []omni.Zone {
 	if len(zones) == 0 {
 		return nil
@@ -1279,18 +1315,23 @@ func (r *edgeLocationResource) toZones(zones []zoneModel) []omni.Zone {
 	return out
 }
 
-func (r *edgeLocationResource) toZoneModel(zones *[]omni.Zone) []zoneModel {
+func (r *edgeLocationResource) toZoneModel(zones *[]omni.Zone) (types.List, diag.Diagnostics) {
+	var diags diag.Diagnostics
 	if zones == nil || len(*zones) == 0 {
-		return nil
+		return types.ListNull(zoneObjectType), diags
 	}
-	out := make([]zoneModel, 0, len(*zones))
+	elements := make([]attr.Value, 0, len(*zones))
 	for _, zone := range *zones {
-		out = append(out, zoneModel{
-			ID:   types.StringValue(lo.FromPtr(zone.Id)),
-			Name: types.StringValue(lo.FromPtr(zone.Name)),
+		obj, d := types.ObjectValue(zoneObjectType.AttrTypes, map[string]attr.Value{
+			"id":   types.StringValue(lo.FromPtr(zone.Id)),
+			"name": types.StringValue(lo.FromPtr(zone.Name)),
 		})
+		diags.Append(d...)
+		elements = append(elements, obj)
 	}
-	return out
+	list, d := types.ListValue(zoneObjectType, elements)
+	diags.Append(d...)
+	return list, diags
 }
 
 func (r *edgeLocationResource) toAWS(ctx context.Context, plan, config *awsModel) (*omni.AWSParam, diag.Diagnostics) {
