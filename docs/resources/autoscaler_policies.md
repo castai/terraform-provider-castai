@@ -31,7 +31,7 @@ resource "castai_autoscaler_policies" "policies" {
   }
 
   unschedulable_pods {
-    enabled                          = true
+    enabled                           = true
     partial_template_matching_enabled = true
 
     pod_pinner {
