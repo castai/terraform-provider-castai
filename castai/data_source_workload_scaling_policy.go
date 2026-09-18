@@ -160,7 +160,9 @@ func dataSourceWorkloadScalingPolicyRead(ctx context.Context, d *schema.Resource
 		}
 	}
 
-	if sp == nil {
+	// A nil payload can occur if the API returns a 2xx response with an empty
+	// body; treat it as not found rather than flattening an empty policy.
+	if sp == nil || sp.Id == "" {
 		return diag.Errorf("scaling policy not found")
 	}
 

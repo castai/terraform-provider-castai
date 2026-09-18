@@ -228,6 +228,38 @@ func TestDataSourceWorkloadScalingPolicyReadAPIError(t *testing.T) {
 	r.True(diags.HasError())
 }
 
+func TestDataSourceWorkloadScalingPolicyReadEmptyBody(t *testing.T) {
+	t.Parallel()
+
+	r := require.New(t)
+	mockClient := mock_sdk.NewMockClientInterface(gomock.NewController(t))
+	ctx := context.Background()
+
+	clusterID := "b6bfc074-a267-400f-b8f1-db0850c36gf4"
+	policyID := "9c9e5f83-03a7-42e1-b7f5-14d0c3a2b111"
+
+	// A 2xx response with a null/empty body leaves resp.JSON200 nil; the read
+	// must return an error, not panic.
+	mockClient.EXPECT().
+		WorkloadOptimizationAPIGetWorkloadScalingPolicy(ctx, clusterID, policyID).
+		Return(&http.Response{
+			StatusCode: http.StatusOK,
+			Header:     http.Header{"Content-Type": []string{"application/json"}},
+			Body:       io.NopCloser(bytes.NewReader([]byte(`null`))),
+		}, nil)
+
+	_, data := dataSourceWorkloadScalingPolicyForTest(t, map[string]cty.Value{
+		"cluster_id": cty.StringVal(clusterID),
+		"policy_id":  cty.StringVal(policyID),
+	})
+
+	diags := dataSourceWorkloadScalingPolicyRead(ctx, data, &ProviderConfig{
+		api: &sdk.ClientWithResponses{ClientInterface: mockClient},
+	})
+	r.True(diags.HasError())
+	r.Contains(diags[0].Summary, "scaling policy not found")
+}
+
 func TestDataSourceWorkloadScalingPolicyDefinitionSchemaParity(t *testing.T) {
 	t.Parallel()
 
@@ -312,6 +344,20 @@ func TestAccGKE_DataSourceWorkloadScalingPolicy(t *testing.T) {
 					resource.TestCheckResourceAttrPair(byID, "name", policyResource, "name"),
 					resource.TestCheckResourceAttrPair(byID, "cpu.0.overhead", policyResource, "cpu.0.overhead"),
 				),
+			},
+		},
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"google": {
+				Source:            "hashicorp/google",
+				VersionConstraint: "> 4.75.0",
+			},
+			"google-beta": {
+				Source:            "hashicorp/google-beta",
+				VersionConstraint: "> 4.75.0",
+			},
+			"helm": {
+				Source:            "hashicorp/helm",
+				VersionConstraint: "~> 2.17.0",
 			},
 		},
 	})
