@@ -15,9 +15,9 @@ import (
 	"github.com/castai/terraform-provider-castai/castai/sdk/cluster_autoscaler_v2"
 	"github.com/castai/terraform-provider-castai/castai/sdk/omni"
 	"github.com/castai/terraform-provider-castai/castai/sdk/organization_management"
-	"github.com/castai/terraform-provider-castai/castai/sdk/workload_eviction"
 	"github.com/castai/terraform-provider-castai/castai/sdk/patching_engine"
 	"github.com/castai/terraform-provider-castai/castai/sdk/pricing"
+	"github.com/castai/terraform-provider-castai/castai/sdk/workload_eviction"
 )
 
 type ProviderConfig struct {
@@ -109,6 +109,7 @@ func Provider(version string) *schema.Provider {
 			"castai_organization":                  dataSourceOrganization(),
 			"castai_rebalancing_schedule":          dataSourceRebalancingSchedule(),
 			"castai_hibernation_schedule":          dataSourceHibernationSchedule(),
+			"castai_workload_scaling_policy":       dataSourceWorkloadScalingPolicy(),
 			"castai_workload_scaling_policies":     dataSourceWorkloadScalingPolicies(),
 			"castai_workload_scaling_policy_order": dataSourceWorkloadScalingPolicyOrder(),
 			"castai_cache_group":                   dataSourceCacheGroup(),
