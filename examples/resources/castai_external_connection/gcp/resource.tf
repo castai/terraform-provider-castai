@@ -1,12 +1,22 @@
-# Example: GCP external connection enabling node autoscaling, workload autoscaling (woop),
-# and cost monitoring. This configuration is for reference only — do not apply without
-# reviewing the placeholder values below.
+# Example: GCP external connections.
 #
-# Flow:
-#   1. castai_external_connection_principals provisions CAST-side IAM principals and
-#      emits a resource_suffix output.
-#   2. castai_external_connection creates the connection, passing that resource_suffix
-#      back to CAST AI along with the customer-side GCP service account emails.
+# This configuration is for reference only — do not apply without reviewing the
+# placeholder values below. It demonstrates the main interaction patterns of the
+# castai_external_connection / castai_external_connection_principals resources:
+#
+#   1. Multiple projects connected with for_each (one principals resource + one
+#      connection per project — one scope_key each), with per-project feature
+#      sets and per-feature service account emails.
+#   2. An explicit connection showing sub-feature selection and an optional
+#      pinned registry_version in the expanded block form.
+#   3. (Commented) an org-level connection using the GCP_ORGANIZATION scope.
+#
+# Flow for each connection:
+#   1. castai_external_connection_principals provisions CAST-side IAM principals
+#      (service accounts, roles) and emits a resource_suffix output.
+#   2. castai_external_connection creates/updates the connection, passing that
+#      resource_suffix back to CAST AI along with the customer-side GCP service
+#      account emails.
 
 terraform {
   required_providers {
@@ -34,66 +44,222 @@ variable "castai_api_token" {
   default     = "replace-with-your-api-token"
 }
 
-variable "gcp_project_id" {
-  description = "GCP project ID to connect to CAST AI."
-  type        = string
-  default     = "my-gcp-project-123"
-}
-
-variable "gcp_service_account_emails" {
-  description = "Map of feature ID to the customer-side GCP service account email created in the customer's project. Keys must match the feature enum values."
-  type        = map(string)
+variable "gcp_projects" {
+  description = <<-EOT
+    Map of GCP projects to connect. Key is an arbitrary label; each entry
+    contains the project ID (scope_key), the features to enable, and the
+    per-feature customer-side service account emails created in the project.
+  EOT
+  type = map(object({
+    project_id = string
+    features   = list(string)
+    service_account_emails = map(string)
+  }))
   default = {
-    NODE_AUTOSCALING     = "node-autoscaling@my-gcp-project-123.iam.gserviceaccount.com"
-    WORKLOAD_AUTOSCALING = "workload-autoscaling@my-gcp-project-123.iam.gserviceaccount.com"
-    COST_MONITORING      = "cost-monitoring@my-gcp-project-123.iam.gserviceaccount.com"
+    prod = {
+      project_id = "my-gcp-project-prod"
+      features = [
+        "NODE_AUTOSCALING",
+        "WORKLOAD_AUTOSCALING",
+        "COST_MONITORING",
+      ]
+      service_account_emails = {
+        NODE_AUTOSCALING     = "node-autoscaling@my-gcp-project-prod.iam.gserviceaccount.com"
+        WORKLOAD_AUTOSCALING = "workload-autoscaling@my-gcp-project-prod.iam.gserviceaccount.com"
+        COST_MONITORING      = "cost-monitoring@my-gcp-project-prod.iam.gserviceaccount.com"
+      }
+    }
+    nonprod = {
+      project_id = "my-gcp-project-nonprod"
+      features = [
+        "NODE_AUTOSCALING",
+        "KARPENTER_ENTERPRISE",
+      ]
+      service_account_emails = {
+        NODE_AUTOSCALING    = "node-autoscaling@my-gcp-project-nonprod.iam.gserviceaccount.com"
+        KARPENTER_ENTERPRISE = "karpenter@my-gcp-project-nonprod.iam.gserviceaccount.com"
+      }
+    }
   }
 }
 
-# Provision CAST-side IAM principals (service accounts, roles) for the requested features.
-# The resource_suffix output is passed to the castai_external_connection resource.
+# -----------------------------------------------------------------------------
+# Per-project principals + connections (one scope_key per project).
+# -----------------------------------------------------------------------------
+
+# CAST-side IAM principals for each project. The resource_suffix output is
+# passed to the corresponding castai_external_connection resource.
 resource "castai_external_connection_principals" "this" {
+  for_each = var.gcp_projects
+
   cloud_provider   = "GCP"
-  scope_key        = var.gcp_project_id
-
   connection_scope = "GCP_PROJECT"
-  features {
-    feature = "NODE_AUTOSCALING"
-  }
+  scope_key        = each.value.project_id
 
-  features {
-    feature = "WORKLOAD_AUTOSCALING"
-  }
-
-  features {
-    feature = "COST_MONITORING"
+  dynamic "features" {
+    for_each = each.value.features
+    content {
+      feature = features.value
+    }
   }
 }
 
-# Create the external connection linking the GCP project to CAST AI.
-# The resource_suffix from the principals resource establishes the trust relationship.
+# Connection linking each GCP project to CAST AI. The resource_suffix from the
+# principals resource establishes the trust relationship.
 resource "castai_external_connection" "this" {
+  for_each = var.gcp_projects
+
   cloud            = "GCP"
   connection_scope = "GCP_PROJECT"
-  scope_key        = var.gcp_project_id
-  resource_suffix  = castai_external_connection_principals.this.resource_suffix
+  scope_key        = each.value.project_id
+  resource_suffix  = castai_external_connection_principals.this[each.key].resource_suffix
 
-  enabled_features {
-    feature = "NODE_AUTOSCALING"
-    # resource_ids = ["some-ID-of-the-cluster"];
-  }
-
-  enabled_features {
-    feature = "WORKLOAD_AUTOSCALING"
-  }
-
-  enabled_features {
-    feature = "COST_MONITORING"
+  dynamic "enabled_features" {
+    for_each = each.value.features
+    content {
+      feature = enabled_features.value
+    }
   }
 
   metadata {
     gcp {
-      service_account_emails = var.gcp_service_account_emails
+      service_account_emails = each.value.service_account_emails
     }
+  }
+}
+
+# -----------------------------------------------------------------------------
+# Single explicit connection with sub-features and a pinned registry_version.
+# This shows the fully expanded block form — useful for reviewing the raw
+# interaction without dynamic blocks.
+# -----------------------------------------------------------------------------
+
+variable "gcp_detailed_project_id" {
+  description = "GCP project for the explicit sub-feature demo connection."
+  type        = string
+  default     = "my-gcp-project-detailed"
+}
+
+resource "castai_external_connection_principals" "detailed" {
+  cloud_provider   = "GCP"
+  connection_scope = "GCP_PROJECT"
+  scope_key        = var.gcp_detailed_project_id
+
+  features {
+    feature = "NODE_AUTOSCALING"
+    # registry_version = "v1.2.3" # uncomment to pin a specific permissions snapshot
+    sub_features = [
+      "NODE_AUTOSCALING_SPOT_INTERRUPTION_HANDLING",
+      "NODE_AUTOSCALING_POD_PINNING",
+    ]
+  }
+
+  features {
+    feature = "WORKLOAD_AUTOSCALING"
+    sub_features = [
+      "WORKLOAD_AUTOSCALING_RESOURCE_QUOTA_AWARE_SCALING",
+    ]
+  }
+}
+
+resource "castai_external_connection" "detailed" {
+  cloud            = "GCP"
+  connection_scope = "GCP_PROJECT"
+  scope_key        = var.gcp_detailed_project_id
+  resource_suffix  = castai_external_connection_principals.detailed.resource_suffix
+
+  enabled_features {
+    feature = "NODE_AUTOSCALING"
+    # registry_version = "v1.2.3" # uncomment to pin a specific permissions snapshot
+    sub_features = [
+      "NODE_AUTOSCALING_SPOT_INTERRUPTION_HANDLING",
+      "NODE_AUTOSCALING_POD_PINNING",
+    ]
+  }
+
+  enabled_features {
+    feature = "WORKLOAD_AUTOSCALING"
+    sub_features = [
+      "WORKLOAD_AUTOSCALING_RESOURCE_QUOTA_AWARE_SCALING",
+    ]
+  }
+
+  metadata {
+    gcp {
+      service_account_emails = {
+        NODE_AUTOSCALING     = "node-autoscaling@my-gcp-project-detailed.iam.gserviceaccount.com"
+        WORKLOAD_AUTOSCALING = "workload-autoscaling@my-gcp-project-detailed.iam.gserviceaccount.com"
+      }
+    }
+  }
+}
+
+# -----------------------------------------------------------------------------
+# (Optional) Org-level connection using the GCP_ORGANIZATION scope. The
+# scope_key is the GCP organization ID instead of a project ID. Uncomment to try
+# this interaction.
+# -----------------------------------------------------------------------------
+
+# variable "gcp_organization_id" {
+#   description = "GCP organization ID for the org-scoped connection."
+#   type        = string
+#   default     = "123456789012"
+# }
+
+# resource "castai_external_connection_principals" "org" {
+#   cloud_provider   = "GCP"
+#   connection_scope = "GCP_ORGANIZATION"
+#   scope_key        = var.gcp_organization_id
+#
+#   features {
+#     feature = "COST_MONITORING"
+#     sub_features = [
+#       "COST_MONITORING_GPU_MONITORING",
+#     ]
+#   }
+# }
+
+# resource "castai_external_connection" "org" {
+#   cloud            = "GCP"
+#   connection_scope = "GCP_ORGANIZATION"
+#   scope_key        = var.gcp_organization_id
+#   resource_suffix  = castai_external_connection_principals.org.resource_suffix
+#
+#   enabled_features {
+#     feature = "COST_MONITORING"
+#     sub_features = [
+#       "COST_MONITORING_GPU_MONITORING",
+#     ]
+#   }
+#
+#   metadata {
+#     gcp {
+#       service_account_emails = {
+#         COST_MONITORING = "cost-monitoring@my-gcp-project-org.iam.gserviceaccount.com"
+#       }
+#     }
+#   }
+# }
+
+# -----------------------------------------------------------------------------
+# Outputs for inspection after apply.
+# -----------------------------------------------------------------------------
+
+output "connection_ids" {
+  description = "IDs of the GCP external connections, keyed by project label."
+  value = {
+    for k, conn in castai_external_connection.this : k => conn.id
+  }
+}
+
+output "detailed_connection_id" {
+  description = "ID of the explicit sub-feature demo connection."
+  value        = castai_external_connection.detailed.id
+}
+
+output "provisioned_principals" {
+  description = "CAST-side provisioned resources per project, keyed by label."
+  value = {
+    for k, p in castai_external_connection_principals.this : k => p.provisioned_resources
   }
 }
