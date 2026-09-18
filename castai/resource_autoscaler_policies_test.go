@@ -34,6 +34,7 @@ func TestResourceAutoscalerPolicies_ReadContext(t *testing.T) {
 	emptyNodesDelay := "5m"
 	emptyNodesEnabled := true
 	unschedulablePodsEnabled := true
+	partialTemplateMatchingEnabled := true
 	podPinnerEnabled := true
 
 	policies := &cluster_autoscaler_v2.PoliciesV2{
@@ -52,7 +53,8 @@ func TestResourceAutoscalerPolicies_ReadContext(t *testing.T) {
 			EmptyNodesEnabled: &emptyNodesEnabled,
 		},
 		UnschedulablePods: &cluster_autoscaler_v2.UnschedulablePodsPolicy{
-			Enabled: &unschedulablePodsEnabled,
+			Enabled:                        &unschedulablePodsEnabled,
+			PartialTemplateMatchingEnabled: &partialTemplateMatchingEnabled,
 			PodPinner: &cluster_autoscaler_v2.PodPinner{
 				Enabled: &podPinnerEnabled,
 			},
@@ -91,6 +93,7 @@ func TestResourceAutoscalerPolicies_ReadContext(t *testing.T) {
 	r.Equal(emptyNodesDelay, data.Get(FieldAutoscalerPoliciesNodeDownscaler+".0."+FieldNodeDownscalerEmptyNodesDelay))
 	r.Equal(emptyNodesEnabled, data.Get(FieldAutoscalerPoliciesNodeDownscaler+".0."+FieldNodeDownscalerEmptyNodesEnabled))
 	r.Equal(unschedulablePodsEnabled, data.Get(FieldAutoscalerPoliciesUnschedulablePods+".0."+FieldUnschedulablePodsEnabled))
+	r.Equal(partialTemplateMatchingEnabled, data.Get(FieldAutoscalerPoliciesUnschedulablePods+".0."+FieldUnschedulablePodsPartialTemplateMatching))
 	r.Equal(podPinnerEnabled, data.Get(FieldAutoscalerPoliciesUnschedulablePods+".0."+FieldUnschedulablePodsPodPinner+".0."+FieldPodPinnerEnabled))
 }
 
@@ -103,6 +106,7 @@ func TestResourceAutoscalerPolicies_CreateContext(t *testing.T) {
 	maxCores := int32(16)
 	emptyNodesEnabled := true
 	unschedulablePodsEnabled := true
+	partialTemplateMatchingEnabled := true
 
 	mockClient := mock_cluster_autoscaler_v2.NewMockClientWithResponsesInterface(t)
 	provider := newAutoscalerPoliciesProvider(mockClient)
@@ -152,7 +156,8 @@ func TestResourceAutoscalerPolicies_CreateContext(t *testing.T) {
 		}),
 		FieldAutoscalerPoliciesUnschedulablePods: cty.ListVal([]cty.Value{
 			cty.ObjectVal(map[string]cty.Value{
-				FieldUnschedulablePodsEnabled: cty.BoolVal(unschedulablePodsEnabled),
+				FieldUnschedulablePodsEnabled:                 cty.BoolVal(unschedulablePodsEnabled),
+				FieldUnschedulablePodsPartialTemplateMatching: cty.BoolVal(partialTemplateMatchingEnabled),
 			}),
 		}),
 	})
@@ -177,6 +182,8 @@ func TestResourceAutoscalerPolicies_CreateContext(t *testing.T) {
 	r.NotNil(capturedBody.UnschedulablePods)
 	r.NotNil(capturedBody.UnschedulablePods.Enabled)
 	r.Equal(unschedulablePodsEnabled, *capturedBody.UnschedulablePods.Enabled)
+	r.NotNil(capturedBody.UnschedulablePods.PartialTemplateMatchingEnabled)
+	r.Equal(partialTemplateMatchingEnabled, *capturedBody.UnschedulablePods.PartialTemplateMatchingEnabled)
 }
 
 func TestResourceAutoscalerPolicies_UpdateContext(t *testing.T) {
@@ -316,7 +323,8 @@ func TestResourceAutoscalerPolicies_toPoliciesV2(t *testing.T) {
 		}),
 		FieldAutoscalerPoliciesUnschedulablePods: cty.ListVal([]cty.Value{
 			cty.ObjectVal(map[string]cty.Value{
-				FieldUnschedulablePodsEnabled: cty.BoolVal(true),
+				FieldUnschedulablePodsEnabled:                 cty.BoolVal(true),
+				FieldUnschedulablePodsPartialTemplateMatching: cty.BoolVal(true),
 				FieldUnschedulablePodsPodPinner: cty.ListVal([]cty.Value{
 					cty.ObjectVal(map[string]cty.Value{
 						FieldPodPinnerEnabled: cty.BoolVal(true),
@@ -354,6 +362,8 @@ func TestResourceAutoscalerPolicies_toPoliciesV2(t *testing.T) {
 	r.NotNil(policies.UnschedulablePods)
 	r.NotNil(policies.UnschedulablePods.Enabled)
 	r.Equal(true, *policies.UnschedulablePods.Enabled)
+	r.NotNil(policies.UnschedulablePods.PartialTemplateMatchingEnabled)
+	r.Equal(true, *policies.UnschedulablePods.PartialTemplateMatchingEnabled)
 	r.NotNil(policies.UnschedulablePods.PodPinner)
 	r.NotNil(policies.UnschedulablePods.PodPinner.Enabled)
 	r.Equal(true, *policies.UnschedulablePods.PodPinner.Enabled)
@@ -501,6 +511,45 @@ func TestResourceAutoscalerPolicies_ReadContext_NilNestedFields(t *testing.T) {
 	r.Empty(data.Get(FieldAutoscalerPoliciesClusterLimits))
 	r.Empty(data.Get(FieldAutoscalerPoliciesNodeDownscaler))
 	r.Empty(data.Get(FieldAutoscalerPoliciesUnschedulablePods))
+}
+
+func TestResourceAutoscalerPolicies_ReadContext_UnschedulablePodsPartialMatchingOmitted(t *testing.T) {
+	t.Parallel()
+
+	clusterId := "b6bfc074-a267-400f-b8f1-db0850c369b1"
+	enabled := true
+	unschedulablePodsEnabled := true
+
+	policies := &cluster_autoscaler_v2.PoliciesV2{
+		Enabled: &enabled,
+		UnschedulablePods: &cluster_autoscaler_v2.UnschedulablePodsPolicy{
+			Enabled: &unschedulablePodsEnabled,
+		},
+	}
+
+	mockClient := mock_cluster_autoscaler_v2.NewMockClientWithResponsesInterface(t)
+	provider := newAutoscalerPoliciesProvider(mockClient)
+
+	mockClient.EXPECT().
+		PoliciesV2APIGetClusterPoliciesWithResponse(mock.Anything, clusterId).
+		Return(&cluster_autoscaler_v2.PoliciesV2APIGetClusterPoliciesResponse{
+			HTTPResponse: &http.Response{StatusCode: http.StatusOK, Header: map[string][]string{"Content-Type": {"application/json"}}},
+			JSON200:      policies,
+		}, nil)
+
+	resource := resourceAutoscalerPolicies()
+	stateValue := cty.ObjectVal(map[string]cty.Value{
+		FieldClusterId: cty.StringVal(clusterId),
+	})
+	state := terraform.NewInstanceStateShimmedFromValue(stateValue, 0)
+	data := resource.Data(state)
+
+	diags := resource.ReadContext(context.Background(), data, provider)
+
+	r := require.New(t)
+	r.False(diags.HasError())
+	r.Equal(unschedulablePodsEnabled, data.Get(FieldAutoscalerPoliciesUnschedulablePods+".0."+FieldUnschedulablePodsEnabled))
+	r.Equal(false, data.Get(FieldAutoscalerPoliciesUnschedulablePods+".0."+FieldUnschedulablePodsPartialTemplateMatching))
 }
 
 func TestAccResourceAutoscalerPolicies(t *testing.T) {
