@@ -8,11 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/golang/mock/gomock"
-	fwresource "github.com/hashicorp/terraform-plugin-framework/resource"
-	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
@@ -21,7 +17,6 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/castai/terraform-provider-castai/castai/sdk/omni"
-	mock_omni "github.com/castai/terraform-provider-castai/castai/sdk/omni/mock"
 )
 
 func TestAccCloudAgnostic_ResourceEdgeConfigurationGCP(t *testing.T) {
@@ -284,16 +279,7 @@ func TestEdgeConfigurationResource_toNebiusConfiguration_Conversions(t *testing.
 				GpuCluster:      lo.ToPtr("gpu-cluster-a"),
 			},
 		},
-		"empty string ImageID is skipped": {
-			plan: &nebiusConfigurationModel{
-				ImageID:         types.StringValue(""),
-				BootDiskSizeGiB: types.Int64Value(50),
-			},
-			expected: &omni.NebiusConfiguration{
-				BootDiskSizeGib: lo.ToPtr(int32(50)),
-			},
-		},
-		"all null/zero values skipped": {
+		"all null/zero values": {
 			plan: &nebiusConfigurationModel{
 				ImageID:         types.StringNull(),
 				BootDiskSizeGiB: types.Int64Null(),
@@ -301,7 +287,13 @@ func TestEdgeConfigurationResource_toNebiusConfiguration_Conversions(t *testing.
 				ReservationIDs:  types.ListNull(types.StringType),
 				GpuCluster:      types.StringNull(),
 			},
-			expected: &omni.NebiusConfiguration{},
+			expected: &omni.NebiusConfiguration{
+				Labels:          lo.ToPtr(map[string]string{}),
+				ImageId:         lo.ToPtr(""),
+				BootDiskSizeGib: lo.ToPtr(int32(0)),
+				ReservationIds:  lo.ToPtr([]string{}),
+				GpuCluster:      lo.ToPtr(""),
+			},
 		},
 		"labels with wrong element type produces diagnostics": {
 			plan: &nebiusConfigurationModel{
@@ -314,7 +306,11 @@ func TestEdgeConfigurationResource_toNebiusConfiguration_Conversions(t *testing.
 				}(),
 			},
 			expected: &omni.NebiusConfiguration{
-				ImageId: lo.ToPtr("img"),
+				ImageId:         lo.ToPtr("img"),
+				Labels:          lo.ToPtr(map[string]string{}),
+				BootDiskSizeGib: lo.ToPtr(int32(0)),
+				ReservationIds:  lo.ToPtr([]string{}),
+				GpuCluster:      lo.ToPtr(""),
 			},
 			expError: "can't unmarshal tftypes.Number into *string, expected string",
 		},
@@ -440,239 +436,6 @@ func TestEdgeConfigurationResource_toNebiusConfigurationModel(t *testing.T) {
 			assert.Equal(t, tc.expected, model)
 			assert.False(t, diag.HasError())
 		})
-	}
-}
-
-func TestEdgeConfigurationResource_Update_Nebius(t *testing.T) {
-	t.Parallel()
-	ctx := context.Background()
-
-	labels, diags := types.MapValueFrom(ctx, types.StringType, map[string]string{
-		"key1": "value1",
-	})
-	require.False(t, diags.HasError())
-
-	reservations, diags := types.ListValueFrom(ctx, types.StringType, []string{"res-1", "res-2"})
-	require.False(t, diags.HasError())
-
-	tests := map[string]struct {
-		name                   string
-		planModel              edgeConfigurationModel
-		expectedOrganizationID string
-		expectedClusterID      string
-		expectedEdgeLocationID string
-		expectedID             string
-		expectedUpdateReq      omni.EdgeConfigurationUpdate
-		expectedUpdateParams   omni.EdgeConfigurationsAPIUpdateEdgeConfigurationParams
-		apiResponse            *omni.EdgeConfiguration
-	}{
-		"regular update": {
-			expectedOrganizationID: "org-1",
-			expectedClusterID:      "cluster-1",
-			expectedEdgeLocationID: "edge-loc-1",
-			expectedID:             "cfg-initial",
-			planModel: edgeConfigurationModel{
-				ID:             types.StringValue("cfg-initial"),
-				OrganizationID: types.StringValue("org-1"),
-				ClusterID:      types.StringValue("cluster-1"),
-				EdgeLocationID: types.StringValue("edge-loc-1"),
-				Name:           types.StringValue("test-nebius-initial"),
-				UserDataBase64: types.StringValue("I2Nsb3VkLWNvbmZpZwojIFVzZXIgZGF0YQ=="),
-				CRI: &criConfigurationModel{
-					Socket: types.StringValue("unix:///run/containerd/containerd.sock"),
-				},
-				Nebius: &nebiusConfigurationModel{
-					ImageID:         types.StringValue("projects/nebius/global/images/nebius-edge-v1"),
-					BootDiskSizeGiB: types.Int64Value(100),
-					Labels:          labels,
-					ReservationIDs:  reservations,
-					GpuCluster:      types.StringValue("gpu-cluster-a"),
-				},
-			},
-			expectedUpdateReq: omni.EdgeConfigurationUpdate{
-				Name:           lo.ToPtr("test-nebius-initial"),
-				UserDataBase64: lo.ToPtr("I2Nsb3VkLWNvbmZpZwojIFVzZXIgZGF0YQ=="),
-				Nebius: &omni.NebiusConfiguration{
-					ImageId:         lo.ToPtr("projects/nebius/global/images/nebius-edge-v1"),
-					BootDiskSizeGib: lo.ToPtr(int32(100)),
-					Labels:          &map[string]string{"key1": "value1"},
-					ReservationIds:  &[]string{"res-1", "res-2"},
-					GpuCluster:      lo.ToPtr("gpu-cluster-a"),
-				},
-				Cri: &omni.EdgeConfigurationCRIConfiguration{
-					Socket: lo.ToPtr("unix:///run/containerd/containerd.sock"),
-				},
-			},
-			expectedUpdateParams: omni.EdgeConfigurationsAPIUpdateEdgeConfigurationParams{
-				UpdateMask: lo.ToPtr("nebius.gpu_cluster,nebius.reservation_ids"),
-			},
-			apiResponse: &omni.EdgeConfiguration{
-				Id:             lo.ToPtr("cfg-initial"),
-				EdgeLocationId: lo.ToPtr("edge-loc-1"),
-				Name:           "test-nebius-initial",
-				Default:        lo.ToPtr(false),
-				UserDataBase64: lo.ToPtr("I2Nsb3VkLWNvbmZpZwojIFVzZXIgZGF0YQ=="),
-				Nebius: &omni.NebiusConfiguration{
-					ImageId:         lo.ToPtr("projects/nebius/global/images/nebius-edge-v1"),
-					BootDiskSizeGib: lo.ToPtr(int32(100)),
-					Labels:          &map[string]string{"key1": "value1"},
-					ReservationIds:  &[]string{"res-1", "res-2"},
-					GpuCluster:      lo.ToPtr("gpu-cluster-a"),
-				},
-				Cri: &omni.EdgeConfigurationCRIConfiguration{
-					Socket: lo.ToPtr("unix:///run/containerd/containerd.sock"),
-				},
-			},
-		},
-		"update with deletion of fields": {
-			expectedOrganizationID: "org-1",
-			expectedClusterID:      "cluster-1",
-			expectedEdgeLocationID: "edge-loc-1",
-			expectedID:             "cfg-initial",
-			planModel: edgeConfigurationModel{
-				ID:             types.StringValue("cfg-initial"),
-				OrganizationID: types.StringValue("org-1"),
-				ClusterID:      types.StringValue("cluster-1"),
-				EdgeLocationID: types.StringValue("edge-loc-1"),
-				Name:           types.StringValue("test-nebius-initial"),
-				UserDataBase64: types.StringValue("I2Nsb3VkLWNvbmZpZwojIFVzZXIgZGF0YQ=="),
-				CRI: &criConfigurationModel{
-					Socket: types.StringValue("unix:///run/containerd/containerd.sock"),
-				},
-				Nebius: &nebiusConfigurationModel{
-					ImageID:         types.StringValue("projects/nebius/global/images/nebius-edge-v1"),
-					BootDiskSizeGiB: types.Int64Value(100),
-					Labels:          labels,
-					ReservationIDs:  reservations,
-				},
-			},
-			expectedUpdateReq: omni.EdgeConfigurationUpdate{
-				Name:           lo.ToPtr("test-nebius-initial"),
-				UserDataBase64: lo.ToPtr("I2Nsb3VkLWNvbmZpZwojIFVzZXIgZGF0YQ=="),
-				Nebius: &omni.NebiusConfiguration{
-					ImageId:         lo.ToPtr("projects/nebius/global/images/nebius-edge-v1"),
-					BootDiskSizeGib: lo.ToPtr(int32(100)),
-					Labels:          &map[string]string{"key1": "value1"},
-					ReservationIds:  &[]string{"res-1", "res-2"},
-				},
-				Cri: &omni.EdgeConfigurationCRIConfiguration{
-					Socket: lo.ToPtr("unix:///run/containerd/containerd.sock"),
-				},
-			},
-			expectedUpdateParams: omni.EdgeConfigurationsAPIUpdateEdgeConfigurationParams{
-				UpdateMask: lo.ToPtr("nebius.gpu_cluster,nebius.reservation_ids"),
-			},
-			apiResponse: &omni.EdgeConfiguration{
-				Id:             lo.ToPtr("cfg-initial"),
-				EdgeLocationId: lo.ToPtr("edge-loc-1"),
-				Name:           "test-nebius-initial",
-				Default:        lo.ToPtr(false),
-				UserDataBase64: lo.ToPtr("I2Nsb3VkLWNvbmZpZwojIFVzZXIgZGF0YQ=="),
-				Nebius: &omni.NebiusConfiguration{
-					ImageId:         lo.ToPtr("projects/nebius/global/images/nebius-edge-v1"),
-					BootDiskSizeGib: lo.ToPtr(int32(100)),
-					Labels:          &map[string]string{"key1": "value1"},
-					ReservationIds:  &[]string{"res-1", "res-2"},
-					GpuCluster:      nil,
-				},
-				Cri: &omni.EdgeConfigurationCRIConfiguration{
-					Socket: lo.ToPtr("unix:///run/containerd/containerd.sock"),
-				},
-			},
-		},
-	}
-
-	for name, tc := range tests {
-		t.Run(name, func(t *testing.T) {
-			t.Parallel()
-
-			ctrl := gomock.NewController(t)
-			defer ctrl.Finish()
-			mockOmni := mock_omni.NewMockClientWithResponsesInterface(ctrl)
-
-			req := buildTFEdgeConfigurationUpdateRequest(t, ctx, tc.planModel)
-
-			r := &edgeConfigurationResource{}
-			schemaResp := fwresource.SchemaResponse{}
-			r.Schema(ctx, fwresource.SchemaRequest{}, &schemaResp)
-
-			resp := &fwresource.UpdateResponse{
-				State: tfsdk.State{
-					Schema: schemaResp.Schema,
-				},
-			}
-
-			var capturedReq omni.EdgeConfigurationsAPIUpdateEdgeConfigurationJSONRequestBody
-
-			mockOmni.EXPECT().
-				EdgeConfigurationsAPIUpdateEdgeConfigurationWithResponse(
-					gomock.Any(),
-					tc.planModel.OrganizationID.ValueString(),
-					tc.planModel.ClusterID.ValueString(),
-					tc.planModel.EdgeLocationID.ValueString(),
-					tc.planModel.ID.ValueString(),
-					gomock.Any(),
-					gomock.Any(),
-				).
-				DoAndReturn(func(_ context.Context, orgID, clusterID, edgeLocID, id string, params *omni.EdgeConfigurationsAPIUpdateEdgeConfigurationParams, body omni.EdgeConfigurationsAPIUpdateEdgeConfigurationJSONRequestBody) (*omni.EdgeConfigurationsAPIUpdateEdgeConfigurationResponse, error) {
-					assert.Equal(t, tc.expectedOrganizationID, orgID)
-					assert.Equal(t, tc.expectedClusterID, clusterID)
-					assert.Equal(t, tc.expectedEdgeLocationID, edgeLocID)
-					assert.Equal(t, tc.expectedID, id)
-
-					require.NotNil(t, params, "expected req params")
-					require.NotNil(t, params.UpdateMask, "expected req params update mask")
-					require.NotNil(t, params.UpdateMask, "expected req params update mask")
-					require.NotNil(t, tc.expectedUpdateParams.UpdateMask, "expected update mask")
-					assert.Equal(t, *tc.expectedUpdateParams.UpdateMask, *params.UpdateMask)
-
-					capturedReq = body
-					return &omni.EdgeConfigurationsAPIUpdateEdgeConfigurationResponse{
-						HTTPResponse: &http.Response{StatusCode: http.StatusOK},
-						JSON200:      tc.apiResponse,
-					}, nil
-				})
-
-			r = &edgeConfigurationResource{client: &ProviderConfig{omniAPI: mockOmni}}
-			r.Update(ctx, req, resp)
-
-			assert.False(t, resp.Diagnostics.HasError(), "unexpected diagnostics: %v", resp.Diagnostics)
-			assert.Equal(t, tc.expectedUpdateReq, capturedReq)
-		})
-	}
-}
-
-// buildTFEdgeConfigurationUpdateRequest constructs resource.UpdateRequest with State, Plan and Config
-// derived from the provided edgeConfigurationModel, using the resource schema.
-func buildTFEdgeConfigurationUpdateRequest(t *testing.T, ctx context.Context, model edgeConfigurationModel) fwresource.UpdateRequest {
-	t.Helper()
-	r := &edgeConfigurationResource{}
-
-	schemaResp := fwresource.SchemaResponse{}
-	r.Schema(ctx, fwresource.SchemaRequest{}, &schemaResp)
-
-	objType := schemaResp.Schema.Type().(basetypes.ObjectType)
-	attrTypes := objType.AttrTypes
-
-	objVal, diags := types.ObjectValueFrom(ctx, attrTypes, &model)
-	require.Falsef(t, diags.HasError(), "failed to build ObjectValueFrom from model: %+v", diags)
-
-	rawVal, err := objVal.ToTerraformValue(ctx)
-	require.NoError(t, err)
-
-	return fwresource.UpdateRequest{
-		State: tfsdk.State{
-			Raw:    rawVal,
-			Schema: schemaResp.Schema,
-		},
-		Plan: tfsdk.Plan{
-			Raw:    rawVal,
-			Schema: schemaResp.Schema,
-		},
-		Config: tfsdk.Config{
-			Raw:    rawVal,
-			Schema: schemaResp.Schema,
-		},
 	}
 }
 

@@ -476,14 +476,7 @@ func (r *edgeConfigurationResource) Update(ctx context.Context, req resource.Upd
 		Cri:            criConfig,
 	}
 
-	apiResp, err := client.EdgeConfigurationsAPIUpdateEdgeConfigurationWithResponse(
-		ctx,
-		organizationID, clusterID, edgeLocationID, plan.ID.ValueString(),
-		&omni.EdgeConfigurationsAPIUpdateEdgeConfigurationParams{
-			UpdateMask: lo.ToPtr("nebius.gpu_cluster,nebius.reservation_ids"),
-		},
-		updateReq,
-	)
+	apiResp, err := client.EdgeConfigurationsAPIUpdateEdgeConfigurationWithResponse(ctx, organizationID, clusterID, edgeLocationID, plan.ID.ValueString(), nil, updateReq)
 	if err != nil {
 		resp.Diagnostics.AddError("Failed to update edge configuration", err.Error())
 		return
@@ -866,7 +859,13 @@ func (r *edgeConfigurationResource) toNebiusConfiguration(ctx context.Context, p
 		return nil, diags
 	}
 
-	config := &omni.NebiusConfiguration{}
+	config := &omni.NebiusConfiguration{
+		Labels:          lo.ToPtr(map[string]string{}),
+		ImageId:         lo.ToPtr(""),
+		BootDiskSizeGib: lo.ToPtr(int32(0)),
+		ReservationIds:  lo.ToPtr([]string{}),
+		GpuCluster:      lo.ToPtr(""),
+	}
 
 	if !plan.ImageID.IsNull() && plan.ImageID.ValueString() != "" {
 		config.ImageId = lo.ToPtr(plan.ImageID.ValueString())
