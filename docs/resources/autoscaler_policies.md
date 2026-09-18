@@ -31,7 +31,8 @@ resource "castai_autoscaler_policies" "policies" {
   }
 
   unschedulable_pods {
-    enabled = true
+    enabled                          = true
+    partial_template_matching_enabled = true
 
     pod_pinner {
       enabled = true
@@ -55,7 +56,7 @@ The V1 `castai_autoscaler` resource is deprecated. Use `castai_autoscaler_polici
 | `node_downscaler.evictor` | **Removed** | Now managed by `castai_evictor` resource |
 | `unschedulable_pods` block | `unschedulable_pods` block | Same structure |
 | `unschedulable_pods.pod_pinner` | `unschedulable_pods.pod_pinner` | Same |
-| `node_templates_partial_matching_enabled` | Not yet exposed | V2 API supports it under `unschedulable_pods`; TF schema will add it in a future release |
+| `node_templates_partial_matching_enabled` | `unschedulable_pods.partial_template_matching_enabled` | Moved inside `unschedulable_pods` |
 | `spot_instances` | **Removed** | Manage via `castai_node_template` |
 | `headroom` / `headroom_spot` | **Removed** | Deprecated in V1; manage via Node Templates |
 | `node_constraints` | **Removed** | Manage via `castai_node_template` |
@@ -140,6 +141,7 @@ Optional:
 Optional:
 
 - `enabled` (Boolean) Enable/disable unschedulable pods detection policy.
+- `partial_template_matching_enabled` (Boolean) Marks whether partial matching should be used when deciding which custom node template to select.
 - `pod_pinner` (Block List, Max: 1) Defines the CAST AI Pod Pinner component settings. (see [below for nested schema](#nestedblock--unschedulable_pods--pod_pinner))
 
 <a id="nestedblock--unschedulable_pods--pod_pinner"></a>

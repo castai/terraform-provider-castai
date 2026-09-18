@@ -474,6 +474,12 @@ const (
 	NODESTATUSUNSPECIFIED ExternalclusterV1GetNodeBatchResponseNodeStatus = "NODE_STATUS_UNSPECIFIED"
 )
 
+// Defines values for ExternalclusterV1KataRuntimeProvisionMode.
+const (
+	KATAPROVISIONMODEMANAGED     ExternalclusterV1KataRuntimeProvisionMode = "KATA_PROVISION_MODE_MANAGED"
+	KATAPROVISIONMODEUNSPECIFIED ExternalclusterV1KataRuntimeProvisionMode = "KATA_PROVISION_MODE_UNSPECIFIED"
+)
+
 // Defines values for ExternalclusterV1KentEligibility.
 const (
 	ELIGIBLE     ExternalclusterV1KentEligibility = "ELIGIBLE"
@@ -6430,6 +6436,26 @@ type ExternalclusterV1KarpenterAttribute struct {
 	Version *string `json:"version"`
 }
 
+// ExternalclusterV1KataConfig VirtualizationConfig describes virtualization isolation settings for a node.
+//
+// Only AKS is wired up through this contract today.
+// For EKS and GKE, Kata Containers must be installed separately via its DaemonSets.
+//
+// See:
+//   - https://katacontainers.io/ — the Kata Containers project
+//   - https://learn.microsoft.com/azure/aks/use-pod-sandboxing — AKS Pod Sandboxing (the AKS feature built on Kata)
+type ExternalclusterV1KataConfig struct {
+	// ProvisionMode KataRuntimeProvisionMode indicates how the Kata runtime is provisioned on the node.
+	//
+	//  - KATA_PROVISION_MODE_MANAGED: Kata is provisioned by CAST AI / the cluster provider (e.g. AKS Pod Sandboxing).
+	ProvisionMode *ExternalclusterV1KataRuntimeProvisionMode `json:"provisionMode,omitempty"`
+}
+
+// ExternalclusterV1KataRuntimeProvisionMode KataRuntimeProvisionMode indicates how the Kata runtime is provisioned on the node.
+//
+//   - KATA_PROVISION_MODE_MANAGED: Kata is provisioned by CAST AI / the cluster provider (e.g. AKS Pod Sandboxing).
+type ExternalclusterV1KataRuntimeProvisionMode string
+
 // ExternalclusterV1KentEligibility KentEligibility defines Karpenter KENT eligibility status.
 type ExternalclusterV1KentEligibility string
 
@@ -6634,6 +6660,13 @@ type ExternalclusterV1NodeConfig struct {
 
 	// SubnetId Node subnet ID.
 	SubnetId *string `json:"subnetId"`
+
+	// Virtualization VirtualizationConfig describes virtualization isolation settings for a node.
+	//
+	// Only AKS is wired up through this contract today. For EKS and GKE,
+	// Kata Containers must be installed separately via its DaemonSets
+	// (https://github.com/kata-containers/kata-containers).
+	Virtualization *ExternalclusterV1VirtualizationConfig `json:"virtualization,omitempty"`
 
 	// Volume NodeVolume defines node's local root volume configuration.
 	Volume *ExternalclusterV1NodeVolume `json:"volume,omitempty"`
@@ -6909,6 +6942,23 @@ type ExternalclusterV1UpdateGKEClusterParams struct {
 type ExternalclusterV1UpdateSelfHostedWithEC2NodesParams struct {
 	AssumeRoleArn      *string `json:"assumeRoleArn,omitempty"`
 	InstanceProfileArn *string `json:"instanceProfileArn"`
+}
+
+// ExternalclusterV1VirtualizationConfig VirtualizationConfig describes virtualization isolation settings for a node.
+//
+// Only AKS is wired up through this contract today. For EKS and GKE,
+// Kata Containers must be installed separately via its DaemonSets
+// (https://github.com/kata-containers/kata-containers).
+type ExternalclusterV1VirtualizationConfig struct {
+	// Kata VirtualizationConfig describes virtualization isolation settings for a node.
+	//
+	// Only AKS is wired up through this contract today.
+	// For EKS and GKE, Kata Containers must be installed separately via its DaemonSets.
+	//
+	// See:
+	//   * https://katacontainers.io/ — the Kata Containers project
+	//   * https://learn.microsoft.com/azure/aks/use-pod-sandboxing — AKS Pod Sandboxing (the AKS feature built on Kata)
+	Kata *ExternalclusterV1KataConfig `json:"kata,omitempty"`
 }
 
 // ExternalclusterV1Zone Cluster zone.
@@ -7767,7 +7817,16 @@ type NodetemplatesV1ListNodeTemplatesResponse struct {
 
 // NodetemplatesV1NewNodeTemplate defines model for nodetemplates.v1.NewNodeTemplate.
 type NodetemplatesV1NewNodeTemplate struct {
-	ClmEnabled                               *bool                               `json:"clmEnabled"`
+	ClmEnabled *bool `json:"clmEnabled"`
+
+	// ClmNetworkingMode CLM networking mode for nodes created from this template.
+	// "default" (or omitted) = auto-detect current behavior.
+	// "none" = no connection preservation during migration.
+	// "tc" = new pod IP on the destination node with eBPF traffic-control
+	// translation of the old IP; allows cross-subnet/AZ migration on any provider.
+	// "cni" = pod IP preservation via the CNI (Calico / AWS VPC CNI fork);
+	// requires same subnet/AZ.
+	ClmNetworkingMode                        *string                             `json:"clmNetworkingMode"`
 	ConfigurationId                          *string                             `json:"configurationId,omitempty"`
 	Constraints                              *NodetemplatesV1TemplateConstraints `json:"constraints,omitempty"`
 	CustomInstancesEnabled                   *bool                               `json:"customInstancesEnabled"`
@@ -7812,7 +7871,16 @@ type NodetemplatesV1NewNodeTemplate struct {
 
 // NodetemplatesV1NodeTemplate defines model for nodetemplates.v1.NodeTemplate.
 type NodetemplatesV1NodeTemplate struct {
-	ClmEnabled                               *bool                               `json:"clmEnabled,omitempty"`
+	ClmEnabled *bool `json:"clmEnabled,omitempty"`
+
+	// ClmNetworkingMode CLM networking mode for nodes created from this template.
+	// "default" (or omitted) = auto-detect current behavior.
+	// "none" = no connection preservation during migration.
+	// "tc" = new pod IP on the destination node with eBPF traffic-control
+	// translation of the old IP; allows cross-subnet/AZ migration on any provider.
+	// "cni" = pod IP preservation via the CNI (Calico / AWS VPC CNI fork);
+	// requires same subnet/AZ.
+	ClmNetworkingMode                        *string                             `json:"clmNetworkingMode"`
 	ConfigurationId                          *string                             `json:"configurationId,omitempty"`
 	ConfigurationName                        *string                             `json:"configurationName,omitempty"`
 	Constraints                              *NodetemplatesV1TemplateConstraints `json:"constraints,omitempty"`
@@ -8122,7 +8190,16 @@ type NodetemplatesV1TemplateConstraintsResourceLimits struct {
 
 // NodetemplatesV1UpdateNodeTemplate defines model for nodetemplates.v1.UpdateNodeTemplate.
 type NodetemplatesV1UpdateNodeTemplate struct {
-	ClmEnabled                               *bool                               `json:"clmEnabled"`
+	ClmEnabled *bool `json:"clmEnabled"`
+
+	// ClmNetworkingMode CLM networking mode for nodes created from this template.
+	// "default" (or omitted) = auto-detect current behavior.
+	// "none" = no connection preservation during migration.
+	// "tc" = new pod IP on the destination node with eBPF traffic-control
+	// translation of the old IP; allows cross-subnet/AZ migration on any provider.
+	// "cni" = pod IP preservation via the CNI (Calico / AWS VPC CNI fork);
+	// requires same subnet/AZ.
+	ClmNetworkingMode                        *string                             `json:"clmNetworkingMode"`
 	ConfigurationId                          *string                             `json:"configurationId,omitempty"`
 	Constraints                              *NodetemplatesV1TemplateConstraints `json:"constraints,omitempty"`
 	CustomInstancesEnabled                   *bool                               `json:"customInstancesEnabled"`
@@ -8167,8 +8244,9 @@ type PoliciesV1ClusterLimitsCpu struct {
 	// MaxCores Defines the maximum allowed amount of vCPUs in the whole cluster.
 	MaxCores *int32 `json:"maxCores,omitempty"`
 
-	// MinCores Defines the minimum allowed amount of CPUs in the whole cluster.
-	// Deprecated: Min CPU limit is no longer enforced.
+	// MinCores Deprecated: Min CPU limit is no longer enforced.
+	// Defines the minimum allowed amount of CPUs in the whole cluster.
+	// Deprecated:
 	MinCores *int32 `json:"minCores,omitempty"`
 }
 
@@ -8251,18 +8329,22 @@ type PoliciesV1GetClusterNodeConstraintsResponseCpuRam struct {
 	RamMib *int32 `json:"ramMib,omitempty"`
 }
 
-// PoliciesV1Headroom Defines Headroom for Unschedulable Pods.
+// PoliciesV1Headroom Deprecated: This message exists for compatibility reasons only.
+// Defines Headroom for Unschedulable Pods.
 type PoliciesV1Headroom struct {
-	// CpuPercentage Defines percentage of additional CPU capacity to be added.
-	// Deprecated. Input only (for backwards-compatibility, ignored).
+	// CpuPercentage Deprecated: input only (for backwards-compatibility, ignored).
+	// Defines percentage of additional CPU capacity to be added.
+	// Deprecated:
 	CpuPercentage *int32 `json:"cpuPercentage,omitempty"`
 
-	// Enabled Defines whether Headroom is enabled.
-	// Deprecated. Input only (for backwards-compatibility, ignored).
+	// Enabled Deprecated: input only (for backwards-compatibility, ignored).
+	// Defines whether Headroom is enabled.
+	// Deprecated:
 	Enabled *bool `json:"enabled"`
 
-	// MemoryPercentage Defines percentage of additional memory capacity to be added
-	// Deprecated. Input only (for backwards-compatibility, ignored).
+	// MemoryPercentage Deprecated: input only (for backwards-compatibility, ignored).
+	// Defines percentage of additional memory capacity to be added.
+	// Deprecated:
 	MemoryPercentage *int32 `json:"memoryPercentage,omitempty"`
 }
 
@@ -8403,19 +8485,24 @@ type PoliciesV1UnschedulablePodsPolicy struct {
 	// CustomInstancesEnabled Defines custom instance usage settings.
 	CustomInstancesEnabled *bool `json:"customInstancesEnabled"`
 
-	// DiskGibToCpuRatio Defines default ratio of 1 CPU to Volume GiB  which will be summed with minimum value when creating new nodes.
+	// DiskGibToCpuRatio Deprecated: input only (for backwards-compatibility, ignored).
+	// Defines default ratio of 1 CPU to Volume GiB  which will be summed with minimum value when creating new nodes.
 	// If set to 5, the ration would be: 1 CPU : 5 GiB.
 	// For example a node with 16 CPU would have (16 * 5 GiB) + minimum(100GiB) = 180 GiB volume size.
-	// Deprecated. Input only (for backwards-compatibility, ignored).
+	// Deprecated:
 	DiskGibToCpuRatio *int32 `json:"diskGibToCpuRatio"`
 
 	// Enabled Enable/disable unschedulable pods detection policy.
 	Enabled *bool `json:"enabled"`
 
-	// Headroom Defines Headroom for Unschedulable Pods.
+	// Headroom Deprecated: This message exists for compatibility reasons only.
+	// Defines Headroom for Unschedulable Pods.
+	// Deprecated:
 	Headroom *PoliciesV1Headroom `json:"headroom,omitempty"`
 
-	// HeadroomSpot Defines Headroom for Unschedulable Pods.
+	// HeadroomSpot Deprecated: This message exists for compatibility reasons only.
+	// Defines Headroom for Unschedulable Pods.
+	// Deprecated:
 	HeadroomSpot *PoliciesV1Headroom `json:"headroomSpot,omitempty"`
 
 	// NodeConstraints Defines the NodeConstraints that will be applied when autoscaling with UnschedulablePodsPolicy.

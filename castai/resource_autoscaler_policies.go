@@ -29,8 +29,9 @@ const (
 	FieldNodeDownscalerEmptyNodesDelay   = "empty_nodes_delay"
 	FieldNodeDownscalerEmptyNodesEnabled = "empty_nodes_enabled"
 
-	FieldUnschedulablePodsEnabled   = "enabled"
-	FieldUnschedulablePodsPodPinner = "pod_pinner"
+	FieldUnschedulablePodsEnabled                 = "enabled"
+	FieldUnschedulablePodsPartialTemplateMatching = "partial_template_matching_enabled"
+	FieldUnschedulablePodsPodPinner               = "pod_pinner"
 
 	FieldPodPinnerEnabled = "enabled"
 )
@@ -132,6 +133,11 @@ func resourceAutoscalerPolicies() *schema.Resource {
 							Type:        schema.TypeBool,
 							Optional:    true,
 							Description: "Enable/disable unschedulable pods detection policy.",
+						},
+						FieldUnschedulablePodsPartialTemplateMatching: {
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Description: "Marks whether partial matching should be used when deciding which custom node template to select.",
 						},
 						FieldUnschedulablePodsPodPinner: {
 							Type:        schema.TypeList,
@@ -366,6 +372,11 @@ func toUnschedulablePodsPolicy(in []interface{}) (*cluster_autoscaler_v2.Unsched
 		out.Enabled = &enabled
 	}
 
+	if v, ok := m[FieldUnschedulablePodsPartialTemplateMatching]; ok {
+		partialTemplateMatching := v.(bool)
+		out.PartialTemplateMatchingEnabled = &partialTemplateMatching
+	}
+
 	if v, ok := m[FieldUnschedulablePodsPodPinner]; ok {
 		podPinnerList := v.([]interface{})
 		if len(podPinnerList) > 0 && podPinnerList[0] != nil {
@@ -481,6 +492,10 @@ func flattenUnschedulablePodsPolicy(in *cluster_autoscaler_v2.UnschedulablePodsP
 
 	if in.Enabled != nil {
 		out[FieldUnschedulablePodsEnabled] = *in.Enabled
+	}
+
+	if in.PartialTemplateMatchingEnabled != nil {
+		out[FieldUnschedulablePodsPartialTemplateMatching] = *in.PartialTemplateMatchingEnabled
 	}
 
 	if in.PodPinner != nil {
