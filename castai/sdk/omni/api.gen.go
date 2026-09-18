@@ -288,6 +288,10 @@ type EdgeClusterControlPlane struct {
 	// KonnectivityPort KonnectivityPort is the port used for konnectivity server.
 	KonnectivityPort *int32 `json:"konnectivityPort,omitempty"`
 
+	// KubernetesVersion KubernetesVersion is edge location cluster control plane version (effectively it is k0s version for example 'v1.36.3+k0s.0');
+	//  if not provided then a default one will be used depending on installed omni agent version.
+	KubernetesVersion *string `json:"kubernetesVersion,omitempty"`
+
 	// ServiceAnnotations ServiceAnnotations are custom annotations to apply to the control plane service.
 	ServiceAnnotations *map[string]string `json:"serviceAnnotations,omitempty"`
 }
@@ -799,6 +803,9 @@ type ListEdgeLocationsResponse struct {
 type NebiusConfiguration struct {
 	// BootDiskSizeGib Boot disk size.
 	BootDiskSizeGib *int32 `json:"bootDiskSizeGib,omitempty"`
+
+	// GpuCluster GPU cluster info
+	GpuCluster *string `json:"gpuCluster,omitempty"`
 
 	// ImageId ImageID to be used for edge creation.
 	ImageId *string `json:"imageId,omitempty"`

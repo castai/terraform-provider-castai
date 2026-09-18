@@ -79,8 +79,10 @@ Optional:
 Optional:
 
 - `boot_disk_size_gib` (Number) Boot disk size in GiB
+- `gpu_cluster` (String) GPU cluster info
 - `image_id` (String) ImageID to be used for edge creation. It can be an image ID or a name filter
 - `labels` (Map of String) Instance/VM labels
+- `reservation_ids` (List of String) Capacity block reservation IDs
 
 
 <a id="nestedatt--oci"></a>

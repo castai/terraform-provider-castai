@@ -16,11 +16,13 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/samber/lo"
 
-	"github.com/castai/terraform-provider-castai/castai/sdk/omni"
 	"github.com/google/uuid"
+
+	"github.com/castai/terraform-provider-castai/castai/sdk/omni"
 )
 
 var (
@@ -72,6 +74,8 @@ type nebiusConfigurationModel struct {
 	Labels          types.Map    `tfsdk:"labels"`
 	ImageID         types.String `tfsdk:"image_id"`
 	BootDiskSizeGiB types.Int64  `tfsdk:"boot_disk_size_gib"`
+	ReservationIDs  types.List   `tfsdk:"reservation_ids"`
+	GpuCluster      types.String `tfsdk:"gpu_cluster"`
 }
 
 type customConfigurationModel struct {
@@ -224,6 +228,15 @@ func (r *edgeConfigurationResource) Schema(_ context.Context, _ resource.SchemaR
 						Optional:    true,
 						Description: "Boot disk size in GiB",
 					},
+					"reservation_ids": schema.ListAttribute{
+						Optional:    true,
+						ElementType: types.StringType,
+						Description: "Capacity block reservation IDs",
+					},
+					"gpu_cluster": schema.StringAttribute{
+						Optional:    true,
+						Description: "GPU cluster info",
+					},
 				},
 			},
 			"custom": schema.SingleNestedAttribute{
@@ -345,8 +358,11 @@ func (r *edgeConfigurationResource) Create(ctx context.Context, req resource.Cre
 		return
 	}
 
-	state := r.edgeConfigurationToTFModel(ctx, apiResp.JSON200, plan.OrganizationID, plan.ClusterID)
-	state.EdgeLocationID = plan.EdgeLocationID
+	state, stateDiags := r.edgeConfigurationToTFModel(ctx, apiResp.JSON200, plan.OrganizationID, plan.ClusterID)
+	resp.Diagnostics.Append(stateDiags...)
+	if !stateDiags.HasError() {
+		state.EdgeLocationID = plan.EdgeLocationID
+	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
 }
@@ -399,7 +415,8 @@ func (r *edgeConfigurationResource) Read(ctx context.Context, req resource.ReadR
 		return
 	}
 
-	state = r.edgeConfigurationToTFModel(ctx, apiResp.JSON200, state.OrganizationID, state.ClusterID)
+	state, stateDiags := r.edgeConfigurationToTFModel(ctx, apiResp.JSON200, state.OrganizationID, state.ClusterID)
+	resp.Diagnostics.Append(stateDiags...)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, state)...)
 }
@@ -481,7 +498,8 @@ func (r *edgeConfigurationResource) Update(ctx context.Context, req resource.Upd
 		return
 	}
 
-	state := r.edgeConfigurationToTFModel(ctx, apiResp.JSON200, plan.OrganizationID, plan.ClusterID)
+	state, stateDiags := r.edgeConfigurationToTFModel(ctx, apiResp.JSON200, plan.OrganizationID, plan.ClusterID)
+	resp.Diagnostics.Append(stateDiags...)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
 }
@@ -614,7 +632,18 @@ func (r *edgeConfigurationResource) getOrganizationID(organizationID types.Strin
 	return r.client.organizationID
 }
 
-func (r *edgeConfigurationResource) edgeConfigurationToTFModel(ctx context.Context, config *omni.EdgeConfiguration, organizationID types.String, clusterID types.String) edgeConfigurationModel {
+func (r *edgeConfigurationResource) edgeConfigurationToTFModel(ctx context.Context, config *omni.EdgeConfiguration, organizationID types.String, clusterID types.String) (edgeConfigurationModel, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	nebiusCfg, nebiusDiag := r.toNebiusConfigurationModel(ctx, config.Nebius)
+	diags.Append(nebiusDiag...)
+
+	gcpCfg, gcpDiag := r.toGCPConfigurationModel(ctx, config.Gcp)
+	diags.Append(gcpDiag...)
+
+	awsCfg, awDiag := r.toAWSConfigurationModel(ctx, config.Aws)
+	diags.Append(awDiag...)
+
 	state := edgeConfigurationModel{
 		ID:             types.StringValue(lo.FromPtr(config.Id)),
 		OrganizationID: organizationID,
@@ -623,15 +652,15 @@ func (r *edgeConfigurationResource) edgeConfigurationToTFModel(ctx context.Conte
 		EdgeLocationID: types.StringValue(lo.FromPtr(config.EdgeLocationId)),
 		Default:        types.BoolValue(lo.FromPtr(config.Default)),
 		UserDataBase64: normalizeStringPtr(config.UserDataBase64),
-		GCP:            r.toGCPConfigurationModel(ctx, config.Gcp),
-		AWS:            r.toAWSConfigurationModel(ctx, config.Aws),
+		GCP:            gcpCfg,
+		AWS:            awsCfg,
 		OCI:            r.toOCIConfigurationModel(ctx, config.Oci),
-		Nebius:         r.toNebiusConfigurationModel(ctx, config.Nebius),
+		Nebius:         nebiusCfg,
 		Custom:         r.toCustomConfigurationModel(ctx, config.Custom),
 		CRI:            r.toCRIConfigurationModel(ctx, config.Cri),
 	}
 
-	return state
+	return state, diags
 }
 
 func (r *edgeConfigurationResource) toGCPConfiguration(ctx context.Context, plan *gcpConfigurationModel) (*omni.GCPConfiguration, diag.Diagnostics) {
@@ -666,9 +695,11 @@ func (r *edgeConfigurationResource) toGCPConfiguration(ctx context.Context, plan
 	return config, diags
 }
 
-func (r *edgeConfigurationResource) toGCPConfigurationModel(ctx context.Context, config *omni.GCPConfiguration) *gcpConfigurationModel {
+func (r *edgeConfigurationResource) toGCPConfigurationModel(ctx context.Context, config *omni.GCPConfiguration) (*gcpConfigurationModel, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
 	if config == nil {
-		return nil
+		return nil, diags
 	}
 
 	model := &gcpConfigurationModel{
@@ -686,14 +717,14 @@ func (r *edgeConfigurationResource) toGCPConfigurationModel(ctx context.Context,
 	}
 
 	if config.Labels != nil {
-		labels, diags := types.MapValueFrom(ctx, types.StringType, *config.Labels)
-		if diags.HasError() {
-			return model
+		labels, labelDiagnostic := types.MapValueFrom(ctx, types.StringType, *config.Labels)
+		diags.Append(labelDiagnostic...)
+		if !diags.HasError() {
+			model.Labels = labels
 		}
-		model.Labels = labels
 	}
 
-	return model
+	return model, diags
 }
 
 func (r *edgeConfigurationResource) toAWSConfiguration(ctx context.Context, plan *awsConfigurationModel) (*omni.AWSConfiguration, diag.Diagnostics) {
@@ -728,9 +759,10 @@ func (r *edgeConfigurationResource) toAWSConfiguration(ctx context.Context, plan
 	return config, diags
 }
 
-func (r *edgeConfigurationResource) toAWSConfigurationModel(ctx context.Context, config *omni.AWSConfiguration) *awsConfigurationModel {
+func (r *edgeConfigurationResource) toAWSConfigurationModel(ctx context.Context, config *omni.AWSConfiguration) (*awsConfigurationModel, diag.Diagnostics) {
+	var diags diag.Diagnostics
 	if config == nil {
-		return nil
+		return nil, diags
 	}
 
 	model := &awsConfigurationModel{
@@ -748,14 +780,14 @@ func (r *edgeConfigurationResource) toAWSConfigurationModel(ctx context.Context,
 	}
 
 	if config.Tags != nil {
-		tags, diags := types.MapValueFrom(ctx, types.StringType, *config.Tags)
-		if diags.HasError() {
-			return model
+		tags, tagDiags := types.MapValueFrom(ctx, types.StringType, *config.Tags)
+		diags.Append(tagDiags...)
+		if !tagDiags.HasError() {
+			model.Tags = tags
 		}
-		model.Tags = tags
 	}
 
-	return model
+	return model, diags
 }
 
 func (r *edgeConfigurationResource) toOCIConfiguration(ctx context.Context, plan *ociConfigurationModel) (*omni.OCIConfiguration, diag.Diagnostics) {
@@ -827,7 +859,13 @@ func (r *edgeConfigurationResource) toNebiusConfiguration(ctx context.Context, p
 		return nil, diags
 	}
 
-	config := &omni.NebiusConfiguration{}
+	config := &omni.NebiusConfiguration{
+		Labels:          lo.ToPtr(map[string]string{}),
+		ImageId:         lo.ToPtr(""),
+		BootDiskSizeGib: lo.ToPtr(int32(0)),
+		ReservationIds:  lo.ToPtr([]string{}),
+		GpuCluster:      lo.ToPtr(""),
+	}
 
 	if !plan.ImageID.IsNull() && plan.ImageID.ValueString() != "" {
 		config.ImageId = lo.ToPtr(plan.ImageID.ValueString())
@@ -845,37 +883,68 @@ func (r *edgeConfigurationResource) toNebiusConfiguration(ctx context.Context, p
 		}
 	}
 
+	if !plan.ReservationIDs.IsNull() {
+		reservationIDs := make([]string, plan.ReservationIDs.Length(basetypes.CollectionLengthOptions{
+			UnhandledNullAsZero:    true,
+			UnhandledUnknownAsZero: true,
+		}))
+		diags.Append(plan.ReservationIDs.ElementsAs(ctx, &reservationIDs, false)...)
+		if !diags.HasError() {
+			config.ReservationIds = &reservationIDs
+		}
+	}
+
+	if !plan.GpuCluster.IsNull() {
+		config.GpuCluster = lo.ToPtr(plan.GpuCluster.ValueString())
+	}
+
 	return config, diags
 }
 
-func (r *edgeConfigurationResource) toNebiusConfigurationModel(ctx context.Context, config *omni.NebiusConfiguration) *nebiusConfigurationModel {
+func (r *edgeConfigurationResource) toNebiusConfigurationModel(ctx context.Context, config *omni.NebiusConfiguration) (*nebiusConfigurationModel, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
 	if config == nil {
-		return nil
+		return nil, diags
 	}
 
 	model := &nebiusConfigurationModel{
 		Labels:          types.MapNull(types.StringType),
 		ImageID:         types.StringNull(),
 		BootDiskSizeGiB: types.Int64Null(),
+		ReservationIDs:  types.ListNull(types.StringType),
+		GpuCluster:      types.StringNull(),
 	}
 
 	if config.ImageId != nil && *config.ImageId != "" {
 		model.ImageID = types.StringValue(*config.ImageId)
 	}
 
-	if config.BootDiskSizeGib != nil {
+	if config.BootDiskSizeGib != nil && *config.BootDiskSizeGib != 0 {
 		model.BootDiskSizeGiB = types.Int64Value(int64(*config.BootDiskSizeGib))
 	}
 
 	if config.Labels != nil && len(*config.Labels) > 0 {
-		labels, diags := types.MapValueFrom(ctx, types.StringType, *config.Labels)
-		if diags.HasError() {
-			return model
+		labels, labelDiags := types.MapValueFrom(ctx, types.StringType, *config.Labels)
+		diags.Append(labelDiags...)
+		if !labelDiags.HasError() {
+			model.Labels = labels
 		}
-		model.Labels = labels
 	}
 
-	return model
+	if config.ReservationIds != nil && len(*config.ReservationIds) > 0 {
+		reservationIds, reservationDiags := types.ListValueFrom(ctx, types.StringType, *config.ReservationIds)
+		diags.Append(reservationDiags...)
+		if !reservationDiags.HasError() {
+			model.ReservationIDs = reservationIds
+		}
+	}
+
+	if config.GpuCluster != nil && *config.GpuCluster != "" {
+		model.GpuCluster = types.StringValue(*config.GpuCluster)
+	}
+
+	return model, diags
 }
 
 func (r *edgeConfigurationResource) toCustomConfiguration(ctx context.Context, plan *customConfigurationModel) (*omni.CustomCloudConfiguration, diag.Diagnostics) {
