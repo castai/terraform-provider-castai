@@ -3,98 +3,164 @@ package castai
 import (
 	"context"
 	"fmt"
-	"log"
 	"net/http"
+	"regexp"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/path"
+	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
+	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
+	"github.com/samber/lo"
 
 	"github.com/castai/terraform-provider-castai/castai/sdk/cluster_autoscaler_v2"
 )
 
-const (
-	FieldAutoscalerPoliciesVersion           = "version"
-	FieldAutoscalerPoliciesEnabled           = "enabled"
-	FieldAutoscalerPoliciesScopedMode        = "scoped_mode"
-	FieldAutoscalerPoliciesClusterLimits     = "cluster_limits"
-	FieldAutoscalerPoliciesNodeDownscaler    = "node_downscaler"
-	FieldAutoscalerPoliciesUnschedulablePods = "unschedulable_pods"
+// uuidRegex matches canonical 8-4-4-4-12 hexadecimal UUID strings.
+var uuidRegex = regexp.MustCompile(`^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$`)
 
-	FieldClusterLimitsEnabled     = "enabled"
-	FieldClusterLimitsCPU         = "cpu"
-	FieldClusterLimitsCPUMaxCores = "max_cores"
-	FieldClusterLimitsCPUMinCores = "min_cores"
-
-	FieldNodeDownscalerEmptyNodesDelay   = "empty_nodes_delay"
-	FieldNodeDownscalerEmptyNodesEnabled = "empty_nodes_enabled"
-
-	FieldUnschedulablePodsEnabled                 = "enabled"
-	FieldUnschedulablePodsPartialTemplateMatching = "partial_template_matching_enabled"
-	FieldUnschedulablePodsPodPinner               = "pod_pinner"
-
-	FieldPodPinnerEnabled = "enabled"
+var (
+	_ resource.Resource                = (*autoscalerPoliciesResource)(nil)
+	_ resource.ResourceWithConfigure   = (*autoscalerPoliciesResource)(nil)
+	_ resource.ResourceWithImportState = (*autoscalerPoliciesResource)(nil)
 )
 
-func resourceAutoscalerPolicies() *schema.Resource {
-	return &schema.Resource{
-		ReadContext:   resourceAutoscalerPoliciesRead,
-		CreateContext: resourceAutoscalerPoliciesCreate,
-		UpdateContext: resourceAutoscalerPoliciesUpdate,
-		DeleteContext: resourceAutoscalerPoliciesDelete,
-		Description:   "CAST AI autoscaler policies V2 resource to manage cluster autoscaling policies.",
-		Importer: &schema.ResourceImporter{
-			StateContext: schema.ImportStatePassthroughContext,
-		},
+// autoscalerPoliciesResource implements the castai_autoscaler_policies resource
+// using the terraform-plugin-framework.
+type autoscalerPoliciesResource struct {
+	client *ProviderConfig
+}
 
-		Schema: map[string]*schema.Schema{
-			FieldClusterId: {
-				Type:             schema.TypeString,
-				Required:         true,
-				ForceNew:         true,
-				ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
-				Description:      "CAST AI cluster id.",
+type autoscalerPoliciesModel struct {
+	ID                types.String             `tfsdk:"id"`
+	ClusterID         types.String             `tfsdk:"cluster_id"`
+	Enabled           types.Bool               `tfsdk:"enabled"`
+	ScopedMode        types.Bool               `tfsdk:"scoped_mode"`
+	Version           types.String             `tfsdk:"version"`
+	ClusterLimits     []clusterLimitsModel     `tfsdk:"cluster_limits"`
+	NodeDownscaler    []nodeDownscalerModel    `tfsdk:"node_downscaler"`
+	UnschedulablePods []unschedulablePodsModel `tfsdk:"unschedulable_pods"`
+}
+
+type clusterLimitsModel struct {
+	Enabled types.Bool              `tfsdk:"enabled"`
+	CPU     []clusterLimitsCPUModel `tfsdk:"cpu"`
+}
+
+type clusterLimitsCPUModel struct {
+	MaxCores types.Int64 `tfsdk:"max_cores"`
+	MinCores types.Int64 `tfsdk:"min_cores"`
+}
+
+type nodeDownscalerModel struct {
+	EmptyNodesDelay   types.String `tfsdk:"empty_nodes_delay"`
+	EmptyNodesEnabled types.Bool   `tfsdk:"empty_nodes_enabled"`
+}
+
+type unschedulablePodsModel struct {
+	Enabled                        types.Bool       `tfsdk:"enabled"`
+	PartialTemplateMatchingEnabled types.Bool       `tfsdk:"partial_template_matching_enabled"`
+	PodPinner                      []podPinnerModel `tfsdk:"pod_pinner"`
+}
+
+type podPinnerModel struct {
+	Enabled types.Bool `tfsdk:"enabled"`
+}
+
+func newAutoscalerPoliciesResource() resource.Resource {
+	return &autoscalerPoliciesResource{}
+}
+
+func (r *autoscalerPoliciesResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_autoscaler_policies"
+}
+
+func (r *autoscalerPoliciesResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
+	resp.Schema = schema.Schema{
+		Description: "CAST AI autoscaler policies V2 resource to manage cluster autoscaling policies.",
+		Attributes: map[string]schema.Attribute{
+			"id": schema.StringAttribute{
+				Computed:    true,
+				Description: "The ID of this resource, equal to the cluster id.",
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
 			},
-			FieldAutoscalerPoliciesEnabled: {
-				Type:        schema.TypeBool,
+			"cluster_id": schema.StringAttribute{
+				Required:    true,
+				Description: "CAST AI cluster id.",
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.RequiresReplace(),
+				},
+				Validators: []validator.String{
+					stringvalidator.RegexMatches(uuidRegex, "cluster_id must be a valid UUID"),
+				},
+			},
+			"enabled": schema.BoolAttribute{
 				Optional:    true,
+				Computed:    true,
 				Description: "Enable/disable all policies (global master switch).",
+				Default:     booldefault.StaticBool(false),
 			},
-			FieldAutoscalerPoliciesScopedMode: {
-				Type:        schema.TypeBool,
+			"scoped_mode": schema.BoolAttribute{
 				Optional:    true,
+				Computed:    true,
 				Description: "Run the node autoscaler in scoped mode.",
+				Default:     booldefault.StaticBool(false),
 			},
-			FieldAutoscalerPoliciesClusterLimits: {
-				Type:        schema.TypeList,
-				Optional:    true,
-				MaxItems:    1,
+			"version": schema.StringAttribute{
+				Computed:    true,
+				Description: "Policy version for optimistic locking.",
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
+			},
+		},
+		Blocks: map[string]schema.Block{
+			"cluster_limits": schema.ListNestedBlock{
 				Description: "Defines minimum and maximum amount of CPU the cluster can have.",
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						FieldClusterLimitsEnabled: {
-							Type:        schema.TypeBool,
+				Validators: []validator.List{
+					listvalidator.SizeAtMost(1),
+				},
+				NestedObject: schema.NestedBlockObject{
+					Attributes: map[string]schema.Attribute{
+						"enabled": schema.BoolAttribute{
 							Optional:    true,
+							Computed:    true,
 							Description: "Enable/disable cluster size limits policy.",
+							Default:     booldefault.StaticBool(false),
 						},
-						FieldClusterLimitsCPU: {
-							Type:        schema.TypeList,
-							Optional:    true,
-							MaxItems:    1,
+					},
+					Blocks: map[string]schema.Block{
+						"cpu": schema.ListNestedBlock{
 							Description: "Defines the minimum and maximum amount of CPUs for cluster's worker nodes.",
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									FieldClusterLimitsCPUMaxCores: {
-										Type:             schema.TypeInt,
-										Required:         true,
-										Description:      "Defines the maximum allowed amount of vCPUs in the whole cluster.",
-										ValidateDiagFunc: validation.ToDiagFunc(validation.IntAtLeast(2)),
+							Validators: []validator.List{
+								listvalidator.SizeAtMost(1),
+							},
+							NestedObject: schema.NestedBlockObject{
+								Attributes: map[string]schema.Attribute{
+									"max_cores": schema.Int64Attribute{
+										Required:    true,
+										Description: "Defines the maximum allowed amount of vCPUs in the whole cluster.",
+										Validators: []validator.Int64{
+											int64validator.AtLeast(2),
+										},
 									},
-									FieldClusterLimitsCPUMinCores: {
-										Type:        schema.TypeInt,
-										Optional:    true,
-										Description: "Defines the minimum allowed amount of CPUs in the whole cluster. Deprecated: Min CPU limit is no longer enforced.",
-										Deprecated:  "Min CPU limit is no longer enforced.",
+									"min_cores": schema.Int64Attribute{
+										Optional:           true,
+										Computed:           true,
+										Description:        "Defines the minimum allowed amount of CPUs in the whole cluster. Deprecated: Min CPU limit is no longer enforced.",
+										DeprecationMessage: "Min CPU limit is no longer enforced.",
+										Default:            int64default.StaticInt64(0),
 									},
 								},
 							},
@@ -102,54 +168,59 @@ func resourceAutoscalerPolicies() *schema.Resource {
 					},
 				},
 			},
-			FieldAutoscalerPoliciesNodeDownscaler: {
-				Type:        schema.TypeList,
-				Optional:    true,
-				MaxItems:    1,
+			"node_downscaler": schema.ListNestedBlock{
 				Description: "Node Downscaler defines policies for removing nodes based on the configured conditions.",
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						FieldNodeDownscalerEmptyNodesDelay: {
-							Type:        schema.TypeString,
+				Validators: []validator.List{
+					listvalidator.SizeAtMost(1),
+				},
+				NestedObject: schema.NestedBlockObject{
+					Attributes: map[string]schema.Attribute{
+						"empty_nodes_delay": schema.StringAttribute{
 							Optional:    true,
 							Description: "Period to wait before removing an empty node.",
 						},
-						FieldNodeDownscalerEmptyNodesEnabled: {
-							Type:        schema.TypeBool,
+						"empty_nodes_enabled": schema.BoolAttribute{
 							Optional:    true,
+							Computed:    true,
 							Description: "Enable/disable the empty worker nodes policy.",
+							Default:     booldefault.StaticBool(false),
 						},
 					},
 				},
 			},
-			FieldAutoscalerPoliciesUnschedulablePods: {
-				Type:        schema.TypeList,
-				Optional:    true,
-				MaxItems:    1,
+			"unschedulable_pods": schema.ListNestedBlock{
 				Description: "Policy defining autoscaler's behavior when unschedulable pods were detected.",
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						FieldUnschedulablePodsEnabled: {
-							Type:        schema.TypeBool,
+				Validators: []validator.List{
+					listvalidator.SizeAtMost(1),
+				},
+				NestedObject: schema.NestedBlockObject{
+					Attributes: map[string]schema.Attribute{
+						"enabled": schema.BoolAttribute{
 							Optional:    true,
+							Computed:    true,
 							Description: "Enable/disable unschedulable pods detection policy.",
+							Default:     booldefault.StaticBool(false),
 						},
-						FieldUnschedulablePodsPartialTemplateMatching: {
-							Type:        schema.TypeBool,
+						"partial_template_matching_enabled": schema.BoolAttribute{
 							Optional:    true,
+							Computed:    true,
 							Description: "Marks whether partial matching should be used when deciding which custom node template to select.",
+							Default:     booldefault.StaticBool(false),
 						},
-						FieldUnschedulablePodsPodPinner: {
-							Type:        schema.TypeList,
-							Optional:    true,
-							MaxItems:    1,
+					},
+					Blocks: map[string]schema.Block{
+						"pod_pinner": schema.ListNestedBlock{
 							Description: "Defines the CAST AI Pod Pinner component settings.",
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									FieldPodPinnerEnabled: {
-										Type:        schema.TypeBool,
+							Validators: []validator.List{
+								listvalidator.SizeAtMost(1),
+							},
+							NestedObject: schema.NestedBlockObject{
+								Attributes: map[string]schema.Attribute{
+									"enabled": schema.BoolAttribute{
 										Optional:    true,
+										Computed:    true,
 										Description: "Enable/disable the Pod Pinner policy.",
+										Default:     booldefault.StaticBool(false),
 									},
 								},
 							},
@@ -157,371 +228,388 @@ func resourceAutoscalerPolicies() *schema.Resource {
 					},
 				},
 			},
-			FieldAutoscalerPoliciesVersion: {
-				Type:        schema.TypeString,
-				Computed:    true,
-				Description: "Policy version for optimistic locking.",
-			},
 		},
 	}
 }
 
-func resourceAutoscalerPoliciesRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	clusterId := getClusterId(data)
-	if clusterId == "" {
-		log.Print("[INFO] ClusterId is missing. Will skip operation.")
-		return nil
+func (r *autoscalerPoliciesResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+	if req.ProviderData == nil {
+		return
 	}
 
-	client := meta.(*ProviderConfig).clusterAutoscalerV2Client
-	resp, err := client.PoliciesV2APIGetClusterPoliciesWithResponse(ctx, clusterId)
+	client, ok := req.ProviderData.(*ProviderConfig)
+	if !ok {
+		resp.Diagnostics.AddError(
+			"Unexpected Resource Configure Type",
+			fmt.Sprintf("Expected *ProviderConfig, got: %T", req.ProviderData),
+		)
+		return
+	}
+
+	r.client = client
+}
+
+func (r *autoscalerPoliciesResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+	var plan autoscalerPoliciesModel
+	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	clusterID := plan.ClusterID.ValueString()
+
+	policies, diags := r.upsert(ctx, clusterID, &plan)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	state := r.policiesToModel(clusterID, policies)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
+}
+
+func (r *autoscalerPoliciesResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+	var state autoscalerPoliciesModel
+	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	// Fall back to the resource id (import passthrough) when cluster_id is not
+	// yet in state; the id equals the cluster id.
+	clusterID := state.ClusterID.ValueString()
+	if clusterID == "" {
+		clusterID = state.ID.ValueString()
+	}
+	if clusterID == "" {
+		tflog.Info(ctx, "ClusterId is missing. Will skip operation.")
+		return
+	}
+
+	policies, found, diags := r.readPolicies(ctx, clusterID)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	if !found {
+		tflog.Info(ctx, "Autoscaler policies not found, removing from state", map[string]interface{}{"cluster_id": clusterID})
+		resp.State.RemoveResource(ctx)
+		return
+	}
+
+	state = r.policiesToModel(clusterID, policies)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
+}
+
+func (r *autoscalerPoliciesResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+	var plan autoscalerPoliciesModel
+	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	clusterID := plan.ClusterID.ValueString()
+
+	policies, diags := r.upsert(ctx, clusterID, &plan)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	state := r.policiesToModel(clusterID, policies)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
+}
+
+func (r *autoscalerPoliciesResource) Delete(ctx context.Context, _ resource.DeleteRequest, resp *resource.DeleteResponse) {
+	tflog.Info(ctx, "Autoscaler policies V2 resource deletion is a no-op. Removing from state.")
+	resp.State.RemoveResource(ctx)
+}
+
+func (r *autoscalerPoliciesResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
+}
+
+// upsert builds the policies payload from the plan and pushes it to the API,
+// then reads the resulting policies back. The version from the plan is
+// included for optimistic locking on updates.
+func (r *autoscalerPoliciesResource) upsert(ctx context.Context, clusterID string, plan *autoscalerPoliciesModel) (*cluster_autoscaler_v2.PoliciesV2, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	policies := policiesFromModel(plan)
+
+	client := r.client.clusterAutoscalerV2Client
+	apiResp, err := client.PoliciesV2APIUpdateClusterPoliciesWithResponse(ctx, clusterID, *policies)
 	if err != nil {
-		return diag.FromErr(err)
+		diags.AddError("Failed to update autoscaler policies", err.Error())
+		return nil, diags
 	}
-	if resp.StatusCode() == http.StatusNotFound {
-		log.Printf("[INFO] Autoscaler policies for cluster %s not found, removing from state", clusterId)
-		data.SetId("")
-		return nil
+	if apiResp.StatusCode() != http.StatusOK {
+		diags.AddError(
+			"Failed to update autoscaler policies",
+			fmt.Sprintf("unexpected status code: %d, body: %s", apiResp.StatusCode(), string(apiResp.Body)),
+		)
+		return nil, diags
 	}
-	if resp.StatusCode() != http.StatusOK {
-		return diag.FromErr(fmt.Errorf("expected status code %d, received: status=%d body=%s", http.StatusOK, resp.StatusCode(), string(resp.Body)))
+	if apiResp.JSON200 == nil {
+		diags.AddError(
+			"Failed to update autoscaler policies",
+			fmt.Sprintf("received empty policies response after update for cluster %s", clusterID),
+		)
+		return nil, diags
 	}
 
-	if resp.JSON200 == nil {
-		return diag.FromErr(fmt.Errorf("received empty policies response for cluster %s", clusterId))
+	// Read the policies back so state reflects what the API actually stored,
+	// mirroring the SDKv2 create/update behavior.
+	result, found, readDiags := r.readPolicies(ctx, clusterID)
+	diags.Append(readDiags...)
+	if diags.HasError() {
+		return nil, diags
+	}
+	if !found {
+		diags.AddError(
+			"Failed to read autoscaler policies",
+			fmt.Sprintf("policies for cluster %s not found after update", clusterID),
+		)
+		return nil, diags
 	}
 
-	if err := setAutoscalerPoliciesState(data, resp.JSON200); err != nil {
-		return diag.FromErr(err)
-	}
-
-	data.SetId(clusterId)
-	return nil
+	return result, diags
 }
 
-func resourceAutoscalerPoliciesCreate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	clusterId := getClusterId(data)
-	if clusterId == "" {
-		log.Print("[INFO] ClusterId is missing. Will skip operation.")
-		return nil
-	}
+// readPolicies fetches the cluster policies. The second return value reports
+// whether the policies were found (false on 404).
+func (r *autoscalerPoliciesResource) readPolicies(ctx context.Context, clusterID string) (*cluster_autoscaler_v2.PoliciesV2, bool, diag.Diagnostics) {
+	var diags diag.Diagnostics
 
-	if err := upsertAutoscalerPolicies(ctx, data, meta, clusterId); err != nil {
-		return diag.FromErr(err)
-	}
-
-	data.SetId(clusterId)
-	return resourceAutoscalerPoliciesRead(ctx, data, meta)
-}
-
-func resourceAutoscalerPoliciesUpdate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	clusterId := getClusterId(data)
-	if clusterId == "" {
-		log.Print("[INFO] ClusterId is missing. Will skip operation.")
-		return nil
-	}
-
-	if err := upsertAutoscalerPolicies(ctx, data, meta, clusterId); err != nil {
-		return diag.FromErr(err)
-	}
-
-	return resourceAutoscalerPoliciesRead(ctx, data, meta)
-}
-
-func resourceAutoscalerPoliciesDelete(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	log.Print("[INFO] Autoscaler policies V2 resource deletion is a no-op. Removing from state.")
-	data.SetId("")
-	return nil
-}
-
-func upsertAutoscalerPolicies(ctx context.Context, data *schema.ResourceData, meta interface{}, clusterId string) error {
-	policies, err := toPoliciesV2(data)
+	client := r.client.clusterAutoscalerV2Client
+	apiResp, err := client.PoliciesV2APIGetClusterPoliciesWithResponse(ctx, clusterID)
 	if err != nil {
-		return fmt.Errorf("building policies V2 request: %w", err)
+		diags.AddError("Failed to read autoscaler policies", err.Error())
+		return nil, false, diags
+	}
+	if apiResp.StatusCode() == http.StatusNotFound {
+		return nil, false, diags
+	}
+	if apiResp.StatusCode() != http.StatusOK {
+		diags.AddError(
+			"Failed to read autoscaler policies",
+			fmt.Sprintf("unexpected status code: %d, body: %s", apiResp.StatusCode(), string(apiResp.Body)),
+		)
+		return nil, false, diags
+	}
+	if apiResp.JSON200 == nil {
+		diags.AddError(
+			"Failed to read autoscaler policies",
+			fmt.Sprintf("received empty policies response for cluster %s", clusterID),
+		)
+		return nil, false, diags
 	}
 
-	client := meta.(*ProviderConfig).clusterAutoscalerV2Client
-	resp, err := client.PoliciesV2APIUpdateClusterPoliciesWithResponse(ctx, clusterId, *policies)
-	if err != nil {
-		return err
-	}
-	if resp.StatusCode() != http.StatusOK {
-		return fmt.Errorf("expected status code %d, received: status=%d body=%s", http.StatusOK, resp.StatusCode(), string(resp.Body))
-	}
-
-	if resp.JSON200 == nil {
-		return fmt.Errorf("received empty policies response after update for cluster %s", clusterId)
-	}
-
-	return nil
+	return apiResp.JSON200, true, diags
 }
 
-func toPoliciesV2(data *schema.ResourceData) (*cluster_autoscaler_v2.PoliciesV2, error) {
+// policiesFromModel converts the Terraform plan model to the SDK policies payload.
+func policiesFromModel(m *autoscalerPoliciesModel) *cluster_autoscaler_v2.PoliciesV2 {
 	policies := &cluster_autoscaler_v2.PoliciesV2{}
 
-	if v, ok := data.GetOk(FieldAutoscalerPoliciesEnabled); ok {
-		enabled := v.(bool)
-		policies.Enabled = &enabled
+	if !m.Enabled.IsNull() {
+		policies.Enabled = lo.ToPtr(m.Enabled.ValueBool())
 	}
 
-	if v, ok := data.GetOk(FieldAutoscalerPoliciesScopedMode); ok {
-		scopedMode := v.(bool)
-		policies.ScopedMode = &scopedMode
+	if !m.ScopedMode.IsNull() {
+		policies.ScopedMode = lo.ToPtr(m.ScopedMode.ValueBool())
 	}
 
-	if v, ok := data.GetOk(FieldAutoscalerPoliciesClusterLimits); ok {
-		clusterLimits, err := toClusterLimitsPolicy(v.([]interface{}))
-		if err != nil {
-			return nil, err
-		}
-		policies.ClusterLimits = clusterLimits
+	if len(m.ClusterLimits) > 0 {
+		policies.ClusterLimits = clusterLimitsFromModel(&m.ClusterLimits[0])
 	}
 
-	if v, ok := data.GetOk(FieldAutoscalerPoliciesNodeDownscaler); ok {
-		nodeDownscaler, err := toNodeDownscalerPolicy(v.([]interface{}))
-		if err != nil {
-			return nil, err
-		}
-		policies.NodeDownscaler = nodeDownscaler
+	if len(m.NodeDownscaler) > 0 {
+		policies.NodeDownscaler = nodeDownscalerFromModel(&m.NodeDownscaler[0])
 	}
 
-	if v, ok := data.GetOk(FieldAutoscalerPoliciesUnschedulablePods); ok {
-		unschedulablePods, err := toUnschedulablePodsPolicy(v.([]interface{}))
-		if err != nil {
-			return nil, err
-		}
-		policies.UnschedulablePods = unschedulablePods
+	if len(m.UnschedulablePods) > 0 {
+		policies.UnschedulablePods = unschedulablePodsFromModel(&m.UnschedulablePods[0])
 	}
 
-	// Include version from state for optimistic locking on updates.
-	if v, ok := data.GetOk(FieldAutoscalerPoliciesVersion); ok {
-		version := v.(string)
-		policies.Version = &version
+	// Include version from plan for optimistic locking on updates.
+	if !m.Version.IsNull() && m.Version.ValueString() != "" {
+		policies.Version = lo.ToPtr(m.Version.ValueString())
 	}
 
-	return policies, nil
+	return policies
 }
 
-func toClusterLimitsPolicy(in []interface{}) (*cluster_autoscaler_v2.ClusterLimitsPolicy, error) {
-	if len(in) == 0 || in[0] == nil {
-		return nil, nil
-	}
-
-	m := in[0].(map[string]interface{})
+func clusterLimitsFromModel(m *clusterLimitsModel) *cluster_autoscaler_v2.ClusterLimitsPolicy {
 	out := &cluster_autoscaler_v2.ClusterLimitsPolicy{}
 
-	if v, ok := m[FieldClusterLimitsEnabled]; ok {
-		enabled := v.(bool)
-		out.Enabled = &enabled
+	if !m.Enabled.IsNull() {
+		out.Enabled = lo.ToPtr(m.Enabled.ValueBool())
 	}
 
-	if v, ok := m[FieldClusterLimitsCPU]; ok {
-		cpuList := v.([]interface{})
-		if len(cpuList) > 0 && cpuList[0] != nil {
-			cpuMap := cpuList[0].(map[string]interface{})
-			cpu := &cluster_autoscaler_v2.ClusterLimitsCpu{}
-
-			maxCores := cpuMap[FieldClusterLimitsCPUMaxCores].(int)
-			cpu.MaxCores = int32(maxCores)
-
-			if v, ok := cpuMap[FieldClusterLimitsCPUMinCores]; ok {
-				minCores := int32(v.(int))
-				cpu.MinCores = &minCores
-			}
-
-			out.Cpu = cpu
+	if len(m.CPU) > 0 {
+		cpu := &cluster_autoscaler_v2.ClusterLimitsCpu{
+			MaxCores: int32(m.CPU[0].MaxCores.ValueInt64()),
 		}
+		if !m.CPU[0].MinCores.IsNull() {
+			cpu.MinCores = lo.ToPtr(int32(m.CPU[0].MinCores.ValueInt64()))
+		}
+		out.Cpu = cpu
 	}
 
-	return out, nil
+	return out
 }
 
-func toNodeDownscalerPolicy(in []interface{}) (*cluster_autoscaler_v2.NodeDownscalerPolicy, error) {
-	if len(in) == 0 || in[0] == nil {
-		return nil, nil
-	}
-
-	m := in[0].(map[string]interface{})
+func nodeDownscalerFromModel(m *nodeDownscalerModel) *cluster_autoscaler_v2.NodeDownscalerPolicy {
 	out := &cluster_autoscaler_v2.NodeDownscalerPolicy{}
 
-	if v, ok := m[FieldNodeDownscalerEmptyNodesDelay]; ok {
-		delay := v.(string)
-		if delay != "" {
-			out.EmptyNodesDelay = &delay
-		}
+	if !m.EmptyNodesDelay.IsNull() && m.EmptyNodesDelay.ValueString() != "" {
+		out.EmptyNodesDelay = lo.ToPtr(m.EmptyNodesDelay.ValueString())
 	}
 
-	if v, ok := m[FieldNodeDownscalerEmptyNodesEnabled]; ok {
-		enabled := v.(bool)
-		out.EmptyNodesEnabled = &enabled
+	if !m.EmptyNodesEnabled.IsNull() {
+		out.EmptyNodesEnabled = lo.ToPtr(m.EmptyNodesEnabled.ValueBool())
 	}
 
-	return out, nil
+	return out
 }
 
-func toUnschedulablePodsPolicy(in []interface{}) (*cluster_autoscaler_v2.UnschedulablePodsPolicy, error) {
-	if len(in) == 0 || in[0] == nil {
-		return nil, nil
-	}
-
-	m := in[0].(map[string]interface{})
+func unschedulablePodsFromModel(m *unschedulablePodsModel) *cluster_autoscaler_v2.UnschedulablePodsPolicy {
 	out := &cluster_autoscaler_v2.UnschedulablePodsPolicy{}
 
-	if v, ok := m[FieldUnschedulablePodsEnabled]; ok {
-		enabled := v.(bool)
-		out.Enabled = &enabled
+	if !m.Enabled.IsNull() {
+		out.Enabled = lo.ToPtr(m.Enabled.ValueBool())
 	}
 
-	if v, ok := m[FieldUnschedulablePodsPartialTemplateMatching]; ok {
-		partialTemplateMatching := v.(bool)
-		out.PartialTemplateMatchingEnabled = &partialTemplateMatching
+	if !m.PartialTemplateMatchingEnabled.IsNull() {
+		out.PartialTemplateMatchingEnabled = lo.ToPtr(m.PartialTemplateMatchingEnabled.ValueBool())
 	}
 
-	if v, ok := m[FieldUnschedulablePodsPodPinner]; ok {
-		podPinnerList := v.([]interface{})
-		if len(podPinnerList) > 0 && podPinnerList[0] != nil {
-			podPinnerMap := podPinnerList[0].(map[string]interface{})
-			podPinner := &cluster_autoscaler_v2.PodPinner{}
-
-			if v, ok := podPinnerMap[FieldPodPinnerEnabled]; ok {
-				enabled := v.(bool)
-				podPinner.Enabled = &enabled
-			}
-
-			out.PodPinner = podPinner
+	if len(m.PodPinner) > 0 {
+		podPinner := &cluster_autoscaler_v2.PodPinner{}
+		if !m.PodPinner[0].Enabled.IsNull() {
+			podPinner.Enabled = lo.ToPtr(m.PodPinner[0].Enabled.ValueBool())
 		}
+		out.PodPinner = podPinner
 	}
 
-	return out, nil
+	return out
 }
 
-func setAutoscalerPoliciesState(data *schema.ResourceData, policies *cluster_autoscaler_v2.PoliciesV2) error {
-	// Always call data.Set to prevent state drift when API omits fields.
-	var enabled bool
-	if policies.Enabled != nil {
-		enabled = *policies.Enabled
-	}
-	if err := data.Set(FieldAutoscalerPoliciesEnabled, enabled); err != nil {
-		return err
-	}
-
-	var scopedMode bool
-	if policies.ScopedMode != nil {
-		scopedMode = *policies.ScopedMode
-	}
-	if err := data.Set(FieldAutoscalerPoliciesScopedMode, scopedMode); err != nil {
-		return err
+// policiesToModel converts the SDK policies response to the Terraform state
+// model. Bool fields with static defaults are always written with concrete
+// values (false when the API omits them) to prevent state drift.
+func (r *autoscalerPoliciesResource) policiesToModel(clusterID string, policies *cluster_autoscaler_v2.PoliciesV2) autoscalerPoliciesModel {
+	model := autoscalerPoliciesModel{
+		ID:         types.StringValue(clusterID),
+		ClusterID:  types.StringValue(clusterID),
+		Enabled:    boolPtrToValue(policies.Enabled),
+		ScopedMode: boolPtrToValue(policies.ScopedMode),
+		Version:    stringPtrToValue(policies.Version),
 	}
 
-	var version string
-	if policies.Version != nil {
-		version = *policies.Version
-	}
-	if err := data.Set(FieldAutoscalerPoliciesVersion, version); err != nil {
-		return err
+	if limits := clusterLimitsToModel(policies.ClusterLimits); limits != nil {
+		model.ClusterLimits = []clusterLimitsModel{*limits}
 	}
 
-	if err := data.Set(FieldAutoscalerPoliciesClusterLimits, flattenClusterLimitsPolicy(policies.ClusterLimits)); err != nil {
-		return err
+	if downscaler := nodeDownscalerToModel(policies.NodeDownscaler); downscaler != nil {
+		model.NodeDownscaler = []nodeDownscalerModel{*downscaler}
 	}
 
-	if err := data.Set(FieldAutoscalerPoliciesNodeDownscaler, flattenNodeDownscalerPolicy(policies.NodeDownscaler)); err != nil {
-		return err
+	if unschedulable := unschedulablePodsToModel(policies.UnschedulablePods); unschedulable != nil {
+		model.UnschedulablePods = []unschedulablePodsModel{*unschedulable}
 	}
 
-	if err := data.Set(FieldAutoscalerPoliciesUnschedulablePods, flattenUnschedulablePodsPolicy(policies.UnschedulablePods)); err != nil {
-		return err
-	}
-
-	return nil
+	return model
 }
 
-func flattenClusterLimitsPolicy(in *cluster_autoscaler_v2.ClusterLimitsPolicy) []map[string]interface{} {
+func clusterLimitsToModel(in *cluster_autoscaler_v2.ClusterLimitsPolicy) *clusterLimitsModel {
 	if in == nil {
 		return nil
 	}
-	out := map[string]interface{}{}
+	if in.Enabled == nil && in.Cpu == nil {
+		return nil
+	}
 
-	if in.Enabled != nil {
-		out[FieldClusterLimitsEnabled] = *in.Enabled
+	out := &clusterLimitsModel{
+		Enabled: boolPtrToValue(in.Enabled),
 	}
 
 	if in.Cpu != nil {
-		cpu := map[string]interface{}{
-			FieldClusterLimitsCPUMaxCores: int(in.Cpu.MaxCores),
+		cpu := clusterLimitsCPUModel{
+			MaxCores: types.Int64Value(int64(in.Cpu.MaxCores)),
 		}
 		if in.Cpu.MinCores != nil {
-			cpu[FieldClusterLimitsCPUMinCores] = int(*in.Cpu.MinCores)
+			cpu.MinCores = types.Int64Value(int64(*in.Cpu.MinCores))
+		} else {
+			cpu.MinCores = types.Int64Value(0)
 		}
-		out[FieldClusterLimitsCPU] = []map[string]interface{}{cpu}
+		out.CPU = []clusterLimitsCPUModel{cpu}
 	}
 
-	if len(out) == 0 {
-		return nil
-	}
-
-	return []map[string]interface{}{out}
+	return out
 }
 
-func flattenNodeDownscalerPolicy(in *cluster_autoscaler_v2.NodeDownscalerPolicy) []map[string]interface{} {
+func nodeDownscalerToModel(in *cluster_autoscaler_v2.NodeDownscalerPolicy) *nodeDownscalerModel {
 	if in == nil {
 		return nil
 	}
-	out := map[string]interface{}{}
+	if in.EmptyNodesDelay == nil && in.EmptyNodesEnabled == nil {
+		return nil
+	}
+
+	out := &nodeDownscalerModel{
+		EmptyNodesEnabled: boolPtrToValue(in.EmptyNodesEnabled),
+	}
 
 	if in.EmptyNodesDelay != nil {
-		out[FieldNodeDownscalerEmptyNodesDelay] = *in.EmptyNodesDelay
+		out.EmptyNodesDelay = types.StringValue(*in.EmptyNodesDelay)
 	}
 
-	if in.EmptyNodesEnabled != nil {
-		out[FieldNodeDownscalerEmptyNodesEnabled] = *in.EmptyNodesEnabled
-	}
-
-	if len(out) == 0 {
-		return nil
-	}
-
-	return []map[string]interface{}{out}
+	return out
 }
 
-func flattenUnschedulablePodsPolicy(in *cluster_autoscaler_v2.UnschedulablePodsPolicy) []map[string]interface{} {
+func unschedulablePodsToModel(in *cluster_autoscaler_v2.UnschedulablePodsPolicy) *unschedulablePodsModel {
 	if in == nil {
 		return nil
 	}
-	out := map[string]interface{}{}
-
-	if in.Enabled != nil {
-		out[FieldUnschedulablePodsEnabled] = *in.Enabled
-	}
-
-	if in.PartialTemplateMatchingEnabled != nil {
-		out[FieldUnschedulablePodsPartialTemplateMatching] = *in.PartialTemplateMatchingEnabled
-	}
-
-	if in.PodPinner != nil {
-		out[FieldUnschedulablePodsPodPinner] = flattenPodPinner(in.PodPinner)
-	}
-
-	if len(out) == 0 {
+	if in.Enabled == nil && in.PartialTemplateMatchingEnabled == nil && in.PodPinner == nil {
 		return nil
 	}
 
-	return []map[string]interface{}{out}
+	out := &unschedulablePodsModel{
+		Enabled:                        boolPtrToValue(in.Enabled),
+		PartialTemplateMatchingEnabled: boolPtrToValue(in.PartialTemplateMatchingEnabled),
+	}
+
+	if podPinner := podPinnerToModel(in.PodPinner); podPinner != nil {
+		out.PodPinner = []podPinnerModel{*podPinner}
+	}
+
+	return out
 }
 
-func flattenPodPinner(in *cluster_autoscaler_v2.PodPinner) []map[string]interface{} {
-	if in == nil {
-		return nil
-	}
-	out := map[string]interface{}{}
-
-	if in.Enabled != nil {
-		out[FieldPodPinnerEnabled] = *in.Enabled
-	}
-
-	if len(out) == 0 {
+func podPinnerToModel(in *cluster_autoscaler_v2.PodPinner) *podPinnerModel {
+	if in == nil || in.Enabled == nil {
 		return nil
 	}
 
-	return []map[string]interface{}{out}
+	return &podPinnerModel{
+		Enabled: boolPtrToValue(in.Enabled),
+	}
+}
+
+func boolPtrToValue(b *bool) types.Bool {
+	if b == nil {
+		return types.BoolValue(false)
+	}
+	return types.BoolValue(*b)
+}
+
+func stringPtrToValue(s *string) types.String {
+	if s == nil {
+		return types.StringValue("")
+	}
+	return types.StringValue(*s)
 }
