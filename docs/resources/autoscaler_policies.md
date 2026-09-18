@@ -31,7 +31,7 @@ resource "castai_autoscaler_policies" "policies" {
   }
 
   unschedulable_pods {
-    enabled                          = true
+    enabled                           = true
     partial_template_matching_enabled = true
 
     pod_pinner {
@@ -94,15 +94,15 @@ V1→V2 internal translation (CO-4291) was marked **Won't Do** — the V1 API wi
 
 ### Optional
 
-- `cluster_limits` (Block List, Max: 1) Defines minimum and maximum amount of CPU the cluster can have. (see [below for nested schema](#nestedblock--cluster_limits))
+- `cluster_limits` (Block List) Defines minimum and maximum amount of CPU the cluster can have. (see [below for nested schema](#nestedblock--cluster_limits))
 - `enabled` (Boolean) Enable/disable all policies (global master switch).
-- `node_downscaler` (Block List, Max: 1) Node Downscaler defines policies for removing nodes based on the configured conditions. (see [below for nested schema](#nestedblock--node_downscaler))
+- `node_downscaler` (Block List) Node Downscaler defines policies for removing nodes based on the configured conditions. (see [below for nested schema](#nestedblock--node_downscaler))
 - `scoped_mode` (Boolean) Run the node autoscaler in scoped mode.
-- `unschedulable_pods` (Block List, Max: 1) Policy defining autoscaler's behavior when unschedulable pods were detected. (see [below for nested schema](#nestedblock--unschedulable_pods))
+- `unschedulable_pods` (Block List) Policy defining autoscaler's behavior when unschedulable pods were detected. (see [below for nested schema](#nestedblock--unschedulable_pods))
 
 ### Read-Only
 
-- `id` (String) The ID of this resource.
+- `id` (String) The ID of this resource, equal to the cluster id.
 - `version` (String) Policy version for optimistic locking.
 
 <a id="nestedblock--cluster_limits"></a>
@@ -110,7 +110,7 @@ V1→V2 internal translation (CO-4291) was marked **Won't Do** — the V1 API wi
 
 Optional:
 
-- `cpu` (Block List, Max: 1) Defines the minimum and maximum amount of CPUs for cluster's worker nodes. (see [below for nested schema](#nestedblock--cluster_limits--cpu))
+- `cpu` (Block List) Defines the minimum and maximum amount of CPUs for cluster's worker nodes. (see [below for nested schema](#nestedblock--cluster_limits--cpu))
 - `enabled` (Boolean) Enable/disable cluster size limits policy.
 
 <a id="nestedblock--cluster_limits--cpu"></a>
@@ -142,7 +142,7 @@ Optional:
 
 - `enabled` (Boolean) Enable/disable unschedulable pods detection policy.
 - `partial_template_matching_enabled` (Boolean) Marks whether partial matching should be used when deciding which custom node template to select.
-- `pod_pinner` (Block List, Max: 1) Defines the CAST AI Pod Pinner component settings. (see [below for nested schema](#nestedblock--unschedulable_pods--pod_pinner))
+- `pod_pinner` (Block List) Defines the CAST AI Pod Pinner component settings. (see [below for nested schema](#nestedblock--unschedulable_pods--pod_pinner))
 
 <a id="nestedblock--unschedulable_pods--pod_pinner"></a>
 ### Nested Schema for `unschedulable_pods.pod_pinner`
