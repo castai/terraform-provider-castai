@@ -332,6 +332,8 @@ func (d *edgeConfigurationDataSource) Read(ctx context.Context, req datasource.R
 			ImageID:         types.StringPointerValue(config.Nebius.ImageId),
 			BootDiskSizeGiB: types.Int64Null(),
 			Labels:          types.MapNull(types.StringType),
+			ReservationIDs:  types.ListNull(types.StringType),
+			GpuCluster:      types.StringNull(),
 		}
 		if config.Nebius.BootDiskSizeGib != nil {
 			data.Nebius.BootDiskSizeGiB = types.Int64Value(int64(*config.Nebius.BootDiskSizeGib))
