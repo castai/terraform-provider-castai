@@ -46,6 +46,39 @@ resource "castai_workload_scaling_policy" "services" {
     type = "AVERAGE_VALUE_FROM_ORIGINAL_REQUESTS"
   }
 
+  hpa_settings {
+    management_option = "MANAGED"
+    take_ownership    = true
+
+    native_hpa_spec {
+      min_replicas = 2
+      max_replicas = 20
+
+      metrics {
+        type = "RESOURCE"
+        resource {
+          name = "cpu"
+          target {
+            type  = "UTILIZATION"
+            value = "80"
+          }
+        }
+      }
+
+      behavior {
+        scale_down {
+          stabilization_window_seconds = 300
+          select_policy                = "MAX_CHANGE_POLICY_SELECT"
+          policies {
+            type           = "PODS_SCALING_POLICY"
+            value          = 1
+            period_seconds = 60
+          }
+        }
+      }
+    }
+  }
+
   cpu {
     function = "QUANTILE"
     overhead = 0.15
@@ -140,6 +173,7 @@ resource "castai_workload_scaling_policy" "services" {
 - `downscaling` (Block List, Max: 1) (see [below for nested schema](#nestedblock--downscaling))
 - `excluded_containers` (List of String) Defines containers to be excluded from receiving recommendations. The containers are matched by exact name.
 - `hpa_converters` (Block List) Configuration for converting existing HPAs when VPA is the sole optimization. If HPA management is enabled, it takes precedence over this setting. (see [below for nested schema](#nestedblock--hpa_converters))
+- `hpa_settings` (Block List, Max: 1) Configures native Kubernetes horizontal pod autoscaling for workloads using this policy. (see [below for nested schema](#nestedblock--hpa_settings))
 - `jvm` (Block List, Max: 1) JVM optimization settings. (see [below for nested schema](#nestedblock--jvm))
 - `memory_event` (Block List, Max: 1) (see [below for nested schema](#nestedblock--memory_event))
 - `predictive_scaling` (Block List, Max: 1) (see [below for nested schema](#nestedblock--predictive_scaling))
@@ -459,6 +493,106 @@ Optional:
 Required:
 
 - `type` (String) HPA converter type. AVERAGE_VALUE_FROM_ORIGINAL_REQUESTS converts HPA utilization (%) targets to AverageValue using workload container requests.
+
+
+<a id="nestedblock--hpa_settings"></a>
+### Nested Schema for `hpa_settings`
+
+Required:
+
+- `management_option` (String) Defines whether CAST AI observes or manages horizontal pod autoscaling.
+- `native_hpa_spec` (Block List, Min: 1, Max: 1) Native Kubernetes HPA specification. (see [below for nested schema](#nestedblock--hpa_settings--native_hpa_spec))
+- `take_ownership` (Boolean) Allows CAST AI to take ownership of eligible existing HPAs.
+
+<a id="nestedblock--hpa_settings--native_hpa_spec"></a>
+### Nested Schema for `hpa_settings.native_hpa_spec`
+
+Required:
+
+- `max_replicas` (Number) Maximum number of replicas.
+- `metrics` (Block List, Min: 1) Resource utilization metrics used by the HPA. (see [below for nested schema](#nestedblock--hpa_settings--native_hpa_spec--metrics))
+- `min_replicas` (Number) Minimum number of replicas.
+
+Optional:
+
+- `behavior` (Block List, Max: 1) (see [below for nested schema](#nestedblock--hpa_settings--native_hpa_spec--behavior))
+
+<a id="nestedblock--hpa_settings--native_hpa_spec--metrics"></a>
+### Nested Schema for `hpa_settings.native_hpa_spec.metrics`
+
+Required:
+
+- `resource` (Block List, Min: 1, Max: 1) (see [below for nested schema](#nestedblock--hpa_settings--native_hpa_spec--metrics--resource))
+- `type` (String)
+
+<a id="nestedblock--hpa_settings--native_hpa_spec--metrics--resource"></a>
+### Nested Schema for `hpa_settings.native_hpa_spec.metrics.resource`
+
+Required:
+
+- `name` (String)
+- `target` (Block List, Min: 1, Max: 1) (see [below for nested schema](#nestedblock--hpa_settings--native_hpa_spec--metrics--resource--target))
+
+<a id="nestedblock--hpa_settings--native_hpa_spec--metrics--resource--target"></a>
+### Nested Schema for `hpa_settings.native_hpa_spec.metrics.resource.target`
+
+Required:
+
+- `type` (String)
+- `value` (String)
+
+
+
+
+<a id="nestedblock--hpa_settings--native_hpa_spec--behavior"></a>
+### Nested Schema for `hpa_settings.native_hpa_spec.behavior`
+
+Optional:
+
+- `scale_down` (Block List, Max: 1) (see [below for nested schema](#nestedblock--hpa_settings--native_hpa_spec--behavior--scale_down))
+- `scale_up` (Block List, Max: 1) (see [below for nested schema](#nestedblock--hpa_settings--native_hpa_spec--behavior--scale_up))
+
+<a id="nestedblock--hpa_settings--native_hpa_spec--behavior--scale_down"></a>
+### Nested Schema for `hpa_settings.native_hpa_spec.behavior.scale_down`
+
+Optional:
+
+- `policies` (Block List) (see [below for nested schema](#nestedblock--hpa_settings--native_hpa_spec--behavior--scale_down--policies))
+- `select_policy` (String)
+- `stabilization_window_seconds` (Number)
+
+<a id="nestedblock--hpa_settings--native_hpa_spec--behavior--scale_down--policies"></a>
+### Nested Schema for `hpa_settings.native_hpa_spec.behavior.scale_down.policies`
+
+Required:
+
+- `period_seconds` (Number)
+- `type` (String)
+- `value` (Number)
+
+
+
+<a id="nestedblock--hpa_settings--native_hpa_spec--behavior--scale_up"></a>
+### Nested Schema for `hpa_settings.native_hpa_spec.behavior.scale_up`
+
+Optional:
+
+- `policies` (Block List) (see [below for nested schema](#nestedblock--hpa_settings--native_hpa_spec--behavior--scale_up--policies))
+- `select_policy` (String)
+- `stabilization_window_seconds` (Number)
+
+<a id="nestedblock--hpa_settings--native_hpa_spec--behavior--scale_up--policies"></a>
+### Nested Schema for `hpa_settings.native_hpa_spec.behavior.scale_up.policies`
+
+Required:
+
+- `period_seconds` (Number)
+- `type` (String)
+- `value` (Number)
+
+
+
+
 
 
 <a id="nestedblock--jvm"></a>

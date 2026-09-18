@@ -56,6 +56,7 @@ const (
 	FieldLimitStrategyOnlyIfOriginalLower                 = "only_if_original_lower"
 	FieldConfidence                                       = "confidence"
 	FieldExcludedContainers                               = "excluded_containers"
+	FieldHpaSettings                                      = "hpa_settings"
 	FieldHpaConverters                                    = "hpa_converters"
 	FieldHpaConverterType                                 = "type"
 	FieldHpaConverterTypeAverageValueFromOriginalRequests = "AVERAGE_VALUE_FROM_ORIGINAL_REQUESTS"
@@ -237,6 +238,7 @@ It can be either:
 					},
 				},
 			},
+			FieldHpaSettings: hpaSettingsSchema(),
 			"startup": {
 				Type:     schema.TypeList,
 				Optional: true,
@@ -836,6 +838,12 @@ func resourceWorkloadScalingPolicyCreate(ctx context.Context, d *schema.Resource
 
 	req.RecommendationPolicies.HpaConverters = toHpaConverters(d.Get(FieldHpaConverters).([]any))
 
+	hpaSettings, err := toHpaSettings(toSection(d, FieldHpaSettings))
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	req.HpaSettings = hpaSettings
+
 	ar, err := toAssignmentRules(toSection(d, FieldAssignmentRules))
 	if err != nil {
 		return diag.FromErr(err)
@@ -959,6 +967,13 @@ func fetchScalingPolicy(ctx context.Context, d *schema.ResourceData, meta any) (
 	if err := d.Set(FieldHpaConverters, toHpaConvertersMap(sp.RecommendationPolicies.HpaConverters)); err != nil {
 		return nil, fmt.Errorf("setting hpa converters: %w", err)
 	}
+	hpaSettings, err := toHpaSettingsMap(sp.HpaSettings)
+	if err != nil {
+		return nil, err
+	}
+	if err := d.Set(FieldHpaSettings, hpaSettings); err != nil {
+		return nil, fmt.Errorf("setting hpa settings: %w", err)
+	}
 	if err := d.Set(FieldConfidence, toConfidenceMap(sp.RecommendationPolicies.Confidence)); err != nil {
 		return nil, fmt.Errorf("setting confidence: %w", err)
 	}
@@ -1024,6 +1039,7 @@ func updateScalingPolicy(ctx context.Context, d *schema.ResourceData, meta any) 
 		FieldAnomalyDetection,
 		FieldExcludedContainers,
 		FieldHpaConverters,
+		FieldHpaSettings,
 	) {
 		tflog.Info(ctx, "scaling policy up to date")
 		return nil, nil
@@ -1043,11 +1059,16 @@ func updateScalingPolicy(ctx context.Context, d *schema.ResourceData, meta any) 
 	if err != nil {
 		return nil, err
 	}
+	hpaSettings, err := toHpaSettings(toSection(d, FieldHpaSettings))
+	if err != nil {
+		return nil, err
+	}
 
 	req := sdk.WorkloadOptimizationAPIUpdateWorkloadScalingPolicyJSONRequestBody{
 		Name:            d.Get("name").(string),
 		ApplyType:       sdk.WorkloadoptimizationV1ApplyType(d.Get(FieldApplyType).(string)),
 		AssignmentRules: ar,
+		HpaSettings:     hpaSettings,
 		RecommendationPolicies: sdk.WorkloadoptimizationV1RecommendationPolicies{
 			ManagementOption:   sdk.WorkloadoptimizationV1ManagementOption(d.Get("management_option").(string)),
 			Cpu:                cpu,
@@ -1135,7 +1156,7 @@ func resourceWorkloadScalingPolicyDiff(_ context.Context, d *schema.ResourceDiff
 			return err
 		}
 	}
-	return nil
+	return validateHpaSettings(d.Get(FieldHpaSettings))
 }
 
 // rawConfigHasField walks a path of nested attributes in a Terraform raw config.
