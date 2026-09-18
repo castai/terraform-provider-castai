@@ -411,17 +411,11 @@ func TestEdgeConfigurationResource_toNebiusConfigurationModel(t *testing.T) {
 			},
 			expected: fullyNullModel,
 		},
-		"zero BootDiskSizeGib is preserved as non-null zero": {
+		"zero BootDiskSizeGib is treated as unset": {
 			config: &omni.NebiusConfiguration{
 				BootDiskSizeGib: lo.ToPtr(int32(0)),
 			},
-			expected: &nebiusConfigurationModel{
-				Labels:          types.MapNull(types.StringType),
-				ImageID:         types.StringNull(),
-				BootDiskSizeGiB: types.Int64Value(0),
-				ReservationIDs:  types.ListNull(types.StringType),
-				GpuCluster:      types.StringNull(),
-			},
+			expected: fullyNullModel,
 		},
 		"all fields missing produce fully-null model": {
 			config:   &omni.NebiusConfiguration{},

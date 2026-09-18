@@ -920,7 +920,7 @@ func (r *edgeConfigurationResource) toNebiusConfigurationModel(ctx context.Conte
 		model.ImageID = types.StringValue(*config.ImageId)
 	}
 
-	if config.BootDiskSizeGib != nil {
+	if config.BootDiskSizeGib != nil && *config.BootDiskSizeGib != 0 {
 		model.BootDiskSizeGiB = types.Int64Value(int64(*config.BootDiskSizeGib))
 	}
 
