@@ -57,6 +57,18 @@ resource "helm_release" "castai_agent" {
         name  = "createNamespace"
         value = "false"
       },
+      {
+        name  = "additionalEnv.EKS_ACCOUNT_ID"
+        value = data.aws_caller_identity.current.account_id
+      },
+      {
+        name  = "additionalEnv.EKS_CLUSTER_NAME"
+        value = var.cluster_name
+      },
+      {
+        name  = "additionalEnv.EKS_REGION"
+        value = var.cluster_region
+      },
     ],
     var.castai_api_url != "" ? [{
       name  = "apiURL"
