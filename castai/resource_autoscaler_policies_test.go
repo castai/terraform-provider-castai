@@ -71,11 +71,11 @@ func autoscalerPoliciesFullPlanValue(t *testing.T, schemaType tftypes.Type, clus
 	objType := schemaType.(tftypes.Object)
 	attrTypes := objType.AttributeTypes
 
-	limitsType := attrTypes["cluster_limits"].(tftypes.List).ElementType.(tftypes.Object)
-	cpuType := limitsType.AttributeTypes["cpu"].(tftypes.List).ElementType.(tftypes.Object)
-	downscalerType := attrTypes["node_downscaler"].(tftypes.List).ElementType.(tftypes.Object)
-	unschedulableType := attrTypes["unschedulable_pods"].(tftypes.List).ElementType.(tftypes.Object)
-	podPinnerType := unschedulableType.AttributeTypes["pod_pinner"].(tftypes.List).ElementType.(tftypes.Object)
+	limitsType := attrTypes[FieldAutoscalerPoliciesClusterLimits].(tftypes.List).ElementType.(tftypes.Object)
+	cpuType := limitsType.AttributeTypes[FieldClusterLimitsCPU].(tftypes.List).ElementType.(tftypes.Object)
+	downscalerType := attrTypes[FieldAutoscalerPoliciesNodeDownscaler].(tftypes.List).ElementType.(tftypes.Object)
+	unschedulableType := attrTypes[FieldAutoscalerPoliciesUnschedulablePods].(tftypes.List).ElementType.(tftypes.Object)
+	podPinnerType := unschedulableType.AttributeTypes[FieldUnschedulablePodsPodPinner].(tftypes.List).ElementType.(tftypes.Object)
 
 	b := func(v bool) tftypes.Value { return tftypes.NewValue(tftypes.Bool, v) }
 	n := func(v int64) tftypes.Value { return tftypes.NewValue(tftypes.Number, float64(v)) }
@@ -88,27 +88,27 @@ func autoscalerPoliciesFullPlanValue(t *testing.T, schemaType tftypes.Type, clus
 	}
 
 	return tftypes.NewValue(objType, map[string]tftypes.Value{
-		"id":          tftypes.NewValue(tftypes.String, tftypes.UnknownValue),
-		"cluster_id":  s(clusterID),
-		"enabled":     b(true),
-		"scoped_mode": b(true),
-		"version":     tftypes.NewValue(tftypes.String, tftypes.UnknownValue),
-		"cluster_limits": list(limitsType, object(limitsType, map[string]tftypes.Value{
-			"enabled": b(true),
-			"cpu": list(cpuType, object(cpuType, map[string]tftypes.Value{
-				"max_cores": n(16),
-				"min_cores": n(2),
+		FieldAutoscalerPoliciesID:         tftypes.NewValue(tftypes.String, tftypes.UnknownValue),
+		FieldClusterId:                    s(clusterID),
+		FieldAutoscalerPoliciesEnabled:    b(true),
+		FieldAutoscalerPoliciesScopedMode: b(true),
+		FieldAutoscalerPoliciesVersion:    tftypes.NewValue(tftypes.String, tftypes.UnknownValue),
+		FieldAutoscalerPoliciesClusterLimits: list(limitsType, object(limitsType, map[string]tftypes.Value{
+			FieldClusterLimitsEnabled: b(true),
+			FieldClusterLimitsCPU: list(cpuType, object(cpuType, map[string]tftypes.Value{
+				FieldClusterLimitsCPUMaxCores: n(16),
+				FieldClusterLimitsCPUMinCores: n(2),
 			})),
 		})),
-		"node_downscaler": list(downscalerType, object(downscalerType, map[string]tftypes.Value{
-			"empty_nodes_delay":   s("3m"),
-			"empty_nodes_enabled": b(true),
+		FieldAutoscalerPoliciesNodeDownscaler: list(downscalerType, object(downscalerType, map[string]tftypes.Value{
+			FieldNodeDownscalerEmptyNodesDelay:   s("3m"),
+			FieldNodeDownscalerEmptyNodesEnabled: b(true),
 		})),
-		"unschedulable_pods": list(unschedulableType, object(unschedulableType, map[string]tftypes.Value{
-			"enabled":                           b(true),
-			"partial_template_matching_enabled": b(true),
-			"pod_pinner": list(podPinnerType, object(podPinnerType, map[string]tftypes.Value{
-				"enabled": b(true),
+		FieldAutoscalerPoliciesUnschedulablePods: list(unschedulableType, object(unschedulableType, map[string]tftypes.Value{
+			FieldUnschedulablePodsEnabled:                 b(true),
+			FieldUnschedulablePodsPartialTemplateMatching: b(true),
+			FieldUnschedulablePodsPodPinner: list(podPinnerType, object(podPinnerType, map[string]tftypes.Value{
+				FieldPodPinnerEnabled: b(true),
 			})),
 		})),
 	})

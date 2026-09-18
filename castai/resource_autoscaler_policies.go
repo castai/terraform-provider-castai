@@ -28,6 +28,33 @@ import (
 // uuidRegex matches canonical 8-4-4-4-12 hexadecimal UUID strings.
 var uuidRegex = regexp.MustCompile(`^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$`)
 
+// Field name constants for the castai_autoscaler_policies resource. Struct
+// tags cannot reference constants, so tfsdk tags are the only place the names
+// appear as string literals.
+const (
+	FieldAutoscalerPoliciesID                = "id"
+	FieldAutoscalerPoliciesVersion           = "version"
+	FieldAutoscalerPoliciesEnabled           = "enabled"
+	FieldAutoscalerPoliciesScopedMode        = "scoped_mode"
+	FieldAutoscalerPoliciesClusterLimits     = "cluster_limits"
+	FieldAutoscalerPoliciesNodeDownscaler    = "node_downscaler"
+	FieldAutoscalerPoliciesUnschedulablePods = "unschedulable_pods"
+
+	FieldClusterLimitsEnabled     = "enabled"
+	FieldClusterLimitsCPU         = "cpu"
+	FieldClusterLimitsCPUMaxCores = "max_cores"
+	FieldClusterLimitsCPUMinCores = "min_cores"
+
+	FieldNodeDownscalerEmptyNodesDelay   = "empty_nodes_delay"
+	FieldNodeDownscalerEmptyNodesEnabled = "empty_nodes_enabled"
+
+	FieldUnschedulablePodsEnabled                 = "enabled"
+	FieldUnschedulablePodsPartialTemplateMatching = "partial_template_matching_enabled"
+	FieldUnschedulablePodsPodPinner               = "pod_pinner"
+
+	FieldPodPinnerEnabled = "enabled"
+)
+
 var (
 	_ resource.Resource                = (*autoscalerPoliciesResource)(nil)
 	_ resource.ResourceWithConfigure   = (*autoscalerPoliciesResource)(nil)
@@ -88,14 +115,14 @@ func (r *autoscalerPoliciesResource) Schema(_ context.Context, _ resource.Schema
 	resp.Schema = schema.Schema{
 		Description: "CAST AI autoscaler policies V2 resource to manage cluster autoscaling policies.",
 		Attributes: map[string]schema.Attribute{
-			"id": schema.StringAttribute{
+			FieldAutoscalerPoliciesID: schema.StringAttribute{
 				Computed:    true,
 				Description: "The ID of this resource, equal to the cluster id.",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
-			"cluster_id": schema.StringAttribute{
+			FieldClusterId: schema.StringAttribute{
 				Required:    true,
 				Description: "CAST AI cluster id.",
 				PlanModifiers: []planmodifier.String{
@@ -105,19 +132,19 @@ func (r *autoscalerPoliciesResource) Schema(_ context.Context, _ resource.Schema
 					stringvalidator.RegexMatches(uuidRegex, "cluster_id must be a valid UUID"),
 				},
 			},
-			"enabled": schema.BoolAttribute{
+			FieldAutoscalerPoliciesEnabled: schema.BoolAttribute{
 				Optional:    true,
 				Computed:    true,
 				Description: "Enable/disable all policies (global master switch).",
 				Default:     booldefault.StaticBool(false),
 			},
-			"scoped_mode": schema.BoolAttribute{
+			FieldAutoscalerPoliciesScopedMode: schema.BoolAttribute{
 				Optional:    true,
 				Computed:    true,
 				Description: "Run the node autoscaler in scoped mode.",
 				Default:     booldefault.StaticBool(false),
 			},
-			"version": schema.StringAttribute{
+			FieldAutoscalerPoliciesVersion: schema.StringAttribute{
 				Computed:    true,
 				Description: "Policy version for optimistic locking.",
 				PlanModifiers: []planmodifier.String{
@@ -126,14 +153,14 @@ func (r *autoscalerPoliciesResource) Schema(_ context.Context, _ resource.Schema
 			},
 		},
 		Blocks: map[string]schema.Block{
-			"cluster_limits": schema.ListNestedBlock{
+			FieldAutoscalerPoliciesClusterLimits: schema.ListNestedBlock{
 				Description: "Defines minimum and maximum amount of CPU the cluster can have.",
 				Validators: []validator.List{
 					listvalidator.SizeAtMost(1),
 				},
 				NestedObject: schema.NestedBlockObject{
 					Attributes: map[string]schema.Attribute{
-						"enabled": schema.BoolAttribute{
+						FieldClusterLimitsEnabled: schema.BoolAttribute{
 							Optional:    true,
 							Computed:    true,
 							Description: "Enable/disable cluster size limits policy.",
@@ -141,21 +168,21 @@ func (r *autoscalerPoliciesResource) Schema(_ context.Context, _ resource.Schema
 						},
 					},
 					Blocks: map[string]schema.Block{
-						"cpu": schema.ListNestedBlock{
+						FieldClusterLimitsCPU: schema.ListNestedBlock{
 							Description: "Defines the minimum and maximum amount of CPUs for cluster's worker nodes.",
 							Validators: []validator.List{
 								listvalidator.SizeAtMost(1),
 							},
 							NestedObject: schema.NestedBlockObject{
 								Attributes: map[string]schema.Attribute{
-									"max_cores": schema.Int64Attribute{
+									FieldClusterLimitsCPUMaxCores: schema.Int64Attribute{
 										Required:    true,
 										Description: "Defines the maximum allowed amount of vCPUs in the whole cluster.",
 										Validators: []validator.Int64{
 											int64validator.AtLeast(2),
 										},
 									},
-									"min_cores": schema.Int64Attribute{
+									FieldClusterLimitsCPUMinCores: schema.Int64Attribute{
 										Optional:           true,
 										Computed:           true,
 										Description:        "Defines the minimum allowed amount of CPUs in the whole cluster. Deprecated: Min CPU limit is no longer enforced.",
@@ -168,18 +195,18 @@ func (r *autoscalerPoliciesResource) Schema(_ context.Context, _ resource.Schema
 					},
 				},
 			},
-			"node_downscaler": schema.ListNestedBlock{
+			FieldAutoscalerPoliciesNodeDownscaler: schema.ListNestedBlock{
 				Description: "Node Downscaler defines policies for removing nodes based on the configured conditions.",
 				Validators: []validator.List{
 					listvalidator.SizeAtMost(1),
 				},
 				NestedObject: schema.NestedBlockObject{
 					Attributes: map[string]schema.Attribute{
-						"empty_nodes_delay": schema.StringAttribute{
+						FieldNodeDownscalerEmptyNodesDelay: schema.StringAttribute{
 							Optional:    true,
 							Description: "Period to wait before removing an empty node.",
 						},
-						"empty_nodes_enabled": schema.BoolAttribute{
+						FieldNodeDownscalerEmptyNodesEnabled: schema.BoolAttribute{
 							Optional:    true,
 							Computed:    true,
 							Description: "Enable/disable the empty worker nodes policy.",
@@ -188,20 +215,20 @@ func (r *autoscalerPoliciesResource) Schema(_ context.Context, _ resource.Schema
 					},
 				},
 			},
-			"unschedulable_pods": schema.ListNestedBlock{
+			FieldAutoscalerPoliciesUnschedulablePods: schema.ListNestedBlock{
 				Description: "Policy defining autoscaler's behavior when unschedulable pods were detected.",
 				Validators: []validator.List{
 					listvalidator.SizeAtMost(1),
 				},
 				NestedObject: schema.NestedBlockObject{
 					Attributes: map[string]schema.Attribute{
-						"enabled": schema.BoolAttribute{
+						FieldUnschedulablePodsEnabled: schema.BoolAttribute{
 							Optional:    true,
 							Computed:    true,
 							Description: "Enable/disable unschedulable pods detection policy.",
 							Default:     booldefault.StaticBool(false),
 						},
-						"partial_template_matching_enabled": schema.BoolAttribute{
+						FieldUnschedulablePodsPartialTemplateMatching: schema.BoolAttribute{
 							Optional:    true,
 							Computed:    true,
 							Description: "Marks whether partial matching should be used when deciding which custom node template to select.",
@@ -209,14 +236,14 @@ func (r *autoscalerPoliciesResource) Schema(_ context.Context, _ resource.Schema
 						},
 					},
 					Blocks: map[string]schema.Block{
-						"pod_pinner": schema.ListNestedBlock{
+						FieldUnschedulablePodsPodPinner: schema.ListNestedBlock{
 							Description: "Defines the CAST AI Pod Pinner component settings.",
 							Validators: []validator.List{
 								listvalidator.SizeAtMost(1),
 							},
 							NestedObject: schema.NestedBlockObject{
 								Attributes: map[string]schema.Attribute{
-									"enabled": schema.BoolAttribute{
+									FieldPodPinnerEnabled: schema.BoolAttribute{
 										Optional:    true,
 										Computed:    true,
 										Description: "Enable/disable the Pod Pinner policy.",
@@ -327,7 +354,7 @@ func (r *autoscalerPoliciesResource) Delete(ctx context.Context, _ resource.Dele
 }
 
 func (r *autoscalerPoliciesResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
+	resource.ImportStatePassthroughID(ctx, path.Root(FieldAutoscalerPoliciesID), req, resp)
 }
 
 // upsert builds the policies payload from the plan and pushes it to the API,
