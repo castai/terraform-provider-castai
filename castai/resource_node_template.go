@@ -158,61 +158,6 @@ func (m nodeSelectorOperatorsSlice) Get(k sdk.K8sSelectorV1Operator) (string, bo
 	return "", false
 }
 
-// clmNetworkingModeProviderInfo describes per-provider behavior of the CLM
-// networking mode field. Used for documentation, plan-time awareness, and
-// determining the recommended mode when the user hasn't picked one.
-type clmNetworkingModeProviderInfo struct {
-	// DefaultResolvesTo is what "default" (or absent) mode effectively
-	// does on this provider.
-	DefaultResolvesTo string
-	// RecommendedMode is the explicit mode that matches the provider's
-	// current default behavior.
-	RecommendedMode string
-	// ModeCaveats lists per-mode limitations on this provider.
-	ModeCaveats map[string]string
-}
-
-// clmNetworkingModeInfo returns provider-specific information about CLM
-// networking modes. Uses switch/case so adding a new provider requires
-// touching every case explicitly.
-func clmNetworkingModeInfo(provider string) clmNetworkingModeProviderInfo {
-	switch provider {
-	case "eks":
-		return clmNetworkingModeProviderInfo{
-			DefaultResolvesTo: "cni",
-			RecommendedMode:   "cni",
-			ModeCaveats: map[string]string{
-				"cni": "Requires the CAST AI VPC CNI fork (deployed by default on EKS with cluster optimization).",
-				"tc":  "Requires kernel 6.6+. Preserves in-cluster IPv4 TCP only; external connections break.",
-			},
-		}
-	case "gke":
-		return clmNetworkingModeProviderInfo{
-			DefaultResolvesTo: "cni",
-			RecommendedMode:   "cni",
-			ModeCaveats: map[string]string{
-				"cni": "Uses Calico for IP preservation.",
-				"tc":  "Requires Dataplane V1. Preserves in-cluster IPv4 TCP only.",
-			},
-		}
-	case "aks":
-		return clmNetworkingModeProviderInfo{
-			DefaultResolvesTo: "cni",
-			RecommendedMode:   "cni",
-			ModeCaveats: map[string]string{
-				"cni": "Requires BYOCNI with Calico. On stock Azure CNI, IP preservation is not available.",
-				"tc":  "Requires kernel 6.6+ (default Azure Ubuntu images run 5.15). Preserves in-cluster IPv4 TCP only.",
-			},
-		}
-	default:
-		return clmNetworkingModeProviderInfo{
-			DefaultResolvesTo: "unknown",
-			RecommendedMode:   "none",
-			ModeCaveats:       map[string]string{},
-		}
-	}
-}
-
 func resourceNodeTemplateCustomizeDiff(_ context.Context, d *schema.ResourceDiff, _ any) error {
 	name := d.Get(FieldNodeTemplateName).(string)
 	isDefault, isDefaultSet := d.GetOk(FieldNodeTemplateIsDefault)
@@ -943,9 +888,9 @@ func resourceNodeTemplate() *schema.Resource {
 				Optional: true,
 				Computed: true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice(
-					[]string{"default", "none", "tc", "cni"}, false,
+					[]string{"default", "none", "tc", "cni", ""}, false,
 				)),
-				Description: "CLM networking mode for nodes created from this template. Controls how TCP connections are handled during live migration. Applied only if `clm_enabled=true`.",
+				Description: "CLM networking mode for nodes created from this template. Controls how TCP connections are handled during live migration. Valid values: default, none, tc, cni, or an empty string (treated the same as not setting the field). Applied only if `clm_enabled=true`.",
 			},
 			FieldNodeTemplateEdgeLocationIDs: {
 				Type:     schema.TypeList,
