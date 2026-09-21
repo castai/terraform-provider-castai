@@ -13,6 +13,18 @@ CAST AI node template resource to manage node templates
 ## Example Usage
 
 ```terraform
+resource "castai_node_template" "with_clm" {
+  cluster_id = castai_eks_cluster.test.id
+  name       = "clm-template"
+  is_enabled = true
+  configuration_id = castai_node_configuration.default.id
+
+  clm_enabled          = true
+  clm_networking_mode = "cni"
+}
+```
+
+```terraform
 resource "castai_node_template" "default_by_castai" {
   cluster_id = castai_eks_cluster.test.id
 
@@ -77,6 +89,7 @@ resource "castai_node_template" "default_by_castai" {
 ### Optional
 
 - `clm_enabled` (Boolean) Marks whether Container Live Migration (CLM) should be enabled for nodes created from this template. Supported on EKS, GKE, and AKS clusters. CLM-enabled nodes participate in live workload migration during rebalancing, scale-down, and node lifecycle events.
+- `clm_networking_mode` (String) CLM networking mode for nodes created from this template. Controls how TCP connections are handled during live migration. `'cni'` preserves the original pod IP via the CNI (EKS: VPC CNI fork; GKE/AKS: Calico). `'tc'` allocates a new pod IP with eBPF-based connection preservation (cross-subnet, requires kernel 6.6+). `'none'` migrates without preserving network connections. `'default'` uses the provider's legacy behavior (equivalent to `'cni'` on all supported providers). If not set, the field is omitted from the request and the backend preserves the existing value. Only applicable when `clm_enabled` is true.
 - `cluster_id` (String) CAST AI cluster id.
 - `configuration_id` (String) CAST AI node configuration id to be used for node template.
 - `constraints` (Block List, Max: 1) (see [below for nested schema](#nestedblock--constraints))
