@@ -40,7 +40,7 @@ resource "castai_rebalancing_schedule" "spots" {
       ignore_problem_job_pods                = true
       ignore_problem_pods_without_controller = true
       ignore_problem_removal_disabled_pods   = true
-      ignore_problem_prevented_drain_pods     = true
+      ignore_problem_prevented_drain_pods    = true
     }
     selector = jsonencode({
       nodeSelectorTerms = [{
