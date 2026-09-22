@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -31,14 +32,14 @@ func newAutoscalerPoliciesResourceWithMock(mockClient *mock_cluster_autoscaler_v
 	}
 }
 
-func autoscalerPoliciesTestSchema(t *testing.T, r resource.Resource) (*resource.SchemaResponse, tftypes.Type) {
+func autoscalerPoliciesTestSchema(t *testing.T, r resource.Resource) (*resource.SchemaResponse, attr.Type) {
 	t.Helper()
 
 	schemaResp := &resource.SchemaResponse{}
 	r.Schema(context.Background(), resource.SchemaRequest{}, schemaResp)
 	require.False(t, schemaResp.Diagnostics.HasError(), "resource schema returned diagnostics: %v", schemaResp.Diagnostics)
 
-	return schemaResp, schemaResp.Schema.Type().TerraformType(context.Background())
+	return schemaResp, schemaResp.Schema.Type()
 }
 
 func okHTTPResponse() *http.Response {
@@ -69,64 +70,53 @@ func testAutoscalerPoliciesV2() *cluster_autoscaler_v2.PoliciesV2 {
 	}
 }
 
-// autoscalerPoliciesFullPlanValue builds a full plan covering every block as a
-// raw tftypes value, mirroring what Terraform core would send to Create. The
-// version is unknown unless explicitly provided (it changes on every write,
-// so it is only known when read back from state).
-func autoscalerPoliciesFullPlanValue(t *testing.T, schemaType tftypes.Type, clusterID, version string) tftypes.Value {
+// testAutoscalerPoliciesPlanModel returns a full model covering every block,
+// mirroring what Terraform core would plan. ID and version are unknown until
+// the resource has been applied (the version changes on every write).
+func testAutoscalerPoliciesPlanModel(clusterID string) autoscalerPoliciesModel {
+	return autoscalerPoliciesModel{
+		ID:         types.StringUnknown(),
+		ClusterID:  types.StringValue(clusterID),
+		Enabled:    types.BoolValue(true),
+		ScopedMode: types.BoolValue(true),
+		Version:    types.StringUnknown(),
+		ClusterLimits: []clusterLimitsModel{{
+			Enabled: types.BoolValue(true),
+			CPU:     []clusterLimitsCPUModel{{MaxCores: types.Int64Value(16), MinCores: types.Int64Value(2)}},
+		}},
+		NodeDownscaler: []nodeDownscalerModel{{
+			EmptyNodesDelay:   types.StringValue("3m"),
+			EmptyNodesEnabled: types.BoolValue(true),
+		}},
+		UnschedulablePods: []unschedulablePodsModel{{
+			Enabled:                        types.BoolValue(true),
+			PartialTemplateMatchingEnabled: types.BoolValue(true),
+			PodPinner:                      []podPinnerModel{{Enabled: types.BoolValue(true)}},
+		}},
+	}
+}
+
+// autoscalerPoliciesPlanValue converts a typed model into the raw tftypes
+// value the framework expects in requests, so tests can declare plans as
+// ordinary model structs instead of hand-built tftypes values.
+func autoscalerPoliciesPlanValue(t *testing.T, schemaType attr.Type, model autoscalerPoliciesModel) tftypes.Value {
 	t.Helper()
 
-	objType := schemaType.(tftypes.Object)
-	attrTypes := objType.AttributeTypes
+	obj, diags := types.ObjectValueFrom(context.Background(), schemaType.(types.ObjectType).AttributeTypes(), model)
+	require.False(t, diags.HasError(), "converting model to object value: %v", diags)
 
-	limitsType := attrTypes[FieldAutoscalerPoliciesClusterLimits].(tftypes.List).ElementType.(tftypes.Object)
-	cpuType := limitsType.AttributeTypes[FieldClusterLimitsCPU].(tftypes.List).ElementType.(tftypes.Object)
-	downscalerType := attrTypes[FieldAutoscalerPoliciesNodeDownscaler].(tftypes.List).ElementType.(tftypes.Object)
-	unschedulableType := attrTypes[FieldAutoscalerPoliciesUnschedulablePods].(tftypes.List).ElementType.(tftypes.Object)
-	podPinnerType := unschedulableType.AttributeTypes[FieldUnschedulablePodsPodPinner].(tftypes.List).ElementType.(tftypes.Object)
+	value, err := obj.ToTerraformValue(context.Background())
+	require.NoError(t, err)
 
-	b := func(v bool) tftypes.Value { return tftypes.NewValue(tftypes.Bool, v) }
-	n := func(v int64) tftypes.Value { return tftypes.NewValue(tftypes.Number, float64(v)) }
-	s := func(v string) tftypes.Value { return tftypes.NewValue(tftypes.String, v) }
-	list := func(el tftypes.Type, vals ...tftypes.Value) tftypes.Value {
-		return tftypes.NewValue(tftypes.List{ElementType: el}, vals)
-	}
-	object := func(obj tftypes.Object, attrs map[string]tftypes.Value) tftypes.Value {
-		return tftypes.NewValue(obj, attrs)
-	}
+	return value
+}
 
-	sOrUnknown := func(v string) tftypes.Value {
-		if v == "" {
-			return tftypes.NewValue(tftypes.String, tftypes.UnknownValue)
-		}
-		return tftypes.NewValue(tftypes.String, v)
-	}
+// autoscalerPoliciesNullValue returns the null raw value for the resource schema,
+// the starting point for response states.
+func autoscalerPoliciesNullValue(t *testing.T, schemaType attr.Type) tftypes.Value {
+	t.Helper()
 
-	return tftypes.NewValue(objType, map[string]tftypes.Value{
-		FieldAutoscalerPoliciesID:         tftypes.NewValue(tftypes.String, tftypes.UnknownValue),
-		FieldClusterId:                    s(clusterID),
-		FieldAutoscalerPoliciesEnabled:    b(true),
-		FieldAutoscalerPoliciesScopedMode: b(true),
-		FieldAutoscalerPoliciesVersion:    sOrUnknown(version),
-		FieldAutoscalerPoliciesClusterLimits: list(limitsType, object(limitsType, map[string]tftypes.Value{
-			FieldClusterLimitsEnabled: b(true),
-			FieldClusterLimitsCPU: list(cpuType, object(cpuType, map[string]tftypes.Value{
-				FieldClusterLimitsCPUMaxCores: n(16),
-				FieldClusterLimitsCPUMinCores: n(2),
-			})),
-		})),
-		FieldAutoscalerPoliciesNodeDownscaler: list(downscalerType, object(downscalerType, map[string]tftypes.Value{
-			FieldNodeDownscalerEmptyNodesDelay:   s("3m"),
-			FieldNodeDownscalerEmptyNodesEnabled: b(true),
-		})),
-		FieldAutoscalerPoliciesUnschedulablePods: list(unschedulableType, object(unschedulableType, map[string]tftypes.Value{
-			FieldUnschedulablePodsEnabled:                 b(true),
-			FieldUnschedulablePodsPartialTemplateMatching: b(true),
-			FieldUnschedulablePodsPodPinner: list(podPinnerType, object(podPinnerType, map[string]tftypes.Value{
-				FieldPodPinnerEnabled: b(true),
-			})),
-		})),
-	})
+	return tftypes.NewValue(schemaType.TerraformType(context.Background()), nil)
 }
 
 func TestResourceAutoscalerPolicies_Create(t *testing.T) {
@@ -159,13 +149,13 @@ func TestResourceAutoscalerPolicies_Create(t *testing.T) {
 
 	req := resource.CreateRequest{
 		Plan: tfsdk.Plan{
-			Raw:    autoscalerPoliciesFullPlanValue(t, schemaType, clusterID, ""),
+			Raw:    autoscalerPoliciesPlanValue(t, schemaType, testAutoscalerPoliciesPlanModel(clusterID)),
 			Schema: schemaResp.Schema,
 		},
 	}
 	resp := resource.CreateResponse{
 		State: tfsdk.State{
-			Raw:    tftypes.NewValue(schemaType, nil),
+			Raw:    autoscalerPoliciesNullValue(t, schemaType),
 			Schema: schemaResp.Schema,
 		},
 	}
@@ -351,19 +341,26 @@ func TestResourceAutoscalerPolicies_Update_UsesStateVersion(t *testing.T) {
 
 	// Plan carries an unknown version (it changes on every write); the prior
 	// state holds "v5", which must be used for optimistic locking.
+	planModel := testAutoscalerPoliciesPlanModel(clusterID)
+	planModel.ID = types.StringValue(clusterID)
+
+	stateModel := testAutoscalerPoliciesPlanModel(clusterID)
+	stateModel.ID = types.StringValue(clusterID)
+	stateModel.Version = types.StringValue("v5")
+
 	req := resource.UpdateRequest{
 		Plan: tfsdk.Plan{
-			Raw:    autoscalerPoliciesFullPlanValue(t, schemaType, clusterID, ""),
+			Raw:    autoscalerPoliciesPlanValue(t, schemaType, planModel),
 			Schema: schemaResp.Schema,
 		},
 		State: tfsdk.State{
-			Raw:    autoscalerPoliciesFullPlanValue(t, schemaType, clusterID, "v5"),
+			Raw:    autoscalerPoliciesPlanValue(t, schemaType, stateModel),
 			Schema: schemaResp.Schema,
 		},
 	}
 	resp := resource.UpdateResponse{
 		State: tfsdk.State{
-			Raw:    tftypes.NewValue(schemaType, nil),
+			Raw:    autoscalerPoliciesNullValue(t, schemaType),
 			Schema: schemaResp.Schema,
 		},
 	}
@@ -483,7 +480,7 @@ func TestResourceAutoscalerPolicies_Delete(t *testing.T) {
 
 	resp := resource.DeleteResponse{
 		State: tfsdk.State{
-			Raw:    tftypes.NewValue(schemaType, nil),
+			Raw:    autoscalerPoliciesNullValue(t, schemaType),
 			Schema: schemaResp.Schema,
 		},
 	}
@@ -504,7 +501,7 @@ func TestResourceAutoscalerPolicies_Import(t *testing.T) {
 	req := resource.ImportStateRequest{ID: clusterID}
 	resp := resource.ImportStateResponse{
 		State: tfsdk.State{
-			Raw:    tftypes.NewValue(schemaType, nil),
+			Raw:    autoscalerPoliciesNullValue(t, schemaType),
 			Schema: schemaResp.Schema,
 		},
 	}
