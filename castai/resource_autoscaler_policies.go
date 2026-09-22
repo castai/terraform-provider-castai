@@ -306,7 +306,11 @@ func (r *autoscalerPoliciesResource) Read(ctx context.Context, req resource.Read
 		clusterID = state.ID.ValueString()
 	}
 	if clusterID == "" {
-		tflog.Info(ctx, "ClusterId is missing. Will skip operation.")
+		resp.Diagnostics.AddError(
+			"Missing cluster id",
+			"Cannot read autoscaler policies: both cluster_id and id are missing from state. "+
+				"The state may be corrupted; consider re-importing the resource.",
+		)
 		return
 	}
 

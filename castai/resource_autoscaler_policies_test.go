@@ -453,6 +453,32 @@ func TestResourceAutoscalerPolicies_Read_NilNestedFields(t *testing.T) {
 	require.Empty(t, state.UnschedulablePods)
 }
 
+func TestResourceAutoscalerPolicies_Read_MissingClusterID(t *testing.T) {
+	t.Parallel()
+
+	r := newAutoscalerPoliciesResourceWithMock(nil)
+	schemaResp, schemaType := autoscalerPoliciesTestSchema(t, r)
+
+	// A state with neither cluster_id nor id is corrupt: the read must
+	// surface an error instead of silently doing nothing.
+	req := resource.ReadRequest{
+		State: tfsdk.State{
+			Raw:    autoscalerPoliciesNullValue(t, schemaType),
+			Schema: schemaResp.Schema,
+		},
+	}
+	resp := resource.ReadResponse{
+		State: tfsdk.State{
+			Raw:    autoscalerPoliciesNullValue(t, schemaType),
+			Schema: schemaResp.Schema,
+		},
+	}
+
+	r.Read(context.Background(), req, &resp)
+
+	require.True(t, resp.Diagnostics.HasError())
+}
+
 func TestResourceAutoscalerPolicies_Read_UnschedulablePodsPartialMatchingOmitted(t *testing.T) {
 	t.Parallel()
 
