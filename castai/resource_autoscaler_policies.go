@@ -358,12 +358,26 @@ func (r *autoscalerPoliciesResource) ImportState(ctx context.Context, req resour
 }
 
 // upsert builds the policies payload from the plan and pushes it to the API,
-// then reads the resulting policies back. The version from the plan is
-// included for optimistic locking on updates.
+// then reads the resulting policies back. The version is included for
+// optimistic locking: on updates it comes from the plan (state), and on
+// create it is fetched from the API first, since the policies most likely
+// already exist for the cluster and the server rejects an insert of a
+// duplicate record.
 func (r *autoscalerPoliciesResource) upsert(ctx context.Context, clusterID string, plan *autoscalerPoliciesModel) (*cluster_autoscaler_v2.PoliciesV2, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	policies := policiesFromModel(plan)
+
+	if policies.Version == nil {
+		current, found, readDiags := r.readPolicies(ctx, clusterID)
+		diags.Append(readDiags...)
+		if diags.HasError() {
+			return nil, diags
+		}
+		if found && current.Version != nil {
+			policies.Version = current.Version
+		}
+	}
 
 	client := r.client.clusterAutoscalerV2Client
 	apiResp, err := client.PoliciesV2APIUpdateClusterPoliciesWithResponse(ctx, clusterID, *policies)

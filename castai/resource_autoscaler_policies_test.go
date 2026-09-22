@@ -165,7 +165,11 @@ func TestResourceAutoscalerPolicies_Create(t *testing.T) {
 
 	require.False(t, resp.Diagnostics.HasError(), "create diagnostics: %v", resp.Diagnostics)
 
-	// Assert the payload sent to the API (expand path).
+	// Assert the payload sent to the API (expand path). The version is
+	// fetched from the API on create since the policies already exist, and is
+	// included in the PUT for optimistic locking.
+	require.NotNil(t, capturedBody.Version)
+	require.Equal(t, "v5", *capturedBody.Version)
 	require.NotNil(t, capturedBody.Enabled)
 	require.True(t, *capturedBody.Enabled)
 	require.NotNil(t, capturedBody.ScopedMode)
@@ -214,6 +218,56 @@ func TestResourceAutoscalerPolicies_Create(t *testing.T) {
 	require.True(t, state.UnschedulablePods[0].PartialTemplateMatchingEnabled.ValueBool())
 	require.Len(t, state.UnschedulablePods[0].PodPinner, 1)
 	require.True(t, state.UnschedulablePods[0].PodPinner[0].Enabled.ValueBool())
+}
+
+func TestResourceAutoscalerPolicies_Create_NoExistingPolicies(t *testing.T) {
+	t.Parallel()
+
+	clusterID := "b6bfc074-a267-400f-b8f1-db0850c369b1"
+	var capturedBody cluster_autoscaler_v2.PoliciesV2
+
+	mockClient := mock_cluster_autoscaler_v2.NewMockClientWithResponsesInterface(t)
+
+	// First GET: no policies exist yet. Second GET: read-back after the PUT.
+	getCalls := 0
+	mockClient.EXPECT().
+		PoliciesV2APIGetClusterPoliciesWithResponse(mock.Anything, clusterID).
+		RunAndReturn(func(_ context.Context, _ string, _ ...cluster_autoscaler_v2.RequestEditorFn) (*cluster_autoscaler_v2.PoliciesV2APIGetClusterPoliciesResponse, error) {
+			getCalls++
+			if getCalls == 1 {
+				return &cluster_autoscaler_v2.PoliciesV2APIGetClusterPoliciesResponse{
+					HTTPResponse: &http.Response{StatusCode: http.StatusNotFound, Header: map[string][]string{"Content-Type": {"application/json"}}},
+					JSON200:      nil,
+				}, nil
+			}
+			return &cluster_autoscaler_v2.PoliciesV2APIGetClusterPoliciesResponse{
+				HTTPResponse: okHTTPResponse(),
+				JSON200:      testAutoscalerPoliciesV2(),
+			}, nil
+		})
+	mockClient.EXPECT().
+		PoliciesV2APIUpdateClusterPoliciesWithResponse(mock.Anything, clusterID, mock.Anything).
+		RunAndReturn(func(_ context.Context, _ string, body cluster_autoscaler_v2.PoliciesV2, _ ...cluster_autoscaler_v2.RequestEditorFn) (*cluster_autoscaler_v2.PoliciesV2APIUpdateClusterPoliciesResponse, error) {
+			capturedBody = body
+			return &cluster_autoscaler_v2.PoliciesV2APIUpdateClusterPoliciesResponse{
+				HTTPResponse: okHTTPResponse(),
+				JSON200:      testAutoscalerPoliciesV2(),
+			}, nil
+		})
+
+	r := newAutoscalerPoliciesResourceWithMock(mockClient)
+
+	plan := &autoscalerPoliciesModel{
+		ClusterID: types.StringValue(clusterID),
+		Enabled:   types.BoolValue(true),
+	}
+	policies, diags := r.upsert(context.Background(), clusterID, plan)
+
+	require.New(t).False(diags.HasError())
+	// No existing policies: no version to lock on, the PUT omits it.
+	require.Nil(t, capturedBody.Version)
+	require.NotNil(t, policies)
+	require.Equal(t, "v5", *policies.Version)
 }
 
 func TestResourceAutoscalerPolicies_Update(t *testing.T) {
