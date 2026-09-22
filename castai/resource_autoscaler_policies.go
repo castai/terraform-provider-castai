@@ -20,6 +20,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
+	"github.com/samber/lo"
 
 	"github.com/castai/terraform-provider-castai/castai/sdk/cluster_autoscaler_v2"
 )
@@ -464,11 +465,11 @@ func policiesFromModel(m *autoscalerPoliciesModel) *cluster_autoscaler_v2.Polici
 	policies := &cluster_autoscaler_v2.PoliciesV2{}
 
 	if !m.Enabled.IsNull() {
-		policies.Enabled = new(m.Enabled.ValueBool())
+		policies.Enabled = lo.ToPtr(m.Enabled.ValueBool())
 	}
 
 	if !m.ScopedMode.IsNull() {
-		policies.ScopedMode = new(m.ScopedMode.ValueBool())
+		policies.ScopedMode = lo.ToPtr(m.ScopedMode.ValueBool())
 	}
 
 	if len(m.ClusterLimits) > 0 {
@@ -485,7 +486,7 @@ func policiesFromModel(m *autoscalerPoliciesModel) *cluster_autoscaler_v2.Polici
 
 	// Include version from plan for optimistic locking on updates.
 	if !m.Version.IsNull() && m.Version.ValueString() != "" {
-		policies.Version = new(m.Version.ValueString())
+		policies.Version = lo.ToPtr(m.Version.ValueString())
 	}
 
 	return policies
@@ -495,7 +496,7 @@ func clusterLimitsFromModel(m *clusterLimitsModel) *cluster_autoscaler_v2.Cluste
 	out := &cluster_autoscaler_v2.ClusterLimitsPolicy{}
 
 	if !m.Enabled.IsNull() {
-		out.Enabled = new(m.Enabled.ValueBool())
+		out.Enabled = lo.ToPtr(m.Enabled.ValueBool())
 	}
 
 	if len(m.CPU) > 0 {
@@ -503,7 +504,7 @@ func clusterLimitsFromModel(m *clusterLimitsModel) *cluster_autoscaler_v2.Cluste
 			MaxCores: int32(m.CPU[0].MaxCores.ValueInt64()),
 		}
 		if !m.CPU[0].MinCores.IsNull() {
-			cpu.MinCores = new(int32(m.CPU[0].MinCores.ValueInt64()))
+			cpu.MinCores = lo.ToPtr(int32(m.CPU[0].MinCores.ValueInt64()))
 		}
 		out.Cpu = cpu
 	}
@@ -515,11 +516,11 @@ func nodeDownscalerFromModel(m *nodeDownscalerModel) *cluster_autoscaler_v2.Node
 	out := &cluster_autoscaler_v2.NodeDownscalerPolicy{}
 
 	if !m.EmptyNodesDelay.IsNull() && m.EmptyNodesDelay.ValueString() != "" {
-		out.EmptyNodesDelay = new(m.EmptyNodesDelay.ValueString())
+		out.EmptyNodesDelay = lo.ToPtr(m.EmptyNodesDelay.ValueString())
 	}
 
 	if !m.EmptyNodesEnabled.IsNull() {
-		out.EmptyNodesEnabled = new(m.EmptyNodesEnabled.ValueBool())
+		out.EmptyNodesEnabled = lo.ToPtr(m.EmptyNodesEnabled.ValueBool())
 	}
 
 	return out
@@ -529,17 +530,17 @@ func unschedulablePodsFromModel(m *unschedulablePodsModel) *cluster_autoscaler_v
 	out := &cluster_autoscaler_v2.UnschedulablePodsPolicy{}
 
 	if !m.Enabled.IsNull() {
-		out.Enabled = new(m.Enabled.ValueBool())
+		out.Enabled = lo.ToPtr(m.Enabled.ValueBool())
 	}
 
 	if !m.PartialTemplateMatchingEnabled.IsNull() {
-		out.PartialTemplateMatchingEnabled = new(m.PartialTemplateMatchingEnabled.ValueBool())
+		out.PartialTemplateMatchingEnabled = lo.ToPtr(m.PartialTemplateMatchingEnabled.ValueBool())
 	}
 
 	if len(m.PodPinner) > 0 {
 		podPinner := &cluster_autoscaler_v2.PodPinner{}
 		if !m.PodPinner[0].Enabled.IsNull() {
-			podPinner.Enabled = new(m.PodPinner[0].Enabled.ValueBool())
+			podPinner.Enabled = lo.ToPtr(m.PodPinner[0].Enabled.ValueBool())
 		}
 		out.PodPinner = podPinner
 	}
