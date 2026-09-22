@@ -147,9 +147,6 @@ func (r *autoscalerPoliciesResource) Schema(_ context.Context, _ resource.Schema
 			FieldAutoscalerPoliciesVersion: schema.StringAttribute{
 				Computed:    true,
 				Description: "Policy version for optimistic locking.",
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
 			},
 		},
 		Blocks: map[string]schema.Block{
@@ -336,6 +333,19 @@ func (r *autoscalerPoliciesResource) Update(ctx context.Context, req resource.Up
 		return
 	}
 
+	var state autoscalerPoliciesModel
+	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	// The version changes on every write, so it stays unknown in the plan.
+	// Carry the version observed in the prior state into the update request
+	// for optimistic locking.
+	if plan.Version.IsNull() || plan.Version.ValueString() == "" {
+		plan.Version = state.Version
+	}
+
 	clusterID := plan.ClusterID.ValueString()
 
 	policies, diags := r.upsert(ctx, clusterID, &plan)
@@ -344,8 +354,8 @@ func (r *autoscalerPoliciesResource) Update(ctx context.Context, req resource.Up
 		return
 	}
 
-	state := r.policiesToModel(clusterID, policies)
-	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
+	newState := r.policiesToModel(clusterID, policies)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &newState)...)
 }
 
 func (r *autoscalerPoliciesResource) Delete(ctx context.Context, _ resource.DeleteRequest, resp *resource.DeleteResponse) {

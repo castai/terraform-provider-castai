@@ -70,8 +70,10 @@ func testAutoscalerPoliciesV2() *cluster_autoscaler_v2.PoliciesV2 {
 }
 
 // autoscalerPoliciesFullPlanValue builds a full plan covering every block as a
-// raw tftypes value, mirroring what Terraform core would send to Create.
-func autoscalerPoliciesFullPlanValue(t *testing.T, schemaType tftypes.Type, clusterID string) tftypes.Value {
+// raw tftypes value, mirroring what Terraform core would send to Create. The
+// version is unknown unless explicitly provided (it changes on every write,
+// so it is only known when read back from state).
+func autoscalerPoliciesFullPlanValue(t *testing.T, schemaType tftypes.Type, clusterID, version string) tftypes.Value {
 	t.Helper()
 
 	objType := schemaType.(tftypes.Object)
@@ -93,12 +95,19 @@ func autoscalerPoliciesFullPlanValue(t *testing.T, schemaType tftypes.Type, clus
 		return tftypes.NewValue(obj, attrs)
 	}
 
+	sOrUnknown := func(v string) tftypes.Value {
+		if v == "" {
+			return tftypes.NewValue(tftypes.String, tftypes.UnknownValue)
+		}
+		return tftypes.NewValue(tftypes.String, v)
+	}
+
 	return tftypes.NewValue(objType, map[string]tftypes.Value{
 		FieldAutoscalerPoliciesID:         tftypes.NewValue(tftypes.String, tftypes.UnknownValue),
 		FieldClusterId:                    s(clusterID),
 		FieldAutoscalerPoliciesEnabled:    b(true),
 		FieldAutoscalerPoliciesScopedMode: b(true),
-		FieldAutoscalerPoliciesVersion:    tftypes.NewValue(tftypes.String, tftypes.UnknownValue),
+		FieldAutoscalerPoliciesVersion:    sOrUnknown(version),
 		FieldAutoscalerPoliciesClusterLimits: list(limitsType, object(limitsType, map[string]tftypes.Value{
 			FieldClusterLimitsEnabled: b(true),
 			FieldClusterLimitsCPU: list(cpuType, object(cpuType, map[string]tftypes.Value{
@@ -150,7 +159,7 @@ func TestResourceAutoscalerPolicies_Create(t *testing.T) {
 
 	req := resource.CreateRequest{
 		Plan: tfsdk.Plan{
-			Raw:    autoscalerPoliciesFullPlanValue(t, schemaType, clusterID),
+			Raw:    autoscalerPoliciesFullPlanValue(t, schemaType, clusterID, ""),
 			Schema: schemaResp.Schema,
 		},
 	}
@@ -311,6 +320,64 @@ func TestResourceAutoscalerPolicies_Update(t *testing.T) {
 	require.NotNil(t, policies)
 	require.NotNil(t, policies.Version)
 	require.Equal(t, "v5", *policies.Version)
+}
+
+func TestResourceAutoscalerPolicies_Update_UsesStateVersion(t *testing.T) {
+	t.Parallel()
+
+	clusterID := "b6bfc074-a267-400f-b8f1-db0850c369b1"
+	var capturedBody cluster_autoscaler_v2.PoliciesV2
+
+	mockClient := mock_cluster_autoscaler_v2.NewMockClientWithResponsesInterface(t)
+
+	mockClient.EXPECT().
+		PoliciesV2APIUpdateClusterPoliciesWithResponse(mock.Anything, clusterID, mock.Anything).
+		RunAndReturn(func(_ context.Context, _ string, body cluster_autoscaler_v2.PoliciesV2, _ ...cluster_autoscaler_v2.RequestEditorFn) (*cluster_autoscaler_v2.PoliciesV2APIUpdateClusterPoliciesResponse, error) {
+			capturedBody = body
+			return &cluster_autoscaler_v2.PoliciesV2APIUpdateClusterPoliciesResponse{
+				HTTPResponse: okHTTPResponse(),
+				JSON200:      testAutoscalerPoliciesV2(),
+			}, nil
+		})
+	mockClient.EXPECT().
+		PoliciesV2APIGetClusterPoliciesWithResponse(mock.Anything, clusterID).
+		Return(&cluster_autoscaler_v2.PoliciesV2APIGetClusterPoliciesResponse{
+			HTTPResponse: okHTTPResponse(),
+			JSON200:      testAutoscalerPoliciesV2(),
+		}, nil)
+
+	r := newAutoscalerPoliciesResourceWithMock(mockClient)
+	schemaResp, schemaType := autoscalerPoliciesTestSchema(t, r)
+
+	// Plan carries an unknown version (it changes on every write); the prior
+	// state holds "v5", which must be used for optimistic locking.
+	req := resource.UpdateRequest{
+		Plan: tfsdk.Plan{
+			Raw:    autoscalerPoliciesFullPlanValue(t, schemaType, clusterID, ""),
+			Schema: schemaResp.Schema,
+		},
+		State: tfsdk.State{
+			Raw:    autoscalerPoliciesFullPlanValue(t, schemaType, clusterID, "v5"),
+			Schema: schemaResp.Schema,
+		},
+	}
+	resp := resource.UpdateResponse{
+		State: tfsdk.State{
+			Raw:    tftypes.NewValue(schemaType, nil),
+			Schema: schemaResp.Schema,
+		},
+	}
+
+	r.Update(context.Background(), req, &resp)
+
+	require.False(t, resp.Diagnostics.HasError(), "update diagnostics: %v", resp.Diagnostics)
+	require.NotNil(t, capturedBody.Version)
+	require.Equal(t, "v5", *capturedBody.Version)
+
+	var state autoscalerPoliciesModel
+	stateDiags := resp.State.Get(context.Background(), &state)
+	require.False(t, stateDiags.HasError(), "state decode diagnostics: %v", stateDiags)
+	require.Equal(t, "v5", state.Version.ValueString())
 }
 
 func TestResourceAutoscalerPolicies_Read(t *testing.T) {
