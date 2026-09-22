@@ -394,12 +394,17 @@ func stateToSchedule(d *schema.ResourceData) (*sdk.ScheduledrebalancingV1Rebalan
 		var aggressiveModeConfig *sdk.ScheduledrebalancingV1AggressiveModeConfig
 		aggressiveModeConfigSection := launchConfigurationData["aggressive_mode_config"].([]any)
 		if len(aggressiveModeConfigSection) != 0 {
+			aggressiveModeConfigData := aggressiveModeConfigSection[0].(map[string]any)
 			aggressiveModeConfig = &sdk.ScheduledrebalancingV1AggressiveModeConfig{
-				IgnoreLocalPersistentVolumes:       lo.ToPtr(aggressiveModeConfigSection[0].(map[string]any)["ignore_local_persistent_volumes"].(bool)),
-				IgnoreProblemJobPods:               lo.ToPtr(aggressiveModeConfigSection[0].(map[string]any)["ignore_problem_job_pods"].(bool)),
-				IgnoreProblemRemovalDisabledPods:   lo.ToPtr(aggressiveModeConfigSection[0].(map[string]any)["ignore_problem_removal_disabled_pods"].(bool)),
-				IgnoreProblemPodsWithoutController: lo.ToPtr(aggressiveModeConfigSection[0].(map[string]any)["ignore_problem_pods_without_controller"].(bool)),
-				IgnoreProblemPreventedDrainPods:    lo.ToPtr(aggressiveModeConfigSection[0].(map[string]any)["ignore_problem_prevented_drain_pods"].(bool)),
+				IgnoreLocalPersistentVolumes:       lo.ToPtr(aggressiveModeConfigData["ignore_local_persistent_volumes"].(bool)),
+				IgnoreProblemJobPods:               lo.ToPtr(aggressiveModeConfigData["ignore_problem_job_pods"].(bool)),
+				IgnoreProblemRemovalDisabledPods:   lo.ToPtr(aggressiveModeConfigData["ignore_problem_removal_disabled_pods"].(bool)),
+				IgnoreProblemPodsWithoutController: lo.ToPtr(aggressiveModeConfigData["ignore_problem_pods_without_controller"].(bool)),
+			}
+			// Optional field: read presence from the raw config so an unset value
+			// stays nil in the request body instead of an explicit false.
+			if rawConfigHasField(d.GetRawConfig(), "launch_configuration", "aggressive_mode_config", "ignore_problem_prevented_drain_pods") {
+				aggressiveModeConfig.IgnoreProblemPreventedDrainPods = lo.ToPtr(aggressiveModeConfigData["ignore_problem_prevented_drain_pods"].(bool))
 			}
 		}
 

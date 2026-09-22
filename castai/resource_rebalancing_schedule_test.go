@@ -36,6 +36,14 @@ func TestRebalancingSchedule_stateToSchedule_EvictGracefullyAndDrainOptions(t *t
 			})}),
 		})}),
 	}), 0)
+	// Raw config sets the field explicitly.
+	state.RawConfig = cty.ObjectVal(map[string]cty.Value{
+		"launch_configuration": cty.ListVal([]cty.Value{cty.ObjectVal(map[string]cty.Value{
+			"aggressive_mode_config": cty.ListVal([]cty.Value{cty.ObjectVal(map[string]cty.Value{
+				"ignore_problem_prevented_drain_pods": cty.BoolVal(true),
+			})}),
+		})}),
+	})
 
 	schedule, err := stateToSchedule(resource.Data(state))
 	r.NoError(err)
@@ -49,6 +57,44 @@ func TestRebalancingSchedule_stateToSchedule_EvictGracefullyAndDrainOptions(t *t
 	r.NotNil(opts.AggressiveModeConfig)
 	r.NotNil(opts.AggressiveModeConfig.IgnoreProblemPreventedDrainPods)
 	r.True(*opts.AggressiveModeConfig.IgnoreProblemPreventedDrainPods)
+
+	// When the optional field is omitted (null in config), it must stay nil
+	// in the request body instead of being sent as an explicit false.
+	unsetState := terraform.NewInstanceStateShimmedFromValue(cty.ObjectVal(map[string]cty.Value{
+		"name": cty.StringVal("test-schedule-unset"),
+		"schedule": cty.ListVal([]cty.Value{cty.ObjectVal(map[string]cty.Value{
+			"cron": cty.StringVal("5 4 * * *"),
+		})}),
+		"trigger_conditions": cty.ListVal([]cty.Value{cty.ObjectVal(map[string]cty.Value{
+			"savings_percentage": cty.NumberFloatVal(15),
+			"ignore_savings":     cty.BoolVal(false),
+		})}),
+		"launch_configuration": cty.ListVal([]cty.Value{cty.ObjectVal(map[string]cty.Value{
+			"aggressive_mode_config": cty.ListVal([]cty.Value{cty.ObjectVal(map[string]cty.Value{
+				"ignore_local_persistent_volumes":        cty.BoolVal(true),
+				"ignore_problem_job_pods":                cty.BoolVal(true),
+				"ignore_problem_removal_disabled_pods":   cty.BoolVal(false),
+				"ignore_problem_pods_without_controller": cty.BoolVal(false),
+				"ignore_problem_prevented_drain_pods":    cty.NullVal(cty.Bool),
+			})}),
+		})}),
+	}), 0)
+	// Raw config omits the field: it is null, as Terraform sends it when the
+	// user does not set it.
+	unsetState.RawConfig = cty.ObjectVal(map[string]cty.Value{
+		"launch_configuration": cty.ListVal([]cty.Value{cty.ObjectVal(map[string]cty.Value{
+			"aggressive_mode_config": cty.ListVal([]cty.Value{cty.ObjectVal(map[string]cty.Value{
+				"ignore_problem_prevented_drain_pods": cty.NullVal(cty.Bool),
+			})}),
+		})}),
+	})
+
+	unsetSchedule, err := stateToSchedule(resource.Data(unsetState))
+	r.NoError(err)
+	unsetOpts := unsetSchedule.LaunchConfiguration.RebalancingOptions
+	r.NotNil(unsetOpts)
+	r.NotNil(unsetOpts.AggressiveModeConfig)
+	r.Nil(unsetOpts.AggressiveModeConfig.IgnoreProblemPreventedDrainPods)
 }
 
 func TestAccCloudAgnostic_ResourceRebalancingSchedule_basic(t *testing.T) {
