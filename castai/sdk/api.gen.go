@@ -4405,6 +4405,12 @@ type CastaiUsersV1beta1UserOrganization struct {
 //   - unknown: Unknown.
 type CastaiV1Cloud string
 
+// ClusteractionsV1ClusterActionDrainNodePodRef Reference to a pod to drain during a partial node drain.
+type ClusteractionsV1ClusterActionDrainNodePodRef struct {
+	Namespace *string `json:"namespace,omitempty"`
+	PodName   *string `json:"podName,omitempty"`
+}
+
 // CostreportV1beta1AllocationGroup defines model for costreport.v1beta1.AllocationGroup.
 type CostreportV1beta1AllocationGroup struct {
 	Filter    *CostreportV1beta1AllocationGroupFilter `json:"filter,omitempty"`
@@ -6171,6 +6177,9 @@ type ExternalclusterV1DrainConfig struct {
 	// Force If set to true, pods will be forcefully deleted after drain timeout.
 	Force *bool `json:"force,omitempty"`
 
+	// Pods When set, drain only the listed pods (partial drain). Empty = normal full node drain.
+	Pods *[]ClusteractionsV1ClusterActionDrainNodePodRef `json:"pods,omitempty"`
+
 	// TimeoutSeconds Node drain timeout in seconds. Defaults to 600s if not set.
 	TimeoutSeconds *int32 `json:"timeoutSeconds,omitempty"`
 }
@@ -7521,10 +7530,8 @@ type NodeconfigV1NewNodeConfiguration struct {
 	Image *string `json:"image"`
 
 	// InitScript Init script to be run on your instance at launch. Should not contain any sensitive data. Value should be base64 encoded.
-	InitScript *string                 `json:"initScript"`
-	Kops       *NodeconfigV1KOPSConfig `json:"kops,omitempty"`
-
-	// KubeletConfig Optional kubelet configuration properties. Applicable for EKS only.
+	InitScript    *string                 `json:"initScript"`
+	Kops          *NodeconfigV1KOPSConfig `json:"kops,omitempty"`
 	KubeletConfig *map[string]interface{} `json:"kubeletConfig,omitempty"`
 
 	// MinDiskSize Minimal disk size in GiB. Defaults to 100.
