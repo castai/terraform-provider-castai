@@ -2,13 +2,19 @@ package castai
 
 import (
 	"context"
+	"fmt"
 	"net/http"
+	"os"
+	"strconv"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-go/tftypes"
+	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
+	tfresource "github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	testingterraform "github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/samber/lo"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -475,4 +481,151 @@ func TestResourceAutoscalerPolicies_policiesToModel_EmptyNestedPolicies(t *testi
 	require.Empty(t, state.ClusterLimits)
 	require.Empty(t, state.NodeDownscaler)
 	require.Empty(t, state.UnschedulablePods)
+}
+
+// autoscalerPoliciesAccSettings holds the knobs for the V2 policies acceptance
+// test configs.
+type autoscalerPoliciesAccSettings struct {
+	Enabled                  bool
+	ScopedMode               bool
+	ClusterLimitsEnabled     bool
+	MinCores                 int
+	MaxCores                 int
+	EmptyNodesEnabled        bool
+	EmptyNodesDelay          string
+	UnschedulablePodsEnabled bool
+	PartialTemplateMatching  bool
+	PodPinnerEnabled         bool
+}
+
+// TestAccEKS_ResourceAutoscalerPolicies_basic covers the V2 autoscaler policies
+// resource end-to-end against a real cluster. It registers the same EKS
+// cluster as the V1 autoscaler acceptance test ("cost-terraform" by default,
+// overridable via CLUSTER_NAME), and both resources manage autoscaling policies
+// on that cluster, so it must not run in parallel with the V1 test: neither
+// test calls t.Parallel(), which keeps them sequential within the package.
+func TestAccEKS_ResourceAutoscalerPolicies_basic(t *testing.T) {
+	rName := fmt.Sprintf("%v-policies-%v", ResourcePrefix, acctest.RandString(8))
+	clusterName, _ := lo.Coalesce(os.Getenv("CLUSTER_NAME"), "cost-terraform")
+
+	initial := autoscalerPoliciesAccSettings{
+		Enabled:                  true,
+		ScopedMode:               false,
+		ClusterLimitsEnabled:     true,
+		MinCores:                 1,
+		MaxCores:                 100,
+		EmptyNodesEnabled:        true,
+		EmptyNodesDelay:          "120s",
+		UnschedulablePodsEnabled: true,
+		PartialTemplateMatching:  true,
+		PodPinnerEnabled:         false,
+	}
+	updated := autoscalerPoliciesAccSettings{
+		Enabled:                  false,
+		ScopedMode:               true,
+		ClusterLimitsEnabled:     false,
+		MinCores:                 2,
+		MaxCores:                 200,
+		EmptyNodesEnabled:        false,
+		EmptyNodesDelay:          "300s",
+		UnschedulablePodsEnabled: false,
+		PartialTemplateMatching:  false,
+		PodPinnerEnabled:         true,
+	}
+
+	tfresource.Test(t, tfresource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		ExternalProviders: map[string]tfresource.ExternalProvider{
+			"aws": {
+				Source:            "hashicorp/aws",
+				VersionConstraint: "~> 5.0",
+			},
+		},
+		Steps: []tfresource.TestStep{
+			// Step 1: Apply initial V2 policies.
+			{
+				Config: testAccAutoscalerPoliciesConfig(rName, clusterName, initial),
+				Check:  testAccCheckAutoscalerPolicies(initial),
+			},
+			// Step 2: Update every policy block.
+			{
+				Config: testAccAutoscalerPoliciesConfig(rName, clusterName, updated),
+				Check:  testAccCheckAutoscalerPolicies(updated),
+			},
+			// Step 3: Import the resource by cluster id.
+			{
+				ResourceName: "castai_autoscaler_policies.test",
+				ImportStateIdFunc: func(s *testingterraform.State) (string, error) {
+					rs, ok := s.RootModule().Resources["castai_eks_cluster.test"]
+					if !ok {
+						return "", fmt.Errorf("castai_eks_cluster.test not found in state")
+					}
+					return rs.Primary.ID, nil
+				},
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			// Step 4: Re-apply the initial policies to verify updating back.
+			{
+				Config: testAccAutoscalerPoliciesConfig(rName, clusterName, initial),
+				Check:  testAccCheckAutoscalerPolicies(initial),
+			},
+		},
+	})
+}
+
+func testAccAutoscalerPoliciesConfig(rName, clusterName string, s autoscalerPoliciesAccSettings) string {
+	return ConfigCompose(testAccEKSClusterConfig(rName, clusterName), fmt.Sprintf(`
+resource "castai_autoscaler_policies" "test" {
+  cluster_id = castai_eks_cluster.test.id
+
+  enabled     = %t
+  scoped_mode = %t
+
+  cluster_limits {
+    enabled = %t
+
+    cpu {
+      max_cores = %d
+      min_cores = %d
+    }
+  }
+
+  node_downscaler {
+    empty_nodes_enabled = %t
+    empty_nodes_delay   = %q
+  }
+
+  unschedulable_pods {
+    enabled                           = %t
+    partial_template_matching_enabled = %t
+
+    pod_pinner {
+      enabled = %t
+    }
+  }
+}
+`, s.Enabled, s.ScopedMode, s.ClusterLimitsEnabled, s.MaxCores, s.MinCores,
+		s.EmptyNodesEnabled, s.EmptyNodesDelay, s.UnschedulablePodsEnabled, s.PartialTemplateMatching, s.PodPinnerEnabled))
+}
+
+func testAccCheckAutoscalerPolicies(s autoscalerPoliciesAccSettings) tfresource.TestCheckFunc {
+	resourceName := "castai_autoscaler_policies.test"
+
+	return tfresource.ComposeTestCheckFunc(
+		tfresource.TestCheckResourceAttrSet(resourceName, "cluster_id"),
+		tfresource.TestCheckResourceAttrSet(resourceName, "id"),
+		tfresource.TestCheckResourceAttrSet(resourceName, "version"),
+		tfresource.TestCheckResourceAttr(resourceName, "enabled", strconv.FormatBool(s.Enabled)),
+		tfresource.TestCheckResourceAttr(resourceName, "scoped_mode", strconv.FormatBool(s.ScopedMode)),
+		tfresource.TestCheckResourceAttr(resourceName, "cluster_limits.0.enabled", strconv.FormatBool(s.ClusterLimitsEnabled)),
+		tfresource.TestCheckResourceAttr(resourceName, "cluster_limits.0.cpu.0.max_cores", strconv.Itoa(s.MaxCores)),
+		tfresource.TestCheckResourceAttr(resourceName, "cluster_limits.0.cpu.0.min_cores", strconv.Itoa(s.MinCores)),
+		tfresource.TestCheckResourceAttr(resourceName, "node_downscaler.0.empty_nodes_enabled", strconv.FormatBool(s.EmptyNodesEnabled)),
+		tfresource.TestCheckResourceAttr(resourceName, "node_downscaler.0.empty_nodes_delay", s.EmptyNodesDelay),
+		tfresource.TestCheckResourceAttr(resourceName, "unschedulable_pods.0.enabled", strconv.FormatBool(s.UnschedulablePodsEnabled)),
+		tfresource.TestCheckResourceAttr(resourceName, "unschedulable_pods.0.partial_template_matching_enabled", strconv.FormatBool(s.PartialTemplateMatching)),
+		tfresource.TestCheckResourceAttr(resourceName, "unschedulable_pods.0.pod_pinner.0.enabled", strconv.FormatBool(s.PodPinnerEnabled)),
+	)
 }
