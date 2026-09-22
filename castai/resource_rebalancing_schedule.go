@@ -117,6 +117,18 @@ func resourceRebalancingSchedule() *schema.Resource {
 							Type:        schema.TypeBool,
 							Optional:    true,
 							Description: "Defines whether the nodes that failed to get drained until a predefined timeout, will be kept with a rebalancing.cast.ai/status=drain-failed annotation instead of forcefully drained.",
+							Deprecated:  "Use evict_gracefully instead.",
+						},
+						"evict_gracefully": {
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Description: "Defines whether the nodes that failed to get drained until a predefined timeout, will be kept with a rebalancing.cast.ai/status=drain-failed annotation instead of forcefully drained. Replaces the deprecated keep_drain_timeout_nodes.",
+						},
+						"max_simultaneous_drains": {
+							Type:             schema.TypeInt,
+							Optional:         true,
+							ValidateDiagFunc: validation.ToDiagFunc(validation.IntAtLeast(0)),
+							Description:      "Number of nodes to drain simultaneously. When unspecified, defaults to unlimited.",
 						},
 						"aggressive_mode": {
 							Type:        schema.TypeBool,
@@ -149,6 +161,11 @@ func resourceRebalancingSchedule() *schema.Resource {
 										Type:        schema.TypeBool,
 										Required:    true,
 										Description: "Pods that don't have a controller (bare pods) will not prevent the Rebalancer from deleting a node on which they run. WARNING: When true, such pods might not restart, since they have no controller to do it.",
+									},
+									"ignore_problem_prevented_drain_pods": {
+										Type:        schema.TypeBool,
+										Required:    true,
+										Description: "Pods annotated with rebalancing.cast.ai/prevented-drain=true will not prevent the Rebalancer from deleting a node on which they run. WARNING: When true, such pods may be evicted without being fully drained.",
 									},
 								},
 							},
@@ -382,6 +399,7 @@ func stateToSchedule(d *schema.ResourceData) (*sdk.ScheduledrebalancingV1Rebalan
 				IgnoreProblemJobPods:               lo.ToPtr(aggressiveModeConfigSection[0].(map[string]any)["ignore_problem_job_pods"].(bool)),
 				IgnoreProblemRemovalDisabledPods:   lo.ToPtr(aggressiveModeConfigSection[0].(map[string]any)["ignore_problem_removal_disabled_pods"].(bool)),
 				IgnoreProblemPodsWithoutController: lo.ToPtr(aggressiveModeConfigSection[0].(map[string]any)["ignore_problem_pods_without_controller"].(bool)),
+				IgnoreProblemPreventedDrainPods:    lo.ToPtr(aggressiveModeConfigSection[0].(map[string]any)["ignore_problem_prevented_drain_pods"].(bool)),
 			}
 		}
 
@@ -404,7 +422,9 @@ func stateToSchedule(d *schema.ResourceData) (*sdk.ScheduledrebalancingV1Rebalan
 			NumTargetedNodes: readOptionalNumber[int, int32](launchConfigurationData, "num_targeted_nodes"),
 			RebalancingOptions: &sdk.ScheduledrebalancingV1RebalancingOptions{
 				MinNodes:              readOptionalNumber[int, int32](launchConfigurationData, "rebalancing_min_nodes"),
-				KeepDrainTimeoutNodes: keepDrainTimeoutNodes,
+				KeepDrainTimeoutNodes: keepDrainTimeoutNodes, //nolint:staticcheck // SA1019: deprecated but still sent for backward compatibility
+				EvictGracefully:       readOptionalValue[bool](launchConfigurationData, "evict_gracefully"),
+				MaxSimultaneousDrains: readOptionalNumber[int, int32](launchConfigurationData, "max_simultaneous_drains"),
 				ExecutionConditions:   executionConditions,
 				AggressiveMode:        aggressiveMode, //nolint:staticcheck // SA1019: deprecated but still used for backward compatibility
 				AggressiveModeConfig:  aggressiveModeConfig,
@@ -439,6 +459,8 @@ func scheduleToState(schedule *sdk.ScheduledrebalancingV1RebalancingSchedule, d 
 	if schedule.LaunchConfiguration.RebalancingOptions != nil {
 		launchConfig["rebalancing_min_nodes"] = schedule.LaunchConfiguration.RebalancingOptions.MinNodes
 		launchConfig["keep_drain_timeout_nodes"] = schedule.LaunchConfiguration.RebalancingOptions.KeepDrainTimeoutNodes
+		launchConfig["evict_gracefully"] = schedule.LaunchConfiguration.RebalancingOptions.EvictGracefully
+		launchConfig["max_simultaneous_drains"] = schedule.LaunchConfiguration.RebalancingOptions.MaxSimultaneousDrains
 		launchConfig["aggressive_mode"] = schedule.LaunchConfiguration.RebalancingOptions.AggressiveMode //nolint:staticcheck // AggressiveMode is deprecated but still supported for backwards compatibility
 		launchConfig["target_node_selection_algorithm"] = schedule.LaunchConfiguration.TargetNodeSelectionAlgorithm
 		if schedule.LaunchConfiguration.RebalancingOptions.AggressiveModeConfig != nil {
@@ -448,6 +470,7 @@ func scheduleToState(schedule *sdk.ScheduledrebalancingV1RebalancingSchedule, d 
 					"ignore_problem_job_pods":                schedule.LaunchConfiguration.RebalancingOptions.AggressiveModeConfig.IgnoreProblemJobPods,
 					"ignore_problem_removal_disabled_pods":   schedule.LaunchConfiguration.RebalancingOptions.AggressiveModeConfig.IgnoreProblemRemovalDisabledPods,
 					"ignore_problem_pods_without_controller": schedule.LaunchConfiguration.RebalancingOptions.AggressiveModeConfig.IgnoreProblemPodsWithoutController,
+					"ignore_problem_prevented_drain_pods":    schedule.LaunchConfiguration.RebalancingOptions.AggressiveModeConfig.IgnoreProblemPreventedDrainPods,
 				},
 			}
 		}

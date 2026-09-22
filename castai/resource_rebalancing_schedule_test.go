@@ -4,9 +4,52 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/stretchr/testify/require"
 )
+
+func TestRebalancingSchedule_stateToSchedule_EvictGracefullyAndDrainOptions(t *testing.T) {
+	r := require.New(t)
+	resource := resourceRebalancingSchedule()
+
+	state := terraform.NewInstanceStateShimmedFromValue(cty.ObjectVal(map[string]cty.Value{
+		"name": cty.StringVal("test-schedule"),
+		"schedule": cty.ListVal([]cty.Value{cty.ObjectVal(map[string]cty.Value{
+			"cron": cty.StringVal("5 4 * * *"),
+		})}),
+		"trigger_conditions": cty.ListVal([]cty.Value{cty.ObjectVal(map[string]cty.Value{
+			"savings_percentage": cty.NumberFloatVal(15),
+			"ignore_savings":     cty.BoolVal(false),
+		})}),
+		"launch_configuration": cty.ListVal([]cty.Value{cty.ObjectVal(map[string]cty.Value{
+			"evict_gracefully":        cty.BoolVal(true),
+			"max_simultaneous_drains": cty.NumberIntVal(5),
+			"aggressive_mode_config": cty.ListVal([]cty.Value{cty.ObjectVal(map[string]cty.Value{
+				"ignore_local_persistent_volumes":        cty.BoolVal(true),
+				"ignore_problem_job_pods":                cty.BoolVal(true),
+				"ignore_problem_removal_disabled_pods":   cty.BoolVal(false),
+				"ignore_problem_pods_without_controller": cty.BoolVal(false),
+				"ignore_problem_prevented_drain_pods":    cty.BoolVal(true),
+			})}),
+		})}),
+	}), 0)
+
+	schedule, err := stateToSchedule(resource.Data(state))
+	r.NoError(err)
+
+	opts := schedule.LaunchConfiguration.RebalancingOptions
+	r.NotNil(opts)
+	r.NotNil(opts.EvictGracefully)
+	r.True(*opts.EvictGracefully)
+	r.NotNil(opts.MaxSimultaneousDrains)
+	r.Equal(int32(5), *opts.MaxSimultaneousDrains)
+	r.NotNil(opts.AggressiveModeConfig)
+	r.NotNil(opts.AggressiveModeConfig.IgnoreProblemPreventedDrainPods)
+	r.True(*opts.AggressiveModeConfig.IgnoreProblemPreventedDrainPods)
+}
 
 func TestAccCloudAgnostic_ResourceRebalancingSchedule_basic(t *testing.T) {
 	rName := fmt.Sprintf("%v-rebalancing-schedule-%v", ResourcePrefix, acctest.RandString(8))

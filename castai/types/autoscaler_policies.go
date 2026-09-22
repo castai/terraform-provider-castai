@@ -52,7 +52,7 @@ type SpotInstances struct {
 	MaxReclaimRate              int                          `mapstructure:"max_reclaim_rate" json:"maxReclaimRate"`
 	SpotBackups                 *SpotBackups                 `mapstructure:"spot_backups" json:"spotBackups,omitempty"`
 	SpotDiversityEnabled        bool                         `mapstructure:"spot_diversity_enabled" json:"spotDiversityEnabled"`
-	SpotDiversityPriceIncrease  int                          `mapstructure:"spot_diversity_price_increase_limit" json:"spotDiversityPriceIncrease"`
+	SpotDiversityPriceIncrease  int                          `mapstructure:"spot_diversity_price_increase_limit" json:"spotDiversityPriceIncreaseLimitPercent"`
 	SpotInterruptionPredictions *SpotInterruptionPredictions `mapstructure:"spot_interruption_predictions" json:"spotInterruptionPredictions,omitempty"`
 }
 
