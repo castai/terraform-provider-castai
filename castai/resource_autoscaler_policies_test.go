@@ -48,24 +48,24 @@ func okHTTPResponse() *http.Response {
 
 func testAutoscalerPoliciesV2() *cluster_autoscaler_v2.PoliciesV2 {
 	return &cluster_autoscaler_v2.PoliciesV2{
-		Enabled:    lo.ToPtr(true),
-		ScopedMode: lo.ToPtr(true),
-		Version:    lo.ToPtr("v5"),
+		Enabled:    new(true),
+		ScopedMode: new(true),
+		Version:    new("v5"),
 		ClusterLimits: &cluster_autoscaler_v2.ClusterLimitsPolicy{
-			Enabled: lo.ToPtr(true),
+			Enabled: new(true),
 			Cpu: &cluster_autoscaler_v2.ClusterLimitsCpu{
 				MaxCores: 16,
-				MinCores: lo.ToPtr(int32(2)),
+				MinCores: new(int32(2)),
 			},
 		},
 		NodeDownscaler: &cluster_autoscaler_v2.NodeDownscalerPolicy{
-			EmptyNodesDelay:   lo.ToPtr("3m"),
-			EmptyNodesEnabled: lo.ToPtr(true),
+			EmptyNodesDelay:   new("3m"),
+			EmptyNodesEnabled: new(true),
 		},
 		UnschedulablePods: &cluster_autoscaler_v2.UnschedulablePodsPolicy{
-			Enabled:                        lo.ToPtr(true),
-			PartialTemplateMatchingEnabled: lo.ToPtr(true),
-			PodPinner:                      &cluster_autoscaler_v2.PodPinner{Enabled: lo.ToPtr(true)},
+			Enabled:                        new(true),
+			PartialTemplateMatchingEnabled: new(true),
+			PodPinner:                      &cluster_autoscaler_v2.PodPinner{Enabled: new(true)},
 		},
 	}
 }
@@ -460,7 +460,7 @@ func TestResourceAutoscalerPolicies_Read_UnschedulablePodsPartialMatchingOmitted
 
 	policies := &cluster_autoscaler_v2.PoliciesV2{
 		UnschedulablePods: &cluster_autoscaler_v2.UnschedulablePodsPolicy{
-			Enabled: lo.ToPtr(true),
+			Enabled: new(true),
 		},
 	}
 
