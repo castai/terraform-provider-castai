@@ -72,6 +72,7 @@ module "castai_eks_cluster" {
 When applying, the following changes are expected in the Terraform plan:
 - `helm_release.castai_workload_autoscaler` will include `preDeleteHook.enabled=false` and `crds.keep=true` settings.
 - `helm_release`s might be updated to newer versions.
+- Some `helm_release`s might show up as being `moved`.
 
 **Apply these changes** before continuing with the next phase.
 
@@ -94,7 +95,7 @@ module "castai_eks_cluster" {
 ```
 
 When applying, the following changes are expected in the Terraform plan:
-- Some existing `helm_releases` being deleted. Depending on your settings, the following `helm_release`
+- Some existing `helm_release`s being deleted. Depending on your settings, the following `helm_release`
   resources _may_ be deleted:
   - `castai_agent`
   - `castai_cluster_controller`
@@ -130,6 +131,10 @@ The migration happens in three phases:
 1. A `castctl` command will remove Helm release state from your cluster. 
 2. A Terraform run installs the umbrella chart adopting the existing resources.
 3. Another `castctl` command cleans up orphaned resources.
+
+Between phase 2 and 3, some components will run duplicated in the cluster. This is expected, but might require
+additional cluster resources (CPU and memory). If you're using Cast AI Node Autoscaling, you should be covered, but
+otherwise you might have to accommodate for the additional components.
 
 Before starting the migration, confirm that you have [castctl](https://docs.cast.ai/docs/connect-with-castctl) installed
 with version `0.15.0` or newer:
