@@ -114,14 +114,22 @@ func resourceRebalancingSchedule() *schema.Resource {
 							Description:      "Minimum number of nodes that should be kept in the cluster after rebalancing.",
 						},
 						"keep_drain_timeout_nodes": {
-							Type:        schema.TypeBool,
-							Optional:    true,
+							Type:     schema.TypeBool,
+							Optional: true,
+							// Computed because the API aliases this field to
+							// evictGracefully in responses.
+							Computed:    true,
 							Description: "Defines whether the nodes that failed to get drained until a predefined timeout, will be kept with a rebalancing.cast.ai/status=drain-failed annotation instead of forcefully drained.",
 							Deprecated:  "Use evict_gracefully instead.",
 						},
 						"evict_gracefully": {
-							Type:        schema.TypeBool,
-							Optional:    true,
+							Type:     schema.TypeBool,
+							Optional: true,
+							// Computed because the API aliases the deprecated
+							// keep_drain_timeout_nodes to this field: a response
+							// always populates it, so a config that only sets the
+							// legacy field would otherwise show a perpetual diff.
+							Computed:    true,
 							Description: "Defines whether the nodes that failed to get drained until a predefined timeout, will be kept with a rebalancing.cast.ai/status=drain-failed annotation instead of forcefully drained. Replaces the deprecated keep_drain_timeout_nodes.",
 						},
 						"max_simultaneous_drains": {
