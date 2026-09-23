@@ -116,10 +116,10 @@ func resourceRebalancingSchedule() *schema.Resource {
 						"evict_gracefully": {
 							Type:     schema.TypeBool,
 							Optional: true,
-							// Computed because the API always returns a value for it
-							// (it also backs the removed legacy
-							// keep_drain_timeout_nodes field), so a config that
-							// leaves it unset would otherwise show a perpetual diff.
+							// Computed: the API returns the stored value on every read,
+							// so a config that removes the attribute after it was
+							// set must not plan it back to null (the value is not
+							// resent when unset, so the plan would never converge).
 							Computed:    true,
 							Description: "Defines whether the nodes that failed to get drained until a predefined timeout, will be kept with a rebalancing.cast.ai/status=drain-failed annotation instead of forcefully drained.",
 						},
