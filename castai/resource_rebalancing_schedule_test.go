@@ -37,8 +37,7 @@ func TestRebalancingSchedule_stateToSchedule_EvictGracefullyAndDrainOptions(t *t
 			})}),
 		})}),
 	}), 0)
-	// Raw config sets the optional fields explicitly, including the deprecated
-	// alias (same value, allowed) so it is sent for backward compatibility.
+	// Raw config sets the fields explicitly (aliases set to the same value).
 	state.RawConfig = cty.ObjectVal(map[string]cty.Value{
 		"launch_configuration": cty.ListVal([]cty.Value{cty.ObjectVal(map[string]cty.Value{
 			"evict_gracefully":         cty.BoolVal(true),
@@ -62,12 +61,10 @@ func TestRebalancingSchedule_stateToSchedule_EvictGracefullyAndDrainOptions(t *t
 	r.NotNil(opts.AggressiveModeConfig)
 	r.NotNil(opts.AggressiveModeConfig.IgnoreProblemPreventedDrainPods)
 	r.True(*opts.AggressiveModeConfig.IgnoreProblemPreventedDrainPods)
-	// The deprecated alias is still sent when set in config.
 	r.NotNil(opts.KeepDrainTimeoutNodes) //nolint:staticcheck // SA1019
 	r.True(*opts.KeepDrainTimeoutNodes)  //nolint:staticcheck // SA1019
 
-	// When the optional field is omitted (null in config), it must stay nil
-	// in the request body instead of being sent as an explicit false.
+	// Omitted (null) fields must stay nil in the request body.
 	unsetState := terraform.NewInstanceStateShimmedFromValue(cty.ObjectVal(map[string]cty.Value{
 		"name": cty.StringVal("test-schedule-unset"),
 		"schedule": cty.ListVal([]cty.Value{cty.ObjectVal(map[string]cty.Value{
@@ -87,8 +84,7 @@ func TestRebalancingSchedule_stateToSchedule_EvictGracefullyAndDrainOptions(t *t
 			})}),
 		})}),
 	}), 0)
-	// Raw config omits the field: it is null, as Terraform sends it when the
-	// user does not set it.
+	// Raw config leaves the fields unset (null).
 	unsetState.RawConfig = cty.ObjectVal(map[string]cty.Value{
 		"launch_configuration": cty.ListVal([]cty.Value{cty.ObjectVal(map[string]cty.Value{
 			"evict_gracefully":        cty.NullVal(cty.Bool),
@@ -105,8 +101,7 @@ func TestRebalancingSchedule_stateToSchedule_EvictGracefullyAndDrainOptions(t *t
 	r.NotNil(unsetOpts)
 	r.NotNil(unsetOpts.AggressiveModeConfig)
 	r.Nil(unsetOpts.AggressiveModeConfig.IgnoreProblemPreventedDrainPods)
-	// Unset optional fields must stay nil so they are omitted from the
-	// request body instead of being sent as explicit false/zero.
+	// Unset optional fields stay nil.
 	r.Nil(unsetOpts.EvictGracefully)
 	r.Nil(unsetOpts.MaxSimultaneousDrains)
 }

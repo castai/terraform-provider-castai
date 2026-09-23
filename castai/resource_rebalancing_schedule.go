@@ -119,9 +119,7 @@ func resourceRebalancingSchedule() *schema.Resource {
 						"keep_drain_timeout_nodes": {
 							Type:     schema.TypeBool,
 							Optional: true,
-							// Computed: the API aliases this field to evictGracefully in
-							// responses, so a legacy config that sets only this field
-							// must not diff against the aliased value.
+							// Computed: the API aliases this field to evictGracefully in responses.
 							Computed:    true,
 							Description: "Defines whether the nodes that failed to get drained until a predefined timeout, will be kept with a rebalancing.cast.ai/status=drain-failed annotation instead of forcefully drained.",
 							Deprecated:  "Use evict_gracefully instead. The two fields are aliases of the same setting; migrate by setting evict_gracefully to the same value.",
@@ -129,10 +127,7 @@ func resourceRebalancingSchedule() *schema.Resource {
 						"evict_gracefully": {
 							Type:     schema.TypeBool,
 							Optional: true,
-							// Computed: the API returns the stored value on every read,
-							// so a config that removes the attribute after it was
-							// set must not plan it back to null (the value is not
-							// resent when unset, so the plan would never converge).
+							// Computed: prevents a perpetual diff when removed from config after being set.
 							Computed:    true,
 							Description: "Defines whether the nodes that failed to get drained until a predefined timeout, will be kept with a rebalancing.cast.ai/status=drain-failed annotation instead of forcefully drained. Replaces the deprecated keep_drain_timeout_nodes.",
 						},
@@ -367,18 +362,14 @@ func rebalancingScheduleStateImporter(ctx context.Context, d *schema.ResourceDat
 	return []*schema.ResourceData{d}, nil
 }
 
-// resourceRebalancingScheduleCustomizeDiff rejects plans that set both the
-// deprecated keep_drain_timeout_nodes and its replacement evict_gracefully to
-// different values: the API treats them as the same knob (aliases), so an
-// ambiguous combination must fail at plan time instead of silently picking
-// one side.
+// resourceRebalancingScheduleCustomizeDiff rejects plans that set both alias
+// fields (keep_drain_timeout_nodes, evict_gracefully) to conflicting values.
 func resourceRebalancingScheduleCustomizeDiff(_ context.Context, d *schema.ResourceDiff, _ interface{}) error {
 	return validateDrainOptionsAlias(d.GetRawConfig(), d.Get("launch_configuration").([]interface{}))
 }
 
-// validateDrainOptionsAlias returns an error when the raw config sets both
-// alias fields with conflicting values. Setting both to the same value is
-// allowed (harmless during migration).
+// validateDrainOptionsAlias errors when the raw config sets both alias fields
+// with conflicting values; equal values are allowed during migration.
 func validateDrainOptionsAlias(rawConfig cty.Value, launchConfig []interface{}) error {
 	if !rawConfigHasField(rawConfig, "launch_configuration", "keep_drain_timeout_nodes") ||
 		!rawConfigHasField(rawConfig, "launch_configuration", "evict_gracefully") {
@@ -399,10 +390,9 @@ func validateDrainOptionsAlias(rawConfig cty.Value, launchConfig []interface{}) 
 	return nil
 }
 
-// optionalLaunchConfigBool returns nil unless the launch_configuration
-// attribute is set in the raw config. The SDK field serializes non-nil
-// pointers unconditionally (no omitempty), so a zero-filled value would
-// otherwise be sent as an explicit false and override API defaults.
+// optionalLaunchConfigBool returns nil unless the attribute is set in the raw
+// config, so an unset value is omitted from the request body instead of being
+// sent as an explicit false.
 func optionalLaunchConfigBool(d *schema.ResourceData, launchConfig map[string]any, attr string) *bool {
 	if !rawConfigHasField(d.GetRawConfig(), "launch_configuration", attr) {
 		return nil
@@ -410,9 +400,7 @@ func optionalLaunchConfigBool(d *schema.ResourceData, launchConfig map[string]an
 	return lo.ToPtr(launchConfig[attr].(bool))
 }
 
-// optionalLaunchConfigInt32 behaves like optionalLaunchConfigBool for int
-// attributes: an unset value stays nil (omitted from the request body)
-// instead of being sent as an explicit zero.
+// optionalLaunchConfigInt32 is optionalLaunchConfigBool for int attributes.
 func optionalLaunchConfigInt32(d *schema.ResourceData, launchConfig map[string]any, attr string) *int32 {
 	if !rawConfigHasField(d.GetRawConfig(), "launch_configuration", attr) {
 		return nil
@@ -464,8 +452,7 @@ func stateToSchedule(d *schema.ResourceData) (*sdk.ScheduledrebalancingV1Rebalan
 				IgnoreProblemRemovalDisabledPods:   lo.ToPtr(aggressiveModeConfigData["ignore_problem_removal_disabled_pods"].(bool)),
 				IgnoreProblemPodsWithoutController: lo.ToPtr(aggressiveModeConfigData["ignore_problem_pods_without_controller"].(bool)),
 			}
-			// Optional field: read presence from the raw config so an unset value
-			// stays nil in the request body instead of an explicit false.
+			// Optional field: stays nil when unset in the raw config.
 			if rawConfigHasField(d.GetRawConfig(), "launch_configuration", "aggressive_mode_config", "ignore_problem_prevented_drain_pods") {
 				aggressiveModeConfig.IgnoreProblemPreventedDrainPods = lo.ToPtr(aggressiveModeConfigData["ignore_problem_prevented_drain_pods"].(bool))
 			}
@@ -528,8 +515,7 @@ func scheduleToState(schedule *sdk.ScheduledrebalancingV1RebalancingSchedule, d 
 		launchConfig["rebalancing_min_nodes"] = schedule.LaunchConfiguration.RebalancingOptions.MinNodes
 		keepDrainTimeoutNodes := schedule.LaunchConfiguration.RebalancingOptions.KeepDrainTimeoutNodes //nolint:staticcheck // SA1019: deprecated but still returned for backward compatibility
 		if keepDrainTimeoutNodes == nil {
-			// The API aliases the deprecated field to evictGracefully; fall
-			// back so legacy configs don't show a perpetual diff.
+			// The API aliases the deprecated field to evictGracefully.
 			keepDrainTimeoutNodes = schedule.LaunchConfiguration.RebalancingOptions.EvictGracefully
 		}
 		launchConfig["keep_drain_timeout_nodes"] = keepDrainTimeoutNodes
