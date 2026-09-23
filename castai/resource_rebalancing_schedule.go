@@ -27,7 +27,10 @@ func resourceRebalancingSchedule() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: rebalancingScheduleStateImporter,
 		},
-		Description: "CAST AI rebalancing schedule resource to manage rebalancing schedules.",
+		CustomizeDiff: resourceRebalancingScheduleCustomizeDiff,
+		Description: "CAST AI rebalancing schedule resource to manage rebalancing schedules. " +
+			"The `keep_drain_timeout_nodes` attribute is deprecated in favor of `evict_gracefully` " +
+			"(both are aliases of the same setting); migrate by renaming the attribute and keeping the same value.",
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(1 * time.Minute),
@@ -113,6 +116,16 @@ func resourceRebalancingSchedule() *schema.Resource {
 							ValidateDiagFunc: validation.ToDiagFunc(validation.IntAtLeast(0)),
 							Description:      "Minimum number of nodes that should be kept in the cluster after rebalancing.",
 						},
+						"keep_drain_timeout_nodes": {
+							Type:     schema.TypeBool,
+							Optional: true,
+							// Computed: the API aliases this field to evictGracefully in
+							// responses, so a legacy config that sets only this field
+							// must not diff against the aliased value.
+							Computed:    true,
+							Description: "Defines whether the nodes that failed to get drained until a predefined timeout, will be kept with a rebalancing.cast.ai/status=drain-failed annotation instead of forcefully drained.",
+							Deprecated:  "Use evict_gracefully instead. The two fields are aliases of the same setting; migrate by setting evict_gracefully to the same value.",
+						},
 						"evict_gracefully": {
 							Type:     schema.TypeBool,
 							Optional: true,
@@ -121,7 +134,7 @@ func resourceRebalancingSchedule() *schema.Resource {
 							// set must not plan it back to null (the value is not
 							// resent when unset, so the plan would never converge).
 							Computed:    true,
-							Description: "Defines whether the nodes that failed to get drained until a predefined timeout, will be kept with a rebalancing.cast.ai/status=drain-failed annotation instead of forcefully drained.",
+							Description: "Defines whether the nodes that failed to get drained until a predefined timeout, will be kept with a rebalancing.cast.ai/status=drain-failed annotation instead of forcefully drained. Replaces the deprecated keep_drain_timeout_nodes.",
 						},
 						"max_simultaneous_drains": {
 							Type:             schema.TypeInt,
@@ -354,6 +367,38 @@ func rebalancingScheduleStateImporter(ctx context.Context, d *schema.ResourceDat
 	return []*schema.ResourceData{d}, nil
 }
 
+// resourceRebalancingScheduleCustomizeDiff rejects plans that set both the
+// deprecated keep_drain_timeout_nodes and its replacement evict_gracefully to
+// different values: the API treats them as the same knob (aliases), so an
+// ambiguous combination must fail at plan time instead of silently picking
+// one side.
+func resourceRebalancingScheduleCustomizeDiff(_ context.Context, d *schema.ResourceDiff, _ interface{}) error {
+	return validateDrainOptionsAlias(d.GetRawConfig(), d.Get("launch_configuration").([]interface{}))
+}
+
+// validateDrainOptionsAlias returns an error when the raw config sets both
+// alias fields with conflicting values. Setting both to the same value is
+// allowed (harmless during migration).
+func validateDrainOptionsAlias(rawConfig cty.Value, launchConfig []interface{}) error {
+	if !rawConfigHasField(rawConfig, "launch_configuration", "keep_drain_timeout_nodes") ||
+		!rawConfigHasField(rawConfig, "launch_configuration", "evict_gracefully") {
+		return nil
+	}
+	if len(launchConfig) == 0 {
+		return nil
+	}
+	section, ok := launchConfig[0].(map[string]interface{})
+	if !ok {
+		return nil
+	}
+	keep := section["keep_drain_timeout_nodes"].(bool)
+	evict := section["evict_gracefully"].(bool)
+	if keep != evict {
+		return fmt.Errorf("keep_drain_timeout_nodes is deprecated and aliases evict_gracefully; both are set with conflicting values (keep_drain_timeout_nodes = %t, evict_gracefully = %t). Remove keep_drain_timeout_nodes and set only evict_gracefully", keep, evict)
+	}
+	return nil
+}
+
 // optionalLaunchConfigBool returns nil unless the launch_configuration
 // attribute is set in the raw config. The SDK field serializes non-nil
 // pointers unconditionally (no omitempty), so a zero-filled value would
@@ -445,6 +490,7 @@ func stateToSchedule(d *schema.ResourceData) (*sdk.ScheduledrebalancingV1Rebalan
 			NumTargetedNodes: readOptionalNumber[int, int32](launchConfigurationData, "num_targeted_nodes"),
 			RebalancingOptions: &sdk.ScheduledrebalancingV1RebalancingOptions{
 				MinNodes:              readOptionalNumber[int, int32](launchConfigurationData, "rebalancing_min_nodes"),
+				KeepDrainTimeoutNodes: optionalLaunchConfigBool(d, launchConfigurationData, "keep_drain_timeout_nodes"), //nolint:staticcheck // SA1019: deprecated but still sent for backward compatibility
 				EvictGracefully:       optionalLaunchConfigBool(d, launchConfigurationData, "evict_gracefully"),
 				MaxSimultaneousDrains: optionalLaunchConfigInt32(d, launchConfigurationData, "max_simultaneous_drains"),
 				ExecutionConditions:   executionConditions,
@@ -480,6 +526,13 @@ func scheduleToState(schedule *sdk.ScheduledrebalancingV1RebalancingSchedule, d 
 
 	if schedule.LaunchConfiguration.RebalancingOptions != nil {
 		launchConfig["rebalancing_min_nodes"] = schedule.LaunchConfiguration.RebalancingOptions.MinNodes
+		keepDrainTimeoutNodes := schedule.LaunchConfiguration.RebalancingOptions.KeepDrainTimeoutNodes //nolint:staticcheck // SA1019: deprecated but still returned for backward compatibility
+		if keepDrainTimeoutNodes == nil {
+			// The API aliases the deprecated field to evictGracefully; fall
+			// back so legacy configs don't show a perpetual diff.
+			keepDrainTimeoutNodes = schedule.LaunchConfiguration.RebalancingOptions.EvictGracefully
+		}
+		launchConfig["keep_drain_timeout_nodes"] = keepDrainTimeoutNodes
 		launchConfig["evict_gracefully"] = schedule.LaunchConfiguration.RebalancingOptions.EvictGracefully
 		launchConfig["max_simultaneous_drains"] = schedule.LaunchConfiguration.RebalancingOptions.MaxSimultaneousDrains
 		launchConfig["aggressive_mode"] = schedule.LaunchConfiguration.RebalancingOptions.AggressiveMode //nolint:staticcheck // AggressiveMode is deprecated but still supported for backwards compatibility

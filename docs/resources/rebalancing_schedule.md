@@ -3,12 +3,12 @@
 page_title: "castai_rebalancing_schedule Resource - terraform-provider-castai"
 subcategory: ""
 description: |-
-  CAST AI rebalancing schedule resource to manage rebalancing schedules.
+  CAST AI rebalancing schedule resource to manage rebalancing schedules. The keep_drain_timeout_nodes attribute is deprecated in favor of evict_gracefully (both are aliases of the same setting); migrate by renaming the attribute and keeping the same value.
 ---
 
 # castai_rebalancing_schedule (Resource)
 
-CAST AI rebalancing schedule resource to manage rebalancing schedules.
+CAST AI rebalancing schedule resource to manage rebalancing schedules. The `keep_drain_timeout_nodes` attribute is deprecated in favor of `evict_gracefully` (both are aliases of the same setting); migrate by renaming the attribute and keeping the same value.
 
 ## Example Usage
 
@@ -86,8 +86,9 @@ Optional:
 - `aggressive_mode` (Boolean, Deprecated) Deprecated: Use aggressive_mode_config instead. When enabled, rebalancing considers all problematic pods (pods without controller, job pods, pods with removal-disabled annotation) as not-problematic.
 - `aggressive_mode_config` (Block List, Max: 1) Advanced configuration for the aggressive rebalancing mode. This is the recommended way to configure aggressive rebalancing. Please keep the `aggressive_mode` parameter unset or set it `aggressive_mode=false` before using this config option. When the legacy `aggressive_mode` is set to `true`, it takes precedence over this option. (see [below for nested schema](#nestedblock--launch_configuration--aggressive_mode_config))
 - `drain_failure_config` (Block List, Max: 1) Configures behavior when a node fails to drain during rebalancing. Relevant only when `evict_gracefully` is true. (see [below for nested schema](#nestedblock--launch_configuration--drain_failure_config))
-- `evict_gracefully` (Boolean) Defines whether the nodes that failed to get drained until a predefined timeout, will be kept with a rebalancing.cast.ai/status=drain-failed annotation instead of forcefully drained.
+- `evict_gracefully` (Boolean) Defines whether the nodes that failed to get drained until a predefined timeout, will be kept with a rebalancing.cast.ai/status=drain-failed annotation instead of forcefully drained. Replaces the deprecated keep_drain_timeout_nodes.
 - `execution_conditions` (Block List, Max: 1) (see [below for nested schema](#nestedblock--launch_configuration--execution_conditions))
+- `keep_drain_timeout_nodes` (Boolean, Deprecated) Defines whether the nodes that failed to get drained until a predefined timeout, will be kept with a rebalancing.cast.ai/status=drain-failed annotation instead of forcefully drained.
 - `max_simultaneous_drains` (Number) Number of nodes to drain simultaneously. When unspecified, defaults to unlimited.
 - `node_ttl_seconds` (Number) Specifies amount of time since node creation before the node is allowed to be considered for automated rebalancing.
 - `num_targeted_nodes` (Number) Maximum number of nodes that will be selected for rebalancing. 0 means all nodes in the cluster can be selected.

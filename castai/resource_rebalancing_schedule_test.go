@@ -25,8 +25,9 @@ func TestRebalancingSchedule_stateToSchedule_EvictGracefullyAndDrainOptions(t *t
 			"ignore_savings":     cty.BoolVal(false),
 		})}),
 		"launch_configuration": cty.ListVal([]cty.Value{cty.ObjectVal(map[string]cty.Value{
-			"evict_gracefully":        cty.BoolVal(true),
-			"max_simultaneous_drains": cty.NumberIntVal(5),
+			"evict_gracefully":         cty.BoolVal(true),
+			"keep_drain_timeout_nodes": cty.BoolVal(true),
+			"max_simultaneous_drains":  cty.NumberIntVal(5),
 			"aggressive_mode_config": cty.ListVal([]cty.Value{cty.ObjectVal(map[string]cty.Value{
 				"ignore_local_persistent_volumes":        cty.BoolVal(true),
 				"ignore_problem_job_pods":                cty.BoolVal(true),
@@ -36,11 +37,13 @@ func TestRebalancingSchedule_stateToSchedule_EvictGracefullyAndDrainOptions(t *t
 			})}),
 		})}),
 	}), 0)
-	// Raw config sets the optional fields explicitly.
+	// Raw config sets the optional fields explicitly, including the deprecated
+	// alias (same value, allowed) so it is sent for backward compatibility.
 	state.RawConfig = cty.ObjectVal(map[string]cty.Value{
 		"launch_configuration": cty.ListVal([]cty.Value{cty.ObjectVal(map[string]cty.Value{
-			"evict_gracefully":        cty.BoolVal(true),
-			"max_simultaneous_drains": cty.NumberIntVal(5),
+			"evict_gracefully":         cty.BoolVal(true),
+			"keep_drain_timeout_nodes": cty.BoolVal(true),
+			"max_simultaneous_drains":  cty.NumberIntVal(5),
 			"aggressive_mode_config": cty.ListVal([]cty.Value{cty.ObjectVal(map[string]cty.Value{
 				"ignore_problem_prevented_drain_pods": cty.BoolVal(true),
 			})}),
@@ -59,6 +62,9 @@ func TestRebalancingSchedule_stateToSchedule_EvictGracefullyAndDrainOptions(t *t
 	r.NotNil(opts.AggressiveModeConfig)
 	r.NotNil(opts.AggressiveModeConfig.IgnoreProblemPreventedDrainPods)
 	r.True(*opts.AggressiveModeConfig.IgnoreProblemPreventedDrainPods)
+	// The deprecated alias is still sent when set in config.
+	r.NotNil(opts.KeepDrainTimeoutNodes) //nolint:staticcheck // SA1019
+	r.True(*opts.KeepDrainTimeoutNodes)  //nolint:staticcheck // SA1019
 
 	// When the optional field is omitted (null in config), it must stay nil
 	// in the request body instead of being sent as an explicit false.
@@ -103,6 +109,42 @@ func TestRebalancingSchedule_stateToSchedule_EvictGracefullyAndDrainOptions(t *t
 	// request body instead of being sent as explicit false/zero.
 	r.Nil(unsetOpts.EvictGracefully)
 	r.Nil(unsetOpts.MaxSimultaneousDrains)
+}
+
+func TestRebalancingSchedule_validateDrainOptionsAlias(t *testing.T) {
+	r := require.New(t)
+
+	launchConfig := func(keep, evict interface{}) []interface{} {
+		return []interface{}{map[string]interface{}{
+			"keep_drain_timeout_nodes": keep,
+			"evict_gracefully":         evict,
+		}}
+	}
+	rawConfig := func(keep, evict cty.Value) cty.Value {
+		return cty.ObjectVal(map[string]cty.Value{
+			"launch_configuration": cty.ListVal([]cty.Value{cty.ObjectVal(map[string]cty.Value{
+				"keep_drain_timeout_nodes": keep,
+				"evict_gracefully":         evict,
+			})}),
+		})
+	}
+
+	// Only the deprecated field set: allowed.
+	r.NoError(validateDrainOptionsAlias(
+		rawConfig(cty.BoolVal(true), cty.NullVal(cty.Bool)), launchConfig(true, false)))
+	// Only the replacement set: allowed.
+	r.NoError(validateDrainOptionsAlias(
+		rawConfig(cty.NullVal(cty.Bool), cty.BoolVal(false)), launchConfig(false, false)))
+	// Neither set: allowed.
+	r.NoError(validateDrainOptionsAlias(
+		rawConfig(cty.NullVal(cty.Bool), cty.NullVal(cty.Bool)), launchConfig(false, false)))
+	// Both set to the same value: allowed during migration.
+	r.NoError(validateDrainOptionsAlias(
+		rawConfig(cty.BoolVal(true), cty.BoolVal(true)), launchConfig(true, true)))
+	// Both set with conflicting values: rejected at plan time.
+	err := validateDrainOptionsAlias(
+		rawConfig(cty.BoolVal(true), cty.BoolVal(false)), launchConfig(true, false))
+	r.ErrorContains(err, "conflicting values")
 }
 
 func TestAccCloudAgnostic_ResourceRebalancingSchedule_basic(t *testing.T) {
@@ -247,7 +289,7 @@ resource "castai_rebalancing_schedule" "test" {
 		savings_percentage = 10
 	}
 	launch_configuration {
-		evict_gracefully = true
+		keep_drain_timeout_nodes = true
 		drain_failure_config {
 			disable_uncordon       = false
 			uncordon_after_seconds = 7200
