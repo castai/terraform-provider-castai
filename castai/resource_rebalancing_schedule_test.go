@@ -36,9 +36,11 @@ func TestRebalancingSchedule_stateToSchedule_EvictGracefullyAndDrainOptions(t *t
 			})}),
 		})}),
 	}), 0)
-	// Raw config sets the field explicitly.
+	// Raw config sets the optional fields explicitly.
 	state.RawConfig = cty.ObjectVal(map[string]cty.Value{
 		"launch_configuration": cty.ListVal([]cty.Value{cty.ObjectVal(map[string]cty.Value{
+			"evict_gracefully":        cty.BoolVal(true),
+			"max_simultaneous_drains": cty.NumberIntVal(5),
 			"aggressive_mode_config": cty.ListVal([]cty.Value{cty.ObjectVal(map[string]cty.Value{
 				"ignore_problem_prevented_drain_pods": cty.BoolVal(true),
 			})}),
@@ -83,6 +85,9 @@ func TestRebalancingSchedule_stateToSchedule_EvictGracefullyAndDrainOptions(t *t
 	// user does not set it.
 	unsetState.RawConfig = cty.ObjectVal(map[string]cty.Value{
 		"launch_configuration": cty.ListVal([]cty.Value{cty.ObjectVal(map[string]cty.Value{
+			"evict_gracefully":         cty.NullVal(cty.Bool),
+			"max_simultaneous_drains":  cty.NullVal(cty.Number),
+			"keep_drain_timeout_nodes": cty.NullVal(cty.Bool),
 			"aggressive_mode_config": cty.ListVal([]cty.Value{cty.ObjectVal(map[string]cty.Value{
 				"ignore_problem_prevented_drain_pods": cty.NullVal(cty.Bool),
 			})}),
@@ -95,6 +100,11 @@ func TestRebalancingSchedule_stateToSchedule_EvictGracefullyAndDrainOptions(t *t
 	r.NotNil(unsetOpts)
 	r.NotNil(unsetOpts.AggressiveModeConfig)
 	r.Nil(unsetOpts.AggressiveModeConfig.IgnoreProblemPreventedDrainPods)
+	// Unset optional fields must stay nil so they are omitted from the
+	// request body instead of being sent as explicit false/zero.
+	r.Nil(unsetOpts.EvictGracefully)
+	r.Nil(unsetOpts.MaxSimultaneousDrains)
+	r.Nil(unsetOpts.KeepDrainTimeoutNodes) //nolint:staticcheck // SA1019
 }
 
 func TestAccCloudAgnostic_ResourceRebalancingSchedule_basic(t *testing.T) {

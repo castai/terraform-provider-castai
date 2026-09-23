@@ -355,6 +355,27 @@ func rebalancingScheduleStateImporter(ctx context.Context, d *schema.ResourceDat
 	return []*schema.ResourceData{d}, nil
 }
 
+// optionalLaunchConfigBool returns nil unless the launch_configuration
+// attribute is set in the raw config. The SDK field serializes non-nil
+// pointers unconditionally (no omitempty), so a zero-filled value would
+// otherwise be sent as an explicit false and override API defaults.
+func optionalLaunchConfigBool(d *schema.ResourceData, launchConfig map[string]any, attr string) *bool {
+	if !rawConfigHasField(d.GetRawConfig(), "launch_configuration", attr) {
+		return nil
+	}
+	return lo.ToPtr(launchConfig[attr].(bool))
+}
+
+// optionalLaunchConfigInt32 behaves like optionalLaunchConfigBool for int
+// attributes: an unset value stays nil (omitted from the request body)
+// instead of being sent as an explicit zero.
+func optionalLaunchConfigInt32(d *schema.ResourceData, launchConfig map[string]any, attr string) *int32 {
+	if !rawConfigHasField(d.GetRawConfig(), "launch_configuration", attr) {
+		return nil
+	}
+	return lo.ToPtr(int32(launchConfig[attr].(int)))
+}
+
 func stateToSchedule(d *schema.ResourceData) (*sdk.ScheduledrebalancingV1RebalancingSchedule, error) {
 	scheduleData := toSection(d, "schedule")
 
@@ -378,7 +399,7 @@ func stateToSchedule(d *schema.ResourceData) (*sdk.ScheduledrebalancingV1Rebalan
 			return nil, fmt.Errorf("parsing selector: %w", err)
 		}
 
-		keepDrainTimeoutNodes := readOptionalValue[bool](launchConfigurationData, "keep_drain_timeout_nodes")
+		keepDrainTimeoutNodes := optionalLaunchConfigBool(d, launchConfigurationData, "keep_drain_timeout_nodes") //nolint:staticcheck // SA1019: deprecated but still sent for backward compatibility
 
 		var executionConditions *sdk.ScheduledrebalancingV1ExecutionConditions
 		executionConditionsData := launchConfigurationData["execution_conditions"].([]any)
@@ -428,8 +449,8 @@ func stateToSchedule(d *schema.ResourceData) (*sdk.ScheduledrebalancingV1Rebalan
 			RebalancingOptions: &sdk.ScheduledrebalancingV1RebalancingOptions{
 				MinNodes:              readOptionalNumber[int, int32](launchConfigurationData, "rebalancing_min_nodes"),
 				KeepDrainTimeoutNodes: keepDrainTimeoutNodes, //nolint:staticcheck // SA1019: deprecated but still sent for backward compatibility
-				EvictGracefully:       readOptionalValue[bool](launchConfigurationData, "evict_gracefully"),
-				MaxSimultaneousDrains: readOptionalNumber[int, int32](launchConfigurationData, "max_simultaneous_drains"),
+				EvictGracefully:       optionalLaunchConfigBool(d, launchConfigurationData, "evict_gracefully"),
+				MaxSimultaneousDrains: optionalLaunchConfigInt32(d, launchConfigurationData, "max_simultaneous_drains"),
 				ExecutionConditions:   executionConditions,
 				AggressiveMode:        aggressiveMode, //nolint:staticcheck // SA1019: deprecated but still used for backward compatibility
 				AggressiveModeConfig:  aggressiveModeConfig,
@@ -463,7 +484,13 @@ func scheduleToState(schedule *sdk.ScheduledrebalancingV1RebalancingSchedule, d 
 
 	if schedule.LaunchConfiguration.RebalancingOptions != nil {
 		launchConfig["rebalancing_min_nodes"] = schedule.LaunchConfiguration.RebalancingOptions.MinNodes
-		launchConfig["keep_drain_timeout_nodes"] = schedule.LaunchConfiguration.RebalancingOptions.KeepDrainTimeoutNodes
+		keepDrainTimeoutNodes := schedule.LaunchConfiguration.RebalancingOptions.KeepDrainTimeoutNodes //nolint:staticcheck // SA1019: deprecated but still returned for backward compatibility
+		if keepDrainTimeoutNodes == nil {
+			// The API aliases the deprecated field to evictGracefully; fall back
+			// so legacy configs don't show a perpetual diff.
+			keepDrainTimeoutNodes = schedule.LaunchConfiguration.RebalancingOptions.EvictGracefully
+		}
+		launchConfig["keep_drain_timeout_nodes"] = keepDrainTimeoutNodes
 		launchConfig["evict_gracefully"] = schedule.LaunchConfiguration.RebalancingOptions.EvictGracefully
 		launchConfig["max_simultaneous_drains"] = schedule.LaunchConfiguration.RebalancingOptions.MaxSimultaneousDrains
 		launchConfig["aggressive_mode"] = schedule.LaunchConfiguration.RebalancingOptions.AggressiveMode //nolint:staticcheck // AggressiveMode is deprecated but still supported for backwards compatibility
