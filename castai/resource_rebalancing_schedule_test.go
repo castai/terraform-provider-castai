@@ -85,9 +85,8 @@ func TestRebalancingSchedule_stateToSchedule_EvictGracefullyAndDrainOptions(t *t
 	// user does not set it.
 	unsetState.RawConfig = cty.ObjectVal(map[string]cty.Value{
 		"launch_configuration": cty.ListVal([]cty.Value{cty.ObjectVal(map[string]cty.Value{
-			"evict_gracefully":         cty.NullVal(cty.Bool),
-			"max_simultaneous_drains":  cty.NullVal(cty.Number),
-			"keep_drain_timeout_nodes": cty.NullVal(cty.Bool),
+			"evict_gracefully":        cty.NullVal(cty.Bool),
+			"max_simultaneous_drains": cty.NullVal(cty.Number),
 			"aggressive_mode_config": cty.ListVal([]cty.Value{cty.ObjectVal(map[string]cty.Value{
 				"ignore_problem_prevented_drain_pods": cty.NullVal(cty.Bool),
 			})}),
@@ -104,7 +103,6 @@ func TestRebalancingSchedule_stateToSchedule_EvictGracefullyAndDrainOptions(t *t
 	// request body instead of being sent as explicit false/zero.
 	r.Nil(unsetOpts.EvictGracefully)
 	r.Nil(unsetOpts.MaxSimultaneousDrains)
-	r.Nil(unsetOpts.KeepDrainTimeoutNodes) //nolint:staticcheck // SA1019
 }
 
 func TestAccCloudAgnostic_ResourceRebalancingSchedule_basic(t *testing.T) {
@@ -146,7 +144,7 @@ func TestAccCloudAgnostic_ResourceRebalancingSchedule_basic(t *testing.T) {
 				Config: makeConfigWithDrainFailureConfig(rName + " drain_failure"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("castai_rebalancing_schedule.test", "name", rName+" drain_failure"),
-					resource.TestCheckResourceAttr("castai_rebalancing_schedule.test", "launch_configuration.0.keep_drain_timeout_nodes", "true"),
+					resource.TestCheckResourceAttr("castai_rebalancing_schedule.test", "launch_configuration.0.evict_gracefully", "true"),
 					resource.TestCheckResourceAttr("castai_rebalancing_schedule.test", "launch_configuration.0.drain_failure_config.0.disable_uncordon", "false"),
 					resource.TestCheckResourceAttr("castai_rebalancing_schedule.test", "launch_configuration.0.drain_failure_config.0.uncordon_after_seconds", "7200"),
 				),
@@ -208,7 +206,7 @@ resource "castai_rebalancing_schedule" "test" {
 		node_ttl_seconds = 10
 		num_targeted_nodes = 3
 		rebalancing_min_nodes = 2
-		keep_drain_timeout_nodes = true
+		evict_gracefully = true
 		aggressive_mode = true
 		aggressive_mode_config {
       		ignore_local_persistent_volumes = true
@@ -249,7 +247,7 @@ resource "castai_rebalancing_schedule" "test" {
 		savings_percentage = 10
 	}
 	launch_configuration {
-		keep_drain_timeout_nodes = true
+		evict_gracefully = true
 		drain_failure_config {
 			disable_uncordon       = false
 			uncordon_after_seconds = 7200

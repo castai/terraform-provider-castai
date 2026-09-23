@@ -143,7 +143,6 @@ launch_configuration.0.evict_gracefully = false
 launch_configuration.0.execution_conditions.# = 1
 launch_configuration.0.execution_conditions.0.achieved_savings_percentage = 15
 launch_configuration.0.execution_conditions.0.enabled = true
-launch_configuration.0.keep_drain_timeout_nodes = false
 launch_configuration.0.max_simultaneous_drains = 0
 launch_configuration.0.node_ttl_seconds = 350
 launch_configuration.0.num_targeted_nodes = 20

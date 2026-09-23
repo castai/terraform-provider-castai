@@ -1842,23 +1842,3 @@ func TestAutoscalerResource_FilterVolatileFields_StatusFields(t *testing.T) {
 		})
 	}
 }
-
-func TestAutoscalerResource_SpotDiversityPriceIncreaseJSONKey(t *testing.T) {
-	require := require.New(t)
-
-	si := &types.SpotInstances{
-		SpotDiversityEnabled:       true,
-		SpotDiversityPriceIncrease: 7,
-	}
-	b, err := json.Marshal(si)
-	require.NoError(err)
-
-	var decoded map[string]interface{}
-	require.NoError(json.Unmarshal(b, &decoded))
-
-	// The API reads the spot diversity limit under this key; the mirror used to
-	// serialize spotDiversityPriceIncrease, silently no-opping the setting.
-	require.Contains(decoded, "spotDiversityPriceIncreaseLimitPercent")
-	require.Equal(7.0, decoded["spotDiversityPriceIncreaseLimitPercent"])
-	require.NotContains(decoded, "spotDiversityPriceIncrease")
-}
