@@ -26,7 +26,7 @@ type ProviderConfig struct {
 	clusterAutoscalerV2Client    cluster_autoscaler_v2.ClientWithResponsesInterface
 	workloadEvictionClient       workload_eviction.ClientWithResponsesInterface
 	organizationManagementClient organization_management.ClientWithResponsesInterface
-	omniAPI                      *omni.ClientWithResponses
+	omniAPI                      omni.ClientWithResponsesInterface
 	aiOptimizerClient            ai_optimizer.ClientWithResponsesInterface
 	patchingEngineClient         patching_engine.ClientWithResponsesInterface
 	pricingClient                pricing.ClientWithResponsesInterface
@@ -66,7 +66,6 @@ func Provider(version string) *schema.Provider {
 			"castai_gke_cluster_id":             resourceGKEClusterId(),
 			"castai_aks_cluster":                resourceAKSCluster(),
 			"castai_autoscaler":                 resourceAutoscaler(),
-			"castai_autoscaler_policies":        resourceAutoscalerPolicies(),
 			"castai_evictor":                    resourceEvictor(),
 			"castai_evictor_advanced_config":    resourceEvictionConfig(),
 			"castai_node_template":              resourceNodeTemplate(),
