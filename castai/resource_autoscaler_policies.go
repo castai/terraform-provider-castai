@@ -288,7 +288,7 @@ func (r *autoscalerPoliciesResource) Create(ctx context.Context, req resource.Cr
 		return
 	}
 
-	state := r.policiesToModel(clusterID, policies)
+	state := r.preserveBlockPresence(r.policiesToModel(clusterID, policies), plan)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
 }
 
@@ -326,7 +326,8 @@ func (r *autoscalerPoliciesResource) Read(ctx context.Context, req resource.Read
 		return
 	}
 
-	state = r.policiesToModel(clusterID, policies)
+	prior := state
+	state = r.preserveBlockPresence(r.policiesToModel(clusterID, policies), prior)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
 }
 
@@ -358,7 +359,7 @@ func (r *autoscalerPoliciesResource) Update(ctx context.Context, req resource.Up
 		return
 	}
 
-	newState := r.policiesToModel(clusterID, policies)
+	newState := r.preserveBlockPresence(r.policiesToModel(clusterID, policies), plan)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &newState)...)
 }
 
@@ -371,12 +372,10 @@ func (r *autoscalerPoliciesResource) ImportState(ctx context.Context, req resour
 	resource.ImportStatePassthroughID(ctx, path.Root(FieldAutoscalerPoliciesID), req, resp)
 }
 
-// upsert builds the policies payload from the plan and pushes it to the API,
-// then reads the resulting policies back. The version is included for
-// optimistic locking: on updates it comes from the plan (state), and on
-// create it is fetched from the API first, since the policies most likely
-// already exist for the cluster and the server rejects an insert of a
-// duplicate record.
+// upsert pushes the plan to the API and returns the stored policies from
+// the update response. The version for optimistic locking comes from the
+// plan on updates and is fetched first on create, where the server rejects
+// a duplicate insert without it.
 func (r *autoscalerPoliciesResource) upsert(ctx context.Context, clusterID string, plan *autoscalerPoliciesModel) (*cluster_autoscaler_v2.PoliciesV2, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
@@ -414,22 +413,9 @@ func (r *autoscalerPoliciesResource) upsert(ctx context.Context, clusterID strin
 		return nil, diags
 	}
 
-	// Read the policies back so state reflects what the API actually stored,
-	// mirroring the SDKv2 create/update behavior.
-	result, found, readDiags := r.readPolicies(ctx, clusterID)
-	diags.Append(readDiags...)
-	if diags.HasError() {
-		return nil, diags
-	}
-	if !found {
-		diags.AddError(
-			"Failed to read autoscaler policies",
-			fmt.Sprintf("policies for cluster %s not found after update", clusterID),
-		)
-		return nil, diags
-	}
-
-	return result, diags
+	// The update response carries the stored policies, including the new
+	// version; no read-back is needed.
+	return apiResp.JSON200, diags
 }
 
 // readPolicies fetches the cluster policies. The second return value reports
@@ -577,6 +563,24 @@ func (r *autoscalerPoliciesResource) policiesToModel(clusterID string, policies 
 	}
 
 	return model
+}
+
+// preserveBlockPresence carries blocks the flatten did not produce — a
+// section whose fields are all nil flattens to an absent block — over from
+// the prior model, so an apply never fails with "block count changed from
+// 1 to 0". Blocks are carried verbatim, never fabricated, and blocks the
+// caller did not declare are not injected.
+func (r *autoscalerPoliciesResource) preserveBlockPresence(state, prior autoscalerPoliciesModel) autoscalerPoliciesModel {
+	if len(prior.ClusterLimits) > 0 && len(state.ClusterLimits) == 0 {
+		state.ClusterLimits = prior.ClusterLimits
+	}
+	if len(prior.NodeDownscaler) > 0 && len(state.NodeDownscaler) == 0 {
+		state.NodeDownscaler = prior.NodeDownscaler
+	}
+	if len(prior.UnschedulablePods) > 0 && len(state.UnschedulablePods) == 0 {
+		state.UnschedulablePods = prior.UnschedulablePods
+	}
+	return state
 }
 
 func clusterLimitsToModel(in *cluster_autoscaler_v2.ClusterLimitsPolicy) *clusterLimitsModel {
