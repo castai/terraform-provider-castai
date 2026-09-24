@@ -933,61 +933,72 @@ func fetchScalingPolicy(ctx context.Context, d *schema.ResourceData, meta any) (
 		return resp, nil
 	}
 
-	sp := resp.JSON200
-
-	if err := d.Set("name", sp.Name); err != nil {
-		return nil, fmt.Errorf("setting name: %w", err)
-	}
-	if err := d.Set(FieldApplyType, sp.ApplyType); err != nil {
-		return nil, fmt.Errorf("setting apply type: %w", err)
-	}
-	if err := d.Set("management_option", sp.RecommendationPolicies.ManagementOption); err != nil {
-		return nil, fmt.Errorf("setting management option: %w", err)
-	}
-	if err := d.Set("cpu", toWorkloadScalingPoliciesMap(getResourceFrom(d, "cpu"), sp.RecommendationPolicies.Cpu)); err != nil {
-		return nil, fmt.Errorf("setting cpu: %w", err)
-	}
-	if err := d.Set("memory", toWorkloadScalingPoliciesMap(getResourceFrom(d, "memory"), sp.RecommendationPolicies.Memory)); err != nil {
-		return nil, fmt.Errorf("setting memory: %w", err)
-	}
-	if err := d.Set("startup", toStartupMap(sp.RecommendationPolicies.Startup)); err != nil {
-		return nil, fmt.Errorf("setting startup: %w", err)
-	}
-	if err := d.Set(FieldExcludedContainers, sp.RecommendationPolicies.ExcludedContainers); err != nil {
-		return nil, fmt.Errorf("setting excluded containers: %w", err)
-	}
-	if err := d.Set(FieldHpaConverters, toHpaConvertersMap(sp.RecommendationPolicies.HpaConverters)); err != nil {
-		return nil, fmt.Errorf("setting hpa converters: %w", err)
-	}
-	if err := d.Set(FieldConfidence, toConfidenceMap(sp.RecommendationPolicies.Confidence)); err != nil {
-		return nil, fmt.Errorf("setting confidence: %w", err)
-	}
-	if err := d.Set("downscaling", toDownscalingMap(sp.RecommendationPolicies.Downscaling)); err != nil {
-		return nil, fmt.Errorf("setting downscaling: %w", err)
-	}
-	if err := d.Set("memory_event", toMemoryEventMap(sp.RecommendationPolicies.MemoryEvent)); err != nil {
-		return nil, fmt.Errorf("setting memory event: %w", err)
-	}
-	if err := d.Set("anti_affinity", toAntiAffinityMap(sp.RecommendationPolicies.AntiAffinity)); err != nil {
-		return nil, fmt.Errorf("setting anti-affinity: %w", err)
-	}
-	if err := d.Set(FieldPredictiveScaling, toPredictiveScalingMap(sp.RecommendationPolicies.PredictiveScaling)); err != nil {
-		return nil, fmt.Errorf("setting predictive scaling: %w", err)
-	}
-	if err := d.Set(FieldRolloutBehavior, toRolloutBehaviorMap(sp.RecommendationPolicies.RolloutBehavior)); err != nil {
-		return nil, fmt.Errorf("setting rollout behavior: %w", err)
-	}
-	if err := d.Set(FieldJVM, toJvmMap(sp.RecommendationPolicies.Jvm)); err != nil {
-		return nil, fmt.Errorf("setting jvm: %w", err)
-	}
-	if err := d.Set(FieldAnomalyDetection, toAnomalyDetectionMap(sp.RecommendationPolicies.AnomalyDetection)); err != nil {
-		return nil, fmt.Errorf("setting anomaly detection: %w", err)
-	}
-	if err := d.Set(FieldAssignmentRules, toAssignmentRulesMap(getResourceFrom(d, FieldAssignmentRules), sp.AssignmentRules)); err != nil {
-		return nil, fmt.Errorf("setting assignment rules: %w", err)
+	if err := flattenWorkloadScalingPolicy(d, resp.JSON200); err != nil {
+		return nil, err
 	}
 
 	return nil, nil
+}
+
+// flattenWorkloadScalingPolicy writes the API representation of a workload
+// scaling policy into the schema fields shared by the
+// castai_workload_scaling_policy resource and data source. Fields already
+// present in the configuration are taken into account so values not
+// round-tripped by the API are preserved when refreshing a resource.
+func flattenWorkloadScalingPolicy(d *schema.ResourceData, sp *sdk.WorkloadoptimizationV1WorkloadScalingPolicy) error {
+	if err := d.Set("name", sp.Name); err != nil {
+		return fmt.Errorf("setting name: %w", err)
+	}
+	if err := d.Set(FieldApplyType, sp.ApplyType); err != nil {
+		return fmt.Errorf("setting apply type: %w", err)
+	}
+	if err := d.Set("management_option", sp.RecommendationPolicies.ManagementOption); err != nil {
+		return fmt.Errorf("setting management option: %w", err)
+	}
+	if err := d.Set("cpu", toWorkloadScalingPoliciesMap(getResourceFrom(d, "cpu"), sp.RecommendationPolicies.Cpu)); err != nil {
+		return fmt.Errorf("setting cpu: %w", err)
+	}
+	if err := d.Set("memory", toWorkloadScalingPoliciesMap(getResourceFrom(d, "memory"), sp.RecommendationPolicies.Memory)); err != nil {
+		return fmt.Errorf("setting memory: %w", err)
+	}
+	if err := d.Set("startup", toStartupMap(sp.RecommendationPolicies.Startup)); err != nil {
+		return fmt.Errorf("setting startup: %w", err)
+	}
+	if err := d.Set(FieldExcludedContainers, sp.RecommendationPolicies.ExcludedContainers); err != nil {
+		return fmt.Errorf("setting excluded containers: %w", err)
+	}
+	if err := d.Set(FieldHpaConverters, toHpaConvertersMap(sp.RecommendationPolicies.HpaConverters)); err != nil {
+		return fmt.Errorf("setting hpa converters: %w", err)
+	}
+	if err := d.Set(FieldConfidence, toConfidenceMap(sp.RecommendationPolicies.Confidence)); err != nil {
+		return fmt.Errorf("setting confidence: %w", err)
+	}
+	if err := d.Set("downscaling", toDownscalingMap(sp.RecommendationPolicies.Downscaling)); err != nil {
+		return fmt.Errorf("setting downscaling: %w", err)
+	}
+	if err := d.Set("memory_event", toMemoryEventMap(sp.RecommendationPolicies.MemoryEvent)); err != nil {
+		return fmt.Errorf("setting memory event: %w", err)
+	}
+	if err := d.Set("anti_affinity", toAntiAffinityMap(sp.RecommendationPolicies.AntiAffinity)); err != nil {
+		return fmt.Errorf("setting anti-affinity: %w", err)
+	}
+	if err := d.Set(FieldPredictiveScaling, toPredictiveScalingMap(sp.RecommendationPolicies.PredictiveScaling)); err != nil {
+		return fmt.Errorf("setting predictive scaling: %w", err)
+	}
+	if err := d.Set(FieldRolloutBehavior, toRolloutBehaviorMap(sp.RecommendationPolicies.RolloutBehavior)); err != nil {
+		return fmt.Errorf("setting rollout behavior: %w", err)
+	}
+	if err := d.Set(FieldJVM, toJvmMap(sp.RecommendationPolicies.Jvm)); err != nil {
+		return fmt.Errorf("setting jvm: %w", err)
+	}
+	if err := d.Set(FieldAnomalyDetection, toAnomalyDetectionMap(sp.RecommendationPolicies.AnomalyDetection)); err != nil {
+		return fmt.Errorf("setting anomaly detection: %w", err)
+	}
+	if err := d.Set(FieldAssignmentRules, toAssignmentRulesMap(getResourceFrom(d, FieldAssignmentRules), sp.AssignmentRules)); err != nil {
+		return fmt.Errorf("setting assignment rules: %w", err)
+	}
+
+	return nil
 }
 
 func getResourceFrom(d *schema.ResourceData, resource string) map[string]any {

@@ -2704,7 +2704,10 @@ type CastaiInventoryV1beta1InstanceType struct {
 
 	// StorageInfo StorageInfo describes the available local volumes for an instance type.
 	StorageInfo *CastaiInventoryV1beta1StorageInfo `json:"storageInfo,omitempty"`
-	TpuInfo     *CastaiInventoryV1beta1TPUInfo     `json:"tpuInfo,omitempty"`
+
+	// SupportsNestedVirtualization Specifies whether the VM instance type supports nested virtualization. Required for Azure AKS Pod Sandboxing (Kata). Azure specific.
+	SupportsNestedVirtualization *bool                          `json:"supportsNestedVirtualization"`
+	TpuInfo                      *CastaiInventoryV1beta1TPUInfo `json:"tpuInfo,omitempty"`
 
 	// UpdatedAt UpdatedAt is the timestamp of the last update operation on this instance type object.
 	UpdatedAt *time.Time `json:"updatedAt,omitempty"`
@@ -6664,18 +6667,18 @@ type ExternalclusterV1NodeConfig struct {
 	// NodeAffinity NodeAffinity provides control over the assignment of individual nodes to dedicated host instances.
 	NodeAffinity *ExternalclusterV1NodeAffinity `json:"nodeAffinity,omitempty"`
 
+	// PodVirtualization VirtualizationConfig describes virtualization isolation settings for a node.
+	//
+	// Only AKS is wired up through this contract today. For EKS and GKE,
+	// Kata Containers must be installed separately via its DaemonSets
+	// (https://github.com/kata-containers/kata-containers).
+	PodVirtualization *ExternalclusterV1VirtualizationConfig `json:"podVirtualization,omitempty"`
+
 	// SpotConfig NodeSpotConfig defines if node should be created as spot instance, and params for creation.
 	SpotConfig *ExternalclusterV1NodeSpotConfig `json:"spotConfig,omitempty"`
 
 	// SubnetId Node subnet ID.
 	SubnetId *string `json:"subnetId"`
-
-	// Virtualization VirtualizationConfig describes virtualization isolation settings for a node.
-	//
-	// Only AKS is wired up through this contract today. For EKS and GKE,
-	// Kata Containers must be installed separately via its DaemonSets
-	// (https://github.com/kata-containers/kata-containers).
-	Virtualization *ExternalclusterV1VirtualizationConfig `json:"virtualization,omitempty"`
 
 	// Volume NodeVolume defines node's local root volume configuration.
 	Volume *ExternalclusterV1NodeVolume `json:"volume,omitempty"`
@@ -9883,7 +9886,8 @@ type WorkloadoptimizationV1GetAgentStatusResponse struct {
 	// ResourceQuotasAffectingOptimization True if we detected at least one ResourceQuota with a hard CPU or memory limit,
 	// regardless of whether VPA is enabled or the quota is currently affecting workload optimization.
 	// This only informs that it MAY prevent workloads from not getting enough resources during spikes.
-	ResourceQuotasAffectingOptimization *bool `json:"resourceQuotasAffectingOptimization"`
+	ResourceQuotasAffectingOptimization       *bool  `json:"resourceQuotasAffectingOptimization"`
+	ScopedRecommendationsSupportedFromVersion string `json:"scopedRecommendationsSupportedFromVersion"`
 
 	// Status AgentStatus defines the status of workload-autoscaler.
 	Status                         WorkloadoptimizationV1GetAgentStatusResponseAgentStatus `json:"status"`
