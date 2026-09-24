@@ -595,6 +595,12 @@ const (
 	Terminate NodeconfigV1GKEConfigOnHostMaintenance = "terminate"
 )
 
+// Defines values for NodeconfigV1SecondaryBootDiskMode.
+const (
+	NodeconfigV1SecondaryBootDiskModeCONTAINERIMAGECACHE NodeconfigV1SecondaryBootDiskMode = "CONTAINER_IMAGE_CACHE"
+	NodeconfigV1SecondaryBootDiskModeMODEUNSPECIFIED     NodeconfigV1SecondaryBootDiskMode = "MODE_UNSPECIFIED"
+)
+
 // Defines values for NodeconfigV1SelfHostedWithEC2NodesConfigImageFamily.
 const (
 	FAMILYAL2          NodeconfigV1SelfHostedWithEC2NodesConfigImageFamily = "FAMILY_AL2"
@@ -885,9 +891,9 @@ const (
 
 // Defines values for WorkloadoptimizationV1HPAManagementMode.
 const (
-	MODEMANAGED     WorkloadoptimizationV1HPAManagementMode = "MODE_MANAGED"
-	MODEUNMANAGED   WorkloadoptimizationV1HPAManagementMode = "MODE_UNMANAGED"
-	MODEUNSPECIFIED WorkloadoptimizationV1HPAManagementMode = "MODE_UNSPECIFIED"
+	WorkloadoptimizationV1HPAManagementModeMODEMANAGED     WorkloadoptimizationV1HPAManagementMode = "MODE_MANAGED"
+	WorkloadoptimizationV1HPAManagementModeMODEUNMANAGED   WorkloadoptimizationV1HPAManagementMode = "MODE_UNMANAGED"
+	WorkloadoptimizationV1HPAManagementModeMODEUNSPECIFIED WorkloadoptimizationV1HPAManagementMode = "MODE_UNSPECIFIED"
 )
 
 // Defines values for WorkloadoptimizationV1HPAManagementSource.
@@ -7404,6 +7410,9 @@ type NodeconfigV1FallbackConfiguration struct {
 
 // NodeconfigV1GKEConfig defines model for nodeconfig.v1.GKEConfig.
 type NodeconfigV1GKEConfig struct {
+	// Computed Server-computed GKE configuration values, populated in read responses.
+	Computed *NodeconfigV1GKEConfigComputed `json:"computed,omitempty"`
+
 	// DiskType Type of boot disk attached to the node. For available types please read official GCP docs(https://cloud.google.com/compute/docs/disks#pdspecs).
 	DiskType *string `json:"diskType"`
 
@@ -7439,13 +7448,23 @@ type NodeconfigV1GKEConfig struct {
 
 	// OnHostMaintenance Maintenance behavior of the instances.
 	OnHostMaintenance *NodeconfigV1GKEConfigOnHostMaintenance `json:"onHostMaintenance,omitempty"`
-	SecondaryIpRange  *NodeconfigV1SecondaryIPRange           `json:"secondaryIpRange,omitempty"`
+
+	// SecondaryBootDisks Secondary boot disks to be attached to provisioned nodes.
+	SecondaryBootDisks *[]NodeconfigV1SecondaryBootDisk `json:"secondaryBootDisks,omitempty"`
+	SecondaryIpRange   *NodeconfigV1SecondaryIPRange    `json:"secondaryIpRange,omitempty"`
 
 	// UseEphemeralStorageLocalSsd Flag indicating whether to use local SSD storage for the node. Defaults to false.
 	UseEphemeralStorageLocalSsd *bool `json:"useEphemeralStorageLocalSsd,omitempty"`
 
 	// Zones Zones is a preferred list of zones to choose from when adding a node.
 	Zones *[]string `json:"zones,omitempty"`
+}
+
+// NodeconfigV1GKEConfigComputed Server-computed GKE configuration values, populated in read responses.
+type NodeconfigV1GKEConfigComputed struct {
+	// SecondaryBootDisks Resolved metadata about each configured secondary boot disk, in the same order
+	// as secondary_boot_disks. One entry per configured disk.
+	SecondaryBootDisks *[]NodeconfigV1GKEConfigSecondaryBootDiskComputed `json:"secondaryBootDisks,omitempty"`
 }
 
 // NodeconfigV1GKEConfigLoadBalancers defines model for nodeconfig.v1.GKEConfig.LoadBalancers.
@@ -7471,6 +7490,19 @@ type NodeconfigV1GKEConfigLoadBalancersUnmanagedInstanceGroups struct {
 
 // NodeconfigV1GKEConfigOnHostMaintenance Maintenance behavior of the instances.
 type NodeconfigV1GKEConfigOnHostMaintenance string
+
+// NodeconfigV1GKEConfigSecondaryBootDiskComputed Server-resolved metadata about a configured secondary boot disk.
+type NodeconfigV1GKEConfigSecondaryBootDiskComputed struct {
+	// DiskImage Image for which the data was computed.
+	DiskImage *string `json:"diskImage"`
+
+	// ImageId ID of the image version this computed data was derived from; images can be
+	// re-created, so it identifies which version produced this data.
+	ImageId *string `json:"imageId"`
+
+	// SizeGb Resolved disk size of the configured disk image in GiB, read from the GCP compute images API.
+	SizeGb *string `json:"sizeGb"`
+}
 
 // NodeconfigV1GetSuggestedConfigurationResponse defines model for nodeconfig.v1.GetSuggestedConfigurationResponse.
 type NodeconfigV1GetSuggestedConfigurationResponse struct {
@@ -7659,6 +7691,25 @@ type NodeconfigV1NodeConfigurationUpdate struct {
 	// Tags Tags to be added on cloud instances for provisioned nodes.
 	Tags *map[string]string `json:"tags,omitempty"`
 }
+
+// NodeconfigV1SecondaryBootDisk Secondary boot disk attached to provisioned GKE nodes.
+type NodeconfigV1SecondaryBootDisk struct {
+	// DiskImage Image the disk is initialized from: a GKE image reference,
+	// projects/PROJECT/global/images/NAME or the same-project shorthand global/images/NAME.
+	DiskImage *string `json:"diskImage,omitempty"`
+
+	// Mode Mode of the secondary boot disk.
+	//
+	//  - MODE_UNSPECIFIED: Arbitrary data disk: the kubelet exposes it via SECONDARY_BOOT_DATA_DISK.
+	//  - CONTAINER_IMAGE_CACHE: Container image cache: the kubelet exposes it via SECONDARY_BOOT_DISKS and the cluster must have image streaming enabled.
+	Mode *NodeconfigV1SecondaryBootDiskMode `json:"mode,omitempty"`
+}
+
+// NodeconfigV1SecondaryBootDiskMode Mode of the secondary boot disk.
+//
+//   - MODE_UNSPECIFIED: Arbitrary data disk: the kubelet exposes it via SECONDARY_BOOT_DATA_DISK.
+//   - CONTAINER_IMAGE_CACHE: Container image cache: the kubelet exposes it via SECONDARY_BOOT_DISKS and the cluster must have image streaming enabled.
+type NodeconfigV1SecondaryBootDiskMode string
 
 // NodeconfigV1SecondaryIPRange defines model for nodeconfig.v1.SecondaryIPRange.
 type NodeconfigV1SecondaryIPRange struct {
