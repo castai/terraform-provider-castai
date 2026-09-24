@@ -12,12 +12,15 @@ data "azurerm_kubernetes_cluster" "example" {
 # Registration with a client secret.
 module "castai_aks_cluster" {
   source  = "castai/aks/castai"
-  version = "~> 11.0"
+  version = "~> 12.0"
 
   api_url                = var.castai_api_url
   castai_api_token       = var.castai_api_token
   grpc_url               = var.castai_grpc_url
   wait_for_cluster_ready = true
+
+  workload_autoscaler_keep_crds = true
+  umbrella_enabled              = true
 
   authentication_method = "workload_identity"
 

@@ -32,7 +32,7 @@ module "castai-eks-role-iam" {
 # Install CAST AI with enabled Kvisor security agent.
 module "castai-eks-cluster" {
   source  = "castai/eks-cluster/castai"
-  version = "~> 14.1"
+  version = "~> 15.0"
 
   kvisor_grpc_addr = var.kvisor_grpc_addr
 
@@ -94,6 +94,9 @@ module "castai-eks-cluster" {
   api_url          = var.castai_api_url
   castai_api_token = var.castai_api_token
   grpc_url         = var.castai_grpc_url
+
+  workload_autoscaler_keep_crds = true
+  umbrella_enabled              = true
 
   aws_account_id     = data.aws_caller_identity.current.account_id
   aws_cluster_region = var.cluster_region

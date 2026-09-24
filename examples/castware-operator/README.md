@@ -108,8 +108,11 @@ If you're using a Cast AI cluster module (e.g., `castai/aks/castai`, `castai/gke
 # First: Cast AI cluster module
 module "castai-aks-cluster" {
   source  = "castai/aks/castai"
-  version = "~> 4.0"
-  
+  version = "~> 12.0"
+
+  workload_autoscaler_keep_crds = true
+  umbrella_enabled              = true
+
   # ... cluster configuration
 }
 
