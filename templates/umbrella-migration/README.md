@@ -8,18 +8,8 @@ the Cast AI cluster Terraform modules to install Cast AI Helm charts:
 - [castai-gke-cluster](https://github.com/castai/terraform-castai-gke-cluster)
 - [castai-aks](https://github.com/castai/terraform-castai-aks)
 
-**If you're not using these modules** for installing Cast AI Helm charts, refer to the following
-[castctl](https://docs.cast.ai/docs/connect-with-castctl) commands for migrating:
-
-```sh
-# If you're using GitOps (e.g. ArgoCD or Flux) or Terraform, but without the modules above, the following
-# command will guide you through the migration process:
-castctl cluster migrate generate
-
-# If you've used `castctl` or the onboarding Shell scripts to connect your cluster, the following command
-# can do the migration for you:
-castctl cluster migrate
-```
+**If you're not using these modules** for installing Cast AI Helm charts, follow this guide instead:
+https://docs.cast.ai/docs/castctl-migrate-gitops
 
 ## Overview
 
@@ -63,7 +53,7 @@ Example configuration:
 ```terraform
 module "castai_eks_cluster" {
   source  = "castai/eks-cluster/castai"
-  version = "~> TODO.0" # <- Update version according to "Appendix: Module versions"
+  version = "~> 15.0" # <- Look up version below in "Appendix: Module versions"
   # ...
   workload_autoscaler_keep_crds = true # <- Add this line
 }
@@ -87,7 +77,7 @@ Example configuration:
 ```terraform
 module "castai_eks_cluster" {
   source  = "castai/eks-cluster/castai"
-  version = "~> TODO.0"
+  version = "~> 15.0"
   # ...
   workload_autoscaler_keep_crds = true
   umbrella_enabled              = true # <- Add this line
@@ -168,7 +158,7 @@ Example configuration:
 ```terraform
 module "castai_eks_cluster" {
   source  = "castai/eks-cluster/castai"
-  version = "~> TODO.0" # <- Update version according to "Appendix: Module versions"
+  version = "~> 15.0" # <- Look up version below in "Appendix: Module versions"
   # ...
   workload_autoscaler_keep_crds = true # <- Add this line
   umbrella_enabled              = true # <- Add this line
@@ -197,11 +187,11 @@ If you've changed rebalancing schedules or Evictor settings during the prerequis
 
 ## Appendix: Module versions
 
-The following minor version of the cluster modules needs to be used during the migration. **Do NOT use a newer minor
+The following major version of the cluster modules needs to be used during the migration. **Do NOT use a newer major
 version!**
 
-| Module               | Minor version | Recommended version constraint |
+| Module               | Major version | Recommended version constraint |
 |----------------------|---------------|--------------------------------|
-| `castai-eks-cluster` | TODO          | `~> TODO.0`                    |
-| `castai-gke-cluster` | TODO          | `~> TODO.0`                    |
-| `castai-aks`         | TODO          | `~> TODO.0`                    |
+| `castai-eks-cluster` | 15            | `~> 15.0`                      |
+| `castai-gke-cluster` | 11            | `~> 11.0`                      |
+| `castai-aks`         | 12            | `~> 12.0`                      |
