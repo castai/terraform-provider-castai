@@ -5,16 +5,115 @@ on:
     branches: [ '*' ]
 
 jobs:
-  testacc:
-    # Repeat this for all clouds and cloud-agnostic
-    strategy:
-      matrix:
-        cloud: [ "eks", "gke", "aks", "cloud-agnostic" ]
-      fail-fast: false # Don't cancel other jobs if one fails
+  files-changed:
+    name: detect files changed
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    outputs:
+      acceptance-tests: ${{ steps.changes.outputs.acceptance-tests }}
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v6
+      - name: Check for file changes
+        uses: dorny/paths-filter@v2
+        id: changes
+        with:
+          token: ${{ github.token }}
+          filters: .github/file-filters.yml
+  aks:
+    needs: files-changed
+    if: needs.files-changed.outputs.acceptance-tests == 'true'
     # Only one instance per cloud should run at the same time
     concurrency:
-      group: testacc-${{ matrix.cloud }}
-    name: ${{ matrix.cloud }}
+      group: testacc-aks
+    name: aks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v6
+
+      - name: Setup Go
+        uses: actions/setup-go@v6
+        with:
+          go-version: '1.25.5'
+
+      - name: Cache Go modules
+        uses: actions/cache@v5
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-build-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-build-
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v4
+        with:
+          terraform_version: '1.11.*'
+          terraform_wrapper: false
+
+      - name: Acceptance test
+        env:
+          CASTAI_API_TOKEN: ${{ secrets.CASTAI_DEV_MASTER_TOKEN }}
+          ARM_CLIENT_ID: ${{ secrets.AZURE_TF_ACCEPTANCE_TEST_ARM_CLIENT_ID_V2 }}
+          ARM_CLIENT_SECRET: ${{ secrets.AZURE_TF_ACCEPTANCE_TEST_ARM_CLIENT_SECRET_V2 }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_TF_ACCEPTANCE_TEST_ARM_SUBSCRIPTION_ID_V2 }}
+          ARM_TENANT_ID: ${{ secrets.AZURE_TF_ACCEPTANCE_TEST_ARM_TENANT_ID_V2 }}
+          AZURE_TF_ACCEPTANCE_TEST_FEDERATION_ID: ${{ secrets.AZURE_TF_ACCEPTANCE_TEST_FEDERATION_ID }}
+          AZURE_TF_ACCEPTANCE_TEST_FEDERATION_TENANT_ID: ${{ secrets.AZURE_TF_ACCEPTANCE_TEST_ARM_TENANT_ID_V2 }}
+          AZURE_TF_ACCEPTANCE_TEST_FEDERATION_CLIENT_ID: ${{ secrets.AZURE_TF_ACCEPTANCE_TEST_FEDERATION_CLIENT_ID }}
+          SSO_CLIENT_ID: ${{ secrets.SSO_CLIENT_ID }}
+          SSO_CLIENT_SECRET: ${{ secrets.SSO_CLIENT_SECRET }}
+          SSO_DOMAIN: ${{ secrets.SSO_DOMAIN }}
+          ACCEPTANCE_TEST_ORGANIZATION_ID: ${{ vars.TF_ACCEPTANCE_TEST_ORGANIZATION_ID }}
+        run: make testacc-aks
+  eks:
+    needs: files-changed
+    if: needs.files-changed.outputs.acceptance-tests == 'true'
+    # Only one instance per cloud should run at the same time
+    concurrency:
+      group: testacc-eks
+    name: eks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v6
+
+      - name: Setup Go
+        uses: actions/setup-go@v6
+        with:
+          go-version: '1.25.5'
+
+      - name: Cache Go modules
+        uses: actions/cache@v5
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-build-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-build-
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v4
+        with:
+          terraform_version: '1.11.*'
+          terraform_wrapper: false
+
+      - name: Acceptance test
+        env:
+          CASTAI_API_TOKEN: ${{ secrets.CASTAI_DEV_MASTER_TOKEN }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_TF_ACCEPTANCE_TEST_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_TF_ACCEPTANCE_TEST_SECRET_KEY_ID }}
+          SSO_CLIENT_ID: ${{ secrets.SSO_CLIENT_ID }}
+          SSO_CLIENT_SECRET: ${{ secrets.SSO_CLIENT_SECRET }}
+          SSO_DOMAIN: ${{ secrets.SSO_DOMAIN }}
+          ACCEPTANCE_TEST_ORGANIZATION_ID: ${{ vars.TF_ACCEPTANCE_TEST_ORGANIZATION_ID }}
+        run: make testacc-eks
+  gke:
+    needs: files-changed
+    if: needs.files-changed.outputs.acceptance-tests == 'true'
+    # Only one instance per cloud should run at the same time
+    concurrency:
+      group: testacc-gke
+    name: gke
     runs-on: ubuntu-latest
     steps:
       - name: Checkout source
@@ -54,20 +153,50 @@ jobs:
       - name: Acceptance test
         env:
           CASTAI_API_TOKEN: ${{ secrets.CASTAI_DEV_MASTER_TOKEN }}
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_TF_ACCEPTANCE_TEST_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_TF_ACCEPTANCE_TEST_SECRET_KEY_ID }}
-          ARM_CLIENT_ID: ${{ secrets.AZURE_TF_ACCEPTANCE_TEST_ARM_CLIENT_ID_V2 }}
-          ARM_CLIENT_SECRET: ${{ secrets.AZURE_TF_ACCEPTANCE_TEST_ARM_CLIENT_SECRET_V2 }}
-          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_TF_ACCEPTANCE_TEST_ARM_SUBSCRIPTION_ID_V2 }}
-          ARM_TENANT_ID: ${{ secrets.AZURE_TF_ACCEPTANCE_TEST_ARM_TENANT_ID_V2 }}
           GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_TF_ACCEPTANCE_TEST_CREDENTIALS }}
           GOOGLE_PROJECT_ID: ${{ secrets.GOOGLE_TF_ACCEPTANCE_PROJECT_ID }}
           SSO_CLIENT_ID: ${{ secrets.SSO_CLIENT_ID }}
           SSO_CLIENT_SECRET: ${{ secrets.SSO_CLIENT_SECRET }}
           SSO_DOMAIN: ${{ secrets.SSO_DOMAIN }}
           ACCEPTANCE_TEST_ORGANIZATION_ID: ${{ vars.TF_ACCEPTANCE_TEST_ORGANIZATION_ID }}
-          AZURE_TF_ACCEPTANCE_TEST_FEDERATION_ID: ${{ secrets.AZURE_TF_ACCEPTANCE_TEST_FEDERATION_ID }}
-          AZURE_TF_ACCEPTANCE_TEST_FEDERATION_TENANT_ID: ${{ secrets.AZURE_TF_ACCEPTANCE_TEST_ARM_TENANT_ID_V2 }}
-          AZURE_TF_ACCEPTANCE_TEST_FEDERATION_CLIENT_ID: ${{ secrets.AZURE_TF_ACCEPTANCE_TEST_FEDERATION_CLIENT_ID }}
-        run: make testacc-${{ matrix.cloud }}
+        run: make testacc-gke
+  cloud-agnostic:
+    needs: files-changed
+    if: needs.files-changed.outputs.acceptance-tests == 'true'
+    # Only one instance per cloud should run at the same time
+    concurrency:
+      group: testacc-cloud-agnostic
+    name: cloud-agnostic
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v6
+
+      - name: Setup Go
+        uses: actions/setup-go@v6
+        with:
+          go-version: '1.25.5'
+
+      - name: Cache Go modules
+        uses: actions/cache@v5
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-build-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-build-
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v4
+        with:
+          terraform_version: '1.11.*'
+          terraform_wrapper: false
+
+      - name: Acceptance test
+        env:
+          CASTAI_API_TOKEN: ${{ secrets.CASTAI_DEV_MASTER_TOKEN }}
+          SSO_CLIENT_ID: ${{ secrets.SSO_CLIENT_ID }}
+          SSO_CLIENT_SECRET: ${{ secrets.SSO_CLIENT_SECRET }}
+          SSO_DOMAIN: ${{ secrets.SSO_DOMAIN }}
+          ACCEPTANCE_TEST_ORGANIZATION_ID: ${{ vars.TF_ACCEPTANCE_TEST_ORGANIZATION_ID }}
+        run: make testacc-cloud-agnostic
 
