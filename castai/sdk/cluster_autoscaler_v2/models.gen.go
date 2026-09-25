@@ -16,31 +16,31 @@ const (
 
 // Defines values for AnalysisStatus.
 const (
-	AnalysisStatusANALYSISSTATUSCANCELED    AnalysisStatus = "ANALYSIS_STATUS_CANCELED"
-	AnalysisStatusANALYSISSTATUSCOMPLETED   AnalysisStatus = "ANALYSIS_STATUS_COMPLETED"
-	AnalysisStatusANALYSISSTATUSFAILED      AnalysisStatus = "ANALYSIS_STATUS_FAILED"
-	AnalysisStatusANALYSISSTATUSPENDING     AnalysisStatus = "ANALYSIS_STATUS_PENDING"
-	AnalysisStatusANALYSISSTATUSRUNNING     AnalysisStatus = "ANALYSIS_STATUS_RUNNING"
-	AnalysisStatusANALYSISSTATUSUNSPECIFIED AnalysisStatus = "ANALYSIS_STATUS_UNSPECIFIED"
+	ANALYSISSTATUSCANCELED    AnalysisStatus = "ANALYSIS_STATUS_CANCELED"
+	ANALYSISSTATUSCOMPLETED   AnalysisStatus = "ANALYSIS_STATUS_COMPLETED"
+	ANALYSISSTATUSFAILED      AnalysisStatus = "ANALYSIS_STATUS_FAILED"
+	ANALYSISSTATUSPENDING     AnalysisStatus = "ANALYSIS_STATUS_PENDING"
+	ANALYSISSTATUSRUNNING     AnalysisStatus = "ANALYSIS_STATUS_RUNNING"
+	ANALYSISSTATUSUNSPECIFIED AnalysisStatus = "ANALYSIS_STATUS_UNSPECIFIED"
 )
 
 // Defines values for AnalysisTriggerType.
 const (
-	AnalysisTriggerTypeTRIGGERTYPEFULLCLUSTER     AnalysisTriggerType = "TRIGGER_TYPE_FULL_CLUSTER"
-	AnalysisTriggerTypeTRIGGERTYPEREBALANCINGPLAN AnalysisTriggerType = "TRIGGER_TYPE_REBALANCING_PLAN"
-	AnalysisTriggerTypeTRIGGERTYPESNAPSHOT        AnalysisTriggerType = "TRIGGER_TYPE_SNAPSHOT"
-	AnalysisTriggerTypeTRIGGERTYPEUNSPECIFIED     AnalysisTriggerType = "TRIGGER_TYPE_UNSPECIFIED"
+	TRIGGERTYPEFULLCLUSTER     AnalysisTriggerType = "TRIGGER_TYPE_FULL_CLUSTER"
+	TRIGGERTYPEREBALANCINGPLAN AnalysisTriggerType = "TRIGGER_TYPE_REBALANCING_PLAN"
+	TRIGGERTYPESNAPSHOT        AnalysisTriggerType = "TRIGGER_TYPE_SNAPSHOT"
+	TRIGGERTYPEUNSPECIFIED     AnalysisTriggerType = "TRIGGER_TYPE_UNSPECIFIED"
 )
 
 // Defines values for AnalysisVariantStatus.
 const (
-	AnalysisVariantStatusANALYSISVARIANTSTATUSCANCELED    AnalysisVariantStatus = "ANALYSIS_VARIANT_STATUS_CANCELED"
-	AnalysisVariantStatusANALYSISVARIANTSTATUSCOMPLETED   AnalysisVariantStatus = "ANALYSIS_VARIANT_STATUS_COMPLETED"
-	AnalysisVariantStatusANALYSISVARIANTSTATUSENQUEUED    AnalysisVariantStatus = "ANALYSIS_VARIANT_STATUS_ENQUEUED"
-	AnalysisVariantStatusANALYSISVARIANTSTATUSFAILED      AnalysisVariantStatus = "ANALYSIS_VARIANT_STATUS_FAILED"
-	AnalysisVariantStatusANALYSISVARIANTSTATUSPENDING     AnalysisVariantStatus = "ANALYSIS_VARIANT_STATUS_PENDING"
-	AnalysisVariantStatusANALYSISVARIANTSTATUSRUNNING     AnalysisVariantStatus = "ANALYSIS_VARIANT_STATUS_RUNNING"
-	AnalysisVariantStatusANALYSISVARIANTSTATUSUNSPECIFIED AnalysisVariantStatus = "ANALYSIS_VARIANT_STATUS_UNSPECIFIED"
+	ANALYSISVARIANTSTATUSCANCELED    AnalysisVariantStatus = "ANALYSIS_VARIANT_STATUS_CANCELED"
+	ANALYSISVARIANTSTATUSCOMPLETED   AnalysisVariantStatus = "ANALYSIS_VARIANT_STATUS_COMPLETED"
+	ANALYSISVARIANTSTATUSENQUEUED    AnalysisVariantStatus = "ANALYSIS_VARIANT_STATUS_ENQUEUED"
+	ANALYSISVARIANTSTATUSFAILED      AnalysisVariantStatus = "ANALYSIS_VARIANT_STATUS_FAILED"
+	ANALYSISVARIANTSTATUSPENDING     AnalysisVariantStatus = "ANALYSIS_VARIANT_STATUS_PENDING"
+	ANALYSISVARIANTSTATUSRUNNING     AnalysisVariantStatus = "ANALYSIS_VARIANT_STATUS_RUNNING"
+	ANALYSISVARIANTSTATUSUNSPECIFIED AnalysisVariantStatus = "ANALYSIS_VARIANT_STATUS_UNSPECIFIED"
 )
 
 // Defines values for FilterFieldType.
@@ -64,12 +64,12 @@ const (
 
 // Defines values for HibernationJobState.
 const (
-	HibernationJobStateFAILED           HibernationJobState = "FAILED"
-	HibernationJobStateFINISHED         HibernationJobState = "FINISHED"
-	HibernationJobStatePAUSING          HibernationJobState = "PAUSING"
-	HibernationJobStatePENDING          HibernationJobState = "PENDING"
-	HibernationJobStateRESUMING         HibernationJobState = "RESUMING"
-	HibernationJobStateSTATEUNSPECIFIED HibernationJobState = "STATE_UNSPECIFIED"
+	FAILED           HibernationJobState = "FAILED"
+	FINISHED         HibernationJobState = "FINISHED"
+	PAUSING          HibernationJobState = "PAUSING"
+	PENDING          HibernationJobState = "PENDING"
+	RESUMING         HibernationJobState = "RESUMING"
+	STATEUNSPECIFIED HibernationJobState = "STATE_UNSPECIFIED"
 )
 
 // Defines values for HibernationJobType.
@@ -81,13 +81,13 @@ const (
 
 // Defines values for KubernetesNodeAffinityOperator.
 const (
-	KubernetesNodeAffinityOperatorDOESNOTEXIST        KubernetesNodeAffinityOperator = "DOES_NOT_EXIST"
-	KubernetesNodeAffinityOperatorEXISTS              KubernetesNodeAffinityOperator = "EXISTS"
-	KubernetesNodeAffinityOperatorGT                  KubernetesNodeAffinityOperator = "GT"
-	KubernetesNodeAffinityOperatorIN                  KubernetesNodeAffinityOperator = "IN"
-	KubernetesNodeAffinityOperatorLT                  KubernetesNodeAffinityOperator = "LT"
-	KubernetesNodeAffinityOperatorNOTIN               KubernetesNodeAffinityOperator = "NOT_IN"
-	KubernetesNodeAffinityOperatorOPERATORUNSPECIFIED KubernetesNodeAffinityOperator = "OPERATOR_UNSPECIFIED"
+	DOESNOTEXIST        KubernetesNodeAffinityOperator = "DOES_NOT_EXIST"
+	EXISTS              KubernetesNodeAffinityOperator = "EXISTS"
+	GT                  KubernetesNodeAffinityOperator = "GT"
+	IN                  KubernetesNodeAffinityOperator = "IN"
+	LT                  KubernetesNodeAffinityOperator = "LT"
+	NOTIN               KubernetesNodeAffinityOperator = "NOT_IN"
+	OPERATORUNSPECIFIED KubernetesNodeAffinityOperator = "OPERATOR_UNSPECIFIED"
 )
 
 // Defines values for NodeComponentType.
@@ -160,20 +160,20 @@ const (
 
 // Defines values for PodPinnerStatus.
 const (
-	PodPinnerStatusPODPINNERSTATUSCOMPATIBLE          PodPinnerStatus = "POD_PINNER_STATUS_COMPATIBLE"
-	PodPinnerStatusPODPINNERSTATUSINCOMPATIBLE        PodPinnerStatus = "POD_PINNER_STATUS_INCOMPATIBLE"
-	PodPinnerStatusPODPINNERSTATUSINCOMPATIBLEVERSION PodPinnerStatus = "POD_PINNER_STATUS_INCOMPATIBLE_VERSION"
-	PodPinnerStatusPODPINNERSTATUSMISSING             PodPinnerStatus = "POD_PINNER_STATUS_MISSING"
-	PodPinnerStatusPODPINNERSTATUSUNKNOWN             PodPinnerStatus = "POD_PINNER_STATUS_UNKNOWN"
-	PodPinnerStatusPODPINNERSTATUSUNSPECIFIED         PodPinnerStatus = "POD_PINNER_STATUS_UNSPECIFIED"
+	PODPINNERSTATUSCOMPATIBLE          PodPinnerStatus = "POD_PINNER_STATUS_COMPATIBLE"
+	PODPINNERSTATUSINCOMPATIBLE        PodPinnerStatus = "POD_PINNER_STATUS_INCOMPATIBLE"
+	PODPINNERSTATUSINCOMPATIBLEVERSION PodPinnerStatus = "POD_PINNER_STATUS_INCOMPATIBLE_VERSION"
+	PODPINNERSTATUSMISSING             PodPinnerStatus = "POD_PINNER_STATUS_MISSING"
+	PODPINNERSTATUSUNKNOWN             PodPinnerStatus = "POD_PINNER_STATUS_UNKNOWN"
+	PODPINNERSTATUSUNSPECIFIED         PodPinnerStatus = "POD_PINNER_STATUS_UNSPECIFIED"
 )
 
 // Defines values for RebalancingNodeResourceOffering.
 const (
-	RebalancingNodeResourceOfferingFALLBACK                    RebalancingNodeResourceOffering = "FALLBACK"
-	RebalancingNodeResourceOfferingONDEMAND                    RebalancingNodeResourceOffering = "ON_DEMAND"
-	RebalancingNodeResourceOfferingRESOURCEOFFERINGUNSPECIFIED RebalancingNodeResourceOffering = "RESOURCE_OFFERING_UNSPECIFIED"
-	RebalancingNodeResourceOfferingSPOT                        RebalancingNodeResourceOffering = "SPOT"
+	FALLBACK                    RebalancingNodeResourceOffering = "FALLBACK"
+	ONDEMAND                    RebalancingNodeResourceOffering = "ON_DEMAND"
+	RESOURCEOFFERINGUNSPECIFIED RebalancingNodeResourceOffering = "RESOURCE_OFFERING_UNSPECIFIED"
+	SPOT                        RebalancingNodeResourceOffering = "SPOT"
 )
 
 // Defines values for RebalancingNodeStatus.
@@ -194,18 +194,18 @@ const (
 
 // Defines values for SortOrder.
 const (
-	SortOrderASC  SortOrder = "ASC"
-	SortOrderAsc  SortOrder = "asc"
-	SortOrderDESC SortOrder = "DESC"
-	SortOrderDesc SortOrder = "desc"
+	ASC  SortOrder = "ASC"
+	Asc  SortOrder = "asc"
+	DESC SortOrder = "DESC"
+	Desc SortOrder = "desc"
 )
 
 // Defines values for UpdateCapacityReservationConstraintsRequestCapacityReservationType.
 const (
-	UpdateCapacityReservationConstraintsRequestCapacityReservationTypeCAPACITYBLOCK                      UpdateCapacityReservationConstraintsRequestCapacityReservationType = "CAPACITY_BLOCK"
-	UpdateCapacityReservationConstraintsRequestCapacityReservationTypeCAPACITYRESERVATIONTYPEUNSPECIFIED UpdateCapacityReservationConstraintsRequestCapacityReservationType = "CAPACITY_RESERVATION_TYPE_UNSPECIFIED"
-	UpdateCapacityReservationConstraintsRequestCapacityReservationTypeGCPCAPACITYRESERVATION             UpdateCapacityReservationConstraintsRequestCapacityReservationType = "GCP_CAPACITY_RESERVATION"
-	UpdateCapacityReservationConstraintsRequestCapacityReservationTypeONDEMANDCAPACITYRESERVATION        UpdateCapacityReservationConstraintsRequestCapacityReservationType = "ON_DEMAND_CAPACITY_RESERVATION"
+	CAPACITYBLOCK                      UpdateCapacityReservationConstraintsRequestCapacityReservationType = "CAPACITY_BLOCK"
+	CAPACITYRESERVATIONTYPEUNSPECIFIED UpdateCapacityReservationConstraintsRequestCapacityReservationType = "CAPACITY_RESERVATION_TYPE_UNSPECIFIED"
+	GCPCAPACITYRESERVATION             UpdateCapacityReservationConstraintsRequestCapacityReservationType = "GCP_CAPACITY_RESERVATION"
+	ONDEMANDCAPACITYRESERVATION        UpdateCapacityReservationConstraintsRequestCapacityReservationType = "ON_DEMAND_CAPACITY_RESERVATION"
 )
 
 // Defines values for WorkloadFilterFieldType.
@@ -217,13 +217,13 @@ const (
 
 // Defines values for WorkloadIssueCategory.
 const (
-	WorkloadIssueCategoryCATEGORYUNSPECIFIED   WorkloadIssueCategory = "CATEGORY_UNSPECIFIED"
-	WorkloadIssueCategoryJOBPOD                WorkloadIssueCategory = "JOB_POD"
-	WorkloadIssueCategoryLOCALPERSISTENTVOLUME WorkloadIssueCategory = "LOCAL_PERSISTENT_VOLUME"
-	WorkloadIssueCategoryNOCONTROLLER          WorkloadIssueCategory = "NO_CONTROLLER"
-	WorkloadIssueCategoryOTHER                 WorkloadIssueCategory = "OTHER"
-	WorkloadIssueCategoryPREVENTEDDRAIN        WorkloadIssueCategory = "PREVENTED_DRAIN"
-	WorkloadIssueCategoryREMOVALDISABLED       WorkloadIssueCategory = "REMOVAL_DISABLED"
+	CATEGORYUNSPECIFIED   WorkloadIssueCategory = "CATEGORY_UNSPECIFIED"
+	JOBPOD                WorkloadIssueCategory = "JOB_POD"
+	LOCALPERSISTENTVOLUME WorkloadIssueCategory = "LOCAL_PERSISTENT_VOLUME"
+	NOCONTROLLER          WorkloadIssueCategory = "NO_CONTROLLER"
+	OTHER                 WorkloadIssueCategory = "OTHER"
+	PREVENTEDDRAIN        WorkloadIssueCategory = "PREVENTED_DRAIN"
+	REMOVALDISABLED       WorkloadIssueCategory = "REMOVAL_DISABLED"
 )
 
 // Defines values for HibernationJobsAPICreateHibernationJobParamsMode.
@@ -242,9 +242,9 @@ const (
 
 // Defines values for HibernationJobsAPIResumeClusterParamsMode.
 const (
-	HibernationJobsAPIResumeClusterParamsModeOPERATIONMODEDEFAULT     HibernationJobsAPIResumeClusterParamsMode = "OPERATION_MODE_DEFAULT"
-	HibernationJobsAPIResumeClusterParamsModeOPERATIONMODEDRYRUN      HibernationJobsAPIResumeClusterParamsMode = "OPERATION_MODE_DRY_RUN"
-	HibernationJobsAPIResumeClusterParamsModeOPERATIONMODEUNSPECIFIED HibernationJobsAPIResumeClusterParamsMode = "OPERATION_MODE_UNSPECIFIED"
+	OPERATIONMODEDEFAULT     HibernationJobsAPIResumeClusterParamsMode = "OPERATION_MODE_DEFAULT"
+	OPERATIONMODEDRYRUN      HibernationJobsAPIResumeClusterParamsMode = "OPERATION_MODE_DRY_RUN"
+	OPERATIONMODEUNSPECIFIED HibernationJobsAPIResumeClusterParamsMode = "OPERATION_MODE_UNSPECIFIED"
 )
 
 // Defines values for RebalancingConfigAPISearchRebalancingNodeFilterValuesParamsField.
