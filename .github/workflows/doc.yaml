@@ -5,7 +5,25 @@ on:
     paths-ignore:
       - 'examples/**'
 jobs:
+  files-changed:
+    name: detect files changed
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    outputs:
+      generate-docs: ${{ steps.changes.outputs.generate-docs }}
+      generate-sdk: ${{ steps.changes.outputs.generate-sdk }}
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v6
+      - name: Check for file changes
+        uses: dorny/paths-filter@v2
+        id: changes
+        with:
+          token: ${{ github.token }}
+          filters: .github/file-filters.yml
   generate-sdk:
+    needs: files-changed
+    if: needs.files-changed.outputs.generate-sdk == 'true'
     name: Check if SDK is up to date
     runs-on: ubuntu-latest
     steps:
@@ -22,6 +40,8 @@ jobs:
             exit 1
           fi
   generate-docs:
+    needs: files-changed
+    if: needs.files-changed.outputs.generate-docs == 'true'
     name: Check if documentation is up to date
     runs-on: ubuntu-latest
     steps:

@@ -5,10 +5,24 @@ on:
     paths-ignore:
       - '**.md.tmpl'
 jobs:
+  files-changed:
+    name: detect files changed
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    outputs:
+      validate-examples: ${{ steps.changes.outputs.validate-examples }}
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v6
+      - name: Check for file changes
+        uses: dorny/paths-filter@v2
+        id: changes
+        with:
+          token: ${{ github.token }}
+          filters: .github/file-filters.yml
   terraform_validation:
-    strategy:
-      matrix:
-        version: ["1.11", latest]
+    needs: files-changed
+    if: needs.files-changed.outputs.validate-examples == 'true'
     runs-on: ubuntu-latest
 
     steps:
@@ -18,7 +32,7 @@ jobs:
       - name: Set up Terraform
         uses: hashicorp/setup-terraform@v4
         with:
-          terraform_version: ${{ matrix.version }}
+          terraform_version: "latest"
 
       - name: Print tf version
         run: terraform version

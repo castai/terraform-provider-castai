@@ -5,7 +5,24 @@ on:
     branches: [ '*' ]
 
 jobs:
+  files-changed:
+    name: detect files changed
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    outputs:
+      acceptance-tests: ${{ steps.changes.outputs.acceptance-tests }}
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v6
+      - name: Check for file changes
+        uses: dorny/paths-filter@v2
+        id: changes
+        with:
+          token: ${{ github.token }}
+          filters: .github/file-filters.yml
   aks:
+    needs: files-changed
+    if: needs.files-changed.outputs.acceptance-tests == 'true'
     # Only one instance per cloud should run at the same time
     concurrency:
       group: testacc-aks
@@ -50,6 +67,8 @@ jobs:
           ACCEPTANCE_TEST_ORGANIZATION_ID: ${{ vars.TF_ACCEPTANCE_TEST_ORGANIZATION_ID }}
         run: make testacc-aks
   eks:
+    needs: files-changed
+    if: needs.files-changed.outputs.acceptance-tests == 'true'
     # Only one instance per cloud should run at the same time
     concurrency:
       group: testacc-eks
@@ -89,6 +108,8 @@ jobs:
           ACCEPTANCE_TEST_ORGANIZATION_ID: ${{ vars.TF_ACCEPTANCE_TEST_ORGANIZATION_ID }}
         run: make testacc-eks
   gke:
+    needs: files-changed
+    if: needs.files-changed.outputs.acceptance-tests == 'true'
     # Only one instance per cloud should run at the same time
     concurrency:
       group: testacc-gke
@@ -139,7 +160,9 @@ jobs:
           SSO_DOMAIN: ${{ secrets.SSO_DOMAIN }}
           ACCEPTANCE_TEST_ORGANIZATION_ID: ${{ vars.TF_ACCEPTANCE_TEST_ORGANIZATION_ID }}
         run: make testacc-gke
-  testacc:
+  cloud-agnostic:
+    needs: files-changed
+    if: needs.files-changed.outputs.acceptance-tests == 'true'
     # Only one instance per cloud should run at the same time
     concurrency:
       group: testacc-cloud-agnostic
