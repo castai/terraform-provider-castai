@@ -34,8 +34,10 @@ Read-Only:
 - `aggressive_mode` (Boolean)
 - `aggressive_mode_config` (List of Object) (see [below for nested schema](#nestedobjatt--launch_configuration--aggressive_mode_config))
 - `drain_failure_config` (List of Object) (see [below for nested schema](#nestedobjatt--launch_configuration--drain_failure_config))
+- `evict_gracefully` (Boolean)
 - `execution_conditions` (List of Object) (see [below for nested schema](#nestedobjatt--launch_configuration--execution_conditions))
 - `keep_drain_timeout_nodes` (Boolean)
+- `max_simultaneous_drains` (Number)
 - `node_ttl_seconds` (Number)
 - `num_targeted_nodes` (Number)
 - `rebalancing_min_nodes` (Number)
@@ -50,6 +52,7 @@ Read-Only:
 - `ignore_local_persistent_volumes` (Boolean)
 - `ignore_problem_job_pods` (Boolean)
 - `ignore_problem_pods_without_controller` (Boolean)
+- `ignore_problem_prevented_drain_pods` (Boolean)
 - `ignore_problem_removal_disabled_pods` (Boolean)
 
 

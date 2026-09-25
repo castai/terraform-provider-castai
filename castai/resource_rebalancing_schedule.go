@@ -27,7 +27,10 @@ func resourceRebalancingSchedule() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: rebalancingScheduleStateImporter,
 		},
-		Description: "CAST AI rebalancing schedule resource to manage rebalancing schedules.",
+		CustomizeDiff: resourceRebalancingScheduleCustomizeDiff,
+		Description: "CAST AI rebalancing schedule resource to manage rebalancing schedules. " +
+			"The `keep_drain_timeout_nodes` attribute is deprecated in favor of `evict_gracefully` " +
+			"(both are aliases of the same setting); migrate by renaming the attribute and keeping the same value.",
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(1 * time.Minute),
@@ -114,9 +117,25 @@ func resourceRebalancingSchedule() *schema.Resource {
 							Description:      "Minimum number of nodes that should be kept in the cluster after rebalancing.",
 						},
 						"keep_drain_timeout_nodes": {
-							Type:        schema.TypeBool,
-							Optional:    true,
+							Type:     schema.TypeBool,
+							Optional: true,
+							// Computed: the API aliases this field to evictGracefully in responses.
+							Computed:    true,
 							Description: "Defines whether the nodes that failed to get drained until a predefined timeout, will be kept with a rebalancing.cast.ai/status=drain-failed annotation instead of forcefully drained.",
+							Deprecated:  "Use evict_gracefully instead. The two fields are aliases of the same setting; migrate by setting evict_gracefully to the same value.",
+						},
+						"evict_gracefully": {
+							Type:     schema.TypeBool,
+							Optional: true,
+							// Computed: prevents a perpetual diff when removed from config after being set.
+							Computed:    true,
+							Description: "Defines whether the nodes that failed to get drained until a predefined timeout, will be kept with a rebalancing.cast.ai/status=drain-failed annotation instead of forcefully drained. Replaces the deprecated keep_drain_timeout_nodes.",
+						},
+						"max_simultaneous_drains": {
+							Type:             schema.TypeInt,
+							Optional:         true,
+							ValidateDiagFunc: validation.ToDiagFunc(validation.IntAtLeast(0)),
+							Description:      "Number of nodes to drain simultaneously. When unspecified, defaults to unlimited.",
 						},
 						"aggressive_mode": {
 							Type:        schema.TypeBool,
@@ -149,6 +168,11 @@ func resourceRebalancingSchedule() *schema.Resource {
 										Type:        schema.TypeBool,
 										Required:    true,
 										Description: "Pods that don't have a controller (bare pods) will not prevent the Rebalancer from deleting a node on which they run. WARNING: When true, such pods might not restart, since they have no controller to do it.",
+									},
+									"ignore_problem_prevented_drain_pods": {
+										Type:        schema.TypeBool,
+										Optional:    true,
+										Description: "Pods annotated with rebalancing.cast.ai/prevented-drain=true will not prevent the Rebalancer from deleting a node on which they run.",
 									},
 								},
 							},
@@ -198,7 +222,7 @@ func resourceRebalancingSchedule() *schema.Resource {
 							MaxItems: 1,
 							Optional: true,
 							Description: "Configures behavior when a node fails to drain during rebalancing. " +
-								"Relevant only when `keep_drain_timeout_nodes` is true.",
+								"Relevant only when `evict_gracefully` is true.",
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"disable_uncordon": {
@@ -338,6 +362,52 @@ func rebalancingScheduleStateImporter(ctx context.Context, d *schema.ResourceDat
 	return []*schema.ResourceData{d}, nil
 }
 
+// resourceRebalancingScheduleCustomizeDiff rejects plans that set both alias
+// fields (keep_drain_timeout_nodes, evict_gracefully) to conflicting values.
+func resourceRebalancingScheduleCustomizeDiff(_ context.Context, d *schema.ResourceDiff, _ interface{}) error {
+	return validateDrainOptionsAlias(d.GetRawConfig(), d.Get("launch_configuration").([]interface{}))
+}
+
+// validateDrainOptionsAlias errors when the raw config sets both alias fields
+// with conflicting values; equal values are allowed during migration.
+func validateDrainOptionsAlias(rawConfig cty.Value, launchConfig []interface{}) error {
+	if !rawConfigHasField(rawConfig, "launch_configuration", "keep_drain_timeout_nodes") ||
+		!rawConfigHasField(rawConfig, "launch_configuration", "evict_gracefully") {
+		return nil
+	}
+	if len(launchConfig) == 0 {
+		return nil
+	}
+	section, ok := launchConfig[0].(map[string]interface{})
+	if !ok {
+		return nil
+	}
+	keep := section["keep_drain_timeout_nodes"].(bool)
+	evict := section["evict_gracefully"].(bool)
+	if keep != evict {
+		return fmt.Errorf("keep_drain_timeout_nodes is deprecated and aliases evict_gracefully; both are set with conflicting values (keep_drain_timeout_nodes = %t, evict_gracefully = %t). Remove keep_drain_timeout_nodes and set only evict_gracefully", keep, evict)
+	}
+	return nil
+}
+
+// optionalLaunchConfigBool returns nil unless the attribute is set in the raw
+// config, so an unset value is omitted from the request body instead of being
+// sent as an explicit false.
+func optionalLaunchConfigBool(d *schema.ResourceData, launchConfig map[string]any, attr string) *bool {
+	if !rawConfigHasField(d.GetRawConfig(), "launch_configuration", attr) {
+		return nil
+	}
+	return lo.ToPtr(launchConfig[attr].(bool))
+}
+
+// optionalLaunchConfigInt32 is optionalLaunchConfigBool for int attributes.
+func optionalLaunchConfigInt32(d *schema.ResourceData, launchConfig map[string]any, attr string) *int32 {
+	if !rawConfigHasField(d.GetRawConfig(), "launch_configuration", attr) {
+		return nil
+	}
+	return lo.ToPtr(int32(launchConfig[attr].(int)))
+}
+
 func stateToSchedule(d *schema.ResourceData) (*sdk.ScheduledrebalancingV1RebalancingSchedule, error) {
 	scheduleData := toSection(d, "schedule")
 
@@ -361,8 +431,6 @@ func stateToSchedule(d *schema.ResourceData) (*sdk.ScheduledrebalancingV1Rebalan
 			return nil, fmt.Errorf("parsing selector: %w", err)
 		}
 
-		keepDrainTimeoutNodes := readOptionalValue[bool](launchConfigurationData, "keep_drain_timeout_nodes")
-
 		var executionConditions *sdk.ScheduledrebalancingV1ExecutionConditions
 		executionConditionsData := launchConfigurationData["execution_conditions"].([]any)
 		if len(executionConditionsData) != 0 {
@@ -377,11 +445,16 @@ func stateToSchedule(d *schema.ResourceData) (*sdk.ScheduledrebalancingV1Rebalan
 		var aggressiveModeConfig *sdk.ScheduledrebalancingV1AggressiveModeConfig
 		aggressiveModeConfigSection := launchConfigurationData["aggressive_mode_config"].([]any)
 		if len(aggressiveModeConfigSection) != 0 {
+			aggressiveModeConfigData := aggressiveModeConfigSection[0].(map[string]any)
 			aggressiveModeConfig = &sdk.ScheduledrebalancingV1AggressiveModeConfig{
-				IgnoreLocalPersistentVolumes:       lo.ToPtr(aggressiveModeConfigSection[0].(map[string]any)["ignore_local_persistent_volumes"].(bool)),
-				IgnoreProblemJobPods:               lo.ToPtr(aggressiveModeConfigSection[0].(map[string]any)["ignore_problem_job_pods"].(bool)),
-				IgnoreProblemRemovalDisabledPods:   lo.ToPtr(aggressiveModeConfigSection[0].(map[string]any)["ignore_problem_removal_disabled_pods"].(bool)),
-				IgnoreProblemPodsWithoutController: lo.ToPtr(aggressiveModeConfigSection[0].(map[string]any)["ignore_problem_pods_without_controller"].(bool)),
+				IgnoreLocalPersistentVolumes:       lo.ToPtr(aggressiveModeConfigData["ignore_local_persistent_volumes"].(bool)),
+				IgnoreProblemJobPods:               lo.ToPtr(aggressiveModeConfigData["ignore_problem_job_pods"].(bool)),
+				IgnoreProblemRemovalDisabledPods:   lo.ToPtr(aggressiveModeConfigData["ignore_problem_removal_disabled_pods"].(bool)),
+				IgnoreProblemPodsWithoutController: lo.ToPtr(aggressiveModeConfigData["ignore_problem_pods_without_controller"].(bool)),
+			}
+			// Optional field: stays nil when unset in the raw config.
+			if rawConfigHasField(d.GetRawConfig(), "launch_configuration", "aggressive_mode_config", "ignore_problem_prevented_drain_pods") {
+				aggressiveModeConfig.IgnoreProblemPreventedDrainPods = lo.ToPtr(aggressiveModeConfigData["ignore_problem_prevented_drain_pods"].(bool))
 			}
 		}
 
@@ -404,7 +477,9 @@ func stateToSchedule(d *schema.ResourceData) (*sdk.ScheduledrebalancingV1Rebalan
 			NumTargetedNodes: readOptionalNumber[int, int32](launchConfigurationData, "num_targeted_nodes"),
 			RebalancingOptions: &sdk.ScheduledrebalancingV1RebalancingOptions{
 				MinNodes:              readOptionalNumber[int, int32](launchConfigurationData, "rebalancing_min_nodes"),
-				KeepDrainTimeoutNodes: keepDrainTimeoutNodes,
+				KeepDrainTimeoutNodes: optionalLaunchConfigBool(d, launchConfigurationData, "keep_drain_timeout_nodes"), //nolint:staticcheck // SA1019: deprecated but still sent for backward compatibility
+				EvictGracefully:       optionalLaunchConfigBool(d, launchConfigurationData, "evict_gracefully"),
+				MaxSimultaneousDrains: optionalLaunchConfigInt32(d, launchConfigurationData, "max_simultaneous_drains"),
 				ExecutionConditions:   executionConditions,
 				AggressiveMode:        aggressiveMode, //nolint:staticcheck // SA1019: deprecated but still used for backward compatibility
 				AggressiveModeConfig:  aggressiveModeConfig,
@@ -438,7 +513,14 @@ func scheduleToState(schedule *sdk.ScheduledrebalancingV1RebalancingSchedule, d 
 
 	if schedule.LaunchConfiguration.RebalancingOptions != nil {
 		launchConfig["rebalancing_min_nodes"] = schedule.LaunchConfiguration.RebalancingOptions.MinNodes
-		launchConfig["keep_drain_timeout_nodes"] = schedule.LaunchConfiguration.RebalancingOptions.KeepDrainTimeoutNodes
+		keepDrainTimeoutNodes := schedule.LaunchConfiguration.RebalancingOptions.KeepDrainTimeoutNodes //nolint:staticcheck // SA1019: deprecated but still returned for backward compatibility
+		if keepDrainTimeoutNodes == nil {
+			// The API aliases the deprecated field to evictGracefully.
+			keepDrainTimeoutNodes = schedule.LaunchConfiguration.RebalancingOptions.EvictGracefully
+		}
+		launchConfig["keep_drain_timeout_nodes"] = keepDrainTimeoutNodes
+		launchConfig["evict_gracefully"] = schedule.LaunchConfiguration.RebalancingOptions.EvictGracefully
+		launchConfig["max_simultaneous_drains"] = schedule.LaunchConfiguration.RebalancingOptions.MaxSimultaneousDrains
 		launchConfig["aggressive_mode"] = schedule.LaunchConfiguration.RebalancingOptions.AggressiveMode //nolint:staticcheck // AggressiveMode is deprecated but still supported for backwards compatibility
 		launchConfig["target_node_selection_algorithm"] = schedule.LaunchConfiguration.TargetNodeSelectionAlgorithm
 		if schedule.LaunchConfiguration.RebalancingOptions.AggressiveModeConfig != nil {
@@ -448,6 +530,7 @@ func scheduleToState(schedule *sdk.ScheduledrebalancingV1RebalancingSchedule, d 
 					"ignore_problem_job_pods":                schedule.LaunchConfiguration.RebalancingOptions.AggressiveModeConfig.IgnoreProblemJobPods,
 					"ignore_problem_removal_disabled_pods":   schedule.LaunchConfiguration.RebalancingOptions.AggressiveModeConfig.IgnoreProblemRemovalDisabledPods,
 					"ignore_problem_pods_without_controller": schedule.LaunchConfiguration.RebalancingOptions.AggressiveModeConfig.IgnoreProblemPodsWithoutController,
+					"ignore_problem_prevented_drain_pods":    schedule.LaunchConfiguration.RebalancingOptions.AggressiveModeConfig.IgnoreProblemPreventedDrainPods,
 				},
 			}
 		}
