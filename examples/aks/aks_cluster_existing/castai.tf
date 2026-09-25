@@ -9,12 +9,15 @@ data "azurerm_kubernetes_cluster" "example" {
 # Configure AKS cluster connection to CAST AI using CAST AI aks-cluster module.
 module "castai_aks_cluster" {
   source  = "castai/aks/castai"
-  version = "~> 11.0"
+  version = "~> 12.0"
 
   api_url                = var.castai_api_url
   castai_api_token       = var.castai_api_token
   grpc_url               = var.castai_grpc_url
   wait_for_cluster_ready = true
+
+  workload_autoscaler_keep_crds = true
+  umbrella_enabled              = true
 
   aks_cluster_name           = var.cluster_name
   aks_cluster_region         = var.cluster_region

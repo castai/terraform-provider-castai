@@ -32,15 +32,17 @@ module "castai-gke-iam" {
 
 module "castai-gke-cluster" {
   source  = "castai/gke-cluster/castai"
-  version = "~> 10.1"
+  version = "~> 11.0"
 
-  api_url                = var.castai_api_url
-  castai_api_token       = var.castai_api_token
-  grpc_url               = var.castai_grpc_url
-  wait_for_cluster_ready = true
-  project_id             = var.project_id
-  gke_cluster_name       = var.cluster_name
-  gke_cluster_location   = module.gke.location
+  api_url                       = var.castai_api_url
+  castai_api_token              = var.castai_api_token
+  grpc_url                      = var.castai_grpc_url
+  wait_for_cluster_ready        = true
+  workload_autoscaler_keep_crds = true
+  umbrella_enabled              = true
+  project_id                    = var.project_id
+  gke_cluster_name              = var.cluster_name
+  gke_cluster_location          = module.gke.location
 
   gke_credentials            = module.castai-gke-iam.private_key
   delete_nodes_on_disconnect = true

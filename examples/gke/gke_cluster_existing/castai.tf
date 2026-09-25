@@ -21,12 +21,14 @@ module "castai_gke_iam" {
 
 module "castai_gke_cluster" {
   source  = "castai/gke-cluster/castai"
-  version = "~> 10.1"
+  version = "~> 11.0"
 
-  api_url                = var.castai_api_url
-  castai_api_token       = var.castai_api_token
-  grpc_url               = var.castai_grpc_url
-  wait_for_cluster_ready = true
+  api_url                       = var.castai_api_url
+  castai_api_token              = var.castai_api_token
+  grpc_url                      = var.castai_grpc_url
+  wait_for_cluster_ready        = true
+  workload_autoscaler_keep_crds = true
+  umbrella_enabled              = true
 
   project_id           = var.project_id
   gke_cluster_name     = var.cluster_name
