@@ -91,6 +91,7 @@ const (
 	FieldNodeTemplateSharedGpuName                            = "gpu_name"
 	FieldNodeTemplateSharingStrategy                          = "sharing_strategy"
 	FieldNodeTemplateClmEnabled                               = "clm_enabled"
+	FieldNodeTemplateClmNetworkingMode                        = "clm_networking_mode"
 	FieldNodeTemplateEdgeLocationIDs                          = "edge_location_ids"
 	FieldNodeTemplatePriceAdjustmentConfiguration             = "price_adjustment_configuration"
 	FieldNodeTemplateInstanceTypeAdjustments                  = "instance_type_adjustments"
@@ -882,6 +883,15 @@ func resourceNodeTemplate() *schema.Resource {
 				Default:     false,
 				Description: "Marks whether Container Live Migration (CLM) should be enabled for nodes created from this template. Supported on EKS, GKE, and AKS clusters. CLM-enabled nodes participate in live workload migration during rebalancing, scale-down, and node lifecycle events.",
 			},
+			FieldNodeTemplateClmNetworkingMode: {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice(
+					[]string{"default", "none", "tc", "cni", ""}, false,
+				)),
+				Description: "CLM networking mode for nodes created from this template. Controls how TCP connections are handled during live migration. Valid values: default, none, tc, cni, or an empty string (treated the same as not setting the field). Applied only if `clm_enabled=true`.",
+			},
 			FieldNodeTemplateEdgeLocationIDs: {
 				Type:     schema.TypeList,
 				Optional: true,
@@ -996,6 +1006,10 @@ func resourceNodeTemplateRead(ctx context.Context, d *schema.ResourceData, meta 
 
 	if err := d.Set(FieldNodeTemplateClmEnabled, nodeTemplate.ClmEnabled); err != nil {
 		return diag.FromErr(fmt.Errorf("setting clm enabled: %w", err))
+	}
+
+	if err := d.Set(FieldNodeTemplateClmNetworkingMode, nodeTemplate.ClmNetworkingMode); err != nil {
+		return diag.FromErr(fmt.Errorf("setting clm networking mode: %w", err))
 	}
 
 	if nodeTemplate.EdgeLocationIds != nil {
@@ -1409,6 +1423,7 @@ func updateNodeTemplate(ctx context.Context, d *schema.ResourceData, meta any, s
 		FieldNodeTemplateSharedGpuName,
 		FieldNodeTemplateSharedClientsPerGpu,
 		FieldNodeTemplateClmEnabled,
+		FieldNodeTemplateClmNetworkingMode,
 		FieldNodeTemplateEdgeLocationIDs,
 		FieldNodeTemplatePriceAdjustmentConfiguration,
 		FieldNodeTemplateUserManagedGPUDrivers,
@@ -1492,6 +1507,10 @@ func updateNodeTemplate(ctx context.Context, d *schema.ResourceData, meta any, s
 		req.ClmEnabled = lo.ToPtr(v.(bool))
 	}
 
+	if v, ok := d.GetOk(FieldNodeTemplateClmNetworkingMode); ok {
+		req.ClmNetworkingMode = lo.ToPtr(v.(string))
+	}
+
 	if v, ok := d.Get(FieldNodeTemplateEdgeLocationIDs).([]any); ok && len(v) > 0 {
 		req.EdgeLocationIds = toPtr(toStringList(v))
 	}
@@ -1531,6 +1550,10 @@ func resourceNodeTemplateCreate(ctx context.Context, d *schema.ResourceData, met
 		ConfigurationId: lo.ToPtr(d.Get(FieldNodeTemplateConfigurationId).(string)),
 		ShouldTaint:     lo.ToPtr(d.Get(FieldNodeTemplateShouldTaint).(bool)),
 		ClmEnabled:      lo.ToPtr(d.Get(FieldNodeTemplateClmEnabled).(bool)),
+	}
+
+	if v, ok := d.GetOk(FieldNodeTemplateClmNetworkingMode); ok {
+		req.ClmNetworkingMode = lo.ToPtr(v.(string))
 	}
 
 	if v, ok := d.Get(FieldNodeTemplateEdgeLocationIDs).([]any); ok && len(v) > 0 {

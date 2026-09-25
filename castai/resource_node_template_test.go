@@ -177,6 +177,7 @@ func TestNodeTemplateResourceReadContext(t *testing.T) {
 	r.Nil(result)
 	r.False(result.HasError())
 	r.ElementsMatch(strings.Split(`ID = gpu
+clm_networking_mode = 
 cluster_id = b6bfc074-a267-400f-b8f1-db0850c369b1
 configuration_id = 7dc4f922-29c9-4377-889c-0c8c5fb8d497
 constraints.# = 1
@@ -789,6 +790,375 @@ func TestNodeTemplateResourceDelete_defaultNodeTemplate(t *testing.T) {
 	r.Equal("Default node templates cannot be deleted from CAST.ai. If you want to autoscaler to stop"+
 		" considering this node template, you can disable it (either from UI or by setting `is_enabled` flag to"+
 		" false).", result[0].Detail)
+}
+
+func TestClmNetworkingModeDefaultAccepted(t *testing.T) {
+	r := require.New(t)
+	field := resourceNodeTemplate().Schema[FieldNodeTemplateClmNetworkingMode]
+	diags := field.ValidateDiagFunc("default", cty.Path{cty.GetAttrStep{Name: FieldNodeTemplateClmNetworkingMode}})
+	r.False(diags.HasError(), "expected 'default' to be accepted by the schema validator")
+}
+
+func TestClmNetworkingModeEmptyStringAccepted(t *testing.T) {
+	r := require.New(t)
+	field := resourceNodeTemplate().Schema[FieldNodeTemplateClmNetworkingMode]
+	diags := field.ValidateDiagFunc("", cty.Path{cty.GetAttrStep{Name: FieldNodeTemplateClmNetworkingMode}})
+	r.False(diags.HasError(), "expected empty string to be accepted by the schema validator")
+}
+
+func TestNodeTemplateResourceCreate_withClmNetworkingMode(t *testing.T) {
+	r := require.New(t)
+	mockctrl := gomock.NewController(t)
+	mockClient := mock_sdk.NewMockClientInterface(mockctrl)
+
+	ctx := context.Background()
+	provider := &ProviderConfig{
+		api: &sdk.ClientWithResponses{
+			ClientInterface: mockClient,
+		},
+	}
+
+	name := "custom-template"
+	clusterId := "b6bfc074-a267-400f-b8f1-db0850c369b1"
+	templateResponse := `
+		{
+		  "configurationId": "7dc4f922-29c9-4377-889c-0c8c5fb8d497",
+		  "configurationName": "default",
+		  "name": "custom-template",
+		  "isEnabled": true,
+		  "clmEnabled": true,
+		  "clmNetworkingMode": "tc",
+		  "constraints": {
+		    "spot": false,
+		    "onDemand": true,
+		    "minCpu": 10,
+		    "maxCpu": 10000,
+		    "architectures": ["amd64", "arm64"],
+		    "resourceLimits": {
+		      "cpuLimitEnabled": true,
+		      "cpuLimitMaxCores": 20
+		    }
+		  },
+		  "version": "1",
+		  "shouldTaint": false,
+		  "customLabels": {},
+		  "customTaints": [],
+		  "rebalancingConfig": {
+		    "minNodes": 0
+		  }
+	    }
+	`
+
+	templateBody := io.NopCloser(bytes.NewReader([]byte(templateResponse)))
+	listBody := io.NopCloser(bytes.NewReader([]byte(fmt.Sprintf(`
+		{
+		  "items": [
+            {
+              "template": %s
+            }
+		  ]
+		}
+	`, templateResponse))))
+
+	mockClient.EXPECT().
+		NodeTemplatesAPIListNodeTemplates(gomock.Any(), clusterId, &sdk.NodeTemplatesAPIListNodeTemplatesParams{IncludeDefault: lo.ToPtr(true)}).
+		Return(&http.Response{StatusCode: 200, Body: listBody, Header: map[string][]string{"Content-Type": {"json"}}}, nil)
+	mockClient.EXPECT().
+		NodeTemplatesAPICreateNodeTemplate(gomock.Any(), clusterId, gomock.Any()).
+		DoAndReturn(func(_ context.Context, _ string, body sdk.NodeTemplatesAPICreateNodeTemplateJSONRequestBody, _ ...any) (*http.Response, error) {
+			if body.ClmNetworkingMode == nil || *body.ClmNetworkingMode != "tc" {
+				return nil, fmt.Errorf("expected clmNetworkingMode = tc, got %v", body.ClmNetworkingMode)
+			}
+			return &http.Response{StatusCode: 200, Body: templateBody, Header: map[string][]string{"Content-Type": {"json"}}}, nil
+		})
+
+	resource := resourceNodeTemplate()
+	val := cty.ObjectVal(map[string]cty.Value{
+		FieldClusterId:                                            cty.StringVal(clusterId),
+		FieldNodeTemplateName:                                     cty.StringVal(name),
+		FieldNodeTemplateIsDefault:                                cty.BoolVal(false),
+		FieldNodeTemplateIsEnabled:                                cty.BoolVal(true),
+		FieldNodeTemplateCustomInstancesEnabled:                   cty.BoolVal(false),
+		FieldNodeTemplateCustomInstancesWithExtendedMemoryEnabled: cty.BoolVal(false),
+		FieldNodeTemplateClmEnabled:                               cty.BoolVal(true),
+		FieldNodeTemplateClmNetworkingMode:                        cty.StringVal("tc"),
+	})
+	state := sdkterraform.NewInstanceStateShimmedFromValue(val, 0)
+	state.ID = name
+
+	data := resource.Data(state)
+	result := resource.CreateContext(ctx, data, provider)
+	r.Nil(result)
+	r.False(result.HasError())
+	r.Equal("tc", data.Get(FieldNodeTemplateClmNetworkingMode))
+}
+
+func TestNodeTemplateResourceCreate_withoutClmNetworkingMode(t *testing.T) {
+	r := require.New(t)
+	mockctrl := gomock.NewController(t)
+	mockClient := mock_sdk.NewMockClientInterface(mockctrl)
+
+	ctx := context.Background()
+	provider := &ProviderConfig{
+		api: &sdk.ClientWithResponses{
+			ClientInterface: mockClient,
+		},
+	}
+
+	name := "custom-template"
+	clusterId := "b6bfc074-a267-400f-b8f1-db0850c369b1"
+	templateResponse := `
+		{
+		  "configurationId": "7dc4f922-29c9-4377-889c-0c8c5fb8d497",
+		  "configurationName": "default",
+		  "name": "custom-template",
+		  "isEnabled": true,
+		  "clmEnabled": true,
+		  "clmNetworkingMode": "default",
+		  "constraints": {
+		    "spot": false,
+		    "onDemand": true,
+		    "minCpu": 10,
+		    "maxCpu": 10000,
+		    "architectures": ["amd64", "arm64"],
+		    "resourceLimits": {
+		      "cpuLimitEnabled": true,
+		      "cpuLimitMaxCores": 20
+		    }
+		  },
+		  "version": "1",
+		  "shouldTaint": false,
+		  "customLabels": {},
+		  "customTaints": [],
+		  "rebalancingConfig": {
+		    "minNodes": 0
+		  }
+	    }
+	`
+
+	templateBody := io.NopCloser(bytes.NewReader([]byte(templateResponse)))
+	listBody := io.NopCloser(bytes.NewReader([]byte(fmt.Sprintf(`
+		{
+		  "items": [
+            {
+              "template": %s
+            }
+		  ]
+		}
+	`, templateResponse))))
+
+	mockClient.EXPECT().
+		NodeTemplatesAPIListNodeTemplates(gomock.Any(), clusterId, &sdk.NodeTemplatesAPIListNodeTemplatesParams{IncludeDefault: lo.ToPtr(true)}).
+		Return(&http.Response{StatusCode: 200, Body: listBody, Header: map[string][]string{"Content-Type": {"json"}}}, nil)
+	mockClient.EXPECT().
+		NodeTemplatesAPICreateNodeTemplate(gomock.Any(), clusterId, gomock.Any()).
+		DoAndReturn(func(_ context.Context, _ string, body sdk.NodeTemplatesAPICreateNodeTemplateJSONRequestBody, _ ...any) (*http.Response, error) {
+			if body.ClmNetworkingMode != nil {
+				return nil, fmt.Errorf("expected clmNetworkingMode to be nil, got %v", *body.ClmNetworkingMode)
+			}
+			return &http.Response{StatusCode: 200, Body: templateBody, Header: map[string][]string{"Content-Type": {"json"}}}, nil
+		})
+
+	resource := resourceNodeTemplate()
+	val := cty.ObjectVal(map[string]cty.Value{
+		FieldClusterId:                                            cty.StringVal(clusterId),
+		FieldNodeTemplateName:                                     cty.StringVal(name),
+		FieldNodeTemplateIsDefault:                                cty.BoolVal(false),
+		FieldNodeTemplateIsEnabled:                                cty.BoolVal(true),
+		FieldNodeTemplateCustomInstancesEnabled:                   cty.BoolVal(false),
+		FieldNodeTemplateCustomInstancesWithExtendedMemoryEnabled: cty.BoolVal(false),
+		FieldNodeTemplateClmEnabled:                               cty.BoolVal(true),
+	})
+	state := sdkterraform.NewInstanceStateShimmedFromValue(val, 0)
+	state.ID = name
+
+	data := resource.Data(state)
+	result := resource.CreateContext(ctx, data, provider)
+	r.Nil(result)
+	r.False(result.HasError())
+	// The read-back should have populated the state with the backend default ("default")
+	r.Equal("default", data.Get(FieldNodeTemplateClmNetworkingMode))
+}
+
+func TestNodeTemplateResourceUpdate_changeClmNetworkingMode(t *testing.T) {
+	r := require.New(t)
+	mockctrl := gomock.NewController(t)
+	mockClient := mock_sdk.NewMockClientInterface(mockctrl)
+
+	ctx := context.Background()
+	provider := &ProviderConfig{
+		api: &sdk.ClientWithResponses{
+			ClientInterface: mockClient,
+		},
+	}
+
+	name := "custom-template"
+	clusterId := "b6bfc074-a267-400f-b8f1-db0850c369b1"
+	templateResponse := `
+		{
+		  "configurationId": "7dc4f922-29c9-4377-889c-0c8c5fb8d497",
+		  "configurationName": "default",
+		  "name": "custom-template",
+		  "isEnabled": true,
+		  "clmEnabled": true,
+		  "clmNetworkingMode": "cni",
+		  "constraints": {
+		    "spot": false,
+		    "onDemand": true,
+		    "minCpu": 10,
+		    "maxCpu": 10000,
+		    "architectures": ["amd64", "arm64"],
+		    "resourceLimits": {
+		      "cpuLimitEnabled": true,
+		      "cpuLimitMaxCores": 20
+		    }
+		  },
+		  "version": "2",
+		  "shouldTaint": false,
+		  "customLabels": {},
+		  "customTaints": [],
+		  "rebalancingConfig": {
+		    "minNodes": 0
+		  }
+	    }
+	`
+
+	listBody := io.NopCloser(bytes.NewReader([]byte(fmt.Sprintf(`
+		{
+		  "items": [
+            {
+              "template": %s
+            }
+		  ]
+		}
+	`, templateResponse))))
+
+	mockClient.EXPECT().
+		NodeTemplatesAPIListNodeTemplates(gomock.Any(), clusterId, &sdk.NodeTemplatesAPIListNodeTemplatesParams{IncludeDefault: lo.ToPtr(true)}).
+		Return(&http.Response{StatusCode: 200, Body: listBody, Header: map[string][]string{"Content-Type": {"json"}}}, nil)
+	mockClient.EXPECT().
+		NodeTemplatesAPIUpdateNodeTemplate(gomock.Any(), clusterId, name, gomock.Any()).
+		DoAndReturn(func(_ context.Context, _ string, _ string, body sdk.NodeTemplatesAPIUpdateNodeTemplateJSONRequestBody, _ ...any) (*http.Response, error) {
+			if body.ClmNetworkingMode == nil || *body.ClmNetworkingMode != "cni" {
+				return nil, fmt.Errorf("expected clmNetworkingMode = cni, got %v", body.ClmNetworkingMode)
+			}
+			return &http.Response{StatusCode: 200, Body: io.NopCloser(bytes.NewReader([]byte(templateResponse))), Header: map[string][]string{"Content-Type": {"json"}}}, nil
+		})
+
+	resource := resourceNodeTemplate()
+	val := cty.ObjectVal(map[string]cty.Value{
+		FieldClusterId:                                            cty.StringVal(clusterId),
+		FieldNodeTemplateName:                                     cty.StringVal(name),
+		FieldNodeTemplateIsDefault:                                cty.BoolVal(false),
+		FieldNodeTemplateIsEnabled:                                cty.BoolVal(true),
+		FieldNodeTemplateCustomInstancesEnabled:                   cty.BoolVal(false),
+		FieldNodeTemplateCustomInstancesWithExtendedMemoryEnabled: cty.BoolVal(false),
+		FieldNodeTemplateClmEnabled:                               cty.BoolVal(true),
+		FieldNodeTemplateClmNetworkingMode:                        cty.StringVal("cni"),
+	})
+	state := sdkterraform.NewInstanceStateShimmedFromValue(val, 0)
+	state.ID = name
+
+	data := resource.Data(state)
+	data.SetId(name)
+	result := updateNodeTemplate(ctx, data, provider, true)
+	r.Nil(result)
+	r.False(result.HasError())
+	r.Equal("cni", data.Get(FieldNodeTemplateClmNetworkingMode))
+}
+
+func TestNodeTemplateResourceUpdate_legacyDefaultInState(t *testing.T) {
+	// Simulates production: every node template in the DB has
+	// clmNetworkingMode = "default" (legacy value). The config does not set
+	// the field; an update is triggered by another field. Verifies the
+	// provider round-trips the stored value instead of dropping it.
+	r := require.New(t)
+	mockctrl := gomock.NewController(t)
+	mockClient := mock_sdk.NewMockClientInterface(mockctrl)
+
+	ctx := context.Background()
+	provider := &ProviderConfig{
+		api: &sdk.ClientWithResponses{
+			ClientInterface: mockClient,
+		},
+	}
+
+	name := "custom-template"
+	clusterId := "b6bfc074-a267-400f-b8f1-db0850c369b1"
+	templateResponse := `
+		{
+		  "configurationId": "7dc4f922-29c9-4377-889c-0c8c5fb8d497",
+		  "configurationName": "default",
+		  "name": "custom-template",
+		  "isEnabled": true,
+		  "clmEnabled": true,
+		  "clmNetworkingMode": "default",
+		  "constraints": {
+		    "spot": false,
+		    "onDemand": true,
+		    "minCpu": 10,
+		    "maxCpu": 10000,
+		    "architectures": ["amd64", "arm64"],
+		    "resourceLimits": {
+		      "cpuLimitEnabled": true,
+		      "cpuLimitMaxCores": 20
+		    }
+		  },
+		  "version": "2",
+		  "shouldTaint": false,
+		  "customLabels": {},
+		  "customTaints": [],
+		  "rebalancingConfig": {
+		    "minNodes": 0
+		  }
+	    }
+	`
+
+	listBody := io.NopCloser(bytes.NewReader([]byte(fmt.Sprintf(`
+		{
+		  "items": [
+            {
+              "template": %s
+            }
+		  ]
+		}
+	`, templateResponse))))
+
+	mockClient.EXPECT().
+		NodeTemplatesAPIListNodeTemplates(gomock.Any(), clusterId, &sdk.NodeTemplatesAPIListNodeTemplatesParams{IncludeDefault: lo.ToPtr(true)}).
+		Return(&http.Response{StatusCode: 200, Body: listBody, Header: map[string][]string{"Content-Type": {"json"}}}, nil)
+
+	var sentMode *string
+	mockClient.EXPECT().
+		NodeTemplatesAPIUpdateNodeTemplate(gomock.Any(), clusterId, name, gomock.Any()).
+		DoAndReturn(func(_ context.Context, _ string, _ string, body sdk.NodeTemplatesAPIUpdateNodeTemplateJSONRequestBody, _ ...any) (*http.Response, error) {
+			sentMode = body.ClmNetworkingMode
+			return &http.Response{StatusCode: 200, Body: io.NopCloser(bytes.NewReader([]byte(templateResponse))), Header: map[string][]string{"Content-Type": {"json"}}}, nil
+		})
+
+	resource := resourceNodeTemplate()
+	val := cty.ObjectVal(map[string]cty.Value{
+		FieldClusterId:                                            cty.StringVal(clusterId),
+		FieldNodeTemplateName:                                     cty.StringVal(name),
+		FieldNodeTemplateIsDefault:                                cty.BoolVal(false),
+		FieldNodeTemplateIsEnabled:                                cty.BoolVal(true),
+		FieldNodeTemplateCustomInstancesEnabled:                   cty.BoolVal(false),
+		FieldNodeTemplateCustomInstancesWithExtendedMemoryEnabled: cty.BoolVal(false),
+		FieldNodeTemplateClmEnabled:                               cty.BoolVal(true),
+		// Post-refresh state carries the legacy DB value; config does not set the field.
+		FieldNodeTemplateClmNetworkingMode: cty.StringVal("default"),
+	})
+	state := sdkterraform.NewInstanceStateShimmedFromValue(val, 0)
+	state.ID = name
+
+	data := resource.Data(state)
+	data.SetId(name)
+	result := updateNodeTemplate(ctx, data, provider, true)
+	r.Nil(result)
+	r.False(result.HasError())
+	r.NotNil(sentMode, "clm_networking_mode must be sent (not dropped) when state holds the legacy value")
+	r.Equal("default", *sentMode)
+	r.Equal("default", data.Get(FieldNodeTemplateClmNetworkingMode))
 }
 
 func TestAccEKS_ResourceNodeTemplate_basic(t *testing.T) {
