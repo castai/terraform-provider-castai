@@ -108,7 +108,7 @@ Required:
 
 Optional:
 
-- `ignore_problem_prevented_drain_pods` (Boolean) Pods annotated with rebalancing.cast.ai/prevented-drain=true will not prevent the Rebalancer from deleting a node on which they run. WARNING: When true, such pods may be evicted without being fully drained.
+- `ignore_problem_prevented_drain_pods` (Boolean) Pods annotated with rebalancing.cast.ai/prevented-drain=true will not prevent the Rebalancer from deleting a node on which they run.
 
 
 <a id="nestedblock--launch_configuration--drain_failure_config"></a>
