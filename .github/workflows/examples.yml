@@ -20,7 +20,7 @@ jobs:
         with:
           token: ${{ github.token }}
           filters: .github/file-filters.yml
-  terraform_validation:
+  validate-examples:
     needs: files-changed
     if: needs.files-changed.outputs.validate-examples == 'true'
     runs-on: ubuntu-latest
