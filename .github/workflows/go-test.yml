@@ -3,10 +3,6 @@ name: Go Tests
 on:
   pull_request:
     branches: [ '*' ]
-    paths-ignore:
-      - '**.md'
-      - '**.md.tmpl'
-      - 'examples/**'
 jobs:
   files-changed:
     name: detect files changed

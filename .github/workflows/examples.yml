@@ -2,8 +2,6 @@ name: Terraform Examples Validation
 on:
   pull_request:
     branches: [ '*' ]
-    paths-ignore:
-      - '**.md.tmpl'
 jobs:
   files-changed:
     name: detect files changed

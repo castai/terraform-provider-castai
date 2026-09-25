@@ -2,8 +2,6 @@ name: Generate SDK and Docs
 on:
   pull_request:
     branches: [ '*' ]
-    paths-ignore:
-      - 'examples/**'
 jobs:
   files-changed:
     name: detect files changed
