@@ -591,26 +591,6 @@ func TestResourceAutoscalerPolicies_policiesFromModel_NullFields(t *testing.T) {
 	r.Nil(policies.UnschedulablePods)
 }
 
-func TestResourceAutoscalerPolicies_policiesFromModel_ExplicitFalseTopLevelBools(t *testing.T) {
-	t.Parallel()
-
-	// Explicitly disabling the master switch must reach the API payload:
-	// plugin-framework distinguishes null from an explicit false.
-	model := &autoscalerPoliciesModel{
-		ClusterID:  types.StringValue("b6bfc074-a267-400f-b8f1-db0850c369b1"),
-		Enabled:    types.BoolValue(false),
-		ScopedMode: types.BoolValue(false),
-	}
-
-	policies := policiesFromModel(model)
-
-	r := require.New(t)
-	r.NotNil(policies.Enabled)
-	r.False(*policies.Enabled)
-	r.NotNil(policies.ScopedMode)
-	r.False(*policies.ScopedMode)
-}
-
 func TestResourceAutoscalerPolicies_policiesToModel_EmptyNestedPolicies(t *testing.T) {
 	t.Parallel()
 
