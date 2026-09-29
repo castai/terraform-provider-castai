@@ -31,3 +31,15 @@ resource "castai_node_configuration" "default" {
     security_groups      = [aws_security_group.test.id]
   }
 }
+
+resource "castai_node_configuration" "gke" {
+  name       = "gke-default"
+  cluster_id = castai_gke_cluster.test.id
+
+  gke {
+    secondary_boot_disks {
+      disk_image = "global/images/container-image-cache-disk"
+      mode       = "CONTAINER_IMAGE_CACHE"
+    }
+  }
+}
