@@ -6454,7 +6454,7 @@ type ExternalclusterV1KarpenterAttribute struct {
 	Version *string `json:"version"`
 }
 
-// ExternalclusterV1KataConfig VirtualizationConfig describes virtualization isolation settings for a node.
+// ExternalclusterV1KataConfig PodVirtualizationConfig describes virtualization isolation settings for a node.
 //
 // Only AKS is wired up through this contract today.
 // For EKS and GKE, Kata Containers must be installed separately via its DaemonSets.
@@ -6673,12 +6673,12 @@ type ExternalclusterV1NodeConfig struct {
 	// NodeAffinity NodeAffinity provides control over the assignment of individual nodes to dedicated host instances.
 	NodeAffinity *ExternalclusterV1NodeAffinity `json:"nodeAffinity,omitempty"`
 
-	// PodVirtualization VirtualizationConfig describes virtualization isolation settings for a node.
+	// PodVirtualization PodVirtualizationConfig describes virtualization isolation settings for a node.
 	//
 	// Only AKS is wired up through this contract today. For EKS and GKE,
 	// Kata Containers must be installed separately via its DaemonSets
 	// (https://github.com/kata-containers/kata-containers).
-	PodVirtualization *ExternalclusterV1VirtualizationConfig `json:"podVirtualization,omitempty"`
+	PodVirtualization *ExternalclusterV1PodVirtualizationConfig `json:"podVirtualization,omitempty"`
 
 	// SpotConfig NodeSpotConfig defines if node should be created as spot instance, and params for creation.
 	SpotConfig *ExternalclusterV1NodeSpotConfig `json:"spotConfig,omitempty"`
@@ -6787,6 +6787,23 @@ type ExternalclusterV1OpenshiftClusterParams struct {
 //   - OPERATION_MODE_DEFAULT: Normal operation - executes the hibernate/resume.
 //   - OPERATION_MODE_DRY_RUN: Dry-run mode - validates only without executing.
 type ExternalclusterV1OperationMode string
+
+// ExternalclusterV1PodVirtualizationConfig PodVirtualizationConfig describes virtualization isolation settings for a node.
+//
+// Only AKS is wired up through this contract today. For EKS and GKE,
+// Kata Containers must be installed separately via its DaemonSets
+// (https://github.com/kata-containers/kata-containers).
+type ExternalclusterV1PodVirtualizationConfig struct {
+	// Kata PodVirtualizationConfig describes virtualization isolation settings for a node.
+	//
+	// Only AKS is wired up through this contract today.
+	// For EKS and GKE, Kata Containers must be installed separately via its DaemonSets.
+	//
+	// See:
+	//   * https://katacontainers.io/ — the Kata Containers project
+	//   * https://learn.microsoft.com/azure/aks/use-pod-sandboxing — AKS Pod Sandboxing (the AKS feature built on Kata)
+	Kata *ExternalclusterV1KataConfig `json:"kata,omitempty"`
+}
 
 // ExternalclusterV1RaidConfig RaidConfig allow You have two or more devices, of approximately the same size, and you want to combine their storage capacity
 // and also combine their performance by accessing them in parallel.
@@ -6960,23 +6977,6 @@ type ExternalclusterV1UpdateGKEClusterParams struct {
 type ExternalclusterV1UpdateSelfHostedWithEC2NodesParams struct {
 	AssumeRoleArn      *string `json:"assumeRoleArn,omitempty"`
 	InstanceProfileArn *string `json:"instanceProfileArn"`
-}
-
-// ExternalclusterV1VirtualizationConfig VirtualizationConfig describes virtualization isolation settings for a node.
-//
-// Only AKS is wired up through this contract today. For EKS and GKE,
-// Kata Containers must be installed separately via its DaemonSets
-// (https://github.com/kata-containers/kata-containers).
-type ExternalclusterV1VirtualizationConfig struct {
-	// Kata VirtualizationConfig describes virtualization isolation settings for a node.
-	//
-	// Only AKS is wired up through this contract today.
-	// For EKS and GKE, Kata Containers must be installed separately via its DaemonSets.
-	//
-	// See:
-	//   * https://katacontainers.io/ — the Kata Containers project
-	//   * https://learn.microsoft.com/azure/aks/use-pod-sandboxing — AKS Pod Sandboxing (the AKS feature built on Kata)
-	Kata *ExternalclusterV1KataConfig `json:"kata,omitempty"`
 }
 
 // ExternalclusterV1Zone Cluster zone.
