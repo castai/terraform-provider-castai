@@ -586,7 +586,7 @@ func cpuToValue(in *cluster_autoscaler_v2.ClusterLimitsCpu) types.List {
 		return types.ListNull(clusterLimitsCPUType)
 	}
 
-	var min types.Int64 = types.Int64Null()
+	min := types.Int64Null()
 	if in.MinCores != nil {
 		min = types.Int64Value(int64(*in.MinCores))
 	}
@@ -602,7 +602,7 @@ func nodeDownscalerToValue(in *cluster_autoscaler_v2.NodeDownscalerPolicy) types
 		return types.ListNull(nodeDownscalerType)
 	}
 
-	var delay types.String = types.StringNull()
+	delay := types.StringNull()
 	if in.EmptyNodesDelay != nil {
 		delay = types.StringValue(*in.EmptyNodesDelay)
 	}
