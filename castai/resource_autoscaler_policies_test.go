@@ -480,10 +480,8 @@ func TestResourceAutoscalerPolicies_Read_UnschedulablePodsPartialMatchingOmitted
 	require.False(t, state.UnschedulablePods[0].PartialTemplateMatchingEnabled.ValueBool())
 }
 
-// The API returns fully materialized policies (every section populated with
-// its defaults), so a configuration that omits a section must adopt the value
-// the API reports instead of planning its removal. That requires the sections
-// to be Optional+Computed nested attributes; declared values still win.
+// Sections must be Optional+Computed so omitted sections adopt the
+// API-reported values instead of planning their removal.
 func TestResourceAutoscalerPolicies_Schema_MaterializedSectionsComputed(t *testing.T) {
 	t.Parallel()
 
@@ -519,10 +517,6 @@ func TestResourceAutoscalerPolicies_Schema_MaterializedSectionsComputed(t *testi
 	require.True(t, unschedulablePods.NestedObject.Attributes[FieldUnschedulablePodsPodPinner].(schema.ListNestedAttribute).Computed)
 }
 
-// A fully materialized API response flows into state with every section
-// present; with the sections Optional+Computed, the next plan adopts these
-// values instead of planning the removal of blocks the configuration never
-// declared.
 func TestResourceAutoscalerPolicies_Read_MaterializedDefaults(t *testing.T) {
 	t.Parallel()
 

@@ -147,14 +147,8 @@ func (r *autoscalerPoliciesResource) Schema(_ context.Context, _ resource.Schema
 				Computed:    true,
 				Description: "Policy version for optimistic locking.",
 			},
-
-			// The sections below are Optional + Computed nested attributes
-			// rather than blocks: the API always returns a fully materialized
-			// policies object (every section populated with its defaults), so
-			// a configuration that omits a section must adopt the value the
-			// API reports instead of planning its removal. Declared values
-			// always win. Removing a section from the configuration stops
-			// managing it rather than resetting it.
+			// The API always returns a fully materialized object, so omitted
+			// sections adopt the reported values instead of planning removal.
 			FieldAutoscalerPoliciesClusterLimits: schema.ListNestedAttribute{
 				Optional:    true,
 				Computed:    true,
@@ -575,11 +569,9 @@ func (r *autoscalerPoliciesResource) policiesToModel(clusterID string, policies 
 	return model
 }
 
-// preserveBlockPresence carries blocks the flatten did not produce — a
-// section whose fields are all nil flattens to an absent block — over from
+// preserveBlockPresence carries blocks the flatten did not produce over from
 // the prior model, so an apply never fails with "block count changed from
-// 1 to 0". Blocks are carried verbatim, never fabricated, and blocks the
-// caller did not declare are not injected.
+// 1 to 0". Blocks are carried verbatim, never fabricated.
 func (r *autoscalerPoliciesResource) preserveBlockPresence(state, prior autoscalerPoliciesModel) autoscalerPoliciesModel {
 	if len(prior.ClusterLimits) > 0 && len(state.ClusterLimits) == 0 {
 		state.ClusterLimits = prior.ClusterLimits
