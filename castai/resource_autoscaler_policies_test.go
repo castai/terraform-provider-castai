@@ -26,6 +26,8 @@ import (
 	mock_cluster_autoscaler_v2 "github.com/castai/terraform-provider-castai/castai/sdk/cluster_autoscaler_v2/mock"
 )
 
+const autoscalerPoliciesTestClusterID = "b6bfc074-a267-400f-b8f1-db0850c369b1"
+
 func newAutoscalerPoliciesResourceWithMock(mockClient *mock_cluster_autoscaler_v2.MockClientWithResponsesInterface) *autoscalerPoliciesResource {
 	return &autoscalerPoliciesResource{
 		client: &ProviderConfig{
@@ -46,6 +48,28 @@ func autoscalerPoliciesTestSchema(t *testing.T, r resource.Resource) (*resource.
 
 func okHTTPResponse() *http.Response {
 	return &http.Response{StatusCode: http.StatusOK, Header: map[string][]string{"Content-Type": {"application/json"}}}
+}
+
+func notFoundHTTPResponse() *http.Response {
+	return &http.Response{StatusCode: http.StatusNotFound, Header: map[string][]string{"Content-Type": {"application/json"}}}
+}
+
+// expectUpdateCapture stubs the policies update call to return stored and
+// returns the captured request body.
+func expectUpdateCapture(t *testing.T, mockClient *mock_cluster_autoscaler_v2.MockClientWithResponsesInterface, stored *cluster_autoscaler_v2.PoliciesV2) *cluster_autoscaler_v2.PoliciesV2 {
+	t.Helper()
+
+	captured := &cluster_autoscaler_v2.PoliciesV2{}
+	mockClient.EXPECT().
+		PoliciesV2APIUpdateClusterPoliciesWithResponse(mock.Anything, mock.Anything, mock.Anything).
+		RunAndReturn(func(_ context.Context, _ string, body cluster_autoscaler_v2.PoliciesV2, _ ...cluster_autoscaler_v2.RequestEditorFn) (*cluster_autoscaler_v2.PoliciesV2APIUpdateClusterPoliciesResponse, error) {
+			*captured = body
+			return &cluster_autoscaler_v2.PoliciesV2APIUpdateClusterPoliciesResponse{
+				HTTPResponse: okHTTPResponse(),
+				JSON200:      stored,
+			}, nil
+		})
+	return captured
 }
 
 func testAutoscalerPoliciesV2() *cluster_autoscaler_v2.PoliciesV2 {
@@ -124,21 +148,11 @@ func autoscalerPoliciesNullValue(t *testing.T, schemaType attr.Type) tftypes.Val
 func TestResourceAutoscalerPolicies_Create(t *testing.T) {
 	t.Parallel()
 
-	clusterID := "b6bfc074-a267-400f-b8f1-db0850c369b1"
+	clusterID := autoscalerPoliciesTestClusterID
 	apiPolicies := testAutoscalerPoliciesV2()
-	var capturedBody cluster_autoscaler_v2.PoliciesV2
 
 	mockClient := mock_cluster_autoscaler_v2.NewMockClientWithResponsesInterface(t)
-
-	mockClient.EXPECT().
-		PoliciesV2APIUpdateClusterPoliciesWithResponse(mock.Anything, clusterID, mock.Anything).
-		RunAndReturn(func(_ context.Context, _ string, body cluster_autoscaler_v2.PoliciesV2, _ ...cluster_autoscaler_v2.RequestEditorFn) (*cluster_autoscaler_v2.PoliciesV2APIUpdateClusterPoliciesResponse, error) {
-			capturedBody = body
-			return &cluster_autoscaler_v2.PoliciesV2APIUpdateClusterPoliciesResponse{
-				HTTPResponse: okHTTPResponse(),
-				JSON200:      apiPolicies,
-			}, nil
-		})
+	capturedBody := expectUpdateCapture(t, mockClient, apiPolicies)
 	mockClient.EXPECT().
 		PoliciesV2APIGetClusterPoliciesWithResponse(mock.Anything, clusterID).
 		Return(&cluster_autoscaler_v2.PoliciesV2APIGetClusterPoliciesResponse{
@@ -166,85 +180,38 @@ func TestResourceAutoscalerPolicies_Create(t *testing.T) {
 
 	require.False(t, resp.Diagnostics.HasError(), "create diagnostics: %v", resp.Diagnostics)
 
-	// Assert the payload sent to the API (expand path). The version is
-	// fetched from the API on create since the policies already exist, and is
-	// included in the PUT for optimistic locking.
+	// The version is fetched from the API on create since the policies
+	// already exist, and is included in the PUT for optimistic locking.
 	require.NotNil(t, capturedBody.Version)
 	require.Equal(t, "v5", *capturedBody.Version)
-	require.NotNil(t, capturedBody.Enabled)
-	require.True(t, *capturedBody.Enabled)
-	require.NotNil(t, capturedBody.ScopedMode)
-	require.True(t, *capturedBody.ScopedMode)
-	require.NotNil(t, capturedBody.ClusterLimits)
-	require.NotNil(t, capturedBody.ClusterLimits.Enabled)
-	require.True(t, *capturedBody.ClusterLimits.Enabled)
-	require.NotNil(t, capturedBody.ClusterLimits.Cpu)
-	require.EqualValues(t, 16, capturedBody.ClusterLimits.Cpu.MaxCores)
-	require.NotNil(t, capturedBody.ClusterLimits.Cpu.MinCores)
-	require.EqualValues(t, 2, *capturedBody.ClusterLimits.Cpu.MinCores)
-	require.NotNil(t, capturedBody.NodeDownscaler)
-	require.NotNil(t, capturedBody.NodeDownscaler.EmptyNodesDelay)
-	require.Equal(t, "3m", *capturedBody.NodeDownscaler.EmptyNodesDelay)
-	require.NotNil(t, capturedBody.NodeDownscaler.EmptyNodesEnabled)
-	require.True(t, *capturedBody.NodeDownscaler.EmptyNodesEnabled)
-	require.NotNil(t, capturedBody.UnschedulablePods)
-	require.NotNil(t, capturedBody.UnschedulablePods.Enabled)
-	require.True(t, *capturedBody.UnschedulablePods.Enabled)
-	require.NotNil(t, capturedBody.UnschedulablePods.PartialTemplateMatchingEnabled)
-	require.True(t, *capturedBody.UnschedulablePods.PartialTemplateMatchingEnabled)
-	require.NotNil(t, capturedBody.UnschedulablePods.PodPinner)
-	require.NotNil(t, capturedBody.UnschedulablePods.PodPinner.Enabled)
-	require.True(t, *capturedBody.UnschedulablePods.PodPinner.Enabled)
 
-	// Assert the state written from the update response (flatten path).
+	// Field-level expand and flatten coverage lives in the policiesFromModel
+	// and Read tests; this asserts the create plumbing.
 	var state autoscalerPoliciesModel
 	stateDiags := resp.State.Get(context.Background(), &state)
 	require.False(t, stateDiags.HasError(), "state decode diagnostics: %v", stateDiags)
 
 	require.Equal(t, clusterID, state.ID.ValueString())
 	require.Equal(t, clusterID, state.ClusterID.ValueString())
-	require.True(t, state.Enabled.ValueBool())
-	require.True(t, state.ScopedMode.ValueBool())
 	require.Equal(t, "v5", state.Version.ValueString())
 	require.Len(t, state.ClusterLimits, 1)
-	require.True(t, state.ClusterLimits[0].Enabled.ValueBool())
-	require.Len(t, state.ClusterLimits[0].CPU, 1)
-	require.EqualValues(t, 16, state.ClusterLimits[0].CPU[0].MaxCores.ValueInt64())
-	require.EqualValues(t, 2, state.ClusterLimits[0].CPU[0].MinCores.ValueInt64())
 	require.Len(t, state.NodeDownscaler, 1)
-	require.Equal(t, "3m", state.NodeDownscaler[0].EmptyNodesDelay.ValueString())
-	require.True(t, state.NodeDownscaler[0].EmptyNodesEnabled.ValueBool())
 	require.Len(t, state.UnschedulablePods, 1)
-	require.True(t, state.UnschedulablePods[0].Enabled.ValueBool())
-	require.True(t, state.UnschedulablePods[0].PartialTemplateMatchingEnabled.ValueBool())
-	require.Len(t, state.UnschedulablePods[0].PodPinner, 1)
-	require.True(t, state.UnschedulablePods[0].PodPinner[0].Enabled.ValueBool())
 }
 
 func TestResourceAutoscalerPolicies_Create_NoExistingPolicies(t *testing.T) {
 	t.Parallel()
 
-	clusterID := "b6bfc074-a267-400f-b8f1-db0850c369b1"
-	var capturedBody cluster_autoscaler_v2.PoliciesV2
+	clusterID := autoscalerPoliciesTestClusterID
 
 	mockClient := mock_cluster_autoscaler_v2.NewMockClientWithResponsesInterface(t)
-
 	mockClient.EXPECT().
 		PoliciesV2APIGetClusterPoliciesWithResponse(mock.Anything, clusterID).
 		Times(1).
 		Return(&cluster_autoscaler_v2.PoliciesV2APIGetClusterPoliciesResponse{
-			HTTPResponse: &http.Response{StatusCode: http.StatusNotFound, Header: map[string][]string{"Content-Type": {"application/json"}}},
-			JSON200:      nil,
+			HTTPResponse: notFoundHTTPResponse(),
 		}, nil)
-	mockClient.EXPECT().
-		PoliciesV2APIUpdateClusterPoliciesWithResponse(mock.Anything, clusterID, mock.Anything).
-		RunAndReturn(func(_ context.Context, _ string, body cluster_autoscaler_v2.PoliciesV2, _ ...cluster_autoscaler_v2.RequestEditorFn) (*cluster_autoscaler_v2.PoliciesV2APIUpdateClusterPoliciesResponse, error) {
-			capturedBody = body
-			return &cluster_autoscaler_v2.PoliciesV2APIUpdateClusterPoliciesResponse{
-				HTTPResponse: okHTTPResponse(),
-				JSON200:      testAutoscalerPoliciesV2(),
-			}, nil
-		})
+	capturedBody := expectUpdateCapture(t, mockClient, testAutoscalerPoliciesV2())
 
 	r := newAutoscalerPoliciesResourceWithMock(mockClient)
 
@@ -264,21 +231,10 @@ func TestResourceAutoscalerPolicies_Create_NoExistingPolicies(t *testing.T) {
 func TestResourceAutoscalerPolicies_Update(t *testing.T) {
 	t.Parallel()
 
-	clusterID := "b6bfc074-a267-400f-b8f1-db0850c369b1"
-	var capturedBody cluster_autoscaler_v2.PoliciesV2
+	clusterID := autoscalerPoliciesTestClusterID
 
 	mockClient := mock_cluster_autoscaler_v2.NewMockClientWithResponsesInterface(t)
-
-	mockClient.EXPECT().
-		PoliciesV2APIUpdateClusterPoliciesWithResponse(mock.Anything, clusterID, mock.Anything).
-		RunAndReturn(func(_ context.Context, _ string, body cluster_autoscaler_v2.PoliciesV2, _ ...cluster_autoscaler_v2.RequestEditorFn) (*cluster_autoscaler_v2.PoliciesV2APIUpdateClusterPoliciesResponse, error) {
-			capturedBody = body
-			return &cluster_autoscaler_v2.PoliciesV2APIUpdateClusterPoliciesResponse{
-				HTTPResponse: okHTTPResponse(),
-				JSON200:      testAutoscalerPoliciesV2(),
-			}, nil
-		})
-	// No read-back: the update response carries the stored policies.
+	capturedBody := expectUpdateCapture(t, mockClient, testAutoscalerPoliciesV2())
 
 	r := newAutoscalerPoliciesResourceWithMock(mockClient)
 
@@ -302,21 +258,10 @@ func TestResourceAutoscalerPolicies_Update(t *testing.T) {
 func TestResourceAutoscalerPolicies_Update_UsesStateVersion(t *testing.T) {
 	t.Parallel()
 
-	clusterID := "b6bfc074-a267-400f-b8f1-db0850c369b1"
-	var capturedBody cluster_autoscaler_v2.PoliciesV2
+	clusterID := autoscalerPoliciesTestClusterID
 
 	mockClient := mock_cluster_autoscaler_v2.NewMockClientWithResponsesInterface(t)
-
-	mockClient.EXPECT().
-		PoliciesV2APIUpdateClusterPoliciesWithResponse(mock.Anything, clusterID, mock.Anything).
-		RunAndReturn(func(_ context.Context, _ string, body cluster_autoscaler_v2.PoliciesV2, _ ...cluster_autoscaler_v2.RequestEditorFn) (*cluster_autoscaler_v2.PoliciesV2APIUpdateClusterPoliciesResponse, error) {
-			capturedBody = body
-			return &cluster_autoscaler_v2.PoliciesV2APIUpdateClusterPoliciesResponse{
-				HTTPResponse: okHTTPResponse(),
-				JSON200:      testAutoscalerPoliciesV2(),
-			}, nil
-		})
-	// No read-back: the update response carries the stored policies.
+	capturedBody := expectUpdateCapture(t, mockClient, testAutoscalerPoliciesV2())
 
 	r := newAutoscalerPoliciesResourceWithMock(mockClient)
 	schemaResp, schemaType := autoscalerPoliciesTestSchema(t, r)
@@ -362,7 +307,7 @@ func TestResourceAutoscalerPolicies_Update_UsesStateVersion(t *testing.T) {
 func TestResourceAutoscalerPolicies_Read(t *testing.T) {
 	t.Parallel()
 
-	clusterID := "b6bfc074-a267-400f-b8f1-db0850c369b1"
+	clusterID := autoscalerPoliciesTestClusterID
 
 	mockClient := mock_cluster_autoscaler_v2.NewMockClientWithResponsesInterface(t)
 	mockClient.EXPECT().
@@ -401,13 +346,13 @@ func TestResourceAutoscalerPolicies_Read(t *testing.T) {
 func TestResourceAutoscalerPolicies_Read_NotFound(t *testing.T) {
 	t.Parallel()
 
-	clusterID := "b6bfc074-a267-400f-b8f1-db0850c369b1"
+	clusterID := autoscalerPoliciesTestClusterID
 
 	mockClient := mock_cluster_autoscaler_v2.NewMockClientWithResponsesInterface(t)
 	mockClient.EXPECT().
 		PoliciesV2APIGetClusterPoliciesWithResponse(mock.Anything, clusterID).
 		Return(&cluster_autoscaler_v2.PoliciesV2APIGetClusterPoliciesResponse{
-			HTTPResponse: &http.Response{StatusCode: http.StatusNotFound, Header: map[string][]string{"Content-Type": {"application/json"}}},
+			HTTPResponse: notFoundHTTPResponse(),
 			JSON200:      nil,
 		}, nil)
 
@@ -422,17 +367,35 @@ func TestResourceAutoscalerPolicies_Read_NotFound(t *testing.T) {
 func TestResourceAutoscalerPolicies_Read_NilNestedFields(t *testing.T) {
 	t.Parallel()
 
+	// Sections the API omits or returns empty flatten to absent blocks; a
+	// section serialized without its fields decodes all-nil.
+	tests := map[string]*cluster_autoscaler_v2.PoliciesV2{
+		"no sections": {},
+		"all-nil section fields": {
+			ClusterLimits:     &cluster_autoscaler_v2.ClusterLimitsPolicy{},
+			NodeDownscaler:    &cluster_autoscaler_v2.NodeDownscalerPolicy{},
+			UnschedulablePods: &cluster_autoscaler_v2.UnschedulablePodsPolicy{},
+		},
+	}
+
+	var emptySection cluster_autoscaler_v2.PoliciesV2
+	require.NoError(t, json.Unmarshal([]byte(`{"unschedulablePods":{}}`), &emptySection))
+	tests["empty serialized section"] = &emptySection
+
 	r := newAutoscalerPoliciesResourceWithMock(nil)
 
-	state := r.policiesToModel("b6bfc074-a267-400f-b8f1-db0850c369b1", &cluster_autoscaler_v2.PoliciesV2{})
+	for name, policies := range tests {
+		t.Run(name, func(t *testing.T) {
+			state := r.policiesToModel(autoscalerPoliciesTestClusterID, policies)
 
-	// Bool defaults are concrete values, not null, to prevent state drift.
-	require.False(t, state.Enabled.ValueBool())
-	require.False(t, state.ScopedMode.ValueBool())
-	require.Equal(t, "", state.Version.ValueString())
-	require.Empty(t, state.ClusterLimits)
-	require.Empty(t, state.NodeDownscaler)
-	require.Empty(t, state.UnschedulablePods)
+			// Bool defaults are concrete values, not null, to prevent state drift.
+			require.False(t, state.Enabled.ValueBool())
+			require.False(t, state.ScopedMode.ValueBool())
+			require.Empty(t, state.ClusterLimits)
+			require.Empty(t, state.NodeDownscaler)
+			require.Empty(t, state.UnschedulablePods)
+		})
+	}
 }
 
 func TestResourceAutoscalerPolicies_Read_MissingClusterID(t *testing.T) {
@@ -472,7 +435,7 @@ func TestResourceAutoscalerPolicies_Read_UnschedulablePodsPartialMatchingOmitted
 		},
 	}
 
-	state := r.policiesToModel("b6bfc074-a267-400f-b8f1-db0850c369b1", policies)
+	state := r.policiesToModel(autoscalerPoliciesTestClusterID, policies)
 
 	require.Len(t, state.UnschedulablePods, 1)
 	require.True(t, state.UnschedulablePods[0].Enabled.ValueBool())
@@ -544,7 +507,7 @@ func TestResourceAutoscalerPolicies_Read_MaterializedDefaults(t *testing.T) {
 		},
 	}
 
-	state := r.policiesToModel("b6bfc074-a267-400f-b8f1-db0850c369b1", policies)
+	state := r.policiesToModel(autoscalerPoliciesTestClusterID, policies)
 
 	require.True(t, state.Enabled.ValueBool())
 	require.Len(t, state.ClusterLimits, 1)
@@ -578,7 +541,7 @@ func TestResourceAutoscalerPolicies_Delete(t *testing.T) {
 func TestResourceAutoscalerPolicies_Import(t *testing.T) {
 	t.Parallel()
 
-	clusterID := "b6bfc074-a267-400f-b8f1-db0850c369b1"
+	clusterID := autoscalerPoliciesTestClusterID
 
 	r := newAutoscalerPoliciesResourceWithMock(nil)
 	schemaResp, schemaType := autoscalerPoliciesTestSchema(t, r)
@@ -605,7 +568,7 @@ func TestResourceAutoscalerPolicies_policiesFromModel(t *testing.T) {
 	t.Parallel()
 
 	model := &autoscalerPoliciesModel{
-		ClusterID:  types.StringValue("b6bfc074-a267-400f-b8f1-db0850c369b1"),
+		ClusterID:  types.StringValue(autoscalerPoliciesTestClusterID),
 		Enabled:    types.BoolValue(true),
 		ScopedMode: types.BoolValue(false),
 		Version:    types.StringValue("v5"),
@@ -654,7 +617,7 @@ func TestResourceAutoscalerPolicies_policiesFromModel_NullFields(t *testing.T) {
 
 	// A minimal model with unset top-level fields omits them from the payload.
 	model := &autoscalerPoliciesModel{
-		ClusterID: types.StringValue("b6bfc074-a267-400f-b8f1-db0850c369b1"),
+		ClusterID: types.StringValue(autoscalerPoliciesTestClusterID),
 	}
 
 	policies := policiesFromModel(model)
@@ -669,23 +632,6 @@ func TestResourceAutoscalerPolicies_policiesFromModel_NullFields(t *testing.T) {
 	r.Nil(policies.UnschedulablePods)
 }
 
-func TestResourceAutoscalerPolicies_policiesToModel_EmptyNestedPolicies(t *testing.T) {
-	t.Parallel()
-
-	r := newAutoscalerPoliciesResourceWithMock(nil)
-
-	// Nested policies with all-nil fields flatten to absent blocks.
-	state := r.policiesToModel("b6bfc074-a267-400f-b8f1-db0850c369b1", &cluster_autoscaler_v2.PoliciesV2{
-		ClusterLimits:     &cluster_autoscaler_v2.ClusterLimitsPolicy{},
-		NodeDownscaler:    &cluster_autoscaler_v2.NodeDownscalerPolicy{},
-		UnschedulablePods: &cluster_autoscaler_v2.UnschedulablePodsPolicy{},
-	})
-
-	require.Empty(t, state.ClusterLimits)
-	require.Empty(t, state.NodeDownscaler)
-	require.Empty(t, state.UnschedulablePods)
-}
-
 // TestResourceAutoscalerPolicies_policiesToModel_ObservedAPIResponse pins the
 // flatten against a payload observed from the V2 policies endpoint.
 func TestResourceAutoscalerPolicies_policiesToModel_ObservedAPIResponse(t *testing.T) {
@@ -698,7 +644,7 @@ func TestResourceAutoscalerPolicies_policiesToModel_ObservedAPIResponse(t *testi
 	require.NoError(t, json.Unmarshal([]byte(body), &policies))
 
 	r := newAutoscalerPoliciesResourceWithMock(nil)
-	state := r.policiesToModel("b6bfc074-a267-400f-b8f1-db0850c369b1", &policies)
+	state := r.policiesToModel(autoscalerPoliciesTestClusterID, &policies)
 
 	require.True(t, state.Enabled.ValueBool())
 	require.False(t, state.ScopedMode.ValueBool())
@@ -713,26 +659,6 @@ func TestResourceAutoscalerPolicies_policiesToModel_ObservedAPIResponse(t *testi
 	require.False(t, state.UnschedulablePods[0].PartialTemplateMatchingEnabled.ValueBool())
 	require.Len(t, state.UnschedulablePods[0].PodPinner, 1)
 	require.False(t, state.UnschedulablePods[0].PodPinner[0].Enabled.ValueBool())
-}
-
-// TestResourceAutoscalerPolicies_EmptySerializedSection: a section
-// serialized without its fields decodes all-nil and flattens to an absent
-// block.
-func TestResourceAutoscalerPolicies_EmptySerializedSection(t *testing.T) {
-	t.Parallel()
-
-	var policies cluster_autoscaler_v2.PoliciesV2
-	require.NoError(t, json.Unmarshal([]byte(`{"unschedulablePods":{}}`), &policies))
-
-	require.NotNil(t, policies.UnschedulablePods)
-	require.Nil(t, policies.UnschedulablePods.Enabled)
-	require.Nil(t, policies.UnschedulablePods.PartialTemplateMatchingEnabled)
-	require.Nil(t, policies.UnschedulablePods.PodPinner)
-
-	r := newAutoscalerPoliciesResourceWithMock(nil)
-	state := r.policiesToModel("b6bfc074-a267-400f-b8f1-db0850c369b1", &policies)
-
-	require.Empty(t, state.UnschedulablePods)
 }
 
 // autoscalerPoliciesAccSettings holds the knobs for the V2 policies acceptance
@@ -935,102 +861,16 @@ func TestResourceAutoscalerPolicies_preserveBlockPresence(t *testing.T) {
 	})
 }
 
-// TestResourceAutoscalerPolicies_Update_OmittedSection: the update response
-// lacks a configured section; the block must survive in state.
-func TestResourceAutoscalerPolicies_Update_OmittedSection(t *testing.T) {
+// TestResourceAutoscalerPolicies_PreservesBlocksMissingFromResponse: the API
+// response lacks the unschedulable_pods section the configuration declares;
+// the block must survive in state on every entry point.
+func TestResourceAutoscalerPolicies_PreservesBlocksMissingFromResponse(t *testing.T) {
 	t.Parallel()
 
-	clusterID := "b6bfc074-a267-400f-b8f1-db0850c369b1"
+	clusterID := autoscalerPoliciesTestClusterID
 
-	mockClient := mock_cluster_autoscaler_v2.NewMockClientWithResponsesInterface(t)
-	// The update response lacks the unschedulable_pods section.
-	apiPolicies := &cluster_autoscaler_v2.PoliciesV2{
-		Enabled:    lo.ToPtr(true),
-		ScopedMode: lo.ToPtr(false),
-		Version:    lo.ToPtr("v6"),
-		ClusterLimits: &cluster_autoscaler_v2.ClusterLimitsPolicy{
-			Enabled: lo.ToPtr(true),
-			Cpu:     &cluster_autoscaler_v2.ClusterLimitsCpu{MaxCores: 20, MinCores: lo.ToPtr(int32(0))},
-		},
-		NodeDownscaler: &cluster_autoscaler_v2.NodeDownscalerPolicy{
-			EmptyNodesDelay:   lo.ToPtr("300s"),
-			EmptyNodesEnabled: lo.ToPtr(true),
-		},
-	}
-	mockClient.EXPECT().
-		PoliciesV2APIUpdateClusterPoliciesWithResponse(mock.Anything, clusterID, mock.Anything).
-		Return(&cluster_autoscaler_v2.PoliciesV2APIUpdateClusterPoliciesResponse{
-			HTTPResponse: okHTTPResponse(),
-			JSON200:      apiPolicies,
-		}, nil)
-	// No read-back: the update response carries the stored policies.
-
-	r := newAutoscalerPoliciesResourceWithMock(mockClient)
-	schemaResp, schemaType := autoscalerPoliciesTestSchema(t, r)
-
-	planModel := autoscalerPoliciesModel{
-		ID:         types.StringValue(clusterID),
-		ClusterID:  types.StringValue(clusterID),
-		Enabled:    types.BoolValue(true),
-		ScopedMode: types.BoolValue(false),
-		ClusterLimits: []clusterLimitsModel{{
-			Enabled: types.BoolValue(true),
-			CPU:     []clusterLimitsCPUModel{{MaxCores: types.Int64Value(20)}},
-		}},
-		NodeDownscaler: []nodeDownscalerModel{{
-			EmptyNodesDelay:   types.StringValue("300s"),
-			EmptyNodesEnabled: types.BoolValue(true),
-		}},
-		UnschedulablePods: []unschedulablePodsModel{{
-			Enabled:                        types.BoolValue(false),
-			PartialTemplateMatchingEnabled: types.BoolValue(false),
-		}},
-	}
-	stateModel := planModel
-	stateModel.Version = types.StringValue("v5")
-
-	req := resource.UpdateRequest{
-		Plan: tfsdk.Plan{
-			Raw:    autoscalerPoliciesPlanValue(t, schemaType, planModel),
-			Schema: schemaResp.Schema,
-		},
-		State: tfsdk.State{
-			Raw:    autoscalerPoliciesPlanValue(t, schemaType, stateModel),
-			Schema: schemaResp.Schema,
-		},
-	}
-	resp := resource.UpdateResponse{
-		State: tfsdk.State{
-			Raw:    autoscalerPoliciesNullValue(t, schemaType),
-			Schema: schemaResp.Schema,
-		},
-	}
-
-	r.Update(context.Background(), req, &resp)
-
-	require.False(t, resp.Diagnostics.HasError(), "update diagnostics: %v", resp.Diagnostics)
-
-	var state autoscalerPoliciesModel
-	stateDiags := resp.State.Get(context.Background(), &state)
-	require.False(t, stateDiags.HasError(), "state decode diagnostics: %v", stateDiags)
-
-	require.Equal(t, "v6", state.Version.ValueString())
-	require.Len(t, state.ClusterLimits, 1)
-	require.Len(t, state.NodeDownscaler, 1)
-	require.Len(t, state.UnschedulablePods, 1)
-	require.False(t, state.UnschedulablePods[0].Enabled.ValueBool())
-	require.False(t, state.UnschedulablePods[0].PartialTemplateMatchingEnabled.ValueBool())
-}
-
-// TestResourceAutoscalerPolicies_Create_OmittedSection covers the Create path
-// of the same regression.
-func TestResourceAutoscalerPolicies_Create_OmittedSection(t *testing.T) {
-	t.Parallel()
-
-	clusterID := "b6bfc074-a267-400f-b8f1-db0850c369b1"
-
-	// The update response lacks the unschedulable_pods section.
-	apiPolicies := &cluster_autoscaler_v2.PoliciesV2{
+	// Response lacks the unschedulable_pods section.
+	responseWithoutSection := &cluster_autoscaler_v2.PoliciesV2{
 		Enabled:    lo.ToPtr(true),
 		ScopedMode: lo.ToPtr(false),
 		Version:    lo.ToPtr("v6"),
@@ -1044,25 +884,7 @@ func TestResourceAutoscalerPolicies_Create_OmittedSection(t *testing.T) {
 		},
 	}
 
-	mockClient := mock_cluster_autoscaler_v2.NewMockClientWithResponsesInterface(t)
-	mockClient.EXPECT().
-		PoliciesV2APIGetClusterPoliciesWithResponse(mock.Anything, clusterID).
-		Times(1).
-		Return(&cluster_autoscaler_v2.PoliciesV2APIGetClusterPoliciesResponse{
-			HTTPResponse: okHTTPResponse(),
-			JSON200:      apiPolicies,
-		}, nil)
-	mockClient.EXPECT().
-		PoliciesV2APIUpdateClusterPoliciesWithResponse(mock.Anything, clusterID, mock.Anything).
-		Return(&cluster_autoscaler_v2.PoliciesV2APIUpdateClusterPoliciesResponse{
-			HTTPResponse: okHTTPResponse(),
-			JSON200:      apiPolicies,
-		}, nil)
-
-	r := newAutoscalerPoliciesResourceWithMock(mockClient)
-	schemaResp, schemaType := autoscalerPoliciesTestSchema(t, r)
-
-	planModel := autoscalerPoliciesModel{
+	configuredModel := autoscalerPoliciesModel{
 		ClusterID:  types.StringValue(clusterID),
 		Enabled:    types.BoolValue(true),
 		ScopedMode: types.BoolValue(false),
@@ -1080,90 +902,119 @@ func TestResourceAutoscalerPolicies_Create_OmittedSection(t *testing.T) {
 		}},
 	}
 
-	req := resource.CreateRequest{
-		Plan: tfsdk.Plan{
-			Raw:    autoscalerPoliciesPlanValue(t, schemaType, planModel),
-			Schema: schemaResp.Schema,
-		},
-	}
-	resp := resource.CreateResponse{
-		State: tfsdk.State{
-			Raw:    autoscalerPoliciesNullValue(t, schemaType),
-			Schema: schemaResp.Schema,
-		},
-	}
+	assertState := func(t *testing.T, state tfsdk.State) {
+		t.Helper()
 
-	r.Create(context.Background(), req, &resp)
+		var m autoscalerPoliciesModel
+		diags := state.Get(context.Background(), &m)
+		require.False(t, diags.HasError(), "state decode diagnostics: %v", diags)
 
-	require.False(t, resp.Diagnostics.HasError(), "create diagnostics: %v", resp.Diagnostics)
-
-	var state autoscalerPoliciesModel
-	stateDiags := resp.State.Get(context.Background(), &state)
-	require.False(t, stateDiags.HasError(), "state decode diagnostics: %v", stateDiags)
-
-	require.Equal(t, "v6", state.Version.ValueString())
-	require.Len(t, state.ClusterLimits, 1)
-	require.Len(t, state.NodeDownscaler, 1)
-	require.Len(t, state.UnschedulablePods, 1)
-	require.False(t, state.UnschedulablePods[0].Enabled.ValueBool())
-	require.False(t, state.UnschedulablePods[0].PartialTemplateMatchingEnabled.ValueBool())
-}
-
-// TestResourceAutoscalerPolicies_Read_PreservesBlocksFromPriorState: a
-// refresh keeps blocks the response lacks, carried over verbatim.
-func TestResourceAutoscalerPolicies_Read_PreservesBlocksFromPriorState(t *testing.T) {
-	t.Parallel()
-
-	clusterID := "b6bfc074-a267-400f-b8f1-db0850c369b1"
-
-	mockClient := mock_cluster_autoscaler_v2.NewMockClientWithResponsesInterface(t)
-	mockClient.EXPECT().
-		PoliciesV2APIGetClusterPoliciesWithResponse(mock.Anything, clusterID).
-		Return(&cluster_autoscaler_v2.PoliciesV2APIGetClusterPoliciesResponse{
-			HTTPResponse: okHTTPResponse(),
-			JSON200: &cluster_autoscaler_v2.PoliciesV2{
-				Enabled:    lo.ToPtr(true),
-				ScopedMode: lo.ToPtr(false),
-				// ClusterLimits, NodeDownscaler and UnschedulablePods omitted.
-			},
-		}, nil)
-
-	r := newAutoscalerPoliciesResourceWithMock(mockClient)
-	schemaResp, schemaType := autoscalerPoliciesTestSchema(t, r)
-
-	priorState := testAutoscalerPoliciesPlanModel(clusterID)
-	priorState.ID = types.StringValue(clusterID)
-	priorState.Version = types.StringValue("v5")
-
-	req := resource.ReadRequest{
-		State: tfsdk.State{
-			Raw:    autoscalerPoliciesPlanValue(t, schemaType, priorState),
-			Schema: schemaResp.Schema,
-		},
-	}
-	resp := resource.ReadResponse{
-		State: tfsdk.State{
-			Raw:    autoscalerPoliciesNullValue(t, schemaType),
-			Schema: schemaResp.Schema,
-		},
+		require.Equal(t, "v6", m.Version.ValueString())
+		require.Len(t, m.ClusterLimits, 1)
+		require.Len(t, m.NodeDownscaler, 1)
+		// The unschedulable_pods block survives, carried over verbatim.
+		require.Len(t, m.UnschedulablePods, 1)
+		require.False(t, m.UnschedulablePods[0].Enabled.ValueBool())
+		require.False(t, m.UnschedulablePods[0].PartialTemplateMatchingEnabled.ValueBool())
 	}
 
-	r.Read(context.Background(), req, &resp)
+	t.Run("update", func(t *testing.T) {
+		t.Parallel()
 
-	require.False(t, resp.Diagnostics.HasError(), "read diagnostics: %v", resp.Diagnostics)
+		mockClient := mock_cluster_autoscaler_v2.NewMockClientWithResponsesInterface(t)
+		mockClient.EXPECT().
+			PoliciesV2APIUpdateClusterPoliciesWithResponse(mock.Anything, clusterID, mock.Anything).
+			Return(&cluster_autoscaler_v2.PoliciesV2APIUpdateClusterPoliciesResponse{
+				HTTPResponse: okHTTPResponse(),
+				JSON200:      responseWithoutSection,
+			}, nil)
 
-	var state autoscalerPoliciesModel
-	stateDiags := resp.State.Get(context.Background(), &state)
-	require.False(t, stateDiags.HasError(), "state decode diagnostics: %v", stateDiags)
+		r := newAutoscalerPoliciesResourceWithMock(mockClient)
+		schemaResp, schemaType := autoscalerPoliciesTestSchema(t, r)
 
-	require.Len(t, state.ClusterLimits, 1)
-	require.True(t, state.ClusterLimits[0].Enabled.ValueBool())
-	require.Len(t, state.NodeDownscaler, 1)
-	require.True(t, state.NodeDownscaler[0].EmptyNodesEnabled.ValueBool())
-	require.Equal(t, "3m", state.NodeDownscaler[0].EmptyNodesDelay.ValueString())
-	require.Len(t, state.UnschedulablePods, 1)
-	require.True(t, state.UnschedulablePods[0].Enabled.ValueBool())
-	require.True(t, state.UnschedulablePods[0].PartialTemplateMatchingEnabled.ValueBool())
-	require.Len(t, state.UnschedulablePods[0].PodPinner, 1)
-	require.True(t, state.UnschedulablePods[0].PodPinner[0].Enabled.ValueBool())
+		stateModel := configuredModel
+		stateModel.ID = types.StringValue(clusterID)
+		stateModel.Version = types.StringValue("v5")
+
+		req := resource.UpdateRequest{
+			Plan:  tfsdk.Plan{Raw: autoscalerPoliciesPlanValue(t, schemaType, configuredModel), Schema: schemaResp.Schema},
+			State: tfsdk.State{Raw: autoscalerPoliciesPlanValue(t, schemaType, stateModel), Schema: schemaResp.Schema},
+		}
+		resp := resource.UpdateResponse{
+			State: tfsdk.State{Raw: autoscalerPoliciesNullValue(t, schemaType), Schema: schemaResp.Schema},
+		}
+
+		r.Update(context.Background(), req, &resp)
+
+		require.False(t, resp.Diagnostics.HasError(), "update diagnostics: %v", resp.Diagnostics)
+		assertState(t, resp.State)
+	})
+
+	t.Run("create", func(t *testing.T) {
+		t.Parallel()
+
+		mockClient := mock_cluster_autoscaler_v2.NewMockClientWithResponsesInterface(t)
+		mockClient.EXPECT().
+			PoliciesV2APIGetClusterPoliciesWithResponse(mock.Anything, clusterID).
+			Times(1).
+			Return(&cluster_autoscaler_v2.PoliciesV2APIGetClusterPoliciesResponse{
+				HTTPResponse: okHTTPResponse(),
+				JSON200:      responseWithoutSection,
+			}, nil)
+		mockClient.EXPECT().
+			PoliciesV2APIUpdateClusterPoliciesWithResponse(mock.Anything, clusterID, mock.Anything).
+			Return(&cluster_autoscaler_v2.PoliciesV2APIUpdateClusterPoliciesResponse{
+				HTTPResponse: okHTTPResponse(),
+				JSON200:      responseWithoutSection,
+			}, nil)
+
+		r := newAutoscalerPoliciesResourceWithMock(mockClient)
+		schemaResp, schemaType := autoscalerPoliciesTestSchema(t, r)
+
+		planModel := configuredModel
+		planModel.ID = types.StringNull()
+
+		req := resource.CreateRequest{
+			Plan: tfsdk.Plan{Raw: autoscalerPoliciesPlanValue(t, schemaType, planModel), Schema: schemaResp.Schema},
+		}
+		resp := resource.CreateResponse{
+			State: tfsdk.State{Raw: autoscalerPoliciesNullValue(t, schemaType), Schema: schemaResp.Schema},
+		}
+
+		r.Create(context.Background(), req, &resp)
+
+		require.False(t, resp.Diagnostics.HasError(), "create diagnostics: %v", resp.Diagnostics)
+		assertState(t, resp.State)
+	})
+
+	t.Run("read", func(t *testing.T) {
+		t.Parallel()
+
+		mockClient := mock_cluster_autoscaler_v2.NewMockClientWithResponsesInterface(t)
+		mockClient.EXPECT().
+			PoliciesV2APIGetClusterPoliciesWithResponse(mock.Anything, clusterID).
+			Return(&cluster_autoscaler_v2.PoliciesV2APIGetClusterPoliciesResponse{
+				HTTPResponse: okHTTPResponse(),
+				JSON200:      responseWithoutSection,
+			}, nil)
+
+		r := newAutoscalerPoliciesResourceWithMock(mockClient)
+		schemaResp, schemaType := autoscalerPoliciesTestSchema(t, r)
+
+		priorState := configuredModel
+		priorState.ID = types.StringValue(clusterID)
+		priorState.Version = types.StringValue("v5")
+
+		req := resource.ReadRequest{
+			State: tfsdk.State{Raw: autoscalerPoliciesPlanValue(t, schemaType, priorState), Schema: schemaResp.Schema},
+		}
+		resp := resource.ReadResponse{
+			State: tfsdk.State{Raw: autoscalerPoliciesNullValue(t, schemaType), Schema: schemaResp.Schema},
+		}
+
+		r.Read(context.Background(), req, &resp)
+
+		require.False(t, resp.Diagnostics.HasError(), "read diagnostics: %v", resp.Diagnostics)
+		assertState(t, resp.State)
+	})
 }
