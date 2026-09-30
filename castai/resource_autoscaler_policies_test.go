@@ -11,6 +11,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-go/tftypes"
@@ -477,6 +478,89 @@ func TestResourceAutoscalerPolicies_Read_UnschedulablePodsPartialMatchingOmitted
 	require.True(t, state.UnschedulablePods[0].Enabled.ValueBool())
 	// API omitted the field: state stays at the static default (false), no drift.
 	require.False(t, state.UnschedulablePods[0].PartialTemplateMatchingEnabled.ValueBool())
+}
+
+// The API returns fully materialized policies (every section populated with
+// its defaults), so a configuration that omits a section must adopt the value
+// the API reports instead of planning its removal. That requires the sections
+// to be Optional+Computed nested attributes; declared values still win.
+func TestResourceAutoscalerPolicies_Schema_MaterializedSectionsComputed(t *testing.T) {
+	t.Parallel()
+
+	r := newAutoscalerPoliciesResourceWithMock(nil)
+	schemaResp := &resource.SchemaResponse{}
+	r.Schema(context.Background(), resource.SchemaRequest{}, schemaResp)
+	require.False(t, schemaResp.Diagnostics.HasError())
+
+	for _, name := range []string{
+		FieldAutoscalerPoliciesClusterLimits,
+		FieldAutoscalerPoliciesNodeDownscaler,
+		FieldAutoscalerPoliciesUnschedulablePods,
+	} {
+		attr := schemaResp.Schema.Attributes[name]
+		require.NotNil(t, attr, name)
+		listAttr, ok := attr.(schema.ListNestedAttribute)
+		require.True(t, ok, "%s should be a nested attribute", name)
+		require.True(t, listAttr.Optional, "%s should be Optional", name)
+		require.True(t, listAttr.Computed, "%s should be Computed", name)
+	}
+
+	clusterLimits := schemaResp.Schema.Attributes[FieldAutoscalerPoliciesClusterLimits].(schema.ListNestedAttribute)
+	cpu := clusterLimits.NestedObject.Attributes[FieldClusterLimitsCPU].(schema.ListNestedAttribute)
+	require.True(t, cpu.Computed)
+	minCores := cpu.NestedObject.Attributes[FieldClusterLimitsCPUMinCores].(schema.Int64Attribute)
+	require.True(t, minCores.Computed)
+	require.Nil(t, minCores.Default, "a static default would drift against the materialized value")
+
+	nodeDownscaler := schemaResp.Schema.Attributes[FieldAutoscalerPoliciesNodeDownscaler].(schema.ListNestedAttribute)
+	require.True(t, nodeDownscaler.NestedObject.Attributes[FieldNodeDownscalerEmptyNodesDelay].(schema.StringAttribute).Computed)
+
+	unschedulablePods := schemaResp.Schema.Attributes[FieldAutoscalerPoliciesUnschedulablePods].(schema.ListNestedAttribute)
+	require.True(t, unschedulablePods.NestedObject.Attributes[FieldUnschedulablePodsPodPinner].(schema.ListNestedAttribute).Computed)
+}
+
+// A fully materialized API response flows into state with every section
+// present; with the sections Optional+Computed, the next plan adopts these
+// values instead of planning the removal of blocks the configuration never
+// declared.
+func TestResourceAutoscalerPolicies_Read_MaterializedDefaults(t *testing.T) {
+	t.Parallel()
+
+	r := newAutoscalerPoliciesResourceWithMock(nil)
+
+	policies := &cluster_autoscaler_v2.PoliciesV2{
+		Enabled:    lo.ToPtr(true),
+		ScopedMode: lo.ToPtr(false),
+		Version:    lo.ToPtr("v7"),
+		ClusterLimits: &cluster_autoscaler_v2.ClusterLimitsPolicy{
+			Enabled: lo.ToPtr(false),
+			Cpu: &cluster_autoscaler_v2.ClusterLimitsCpu{
+				MinCores: lo.ToPtr(int32(1)),
+				MaxCores: 100,
+			},
+		},
+		NodeDownscaler: &cluster_autoscaler_v2.NodeDownscalerPolicy{
+			EmptyNodesEnabled: lo.ToPtr(false),
+			EmptyNodesDelay:   lo.ToPtr("5m0s"),
+		},
+		UnschedulablePods: &cluster_autoscaler_v2.UnschedulablePodsPolicy{
+			Enabled:                        lo.ToPtr(false),
+			PartialTemplateMatchingEnabled: lo.ToPtr(false),
+			PodPinner:                      &cluster_autoscaler_v2.PodPinner{Enabled: lo.ToPtr(false)},
+		},
+	}
+
+	state := r.policiesToModel("b6bfc074-a267-400f-b8f1-db0850c369b1", policies)
+
+	require.True(t, state.Enabled.ValueBool())
+	require.Len(t, state.ClusterLimits, 1)
+	require.False(t, state.ClusterLimits[0].Enabled.ValueBool())
+	require.Equal(t, int64(1), state.ClusterLimits[0].CPU[0].MinCores.ValueInt64())
+	require.Equal(t, int64(100), state.ClusterLimits[0].CPU[0].MaxCores.ValueInt64())
+	require.Len(t, state.NodeDownscaler, 1)
+	require.Equal(t, "5m0s", state.NodeDownscaler[0].EmptyNodesDelay.ValueString())
+	require.Len(t, state.UnschedulablePods, 1)
+	require.Len(t, state.UnschedulablePods[0].PodPinner, 1)
 }
 
 func TestResourceAutoscalerPolicies_Delete(t *testing.T) {

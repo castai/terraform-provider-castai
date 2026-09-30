@@ -94,26 +94,26 @@ V1→V2 internal translation (CO-4291) was marked **Won't Do** — the V1 API wi
 
 ### Optional
 
-- `cluster_limits` (Block List) Defines minimum and maximum amount of CPU the cluster can have. (see [below for nested schema](#nestedblock--cluster_limits))
+- `cluster_limits` (Attributes List) Defines minimum and maximum amount of CPU the cluster can have. (see [below for nested schema](#nestedatt--cluster_limits))
 - `enabled` (Boolean) Enable/disable all policies (global master switch).
-- `node_downscaler` (Block List) Node Downscaler defines policies for removing nodes based on the configured conditions. (see [below for nested schema](#nestedblock--node_downscaler))
+- `node_downscaler` (Attributes List) Node Downscaler defines policies for removing nodes based on the configured conditions. (see [below for nested schema](#nestedatt--node_downscaler))
 - `scoped_mode` (Boolean) Run the node autoscaler in scoped mode.
-- `unschedulable_pods` (Block List) Policy defining autoscaler's behavior when unschedulable pods were detected. (see [below for nested schema](#nestedblock--unschedulable_pods))
+- `unschedulable_pods` (Attributes List) Policy defining autoscaler's behavior when unschedulable pods were detected. (see [below for nested schema](#nestedatt--unschedulable_pods))
 
 ### Read-Only
 
 - `id` (String) The ID of this resource, equal to the cluster id.
 - `version` (String) Policy version for optimistic locking.
 
-<a id="nestedblock--cluster_limits"></a>
+<a id="nestedatt--cluster_limits"></a>
 ### Nested Schema for `cluster_limits`
 
 Optional:
 
-- `cpu` (Block List) Defines the minimum and maximum amount of CPUs for cluster's worker nodes. (see [below for nested schema](#nestedblock--cluster_limits--cpu))
+- `cpu` (Attributes List) Defines the minimum and maximum amount of CPUs for cluster's worker nodes. (see [below for nested schema](#nestedatt--cluster_limits--cpu))
 - `enabled` (Boolean) Enable/disable cluster size limits policy.
 
-<a id="nestedblock--cluster_limits--cpu"></a>
+<a id="nestedatt--cluster_limits--cpu"></a>
 ### Nested Schema for `cluster_limits.cpu`
 
 Required:
@@ -126,7 +126,7 @@ Optional:
 
 
 
-<a id="nestedblock--node_downscaler"></a>
+<a id="nestedatt--node_downscaler"></a>
 ### Nested Schema for `node_downscaler`
 
 Optional:
@@ -135,16 +135,16 @@ Optional:
 - `empty_nodes_enabled` (Boolean) Enable/disable the empty worker nodes policy.
 
 
-<a id="nestedblock--unschedulable_pods"></a>
+<a id="nestedatt--unschedulable_pods"></a>
 ### Nested Schema for `unschedulable_pods`
 
 Optional:
 
 - `enabled` (Boolean) Enable/disable unschedulable pods detection policy.
 - `partial_template_matching_enabled` (Boolean) Marks whether partial matching should be used when deciding which custom node template to select.
-- `pod_pinner` (Block List) Defines the CAST AI Pod Pinner component settings. (see [below for nested schema](#nestedblock--unschedulable_pods--pod_pinner))
+- `pod_pinner` (Attributes List) Defines the CAST AI Pod Pinner component settings. (see [below for nested schema](#nestedatt--unschedulable_pods--pod_pinner))
 
-<a id="nestedblock--unschedulable_pods--pod_pinner"></a>
+<a id="nestedatt--unschedulable_pods--pod_pinner"></a>
 ### Nested Schema for `unschedulable_pods.pod_pinner`
 
 Optional:

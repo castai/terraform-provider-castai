@@ -14,7 +14,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
@@ -148,14 +147,22 @@ func (r *autoscalerPoliciesResource) Schema(_ context.Context, _ resource.Schema
 				Computed:    true,
 				Description: "Policy version for optimistic locking.",
 			},
-		},
-		Blocks: map[string]schema.Block{
-			FieldAutoscalerPoliciesClusterLimits: schema.ListNestedBlock{
+
+			// The sections below are Optional + Computed nested attributes
+			// rather than blocks: the API always returns a fully materialized
+			// policies object (every section populated with its defaults), so
+			// a configuration that omits a section must adopt the value the
+			// API reports instead of planning its removal. Declared values
+			// always win. Removing a section from the configuration stops
+			// managing it rather than resetting it.
+			FieldAutoscalerPoliciesClusterLimits: schema.ListNestedAttribute{
+				Optional:    true,
+				Computed:    true,
 				Description: "Defines minimum and maximum amount of CPU the cluster can have.",
 				Validators: []validator.List{
 					listvalidator.SizeAtMost(1),
 				},
-				NestedObject: schema.NestedBlockObject{
+				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 						FieldClusterLimitsEnabled: schema.BoolAttribute{
 							Optional:    true,
@@ -163,14 +170,14 @@ func (r *autoscalerPoliciesResource) Schema(_ context.Context, _ resource.Schema
 							Description: "Enable/disable cluster size limits policy.",
 							Default:     booldefault.StaticBool(false),
 						},
-					},
-					Blocks: map[string]schema.Block{
-						FieldClusterLimitsCPU: schema.ListNestedBlock{
+						FieldClusterLimitsCPU: schema.ListNestedAttribute{
+							Optional:    true,
+							Computed:    true,
 							Description: "Defines the minimum and maximum amount of CPUs for cluster's worker nodes.",
 							Validators: []validator.List{
 								listvalidator.SizeAtMost(1),
 							},
-							NestedObject: schema.NestedBlockObject{
+							NestedObject: schema.NestedAttributeObject{
 								Attributes: map[string]schema.Attribute{
 									FieldClusterLimitsCPUMaxCores: schema.Int64Attribute{
 										Required:    true,
@@ -184,7 +191,6 @@ func (r *autoscalerPoliciesResource) Schema(_ context.Context, _ resource.Schema
 										Computed:           true,
 										Description:        "Defines the minimum allowed amount of CPUs in the whole cluster. Deprecated: Min CPU limit is no longer enforced.",
 										DeprecationMessage: "Min CPU limit is no longer enforced.",
-										Default:            int64default.StaticInt64(0),
 									},
 								},
 							},
@@ -192,15 +198,18 @@ func (r *autoscalerPoliciesResource) Schema(_ context.Context, _ resource.Schema
 					},
 				},
 			},
-			FieldAutoscalerPoliciesNodeDownscaler: schema.ListNestedBlock{
+			FieldAutoscalerPoliciesNodeDownscaler: schema.ListNestedAttribute{
+				Optional:    true,
+				Computed:    true,
 				Description: "Node Downscaler defines policies for removing nodes based on the configured conditions.",
 				Validators: []validator.List{
 					listvalidator.SizeAtMost(1),
 				},
-				NestedObject: schema.NestedBlockObject{
+				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 						FieldNodeDownscalerEmptyNodesDelay: schema.StringAttribute{
 							Optional:    true,
+							Computed:    true,
 							Description: "Period to wait before removing an empty node.",
 						},
 						FieldNodeDownscalerEmptyNodesEnabled: schema.BoolAttribute{
@@ -212,12 +221,14 @@ func (r *autoscalerPoliciesResource) Schema(_ context.Context, _ resource.Schema
 					},
 				},
 			},
-			FieldAutoscalerPoliciesUnschedulablePods: schema.ListNestedBlock{
+			FieldAutoscalerPoliciesUnschedulablePods: schema.ListNestedAttribute{
+				Optional:    true,
+				Computed:    true,
 				Description: "Policy defining autoscaler's behavior when unschedulable pods were detected.",
 				Validators: []validator.List{
 					listvalidator.SizeAtMost(1),
 				},
-				NestedObject: schema.NestedBlockObject{
+				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 						FieldUnschedulablePodsEnabled: schema.BoolAttribute{
 							Optional:    true,
@@ -231,14 +242,14 @@ func (r *autoscalerPoliciesResource) Schema(_ context.Context, _ resource.Schema
 							Description: "Marks whether partial matching should be used when deciding which custom node template to select.",
 							Default:     booldefault.StaticBool(false),
 						},
-					},
-					Blocks: map[string]schema.Block{
-						FieldUnschedulablePodsPodPinner: schema.ListNestedBlock{
+						FieldUnschedulablePodsPodPinner: schema.ListNestedAttribute{
+							Optional:    true,
+							Computed:    true,
 							Description: "Defines the CAST AI Pod Pinner component settings.",
 							Validators: []validator.List{
 								listvalidator.SizeAtMost(1),
 							},
-							NestedObject: schema.NestedBlockObject{
+							NestedObject: schema.NestedAttributeObject{
 								Attributes: map[string]schema.Attribute{
 									FieldPodPinnerEnabled: schema.BoolAttribute{
 										Optional:    true,
@@ -255,7 +266,6 @@ func (r *autoscalerPoliciesResource) Schema(_ context.Context, _ resource.Schema
 		},
 	}
 }
-
 func (r *autoscalerPoliciesResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
