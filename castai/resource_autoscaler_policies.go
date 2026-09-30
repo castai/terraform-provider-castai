@@ -58,6 +58,7 @@ var (
 	_ resource.Resource                = (*autoscalerPoliciesResource)(nil)
 	_ resource.ResourceWithConfigure   = (*autoscalerPoliciesResource)(nil)
 	_ resource.ResourceWithImportState = (*autoscalerPoliciesResource)(nil)
+	_ resource.ResourceWithModifyPlan  = (*autoscalerPoliciesResource)(nil)
 )
 
 // autoscalerPoliciesResource implements the castai_autoscaler_policies resource
@@ -147,16 +148,14 @@ func (r *autoscalerPoliciesResource) Schema(_ context.Context, _ resource.Schema
 				Computed:    true,
 				Description: "Policy version for optimistic locking.",
 			},
-			// The API always returns a fully materialized object, so omitted
-			// sections adopt the reported values instead of planning removal.
-			FieldAutoscalerPoliciesClusterLimits: schema.ListNestedAttribute{
-				Optional:    true,
-				Computed:    true,
+		},
+		Blocks: map[string]schema.Block{
+			FieldAutoscalerPoliciesClusterLimits: schema.ListNestedBlock{
 				Description: "Defines minimum and maximum amount of CPU the cluster can have.",
 				Validators: []validator.List{
 					listvalidator.SizeAtMost(1),
 				},
-				NestedObject: schema.NestedAttributeObject{
+				NestedObject: schema.NestedBlockObject{
 					Attributes: map[string]schema.Attribute{
 						FieldClusterLimitsEnabled: schema.BoolAttribute{
 							Optional:    true,
@@ -164,14 +163,14 @@ func (r *autoscalerPoliciesResource) Schema(_ context.Context, _ resource.Schema
 							Description: "Enable/disable cluster size limits policy.",
 							Default:     booldefault.StaticBool(false),
 						},
-						FieldClusterLimitsCPU: schema.ListNestedAttribute{
-							Optional:    true,
-							Computed:    true,
+					},
+					Blocks: map[string]schema.Block{
+						FieldClusterLimitsCPU: schema.ListNestedBlock{
 							Description: "Defines the minimum and maximum amount of CPUs for cluster's worker nodes.",
 							Validators: []validator.List{
 								listvalidator.SizeAtMost(1),
 							},
-							NestedObject: schema.NestedAttributeObject{
+							NestedObject: schema.NestedBlockObject{
 								Attributes: map[string]schema.Attribute{
 									FieldClusterLimitsCPUMaxCores: schema.Int64Attribute{
 										Required:    true,
@@ -192,14 +191,12 @@ func (r *autoscalerPoliciesResource) Schema(_ context.Context, _ resource.Schema
 					},
 				},
 			},
-			FieldAutoscalerPoliciesNodeDownscaler: schema.ListNestedAttribute{
-				Optional:    true,
-				Computed:    true,
+			FieldAutoscalerPoliciesNodeDownscaler: schema.ListNestedBlock{
 				Description: "Node Downscaler defines policies for removing nodes based on the configured conditions.",
 				Validators: []validator.List{
 					listvalidator.SizeAtMost(1),
 				},
-				NestedObject: schema.NestedAttributeObject{
+				NestedObject: schema.NestedBlockObject{
 					Attributes: map[string]schema.Attribute{
 						FieldNodeDownscalerEmptyNodesDelay: schema.StringAttribute{
 							Optional:    true,
@@ -215,14 +212,12 @@ func (r *autoscalerPoliciesResource) Schema(_ context.Context, _ resource.Schema
 					},
 				},
 			},
-			FieldAutoscalerPoliciesUnschedulablePods: schema.ListNestedAttribute{
-				Optional:    true,
-				Computed:    true,
+			FieldAutoscalerPoliciesUnschedulablePods: schema.ListNestedBlock{
 				Description: "Policy defining autoscaler's behavior when unschedulable pods were detected.",
 				Validators: []validator.List{
 					listvalidator.SizeAtMost(1),
 				},
-				NestedObject: schema.NestedAttributeObject{
+				NestedObject: schema.NestedBlockObject{
 					Attributes: map[string]schema.Attribute{
 						FieldUnschedulablePodsEnabled: schema.BoolAttribute{
 							Optional:    true,
@@ -236,14 +231,14 @@ func (r *autoscalerPoliciesResource) Schema(_ context.Context, _ resource.Schema
 							Description: "Marks whether partial matching should be used when deciding which custom node template to select.",
 							Default:     booldefault.StaticBool(false),
 						},
-						FieldUnschedulablePodsPodPinner: schema.ListNestedAttribute{
-							Optional:    true,
-							Computed:    true,
+					},
+					Blocks: map[string]schema.Block{
+						FieldUnschedulablePodsPodPinner: schema.ListNestedBlock{
 							Description: "Defines the CAST AI Pod Pinner component settings.",
 							Validators: []validator.List{
 								listvalidator.SizeAtMost(1),
 							},
-							NestedObject: schema.NestedAttributeObject{
+							NestedObject: schema.NestedBlockObject{
 								Attributes: map[string]schema.Attribute{
 									FieldPodPinnerEnabled: schema.BoolAttribute{
 										Optional:    true,
@@ -374,6 +369,49 @@ func (r *autoscalerPoliciesResource) Delete(ctx context.Context, _ resource.Dele
 
 func (r *autoscalerPoliciesResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root(FieldAutoscalerPoliciesID), req, resp)
+}
+
+// ModifyPlan carries section blocks the configuration does not declare over
+// from the state into the plan: the API always returns a fully materialized
+// object, so an omitted section would otherwise be planned for removal on
+// every run.
+func (r *autoscalerPoliciesResource) ModifyPlan(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse) {
+	if req.Plan.Raw.IsNull() || req.Config.Raw.IsNull() || req.State.Raw.IsNull() {
+		return
+	}
+
+	var config, plan, state autoscalerPoliciesModel
+	if diags := req.Config.Get(ctx, &config); diags.HasError() {
+		return
+	}
+	if diags := req.Plan.Get(ctx, &plan); diags.HasError() {
+		return
+	}
+	if diags := req.State.Get(ctx, &state); diags.HasError() {
+		return
+	}
+
+	if len(config.ClusterLimits) == 0 {
+		if len(state.ClusterLimits) > 0 {
+			plan.ClusterLimits = state.ClusterLimits
+		}
+	} else if len(state.ClusterLimits) > 0 && len(config.ClusterLimits[0].CPU) == 0 && len(state.ClusterLimits[0].CPU) > 0 {
+		plan.ClusterLimits[0].CPU = state.ClusterLimits[0].CPU
+	}
+
+	if len(config.NodeDownscaler) == 0 && len(state.NodeDownscaler) > 0 {
+		plan.NodeDownscaler = state.NodeDownscaler
+	}
+
+	if len(config.UnschedulablePods) == 0 {
+		if len(state.UnschedulablePods) > 0 {
+			plan.UnschedulablePods = state.UnschedulablePods
+		}
+	} else if len(state.UnschedulablePods) > 0 && len(config.UnschedulablePods[0].PodPinner) == 0 && len(state.UnschedulablePods[0].PodPinner) > 0 {
+		plan.UnschedulablePods[0].PodPinner = state.UnschedulablePods[0].PodPinner
+	}
+
+	resp.Diagnostics.Append(resp.Plan.Set(ctx, plan)...)
 }
 
 // upsert pushes the plan to the API and returns the stored policies from

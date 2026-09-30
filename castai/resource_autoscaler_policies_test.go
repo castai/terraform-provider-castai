@@ -11,7 +11,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-go/tftypes"
@@ -443,41 +442,57 @@ func TestResourceAutoscalerPolicies_Read_UnschedulablePodsPartialMatchingOmitted
 	require.False(t, state.UnschedulablePods[0].PartialTemplateMatchingEnabled.ValueBool())
 }
 
-// Sections must be Optional+Computed so omitted sections adopt the
-// API-reported values instead of planning their removal.
-func TestResourceAutoscalerPolicies_Schema_MaterializedSectionsComputed(t *testing.T) {
+// ModifyPlan must carry section blocks the configuration does not declare
+// over from the state into the plan, so an omitted section is not planned for
+// removal on every run.
+func TestResourceAutoscalerPolicies_ModifyPlan_KeepsUndeclaredSections(t *testing.T) {
 	t.Parallel()
 
 	r := newAutoscalerPoliciesResourceWithMock(nil)
-	schemaResp := &resource.SchemaResponse{}
-	r.Schema(context.Background(), resource.SchemaRequest{}, schemaResp)
-	require.False(t, schemaResp.Diagnostics.HasError())
+	schemaResp, schemaType := autoscalerPoliciesTestSchema(t, r)
 
-	for _, name := range []string{
-		FieldAutoscalerPoliciesClusterLimits,
-		FieldAutoscalerPoliciesNodeDownscaler,
-		FieldAutoscalerPoliciesUnschedulablePods,
-	} {
-		attr := schemaResp.Schema.Attributes[name]
-		require.NotNil(t, attr, name)
-		listAttr, ok := attr.(schema.ListNestedAttribute)
-		require.True(t, ok, "%s should be a nested attribute", name)
-		require.True(t, listAttr.Optional, "%s should be Optional", name)
-		require.True(t, listAttr.Computed, "%s should be Computed", name)
+	config := autoscalerPoliciesModel{
+		ClusterID: types.StringValue(autoscalerPoliciesTestClusterID),
+		Enabled:   types.BoolValue(true),
+		// Sections deliberately omitted.
 	}
+	state := testAutoscalerPoliciesPlanModel(autoscalerPoliciesTestClusterID)
+	state.ID = types.StringValue(autoscalerPoliciesTestClusterID)
+	state.Version = types.StringValue("v5")
 
-	clusterLimits := schemaResp.Schema.Attributes[FieldAutoscalerPoliciesClusterLimits].(schema.ListNestedAttribute)
-	cpu := clusterLimits.NestedObject.Attributes[FieldClusterLimitsCPU].(schema.ListNestedAttribute)
-	require.True(t, cpu.Computed)
-	minCores := cpu.NestedObject.Attributes[FieldClusterLimitsCPUMinCores].(schema.Int64Attribute)
-	require.True(t, minCores.Computed)
-	require.Nil(t, minCores.Default, "a static default would drift against the materialized value")
+	req := resource.ModifyPlanRequest{
+		Config: tfsdk.Config{Raw: autoscalerPoliciesPlanValue(t, schemaType, config), Schema: schemaResp.Schema},
+		Plan:   tfsdk.Plan{Raw: autoscalerPoliciesPlanValue(t, schemaType, config), Schema: schemaResp.Schema},
+		State:  tfsdk.State{Raw: autoscalerPoliciesPlanValue(t, schemaType, state), Schema: schemaResp.Schema},
+	}
+	resp := &resource.ModifyPlanResponse{Plan: req.Plan}
 
-	nodeDownscaler := schemaResp.Schema.Attributes[FieldAutoscalerPoliciesNodeDownscaler].(schema.ListNestedAttribute)
-	require.True(t, nodeDownscaler.NestedObject.Attributes[FieldNodeDownscalerEmptyNodesDelay].(schema.StringAttribute).Computed)
+	r.ModifyPlan(context.Background(), req, resp)
 
-	unschedulablePods := schemaResp.Schema.Attributes[FieldAutoscalerPoliciesUnschedulablePods].(schema.ListNestedAttribute)
-	require.True(t, unschedulablePods.NestedObject.Attributes[FieldUnschedulablePodsPodPinner].(schema.ListNestedAttribute).Computed)
+	require.False(t, resp.Diagnostics.HasError(), "modify plan diagnostics: %v", resp.Diagnostics)
+
+	var plan autoscalerPoliciesModel
+	diags := resp.Plan.Get(context.Background(), &plan)
+	require.False(t, diags.HasError(), "plan decode diagnostics: %v", diags)
+
+	require.Equal(t, state.ClusterLimits, plan.ClusterLimits)
+	require.Equal(t, state.NodeDownscaler, plan.NodeDownscaler)
+	require.Equal(t, state.UnschedulablePods, plan.UnschedulablePods)
+
+	// A section the configuration declares is not overwritten.
+	declared := config
+	declared.NodeDownscaler = []nodeDownscalerModel{{EmptyNodesEnabled: types.BoolValue(false)}}
+	req.Config = tfsdk.Config{Raw: autoscalerPoliciesPlanValue(t, schemaType, declared), Schema: schemaResp.Schema}
+	req.Plan = tfsdk.Plan{Raw: autoscalerPoliciesPlanValue(t, schemaType, declared), Schema: schemaResp.Schema}
+	resp = &resource.ModifyPlanResponse{Plan: req.Plan}
+
+	r.ModifyPlan(context.Background(), req, resp)
+
+	require.False(t, resp.Diagnostics.HasError(), "modify plan diagnostics: %v", resp.Diagnostics)
+
+	diags = resp.Plan.Get(context.Background(), &plan)
+	require.False(t, diags.HasError(), "plan decode diagnostics: %v", diags)
+	require.Equal(t, declared.NodeDownscaler, plan.NodeDownscaler)
 }
 
 func TestResourceAutoscalerPolicies_Read_MaterializedDefaults(t *testing.T) {
