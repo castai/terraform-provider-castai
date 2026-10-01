@@ -91,10 +91,10 @@ func TestPodMutation_ReadContext(t *testing.T) {
 			SpotDistributionPercentage: lo.ToPtr(int32(80)),
 			ObjectFilterV2: &patching_engine.ObjectFilterV2{
 				Namespaces: &[]patching_engine.ObjectFilterV2Matcher{
-					{Type: lo.ToPtr(patching_engine.ObjectFilterV2MatcherTypeEXACT), Value: lo.ToPtr("default")},
+					{Type: lo.ToPtr(patching_engine.EXACT), Value: lo.ToPtr("default")},
 				},
 				Kinds: &[]patching_engine.ObjectFilterV2Matcher{
-					{Type: lo.ToPtr(patching_engine.ObjectFilterV2MatcherTypeEXACT), Value: lo.ToPtr("Deployment")},
+					{Type: lo.ToPtr(patching_engine.EXACT), Value: lo.ToPtr("Deployment")},
 				},
 			},
 			Tolerations: &[]patching_engine.Toleration{
@@ -105,7 +105,7 @@ func TestPodMutation_ReadContext(t *testing.T) {
 					Effect:   lo.ToPtr("NoSchedule"),
 				},
 			},
-			Source: lo.ToPtr(patching_engine.PodMutationSourceAPI),
+			Source: lo.ToPtr(patching_engine.API),
 			PodEviction: &patching_engine.PodEviction{
 				Enabled: lo.ToPtr(true),
 			},
@@ -268,10 +268,10 @@ func TestPodMutation_ReadContext_WithDistributionGroups(t *testing.T) {
 			Enabled:        lo.ToPtr(true),
 			ClusterId:      lo.ToPtr(testClusterID),
 			OrganizationId: lo.ToPtr(testOrgID),
-			Source:         lo.ToPtr(patching_engine.PodMutationSourceAPI),
+			Source:         lo.ToPtr(patching_engine.API),
 			ObjectFilterV2: &patching_engine.ObjectFilterV2{
 				Namespaces: &[]patching_engine.ObjectFilterV2Matcher{
-					{Type: lo.ToPtr(patching_engine.ObjectFilterV2MatcherTypeEXACT), Value: lo.ToPtr("default")},
+					{Type: lo.ToPtr(patching_engine.EXACT), Value: lo.ToPtr("default")},
 				},
 			},
 			DistributionGroups: &[]patching_engine.DistributionGroup{
@@ -376,7 +376,7 @@ func TestPodMutation_CreateContext(t *testing.T) {
 			Enabled:        lo.ToPtr(true),
 			ClusterId:      lo.ToPtr(testClusterID),
 			OrganizationId: lo.ToPtr(testOrgID),
-			Source:         lo.ToPtr(patching_engine.PodMutationSourceAPI),
+			Source:         lo.ToPtr(patching_engine.API),
 		}
 
 		createRespBody, _ := json.Marshal(createdMutation)
@@ -422,7 +422,7 @@ func TestPodMutation_CreateContext(t *testing.T) {
 					map[string]interface{}{
 						FieldPodMutationFilterNamespaces: []interface{}{
 							map[string]interface{}{
-								FieldPodMutationMatcherType:  string(patching_engine.ObjectFilterV2MatcherTypeEXACT),
+								FieldPodMutationMatcherType:  string(patching_engine.EXACT),
 								FieldPodMutationMatcherValue: "default",
 							},
 						},
@@ -469,7 +469,7 @@ func TestPodMutation_CreateContext(t *testing.T) {
 					map[string]interface{}{
 						FieldPodMutationFilterNamespaces: []interface{}{
 							map[string]interface{}{
-								FieldPodMutationMatcherType:  string(patching_engine.ObjectFilterV2MatcherTypeEXACT),
+								FieldPodMutationMatcherType:  string(patching_engine.EXACT),
 								FieldPodMutationMatcherValue: "default",
 							},
 						},
@@ -577,7 +577,7 @@ func TestPodMutation_UpdateContext(t *testing.T) {
 			Enabled:        lo.ToPtr(false),
 			ClusterId:      lo.ToPtr(testClusterID),
 			OrganizationId: lo.ToPtr(testOrgID),
-			Source:         lo.ToPtr(patching_engine.PodMutationSourceAPI),
+			Source:         lo.ToPtr(patching_engine.API),
 		}
 
 		updateRespBody, _ := json.Marshal(updatedMutation)
@@ -625,7 +625,7 @@ func TestPodMutation_UpdateContext(t *testing.T) {
 					map[string]interface{}{
 						FieldPodMutationFilterNamespaces: []interface{}{
 							map[string]interface{}{
-								FieldPodMutationMatcherType:  string(patching_engine.ObjectFilterV2MatcherTypeEXACT),
+								FieldPodMutationMatcherType:  string(patching_engine.EXACT),
 								FieldPodMutationMatcherValue: "default",
 							},
 						},
@@ -878,10 +878,10 @@ func TestPodMutationToState_PodEvictionNormalization(t *testing.T) {
 			Enabled:        lo.ToPtr(true),
 			ClusterId:      lo.ToPtr(testClusterID),
 			OrganizationId: lo.ToPtr(testOrgID),
-			Source:         lo.ToPtr(patching_engine.PodMutationSourceAPI),
+			Source:         lo.ToPtr(patching_engine.API),
 			ObjectFilterV2: &patching_engine.ObjectFilterV2{
 				Namespaces: &[]patching_engine.ObjectFilterV2Matcher{
-					{Type: lo.ToPtr(patching_engine.ObjectFilterV2MatcherTypeEXACT), Value: lo.ToPtr("default")},
+					{Type: lo.ToPtr(patching_engine.EXACT), Value: lo.ToPtr("default")},
 				},
 			},
 			PodEviction: &patching_engine.PodEviction{
@@ -1019,10 +1019,10 @@ func TestFlattenObjectFilterV2(t *testing.T) {
 
 		filter := &patching_engine.ObjectFilterV2{
 			Namespaces: &[]patching_engine.ObjectFilterV2Matcher{
-				{Type: lo.ToPtr(patching_engine.ObjectFilterV2MatcherTypeEXACT), Value: lo.ToPtr("default")},
+				{Type: lo.ToPtr(patching_engine.EXACT), Value: lo.ToPtr("default")},
 			},
 			ExcludeKinds: &[]patching_engine.ObjectFilterV2Matcher{
-				{Type: lo.ToPtr(patching_engine.ObjectFilterV2MatcherTypeREGEX), Value: lo.ToPtr("^Job$")},
+				{Type: lo.ToPtr(patching_engine.REGEX), Value: lo.ToPtr("^Job$")},
 			},
 		}
 
@@ -1048,8 +1048,8 @@ func TestFlattenObjectFilterV2(t *testing.T) {
 				Operator: &op,
 				Matchers: &[]patching_engine.ObjectFilterV2LabelMatcher{
 					{
-						Key:   &patching_engine.ObjectFilterV2Matcher{Type: lo.ToPtr(patching_engine.ObjectFilterV2MatcherTypeEXACT), Value: lo.ToPtr("app")},
-						Value: &patching_engine.ObjectFilterV2Matcher{Type: lo.ToPtr(patching_engine.ObjectFilterV2MatcherTypeEXACT), Value: lo.ToPtr("web")},
+						Key:   &patching_engine.ObjectFilterV2Matcher{Type: lo.ToPtr(patching_engine.EXACT), Value: lo.ToPtr("app")},
+						Value: &patching_engine.ObjectFilterV2Matcher{Type: lo.ToPtr(patching_engine.EXACT), Value: lo.ToPtr("web")},
 					},
 				},
 			},
@@ -1075,13 +1075,13 @@ func TestFlattenObjectFilterV2(t *testing.T) {
 		op := patching_engine.ObjectFilterV2LabelsFilterOperatorOR
 		filter := &patching_engine.ObjectFilterV2{
 			Names: &[]patching_engine.ObjectFilterV2Matcher{
-				{Type: lo.ToPtr(patching_engine.ObjectFilterV2MatcherTypeEXACT), Value: lo.ToPtr("my-deploy")},
+				{Type: lo.ToPtr(patching_engine.EXACT), Value: lo.ToPtr("my-deploy")},
 			},
 			ExcludeLabels: &patching_engine.ObjectFilterV2LabelsFilter{
 				Operator: &op,
 				Matchers: &[]patching_engine.ObjectFilterV2LabelMatcher{
 					{
-						Key: &patching_engine.ObjectFilterV2Matcher{Type: lo.ToPtr(patching_engine.ObjectFilterV2MatcherTypeEXACT), Value: lo.ToPtr("env")},
+						Key: &patching_engine.ObjectFilterV2Matcher{Type: lo.ToPtr(patching_engine.EXACT), Value: lo.ToPtr("env")},
 					},
 				},
 			},
@@ -1123,9 +1123,9 @@ func TestFlattenObjectFilterV2(t *testing.T) {
 				Operator: &op,
 				Matchers: &[]patching_engine.ObjectFilterV2TolerationMatcher{
 					{
-						Key: &patching_engine.ObjectFilterV2Matcher{Type: lo.ToPtr(patching_engine.ObjectFilterV2MatcherTypeEXACT), Value: lo.ToPtr("dedicated")},
-						Value: &patching_engine.ObjectFilterV2Matcher{Type: lo.ToPtr(patching_engine.ObjectFilterV2MatcherTypeEXACT), Value: lo.ToPtr("spot")},
-						Operator: &patching_engine.ObjectFilterV2Matcher{Type: lo.ToPtr(patching_engine.ObjectFilterV2MatcherTypeEXACT), Value: lo.ToPtr("Equal")},
+						Key: &patching_engine.ObjectFilterV2Matcher{Type: lo.ToPtr(patching_engine.EXACT), Value: lo.ToPtr("dedicated")},
+						Value: &patching_engine.ObjectFilterV2Matcher{Type: lo.ToPtr(patching_engine.EXACT), Value: lo.ToPtr("spot")},
+						Operator: &patching_engine.ObjectFilterV2Matcher{Type: lo.ToPtr(patching_engine.EXACT), Value: lo.ToPtr("Equal")},
 					},
 				},
 			},
@@ -1278,7 +1278,7 @@ func TestStateToObjectFilterV2(t *testing.T) {
 		r.NotNil(filter.ExcludeNames)
 		r.Len(*filter.ExcludeNames, 1)
 		r.Equal("^skip-.*", lo.FromPtr((*filter.ExcludeNames)[0].Value))
-		r.Equal(patching_engine.ObjectFilterV2MatcherTypeREGEX, lo.FromPtr((*filter.ExcludeNames)[0].Type))
+		r.Equal(patching_engine.REGEX, lo.FromPtr((*filter.ExcludeNames)[0].Type))
 	})
 
 	t.Run("pod exclude_labels", func(t *testing.T) {
@@ -1374,8 +1374,8 @@ func TestFlattenObjectFilterV2_MatcherValues(t *testing.T) {
 				Operator: &op,
 				Matchers: &[]patching_engine.ObjectFilterV2LabelMatcher{
 					{
-						Key:   &patching_engine.ObjectFilterV2Matcher{Type: lo.ToPtr(patching_engine.ObjectFilterV2MatcherTypeEXACT), Value: lo.ToPtr("app")},
-						Value: &patching_engine.ObjectFilterV2Matcher{Type: lo.ToPtr(patching_engine.ObjectFilterV2MatcherTypeREGEX), Value: lo.ToPtr("^web-.*")},
+						Key:   &patching_engine.ObjectFilterV2Matcher{Type: lo.ToPtr(patching_engine.EXACT), Value: lo.ToPtr("app")},
+						Value: &patching_engine.ObjectFilterV2Matcher{Type: lo.ToPtr(patching_engine.REGEX), Value: lo.ToPtr("^web-.*")},
 					},
 				},
 			},
@@ -1405,8 +1405,8 @@ func TestFlattenObjectFilterV2_MatcherValues(t *testing.T) {
 				Operator: &op,
 				Matchers: &[]patching_engine.ObjectFilterV2LabelMatcher{
 					{
-						Key:   &patching_engine.ObjectFilterV2Matcher{Type: lo.ToPtr(patching_engine.ObjectFilterV2MatcherTypeEXACT), Value: lo.ToPtr("tier")},
-						Value: &patching_engine.ObjectFilterV2Matcher{Type: lo.ToPtr(patching_engine.ObjectFilterV2MatcherTypeEXACT), Value: lo.ToPtr("frontend")},
+						Key:   &patching_engine.ObjectFilterV2Matcher{Type: lo.ToPtr(patching_engine.EXACT), Value: lo.ToPtr("tier")},
+						Value: &patching_engine.ObjectFilterV2Matcher{Type: lo.ToPtr(patching_engine.EXACT), Value: lo.ToPtr("frontend")},
 					},
 				},
 			},
@@ -1432,13 +1432,13 @@ func TestFlattenObjectFilterV2_MatcherValues(t *testing.T) {
 
 		filter := &patching_engine.ObjectFilterV2{
 			ExcludeNamespaces: &[]patching_engine.ObjectFilterV2Matcher{
-				{Type: lo.ToPtr(patching_engine.ObjectFilterV2MatcherTypeEXACT), Value: lo.ToPtr("kube-system")},
+				{Type: lo.ToPtr(patching_engine.EXACT), Value: lo.ToPtr("kube-system")},
 			},
 			ExcludeKinds: &[]patching_engine.ObjectFilterV2Matcher{
-				{Type: lo.ToPtr(patching_engine.ObjectFilterV2MatcherTypeEXACT), Value: lo.ToPtr("DaemonSet")},
+				{Type: lo.ToPtr(patching_engine.EXACT), Value: lo.ToPtr("DaemonSet")},
 			},
 			ExcludeNames: &[]patching_engine.ObjectFilterV2Matcher{
-				{Type: lo.ToPtr(patching_engine.ObjectFilterV2MatcherTypeREGEX), Value: lo.ToPtr("^skip-.*")},
+				{Type: lo.ToPtr(patching_engine.REGEX), Value: lo.ToPtr("^skip-.*")},
 			},
 		}
 
@@ -1468,9 +1468,9 @@ func TestFlattenObjectFilterV2_MatcherValues(t *testing.T) {
 				Operator: &op,
 				Matchers: &[]patching_engine.ObjectFilterV2TolerationMatcher{
 					{
-						Key:      &patching_engine.ObjectFilterV2Matcher{Type: lo.ToPtr(patching_engine.ObjectFilterV2MatcherTypeEXACT), Value: lo.ToPtr("dedicated")},
-						Value:    &patching_engine.ObjectFilterV2Matcher{Type: lo.ToPtr(patching_engine.ObjectFilterV2MatcherTypeEXACT), Value: lo.ToPtr("spot")},
-						Operator: &patching_engine.ObjectFilterV2Matcher{Type: lo.ToPtr(patching_engine.ObjectFilterV2MatcherTypeEXACT), Value: lo.ToPtr("Equal")},
+						Key:      &patching_engine.ObjectFilterV2Matcher{Type: lo.ToPtr(patching_engine.EXACT), Value: lo.ToPtr("dedicated")},
+						Value:    &patching_engine.ObjectFilterV2Matcher{Type: lo.ToPtr(patching_engine.EXACT), Value: lo.ToPtr("spot")},
+						Operator: &patching_engine.ObjectFilterV2Matcher{Type: lo.ToPtr(patching_engine.EXACT), Value: lo.ToPtr("Equal")},
 					},
 				},
 			},
@@ -1901,12 +1901,12 @@ func TestPodMutation_ReadContext_RoundTrip_UnorderedNamespaces(t *testing.T) {
 		ClusterId:      lo.ToPtr(testClusterID),
 		OrganizationId: lo.ToPtr(testOrgID),
 		SpotType:       lo.ToPtr(patching_engine.PodMutationSpotTypeOPTIONALSPOT),
-		Source:         lo.ToPtr(patching_engine.PodMutationSourceAPI),
+		Source:         lo.ToPtr(patching_engine.API),
 		ObjectFilterV2: &patching_engine.ObjectFilterV2{
 			Namespaces: &[]patching_engine.ObjectFilterV2Matcher{
-				{Type: lo.ToPtr(patching_engine.ObjectFilterV2MatcherTypeEXACT), Value: lo.ToPtr("c")},
-				{Type: lo.ToPtr(patching_engine.ObjectFilterV2MatcherTypeEXACT), Value: lo.ToPtr("a")},
-				{Type: lo.ToPtr(patching_engine.ObjectFilterV2MatcherTypeEXACT), Value: lo.ToPtr("b")},
+				{Type: lo.ToPtr(patching_engine.EXACT), Value: lo.ToPtr("c")},
+				{Type: lo.ToPtr(patching_engine.EXACT), Value: lo.ToPtr("a")},
+				{Type: lo.ToPtr(patching_engine.EXACT), Value: lo.ToPtr("b")},
 			},
 		},
 	}

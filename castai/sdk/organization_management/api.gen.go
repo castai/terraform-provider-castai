@@ -44,11 +44,11 @@ const (
 
 // Defines values for GetEnterpriseGroupResponseSsoProvider.
 const (
-	GetEnterpriseGroupResponseSsoProviderSSOPROVIDEROIDC        GetEnterpriseGroupResponseSsoProvider = "SSO_PROVIDER_OIDC"
-	GetEnterpriseGroupResponseSsoProviderSSOPROVIDEROKTA        GetEnterpriseGroupResponseSsoProvider = "SSO_PROVIDER_OKTA"
-	GetEnterpriseGroupResponseSsoProviderSSOPROVIDERSAML        GetEnterpriseGroupResponseSsoProvider = "SSO_PROVIDER_SAML"
-	GetEnterpriseGroupResponseSsoProviderSSOPROVIDERUNSPECIFIED GetEnterpriseGroupResponseSsoProvider = "SSO_PROVIDER_UNSPECIFIED"
-	GetEnterpriseGroupResponseSsoProviderSSOPROVIDERWAAD        GetEnterpriseGroupResponseSsoProvider = "SSO_PROVIDER_WAAD"
+	SSOPROVIDEROIDC        GetEnterpriseGroupResponseSsoProvider = "SSO_PROVIDER_OIDC"
+	SSOPROVIDEROKTA        GetEnterpriseGroupResponseSsoProvider = "SSO_PROVIDER_OKTA"
+	SSOPROVIDERSAML        GetEnterpriseGroupResponseSsoProvider = "SSO_PROVIDER_SAML"
+	SSOPROVIDERUNSPECIFIED GetEnterpriseGroupResponseSsoProvider = "SSO_PROVIDER_UNSPECIFIED"
+	SSOPROVIDERWAAD        GetEnterpriseGroupResponseSsoProvider = "SSO_PROVIDER_WAAD"
 )
 
 // Defines values for GroupDefinitionAuthorKind.
@@ -67,24 +67,24 @@ const (
 
 // Defines values for ListChildrenOrganizationsResponseChildOrganizationType.
 const (
-	ListChildrenOrganizationsResponseChildOrganizationTypeORGANIZATIONTYPECHILD       ListChildrenOrganizationsResponseChildOrganizationType = "ORGANIZATION_TYPE_CHILD"
-	ListChildrenOrganizationsResponseChildOrganizationTypeORGANIZATIONTYPEDEFAULT     ListChildrenOrganizationsResponseChildOrganizationType = "ORGANIZATION_TYPE_DEFAULT"
-	ListChildrenOrganizationsResponseChildOrganizationTypeORGANIZATIONTYPEENTERPRISE  ListChildrenOrganizationsResponseChildOrganizationType = "ORGANIZATION_TYPE_ENTERPRISE"
-	ListChildrenOrganizationsResponseChildOrganizationTypeORGANIZATIONTYPEUNSPECIFIED ListChildrenOrganizationsResponseChildOrganizationType = "ORGANIZATION_TYPE_UNSPECIFIED"
+	ORGANIZATIONTYPECHILD       ListChildrenOrganizationsResponseChildOrganizationType = "ORGANIZATION_TYPE_CHILD"
+	ORGANIZATIONTYPEDEFAULT     ListChildrenOrganizationsResponseChildOrganizationType = "ORGANIZATION_TYPE_DEFAULT"
+	ORGANIZATIONTYPEENTERPRISE  ListChildrenOrganizationsResponseChildOrganizationType = "ORGANIZATION_TYPE_ENTERPRISE"
+	ORGANIZATIONTYPEUNSPECIFIED ListChildrenOrganizationsResponseChildOrganizationType = "ORGANIZATION_TYPE_UNSPECIFIED"
 )
 
 // Defines values for RoleBindingRoleBindingStatusState.
 const (
-	RoleBindingRoleBindingStatusStatePOLICIESSTATEACCEPTED    RoleBindingRoleBindingStatusState = "POLICIES_STATE_ACCEPTED"
-	RoleBindingRoleBindingStatusStatePOLICIESSTATECREATED     RoleBindingRoleBindingStatusState = "POLICIES_STATE_CREATED"
-	RoleBindingRoleBindingStatusStatePOLICIESSTATEFAILED      RoleBindingRoleBindingStatusState = "POLICIES_STATE_FAILED"
-	RoleBindingRoleBindingStatusStatePOLICIESSTATEUNSPECIFIED RoleBindingRoleBindingStatusState = "POLICIES_STATE_UNSPECIFIED"
+	POLICIESSTATEACCEPTED    RoleBindingRoleBindingStatusState = "POLICIES_STATE_ACCEPTED"
+	POLICIESSTATECREATED     RoleBindingRoleBindingStatusState = "POLICIES_STATE_CREATED"
+	POLICIESSTATEFAILED      RoleBindingRoleBindingStatusState = "POLICIES_STATE_FAILED"
+	POLICIESSTATEUNSPECIFIED RoleBindingRoleBindingStatusState = "POLICIES_STATE_UNSPECIFIED"
 )
 
 // Defines values for RoleBindingScopeScope.
 const (
-	RoleBindingScopeScopeCLUSTER      RoleBindingScopeScope = "CLUSTER"
-	RoleBindingScopeScopeORGANIZATION RoleBindingScopeScope = "ORGANIZATION"
+	CLUSTER      RoleBindingScopeScope = "CLUSTER"
+	ORGANIZATION RoleBindingScopeScope = "ORGANIZATION"
 )
 
 // Defines values for EnterpriseAPIListGroupsParamsSortOrder.
@@ -105,17 +105,17 @@ const (
 
 // Defines values for EnterpriseAPIListMembersParamsStatus.
 const (
-	EnterpriseAPIListMembersParamsStatusMEMBERSTATUSACTIVE        EnterpriseAPIListMembersParamsStatus = "MEMBER_STATUS_ACTIVE"
-	EnterpriseAPIListMembersParamsStatusMEMBERSTATUSALL           EnterpriseAPIListMembersParamsStatus = "MEMBER_STATUS_ALL"
-	EnterpriseAPIListMembersParamsStatusMEMBERSTATUSINVITEPENDING EnterpriseAPIListMembersParamsStatus = "MEMBER_STATUS_INVITE_PENDING"
-	EnterpriseAPIListMembersParamsStatusMEMBERSTATUSUNSPECIFIED   EnterpriseAPIListMembersParamsStatus = "MEMBER_STATUS_UNSPECIFIED"
+	MEMBERSTATUSACTIVE        EnterpriseAPIListMembersParamsStatus = "MEMBER_STATUS_ACTIVE"
+	MEMBERSTATUSALL           EnterpriseAPIListMembersParamsStatus = "MEMBER_STATUS_ALL"
+	MEMBERSTATUSINVITEPENDING EnterpriseAPIListMembersParamsStatus = "MEMBER_STATUS_INVITE_PENDING"
+	MEMBERSTATUSUNSPECIFIED   EnterpriseAPIListMembersParamsStatus = "MEMBER_STATUS_UNSPECIFIED"
 )
 
 // Defines values for EnterpriseAPIGetEnterpriseMemberParamsType.
 const (
-	EnterpriseAPIGetEnterpriseMemberParamsTypeGETENTERPRISEMEMBERTYPEINVITATION  EnterpriseAPIGetEnterpriseMemberParamsType = "GET_ENTERPRISE_MEMBER_TYPE_INVITATION"
-	EnterpriseAPIGetEnterpriseMemberParamsTypeGETENTERPRISEMEMBERTYPEUNSPECIFIED EnterpriseAPIGetEnterpriseMemberParamsType = "GET_ENTERPRISE_MEMBER_TYPE_UNSPECIFIED"
-	EnterpriseAPIGetEnterpriseMemberParamsTypeGETENTERPRISEMEMBERTYPEUSER        EnterpriseAPIGetEnterpriseMemberParamsType = "GET_ENTERPRISE_MEMBER_TYPE_USER"
+	GETENTERPRISEMEMBERTYPEINVITATION  EnterpriseAPIGetEnterpriseMemberParamsType = "GET_ENTERPRISE_MEMBER_TYPE_INVITATION"
+	GETENTERPRISEMEMBERTYPEUNSPECIFIED EnterpriseAPIGetEnterpriseMemberParamsType = "GET_ENTERPRISE_MEMBER_TYPE_UNSPECIFIED"
+	GETENTERPRISEMEMBERTYPEUSER        EnterpriseAPIGetEnterpriseMemberParamsType = "GET_ENTERPRISE_MEMBER_TYPE_USER"
 )
 
 // Defines values for EnterpriseAPIListChildrenOrganizationsParamsSortOrder.

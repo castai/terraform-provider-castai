@@ -354,13 +354,13 @@ func (r *edgeLocationResource) Schema(_ context.Context, _ resource.SchemaReques
 			"control_plane_mode": schema.StringAttribute{
 				Optional:    true,
 				Computed:    true,
-				Default:     stringdefault.StaticString(string(omni.EdgeLocationControlPlaneModeDEDICATED)),
+				Default:     stringdefault.StaticString(string(omni.DEDICATED)),
 				Description: "The mode of control plane inside edge location. Valid values: DEDICATED, SHARED.",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
 				},
 				Validators: []validator.String{
-					stringvalidator.OneOf(string(omni.EdgeLocationControlPlaneModeDEDICATED), string(omni.EdgeLocationControlPlaneModeSHARED)),
+					stringvalidator.OneOf(string(omni.DEDICATED), string(omni.SHARED)),
 				},
 			},
 			"control_plane": schema.SingleNestedAttribute{
@@ -395,10 +395,10 @@ func (r *edgeLocationResource) Schema(_ context.Context, _ resource.SchemaReques
 								Description: "Overlay mode for kube-router pod-to-pod traffic. Valid values: OVERLAY_UNSPECIFIED, OVERLAY_OFF, OVERLAY_SUBNET, OVERLAY_FULL.",
 								Validators: []validator.String{
 									stringvalidator.OneOf(
-										string(omni.EdgeClusterCNIOverlayOVERLAYUNSPECIFIED),
-										string(omni.EdgeClusterCNIOverlayOVERLAYOFF),
-										string(omni.EdgeClusterCNIOverlayOVERLAYSUBNET),
-										string(omni.EdgeClusterCNIOverlayOVERLAYFULL),
+										string(omni.OVERLAYUNSPECIFIED),
+										string(omni.OVERLAYOFF),
+										string(omni.OVERLAYSUBNET),
+										string(omni.OVERLAYFULL),
 									),
 								},
 							},
@@ -407,9 +407,9 @@ func (r *edgeLocationResource) Schema(_ context.Context, _ resource.SchemaReques
 								Description: "Encapsulation protocol used by the overlay. Valid values: OVERLAY_ENCAP_UNSPECIFIED, OVERLAY_ENCAP_IPIP, OVERLAY_ENCAP_FOU.",
 								Validators: []validator.String{
 									stringvalidator.OneOf(
-										string(omni.EdgeClusterCNIOverlayEncapOVERLAYENCAPUNSPECIFIED),
-										string(omni.EdgeClusterCNIOverlayEncapOVERLAYENCAPIPIP),
-										string(omni.EdgeClusterCNIOverlayEncapOVERLAYENCAPFOU),
+										string(omni.OVERLAYENCAPUNSPECIFIED),
+										string(omni.OVERLAYENCAPIPIP),
+										string(omni.OVERLAYENCAPFOU),
 									),
 								},
 							},
@@ -840,10 +840,10 @@ func (r *edgeLocationResource) Read(ctx context.Context, req resource.ReadReques
 
 				// Treat UNSPECIFIED values from the API as null when the user hasn't
 				// explicitly set them, to avoid perpetual diffs.
-				if state.Networking.CNI.Overlay.IsNull() && overlay.ValueString() == string(omni.EdgeClusterCNIOverlayOVERLAYUNSPECIFIED) {
+				if state.Networking.CNI.Overlay.IsNull() && overlay.ValueString() == string(omni.OVERLAYUNSPECIFIED) {
 					overlay = types.StringNull()
 				}
-				if state.Networking.CNI.OverlayEncap.IsNull() && overlayEncap.ValueString() == string(omni.EdgeClusterCNIOverlayEncapOVERLAYENCAPUNSPECIFIED) {
+				if state.Networking.CNI.OverlayEncap.IsNull() && overlayEncap.ValueString() == string(omni.OVERLAYENCAPUNSPECIFIED) {
 					overlayEncap = types.StringNull()
 				}
 

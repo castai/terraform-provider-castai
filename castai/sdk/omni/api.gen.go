@@ -16,10 +16,10 @@ const (
 
 // Defines values for ClusterProviderType.
 const (
-	ClusterProviderTypeAKS                     ClusterProviderType = "AKS"
-	ClusterProviderTypeEKS                     ClusterProviderType = "EKS"
-	ClusterProviderTypeGKE                     ClusterProviderType = "GKE"
-	ClusterProviderTypePROVIDERTYPEUNSPECIFIED ClusterProviderType = "PROVIDER_TYPE_UNSPECIFIED"
+	AKS                     ClusterProviderType = "AKS"
+	EKS                     ClusterProviderType = "EKS"
+	GKE                     ClusterProviderType = "GKE"
+	PROVIDERTYPEUNSPECIFIED ClusterProviderType = "PROVIDER_TYPE_UNSPECIFIED"
 )
 
 // Defines values for ClusterState.
@@ -34,34 +34,34 @@ const (
 
 // Defines values for EdgeClusterCNIOverlay.
 const (
-	EdgeClusterCNIOverlayOVERLAYFULL        EdgeClusterCNIOverlay = "OVERLAY_FULL"
-	EdgeClusterCNIOverlayOVERLAYOFF         EdgeClusterCNIOverlay = "OVERLAY_OFF"
-	EdgeClusterCNIOverlayOVERLAYSUBNET      EdgeClusterCNIOverlay = "OVERLAY_SUBNET"
-	EdgeClusterCNIOverlayOVERLAYUNSPECIFIED EdgeClusterCNIOverlay = "OVERLAY_UNSPECIFIED"
+	OVERLAYFULL        EdgeClusterCNIOverlay = "OVERLAY_FULL"
+	OVERLAYOFF         EdgeClusterCNIOverlay = "OVERLAY_OFF"
+	OVERLAYSUBNET      EdgeClusterCNIOverlay = "OVERLAY_SUBNET"
+	OVERLAYUNSPECIFIED EdgeClusterCNIOverlay = "OVERLAY_UNSPECIFIED"
 )
 
 // Defines values for EdgeClusterCNIOverlayEncap.
 const (
-	EdgeClusterCNIOverlayEncapOVERLAYENCAPFOU         EdgeClusterCNIOverlayEncap = "OVERLAY_ENCAP_FOU"
-	EdgeClusterCNIOverlayEncapOVERLAYENCAPIPIP        EdgeClusterCNIOverlayEncap = "OVERLAY_ENCAP_IPIP"
-	EdgeClusterCNIOverlayEncapOVERLAYENCAPUNSPECIFIED EdgeClusterCNIOverlayEncap = "OVERLAY_ENCAP_UNSPECIFIED"
+	OVERLAYENCAPFOU         EdgeClusterCNIOverlayEncap = "OVERLAY_ENCAP_FOU"
+	OVERLAYENCAPIPIP        EdgeClusterCNIOverlayEncap = "OVERLAY_ENCAP_IPIP"
+	OVERLAYENCAPUNSPECIFIED EdgeClusterCNIOverlayEncap = "OVERLAY_ENCAP_UNSPECIFIED"
 )
 
 // Defines values for EdgeLocationCloudProviderType.
 const (
-	EdgeLocationCloudProviderTypeAWS                          EdgeLocationCloudProviderType = "AWS"
-	EdgeLocationCloudProviderTypeCLOUDPROVIDERTYPEUNSPECIFIED EdgeLocationCloudProviderType = "CLOUD_PROVIDER_TYPE_UNSPECIFIED"
-	EdgeLocationCloudProviderTypeCUSTOM                       EdgeLocationCloudProviderType = "CUSTOM"
-	EdgeLocationCloudProviderTypeGCP                          EdgeLocationCloudProviderType = "GCP"
-	EdgeLocationCloudProviderTypeNEBIUS                       EdgeLocationCloudProviderType = "NEBIUS"
-	EdgeLocationCloudProviderTypeOCI                          EdgeLocationCloudProviderType = "OCI"
+	AWS                          EdgeLocationCloudProviderType = "AWS"
+	CLOUDPROVIDERTYPEUNSPECIFIED EdgeLocationCloudProviderType = "CLOUD_PROVIDER_TYPE_UNSPECIFIED"
+	CUSTOM                       EdgeLocationCloudProviderType = "CUSTOM"
+	GCP                          EdgeLocationCloudProviderType = "GCP"
+	NEBIUS                       EdgeLocationCloudProviderType = "NEBIUS"
+	OCI                          EdgeLocationCloudProviderType = "OCI"
 )
 
 // Defines values for EdgeLocationControlPlaneMode.
 const (
-	EdgeLocationControlPlaneModeCONTROLPLANEMODEUNSPECIFIED EdgeLocationControlPlaneMode = "CONTROL_PLANE_MODE_UNSPECIFIED"
-	EdgeLocationControlPlaneModeDEDICATED                   EdgeLocationControlPlaneMode = "DEDICATED"
-	EdgeLocationControlPlaneModeSHARED                      EdgeLocationControlPlaneMode = "SHARED"
+	CONTROLPLANEMODEUNSPECIFIED EdgeLocationControlPlaneMode = "CONTROL_PLANE_MODE_UNSPECIFIED"
+	DEDICATED                   EdgeLocationControlPlaneMode = "DEDICATED"
+	SHARED                      EdgeLocationControlPlaneMode = "SHARED"
 )
 
 // Defines values for EdgeLocationState.
@@ -77,21 +77,21 @@ const (
 
 // Defines values for KubernetesTaintEffect.
 const (
-	KubernetesTaintEffectNOEXECUTE              KubernetesTaintEffect = "NO_EXECUTE"
-	KubernetesTaintEffectNOSCHEDULE             KubernetesTaintEffect = "NO_SCHEDULE"
-	KubernetesTaintEffectPREFERNOSCHEDULE       KubernetesTaintEffect = "PREFER_NO_SCHEDULE"
-	KubernetesTaintEffectTAINTEFFECTUNSPECIFIED KubernetesTaintEffect = "TAINT_EFFECT_UNSPECIFIED"
+	NOEXECUTE              KubernetesTaintEffect = "NO_EXECUTE"
+	NOSCHEDULE             KubernetesTaintEffect = "NO_SCHEDULE"
+	PREFERNOSCHEDULE       KubernetesTaintEffect = "PREFER_NO_SCHEDULE"
+	TAINTEFFECTUNSPECIFIED KubernetesTaintEffect = "TAINT_EFFECT_UNSPECIFIED"
 )
 
 // Defines values for ObjectStatusPhase.
 const (
-	ObjectStatusPhaseCREATING         ObjectStatusPhase = "CREATING"
-	ObjectStatusPhaseDELETED          ObjectStatusPhase = "DELETED"
-	ObjectStatusPhaseDELETING         ObjectStatusPhase = "DELETING"
-	ObjectStatusPhaseFAILED           ObjectStatusPhase = "FAILED"
-	ObjectStatusPhasePHASEUNSPECIFIED ObjectStatusPhase = "PHASE_UNSPECIFIED"
-	ObjectStatusPhaseREADY            ObjectStatusPhase = "READY"
-	ObjectStatusPhaseUNKNOWN          ObjectStatusPhase = "UNKNOWN"
+	CREATING         ObjectStatusPhase = "CREATING"
+	DELETED          ObjectStatusPhase = "DELETED"
+	DELETING         ObjectStatusPhase = "DELETING"
+	FAILED           ObjectStatusPhase = "FAILED"
+	PHASEUNSPECIFIED ObjectStatusPhase = "PHASE_UNSPECIFIED"
+	READY            ObjectStatusPhase = "READY"
+	UNKNOWN          ObjectStatusPhase = "UNKNOWN"
 )
 
 // AWSConfiguration AWS specific parameters present in edge configuration.
@@ -627,16 +627,6 @@ type EdgeLocationAddonStatus struct {
 	Ready *bool `json:"ready,omitempty"`
 }
 
-// FilesystemAttachment Attachment of an existing Nebius shared filesystem to an edge VM.
-type FilesystemAttachment struct {
-	// FilesystemId ID of an existing Nebius shared filesystem.
-	//  Example: computefilesystem-e00yt3n68egnzr50nz
-	FilesystemId string `json:"filesystemId"`
-
-	// MountPath Mount path inside the VM.
-	MountPath string `json:"mountPath"`
-}
-
 // GCPConfiguration GCP specific parameters present in edge configuration.
 type GCPConfiguration struct {
 	// BootDiskSizeGib Boot disk size in GiB.
@@ -813,9 +803,6 @@ type ListEdgeLocationsResponse struct {
 type NebiusConfiguration struct {
 	// BootDiskSizeGib Boot disk size.
 	BootDiskSizeGib *int32 `json:"bootDiskSizeGib,omitempty"`
-
-	// Filesystems Shared filesystems to attach to each VM created from this configuration.
-	Filesystems *[]FilesystemAttachment `json:"filesystems,omitempty"`
 
 	// GpuCluster GPU cluster info
 	GpuCluster *string `json:"gpuCluster,omitempty"`

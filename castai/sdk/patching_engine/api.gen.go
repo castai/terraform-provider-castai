@@ -45,9 +45,9 @@ const (
 
 // Defines values for ObjectFilterV2MatcherType.
 const (
-	ObjectFilterV2MatcherTypeEXACT           ObjectFilterV2MatcherType = "EXACT"
-	ObjectFilterV2MatcherTypeREGEX           ObjectFilterV2MatcherType = "REGEX"
-	ObjectFilterV2MatcherTypeTYPEUNSPECIFIED ObjectFilterV2MatcherType = "TYPE_UNSPECIFIED"
+	EXACT           ObjectFilterV2MatcherType = "EXACT"
+	REGEX           ObjectFilterV2MatcherType = "REGEX"
+	TYPEUNSPECIFIED ObjectFilterV2MatcherType = "TYPE_UNSPECIFIED"
 )
 
 // Defines values for ObjectFilterV2TolerationsFilterOperator.
@@ -59,9 +59,9 @@ const (
 
 // Defines values for PodMutationSource.
 const (
-	PodMutationSourceAPI               PodMutationSource = "API"
-	PodMutationSourceCUSTOMRESOURCE    PodMutationSource = "CUSTOM_RESOURCE"
-	PodMutationSourceSOURCEUNSPECIFIED PodMutationSource = "SOURCE_UNSPECIFIED"
+	API               PodMutationSource = "API"
+	CUSTOMRESOURCE    PodMutationSource = "CUSTOM_RESOURCE"
+	SOURCEUNSPECIFIED PodMutationSource = "SOURCE_UNSPECIFIED"
 )
 
 // Defines values for PodMutationSpotType.
@@ -74,25 +74,25 @@ const (
 
 // Defines values for PodMutatorStatusStatus.
 const (
-	PodMutatorStatusStatusDISABLED          PodMutatorStatusStatus = "DISABLED"
-	PodMutatorStatusStatusINVALID           PodMutatorStatusStatus = "INVALID"
-	PodMutatorStatusStatusRUNNING           PodMutatorStatusStatus = "RUNNING"
-	PodMutatorStatusStatusSTATUSUNSPECIFIED PodMutatorStatusStatus = "STATUS_UNSPECIFIED"
+	DISABLED          PodMutatorStatusStatus = "DISABLED"
+	INVALID           PodMutatorStatusStatus = "INVALID"
+	RUNNING           PodMutatorStatusStatus = "RUNNING"
+	STATUSUNSPECIFIED PodMutatorStatusStatus = "STATUS_UNSPECIFIED"
 )
 
 // Defines values for PodMutationsAPIListWorkloadPreviewsParamsWorkloadType.
 const (
-	PodMutationsAPIListWorkloadPreviewsParamsWorkloadTypeAFFECTED                PodMutationsAPIListWorkloadPreviewsParamsWorkloadType = "AFFECTED"
-	PodMutationsAPIListWorkloadPreviewsParamsWorkloadTypeUNAFFECTED              PodMutationsAPIListWorkloadPreviewsParamsWorkloadType = "UNAFFECTED"
-	PodMutationsAPIListWorkloadPreviewsParamsWorkloadTypeWORKLOADTYPEUNSPECIFIED PodMutationsAPIListWorkloadPreviewsParamsWorkloadType = "WORKLOAD_TYPE_UNSPECIFIED"
+	AFFECTED                PodMutationsAPIListWorkloadPreviewsParamsWorkloadType = "AFFECTED"
+	UNAFFECTED              PodMutationsAPIListWorkloadPreviewsParamsWorkloadType = "UNAFFECTED"
+	WORKLOADTYPEUNSPECIFIED PodMutationsAPIListWorkloadPreviewsParamsWorkloadType = "WORKLOAD_TYPE_UNSPECIFIED"
 )
 
 // Defines values for PodMutationsAPIListWorkloadPreviewsParamsSortOrder.
 const (
-	PodMutationsAPIListWorkloadPreviewsParamsSortOrderASC  PodMutationsAPIListWorkloadPreviewsParamsSortOrder = "ASC"
-	PodMutationsAPIListWorkloadPreviewsParamsSortOrderAsc  PodMutationsAPIListWorkloadPreviewsParamsSortOrder = "asc"
-	PodMutationsAPIListWorkloadPreviewsParamsSortOrderDESC PodMutationsAPIListWorkloadPreviewsParamsSortOrder = "DESC"
-	PodMutationsAPIListWorkloadPreviewsParamsSortOrderDesc PodMutationsAPIListWorkloadPreviewsParamsSortOrder = "desc"
+	ASC  PodMutationsAPIListWorkloadPreviewsParamsSortOrder = "ASC"
+	Asc  PodMutationsAPIListWorkloadPreviewsParamsSortOrder = "asc"
+	DESC PodMutationsAPIListWorkloadPreviewsParamsSortOrder = "DESC"
+	Desc PodMutationsAPIListWorkloadPreviewsParamsSortOrder = "desc"
 )
 
 // Affinity Affinity represents the affinity settings for the pod mutation.

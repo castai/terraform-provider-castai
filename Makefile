@@ -63,6 +63,10 @@ generate-omni-sdk:
 .PHONY: generate-sdk-new
 # Internal target: run oapi-codegen for the given SPECS variable.
 # Not meant to be called directly; use generate-sdk or generate-omni-sdk.
+# A package opts into stable, type-prefixed enum constants by committing a
+# types.cfg.yaml with compatibility.always-prefix-enum-values: true (see
+# castai/sdk/cluster_autoscaler/types.cfg.yaml). Packages without a config
+# keep the legacy flag-based types generation.
 generate-sdk-new:
 	@echo "==> Generating api sdk clients"
 	@go install github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen@v2.4.1
@@ -72,7 +76,12 @@ generate-sdk-new:
 		[ -z "$$pkg" ] && continue; \
 		echo "generating sdk for: $$tag from $$loc"; \
 		mkdir -p $$pkg/mock && \
-		oapi-codegen -config $$pkg/types.cfg.yaml -o $$pkg/api.gen.go -include-tags $$tag $$loc && \
+		if [ -f $$pkg/types.cfg.yaml ]; then \
+			types_flags="-config $$pkg/types.cfg.yaml"; \
+		else \
+			types_flags="-generate types -package $$pkg"; \
+		fi; \
+		oapi-codegen $$types_flags -o $$pkg/api.gen.go -include-tags $$tag $$loc && \
 		oapi-codegen -o $$pkg/client.gen.go -templates codegen/templates -generate client -include-tags $$tag -package $$pkg $$loc && \
 		mockgen -source $$pkg/client.gen.go -destination $$pkg/mock/client.go . ClientInterface; \
 	done
