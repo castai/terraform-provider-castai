@@ -9,6 +9,6 @@
 # breaking callers (as happened in #615).
 package: sdk
 generate:
-  - types
+  models: true
 compatibility:
   always-prefix-enum-values: true

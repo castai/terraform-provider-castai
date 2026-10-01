@@ -1,6 +1,6 @@
 # See castai/sdk/codegen/types.cfg.yaml for why always-prefix-enum-values is set.
 package: patching_engine
 generate:
-  - types
+  models: true
 compatibility:
   always-prefix-enum-values: true
