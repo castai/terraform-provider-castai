@@ -1151,6 +1151,12 @@ const (
 	SCALINGPOLICYSELECTUNSPECIFIED WorkloadoptimizationV1ScalingPolicySelect = "SCALING_POLICY_SELECT_UNSPECIFIED"
 )
 
+// Defines values for WorkloadoptimizationV1ScopeType.
+const (
+	SCOPETYPENODELABEL WorkloadoptimizationV1ScopeType = "SCOPE_TYPE_NODE_LABEL"
+	SCOPETYPEUNKNOWN   WorkloadoptimizationV1ScopeType = "SCOPE_TYPE_UNKNOWN"
+)
+
 // Defines values for WorkloadoptimizationV1SystemOverrideOrigin.
 const (
 	SYSTEMOVERRIDEORIGINCONTINUOUSOOMKILLED WorkloadoptimizationV1SystemOverrideOrigin = "SYSTEM_OVERRIDE_ORIGIN_CONTINUOUS_OOM_KILLED"
@@ -11133,6 +11139,12 @@ type WorkloadoptimizationV1PodMetadata struct {
 	Name           string                                         `json:"name"`
 	Recommendation *WorkloadoptimizationV1PodRecommendationStatus `json:"recommendation,omitempty"`
 
+	// ScopeValue Scope value of the node this pod runs on.
+	// Set only when the workload is scoped and the pod's node carries the scope label;
+	// omitted when scoping is not configured or the node lacks the label.
+	// Consumers show the flat recommendation when it is unset or the pod has no matching group.
+	ScopeValue *string `json:"scopeValue"`
+
 	// Status PodStatus defines short status information of the pod.
 	Status WorkloadoptimizationV1PodStatus `json:"status"`
 
@@ -11143,8 +11155,9 @@ type WorkloadoptimizationV1PodMetadata struct {
 // WorkloadoptimizationV1PodMetadataContainer defines model for workloadoptimization.v1.PodMetadataContainer.
 type WorkloadoptimizationV1PodMetadataContainer struct {
 	// Name Container name.
-	Name      string                          `json:"name"`
-	Resources WorkloadoptimizationV1Resources `json:"resources"`
+	Name           string                           `json:"name"`
+	Recommendation *WorkloadoptimizationV1Resources `json:"recommendation,omitempty"`
+	Resources      WorkloadoptimizationV1Resources  `json:"resources"`
 }
 
 // WorkloadoptimizationV1PodMetrics defines model for workloadoptimization.v1.PodMetrics.
@@ -11757,6 +11770,18 @@ type WorkloadoptimizationV1SchedulerReasons struct {
 	UntoleratedTaints *int32 `json:"untoleratedTaints,omitempty"`
 }
 
+// WorkloadoptimizationV1Scope Scope defines the scoping configuration for per-scope recommendations.
+type WorkloadoptimizationV1Scope struct {
+	// Key The scope key, e.g., "node.kubernetes.io/instance-type".
+	Key *string `json:"key,omitempty"`
+
+	// Type ScopeType classifies the scoping mechanism. Mirrors the domain scope.Type enum.
+	Type *WorkloadoptimizationV1ScopeType `json:"type,omitempty"`
+}
+
+// WorkloadoptimizationV1ScopeType ScopeType classifies the scoping mechanism. Mirrors the domain scope.Type enum.
+type WorkloadoptimizationV1ScopeType string
+
 // WorkloadoptimizationV1SetScalingPoliciesOrderResponse defines model for workloadoptimization.v1.SetScalingPoliciesOrderResponse.
 type WorkloadoptimizationV1SetScalingPoliciesOrderResponse = map[string]interface{}
 
@@ -11976,7 +12001,10 @@ type WorkloadoptimizationV1VPAConfig struct {
 	Memory            WorkloadoptimizationV1ResourceConfig             `json:"memory"`
 	MemoryEvent       *WorkloadoptimizationV1MemoryEventSettings       `json:"memoryEvent,omitempty"`
 	PredictiveScaling *WorkloadoptimizationV1PredictiveScalingSettings `json:"predictiveScaling,omitempty"`
-	Startup           *WorkloadoptimizationV1StartupSettings           `json:"startup,omitempty"`
+
+	// Scope Scope defines the scoping configuration for per-scope recommendations.
+	Scope   *WorkloadoptimizationV1Scope           `json:"scope,omitempty"`
+	Startup *WorkloadoptimizationV1StartupSettings `json:"startup,omitempty"`
 }
 
 // WorkloadoptimizationV1VPAConfigUpdate defines model for workloadoptimization.v1.VPAConfigUpdate.
@@ -12210,6 +12238,9 @@ type WorkloadoptimizationV1WorkloadRecommendation struct {
 
 	// Replicas Number of recommended replicas. Available only when workload horizontal scaling is enabled and native HPA is disabled.
 	Replicas *int32 `json:"replicas"`
+
+	// Scope Scope defines the scoping configuration for per-scope recommendations.
+	Scope *WorkloadoptimizationV1Scope `json:"scope,omitempty"`
 }
 
 // WorkloadoptimizationV1WorkloadResourceConfigUpdate defines model for workloadoptimization.v1.WorkloadResourceConfigUpdate.
