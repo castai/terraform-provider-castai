@@ -260,7 +260,7 @@ func toLabels(lv map[string]interface{}) []sdk.CostreportV1beta1AllocationGroupF
 	if len(lv) > 0 {
 		labelsStringMap := toStringMap(lv)
 
-		operator := sdk.Equal
+		operator := sdk.CostreportV1beta1AllocationGroupFilterLabelValueOperatorEqual
 
 		if len(labelsStringMap) > 0 {
 			labels := make([]sdk.CostreportV1beta1AllocationGroupFilterLabelValue, 0, len(labelsStringMap))

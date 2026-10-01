@@ -72,7 +72,7 @@ generate-sdk-new:
 		[ -z "$$pkg" ] && continue; \
 		echo "generating sdk for: $$tag from $$loc"; \
 		mkdir -p $$pkg/mock && \
-		oapi-codegen -o $$pkg/api.gen.go --old-config-style -generate types -include-tags $$tag -package $$pkg $$loc && \
+		oapi-codegen --old-config-style -config $$pkg/types.cfg.yaml -o $$pkg/api.gen.go -include-tags $$tag $$loc && \
 		oapi-codegen -o $$pkg/client.gen.go --old-config-style -templates codegen/templates -generate client -include-tags $$tag -package $$pkg $$loc && \
 		mockgen -source $$pkg/client.gen.go -destination $$pkg/mock/client.go . ClientInterface; \
 	done

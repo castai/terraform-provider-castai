@@ -2300,19 +2300,19 @@ func getFirstElem(in map[string]any, key string) map[string]any {
 func toLabelSelectorOperator(in string) sdk.WorkloadoptimizationV1KubernetesLabelSelectorOperator {
 	switch in {
 	case K8sLabelInOperator:
-		return sdk.KUBERNETESLABELSELECTOROPIN
+		return sdk.WorkloadoptimizationV1KubernetesLabelSelectorOperatorKUBERNETESLABELSELECTOROPIN
 	case K8sLabelNotInOperator:
-		return sdk.KUBERNETESLABELSELECTOROPNOTIN
+		return sdk.WorkloadoptimizationV1KubernetesLabelSelectorOperatorKUBERNETESLABELSELECTOROPNOTIN
 	case K8sLabelExistsOperator:
-		return sdk.KUBERNETESLABELSELECTOROPEXISTS
+		return sdk.WorkloadoptimizationV1KubernetesLabelSelectorOperatorKUBERNETESLABELSELECTOROPEXISTS
 	case K8sLabelDoesNotExistOperator:
-		return sdk.KUBERNETESLABELSELECTOROPDOESNOTEXIST
+		return sdk.WorkloadoptimizationV1KubernetesLabelSelectorOperatorKUBERNETESLABELSELECTOROPDOESNOTEXIST
 	case K8sLabelContainsOperator:
-		return sdk.KUBERNETESLABELSELECTOROPCONTAINS
+		return sdk.WorkloadoptimizationV1KubernetesLabelSelectorOperatorKUBERNETESLABELSELECTOROPCONTAINS
 	case K8sLabelRegexOperator:
-		return sdk.KUBERNETESLABELSELECTOROPREGEX
+		return sdk.WorkloadoptimizationV1KubernetesLabelSelectorOperatorKUBERNETESLABELSELECTOROPREGEX
 	}
-	return sdk.KUBERNETESLABELSELECTOROPUNSPECIFIED
+	return sdk.WorkloadoptimizationV1KubernetesLabelSelectorOperatorKUBERNETESLABELSELECTOROPUNSPECIFIED
 }
 
 func toAssignmentRulesMap(previous map[string]any, rules *[]sdk.WorkloadoptimizationV1ScalingPolicyAssignmentRule) []any {
@@ -2380,17 +2380,17 @@ func toK8sLabelsExpressionsMap(in []sdk.WorkloadoptimizationV1KubernetesLabelExp
 
 func labelSelectorOperatorMap(in sdk.WorkloadoptimizationV1KubernetesLabelSelectorOperator) string {
 	switch in {
-	case sdk.KUBERNETESLABELSELECTOROPIN:
+	case sdk.WorkloadoptimizationV1KubernetesLabelSelectorOperatorKUBERNETESLABELSELECTOROPIN:
 		return K8sLabelInOperator
-	case sdk.KUBERNETESLABELSELECTOROPNOTIN:
+	case sdk.WorkloadoptimizationV1KubernetesLabelSelectorOperatorKUBERNETESLABELSELECTOROPNOTIN:
 		return K8sLabelNotInOperator
-	case sdk.KUBERNETESLABELSELECTOROPEXISTS:
+	case sdk.WorkloadoptimizationV1KubernetesLabelSelectorOperatorKUBERNETESLABELSELECTOROPEXISTS:
 		return K8sLabelExistsOperator
-	case sdk.KUBERNETESLABELSELECTOROPDOESNOTEXIST:
+	case sdk.WorkloadoptimizationV1KubernetesLabelSelectorOperatorKUBERNETESLABELSELECTOROPDOESNOTEXIST:
 		return K8sLabelDoesNotExistOperator
-	case sdk.KUBERNETESLABELSELECTOROPCONTAINS:
+	case sdk.WorkloadoptimizationV1KubernetesLabelSelectorOperatorKUBERNETESLABELSELECTOROPCONTAINS:
 		return K8sLabelContainsOperator
-	case sdk.KUBERNETESLABELSELECTOROPREGEX:
+	case sdk.WorkloadoptimizationV1KubernetesLabelSelectorOperatorKUBERNETESLABELSELECTOROPREGEX:
 		return K8sLabelRegexOperator
 	}
 	return "unspecified"
