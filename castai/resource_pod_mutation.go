@@ -93,8 +93,8 @@ var spotModeValues = []string{
 }
 
 var matcherTypeValues = []string{
-	string(patching_engine.EXACT),
-	string(patching_engine.REGEX),
+	string(patching_engine.ObjectFilterV2MatcherTypeEXACT),
+	string(patching_engine.ObjectFilterV2MatcherTypeREGEX),
 }
 
 var labelsFilterOperatorValues = []string{

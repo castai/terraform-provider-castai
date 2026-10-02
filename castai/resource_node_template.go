@@ -1227,11 +1227,11 @@ func flattenConstraints(c *sdk.NodetemplatesV1TemplateConstraints) ([]map[string
 func setStateConstraintValue(value *sdk.NodetemplatesV1TemplateConstraintsConstraintState, key string, values map[string]any) map[string]any {
 	if value != nil {
 		switch lo.FromPtr(value) {
-		case sdk.ENABLED:
+		case sdk.NodetemplatesV1TemplateConstraintsConstraintStateENABLED:
 			values[key] = Enabled
-		case sdk.DISABLED:
+		case sdk.NodetemplatesV1TemplateConstraintsConstraintStateDISABLED:
 			values[key] = Disabled
-		case sdk.NOTSET:
+		case sdk.NodetemplatesV1TemplateConstraintsConstraintStateNOTSET:
 			values[key] = ""
 		default:
 			values[key] = ""
@@ -1966,18 +1966,18 @@ func toTemplateConstraints(obj map[string]any) *sdk.NodetemplatesV1TemplateConst
 	if v, ok := obj[FieldNodeTemplateBurstableInstances].(string); ok {
 		switch v {
 		case Enabled:
-			out.Burstable = toPtr(sdk.ENABLED)
+			out.Burstable = toPtr(sdk.NodetemplatesV1TemplateConstraintsConstraintStateENABLED)
 		case Disabled:
-			out.Burstable = toPtr(sdk.DISABLED)
+			out.Burstable = toPtr(sdk.NodetemplatesV1TemplateConstraintsConstraintStateDISABLED)
 		}
 	}
 
 	if v, ok := obj[FieldNodeTemplateCustomerSpecific].(string); ok {
 		switch v {
 		case Enabled:
-			out.CustomerSpecific = toPtr(sdk.ENABLED)
+			out.CustomerSpecific = toPtr(sdk.NodetemplatesV1TemplateConstraintsConstraintStateENABLED)
 		case Disabled:
-			out.CustomerSpecific = toPtr(sdk.DISABLED)
+			out.CustomerSpecific = toPtr(sdk.NodetemplatesV1TemplateConstraintsConstraintStateDISABLED)
 		}
 	}
 
@@ -2192,9 +2192,9 @@ func toTemplateConstraintsGpuConstraints(o map[string]any) *sdk.NodetemplatesV1T
 	if v, ok := o[FieldNodeTemplateFractionalGPUs].(string); ok {
 		switch v {
 		case Enabled:
-			out.FractionalGpus = toPtr(sdk.ENABLED)
+			out.FractionalGpus = toPtr(sdk.NodetemplatesV1TemplateConstraintsConstraintStateENABLED)
 		case Disabled:
-			out.FractionalGpus = toPtr(sdk.DISABLED)
+			out.FractionalGpus = toPtr(sdk.NodetemplatesV1TemplateConstraintsConstraintStateDISABLED)
 		}
 	}
 
@@ -2336,20 +2336,20 @@ func compareLists(key, oldValue, newValue string, d *schema.ResourceData) bool {
 func gpuSharingStrategyToAPI(s string) sdk.NodetemplatesV1GPUSharingStrategy {
 	switch s {
 	case "mps":
-		return sdk.GPUSHARINGSTRATEGYMPS
+		return sdk.NodetemplatesV1GPUSharingStrategyGPUSHARINGSTRATEGYMPS
 	case "time-slicing":
-		return sdk.GPUSHARINGSTRATEGYTIMESLICING
+		return sdk.NodetemplatesV1GPUSharingStrategyGPUSHARINGSTRATEGYTIMESLICING
 	default:
-		return sdk.GPUSHARINGSTRATEGYUNSPECIFIED
+		return sdk.NodetemplatesV1GPUSharingStrategyGPUSHARINGSTRATEGYUNSPECIFIED
 	}
 }
 
 // gpuSharingStrategyToTerraform converts the API enum value to a terraform-friendly string.
 func gpuSharingStrategyToTerraform(s sdk.NodetemplatesV1GPUSharingStrategy) string {
 	switch s {
-	case sdk.GPUSHARINGSTRATEGYMPS:
+	case sdk.NodetemplatesV1GPUSharingStrategyGPUSHARINGSTRATEGYMPS:
 		return "mps"
-	case sdk.GPUSHARINGSTRATEGYTIMESLICING:
+	case sdk.NodetemplatesV1GPUSharingStrategyGPUSHARINGSTRATEGYTIMESLICING:
 		return "time-slicing"
 	default:
 		return ""

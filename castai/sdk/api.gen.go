@@ -25,31 +25,31 @@ const (
 
 // Defines values for CastaiFeaturesV1LogicalOperator.
 const (
-	And                CastaiFeaturesV1LogicalOperator = "and"
-	LogicalUnspecified CastaiFeaturesV1LogicalOperator = "logical_unspecified"
-	Or                 CastaiFeaturesV1LogicalOperator = "or"
+	CastaiFeaturesV1LogicalOperatorAnd                CastaiFeaturesV1LogicalOperator = "and"
+	CastaiFeaturesV1LogicalOperatorLogicalUnspecified CastaiFeaturesV1LogicalOperator = "logical_unspecified"
+	CastaiFeaturesV1LogicalOperatorOr                 CastaiFeaturesV1LogicalOperator = "or"
 )
 
 // Defines values for CastaiFeaturesV1Operator.
 const (
-	Equals              CastaiFeaturesV1Operator = "equals"
-	NotEquals           CastaiFeaturesV1Operator = "not_equals"
-	OperatorUnspecified CastaiFeaturesV1Operator = "operator_unspecified"
+	CastaiFeaturesV1OperatorEquals              CastaiFeaturesV1Operator = "equals"
+	CastaiFeaturesV1OperatorNotEquals           CastaiFeaturesV1Operator = "not_equals"
+	CastaiFeaturesV1OperatorOperatorUnspecified CastaiFeaturesV1Operator = "operator_unspecified"
 )
 
 // Defines values for CastaiInventoryV1beta1AWSSavingsPlanCommitmentTermUnit.
 const (
-	COMMITMENTTERMUNITONEYEAR     CastaiInventoryV1beta1AWSSavingsPlanCommitmentTermUnit = "COMMITMENT_TERM_UNIT_ONE_YEAR"
-	COMMITMENTTERMUNITTHREEYEARS  CastaiInventoryV1beta1AWSSavingsPlanCommitmentTermUnit = "COMMITMENT_TERM_UNIT_THREE_YEARS"
-	COMMITMENTTERMUNITUNSPECIFIED CastaiInventoryV1beta1AWSSavingsPlanCommitmentTermUnit = "COMMITMENT_TERM_UNIT_UNSPECIFIED"
+	CastaiInventoryV1beta1AWSSavingsPlanCommitmentTermUnitCOMMITMENTTERMUNITONEYEAR     CastaiInventoryV1beta1AWSSavingsPlanCommitmentTermUnit = "COMMITMENT_TERM_UNIT_ONE_YEAR"
+	CastaiInventoryV1beta1AWSSavingsPlanCommitmentTermUnitCOMMITMENTTERMUNITTHREEYEARS  CastaiInventoryV1beta1AWSSavingsPlanCommitmentTermUnit = "COMMITMENT_TERM_UNIT_THREE_YEARS"
+	CastaiInventoryV1beta1AWSSavingsPlanCommitmentTermUnitCOMMITMENTTERMUNITUNSPECIFIED CastaiInventoryV1beta1AWSSavingsPlanCommitmentTermUnit = "COMMITMENT_TERM_UNIT_UNSPECIFIED"
 )
 
 // Defines values for CastaiInventoryV1beta1AWSSavingsPlanPaymentOption.
 const (
-	ALLUPFRONT               CastaiInventoryV1beta1AWSSavingsPlanPaymentOption = "ALL_UPFRONT"
-	NOUPFRONT                CastaiInventoryV1beta1AWSSavingsPlanPaymentOption = "NO_UPFRONT"
-	PARTIALUPFRONT           CastaiInventoryV1beta1AWSSavingsPlanPaymentOption = "PARTIAL_UPFRONT"
-	PAYMENTOPTIONUNSPECIFIED CastaiInventoryV1beta1AWSSavingsPlanPaymentOption = "PAYMENT_OPTION_UNSPECIFIED"
+	CastaiInventoryV1beta1AWSSavingsPlanPaymentOptionALLUPFRONT               CastaiInventoryV1beta1AWSSavingsPlanPaymentOption = "ALL_UPFRONT"
+	CastaiInventoryV1beta1AWSSavingsPlanPaymentOptionNOUPFRONT                CastaiInventoryV1beta1AWSSavingsPlanPaymentOption = "NO_UPFRONT"
+	CastaiInventoryV1beta1AWSSavingsPlanPaymentOptionPARTIALUPFRONT           CastaiInventoryV1beta1AWSSavingsPlanPaymentOption = "PARTIAL_UPFRONT"
+	CastaiInventoryV1beta1AWSSavingsPlanPaymentOptionPAYMENTOPTIONUNSPECIFIED CastaiInventoryV1beta1AWSSavingsPlanPaymentOption = "PAYMENT_OPTION_UNSPECIFIED"
 )
 
 // Defines values for CastaiInventoryV1beta1AttachableGPUDeviceManufacturer.
@@ -61,8 +61,8 @@ const (
 
 // Defines values for CastaiInventoryV1beta1AzureReservationInstanceFlexibility.
 const (
-	OFF CastaiInventoryV1beta1AzureReservationInstanceFlexibility = "OFF"
-	ON  CastaiInventoryV1beta1AzureReservationInstanceFlexibility = "ON"
+	CastaiInventoryV1beta1AzureReservationInstanceFlexibilityOFF CastaiInventoryV1beta1AzureReservationInstanceFlexibility = "OFF"
+	CastaiInventoryV1beta1AzureReservationInstanceFlexibilityON  CastaiInventoryV1beta1AzureReservationInstanceFlexibility = "ON"
 )
 
 // Defines values for CastaiInventoryV1beta1AzureReservationReservationPlan.
@@ -73,10 +73,10 @@ const (
 
 // Defines values for CastaiInventoryV1beta1AzureSavingsPlanContextAzureSavingsPlanScope.
 const (
-	AZURESAVINGSPLANSCOPEUNSPECIFIED CastaiInventoryV1beta1AzureSavingsPlanContextAzureSavingsPlanScope = "AZURE_SAVINGS_PLAN_SCOPE_UNSPECIFIED"
-	MANAGEMENTGROUP                  CastaiInventoryV1beta1AzureSavingsPlanContextAzureSavingsPlanScope = "MANAGEMENT_GROUP"
-	SHARED                           CastaiInventoryV1beta1AzureSavingsPlanContextAzureSavingsPlanScope = "SHARED"
-	SINGLE                           CastaiInventoryV1beta1AzureSavingsPlanContextAzureSavingsPlanScope = "SINGLE"
+	CastaiInventoryV1beta1AzureSavingsPlanContextAzureSavingsPlanScopeAZURESAVINGSPLANSCOPEUNSPECIFIED CastaiInventoryV1beta1AzureSavingsPlanContextAzureSavingsPlanScope = "AZURE_SAVINGS_PLAN_SCOPE_UNSPECIFIED"
+	CastaiInventoryV1beta1AzureSavingsPlanContextAzureSavingsPlanScopeMANAGEMENTGROUP                  CastaiInventoryV1beta1AzureSavingsPlanContextAzureSavingsPlanScope = "MANAGEMENT_GROUP"
+	CastaiInventoryV1beta1AzureSavingsPlanContextAzureSavingsPlanScopeSHARED                           CastaiInventoryV1beta1AzureSavingsPlanContextAzureSavingsPlanScope = "SHARED"
+	CastaiInventoryV1beta1AzureSavingsPlanContextAzureSavingsPlanScopeSINGLE                           CastaiInventoryV1beta1AzureSavingsPlanContextAzureSavingsPlanScope = "SINGLE"
 )
 
 // Defines values for CastaiInventoryV1beta1AzureSavingsPlanContextAzureSavingsPlanTerm.
@@ -89,33 +89,33 @@ const (
 
 // Defines values for CastaiInventoryV1beta1BlockStorageInfoAttachmentLimitType.
 const (
-	ATTACHMENTLIMITTYPEDEDICATED CastaiInventoryV1beta1BlockStorageInfoAttachmentLimitType = "ATTACHMENT_LIMIT_TYPE_DEDICATED"
-	ATTACHMENTLIMITTYPESHARED    CastaiInventoryV1beta1BlockStorageInfoAttachmentLimitType = "ATTACHMENT_LIMIT_TYPE_SHARED"
-	ATTACHMENTLIMITTYPEUNKNOWN   CastaiInventoryV1beta1BlockStorageInfoAttachmentLimitType = "ATTACHMENT_LIMIT_TYPE_UNKNOWN"
+	CastaiInventoryV1beta1BlockStorageInfoAttachmentLimitTypeATTACHMENTLIMITTYPEDEDICATED CastaiInventoryV1beta1BlockStorageInfoAttachmentLimitType = "ATTACHMENT_LIMIT_TYPE_DEDICATED"
+	CastaiInventoryV1beta1BlockStorageInfoAttachmentLimitTypeATTACHMENTLIMITTYPESHARED    CastaiInventoryV1beta1BlockStorageInfoAttachmentLimitType = "ATTACHMENT_LIMIT_TYPE_SHARED"
+	CastaiInventoryV1beta1BlockStorageInfoAttachmentLimitTypeATTACHMENTLIMITTYPEUNKNOWN   CastaiInventoryV1beta1BlockStorageInfoAttachmentLimitType = "ATTACHMENT_LIMIT_TYPE_UNKNOWN"
 )
 
 // Defines values for CastaiInventoryV1beta1BlockStorageInfoEbsOptimizedSupport.
 const (
-	EBSOPTIMIZEDSUPPORTDEFAULT     CastaiInventoryV1beta1BlockStorageInfoEbsOptimizedSupport = "EBS_OPTIMIZED_SUPPORT_DEFAULT"
-	EBSOPTIMIZEDSUPPORTSUPPORTED   CastaiInventoryV1beta1BlockStorageInfoEbsOptimizedSupport = "EBS_OPTIMIZED_SUPPORT_SUPPORTED"
-	EBSOPTIMIZEDSUPPORTUNKNOWN     CastaiInventoryV1beta1BlockStorageInfoEbsOptimizedSupport = "EBS_OPTIMIZED_SUPPORT_UNKNOWN"
-	EBSOPTIMIZEDSUPPORTUNSUPPORTED CastaiInventoryV1beta1BlockStorageInfoEbsOptimizedSupport = "EBS_OPTIMIZED_SUPPORT_UNSUPPORTED"
+	CastaiInventoryV1beta1BlockStorageInfoEbsOptimizedSupportEBSOPTIMIZEDSUPPORTDEFAULT     CastaiInventoryV1beta1BlockStorageInfoEbsOptimizedSupport = "EBS_OPTIMIZED_SUPPORT_DEFAULT"
+	CastaiInventoryV1beta1BlockStorageInfoEbsOptimizedSupportEBSOPTIMIZEDSUPPORTSUPPORTED   CastaiInventoryV1beta1BlockStorageInfoEbsOptimizedSupport = "EBS_OPTIMIZED_SUPPORT_SUPPORTED"
+	CastaiInventoryV1beta1BlockStorageInfoEbsOptimizedSupportEBSOPTIMIZEDSUPPORTUNKNOWN     CastaiInventoryV1beta1BlockStorageInfoEbsOptimizedSupport = "EBS_OPTIMIZED_SUPPORT_UNKNOWN"
+	CastaiInventoryV1beta1BlockStorageInfoEbsOptimizedSupportEBSOPTIMIZEDSUPPORTUNSUPPORTED CastaiInventoryV1beta1BlockStorageInfoEbsOptimizedSupport = "EBS_OPTIMIZED_SUPPORT_UNSUPPORTED"
 )
 
 // Defines values for CastaiInventoryV1beta1CommitmentScalingStrategy.
 const (
-	CPUBased CastaiInventoryV1beta1CommitmentScalingStrategy = "CPUBased"
-	Default  CastaiInventoryV1beta1CommitmentScalingStrategy = "Default"
-	RamBased CastaiInventoryV1beta1CommitmentScalingStrategy = "RamBased"
+	CastaiInventoryV1beta1CommitmentScalingStrategyCPUBased CastaiInventoryV1beta1CommitmentScalingStrategy = "CPUBased"
+	CastaiInventoryV1beta1CommitmentScalingStrategyDefault  CastaiInventoryV1beta1CommitmentScalingStrategy = "Default"
+	CastaiInventoryV1beta1CommitmentScalingStrategyRamBased CastaiInventoryV1beta1CommitmentScalingStrategy = "RamBased"
 )
 
 // Defines values for CastaiInventoryV1beta1CommitmentState.
 const (
-	STATEACTIVE   CastaiInventoryV1beta1CommitmentState = "STATE_ACTIVE"
-	STATEDELETED  CastaiInventoryV1beta1CommitmentState = "STATE_DELETED"
-	STATEEXPIRED  CastaiInventoryV1beta1CommitmentState = "STATE_EXPIRED"
-	STATEINACTIVE CastaiInventoryV1beta1CommitmentState = "STATE_INACTIVE"
-	STATEPENDING  CastaiInventoryV1beta1CommitmentState = "STATE_PENDING"
+	CastaiInventoryV1beta1CommitmentStateSTATEACTIVE   CastaiInventoryV1beta1CommitmentState = "STATE_ACTIVE"
+	CastaiInventoryV1beta1CommitmentStateSTATEDELETED  CastaiInventoryV1beta1CommitmentState = "STATE_DELETED"
+	CastaiInventoryV1beta1CommitmentStateSTATEEXPIRED  CastaiInventoryV1beta1CommitmentState = "STATE_EXPIRED"
+	CastaiInventoryV1beta1CommitmentStateSTATEINACTIVE CastaiInventoryV1beta1CommitmentState = "STATE_INACTIVE"
+	CastaiInventoryV1beta1CommitmentStateSTATEPENDING  CastaiInventoryV1beta1CommitmentState = "STATE_PENDING"
 )
 
 // Defines values for CastaiInventoryV1beta1CommitmentStatus.
@@ -140,17 +140,17 @@ const (
 
 // Defines values for CastaiInventoryV1beta1GCPReservationLocalSsdInterface.
 const (
-	GCPRESERVATIONLOCALSSDINTERFACENVME        CastaiInventoryV1beta1GCPReservationLocalSsdInterface = "GCP_RESERVATION_LOCAL_SSD_INTERFACE_NVME"
-	GCPRESERVATIONLOCALSSDINTERFACESCSI        CastaiInventoryV1beta1GCPReservationLocalSsdInterface = "GCP_RESERVATION_LOCAL_SSD_INTERFACE_SCSI"
-	GCPRESERVATIONLOCALSSDINTERFACEUNSPECIFIED CastaiInventoryV1beta1GCPReservationLocalSsdInterface = "GCP_RESERVATION_LOCAL_SSD_INTERFACE_UNSPECIFIED"
+	CastaiInventoryV1beta1GCPReservationLocalSsdInterfaceGCPRESERVATIONLOCALSSDINTERFACENVME        CastaiInventoryV1beta1GCPReservationLocalSsdInterface = "GCP_RESERVATION_LOCAL_SSD_INTERFACE_NVME"
+	CastaiInventoryV1beta1GCPReservationLocalSsdInterfaceGCPRESERVATIONLOCALSSDINTERFACESCSI        CastaiInventoryV1beta1GCPReservationLocalSsdInterface = "GCP_RESERVATION_LOCAL_SSD_INTERFACE_SCSI"
+	CastaiInventoryV1beta1GCPReservationLocalSsdInterfaceGCPRESERVATIONLOCALSSDINTERFACEUNSPECIFIED CastaiInventoryV1beta1GCPReservationLocalSsdInterface = "GCP_RESERVATION_LOCAL_SSD_INTERFACE_UNSPECIFIED"
 )
 
 // Defines values for CastaiInventoryV1beta1GCPReservationShareType.
 const (
-	GCPRESERVATIONSHARETYPELOCAL            CastaiInventoryV1beta1GCPReservationShareType = "GCP_RESERVATION_SHARE_TYPE_LOCAL"
-	GCPRESERVATIONSHARETYPEORGANIZATION     CastaiInventoryV1beta1GCPReservationShareType = "GCP_RESERVATION_SHARE_TYPE_ORGANIZATION"
-	GCPRESERVATIONSHARETYPESPECIFICPROJECTS CastaiInventoryV1beta1GCPReservationShareType = "GCP_RESERVATION_SHARE_TYPE_SPECIFIC_PROJECTS"
-	GCPRESERVATIONSHARETYPEUNSPECIFIED      CastaiInventoryV1beta1GCPReservationShareType = "GCP_RESERVATION_SHARE_TYPE_UNSPECIFIED"
+	CastaiInventoryV1beta1GCPReservationShareTypeGCPRESERVATIONSHARETYPELOCAL            CastaiInventoryV1beta1GCPReservationShareType = "GCP_RESERVATION_SHARE_TYPE_LOCAL"
+	CastaiInventoryV1beta1GCPReservationShareTypeGCPRESERVATIONSHARETYPEORGANIZATION     CastaiInventoryV1beta1GCPReservationShareType = "GCP_RESERVATION_SHARE_TYPE_ORGANIZATION"
+	CastaiInventoryV1beta1GCPReservationShareTypeGCPRESERVATIONSHARETYPESPECIFICPROJECTS CastaiInventoryV1beta1GCPReservationShareType = "GCP_RESERVATION_SHARE_TYPE_SPECIFIC_PROJECTS"
+	CastaiInventoryV1beta1GCPReservationShareTypeGCPRESERVATIONSHARETYPEUNSPECIFIED      CastaiInventoryV1beta1GCPReservationShareType = "GCP_RESERVATION_SHARE_TYPE_UNSPECIFIED"
 )
 
 // Defines values for CastaiInventoryV1beta1GCPResourceCUDCUDPlan.
@@ -228,14 +228,14 @@ const (
 
 // Defines values for CastaiRbacV1beta1Effects.
 const (
-	ALLOW CastaiRbacV1beta1Effects = "ALLOW"
-	DENY  CastaiRbacV1beta1Effects = "DENY"
+	CastaiRbacV1beta1EffectsALLOW CastaiRbacV1beta1Effects = "ALLOW"
+	CastaiRbacV1beta1EffectsDENY  CastaiRbacV1beta1Effects = "DENY"
 )
 
 // Defines values for CastaiRbacV1beta1Kind.
 const (
-	SERVICEACCOUNT CastaiRbacV1beta1Kind = "SERVICE_ACCOUNT"
-	USER           CastaiRbacV1beta1Kind = "USER"
+	CastaiRbacV1beta1KindSERVICEACCOUNT CastaiRbacV1beta1Kind = "SERVICE_ACCOUNT"
+	CastaiRbacV1beta1KindUSER           CastaiRbacV1beta1Kind = "USER"
 )
 
 // Defines values for CastaiRbacV1beta1LabelSelectorCondition.
@@ -255,8 +255,8 @@ const (
 
 // Defines values for CastaiRbacV1beta1MemberActions.
 const (
-	ADD    CastaiRbacV1beta1MemberActions = "ADD"
-	REMOVE CastaiRbacV1beta1MemberActions = "REMOVE"
+	CastaiRbacV1beta1MemberActionsADD    CastaiRbacV1beta1MemberActions = "ADD"
+	CastaiRbacV1beta1MemberActionsREMOVE CastaiRbacV1beta1MemberActions = "REMOVE"
 )
 
 // Defines values for CastaiRbacV1beta1PoliciesState.
@@ -298,9 +298,9 @@ const (
 
 // Defines values for CastaiUsersV1beta1OrganizationType.
 const (
-	ORGANIZATIONTYPECHILD      CastaiUsersV1beta1OrganizationType = "ORGANIZATION_TYPE_CHILD"
-	ORGANIZATIONTYPEDEFAULT    CastaiUsersV1beta1OrganizationType = "ORGANIZATION_TYPE_DEFAULT"
-	ORGANIZATIONTYPEENTERPRISE CastaiUsersV1beta1OrganizationType = "ORGANIZATION_TYPE_ENTERPRISE"
+	CastaiUsersV1beta1OrganizationTypeORGANIZATIONTYPECHILD      CastaiUsersV1beta1OrganizationType = "ORGANIZATION_TYPE_CHILD"
+	CastaiUsersV1beta1OrganizationTypeORGANIZATIONTYPEDEFAULT    CastaiUsersV1beta1OrganizationType = "ORGANIZATION_TYPE_DEFAULT"
+	CastaiUsersV1beta1OrganizationTypeORGANIZATIONTYPEENTERPRISE CastaiUsersV1beta1OrganizationType = "ORGANIZATION_TYPE_ENTERPRISE"
 )
 
 // Defines values for CastaiV1Cloud.
@@ -319,10 +319,10 @@ const (
 
 // Defines values for CostreportV1beta1AllocationGroupFilterLabelValueOperator.
 const (
-	DoesNotExist CostreportV1beta1AllocationGroupFilterLabelValueOperator = "DoesNotExist"
-	Equal        CostreportV1beta1AllocationGroupFilterLabelValueOperator = "Equal"
-	Exists       CostreportV1beta1AllocationGroupFilterLabelValueOperator = "Exists"
-	NotEqual     CostreportV1beta1AllocationGroupFilterLabelValueOperator = "NotEqual"
+	CostreportV1beta1AllocationGroupFilterLabelValueOperatorDoesNotExist CostreportV1beta1AllocationGroupFilterLabelValueOperator = "DoesNotExist"
+	CostreportV1beta1AllocationGroupFilterLabelValueOperatorEqual        CostreportV1beta1AllocationGroupFilterLabelValueOperator = "Equal"
+	CostreportV1beta1AllocationGroupFilterLabelValueOperatorExists       CostreportV1beta1AllocationGroupFilterLabelValueOperator = "Exists"
+	CostreportV1beta1AllocationGroupFilterLabelValueOperatorNotEqual     CostreportV1beta1AllocationGroupFilterLabelValueOperator = "NotEqual"
 )
 
 // Defines values for CostreportV1beta1FilterOperator.
@@ -371,9 +371,9 @@ const (
 
 // Defines values for DboV1EventType.
 const (
-	DIRECTMODEDISABLED   DboV1EventType = "DIRECT_MODE_DISABLED"
-	DIRECTMODEENABLED    DboV1EventType = "DIRECT_MODE_ENABLED"
-	EVENTTYPEUNSPECIFIED DboV1EventType = "EVENT_TYPE_UNSPECIFIED"
+	DboV1EventTypeDIRECTMODEDISABLED   DboV1EventType = "DIRECT_MODE_DISABLED"
+	DboV1EventTypeDIRECTMODEENABLED    DboV1EventType = "DIRECT_MODE_ENABLED"
+	DboV1EventTypeEVENTTYPEUNSPECIFIED DboV1EventType = "EVENT_TYPE_UNSPECIFIED"
 )
 
 // Defines values for DboV1ProxyStateDatabaseConnectionStatus.
@@ -394,36 +394,36 @@ const (
 
 // Defines values for DboV1RegistrationType.
 const (
-	DeleteAccount      DboV1RegistrationType = "DeleteAccount"
-	DeployCache        DboV1RegistrationType = "DeployCache"
-	DeployDBAgent      DboV1RegistrationType = "DeployDBAgent"
-	DeployDBO          DboV1RegistrationType = "DeployDBO"
-	PhaseOneOnboarding DboV1RegistrationType = "PhaseOneOnboarding"
-	UninstallCache     DboV1RegistrationType = "UninstallCache"
-	UninstallDBAgent   DboV1RegistrationType = "UninstallDBAgent"
-	UninstallDBO       DboV1RegistrationType = "UninstallDBO"
+	DboV1RegistrationTypeDeleteAccount      DboV1RegistrationType = "DeleteAccount"
+	DboV1RegistrationTypeDeployCache        DboV1RegistrationType = "DeployCache"
+	DboV1RegistrationTypeDeployDBAgent      DboV1RegistrationType = "DeployDBAgent"
+	DboV1RegistrationTypeDeployDBO          DboV1RegistrationType = "DeployDBO"
+	DboV1RegistrationTypePhaseOneOnboarding DboV1RegistrationType = "PhaseOneOnboarding"
+	DboV1RegistrationTypeUninstallCache     DboV1RegistrationType = "UninstallCache"
+	DboV1RegistrationTypeUninstallDBAgent   DboV1RegistrationType = "UninstallDBAgent"
+	DboV1RegistrationTypeUninstallDBO       DboV1RegistrationType = "UninstallDBO"
 )
 
 // Defines values for DboV1RuleType.
 const (
-	Query DboV1RuleType = "Query"
-	Table DboV1RuleType = "Table"
+	DboV1RuleTypeQuery DboV1RuleType = "Query"
+	DboV1RuleTypeTable DboV1RuleType = "Table"
 )
 
 // Defines values for DboV1TTLMode.
 const (
-	Auto      DboV1TTLMode = "Auto"
-	DontCache DboV1TTLMode = "DontCache"
-	Manual    DboV1TTLMode = "Manual"
+	DboV1TTLModeAuto      DboV1TTLMode = "Auto"
+	DboV1TTLModeDontCache DboV1TTLMode = "DontCache"
+	DboV1TTLModeManual    DboV1TTLMode = "Manual"
 )
 
 // Defines values for DboV1TrafficInsightsType.
 const (
-	ListenNotify                 DboV1TrafficInsightsType = "ListenNotify"
-	PoolingIncompatibleFunctions DboV1TrafficInsightsType = "PoolingIncompatibleFunctions"
-	SessionLocks                 DboV1TrafficInsightsType = "SessionLocks"
-	SimpleProtocolPrepares       DboV1TrafficInsightsType = "SimpleProtocolPrepares"
-	Undefined                    DboV1TrafficInsightsType = "Undefined"
+	DboV1TrafficInsightsTypeListenNotify                 DboV1TrafficInsightsType = "ListenNotify"
+	DboV1TrafficInsightsTypePoolingIncompatibleFunctions DboV1TrafficInsightsType = "PoolingIncompatibleFunctions"
+	DboV1TrafficInsightsTypeSessionLocks                 DboV1TrafficInsightsType = "SessionLocks"
+	DboV1TrafficInsightsTypeSimpleProtocolPrepares       DboV1TrafficInsightsType = "SimpleProtocolPrepares"
+	DboV1TrafficInsightsTypeUndefined                    DboV1TrafficInsightsType = "Undefined"
 )
 
 // Defines values for ExternalclusterV1AWSNodeConfigCapacityReservationType.
@@ -436,8 +436,8 @@ const (
 
 // Defines values for ExternalclusterV1ClusterCastwareInstallMethod.
 const (
-	CASTWAREINSTALLMETHODUNSPECIFIED ExternalclusterV1ClusterCastwareInstallMethod = "CASTWARE_INSTALL_METHOD_UNSPECIFIED"
-	OPERATOR                         ExternalclusterV1ClusterCastwareInstallMethod = "OPERATOR"
+	ExternalclusterV1ClusterCastwareInstallMethodCASTWAREINSTALLMETHODUNSPECIFIED ExternalclusterV1ClusterCastwareInstallMethod = "CASTWARE_INSTALL_METHOD_UNSPECIFIED"
+	ExternalclusterV1ClusterCastwareInstallMethodOPERATOR                         ExternalclusterV1ClusterCastwareInstallMethod = "OPERATOR"
 )
 
 // Defines values for ExternalclusterV1ClusterReconcileInfoReconcileMode.
@@ -468,31 +468,38 @@ const (
 
 // Defines values for ExternalclusterV1GetNodeBatchResponseNodeStatus.
 const (
-	CREATED               ExternalclusterV1GetNodeBatchResponseNodeStatus = "CREATED"
-	JOINED                ExternalclusterV1GetNodeBatchResponseNodeStatus = "JOINED"
-	JOINFAILED            ExternalclusterV1GetNodeBatchResponseNodeStatus = "JOIN_FAILED"
-	NODESTATUSUNSPECIFIED ExternalclusterV1GetNodeBatchResponseNodeStatus = "NODE_STATUS_UNSPECIFIED"
+	ExternalclusterV1GetNodeBatchResponseNodeStatusCREATED               ExternalclusterV1GetNodeBatchResponseNodeStatus = "CREATED"
+	ExternalclusterV1GetNodeBatchResponseNodeStatusJOINED                ExternalclusterV1GetNodeBatchResponseNodeStatus = "JOINED"
+	ExternalclusterV1GetNodeBatchResponseNodeStatusJOINFAILED            ExternalclusterV1GetNodeBatchResponseNodeStatus = "JOIN_FAILED"
+	ExternalclusterV1GetNodeBatchResponseNodeStatusNODESTATUSUNSPECIFIED ExternalclusterV1GetNodeBatchResponseNodeStatus = "NODE_STATUS_UNSPECIFIED"
+)
+
+// Defines values for ExternalclusterV1KarpenterControllerMode.
+const (
+	ExternalclusterV1KarpenterControllerModeKARPENTERCONTROLLERMODEUNSPECIFIED ExternalclusterV1KarpenterControllerMode = "KARPENTER_CONTROLLER_MODE_UNSPECIFIED"
+	ExternalclusterV1KarpenterControllerModeMANAGEDOUTOFBAND                   ExternalclusterV1KarpenterControllerMode = "MANAGED_OUT_OF_BAND"
+	ExternalclusterV1KarpenterControllerModeSELFHOSTED                         ExternalclusterV1KarpenterControllerMode = "SELF_HOSTED"
 )
 
 // Defines values for ExternalclusterV1KataRuntimeProvisionMode.
 const (
-	KATAPROVISIONMODEMANAGED     ExternalclusterV1KataRuntimeProvisionMode = "KATA_PROVISION_MODE_MANAGED"
-	KATAPROVISIONMODEUNSPECIFIED ExternalclusterV1KataRuntimeProvisionMode = "KATA_PROVISION_MODE_UNSPECIFIED"
+	ExternalclusterV1KataRuntimeProvisionModeKATAPROVISIONMODEMANAGED     ExternalclusterV1KataRuntimeProvisionMode = "KATA_PROVISION_MODE_MANAGED"
+	ExternalclusterV1KataRuntimeProvisionModeKATAPROVISIONMODEUNSPECIFIED ExternalclusterV1KataRuntimeProvisionMode = "KATA_PROVISION_MODE_UNSPECIFIED"
 )
 
 // Defines values for ExternalclusterV1KentEligibility.
 const (
-	ELIGIBLE     ExternalclusterV1KentEligibility = "ELIGIBLE"
-	NOTSUPPORTED ExternalclusterV1KentEligibility = "NOT_SUPPORTED"
+	ExternalclusterV1KentEligibilityELIGIBLE     ExternalclusterV1KentEligibility = "ELIGIBLE"
+	ExternalclusterV1KentEligibilityNOTSUPPORTED ExternalclusterV1KentEligibility = "NOT_SUPPORTED"
 )
 
 // Defines values for ExternalclusterV1NodeType.
 const (
-	Master          ExternalclusterV1NodeType = "master"
-	NODETYPEINVALID ExternalclusterV1NodeType = "NODE_TYPE_INVALID"
-	NODETYPEMASTER  ExternalclusterV1NodeType = "NODE_TYPE_MASTER"
-	NODETYPEWORKER  ExternalclusterV1NodeType = "NODE_TYPE_WORKER"
-	Worker          ExternalclusterV1NodeType = "worker"
+	ExternalclusterV1NodeTypeMaster          ExternalclusterV1NodeType = "master"
+	ExternalclusterV1NodeTypeNODETYPEINVALID ExternalclusterV1NodeType = "NODE_TYPE_INVALID"
+	ExternalclusterV1NodeTypeNODETYPEMASTER  ExternalclusterV1NodeType = "NODE_TYPE_MASTER"
+	ExternalclusterV1NodeTypeNODETYPEWORKER  ExternalclusterV1NodeType = "NODE_TYPE_WORKER"
+	ExternalclusterV1NodeTypeWorker          ExternalclusterV1NodeType = "worker"
 )
 
 // Defines values for ExternalclusterV1OperationMode.
@@ -520,8 +527,8 @@ const (
 
 // Defines values for NodeconfigV1AKSConfigAcceleratedNetworkingMode.
 const (
-	ACCELERATEDNETWORKINGMODEDISABLED    NodeconfigV1AKSConfigAcceleratedNetworkingMode = "ACCELERATED_NETWORKING_MODE_DISABLED"
-	ACCELERATEDNETWORKINGMODEUNSPECIFIED NodeconfigV1AKSConfigAcceleratedNetworkingMode = "ACCELERATED_NETWORKING_MODE_UNSPECIFIED"
+	NodeconfigV1AKSConfigAcceleratedNetworkingModeACCELERATEDNETWORKINGMODEDISABLED    NodeconfigV1AKSConfigAcceleratedNetworkingMode = "ACCELERATED_NETWORKING_MODE_DISABLED"
+	NodeconfigV1AKSConfigAcceleratedNetworkingModeACCELERATEDNETWORKINGMODEUNSPECIFIED NodeconfigV1AKSConfigAcceleratedNetworkingMode = "ACCELERATED_NETWORKING_MODE_UNSPECIFIED"
 )
 
 // Defines values for NodeconfigV1AKSConfigImageFamily.
@@ -560,10 +567,10 @@ const (
 
 // Defines values for NodeconfigV1AKSConfigOsDiskType.
 const (
-	OSDISKTYPEPREMIUMSSD  NodeconfigV1AKSConfigOsDiskType = "OS_DISK_TYPE_PREMIUM_SSD"
-	OSDISKTYPESTANDARD    NodeconfigV1AKSConfigOsDiskType = "OS_DISK_TYPE_STANDARD"
-	OSDISKTYPESTANDARDSSD NodeconfigV1AKSConfigOsDiskType = "OS_DISK_TYPE_STANDARD_SSD"
-	OSDISKTYPEUNSPECIFIED NodeconfigV1AKSConfigOsDiskType = "OS_DISK_TYPE_UNSPECIFIED"
+	NodeconfigV1AKSConfigOsDiskTypeOSDISKTYPEPREMIUMSSD  NodeconfigV1AKSConfigOsDiskType = "OS_DISK_TYPE_PREMIUM_SSD"
+	NodeconfigV1AKSConfigOsDiskTypeOSDISKTYPESTANDARD    NodeconfigV1AKSConfigOsDiskType = "OS_DISK_TYPE_STANDARD"
+	NodeconfigV1AKSConfigOsDiskTypeOSDISKTYPESTANDARDSSD NodeconfigV1AKSConfigOsDiskType = "OS_DISK_TYPE_STANDARD_SSD"
+	NodeconfigV1AKSConfigOsDiskTypeOSDISKTYPEUNSPECIFIED NodeconfigV1AKSConfigOsDiskType = "OS_DISK_TYPE_UNSPECIFIED"
 )
 
 // Defines values for NodeconfigV1ContainerRuntime.
@@ -589,10 +596,10 @@ const (
 
 // Defines values for NodeconfigV1GKEConfigOnHostMaintenance.
 const (
-	MIGRATE   NodeconfigV1GKEConfigOnHostMaintenance = "MIGRATE"
-	Migrate   NodeconfigV1GKEConfigOnHostMaintenance = "migrate"
-	TERMINATE NodeconfigV1GKEConfigOnHostMaintenance = "TERMINATE"
-	Terminate NodeconfigV1GKEConfigOnHostMaintenance = "terminate"
+	NodeconfigV1GKEConfigOnHostMaintenanceMIGRATE   NodeconfigV1GKEConfigOnHostMaintenance = "MIGRATE"
+	NodeconfigV1GKEConfigOnHostMaintenanceMigrate   NodeconfigV1GKEConfigOnHostMaintenance = "migrate"
+	NodeconfigV1GKEConfigOnHostMaintenanceTERMINATE NodeconfigV1GKEConfigOnHostMaintenance = "TERMINATE"
+	NodeconfigV1GKEConfigOnHostMaintenanceTerminate NodeconfigV1GKEConfigOnHostMaintenance = "terminate"
 )
 
 // Defines values for NodeconfigV1SecondaryBootDiskMode.
@@ -603,15 +610,15 @@ const (
 
 // Defines values for NodeconfigV1SelfHostedWithEC2NodesConfigImageFamily.
 const (
-	FAMILYAL2          NodeconfigV1SelfHostedWithEC2NodesConfigImageFamily = "FAMILY_AL2"
-	FAMILYAL2023       NodeconfigV1SelfHostedWithEC2NodesConfigImageFamily = "FAMILY_AL2023"
-	FAMILYBOTTLEROCKET NodeconfigV1SelfHostedWithEC2NodesConfigImageFamily = "FAMILY_BOTTLEROCKET"
-	FAMILYCUSTOM       NodeconfigV1SelfHostedWithEC2NodesConfigImageFamily = "FAMILY_CUSTOM"
-	FAMILYUNSPECIFIED  NodeconfigV1SelfHostedWithEC2NodesConfigImageFamily = "FAMILY_UNSPECIFIED"
-	FamilyAl2          NodeconfigV1SelfHostedWithEC2NodesConfigImageFamily = "family_al2"
-	FamilyAl2023       NodeconfigV1SelfHostedWithEC2NodesConfigImageFamily = "family_al2023"
-	FamilyBottlerocket NodeconfigV1SelfHostedWithEC2NodesConfigImageFamily = "family_bottlerocket"
-	FamilyCustom       NodeconfigV1SelfHostedWithEC2NodesConfigImageFamily = "family_custom"
+	NodeconfigV1SelfHostedWithEC2NodesConfigImageFamilyFAMILYAL2          NodeconfigV1SelfHostedWithEC2NodesConfigImageFamily = "FAMILY_AL2"
+	NodeconfigV1SelfHostedWithEC2NodesConfigImageFamilyFAMILYAL2023       NodeconfigV1SelfHostedWithEC2NodesConfigImageFamily = "FAMILY_AL2023"
+	NodeconfigV1SelfHostedWithEC2NodesConfigImageFamilyFAMILYBOTTLEROCKET NodeconfigV1SelfHostedWithEC2NodesConfigImageFamily = "FAMILY_BOTTLEROCKET"
+	NodeconfigV1SelfHostedWithEC2NodesConfigImageFamilyFAMILYCUSTOM       NodeconfigV1SelfHostedWithEC2NodesConfigImageFamily = "FAMILY_CUSTOM"
+	NodeconfigV1SelfHostedWithEC2NodesConfigImageFamilyFAMILYUNSPECIFIED  NodeconfigV1SelfHostedWithEC2NodesConfigImageFamily = "FAMILY_UNSPECIFIED"
+	NodeconfigV1SelfHostedWithEC2NodesConfigImageFamilyFamilyAl2          NodeconfigV1SelfHostedWithEC2NodesConfigImageFamily = "family_al2"
+	NodeconfigV1SelfHostedWithEC2NodesConfigImageFamilyFamilyAl2023       NodeconfigV1SelfHostedWithEC2NodesConfigImageFamily = "family_al2023"
+	NodeconfigV1SelfHostedWithEC2NodesConfigImageFamilyFamilyBottlerocket NodeconfigV1SelfHostedWithEC2NodesConfigImageFamily = "family_bottlerocket"
+	NodeconfigV1SelfHostedWithEC2NodesConfigImageFamilyFamilyCustom       NodeconfigV1SelfHostedWithEC2NodesConfigImageFamily = "family_custom"
 )
 
 // Defines values for NodetemplatesV1AvailableInstanceTypeOs.
@@ -630,15 +637,15 @@ const (
 
 // Defines values for NodetemplatesV1GPUSharingStrategy.
 const (
-	GPUSHARINGSTRATEGYMPS         NodetemplatesV1GPUSharingStrategy = "GPU_SHARING_STRATEGY_MPS"
-	GPUSHARINGSTRATEGYTIMESLICING NodetemplatesV1GPUSharingStrategy = "GPU_SHARING_STRATEGY_TIME_SLICING"
-	GPUSHARINGSTRATEGYUNSPECIFIED NodetemplatesV1GPUSharingStrategy = "GPU_SHARING_STRATEGY_UNSPECIFIED"
+	NodetemplatesV1GPUSharingStrategyGPUSHARINGSTRATEGYMPS         NodetemplatesV1GPUSharingStrategy = "GPU_SHARING_STRATEGY_MPS"
+	NodetemplatesV1GPUSharingStrategyGPUSHARINGSTRATEGYTIMESLICING NodetemplatesV1GPUSharingStrategy = "GPU_SHARING_STRATEGY_TIME_SLICING"
+	NodetemplatesV1GPUSharingStrategyGPUSHARINGSTRATEGYUNSPECIFIED NodetemplatesV1GPUSharingStrategy = "GPU_SHARING_STRATEGY_UNSPECIFIED"
 )
 
 // Defines values for NodetemplatesV1TaintEffect.
 const (
-	NoExecute  NodetemplatesV1TaintEffect = "NoExecute"
-	NoSchedule NodetemplatesV1TaintEffect = "NoSchedule"
+	NodetemplatesV1TaintEffectNoExecute  NodetemplatesV1TaintEffect = "NoExecute"
+	NodetemplatesV1TaintEffectNoSchedule NodetemplatesV1TaintEffect = "NoSchedule"
 )
 
 // Defines values for NodetemplatesV1TemplateConstraintsAWSConstraintsCapacityReservationType.
@@ -659,9 +666,9 @@ const (
 
 // Defines values for NodetemplatesV1TemplateConstraintsConstraintState.
 const (
-	DISABLED NodetemplatesV1TemplateConstraintsConstraintState = "DISABLED"
-	ENABLED  NodetemplatesV1TemplateConstraintsConstraintState = "ENABLED"
-	NOTSET   NodetemplatesV1TemplateConstraintsConstraintState = "NOT_SET"
+	NodetemplatesV1TemplateConstraintsConstraintStateDISABLED NodetemplatesV1TemplateConstraintsConstraintState = "DISABLED"
+	NodetemplatesV1TemplateConstraintsConstraintStateENABLED  NodetemplatesV1TemplateConstraintsConstraintState = "ENABLED"
+	NodetemplatesV1TemplateConstraintsConstraintStateNOTSET   NodetemplatesV1TemplateConstraintsConstraintState = "NOT_SET"
 )
 
 // Defines values for PoliciesV1EvictorStatus.
@@ -675,49 +682,49 @@ const (
 
 // Defines values for PoliciesV1PodPinnerStatus.
 const (
-	PodPinnerStatusCompatible          PoliciesV1PodPinnerStatus = "PodPinnerStatus_Compatible"
-	PodPinnerStatusIncompatible        PoliciesV1PodPinnerStatus = "PodPinnerStatus_Incompatible"
-	PodPinnerStatusIncompatibleVersion PoliciesV1PodPinnerStatus = "PodPinnerStatus_IncompatibleVersion"
-	PodPinnerStatusMissing             PoliciesV1PodPinnerStatus = "PodPinnerStatus_Missing"
-	PodPinnerStatusUnknown             PoliciesV1PodPinnerStatus = "PodPinnerStatus_Unknown"
+	PoliciesV1PodPinnerStatusPodPinnerStatusCompatible          PoliciesV1PodPinnerStatus = "PodPinnerStatus_Compatible"
+	PoliciesV1PodPinnerStatusPodPinnerStatusIncompatible        PoliciesV1PodPinnerStatus = "PodPinnerStatus_Incompatible"
+	PoliciesV1PodPinnerStatusPodPinnerStatusIncompatibleVersion PoliciesV1PodPinnerStatus = "PodPinnerStatus_IncompatibleVersion"
+	PoliciesV1PodPinnerStatusPodPinnerStatusMissing             PoliciesV1PodPinnerStatus = "PodPinnerStatus_Missing"
+	PoliciesV1PodPinnerStatusPodPinnerStatusUnknown             PoliciesV1PodPinnerStatus = "PodPinnerStatus_Unknown"
 )
 
 // Defines values for PoliciesV1SpotInterruptionPredictionsType.
 const (
-	AWSRebalanceRecommendations   PoliciesV1SpotInterruptionPredictionsType = "AWSRebalanceRecommendations"
-	CASTAIInterruptionPredictions PoliciesV1SpotInterruptionPredictionsType = "CASTAIInterruptionPredictions"
+	PoliciesV1SpotInterruptionPredictionsTypeAWSRebalanceRecommendations   PoliciesV1SpotInterruptionPredictionsType = "AWSRebalanceRecommendations"
+	PoliciesV1SpotInterruptionPredictionsTypeCASTAIInterruptionPredictions PoliciesV1SpotInterruptionPredictionsType = "CASTAIInterruptionPredictions"
 )
 
 // Defines values for RuntimeV1AnomalyStatus.
 const (
-	ANOMALYSTATUSACKED       RuntimeV1AnomalyStatus = "ANOMALY_STATUS_ACKED"
-	ANOMALYSTATUSCLOSED      RuntimeV1AnomalyStatus = "ANOMALY_STATUS_CLOSED"
-	ANOMALYSTATUSOPEN        RuntimeV1AnomalyStatus = "ANOMALY_STATUS_OPEN"
-	ANOMALYSTATUSUNSPECIFIED RuntimeV1AnomalyStatus = "ANOMALY_STATUS_UNSPECIFIED"
+	RuntimeV1AnomalyStatusANOMALYSTATUSACKED       RuntimeV1AnomalyStatus = "ANOMALY_STATUS_ACKED"
+	RuntimeV1AnomalyStatusANOMALYSTATUSCLOSED      RuntimeV1AnomalyStatus = "ANOMALY_STATUS_CLOSED"
+	RuntimeV1AnomalyStatusANOMALYSTATUSOPEN        RuntimeV1AnomalyStatus = "ANOMALY_STATUS_OPEN"
+	RuntimeV1AnomalyStatusANOMALYSTATUSUNSPECIFIED RuntimeV1AnomalyStatus = "ANOMALY_STATUS_UNSPECIFIED"
 )
 
 // Defines values for RuntimeV1CloseReason.
 const (
-	CLOSEREASONFALSEPOSITIVE RuntimeV1CloseReason = "CLOSE_REASON_FALSE_POSITIVE"
-	CLOSEREASONOTHER         RuntimeV1CloseReason = "CLOSE_REASON_OTHER"
-	CLOSEREASONRESOLVED      RuntimeV1CloseReason = "CLOSE_REASON_RESOLVED"
-	CLOSEREASONUNSPECIFIED   RuntimeV1CloseReason = "CLOSE_REASON_UNSPECIFIED"
+	RuntimeV1CloseReasonCLOSEREASONFALSEPOSITIVE RuntimeV1CloseReason = "CLOSE_REASON_FALSE_POSITIVE"
+	RuntimeV1CloseReasonCLOSEREASONOTHER         RuntimeV1CloseReason = "CLOSE_REASON_OTHER"
+	RuntimeV1CloseReasonCLOSEREASONRESOLVED      RuntimeV1CloseReason = "CLOSE_REASON_RESOLVED"
+	RuntimeV1CloseReasonCLOSEREASONUNSPECIFIED   RuntimeV1CloseReason = "CLOSE_REASON_UNSPECIFIED"
 )
 
 // Defines values for RuntimeV1ListEntryKind.
 const (
-	LISTENTRYKINDCIDR    RuntimeV1ListEntryKind = "LIST_ENTRY_KIND_CIDR"
-	LISTENTRYKINDIP      RuntimeV1ListEntryKind = "LIST_ENTRY_KIND_IP"
-	LISTENTRYKINDSHA256  RuntimeV1ListEntryKind = "LIST_ENTRY_KIND_SHA256"
-	LISTENTRYKINDSTRING  RuntimeV1ListEntryKind = "LIST_ENTRY_KIND_STRING"
-	LISTENTRYKINDUNKNOWN RuntimeV1ListEntryKind = "LIST_ENTRY_KIND_UNKNOWN"
+	RuntimeV1ListEntryKindLISTENTRYKINDCIDR    RuntimeV1ListEntryKind = "LIST_ENTRY_KIND_CIDR"
+	RuntimeV1ListEntryKindLISTENTRYKINDIP      RuntimeV1ListEntryKind = "LIST_ENTRY_KIND_IP"
+	RuntimeV1ListEntryKindLISTENTRYKINDSHA256  RuntimeV1ListEntryKind = "LIST_ENTRY_KIND_SHA256"
+	RuntimeV1ListEntryKindLISTENTRYKINDSTRING  RuntimeV1ListEntryKind = "LIST_ENTRY_KIND_STRING"
+	RuntimeV1ListEntryKindLISTENTRYKINDUNKNOWN RuntimeV1ListEntryKind = "LIST_ENTRY_KIND_UNKNOWN"
 )
 
 // Defines values for RuntimeV1RuleEngineType.
 const (
-	RULEENGINETYPECEL     RuntimeV1RuleEngineType = "RULE_ENGINE_TYPE_CEL"
-	RULEENGINETYPEGO      RuntimeV1RuleEngineType = "RULE_ENGINE_TYPE_GO"
-	RULEENGINETYPEUNKNOWN RuntimeV1RuleEngineType = "RULE_ENGINE_TYPE_UNKNOWN"
+	RuntimeV1RuleEngineTypeRULEENGINETYPECEL     RuntimeV1RuleEngineType = "RULE_ENGINE_TYPE_CEL"
+	RuntimeV1RuleEngineTypeRULEENGINETYPEGO      RuntimeV1RuleEngineType = "RULE_ENGINE_TYPE_GO"
+	RuntimeV1RuleEngineTypeRULEENGINETYPEUNKNOWN RuntimeV1RuleEngineType = "RULE_ENGINE_TYPE_UNKNOWN"
 )
 
 // Defines values for RuntimeV1Severity.
@@ -732,33 +739,33 @@ const (
 
 // Defines values for RuntimeV1ValidationType.
 const (
-	VALIDATECELRESOURCESELECTOR RuntimeV1ValidationType = "VALIDATE_CEL_RESOURCE_SELECTOR"
-	VALIDATECELRULE             RuntimeV1ValidationType = "VALIDATE_CEL_RULE"
-	VALIDATEUNKNOWN             RuntimeV1ValidationType = "VALIDATE_UNKNOWN"
+	RuntimeV1ValidationTypeVALIDATECELRESOURCESELECTOR RuntimeV1ValidationType = "VALIDATE_CEL_RESOURCE_SELECTOR"
+	RuntimeV1ValidationTypeVALIDATECELRULE             RuntimeV1ValidationType = "VALIDATE_CEL_RULE"
+	RuntimeV1ValidationTypeVALIDATEUNKNOWN             RuntimeV1ValidationType = "VALIDATE_UNKNOWN"
 )
 
 // Defines values for ScheduledrebalancingV1JobStatus.
 const (
-	JobStatusFailed     ScheduledrebalancingV1JobStatus = "JobStatusFailed"
-	JobStatusFinished   ScheduledrebalancingV1JobStatus = "JobStatusFinished"
-	JobStatusInProgress ScheduledrebalancingV1JobStatus = "JobStatusInProgress"
-	JobStatusPending    ScheduledrebalancingV1JobStatus = "JobStatusPending"
-	JobStatusSkipped    ScheduledrebalancingV1JobStatus = "JobStatusSkipped"
+	ScheduledrebalancingV1JobStatusJobStatusFailed     ScheduledrebalancingV1JobStatus = "JobStatusFailed"
+	ScheduledrebalancingV1JobStatusJobStatusFinished   ScheduledrebalancingV1JobStatus = "JobStatusFinished"
+	ScheduledrebalancingV1JobStatusJobStatusInProgress ScheduledrebalancingV1JobStatus = "JobStatusInProgress"
+	ScheduledrebalancingV1JobStatusJobStatusPending    ScheduledrebalancingV1JobStatus = "JobStatusPending"
+	ScheduledrebalancingV1JobStatusJobStatusSkipped    ScheduledrebalancingV1JobStatus = "JobStatusSkipped"
 )
 
 // Defines values for ScheduledrebalancingV1TargetNodeSelectionAlgorithm.
 const (
-	TargetNodeSelectionAlgorithmNormalizedPrice ScheduledrebalancingV1TargetNodeSelectionAlgorithm = "TargetNodeSelectionAlgorithmNormalizedPrice"
-	TargetNodeSelectionAlgorithmUtilization     ScheduledrebalancingV1TargetNodeSelectionAlgorithm = "TargetNodeSelectionAlgorithmUtilization"
-	TargetNodeSelectionAlgorithmUtilizedPrice   ScheduledrebalancingV1TargetNodeSelectionAlgorithm = "TargetNodeSelectionAlgorithmUtilizedPrice"
+	ScheduledrebalancingV1TargetNodeSelectionAlgorithmTargetNodeSelectionAlgorithmNormalizedPrice ScheduledrebalancingV1TargetNodeSelectionAlgorithm = "TargetNodeSelectionAlgorithmNormalizedPrice"
+	ScheduledrebalancingV1TargetNodeSelectionAlgorithmTargetNodeSelectionAlgorithmUtilization     ScheduledrebalancingV1TargetNodeSelectionAlgorithm = "TargetNodeSelectionAlgorithmUtilization"
+	ScheduledrebalancingV1TargetNodeSelectionAlgorithmTargetNodeSelectionAlgorithmUtilizedPrice   ScheduledrebalancingV1TargetNodeSelectionAlgorithm = "TargetNodeSelectionAlgorithmUtilizedPrice"
 )
 
 // Defines values for WorkloadoptimizationV1ActionType.
 const (
-	ACTIONTYPEUNSPECIFIED WorkloadoptimizationV1ActionType = "ACTION_TYPE_UNSPECIFIED"
-	APPLY                 WorkloadoptimizationV1ActionType = "APPLY"
-	IGNORE                WorkloadoptimizationV1ActionType = "IGNORE"
-	PERSIST               WorkloadoptimizationV1ActionType = "PERSIST"
+	WorkloadoptimizationV1ActionTypeACTIONTYPEUNSPECIFIED WorkloadoptimizationV1ActionType = "ACTION_TYPE_UNSPECIFIED"
+	WorkloadoptimizationV1ActionTypeAPPLY                 WorkloadoptimizationV1ActionType = "APPLY"
+	WorkloadoptimizationV1ActionTypeIGNORE                WorkloadoptimizationV1ActionType = "IGNORE"
+	WorkloadoptimizationV1ActionTypePERSIST               WorkloadoptimizationV1ActionType = "PERSIST"
 )
 
 // Defines values for WorkloadoptimizationV1ApplyType.
@@ -770,13 +777,13 @@ const (
 
 // Defines values for WorkloadoptimizationV1ConversionResultStatus.
 const (
-	ALREADYAVERAGE              WorkloadoptimizationV1ConversionResultStatus = "ALREADY_AVERAGE"
-	CONVERSIONSTATUSUNSPECIFIED WorkloadoptimizationV1ConversionResultStatus = "CONVERSION_STATUS_UNSPECIFIED"
-	CONVERTED                   WorkloadoptimizationV1ConversionResultStatus = "CONVERTED"
-	MISSINGREQUESTS             WorkloadoptimizationV1ConversionResultStatus = "MISSING_REQUESTS"
-	NOMETRICS                   WorkloadoptimizationV1ConversionResultStatus = "NO_METRICS"
-	NONCONVERTIBLE              WorkloadoptimizationV1ConversionResultStatus = "NON_CONVERTIBLE"
-	REQUESTSTOOSMALL            WorkloadoptimizationV1ConversionResultStatus = "REQUESTS_TOO_SMALL"
+	WorkloadoptimizationV1ConversionResultStatusALREADYAVERAGE              WorkloadoptimizationV1ConversionResultStatus = "ALREADY_AVERAGE"
+	WorkloadoptimizationV1ConversionResultStatusCONVERSIONSTATUSUNSPECIFIED WorkloadoptimizationV1ConversionResultStatus = "CONVERSION_STATUS_UNSPECIFIED"
+	WorkloadoptimizationV1ConversionResultStatusCONVERTED                   WorkloadoptimizationV1ConversionResultStatus = "CONVERTED"
+	WorkloadoptimizationV1ConversionResultStatusMISSINGREQUESTS             WorkloadoptimizationV1ConversionResultStatus = "MISSING_REQUESTS"
+	WorkloadoptimizationV1ConversionResultStatusNOMETRICS                   WorkloadoptimizationV1ConversionResultStatus = "NO_METRICS"
+	WorkloadoptimizationV1ConversionResultStatusNONCONVERTIBLE              WorkloadoptimizationV1ConversionResultStatus = "NON_CONVERTIBLE"
+	WorkloadoptimizationV1ConversionResultStatusREQUESTSTOOSMALL            WorkloadoptimizationV1ConversionResultStatus = "REQUESTS_TOO_SMALL"
 )
 
 // Defines values for WorkloadoptimizationV1CustomMetricUnit.
@@ -860,9 +867,9 @@ const (
 
 // Defines values for WorkloadoptimizationV1GetAgentStatusResponseAgentStatus.
 const (
-	AGENTSTATUSINVALID WorkloadoptimizationV1GetAgentStatusResponseAgentStatus = "AGENT_STATUS_INVALID"
-	AGENTSTATUSRUNNING WorkloadoptimizationV1GetAgentStatusResponseAgentStatus = "AGENT_STATUS_RUNNING"
-	AGENTSTATUSUNKNOWN WorkloadoptimizationV1GetAgentStatusResponseAgentStatus = "AGENT_STATUS_UNKNOWN"
+	WorkloadoptimizationV1GetAgentStatusResponseAgentStatusAGENTSTATUSINVALID WorkloadoptimizationV1GetAgentStatusResponseAgentStatus = "AGENT_STATUS_INVALID"
+	WorkloadoptimizationV1GetAgentStatusResponseAgentStatusAGENTSTATUSRUNNING WorkloadoptimizationV1GetAgentStatusResponseAgentStatus = "AGENT_STATUS_RUNNING"
+	WorkloadoptimizationV1GetAgentStatusResponseAgentStatusAGENTSTATUSUNKNOWN WorkloadoptimizationV1GetAgentStatusResponseAgentStatus = "AGENT_STATUS_UNKNOWN"
 )
 
 // Defines values for WorkloadoptimizationV1GetHPAV2MigrationEligibilityResponseMigrationStatus.
@@ -882,11 +889,11 @@ const (
 
 // Defines values for WorkloadoptimizationV1HPALegacyUnsupportedReasonType.
 const (
-	HPALEGACYUNSUPPORTEDREASONHASNATIVEHPA        WorkloadoptimizationV1HPALegacyUnsupportedReasonType = "HPA_LEGACY_UNSUPPORTED_REASON_HAS_NATIVE_HPA"
-	HPALEGACYUNSUPPORTEDREASONNOELIGIBLECONTAINER WorkloadoptimizationV1HPALegacyUnsupportedReasonType = "HPA_LEGACY_UNSUPPORTED_REASON_NO_ELIGIBLE_CONTAINER"
-	HPALEGACYUNSUPPORTEDREASONROLLOUTWORKLOADREF  WorkloadoptimizationV1HPALegacyUnsupportedReasonType = "HPA_LEGACY_UNSUPPORTED_REASON_ROLLOUT_WORKLOAD_REF"
-	HPALEGACYUNSUPPORTEDREASONUNKNOWN             WorkloadoptimizationV1HPALegacyUnsupportedReasonType = "HPA_LEGACY_UNSUPPORTED_REASON_UNKNOWN"
-	HPALEGACYUNSUPPORTEDREASONWORKLOADTYPE        WorkloadoptimizationV1HPALegacyUnsupportedReasonType = "HPA_LEGACY_UNSUPPORTED_REASON_WORKLOAD_TYPE"
+	WorkloadoptimizationV1HPALegacyUnsupportedReasonTypeHPALEGACYUNSUPPORTEDREASONHASNATIVEHPA        WorkloadoptimizationV1HPALegacyUnsupportedReasonType = "HPA_LEGACY_UNSUPPORTED_REASON_HAS_NATIVE_HPA"
+	WorkloadoptimizationV1HPALegacyUnsupportedReasonTypeHPALEGACYUNSUPPORTEDREASONNOELIGIBLECONTAINER WorkloadoptimizationV1HPALegacyUnsupportedReasonType = "HPA_LEGACY_UNSUPPORTED_REASON_NO_ELIGIBLE_CONTAINER"
+	WorkloadoptimizationV1HPALegacyUnsupportedReasonTypeHPALEGACYUNSUPPORTEDREASONROLLOUTWORKLOADREF  WorkloadoptimizationV1HPALegacyUnsupportedReasonType = "HPA_LEGACY_UNSUPPORTED_REASON_ROLLOUT_WORKLOAD_REF"
+	WorkloadoptimizationV1HPALegacyUnsupportedReasonTypeHPALEGACYUNSUPPORTEDREASONUNKNOWN             WorkloadoptimizationV1HPALegacyUnsupportedReasonType = "HPA_LEGACY_UNSUPPORTED_REASON_UNKNOWN"
+	WorkloadoptimizationV1HPALegacyUnsupportedReasonTypeHPALEGACYUNSUPPORTEDREASONWORKLOADTYPE        WorkloadoptimizationV1HPALegacyUnsupportedReasonType = "HPA_LEGACY_UNSUPPORTED_REASON_WORKLOAD_TYPE"
 )
 
 // Defines values for WorkloadoptimizationV1HPAManagementMode.
@@ -898,19 +905,19 @@ const (
 
 // Defines values for WorkloadoptimizationV1HPAManagementSource.
 const (
-	SOURCESCALINGPOLICY WorkloadoptimizationV1HPAManagementSource = "SOURCE_SCALING_POLICY"
-	SOURCEUNSPECIFIED   WorkloadoptimizationV1HPAManagementSource = "SOURCE_UNSPECIFIED"
-	SOURCEVPACONVERTER  WorkloadoptimizationV1HPAManagementSource = "SOURCE_VPA_CONVERTER"
+	WorkloadoptimizationV1HPAManagementSourceSOURCESCALINGPOLICY WorkloadoptimizationV1HPAManagementSource = "SOURCE_SCALING_POLICY"
+	WorkloadoptimizationV1HPAManagementSourceSOURCEUNSPECIFIED   WorkloadoptimizationV1HPAManagementSource = "SOURCE_UNSPECIFIED"
+	WorkloadoptimizationV1HPAManagementSourceSOURCEVPACONVERTER  WorkloadoptimizationV1HPAManagementSource = "SOURCE_VPA_CONVERTER"
 )
 
 // Defines values for WorkloadoptimizationV1HPAMode.
 const (
-	HPAMODELEGACY      WorkloadoptimizationV1HPAMode = "HPA_MODE_LEGACY"
-	HPAMODENATIVE      WorkloadoptimizationV1HPAMode = "HPA_MODE_NATIVE"
-	HPAMODENOTSET      WorkloadoptimizationV1HPAMode = "HPA_MODE_NOT_SET"
-	HPAMODETAKEOVER    WorkloadoptimizationV1HPAMode = "HPA_MODE_TAKEOVER"
-	HPAMODEUNSPECIFIED WorkloadoptimizationV1HPAMode = "HPA_MODE_UNSPECIFIED"
-	HPAMODEV2          WorkloadoptimizationV1HPAMode = "HPA_MODE_V2"
+	WorkloadoptimizationV1HPAModeHPAMODELEGACY      WorkloadoptimizationV1HPAMode = "HPA_MODE_LEGACY"
+	WorkloadoptimizationV1HPAModeHPAMODENATIVE      WorkloadoptimizationV1HPAMode = "HPA_MODE_NATIVE"
+	WorkloadoptimizationV1HPAModeHPAMODENOTSET      WorkloadoptimizationV1HPAMode = "HPA_MODE_NOT_SET"
+	WorkloadoptimizationV1HPAModeHPAMODETAKEOVER    WorkloadoptimizationV1HPAMode = "HPA_MODE_TAKEOVER"
+	WorkloadoptimizationV1HPAModeHPAMODEUNSPECIFIED WorkloadoptimizationV1HPAMode = "HPA_MODE_UNSPECIFIED"
+	WorkloadoptimizationV1HPAModeHPAMODEV2          WorkloadoptimizationV1HPAMode = "HPA_MODE_V2"
 )
 
 // Defines values for WorkloadoptimizationV1HPAOwnerType.
@@ -924,41 +931,41 @@ const (
 
 // Defines values for WorkloadoptimizationV1HPAScalingPolicyType.
 const (
-	HPASCALINGPOLICYTYPEUNSPECIFIED WorkloadoptimizationV1HPAScalingPolicyType = "HPA_SCALING_POLICY_TYPE_UNSPECIFIED"
-	PERCENTSCALINGPOLICY            WorkloadoptimizationV1HPAScalingPolicyType = "PERCENT_SCALING_POLICY"
-	PODSSCALINGPOLICY               WorkloadoptimizationV1HPAScalingPolicyType = "PODS_SCALING_POLICY"
+	WorkloadoptimizationV1HPAScalingPolicyTypeHPASCALINGPOLICYTYPEUNSPECIFIED WorkloadoptimizationV1HPAScalingPolicyType = "HPA_SCALING_POLICY_TYPE_UNSPECIFIED"
+	WorkloadoptimizationV1HPAScalingPolicyTypePERCENTSCALINGPOLICY            WorkloadoptimizationV1HPAScalingPolicyType = "PERCENT_SCALING_POLICY"
+	WorkloadoptimizationV1HPAScalingPolicyTypePODSSCALINGPOLICY               WorkloadoptimizationV1HPAScalingPolicyType = "PODS_SCALING_POLICY"
 )
 
 // Defines values for WorkloadoptimizationV1HPAUnsupportedReasonType.
 const (
-	HPAUNSUPPORTEDREASONTAKEOWNERSHIP WorkloadoptimizationV1HPAUnsupportedReasonType = "HPA_UNSUPPORTED_REASON_TAKE_OWNERSHIP"
-	HPAUNSUPPORTEDREASONUNKNOWN       WorkloadoptimizationV1HPAUnsupportedReasonType = "HPA_UNSUPPORTED_REASON_UNKNOWN"
-	HPAUNSUPPORTEDREASONWORKLOADTYPE  WorkloadoptimizationV1HPAUnsupportedReasonType = "HPA_UNSUPPORTED_REASON_WORKLOAD_TYPE"
+	WorkloadoptimizationV1HPAUnsupportedReasonTypeHPAUNSUPPORTEDREASONTAKEOWNERSHIP WorkloadoptimizationV1HPAUnsupportedReasonType = "HPA_UNSUPPORTED_REASON_TAKE_OWNERSHIP"
+	WorkloadoptimizationV1HPAUnsupportedReasonTypeHPAUNSUPPORTEDREASONUNKNOWN       WorkloadoptimizationV1HPAUnsupportedReasonType = "HPA_UNSUPPORTED_REASON_UNKNOWN"
+	WorkloadoptimizationV1HPAUnsupportedReasonTypeHPAUNSUPPORTEDREASONWORKLOADTYPE  WorkloadoptimizationV1HPAUnsupportedReasonType = "HPA_UNSUPPORTED_REASON_WORKLOAD_TYPE"
 )
 
 // Defines values for WorkloadoptimizationV1InPlaceResizeStatus.
 const (
-	ERROR                      WorkloadoptimizationV1InPlaceResizeStatus = "ERROR"
-	RESIZED                    WorkloadoptimizationV1InPlaceResizeStatus = "RESIZED"
-	RESIZING                   WorkloadoptimizationV1InPlaceResizeStatus = "RESIZING"
-	UNKNOWNINPLACERESIZESTATUS WorkloadoptimizationV1InPlaceResizeStatus = "UNKNOWN_INPLACE_RESIZE_STATUS"
+	WorkloadoptimizationV1InPlaceResizeStatusERROR                      WorkloadoptimizationV1InPlaceResizeStatus = "ERROR"
+	WorkloadoptimizationV1InPlaceResizeStatusRESIZED                    WorkloadoptimizationV1InPlaceResizeStatus = "RESIZED"
+	WorkloadoptimizationV1InPlaceResizeStatusRESIZING                   WorkloadoptimizationV1InPlaceResizeStatus = "RESIZING"
+	WorkloadoptimizationV1InPlaceResizeStatusUNKNOWNINPLACERESIZESTATUS WorkloadoptimizationV1InPlaceResizeStatus = "UNKNOWN_INPLACE_RESIZE_STATUS"
 )
 
 // Defines values for WorkloadoptimizationV1KubernetesLabelSelectorOperator.
 const (
-	KUBERNETESLABELSELECTOROPCONTAINS     WorkloadoptimizationV1KubernetesLabelSelectorOperator = "KUBERNETES_LABEL_SELECTOR_OP_CONTAINS"
-	KUBERNETESLABELSELECTOROPDOESNOTEXIST WorkloadoptimizationV1KubernetesLabelSelectorOperator = "KUBERNETES_LABEL_SELECTOR_OP_DOES_NOT_EXIST"
-	KUBERNETESLABELSELECTOROPEXISTS       WorkloadoptimizationV1KubernetesLabelSelectorOperator = "KUBERNETES_LABEL_SELECTOR_OP_EXISTS"
-	KUBERNETESLABELSELECTOROPIN           WorkloadoptimizationV1KubernetesLabelSelectorOperator = "KUBERNETES_LABEL_SELECTOR_OP_IN"
-	KUBERNETESLABELSELECTOROPNOTIN        WorkloadoptimizationV1KubernetesLabelSelectorOperator = "KUBERNETES_LABEL_SELECTOR_OP_NOT_IN"
-	KUBERNETESLABELSELECTOROPREGEX        WorkloadoptimizationV1KubernetesLabelSelectorOperator = "KUBERNETES_LABEL_SELECTOR_OP_REGEX"
-	KUBERNETESLABELSELECTOROPUNSPECIFIED  WorkloadoptimizationV1KubernetesLabelSelectorOperator = "KUBERNETES_LABEL_SELECTOR_OP_UNSPECIFIED"
+	WorkloadoptimizationV1KubernetesLabelSelectorOperatorKUBERNETESLABELSELECTOROPCONTAINS     WorkloadoptimizationV1KubernetesLabelSelectorOperator = "KUBERNETES_LABEL_SELECTOR_OP_CONTAINS"
+	WorkloadoptimizationV1KubernetesLabelSelectorOperatorKUBERNETESLABELSELECTOROPDOESNOTEXIST WorkloadoptimizationV1KubernetesLabelSelectorOperator = "KUBERNETES_LABEL_SELECTOR_OP_DOES_NOT_EXIST"
+	WorkloadoptimizationV1KubernetesLabelSelectorOperatorKUBERNETESLABELSELECTOROPEXISTS       WorkloadoptimizationV1KubernetesLabelSelectorOperator = "KUBERNETES_LABEL_SELECTOR_OP_EXISTS"
+	WorkloadoptimizationV1KubernetesLabelSelectorOperatorKUBERNETESLABELSELECTOROPIN           WorkloadoptimizationV1KubernetesLabelSelectorOperator = "KUBERNETES_LABEL_SELECTOR_OP_IN"
+	WorkloadoptimizationV1KubernetesLabelSelectorOperatorKUBERNETESLABELSELECTOROPNOTIN        WorkloadoptimizationV1KubernetesLabelSelectorOperator = "KUBERNETES_LABEL_SELECTOR_OP_NOT_IN"
+	WorkloadoptimizationV1KubernetesLabelSelectorOperatorKUBERNETESLABELSELECTOROPREGEX        WorkloadoptimizationV1KubernetesLabelSelectorOperator = "KUBERNETES_LABEL_SELECTOR_OP_REGEX"
+	WorkloadoptimizationV1KubernetesLabelSelectorOperatorKUBERNETESLABELSELECTOROPUNSPECIFIED  WorkloadoptimizationV1KubernetesLabelSelectorOperator = "KUBERNETES_LABEL_SELECTOR_OP_UNSPECIFIED"
 )
 
 // Defines values for WorkloadoptimizationV1ManagedBy.
 const (
-	ANNOTATIONS WorkloadoptimizationV1ManagedBy = "ANNOTATIONS"
-	API         WorkloadoptimizationV1ManagedBy = "API"
+	WorkloadoptimizationV1ManagedByANNOTATIONS WorkloadoptimizationV1ManagedBy = "ANNOTATIONS"
+	WorkloadoptimizationV1ManagedByAPI         WorkloadoptimizationV1ManagedBy = "API"
 )
 
 // Defines values for WorkloadoptimizationV1ManagementOption.
@@ -970,87 +977,87 @@ const (
 
 // Defines values for WorkloadoptimizationV1MetricSourceType.
 const (
-	CONTAINERRESOURCE           WorkloadoptimizationV1MetricSourceType = "CONTAINER_RESOURCE"
-	EXTERNAL                    WorkloadoptimizationV1MetricSourceType = "EXTERNAL"
-	METRICSOURCETYPEUNSPECIFIED WorkloadoptimizationV1MetricSourceType = "METRIC_SOURCE_TYPE_UNSPECIFIED"
-	OBJECT                      WorkloadoptimizationV1MetricSourceType = "OBJECT"
-	PODS                        WorkloadoptimizationV1MetricSourceType = "PODS"
-	RESOURCE                    WorkloadoptimizationV1MetricSourceType = "RESOURCE"
+	WorkloadoptimizationV1MetricSourceTypeCONTAINERRESOURCE           WorkloadoptimizationV1MetricSourceType = "CONTAINER_RESOURCE"
+	WorkloadoptimizationV1MetricSourceTypeEXTERNAL                    WorkloadoptimizationV1MetricSourceType = "EXTERNAL"
+	WorkloadoptimizationV1MetricSourceTypeMETRICSOURCETYPEUNSPECIFIED WorkloadoptimizationV1MetricSourceType = "METRIC_SOURCE_TYPE_UNSPECIFIED"
+	WorkloadoptimizationV1MetricSourceTypeOBJECT                      WorkloadoptimizationV1MetricSourceType = "OBJECT"
+	WorkloadoptimizationV1MetricSourceTypePODS                        WorkloadoptimizationV1MetricSourceType = "PODS"
+	WorkloadoptimizationV1MetricSourceTypeRESOURCE                    WorkloadoptimizationV1MetricSourceType = "RESOURCE"
 )
 
 // Defines values for WorkloadoptimizationV1MetricTargetType.
 const (
-	AVERAGEVALUE                WorkloadoptimizationV1MetricTargetType = "AVERAGE_VALUE"
-	METRICTARGETTYPEUNSPECIFIED WorkloadoptimizationV1MetricTargetType = "METRIC_TARGET_TYPE_UNSPECIFIED"
-	UTILIZATION                 WorkloadoptimizationV1MetricTargetType = "UTILIZATION"
-	VALUE                       WorkloadoptimizationV1MetricTargetType = "VALUE"
+	WorkloadoptimizationV1MetricTargetTypeAVERAGEVALUE                WorkloadoptimizationV1MetricTargetType = "AVERAGE_VALUE"
+	WorkloadoptimizationV1MetricTargetTypeMETRICTARGETTYPEUNSPECIFIED WorkloadoptimizationV1MetricTargetType = "METRIC_TARGET_TYPE_UNSPECIFIED"
+	WorkloadoptimizationV1MetricTargetTypeUTILIZATION                 WorkloadoptimizationV1MetricTargetType = "UTILIZATION"
+	WorkloadoptimizationV1MetricTargetTypeVALUE                       WorkloadoptimizationV1MetricTargetType = "VALUE"
 )
 
 // Defines values for WorkloadoptimizationV1MetricsBinaryOpType.
 const (
-	METRICSBINARYOPADD             WorkloadoptimizationV1MetricsBinaryOpType = "METRICS_BINARY_OP_ADD"
-	METRICSBINARYOPDIV             WorkloadoptimizationV1MetricsBinaryOpType = "METRICS_BINARY_OP_DIV"
-	METRICSBINARYOPMUL             WorkloadoptimizationV1MetricsBinaryOpType = "METRICS_BINARY_OP_MUL"
-	METRICSBINARYOPSUB             WorkloadoptimizationV1MetricsBinaryOpType = "METRICS_BINARY_OP_SUB"
-	METRICSBINARYOPTYPEUNSPECIFIED WorkloadoptimizationV1MetricsBinaryOpType = "METRICS_BINARY_OP_TYPE_UNSPECIFIED"
+	WorkloadoptimizationV1MetricsBinaryOpTypeMETRICSBINARYOPADD             WorkloadoptimizationV1MetricsBinaryOpType = "METRICS_BINARY_OP_ADD"
+	WorkloadoptimizationV1MetricsBinaryOpTypeMETRICSBINARYOPDIV             WorkloadoptimizationV1MetricsBinaryOpType = "METRICS_BINARY_OP_DIV"
+	WorkloadoptimizationV1MetricsBinaryOpTypeMETRICSBINARYOPMUL             WorkloadoptimizationV1MetricsBinaryOpType = "METRICS_BINARY_OP_MUL"
+	WorkloadoptimizationV1MetricsBinaryOpTypeMETRICSBINARYOPSUB             WorkloadoptimizationV1MetricsBinaryOpType = "METRICS_BINARY_OP_SUB"
+	WorkloadoptimizationV1MetricsBinaryOpTypeMETRICSBINARYOPTYPEUNSPECIFIED WorkloadoptimizationV1MetricsBinaryOpType = "METRICS_BINARY_OP_TYPE_UNSPECIFIED"
 )
 
 // Defines values for WorkloadoptimizationV1MetricsGroupByDimension.
 const (
-	DIMENSIONCONTAINER   WorkloadoptimizationV1MetricsGroupByDimension = "DIMENSION_CONTAINER"
-	DIMENSIONISCUSTOM    WorkloadoptimizationV1MetricsGroupByDimension = "DIMENSION_IS_CUSTOM"
-	DIMENSIONKIND        WorkloadoptimizationV1MetricsGroupByDimension = "DIMENSION_KIND"
-	DIMENSIONNAME        WorkloadoptimizationV1MetricsGroupByDimension = "DIMENSION_NAME"
-	DIMENSIONNAMESPACE   WorkloadoptimizationV1MetricsGroupByDimension = "DIMENSION_NAMESPACE"
-	DIMENSIONUNSPECIFIED WorkloadoptimizationV1MetricsGroupByDimension = "DIMENSION_UNSPECIFIED"
+	WorkloadoptimizationV1MetricsGroupByDimensionDIMENSIONCONTAINER   WorkloadoptimizationV1MetricsGroupByDimension = "DIMENSION_CONTAINER"
+	WorkloadoptimizationV1MetricsGroupByDimensionDIMENSIONISCUSTOM    WorkloadoptimizationV1MetricsGroupByDimension = "DIMENSION_IS_CUSTOM"
+	WorkloadoptimizationV1MetricsGroupByDimensionDIMENSIONKIND        WorkloadoptimizationV1MetricsGroupByDimension = "DIMENSION_KIND"
+	WorkloadoptimizationV1MetricsGroupByDimensionDIMENSIONNAME        WorkloadoptimizationV1MetricsGroupByDimension = "DIMENSION_NAME"
+	WorkloadoptimizationV1MetricsGroupByDimensionDIMENSIONNAMESPACE   WorkloadoptimizationV1MetricsGroupByDimension = "DIMENSION_NAMESPACE"
+	WorkloadoptimizationV1MetricsGroupByDimensionDIMENSIONUNSPECIFIED WorkloadoptimizationV1MetricsGroupByDimension = "DIMENSION_UNSPECIFIED"
 )
 
 // Defines values for WorkloadoptimizationV1MetricsScalarOpType.
 const (
-	METRICSSCALAROPADD             WorkloadoptimizationV1MetricsScalarOpType = "METRICS_SCALAR_OP_ADD"
-	METRICSSCALAROPDIV             WorkloadoptimizationV1MetricsScalarOpType = "METRICS_SCALAR_OP_DIV"
-	METRICSSCALAROPMUL             WorkloadoptimizationV1MetricsScalarOpType = "METRICS_SCALAR_OP_MUL"
-	METRICSSCALAROPTYPEUNSPECIFIED WorkloadoptimizationV1MetricsScalarOpType = "METRICS_SCALAR_OP_TYPE_UNSPECIFIED"
+	WorkloadoptimizationV1MetricsScalarOpTypeMETRICSSCALAROPADD             WorkloadoptimizationV1MetricsScalarOpType = "METRICS_SCALAR_OP_ADD"
+	WorkloadoptimizationV1MetricsScalarOpTypeMETRICSSCALAROPDIV             WorkloadoptimizationV1MetricsScalarOpType = "METRICS_SCALAR_OP_DIV"
+	WorkloadoptimizationV1MetricsScalarOpTypeMETRICSSCALAROPMUL             WorkloadoptimizationV1MetricsScalarOpType = "METRICS_SCALAR_OP_MUL"
+	WorkloadoptimizationV1MetricsScalarOpTypeMETRICSSCALAROPTYPEUNSPECIFIED WorkloadoptimizationV1MetricsScalarOpType = "METRICS_SCALAR_OP_TYPE_UNSPECIFIED"
 )
 
 // Defines values for WorkloadoptimizationV1PodStatus.
 const (
-	FAILED           WorkloadoptimizationV1PodStatus = "FAILED"
-	PENDING          WorkloadoptimizationV1PodStatus = "PENDING"
-	RUNNING          WorkloadoptimizationV1PodStatus = "RUNNING"
-	SUCCEEDED        WorkloadoptimizationV1PodStatus = "SUCCEEDED"
-	UNKNOWNPODSTATUS WorkloadoptimizationV1PodStatus = "UNKNOWN_POD_STATUS"
+	WorkloadoptimizationV1PodStatusFAILED           WorkloadoptimizationV1PodStatus = "FAILED"
+	WorkloadoptimizationV1PodStatusPENDING          WorkloadoptimizationV1PodStatus = "PENDING"
+	WorkloadoptimizationV1PodStatusRUNNING          WorkloadoptimizationV1PodStatus = "RUNNING"
+	WorkloadoptimizationV1PodStatusSUCCEEDED        WorkloadoptimizationV1PodStatus = "SUCCEEDED"
+	WorkloadoptimizationV1PodStatusUNKNOWNPODSTATUS WorkloadoptimizationV1PodStatus = "UNKNOWN_POD_STATUS"
 )
 
 // Defines values for WorkloadoptimizationV1RecommendationErrorType.
 const (
-	ERRORCUSTOMWORKLOADCONTAINERSMISMATCH WorkloadoptimizationV1RecommendationErrorType = "ERROR_CUSTOM_WORKLOAD_CONTAINERS_MISMATCH"
-	ERRORCUSTOMWORKLOADINVALIDNAME        WorkloadoptimizationV1RecommendationErrorType = "ERROR_CUSTOM_WORKLOAD_INVALID_NAME"
-	ERRORDEPLOYFAILED                     WorkloadoptimizationV1RecommendationErrorType = "ERROR_DEPLOY_FAILED"
-	ERRORHPASTATUSUNHEALTHY               WorkloadoptimizationV1RecommendationErrorType = "ERROR_HPA_STATUS_UNHEALTHY"
-	ERRORIMMEDIATEAPPLYBLOCKED            WorkloadoptimizationV1RecommendationErrorType = "ERROR_IMMEDIATE_APPLY_BLOCKED"
-	ERRORRECOMMENDATIONGENERATION         WorkloadoptimizationV1RecommendationErrorType = "ERROR_RECOMMENDATION_GENERATION"
-	ERRORUNKNOWN                          WorkloadoptimizationV1RecommendationErrorType = "ERROR_UNKNOWN"
+	WorkloadoptimizationV1RecommendationErrorTypeERRORCUSTOMWORKLOADCONTAINERSMISMATCH WorkloadoptimizationV1RecommendationErrorType = "ERROR_CUSTOM_WORKLOAD_CONTAINERS_MISMATCH"
+	WorkloadoptimizationV1RecommendationErrorTypeERRORCUSTOMWORKLOADINVALIDNAME        WorkloadoptimizationV1RecommendationErrorType = "ERROR_CUSTOM_WORKLOAD_INVALID_NAME"
+	WorkloadoptimizationV1RecommendationErrorTypeERRORDEPLOYFAILED                     WorkloadoptimizationV1RecommendationErrorType = "ERROR_DEPLOY_FAILED"
+	WorkloadoptimizationV1RecommendationErrorTypeERRORHPASTATUSUNHEALTHY               WorkloadoptimizationV1RecommendationErrorType = "ERROR_HPA_STATUS_UNHEALTHY"
+	WorkloadoptimizationV1RecommendationErrorTypeERRORIMMEDIATEAPPLYBLOCKED            WorkloadoptimizationV1RecommendationErrorType = "ERROR_IMMEDIATE_APPLY_BLOCKED"
+	WorkloadoptimizationV1RecommendationErrorTypeERRORRECOMMENDATIONGENERATION         WorkloadoptimizationV1RecommendationErrorType = "ERROR_RECOMMENDATION_GENERATION"
+	WorkloadoptimizationV1RecommendationErrorTypeERRORUNKNOWN                          WorkloadoptimizationV1RecommendationErrorType = "ERROR_UNKNOWN"
 )
 
 // Defines values for WorkloadoptimizationV1RecommendationEventType.
 const (
-	RECOMMENDATIONEVENTTYPEINVALID WorkloadoptimizationV1RecommendationEventType = "RECOMMENDATION_EVENT_TYPE_INVALID"
-	RECOMMENDATIONEVENTTYPEREVERT  WorkloadoptimizationV1RecommendationEventType = "RECOMMENDATION_EVENT_TYPE_REVERT"
+	WorkloadoptimizationV1RecommendationEventTypeRECOMMENDATIONEVENTTYPEINVALID WorkloadoptimizationV1RecommendationEventType = "RECOMMENDATION_EVENT_TYPE_INVALID"
+	WorkloadoptimizationV1RecommendationEventTypeRECOMMENDATIONEVENTTYPEREVERT  WorkloadoptimizationV1RecommendationEventType = "RECOMMENDATION_EVENT_TYPE_REVERT"
 )
 
 // Defines values for WorkloadoptimizationV1RecommendationOrigin.
 const (
-	ORIGINCONFIGCHANGED             WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_CONFIG_CHANGED"
-	ORIGINHPAALMOSTMAXEDOUT         WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_HPA_ALMOST_MAXED_OUT"
-	ORIGINHPAMAXEDOUT               WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_HPA_MAXED_OUT"
-	ORIGINMEMORYEVENT               WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_MEMORY_EVENT"
-	ORIGINREADONLYRESOURCECHANGED   WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_READONLY_RESOURCE_CHANGED"
-	ORIGINSNAPSHOT                  WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_SNAPSHOT"
-	ORIGINSTARTUPFAILUREEVENT       WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_STARTUP_FAILURE_EVENT"
-	ORIGINSURGEEVENT                WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_SURGE_EVENT"
-	ORIGINUNKNOWN                   WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_UNKNOWN"
-	ORIGINVERTICALMANAGEMENTENABLED WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_VERTICAL_MANAGEMENT_ENABLED"
+	WorkloadoptimizationV1RecommendationOriginORIGINCONFIGCHANGED             WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_CONFIG_CHANGED"
+	WorkloadoptimizationV1RecommendationOriginORIGINHPAALMOSTMAXEDOUT         WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_HPA_ALMOST_MAXED_OUT"
+	WorkloadoptimizationV1RecommendationOriginORIGINHPAMAXEDOUT               WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_HPA_MAXED_OUT"
+	WorkloadoptimizationV1RecommendationOriginORIGINMEMORYEVENT               WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_MEMORY_EVENT"
+	WorkloadoptimizationV1RecommendationOriginORIGINREADONLYRESOURCECHANGED   WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_READONLY_RESOURCE_CHANGED"
+	WorkloadoptimizationV1RecommendationOriginORIGINSNAPSHOT                  WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_SNAPSHOT"
+	WorkloadoptimizationV1RecommendationOriginORIGINSTARTUPFAILUREEVENT       WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_STARTUP_FAILURE_EVENT"
+	WorkloadoptimizationV1RecommendationOriginORIGINSURGEEVENT                WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_SURGE_EVENT"
+	WorkloadoptimizationV1RecommendationOriginORIGINUNKNOWN                   WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_UNKNOWN"
+	WorkloadoptimizationV1RecommendationOriginORIGINVERTICALMANAGEMENTENABLED WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_VERTICAL_MANAGEMENT_ENABLED"
 )
 
 // Defines values for WorkloadoptimizationV1RecommendationStatusType.
@@ -1063,35 +1070,35 @@ const (
 
 // Defines values for WorkloadoptimizationV1RecommendationStepLabelUnit.
 const (
-	BYTE            WorkloadoptimizationV1RecommendationStepLabelUnit = "BYTE"
-	MILLICORE       WorkloadoptimizationV1RecommendationStepLabelUnit = "MILLICORE"
-	PERCENT         WorkloadoptimizationV1RecommendationStepLabelUnit = "PERCENT"
-	UNITUNSPECIFIED WorkloadoptimizationV1RecommendationStepLabelUnit = "UNIT_UNSPECIFIED"
+	WorkloadoptimizationV1RecommendationStepLabelUnitBYTE            WorkloadoptimizationV1RecommendationStepLabelUnit = "BYTE"
+	WorkloadoptimizationV1RecommendationStepLabelUnitMILLICORE       WorkloadoptimizationV1RecommendationStepLabelUnit = "MILLICORE"
+	WorkloadoptimizationV1RecommendationStepLabelUnitPERCENT         WorkloadoptimizationV1RecommendationStepLabelUnit = "PERCENT"
+	WorkloadoptimizationV1RecommendationStepLabelUnitUNITUNSPECIFIED WorkloadoptimizationV1RecommendationStepLabelUnit = "UNIT_UNSPECIFIED"
 )
 
 // Defines values for WorkloadoptimizationV1RecommendationStopReasonType.
 const (
-	STOPREASONOOMKILL WorkloadoptimizationV1RecommendationStopReasonType = "STOP_REASON_OOMKILL"
-	STOPREASONUNKNOWN WorkloadoptimizationV1RecommendationStopReasonType = "STOP_REASON_UNKNOWN"
+	WorkloadoptimizationV1RecommendationStopReasonTypeSTOPREASONOOMKILL WorkloadoptimizationV1RecommendationStopReasonType = "STOP_REASON_OOMKILL"
+	WorkloadoptimizationV1RecommendationStopReasonTypeSTOPREASONUNKNOWN WorkloadoptimizationV1RecommendationStopReasonType = "STOP_REASON_UNKNOWN"
 )
 
 // Defines values for WorkloadoptimizationV1ResetSystemOverridesRequestTarget.
 const (
-	TARGETUNSPECIFIED    WorkloadoptimizationV1ResetSystemOverridesRequestTarget = "TARGET_UNSPECIFIED"
-	VERTICALOPTIMIZATION WorkloadoptimizationV1ResetSystemOverridesRequestTarget = "VERTICAL_OPTIMIZATION"
+	WorkloadoptimizationV1ResetSystemOverridesRequestTargetTARGETUNSPECIFIED    WorkloadoptimizationV1ResetSystemOverridesRequestTarget = "TARGET_UNSPECIFIED"
+	WorkloadoptimizationV1ResetSystemOverridesRequestTargetVERTICALOPTIMIZATION WorkloadoptimizationV1ResetSystemOverridesRequestTarget = "VERTICAL_OPTIMIZATION"
 )
 
 // Defines values for WorkloadoptimizationV1ResetSystemOverridesResponseReason.
 const (
-	REASONUNSPECIFIED      WorkloadoptimizationV1ResetSystemOverridesResponseReason = "REASON_UNSPECIFIED"
-	SYSTEMOVERRIDEINACTIVE WorkloadoptimizationV1ResetSystemOverridesResponseReason = "SYSTEM_OVERRIDE_INACTIVE"
+	WorkloadoptimizationV1ResetSystemOverridesResponseReasonREASONUNSPECIFIED      WorkloadoptimizationV1ResetSystemOverridesResponseReason = "REASON_UNSPECIFIED"
+	WorkloadoptimizationV1ResetSystemOverridesResponseReasonSYSTEMOVERRIDEINACTIVE WorkloadoptimizationV1ResetSystemOverridesResponseReason = "SYSTEM_OVERRIDE_INACTIVE"
 )
 
 // Defines values for WorkloadoptimizationV1ResetSystemOverridesResponseResult.
 const (
-	IGNORED           WorkloadoptimizationV1ResetSystemOverridesResponseResult = "IGNORED"
-	RESULTUNSPECIFIED WorkloadoptimizationV1ResetSystemOverridesResponseResult = "RESULT_UNSPECIFIED"
-	SUCCESS           WorkloadoptimizationV1ResetSystemOverridesResponseResult = "SUCCESS"
+	WorkloadoptimizationV1ResetSystemOverridesResponseResultIGNORED           WorkloadoptimizationV1ResetSystemOverridesResponseResult = "IGNORED"
+	WorkloadoptimizationV1ResetSystemOverridesResponseResultRESULTUNSPECIFIED WorkloadoptimizationV1ResetSystemOverridesResponseResult = "RESULT_UNSPECIFIED"
+	WorkloadoptimizationV1ResetSystemOverridesResponseResultSUCCESS           WorkloadoptimizationV1ResetSystemOverridesResponseResult = "SUCCESS"
 )
 
 // Defines values for WorkloadoptimizationV1ResourceConfigFunction.
@@ -1123,8 +1130,8 @@ const (
 
 // Defines values for WorkloadoptimizationV1RolloutBehaviorType.
 const (
-	NODISRUPTION WorkloadoptimizationV1RolloutBehaviorType = "NO_DISRUPTION"
-	UNSPECIFIED  WorkloadoptimizationV1RolloutBehaviorType = "UNSPECIFIED"
+	WorkloadoptimizationV1RolloutBehaviorTypeNODISRUPTION WorkloadoptimizationV1RolloutBehaviorType = "NO_DISRUPTION"
+	WorkloadoptimizationV1RolloutBehaviorTypeUNSPECIFIED  WorkloadoptimizationV1RolloutBehaviorType = "UNSPECIFIED"
 )
 
 // Defines values for WorkloadoptimizationV1Runtime.
@@ -1136,47 +1143,47 @@ const (
 
 // Defines values for WorkloadoptimizationV1ScalingPolicyOrigin.
 const (
-	ORIGINANNOTATIONS     WorkloadoptimizationV1ScalingPolicyOrigin = "ORIGIN_ANNOTATIONS"
-	ORIGINAPI             WorkloadoptimizationV1ScalingPolicyOrigin = "ORIGIN_API"
-	ORIGINASSIGNMENTRULES WorkloadoptimizationV1ScalingPolicyOrigin = "ORIGIN_ASSIGNMENT_RULES"
-	ORIGINDEFAULT         WorkloadoptimizationV1ScalingPolicyOrigin = "ORIGIN_DEFAULT"
-	ORIGINUNSET           WorkloadoptimizationV1ScalingPolicyOrigin = "ORIGIN_UNSET"
+	WorkloadoptimizationV1ScalingPolicyOriginORIGINANNOTATIONS     WorkloadoptimizationV1ScalingPolicyOrigin = "ORIGIN_ANNOTATIONS"
+	WorkloadoptimizationV1ScalingPolicyOriginORIGINAPI             WorkloadoptimizationV1ScalingPolicyOrigin = "ORIGIN_API"
+	WorkloadoptimizationV1ScalingPolicyOriginORIGINASSIGNMENTRULES WorkloadoptimizationV1ScalingPolicyOrigin = "ORIGIN_ASSIGNMENT_RULES"
+	WorkloadoptimizationV1ScalingPolicyOriginORIGINDEFAULT         WorkloadoptimizationV1ScalingPolicyOrigin = "ORIGIN_DEFAULT"
+	WorkloadoptimizationV1ScalingPolicyOriginORIGINUNSET           WorkloadoptimizationV1ScalingPolicyOrigin = "ORIGIN_UNSET"
 )
 
 // Defines values for WorkloadoptimizationV1ScalingPolicySelect.
 const (
-	DISABLEDPOLICYSELECT           WorkloadoptimizationV1ScalingPolicySelect = "DISABLED_POLICY_SELECT"
-	MAXCHANGEPOLICYSELECT          WorkloadoptimizationV1ScalingPolicySelect = "MAX_CHANGE_POLICY_SELECT"
-	MINCHANGEPOLICYSELECT          WorkloadoptimizationV1ScalingPolicySelect = "MIN_CHANGE_POLICY_SELECT"
-	SCALINGPOLICYSELECTUNSPECIFIED WorkloadoptimizationV1ScalingPolicySelect = "SCALING_POLICY_SELECT_UNSPECIFIED"
+	WorkloadoptimizationV1ScalingPolicySelectDISABLEDPOLICYSELECT           WorkloadoptimizationV1ScalingPolicySelect = "DISABLED_POLICY_SELECT"
+	WorkloadoptimizationV1ScalingPolicySelectMAXCHANGEPOLICYSELECT          WorkloadoptimizationV1ScalingPolicySelect = "MAX_CHANGE_POLICY_SELECT"
+	WorkloadoptimizationV1ScalingPolicySelectMINCHANGEPOLICYSELECT          WorkloadoptimizationV1ScalingPolicySelect = "MIN_CHANGE_POLICY_SELECT"
+	WorkloadoptimizationV1ScalingPolicySelectSCALINGPOLICYSELECTUNSPECIFIED WorkloadoptimizationV1ScalingPolicySelect = "SCALING_POLICY_SELECT_UNSPECIFIED"
 )
 
 // Defines values for WorkloadoptimizationV1ScopeType.
 const (
-	SCOPETYPENODELABEL WorkloadoptimizationV1ScopeType = "SCOPE_TYPE_NODE_LABEL"
-	SCOPETYPEUNKNOWN   WorkloadoptimizationV1ScopeType = "SCOPE_TYPE_UNKNOWN"
+	WorkloadoptimizationV1ScopeTypeSCOPETYPENODELABEL WorkloadoptimizationV1ScopeType = "SCOPE_TYPE_NODE_LABEL"
+	WorkloadoptimizationV1ScopeTypeSCOPETYPEUNKNOWN   WorkloadoptimizationV1ScopeType = "SCOPE_TYPE_UNKNOWN"
 )
 
 // Defines values for WorkloadoptimizationV1SystemOverrideOrigin.
 const (
-	SYSTEMOVERRIDEORIGINCONTINUOUSOOMKILLED WorkloadoptimizationV1SystemOverrideOrigin = "SYSTEM_OVERRIDE_ORIGIN_CONTINUOUS_OOM_KILLED"
-	SYSTEMOVERRIDEORIGINUNBOUNDMEMORYGROWTH WorkloadoptimizationV1SystemOverrideOrigin = "SYSTEM_OVERRIDE_ORIGIN_UNBOUND_MEMORY_GROWTH"
-	SYSTEMOVERRIDEORIGINUNSPECIFIED         WorkloadoptimizationV1SystemOverrideOrigin = "SYSTEM_OVERRIDE_ORIGIN_UNSPECIFIED"
+	WorkloadoptimizationV1SystemOverrideOriginSYSTEMOVERRIDEORIGINCONTINUOUSOOMKILLED WorkloadoptimizationV1SystemOverrideOrigin = "SYSTEM_OVERRIDE_ORIGIN_CONTINUOUS_OOM_KILLED"
+	WorkloadoptimizationV1SystemOverrideOriginSYSTEMOVERRIDEORIGINUNBOUNDMEMORYGROWTH WorkloadoptimizationV1SystemOverrideOrigin = "SYSTEM_OVERRIDE_ORIGIN_UNBOUND_MEMORY_GROWTH"
+	WorkloadoptimizationV1SystemOverrideOriginSYSTEMOVERRIDEORIGINUNSPECIFIED         WorkloadoptimizationV1SystemOverrideOrigin = "SYSTEM_OVERRIDE_ORIGIN_UNSPECIFIED"
 )
 
 // Defines values for WorkloadoptimizationV1SystemOverrideResetOrigin.
 const (
-	SYSTEMOVERRIDERESETORIGINANNOTATIONSOFF WorkloadoptimizationV1SystemOverrideResetOrigin = "SYSTEM_OVERRIDE_RESET_ORIGIN_ANNOTATIONS_OFF"
-	SYSTEMOVERRIDERESETORIGINAPICALL        WorkloadoptimizationV1SystemOverrideResetOrigin = "SYSTEM_OVERRIDE_RESET_ORIGIN_API_CALL"
-	SYSTEMOVERRIDERESETORIGINEXPIRED        WorkloadoptimizationV1SystemOverrideResetOrigin = "SYSTEM_OVERRIDE_RESET_ORIGIN_EXPIRED"
-	SYSTEMOVERRIDERESETORIGINUNSPECIFIED    WorkloadoptimizationV1SystemOverrideResetOrigin = "SYSTEM_OVERRIDE_RESET_ORIGIN_UNSPECIFIED"
+	WorkloadoptimizationV1SystemOverrideResetOriginSYSTEMOVERRIDERESETORIGINANNOTATIONSOFF WorkloadoptimizationV1SystemOverrideResetOrigin = "SYSTEM_OVERRIDE_RESET_ORIGIN_ANNOTATIONS_OFF"
+	WorkloadoptimizationV1SystemOverrideResetOriginSYSTEMOVERRIDERESETORIGINAPICALL        WorkloadoptimizationV1SystemOverrideResetOrigin = "SYSTEM_OVERRIDE_RESET_ORIGIN_API_CALL"
+	WorkloadoptimizationV1SystemOverrideResetOriginSYSTEMOVERRIDERESETORIGINEXPIRED        WorkloadoptimizationV1SystemOverrideResetOrigin = "SYSTEM_OVERRIDE_RESET_ORIGIN_EXPIRED"
+	WorkloadoptimizationV1SystemOverrideResetOriginSYSTEMOVERRIDERESETORIGINUNSPECIFIED    WorkloadoptimizationV1SystemOverrideResetOrigin = "SYSTEM_OVERRIDE_RESET_ORIGIN_UNSPECIFIED"
 )
 
 // Defines values for WorkloadoptimizationV1SystemOverrideTarget.
 const (
-	SYSTEMOVERRIDETARGETALL                  WorkloadoptimizationV1SystemOverrideTarget = "SYSTEM_OVERRIDE_TARGET_ALL"
-	SYSTEMOVERRIDETARGETUNSPECIFIED          WorkloadoptimizationV1SystemOverrideTarget = "SYSTEM_OVERRIDE_TARGET_UNSPECIFIED"
-	SYSTEMOVERRIDETARGETVERTICALOPTIMIZATION WorkloadoptimizationV1SystemOverrideTarget = "SYSTEM_OVERRIDE_TARGET_VERTICAL_OPTIMIZATION"
+	WorkloadoptimizationV1SystemOverrideTargetSYSTEMOVERRIDETARGETALL                  WorkloadoptimizationV1SystemOverrideTarget = "SYSTEM_OVERRIDE_TARGET_ALL"
+	WorkloadoptimizationV1SystemOverrideTargetSYSTEMOVERRIDETARGETUNSPECIFIED          WorkloadoptimizationV1SystemOverrideTarget = "SYSTEM_OVERRIDE_TARGET_UNSPECIFIED"
+	WorkloadoptimizationV1SystemOverrideTargetSYSTEMOVERRIDETARGETVERTICALOPTIMIZATION WorkloadoptimizationV1SystemOverrideTarget = "SYSTEM_OVERRIDE_TARGET_VERTICAL_OPTIMIZATION"
 )
 
 // Defines values for RbacServiceAPIListPermissionGroupsParamsProduct.
@@ -1189,9 +1196,9 @@ const (
 
 // Defines values for CommitmentsAPIGetCommitmentUsageHistoryParamsAggregationInterval.
 const (
-	AGGREGATIONINTERVALUNSPECIFIED CommitmentsAPIGetCommitmentUsageHistoryParamsAggregationInterval = "AGGREGATION_INTERVAL_UNSPECIFIED"
-	DAY                            CommitmentsAPIGetCommitmentUsageHistoryParamsAggregationInterval = "DAY"
-	HOUR                           CommitmentsAPIGetCommitmentUsageHistoryParamsAggregationInterval = "HOUR"
+	CommitmentsAPIGetCommitmentUsageHistoryParamsAggregationIntervalAGGREGATIONINTERVALUNSPECIFIED CommitmentsAPIGetCommitmentUsageHistoryParamsAggregationInterval = "AGGREGATION_INTERVAL_UNSPECIFIED"
+	CommitmentsAPIGetCommitmentUsageHistoryParamsAggregationIntervalDAY                            CommitmentsAPIGetCommitmentUsageHistoryParamsAggregationInterval = "DAY"
+	CommitmentsAPIGetCommitmentUsageHistoryParamsAggregationIntervalHOUR                           CommitmentsAPIGetCommitmentUsageHistoryParamsAggregationInterval = "HOUR"
 )
 
 // Defines values for CommitmentsAPIGetCommitmentUsageHistoryParamsCloud.
@@ -1268,17 +1275,17 @@ const (
 
 // Defines values for ExternalClusterAPIGetConnectAndEnableCASTAICmdParamsOnboardingPath.
 const (
-	ONBOARDINGPATHCASTCTL     ExternalClusterAPIGetConnectAndEnableCASTAICmdParamsOnboardingPath = "ONBOARDING_PATH_CASTCTL"
-	ONBOARDINGPATHHELM        ExternalClusterAPIGetConnectAndEnableCASTAICmdParamsOnboardingPath = "ONBOARDING_PATH_HELM"
-	ONBOARDINGPATHSCRIPT      ExternalClusterAPIGetConnectAndEnableCASTAICmdParamsOnboardingPath = "ONBOARDING_PATH_SCRIPT"
-	ONBOARDINGPATHUNSPECIFIED ExternalClusterAPIGetConnectAndEnableCASTAICmdParamsOnboardingPath = "ONBOARDING_PATH_UNSPECIFIED"
+	ExternalClusterAPIGetConnectAndEnableCASTAICmdParamsOnboardingPathONBOARDINGPATHCASTCTL     ExternalClusterAPIGetConnectAndEnableCASTAICmdParamsOnboardingPath = "ONBOARDING_PATH_CASTCTL"
+	ExternalClusterAPIGetConnectAndEnableCASTAICmdParamsOnboardingPathONBOARDINGPATHHELM        ExternalClusterAPIGetConnectAndEnableCASTAICmdParamsOnboardingPath = "ONBOARDING_PATH_HELM"
+	ExternalClusterAPIGetConnectAndEnableCASTAICmdParamsOnboardingPathONBOARDINGPATHSCRIPT      ExternalClusterAPIGetConnectAndEnableCASTAICmdParamsOnboardingPath = "ONBOARDING_PATH_SCRIPT"
+	ExternalClusterAPIGetConnectAndEnableCASTAICmdParamsOnboardingPathONBOARDINGPATHUNSPECIFIED ExternalClusterAPIGetConnectAndEnableCASTAICmdParamsOnboardingPath = "ONBOARDING_PATH_UNSPECIFIED"
 )
 
 // Defines values for ExternalClusterAPIGetCredentialsScriptParamsKentParams.
 const (
-	EnableRebalancing                ExternalClusterAPIGetCredentialsScriptParamsKentParams = "enable_rebalancing"
-	EnableSpotInterruptionPrediction ExternalClusterAPIGetCredentialsScriptParamsKentParams = "enable_spot_interruption_prediction"
-	InstallEvictor                   ExternalClusterAPIGetCredentialsScriptParamsKentParams = "install_evictor"
+	ExternalClusterAPIGetCredentialsScriptParamsKentParamsEnableRebalancing                ExternalClusterAPIGetCredentialsScriptParamsKentParams = "enable_rebalancing"
+	ExternalClusterAPIGetCredentialsScriptParamsKentParamsEnableSpotInterruptionPrediction ExternalClusterAPIGetCredentialsScriptParamsKentParams = "enable_spot_interruption_prediction"
+	ExternalClusterAPIGetCredentialsScriptParamsKentParamsInstallEvictor                   ExternalClusterAPIGetCredentialsScriptParamsKentParams = "install_evictor"
 )
 
 // Defines values for ExternalClusterAPITriggerHibernateClusterParamsMode.
@@ -1313,9 +1320,9 @@ const (
 
 // Defines values for ExternalClusterAPITriggerResumeClusterParamsMode.
 const (
-	OPERATIONMODEDEFAULT     ExternalClusterAPITriggerResumeClusterParamsMode = "OPERATION_MODE_DEFAULT"
-	OPERATIONMODEDRYRUN      ExternalClusterAPITriggerResumeClusterParamsMode = "OPERATION_MODE_DRY_RUN"
-	OPERATIONMODEUNSPECIFIED ExternalClusterAPITriggerResumeClusterParamsMode = "OPERATION_MODE_UNSPECIFIED"
+	ExternalClusterAPITriggerResumeClusterParamsModeOPERATIONMODEDEFAULT     ExternalClusterAPITriggerResumeClusterParamsMode = "OPERATION_MODE_DEFAULT"
+	ExternalClusterAPITriggerResumeClusterParamsModeOPERATIONMODEDRYRUN      ExternalClusterAPITriggerResumeClusterParamsMode = "OPERATION_MODE_DRY_RUN"
+	ExternalClusterAPITriggerResumeClusterParamsModeOPERATIONMODEUNSPECIFIED ExternalClusterAPITriggerResumeClusterParamsMode = "OPERATION_MODE_UNSPECIFIED"
 )
 
 // Defines values for RbacServiceAPIListRoleBindingsParamsScopeType.
@@ -1326,9 +1333,9 @@ const (
 
 // Defines values for RbacServiceAPIListRoleBindingsParamsSubjectType.
 const (
-	SUBJECTGROUP          RbacServiceAPIListRoleBindingsParamsSubjectType = "SUBJECT_GROUP"
-	SUBJECTSERVICEACCOUNT RbacServiceAPIListRoleBindingsParamsSubjectType = "SUBJECT_SERVICE_ACCOUNT"
-	SUBJECTUSER           RbacServiceAPIListRoleBindingsParamsSubjectType = "SUBJECT_USER"
+	RbacServiceAPIListRoleBindingsParamsSubjectTypeSUBJECTGROUP          RbacServiceAPIListRoleBindingsParamsSubjectType = "SUBJECT_GROUP"
+	RbacServiceAPIListRoleBindingsParamsSubjectTypeSUBJECTSERVICEACCOUNT RbacServiceAPIListRoleBindingsParamsSubjectType = "SUBJECT_SERVICE_ACCOUNT"
+	RbacServiceAPIListRoleBindingsParamsSubjectTypeSUBJECTUSER           RbacServiceAPIListRoleBindingsParamsSubjectType = "SUBJECT_USER"
 )
 
 // Defines values for RbacServiceAPIListRolesParamsType.
@@ -1346,15 +1353,15 @@ const (
 
 // Defines values for CommitmentsAPIImportGCPCommitmentsParamsBehaviour.
 const (
-	OVERWRITE CommitmentsAPIImportGCPCommitmentsParamsBehaviour = "OVERWRITE"
+	CommitmentsAPIImportGCPCommitmentsParamsBehaviourOVERWRITE CommitmentsAPIImportGCPCommitmentsParamsBehaviour = "OVERWRITE"
 )
 
 // Defines values for RuntimeSecurityAPIGetAnomaliesParamsStatus.
 const (
-	ANOMALYSTATUSFILTERCLOSED      RuntimeSecurityAPIGetAnomaliesParamsStatus = "ANOMALY_STATUS_FILTER_CLOSED"
-	ANOMALYSTATUSFILTEROPEN        RuntimeSecurityAPIGetAnomaliesParamsStatus = "ANOMALY_STATUS_FILTER_OPEN"
-	ANOMALYSTATUSFILTERUNACKED     RuntimeSecurityAPIGetAnomaliesParamsStatus = "ANOMALY_STATUS_FILTER_UNACKED"
-	ANOMALYSTATUSFILTERUNSPECIFIED RuntimeSecurityAPIGetAnomaliesParamsStatus = "ANOMALY_STATUS_FILTER_UNSPECIFIED"
+	RuntimeSecurityAPIGetAnomaliesParamsStatusANOMALYSTATUSFILTERCLOSED      RuntimeSecurityAPIGetAnomaliesParamsStatus = "ANOMALY_STATUS_FILTER_CLOSED"
+	RuntimeSecurityAPIGetAnomaliesParamsStatusANOMALYSTATUSFILTEROPEN        RuntimeSecurityAPIGetAnomaliesParamsStatus = "ANOMALY_STATUS_FILTER_OPEN"
+	RuntimeSecurityAPIGetAnomaliesParamsStatusANOMALYSTATUSFILTERUNACKED     RuntimeSecurityAPIGetAnomaliesParamsStatus = "ANOMALY_STATUS_FILTER_UNACKED"
+	RuntimeSecurityAPIGetAnomaliesParamsStatusANOMALYSTATUSFILTERUNSPECIFIED RuntimeSecurityAPIGetAnomaliesParamsStatus = "ANOMALY_STATUS_FILTER_UNSPECIFIED"
 )
 
 // Defines values for RuntimeSecurityAPIGetAnomaliesParamsSortOrder.
@@ -1463,32 +1470,32 @@ const (
 
 // Defines values for WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType.
 const (
-	EVENTTYPECONFIGURATIONCHANGEDV2        WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_CONFIGURATION_CHANGEDV2"
-	EVENTTYPECPUPRESSURE                   WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_CPU_PRESSURE"
-	EVENTTYPECPUPRESSURERESOLVED           WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_CPU_PRESSURE_RESOLVED"
-	EVENTTYPEFAILEDHELMTESTHOOK            WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_FAILED_HELM_TEST_HOOK"
-	EVENTTYPEGPURECOMMENDEDREQUESTSCHANGED WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_GPU_RECOMMENDED_REQUESTS_CHANGED"
-	EVENTTYPEHPAALMOSTMAXEDOUT             WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_HPA_ALMOST_MAXED_OUT"
-	EVENTTYPEHPAMAXEDOUT                   WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_HPA_MAXED_OUT"
-	EVENTTYPEINVALID                       WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_INVALID"
-	EVENTTYPEMEMORYPRESSUREEVICTION        WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_MEMORY_PRESSURE_EVICTION"
-	EVENTTYPENATIVEVPASTATECHANGED         WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_NATIVE_VPA_STATE_CHANGED"
-	EVENTTYPEOOMKILL                       WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_OOM_KILL"
-	EVENTTYPERECOMMENDEDPODCOUNTCHANGED    WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_RECOMMENDED_POD_COUNT_CHANGED"
-	EVENTTYPERECOMMENDEDREQUESTSCHANGED    WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_RECOMMENDED_REQUESTS_CHANGED"
-	EVENTTYPESCALINGPOLICYASSIGNED         WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_SCALING_POLICY_ASSIGNED"
-	EVENTTYPESCALINGPOLICYCREATED          WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_SCALING_POLICY_CREATED"
-	EVENTTYPESCALINGPOLICYDELETED          WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_SCALING_POLICY_DELETED"
-	EVENTTYPESCALINGPOLICYORDERUPDATED     WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_SCALING_POLICY_ORDER_UPDATED"
-	EVENTTYPESCALINGPOLICYUPDATED          WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_SCALING_POLICY_UPDATED"
-	EVENTTYPESTARTUPFAILURE                WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_STARTUP_FAILURE"
-	EVENTTYPESURGE                         WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_SURGE"
-	EVENTTYPESYSTEMOVERRIDERESET           WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_SYSTEM_OVERRIDE_RESET"
-	EVENTTYPESYSTEMOVERRIDETRIGGERED       WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_SYSTEM_OVERRIDE_TRIGGERED"
-	EVENTTYPEUNBOUNDMEMORYGROWTH           WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_UNBOUND_MEMORY_GROWTH"
-	EVENTTYPEUNSCHEDULABLERECOMMENDATION   WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_UNSCHEDULABLE_RECOMMENDATION"
-	EVENTTYPEWORKLOADAUTOSCALERINSTALLED   WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_WORKLOAD_AUTOSCALER_INSTALLED"
-	EVENTTYPEWORKLOADAUTOSCALERUNINSTALLED WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_WORKLOAD_AUTOSCALER_UNINSTALLED"
+	WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsTypeEVENTTYPECONFIGURATIONCHANGEDV2        WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_CONFIGURATION_CHANGEDV2"
+	WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsTypeEVENTTYPECPUPRESSURE                   WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_CPU_PRESSURE"
+	WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsTypeEVENTTYPECPUPRESSURERESOLVED           WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_CPU_PRESSURE_RESOLVED"
+	WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsTypeEVENTTYPEFAILEDHELMTESTHOOK            WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_FAILED_HELM_TEST_HOOK"
+	WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsTypeEVENTTYPEGPURECOMMENDEDREQUESTSCHANGED WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_GPU_RECOMMENDED_REQUESTS_CHANGED"
+	WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsTypeEVENTTYPEHPAALMOSTMAXEDOUT             WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_HPA_ALMOST_MAXED_OUT"
+	WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsTypeEVENTTYPEHPAMAXEDOUT                   WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_HPA_MAXED_OUT"
+	WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsTypeEVENTTYPEINVALID                       WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_INVALID"
+	WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsTypeEVENTTYPEMEMORYPRESSUREEVICTION        WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_MEMORY_PRESSURE_EVICTION"
+	WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsTypeEVENTTYPENATIVEVPASTATECHANGED         WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_NATIVE_VPA_STATE_CHANGED"
+	WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsTypeEVENTTYPEOOMKILL                       WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_OOM_KILL"
+	WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsTypeEVENTTYPERECOMMENDEDPODCOUNTCHANGED    WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_RECOMMENDED_POD_COUNT_CHANGED"
+	WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsTypeEVENTTYPERECOMMENDEDREQUESTSCHANGED    WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_RECOMMENDED_REQUESTS_CHANGED"
+	WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsTypeEVENTTYPESCALINGPOLICYASSIGNED         WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_SCALING_POLICY_ASSIGNED"
+	WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsTypeEVENTTYPESCALINGPOLICYCREATED          WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_SCALING_POLICY_CREATED"
+	WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsTypeEVENTTYPESCALINGPOLICYDELETED          WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_SCALING_POLICY_DELETED"
+	WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsTypeEVENTTYPESCALINGPOLICYORDERUPDATED     WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_SCALING_POLICY_ORDER_UPDATED"
+	WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsTypeEVENTTYPESCALINGPOLICYUPDATED          WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_SCALING_POLICY_UPDATED"
+	WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsTypeEVENTTYPESTARTUPFAILURE                WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_STARTUP_FAILURE"
+	WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsTypeEVENTTYPESURGE                         WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_SURGE"
+	WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsTypeEVENTTYPESYSTEMOVERRIDERESET           WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_SYSTEM_OVERRIDE_RESET"
+	WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsTypeEVENTTYPESYSTEMOVERRIDETRIGGERED       WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_SYSTEM_OVERRIDE_TRIGGERED"
+	WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsTypeEVENTTYPEUNBOUNDMEMORYGROWTH           WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_UNBOUND_MEMORY_GROWTH"
+	WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsTypeEVENTTYPEUNSCHEDULABLERECOMMENDATION   WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_UNSCHEDULABLE_RECOMMENDATION"
+	WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsTypeEVENTTYPEWORKLOADAUTOSCALERINSTALLED   WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_WORKLOAD_AUTOSCALER_INSTALLED"
+	WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsTypeEVENTTYPEWORKLOADAUTOSCALERUNINSTALLED WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_WORKLOAD_AUTOSCALER_UNINSTALLED"
 )
 
 // Defines values for WorkloadOptimizationAPIListWorkloadsParamsManagementOptions.
@@ -2717,7 +2724,7 @@ type CastaiInventoryV1beta1InstanceType struct {
 	// StorageInfo StorageInfo describes the available local volumes for an instance type.
 	StorageInfo *CastaiInventoryV1beta1StorageInfo `json:"storageInfo,omitempty"`
 
-	// SupportsNestedVirtualization Specifies whether the VM instance type supports nested virtualization. Required for Azure AKS Pod Sandboxing (Kata). Azure specific.
+	// SupportsNestedVirtualization Specifies whether the VM instance type supports nested virtualization. Required for Azure/AWS Pod Sandboxing (Kata).
 	SupportsNestedVirtualization *bool                          `json:"supportsNestedVirtualization"`
 	TpuInfo                      *CastaiInventoryV1beta1TPUInfo `json:"tpuInfo,omitempty"`
 
@@ -6453,12 +6460,26 @@ type ExternalclusterV1KOPSClusterParams struct {
 
 // ExternalclusterV1KarpenterAttribute KarpenterAttribute defines Karpenter-specific attributes.
 type ExternalclusterV1KarpenterAttribute struct {
+	// ControllerMode KarpenterControllerMode defines how the Karpenter controller is deployed.
+	//
+	//  - KARPENTER_CONTROLLER_MODE_UNSPECIFIED: Default value.
+	//  - SELF_HOSTED: Controller is self-hosted inside the cluster.
+	//  - MANAGED_OUT_OF_BAND: Controller is managed out-of-band by the provider. Only AKS NAP is detected; EKS Auto Mode is not yet.
+	ControllerMode *ExternalclusterV1KarpenterControllerMode `json:"controllerMode,omitempty"`
+
 	// KentEligibility KentEligibility defines Karpenter KENT eligibility status.
 	KentEligibility *ExternalclusterV1KentEligibility `json:"kentEligibility,omitempty"`
 
 	// Version Karpenter version.
 	Version *string `json:"version"`
 }
+
+// ExternalclusterV1KarpenterControllerMode KarpenterControllerMode defines how the Karpenter controller is deployed.
+//
+//   - KARPENTER_CONTROLLER_MODE_UNSPECIFIED: Default value.
+//   - SELF_HOSTED: Controller is self-hosted inside the cluster.
+//   - MANAGED_OUT_OF_BAND: Controller is managed out-of-band by the provider. Only AKS NAP is detected; EKS Auto Mode is not yet.
+type ExternalclusterV1KarpenterControllerMode string
 
 // ExternalclusterV1KataConfig PodVirtualizationConfig describes virtualization isolation settings for a node.
 //

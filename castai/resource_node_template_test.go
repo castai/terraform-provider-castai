@@ -1740,7 +1740,7 @@ func Test_toTemplateGpu(t *testing.T) {
 				DefaultSharedClientsPerGpu: lo.ToPtr(int32(4)),
 				EnableTimeSharing:          lo.ToPtr(false),
 				SharingConfiguration:       &map[string]sdk.NodetemplatesV1SharedGPU{},
-				SharingStrategy:            lo.ToPtr(sdk.GPUSHARINGSTRATEGYMPS),
+				SharingStrategy:            lo.ToPtr(sdk.NodetemplatesV1GPUSharingStrategyGPUSHARINGSTRATEGYMPS),
 			},
 		},
 		{
@@ -1753,7 +1753,7 @@ func Test_toTemplateGpu(t *testing.T) {
 				DefaultSharedClientsPerGpu: lo.ToPtr(int32(8)),
 				EnableTimeSharing:          lo.ToPtr(false),
 				SharingConfiguration:       &map[string]sdk.NodetemplatesV1SharedGPU{},
-				SharingStrategy:            lo.ToPtr(sdk.GPUSHARINGSTRATEGYTIMESLICING),
+				SharingStrategy:            lo.ToPtr(sdk.NodetemplatesV1GPUSharingStrategyGPUSHARINGSTRATEGYTIMESLICING),
 			},
 		},
 		{
@@ -1765,7 +1765,7 @@ func Test_toTemplateGpu(t *testing.T) {
 			want: &sdk.NodetemplatesV1GPU{
 				EnableTimeSharing:     lo.ToPtr(false),
 				SharingConfiguration:  &map[string]sdk.NodetemplatesV1SharedGPU{},
-				SharingStrategy:       lo.ToPtr(sdk.GPUSHARINGSTRATEGYMPS),
+				SharingStrategy:       lo.ToPtr(sdk.NodetemplatesV1GPUSharingStrategyGPUSHARINGSTRATEGYMPS),
 				UserManagedGpuDrivers: lo.ToPtr(true),
 			},
 		},
@@ -1910,7 +1910,7 @@ func Test_flattenGpuSettings(t *testing.T) {
 		{
 			name: "sharing_strategy mps",
 			input: &sdk.NodetemplatesV1GPU{
-				SharingStrategy:            lo.ToPtr(sdk.GPUSHARINGSTRATEGYMPS),
+				SharingStrategy:            lo.ToPtr(sdk.NodetemplatesV1GPUSharingStrategyGPUSHARINGSTRATEGYMPS),
 				DefaultSharedClientsPerGpu: lo.ToPtr(int32(4)),
 			},
 			want: []map[string]any{
@@ -1924,7 +1924,7 @@ func Test_flattenGpuSettings(t *testing.T) {
 		{
 			name: "sharing_strategy time-slicing",
 			input: &sdk.NodetemplatesV1GPU{
-				SharingStrategy:            lo.ToPtr(sdk.GPUSHARINGSTRATEGYTIMESLICING),
+				SharingStrategy:            lo.ToPtr(sdk.NodetemplatesV1GPUSharingStrategyGPUSHARINGSTRATEGYTIMESLICING),
 				DefaultSharedClientsPerGpu: lo.ToPtr(int32(8)),
 			},
 			want: []map[string]any{

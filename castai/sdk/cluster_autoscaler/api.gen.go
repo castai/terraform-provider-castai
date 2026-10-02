@@ -16,13 +16,13 @@ const (
 
 // Defines values for KubernetesNodeAffinityOperator.
 const (
-	DOESNOTEXIST        KubernetesNodeAffinityOperator = "DOES_NOT_EXIST"
-	EXISTS              KubernetesNodeAffinityOperator = "EXISTS"
-	GT                  KubernetesNodeAffinityOperator = "GT"
-	IN                  KubernetesNodeAffinityOperator = "IN"
-	LT                  KubernetesNodeAffinityOperator = "LT"
-	NOTIN               KubernetesNodeAffinityOperator = "NOT_IN"
-	OPERATORUNSPECIFIED KubernetesNodeAffinityOperator = "OPERATOR_UNSPECIFIED"
+	KubernetesNodeAffinityOperatorDOESNOTEXIST        KubernetesNodeAffinityOperator = "DOES_NOT_EXIST"
+	KubernetesNodeAffinityOperatorEXISTS              KubernetesNodeAffinityOperator = "EXISTS"
+	KubernetesNodeAffinityOperatorGT                  KubernetesNodeAffinityOperator = "GT"
+	KubernetesNodeAffinityOperatorIN                  KubernetesNodeAffinityOperator = "IN"
+	KubernetesNodeAffinityOperatorLT                  KubernetesNodeAffinityOperator = "LT"
+	KubernetesNodeAffinityOperatorNOTIN               KubernetesNodeAffinityOperator = "NOT_IN"
+	KubernetesNodeAffinityOperatorOPERATORUNSPECIFIED KubernetesNodeAffinityOperator = "OPERATOR_UNSPECIFIED"
 )
 
 // ClusterAssignment Cluster assignment
