@@ -9205,6 +9205,13 @@ type ScheduledrebalancingV1RebalancingOptions struct {
 
 	// MinNodes Minimum number of nodes that should be kept in the cluster after rebalancing.
 	MinNodes *int32 `json:"minNodes,omitempty"`
+
+	// SplitNodesInBatchesOf If set, the rebalancing plan is executed in batches such that at most this
+	// many additional nodes (nodes created minus nodes drained) are alive at any
+	// moment during execution, and a node is only drained after its replacement
+	// node exists. Zero and negative values are accepted and treated as unset:
+	// the plan executes in a single batch.
+	SplitNodesInBatchesOf *int32 `json:"splitNodesInBatchesOf"`
 }
 
 // ScheduledrebalancingV1RebalancingSchedule defines model for scheduledrebalancing.v1.RebalancingSchedule.
