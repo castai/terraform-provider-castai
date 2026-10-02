@@ -17,6 +17,7 @@ import (
 	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	sdkterraform "github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
@@ -1012,6 +1013,271 @@ func Test_stuckPodResizeDisabled(t *testing.T) {
 			r.Equal(tc.expectDisabled, disabled)
 		})
 	}
+}
+
+func TestNodeTemplateResourceCreate_edgeLocationConfig(t *testing.T) {
+	r := require.New(t)
+	mockctrl := gomock.NewController(t)
+	mockClient := mock_sdk.NewMockClientInterface(mockctrl)
+
+	ctx := context.Background()
+	provider := &ProviderConfig{
+		api: &sdk.ClientWithResponses{
+			ClientInterface: mockClient,
+		},
+	}
+
+	name := "custom-template"
+	clusterId := "b6bfc074-a267-400f-b8f1-db0850c369b1"
+	edgeLocation1 := "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+	edgeLocation2 := "b2c3d4e5-f6a7-8901-bcde-f12345678901"
+	edgeConfig1 := "c3d4e5f6-a7b8-9012-cdef-234567890123"
+
+	// The response lists the entries in reverse order compared to the configuration.
+	templateResponse := fmt.Sprintf(`
+		{
+		  "configurationId": "7dc4f922-29c9-4377-889c-0c8c5fb8d497",
+		  "name": %q,
+		  "isEnabled": false,
+		  "shouldTaint": true,
+		  "rebalancingConfig": {
+		    "minNodes": 0
+		  },
+		  "edgeLocationConfigs": [
+		    {"edgeLocationId": %q},
+		    {"edgeLocationId": %q, "edgeConfigId": %q}
+		  ]
+	    }
+	`, name, edgeLocation2, edgeLocation1, edgeConfig1)
+
+	var capturedCreateBody sdk.NodeTemplatesAPICreateNodeTemplateJSONRequestBody
+	mockClient.EXPECT().
+		NodeTemplatesAPICreateNodeTemplate(gomock.Any(), clusterId, gomock.Any()).
+		DoAndReturn(func(ctx context.Context, clusterId string, body sdk.NodeTemplatesAPICreateNodeTemplateJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+			capturedCreateBody = body
+			return &http.Response{StatusCode: 200, Body: io.NopCloser(bytes.NewReader([]byte(templateResponse))), Header: map[string][]string{"Content-Type": {"json"}}}, nil
+		})
+
+	listBody := io.NopCloser(bytes.NewReader([]byte(fmt.Sprintf(`
+		{
+		  "items": [
+            {
+              "template": %s
+            }
+		  ]
+		}
+	`, templateResponse))))
+	mockClient.EXPECT().
+		NodeTemplatesAPIListNodeTemplates(gomock.Any(), clusterId, &sdk.NodeTemplatesAPIListNodeTemplatesParams{IncludeDefault: lo.ToPtr(true)}).
+		Return(&http.Response{StatusCode: 200, Body: listBody, Header: map[string][]string{"Content-Type": {"json"}}}, nil)
+
+	resource := resourceNodeTemplate()
+	val := cty.ObjectVal(map[string]cty.Value{
+		FieldClusterId:        cty.StringVal(clusterId),
+		FieldNodeTemplateName: cty.StringVal(name),
+		FieldNodeTemplateEdgeLocationConfig: cty.ListVal([]cty.Value{
+			cty.ObjectVal(map[string]cty.Value{
+				FieldNodeTemplateEdgeLocationId: cty.StringVal(edgeLocation1),
+				FieldNodeTemplateEdgeConfigId:   cty.StringVal(edgeConfig1),
+			}),
+			cty.ObjectVal(map[string]cty.Value{
+				FieldNodeTemplateEdgeLocationId: cty.StringVal(edgeLocation2),
+				FieldNodeTemplateEdgeConfigId:   cty.StringVal(""),
+			}),
+		}),
+	})
+	state := sdkterraform.NewInstanceStateShimmedFromValue(val, 0)
+	state.ID = name
+
+	data := resource.Data(state)
+	result := resource.CreateContext(ctx, data, provider)
+	r.Nil(result)
+	r.False(result.HasError())
+
+	// The create request carries the configured edge location configs, with the
+	// location-only entry omitting edgeConfigId entirely.
+	r.NotNil(capturedCreateBody.EdgeLocationConfigs)
+	r.Equal([]sdk.NodetemplatesV1EdgeLocationConfig{
+		{EdgeLocationId: toPtr(edgeLocation1), EdgeConfigId: toPtr(edgeConfig1)},
+		{EdgeLocationId: toPtr(edgeLocation2)},
+	}, *capturedCreateBody.EdgeLocationConfigs)
+
+	// The read maps the reordered API response back into edge_location_config in the
+	// configuration's order, with the unset edge config stored as an empty string.
+	r.Equal([]any{
+		map[string]any{
+			FieldNodeTemplateEdgeLocationId: edgeLocation1,
+			FieldNodeTemplateEdgeConfigId:   edgeConfig1,
+		},
+		map[string]any{
+			FieldNodeTemplateEdgeLocationId: edgeLocation2,
+			FieldNodeTemplateEdgeConfigId:   "",
+		},
+	}, data.Get(FieldNodeTemplateEdgeLocationConfig))
+}
+
+func TestNodeTemplateResourceUpdate_edgeLocationConfig(t *testing.T) {
+	r := require.New(t)
+	mockctrl := gomock.NewController(t)
+	mockClient := mock_sdk.NewMockClientInterface(mockctrl)
+
+	ctx := context.Background()
+	provider := &ProviderConfig{
+		api: &sdk.ClientWithResponses{
+			ClientInterface: mockClient,
+		},
+	}
+
+	name := "custom-template"
+	clusterId := "b6bfc074-a267-400f-b8f1-db0850c369b1"
+	edgeLocation1 := "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+	edgeConfig1 := "c3d4e5f6-a7b8-9012-cdef-234567890123"
+
+	templateResponse := fmt.Sprintf(`
+		{
+		  "configurationId": "7dc4f922-29c9-4377-889c-0c8c5fb8d497",
+		  "name": %q,
+		  "isEnabled": false,
+		  "shouldTaint": true,
+		  "rebalancingConfig": {
+		    "minNodes": 0
+		  },
+		  "edgeLocationConfigs": [
+		    {"edgeLocationId": %q, "edgeConfigId": %q}
+		  ]
+	    }
+	`, name, edgeLocation1, edgeConfig1)
+
+	var capturedUpdateBody sdk.NodeTemplatesAPIUpdateNodeTemplateJSONRequestBody
+	mockClient.EXPECT().
+		NodeTemplatesAPIUpdateNodeTemplate(gomock.Any(), clusterId, name, gomock.Any()).
+		DoAndReturn(func(ctx context.Context, clusterId, nodeTemplateName string, body sdk.NodeTemplatesAPIUpdateNodeTemplateJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+			capturedUpdateBody = body
+			return &http.Response{StatusCode: 200, Body: io.NopCloser(bytes.NewReader([]byte(templateResponse))), Header: map[string][]string{"Content-Type": {"json"}}}, nil
+		})
+
+	listBody := io.NopCloser(bytes.NewReader([]byte(fmt.Sprintf(`
+		{
+		  "items": [
+            {
+              "template": %s
+            }
+		  ]
+		}
+	`, templateResponse))))
+	mockClient.EXPECT().
+		NodeTemplatesAPIListNodeTemplates(gomock.Any(), clusterId, &sdk.NodeTemplatesAPIListNodeTemplatesParams{IncludeDefault: lo.ToPtr(true)}).
+		Return(&http.Response{StatusCode: 200, Body: listBody, Header: map[string][]string{"Content-Type": {"json"}}}, nil)
+
+	resource := resourceNodeTemplate()
+	data := schema.TestResourceDataRaw(t, resource.Schema, map[string]any{
+		FieldClusterId:        clusterId,
+		FieldNodeTemplateName: name,
+		FieldNodeTemplateEdgeLocationConfig: []any{
+			map[string]any{
+				FieldNodeTemplateEdgeLocationId: edgeLocation1,
+				FieldNodeTemplateEdgeConfigId:   edgeConfig1,
+			},
+		},
+	})
+	data.SetId(name)
+
+	result := resource.UpdateContext(ctx, data, provider)
+	r.Nil(result)
+	r.False(result.HasError())
+
+	// The switch is sent as EdgeLocationConfigs; the deprecated EdgeLocationIds stays unset.
+	r.NotNil(capturedUpdateBody.EdgeLocationConfigs)
+	r.Equal([]sdk.NodetemplatesV1EdgeLocationConfig{
+		{EdgeLocationId: toPtr(edgeLocation1), EdgeConfigId: toPtr(edgeConfig1)},
+	}, *capturedUpdateBody.EdgeLocationConfigs)
+	r.Nil(capturedUpdateBody.EdgeLocationIds)
+
+	// The read populates edge_location_config from the API response.
+	r.Equal([]any{
+		map[string]any{
+			FieldNodeTemplateEdgeLocationId: edgeLocation1,
+			FieldNodeTemplateEdgeConfigId:   edgeConfig1,
+		},
+	}, data.Get(FieldNodeTemplateEdgeLocationConfig))
+}
+
+func TestNodeTemplateResourceUpdate_edgeLocationIDs(t *testing.T) {
+	r := require.New(t)
+	mockctrl := gomock.NewController(t)
+	mockClient := mock_sdk.NewMockClientInterface(mockctrl)
+
+	ctx := context.Background()
+	provider := &ProviderConfig{
+		api: &sdk.ClientWithResponses{
+			ClientInterface: mockClient,
+		},
+	}
+
+	name := "custom-template"
+	clusterId := "b6bfc074-a267-400f-b8f1-db0850c369b1"
+	edgeLocation1 := "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+	edgeLocation2 := "b2c3d4e5-f6a7-8901-bcde-f12345678901"
+
+	// The response lists the locations in reverse order compared to the configuration.
+	templateResponse := fmt.Sprintf(`
+		{
+		  "configurationId": "7dc4f922-29c9-4377-889c-0c8c5fb8d497",
+		  "name": %q,
+		  "isEnabled": true,
+		  "shouldTaint": true,
+		  "rebalancingConfig": {
+		    "minNodes": 0
+		  },
+		  "edgeLocationIds": [%q, %q]
+	    }
+	`, name, edgeLocation2, edgeLocation1)
+
+	var capturedUpdateBody sdk.NodeTemplatesAPIUpdateNodeTemplateJSONRequestBody
+	mockClient.EXPECT().
+		NodeTemplatesAPIUpdateNodeTemplate(gomock.Any(), clusterId, name, gomock.Any()).
+		DoAndReturn(func(ctx context.Context, clusterId, nodeTemplateName string, body sdk.NodeTemplatesAPIUpdateNodeTemplateJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+			capturedUpdateBody = body
+			return &http.Response{StatusCode: 200, Body: io.NopCloser(bytes.NewReader([]byte(templateResponse))), Header: map[string][]string{"Content-Type": {"json"}}}, nil
+		})
+
+	listBody := io.NopCloser(bytes.NewReader([]byte(fmt.Sprintf(`
+		{
+		  "items": [
+            {
+              "template": %s
+            }
+		  ]
+		}
+	`, templateResponse))))
+	mockClient.EXPECT().
+		NodeTemplatesAPIListNodeTemplates(gomock.Any(), clusterId, &sdk.NodeTemplatesAPIListNodeTemplatesParams{IncludeDefault: lo.ToPtr(true)}).
+		Return(&http.Response{StatusCode: 200, Body: listBody, Header: map[string][]string{"Content-Type": {"json"}}}, nil)
+
+	resource := resourceNodeTemplate()
+	data := schema.TestResourceDataRaw(t, resource.Schema, map[string]any{
+		FieldClusterId:                   clusterId,
+		FieldNodeTemplateName:            name,
+		FieldNodeTemplateIsEnabled:       true,
+		FieldNodeTemplateEdgeLocationIDs: []any{edgeLocation1, edgeLocation2},
+	})
+	data.SetId(name)
+
+	result := resource.UpdateContext(ctx, data, provider)
+	r.Nil(result)
+	r.False(result.HasError())
+
+	// Legacy edge_location_ids are sent as location-only EdgeLocationConfigs entries.
+	r.NotNil(capturedUpdateBody.EdgeLocationConfigs)
+	r.Equal([]sdk.NodetemplatesV1EdgeLocationConfig{
+		{EdgeLocationId: toPtr(edgeLocation1)},
+		{EdgeLocationId: toPtr(edgeLocation2)},
+	}, *capturedUpdateBody.EdgeLocationConfigs)
+	r.Nil(capturedUpdateBody.EdgeLocationIds)
+
+	// The read maps the reordered legacy response back into edge_location_ids in the
+	// configuration's order, so legacy configurations keep planning clean.
+	r.Equal([]any{edgeLocation1, edgeLocation2}, data.Get(FieldNodeTemplateEdgeLocationIDs))
 }
 
 func TestNodeTemplateResourceDelete_defaultNodeTemplate(t *testing.T) {
