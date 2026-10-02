@@ -474,6 +474,13 @@ const (
 	ExternalclusterV1GetNodeBatchResponseNodeStatusNODESTATUSUNSPECIFIED ExternalclusterV1GetNodeBatchResponseNodeStatus = "NODE_STATUS_UNSPECIFIED"
 )
 
+// Defines values for ExternalclusterV1KarpenterControllerMode.
+const (
+	ExternalclusterV1KarpenterControllerModeKARPENTERCONTROLLERMODEUNSPECIFIED ExternalclusterV1KarpenterControllerMode = "KARPENTER_CONTROLLER_MODE_UNSPECIFIED"
+	ExternalclusterV1KarpenterControllerModeMANAGEDOUTOFBAND                   ExternalclusterV1KarpenterControllerMode = "MANAGED_OUT_OF_BAND"
+	ExternalclusterV1KarpenterControllerModeSELFHOSTED                         ExternalclusterV1KarpenterControllerMode = "SELF_HOSTED"
+)
+
 // Defines values for ExternalclusterV1KataRuntimeProvisionMode.
 const (
 	ExternalclusterV1KataRuntimeProvisionModeKATAPROVISIONMODEMANAGED     ExternalclusterV1KataRuntimeProvisionMode = "KATA_PROVISION_MODE_MANAGED"
@@ -2717,7 +2724,7 @@ type CastaiInventoryV1beta1InstanceType struct {
 	// StorageInfo StorageInfo describes the available local volumes for an instance type.
 	StorageInfo *CastaiInventoryV1beta1StorageInfo `json:"storageInfo,omitempty"`
 
-	// SupportsNestedVirtualization Specifies whether the VM instance type supports nested virtualization. Required for Azure AKS Pod Sandboxing (Kata). Azure specific.
+	// SupportsNestedVirtualization Specifies whether the VM instance type supports nested virtualization. Required for Azure/AWS Pod Sandboxing (Kata).
 	SupportsNestedVirtualization *bool                          `json:"supportsNestedVirtualization"`
 	TpuInfo                      *CastaiInventoryV1beta1TPUInfo `json:"tpuInfo,omitempty"`
 
@@ -6453,12 +6460,26 @@ type ExternalclusterV1KOPSClusterParams struct {
 
 // ExternalclusterV1KarpenterAttribute KarpenterAttribute defines Karpenter-specific attributes.
 type ExternalclusterV1KarpenterAttribute struct {
+	// ControllerMode KarpenterControllerMode defines how the Karpenter controller is deployed.
+	//
+	//  - KARPENTER_CONTROLLER_MODE_UNSPECIFIED: Default value.
+	//  - SELF_HOSTED: Controller is self-hosted inside the cluster.
+	//  - MANAGED_OUT_OF_BAND: Controller is managed out-of-band by the provider. Only AKS NAP is detected; EKS Auto Mode is not yet.
+	ControllerMode *ExternalclusterV1KarpenterControllerMode `json:"controllerMode,omitempty"`
+
 	// KentEligibility KentEligibility defines Karpenter KENT eligibility status.
 	KentEligibility *ExternalclusterV1KentEligibility `json:"kentEligibility,omitempty"`
 
 	// Version Karpenter version.
 	Version *string `json:"version"`
 }
+
+// ExternalclusterV1KarpenterControllerMode KarpenterControllerMode defines how the Karpenter controller is deployed.
+//
+//   - KARPENTER_CONTROLLER_MODE_UNSPECIFIED: Default value.
+//   - SELF_HOSTED: Controller is self-hosted inside the cluster.
+//   - MANAGED_OUT_OF_BAND: Controller is managed out-of-band by the provider. Only AKS NAP is detected; EKS Auto Mode is not yet.
+type ExternalclusterV1KarpenterControllerMode string
 
 // ExternalclusterV1KataConfig PodVirtualizationConfig describes virtualization isolation settings for a node.
 //

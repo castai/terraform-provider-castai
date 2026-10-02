@@ -1,6 +1,0 @@
-# See castai/sdk/codegen/types.cfg.yaml for why always-prefix-enum-values is set.
-package: cluster_autoscaler
-generate:
-  models: true
-compatibility:
-  always-prefix-enum-values: true
