@@ -92,6 +92,9 @@ const (
 	FieldNodeTemplateSharingStrategy                          = "sharing_strategy"
 	FieldNodeTemplateClmEnabled                               = "clm_enabled"
 	FieldNodeTemplateEdgeLocationIDs                          = "edge_location_ids"
+	FieldNodeTemplateEdgeLocationConfig                       = "edge_location_config"
+	FieldNodeTemplateEdgeLocationId                           = "edge_location_id"
+	FieldNodeTemplateEdgeConfigId                             = "edge_config_id"
 	FieldNodeTemplatePriceAdjustmentConfiguration             = "price_adjustment_configuration"
 	FieldNodeTemplateInstanceTypeAdjustments                  = "instance_type_adjustments"
 	FieldNodeTemplateUserManagedGPUDrivers                    = "user_managed_gpu_drivers"
@@ -889,7 +892,31 @@ func resourceNodeTemplate() *schema.Resource {
 					Type:             schema.TypeString,
 					ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
 				},
-				Description: "List of edge location IDs to associate with this node template. Must be valid UUIDs referencing castai_edge_location resources.",
+				Deprecated:    "The 'edge_location_ids' field is deprecated. Use 'edge_location_config' instead to associate edge locations, optionally with an edge configuration, with this node template.",
+				ConflictsWith: []string{FieldNodeTemplateEdgeLocationConfig},
+				Description:   "List of edge location IDs to associate with this node template. Must be valid UUIDs referencing castai_edge_location resources.",
+			},
+			FieldNodeTemplateEdgeLocationConfig: {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Description: "List of edge location configurations to associate with this node template. Each entry pairs an edge location with an optional edge configuration. Conflicts with edge_location_ids.",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						FieldNodeTemplateEdgeLocationId: {
+							Type:             schema.TypeString,
+							Required:         true,
+							ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
+							Description:      "Edge location ID to associate with this node template. Must be a valid UUID referencing a castai_edge_location resource.",
+						},
+						FieldNodeTemplateEdgeConfigId: {
+							Type:             schema.TypeString,
+							Optional:         true,
+							ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
+							Description:      "Optional edge configuration ID to apply at this edge location. Must be a valid UUID referencing a castai_edge_configuration resource.",
+						},
+					},
+				},
+				ConflictsWith: []string{FieldNodeTemplateEdgeLocationIDs},
 			},
 			FieldNodeTemplatePriceAdjustmentConfiguration: {
 				Type:        schema.TypeList,
@@ -998,10 +1025,8 @@ func resourceNodeTemplateRead(ctx context.Context, d *schema.ResourceData, meta 
 		return diag.FromErr(fmt.Errorf("setting clm enabled: %w", err))
 	}
 
-	if nodeTemplate.EdgeLocationIds != nil {
-		if err := d.Set(FieldNodeTemplateEdgeLocationIDs, lo.FromPtr(nodeTemplate.EdgeLocationIds)); err != nil {
-			return diag.FromErr(fmt.Errorf("setting edge location ids: %w", err))
-		}
+	if err := setEdgeLocationState(d, nodeTemplate); err != nil {
+		return diag.FromErr(fmt.Errorf("setting edge locations: %w", err))
 	}
 
 	if nodeTemplate.PriceAdjustmentConfiguration != nil {
@@ -1012,6 +1037,183 @@ func resourceNodeTemplateRead(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	return nil
+}
+
+// setEdgeLocationState maps the API response into the edge location field used by the
+// configuration, so neither the deprecated edge_location_ids form nor the edge_location_config
+// form produces a perpetual diff (CO-4843).
+func setEdgeLocationState(d *schema.ResourceData, nodeTemplate *sdk.NodetemplatesV1NodeTemplate) error {
+	var entries []sdk.NodetemplatesV1EdgeLocationConfig
+	if nodeTemplate.EdgeLocationConfigs != nil {
+		entries = *nodeTemplate.EdgeLocationConfigs
+	} else if nodeTemplate.EdgeLocationIds != nil {
+		// The API may still respond with the deprecated field only.
+		ids := *nodeTemplate.EdgeLocationIds
+		entries = make([]sdk.NodetemplatesV1EdgeLocationConfig, 0, len(ids))
+		for _, id := range ids {
+			entries = append(entries, sdk.NodetemplatesV1EdgeLocationConfig{EdgeLocationId: toPtr(id)})
+		}
+	}
+
+	edgeLocationConfigs, hasEdgeLocationConfigs := d.Get(FieldNodeTemplateEdgeLocationConfig).([]any)
+	edgeLocationIDs, hasEdgeLocationIDs := d.Get(FieldNodeTemplateEdgeLocationIDs).([]any)
+
+	switch {
+	case hasEdgeLocationConfigs && len(edgeLocationConfigs) > 0:
+		// The configuration uses the new form: populate edge_location_config from the response.
+		// An unset edge config is stored as an empty string so it never produces a diff, and
+		// entries follow the configuration order so a server-side reordering never diffs.
+		ordered := orderEdgeLocationConfigs(entries, edgeLocationConfigs)
+		if err := d.Set(FieldNodeTemplateEdgeLocationConfig, flattenEdgeLocationConfigs(ordered)); err != nil {
+			return fmt.Errorf("setting edge location configs: %w", err)
+		}
+	case hasEdgeLocationIDs && len(edgeLocationIDs) > 0:
+		// The configuration uses the deprecated form: map the response back into edge_location_ids.
+		ids := orderStrings(edgeLocationIDsFromConfigs(entries), toStringList(edgeLocationIDs))
+		if err := d.Set(FieldNodeTemplateEdgeLocationIDs, ids); err != nil {
+			return fmt.Errorf("setting edge location ids: %w", err)
+		}
+	default:
+		// Neither form is set in state (import or unset): entries carrying an edge
+		// configuration can only be represented by edge_location_config, so prefer it
+		// when present and fall back to the deprecated form otherwise.
+		hasEdgeConfig := false
+		for _, entry := range entries {
+			if lo.FromPtr(entry.EdgeConfigId) != "" {
+				hasEdgeConfig = true
+				break
+			}
+		}
+		if hasEdgeConfig {
+			if err := d.Set(FieldNodeTemplateEdgeLocationConfig, flattenEdgeLocationConfigs(entries)); err != nil {
+				return fmt.Errorf("setting edge location configs: %w", err)
+			}
+		} else if err := d.Set(FieldNodeTemplateEdgeLocationIDs, edgeLocationIDsFromConfigs(entries)); err != nil {
+			return fmt.Errorf("setting edge location ids: %w", err)
+		}
+	}
+	return nil
+}
+
+// flattenEdgeLocationConfigs maps API edge location configuration entries into
+// edge_location_config state values. Unset edge configurations flatten to an empty string.
+func flattenEdgeLocationConfigs(entries []sdk.NodetemplatesV1EdgeLocationConfig) []map[string]any {
+	out := make([]map[string]any, 0, len(entries))
+	for _, entry := range entries {
+		out = append(out, map[string]any{
+			FieldNodeTemplateEdgeLocationId: lo.FromPtr(entry.EdgeLocationId),
+			FieldNodeTemplateEdgeConfigId:   lo.FromPtr(entry.EdgeConfigId),
+		})
+	}
+	return out
+}
+
+// edgeLocationIDsFromConfigs maps API edge location configuration entries into the deprecated
+// edge_location_ids state values.
+func edgeLocationIDsFromConfigs(entries []sdk.NodetemplatesV1EdgeLocationConfig) []string {
+	ids := make([]string, 0, len(entries))
+	for _, entry := range entries {
+		ids = append(ids, lo.FromPtr(entry.EdgeLocationId))
+	}
+	return ids
+}
+
+// orderStrings returns ids in the order used by the current configuration, so a server-side
+// reordering of the API response never produces a diff. IDs missing from the configuration
+// are appended in ascending order.
+func orderStrings(ids []string, configured []string) []string {
+	known := make(map[string]struct{}, len(ids))
+	for _, id := range ids {
+		known[id] = struct{}{}
+	}
+
+	out := make([]string, 0, len(ids))
+	used := make(map[string]struct{}, len(ids))
+	for _, id := range configured {
+		if _, ok := known[id]; !ok {
+			continue
+		}
+		if _, ok := used[id]; ok {
+			continue
+		}
+		out = append(out, id)
+		used[id] = struct{}{}
+	}
+
+	rest := make([]string, 0, len(ids)-len(out))
+	for _, id := range ids {
+		if _, ok := used[id]; !ok {
+			rest = append(rest, id)
+			used[id] = struct{}{}
+		}
+	}
+	sort.Strings(rest)
+	return append(out, rest...)
+}
+
+// orderEdgeLocationConfigs returns the API entries in the order used by the current
+// configuration (keyed by edge location ID), so a server-side reordering of the API
+// response never produces a diff. Entries missing from the configuration are appended
+// in ascending edge location ID order.
+func orderEdgeLocationConfigs(entries []sdk.NodetemplatesV1EdgeLocationConfig, configured []any) []sdk.NodetemplatesV1EdgeLocationConfig {
+	configuredIDs := make([]string, 0, len(configured))
+	for _, item := range configured {
+		obj, ok := item.(map[string]any)
+		if !ok {
+			continue
+		}
+		if id, ok := obj[FieldNodeTemplateEdgeLocationId].(string); ok {
+			configuredIDs = append(configuredIDs, id)
+		}
+	}
+
+	ids := make([]string, 0, len(entries))
+	byID := make(map[string]sdk.NodetemplatesV1EdgeLocationConfig, len(entries))
+	for _, entry := range entries {
+		id := lo.FromPtr(entry.EdgeLocationId)
+		ids = append(ids, id)
+		if _, ok := byID[id]; !ok {
+			byID[id] = entry
+		}
+	}
+
+	out := make([]sdk.NodetemplatesV1EdgeLocationConfig, 0, len(entries))
+	for _, id := range orderStrings(ids, configuredIDs) {
+		if entry, ok := byID[id]; ok {
+			out = append(out, entry)
+		}
+	}
+	return out
+}
+
+// toEdgeLocationConfigs maps edge_location_config state values into API edge location
+// configuration entries.
+func toEdgeLocationConfigs(items []any) *[]sdk.NodetemplatesV1EdgeLocationConfig {
+	out := make([]sdk.NodetemplatesV1EdgeLocationConfig, 0, len(items))
+	for _, item := range items {
+		obj, ok := item.(map[string]any)
+		if !ok {
+			continue
+		}
+		entry := sdk.NodetemplatesV1EdgeLocationConfig{
+			EdgeLocationId: toPtr(obj[FieldNodeTemplateEdgeLocationId].(string)),
+		}
+		if edgeConfigID, ok := obj[FieldNodeTemplateEdgeConfigId].(string); ok && edgeConfigID != "" {
+			entry.EdgeConfigId = toPtr(edgeConfigID)
+		}
+		out = append(out, entry)
+	}
+	return &out
+}
+
+// toEdgeLocationConfigsFromIDs maps the deprecated edge_location_ids values into location-only
+// API edge location configuration entries.
+func toEdgeLocationConfigsFromIDs(ids []string) *[]sdk.NodetemplatesV1EdgeLocationConfig {
+	out := make([]sdk.NodetemplatesV1EdgeLocationConfig, 0, len(ids))
+	for _, id := range ids {
+		out = append(out, sdk.NodetemplatesV1EdgeLocationConfig{EdgeLocationId: toPtr(id)})
+	}
+	return &out
 }
 
 func flattenPriceAdjustmentConfiguration(pac *sdk.NodetemplatesV1PriceAdjustmentConfiguration) []map[string]any {
@@ -1410,6 +1612,7 @@ func updateNodeTemplate(ctx context.Context, d *schema.ResourceData, meta any, s
 		FieldNodeTemplateSharedClientsPerGpu,
 		FieldNodeTemplateClmEnabled,
 		FieldNodeTemplateEdgeLocationIDs,
+		FieldNodeTemplateEdgeLocationConfig,
 		FieldNodeTemplatePriceAdjustmentConfiguration,
 		FieldNodeTemplateUserManagedGPUDrivers,
 	) {
@@ -1492,8 +1695,12 @@ func updateNodeTemplate(ctx context.Context, d *schema.ResourceData, meta any, s
 		req.ClmEnabled = lo.ToPtr(v.(bool))
 	}
 
-	if v, ok := d.Get(FieldNodeTemplateEdgeLocationIDs).([]any); ok && len(v) > 0 {
-		req.EdgeLocationIds = toPtr(toStringList(v))
+	if v, ok := d.Get(FieldNodeTemplateEdgeLocationConfig).([]any); ok && len(v) > 0 {
+		req.EdgeLocationConfigs = toEdgeLocationConfigs(v)
+	} else if v, ok := d.Get(FieldNodeTemplateEdgeLocationIDs).([]any); ok && len(v) > 0 {
+		// The deprecated edge_location_ids values are sent as location-only entries of the
+		// EdgeLocationConfigs field which replaced edgeLocationIds in the API (CO-4602).
+		req.EdgeLocationConfigs = toEdgeLocationConfigsFromIDs(toStringList(v))
 	}
 
 	if v, ok := d.Get(FieldNodeTemplatePriceAdjustmentConfiguration).([]any); ok && len(v) > 0 {
@@ -1533,8 +1740,12 @@ func resourceNodeTemplateCreate(ctx context.Context, d *schema.ResourceData, met
 		ClmEnabled:      lo.ToPtr(d.Get(FieldNodeTemplateClmEnabled).(bool)),
 	}
 
-	if v, ok := d.Get(FieldNodeTemplateEdgeLocationIDs).([]any); ok && len(v) > 0 {
-		req.EdgeLocationIds = toPtr(toStringList(v))
+	if v, ok := d.Get(FieldNodeTemplateEdgeLocationConfig).([]any); ok && len(v) > 0 {
+		req.EdgeLocationConfigs = toEdgeLocationConfigs(v)
+	} else if v, ok := d.Get(FieldNodeTemplateEdgeLocationIDs).([]any); ok && len(v) > 0 {
+		// The deprecated edge_location_ids values are sent as location-only entries of the
+		// EdgeLocationConfigs field which replaced edgeLocationIds in the API (CO-4602).
+		req.EdgeLocationConfigs = toEdgeLocationConfigsFromIDs(toStringList(v))
 	}
 
 	//nolint:staticcheck // Currently no other way to reliably get the value and determine if it is set
