@@ -889,13 +889,30 @@ func (r *edgeLocationResource) Read(ctx context.Context, req resource.ReadReques
 		// Otherwise, we'd cause perpetual drift for users who never set the block.
 		if state.ControlPlane != nil && edgeLocation.EdgeClusterSpec.ControlPlane != nil {
 			apiCP := edgeLocation.EdgeClusterSpec.ControlPlane
-			state.ControlPlane = &controlPlaneModel{
+			// ha is Computed, so it is always present in state; refresh it from the API.
+			// The remaining attributes are Optional-only: only refresh those the user
+			// actually configured, otherwise API-assigned defaults would be written to
+			// state for attributes absent from the config, causing perpetual drift.
+			cp := &controlPlaneModel{
 				Ha:                 types.BoolPointerValue(apiCP.Ha),
-				ExternalAddress:    types.StringPointerValue(apiCP.ExternalAddress),
-				APIServerPort:      types.Int32PointerValue(apiCP.ApiServerPort),
-				KonnectivityPort:   types.Int32PointerValue(apiCP.KonnectivityPort),
-				ServiceAnnotations: stringMapValue(ctx, apiCP.ServiceAnnotations, &resp.Diagnostics),
+				ExternalAddress:    state.ControlPlane.ExternalAddress,
+				APIServerPort:      state.ControlPlane.APIServerPort,
+				KonnectivityPort:   state.ControlPlane.KonnectivityPort,
+				ServiceAnnotations: state.ControlPlane.ServiceAnnotations,
 			}
+			if !cp.ExternalAddress.IsNull() {
+				cp.ExternalAddress = types.StringPointerValue(apiCP.ExternalAddress)
+			}
+			if !cp.APIServerPort.IsNull() {
+				cp.APIServerPort = types.Int32PointerValue(apiCP.ApiServerPort)
+			}
+			if !cp.KonnectivityPort.IsNull() {
+				cp.KonnectivityPort = types.Int32PointerValue(apiCP.KonnectivityPort)
+			}
+			if !cp.ServiceAnnotations.IsNull() {
+				cp.ServiceAnnotations = stringMapValue(ctx, apiCP.ServiceAnnotations, &resp.Diagnostics)
+			}
+			state.ControlPlane = cp
 		}
 		// Only sync networking from API if it was already managed in state.
 		// Otherwise, we'd cause perpetual drift for users who never set the block.
@@ -942,8 +959,15 @@ func (r *edgeLocationResource) Read(ctx context.Context, req resource.ReadReques
 					ExternalPort:       types.Int32PointerValue(apiGS.ExternalPort),
 				}
 			}
+			// gateway_replicas is Optional-only: only refresh it if the user configured it,
+			// otherwise the API default would be written to state for an attribute absent
+			// from the config, causing perpetual drift.
+			gatewayReplicas := state.Liqo.GatewayReplicas
+			if !gatewayReplicas.IsNull() {
+				gatewayReplicas = types.Int32PointerValue(apiLiqo.GatewayReplicas)
+			}
 			state.Liqo = &liqoModel{
-				GatewayReplicas: types.Int32PointerValue(apiLiqo.GatewayReplicas),
+				GatewayReplicas: gatewayReplicas,
 				GatewayServer:   gatewayServer,
 			}
 		}
