@@ -720,6 +720,179 @@ func TestNodeTemplateResourceCreate_customNodeTemplate(t *testing.T) {
 	r.False(result.HasError())
 }
 
+func TestNodeTemplateResourceReadContext_StuckPodResizeReconciliation(t *testing.T) {
+	testCases := []struct {
+		name             string
+		templateResponse string
+		expectEnabled   *bool // nil means the block should not be populated in state
+	}{
+		{
+			name: "spr enabled",
+			templateResponse: `
+			{
+			  "name": "custom-template",
+			  "isEnabled": true,
+			  "stuckPodResizeReconciliation": {
+			    "enabled": true
+			  }
+			}`,
+			expectEnabled: lo.ToPtr(true),
+		},
+		{
+			name: "spr disabled",
+			templateResponse: `
+			{
+			  "name": "custom-template",
+			  "isEnabled": true,
+			  "stuckPodResizeReconciliation": {
+			    "enabled": false
+			  }
+			}`,
+			expectEnabled: lo.ToPtr(false),
+		},
+		{
+			name: "spr object omitted",
+			templateResponse: `
+			{
+			  "name": "custom-template",
+			  "isEnabled": true
+			}`,
+			expectEnabled: nil,
+		},
+		{
+			name: "spr enabled is null",
+			templateResponse: `
+			{
+			  "name": "custom-template",
+			  "isEnabled": true,
+			  "stuckPodResizeReconciliation": {
+			    "enabled": null
+			  }
+			}`,
+			expectEnabled: nil,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			r := require.New(t)
+			mockctrl := gomock.NewController(t)
+			mockClient := mock_sdk.NewMockClientInterface(mockctrl)
+
+			ctx := context.Background()
+			provider := &ProviderConfig{
+				api: &sdk.ClientWithResponses{
+					ClientInterface: mockClient,
+				},
+			}
+
+			clusterId := "b6bfc074-a267-400f-b8f1-db0850c369b1"
+			listBody := io.NopCloser(bytes.NewReader([]byte(fmt.Sprintf(`
+			{
+			  "items": [
+			    {
+			      "template": %s
+			    }
+			  ]
+			}`, tc.templateResponse))))
+
+			mockClient.EXPECT().
+				NodeTemplatesAPIListNodeTemplates(gomock.Any(), clusterId, &sdk.NodeTemplatesAPIListNodeTemplatesParams{IncludeDefault: lo.ToPtr(true)}).
+				Return(&http.Response{StatusCode: 200, Body: listBody, Header: map[string][]string{"Content-Type": {"json"}}}, nil)
+
+			resource := resourceNodeTemplate()
+			val := cty.ObjectVal(map[string]cty.Value{
+				FieldClusterId:        cty.StringVal(clusterId),
+				FieldNodeTemplateName: cty.StringVal("custom-template"),
+			})
+			state := sdkterraform.NewInstanceStateShimmedFromValue(val, 0)
+			state.ID = "custom-template"
+
+			data := resource.Data(state)
+			result := resource.ReadContext(ctx, data, provider)
+			r.Nil(result)
+			r.False(result.HasError())
+
+			blocks := data.Get(FieldNodeTemplateStuckPodResizeReconciliation).([]any)
+			if tc.expectEnabled == nil {
+				r.Empty(blocks)
+				return
+			}
+
+			r.Len(blocks, 1)
+			block := blocks[0].(map[string]any)
+			r.Equal(*tc.expectEnabled, block[FieldNodeTemplateStuckPodResizeEnabled])
+		})
+	}
+}
+
+func TestNodeTemplateResourceCreate_StuckPodResizeReconciliation(t *testing.T) {
+	r := require.New(t)
+	mockctrl := gomock.NewController(t)
+	mockClient := mock_sdk.NewMockClientInterface(mockctrl)
+
+	ctx := context.Background()
+	provider := &ProviderConfig{
+		api: &sdk.ClientWithResponses{
+			ClientInterface: mockClient,
+		},
+	}
+
+	name := "custom-template"
+	clusterId := "b6bfc074-a267-400f-b8f1-db0850c369b1"
+	templateResponse := `
+		{
+		  "name": "custom-template",
+		  "isEnabled": true,
+		  "stuckPodResizeReconciliation": {
+		    "enabled": true
+		  }
+		}`
+
+	templateBody := io.NopCloser(bytes.NewReader([]byte(templateResponse)))
+	listBody := io.NopCloser(bytes.NewReader([]byte(fmt.Sprintf(`
+		{
+		  "items": [
+            {
+              "template": %s
+            }
+		  ]
+		}`, templateResponse))))
+
+	var capturedBody sdk.NodeTemplatesAPICreateNodeTemplateJSONRequestBody
+	mockClient.EXPECT().
+		NodeTemplatesAPICreateNodeTemplate(gomock.Any(), clusterId, gomock.Any()).
+		DoAndReturn(func(_ context.Context, _ string, body sdk.NodeTemplatesAPICreateNodeTemplateJSONRequestBody, _ ...sdk.RequestEditorFn) (*http.Response, error) {
+			capturedBody = body
+			return &http.Response{StatusCode: 200, Body: templateBody, Header: map[string][]string{"Content-Type": {"json"}}}, nil
+		})
+	mockClient.EXPECT().
+		NodeTemplatesAPIListNodeTemplates(gomock.Any(), clusterId, &sdk.NodeTemplatesAPIListNodeTemplatesParams{IncludeDefault: lo.ToPtr(true)}).
+		Return(&http.Response{StatusCode: 200, Body: listBody, Header: map[string][]string{"Content-Type": {"json"}}}, nil)
+
+	resource := resourceNodeTemplate()
+	val := cty.ObjectVal(map[string]cty.Value{
+		FieldClusterId:                               cty.StringVal(clusterId),
+		FieldNodeTemplateName:                        cty.StringVal(name),
+		FieldNodeTemplateStuckPodResizeReconciliation: cty.ListVal([]cty.Value{cty.ObjectVal(map[string]cty.Value{FieldNodeTemplateStuckPodResizeEnabled: cty.BoolVal(true)})}),
+	})
+	state := sdkterraform.NewInstanceStateShimmedFromValue(val, 0)
+	state.ID = name
+
+	data := resource.Data(state)
+	result := resource.CreateContext(ctx, data, provider)
+	r.Nil(result)
+	r.False(result.HasError())
+
+	r.NotNil(capturedBody.StuckPodResizeReconciliation)
+	r.NotNil(capturedBody.StuckPodResizeReconciliation.Enabled)
+	r.True(*capturedBody.StuckPodResizeReconciliation.Enabled)
+
+	blocks := data.Get(FieldNodeTemplateStuckPodResizeReconciliation).([]any)
+	r.Len(blocks, 1)
+	r.True(blocks[0].(map[string]any)[FieldNodeTemplateStuckPodResizeEnabled].(bool))
+}
+
 func TestNodeTemplateResourceDelete_defaultNodeTemplate(t *testing.T) {
 	r := require.New(t)
 	mockctrl := gomock.NewController(t)
