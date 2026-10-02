@@ -81,12 +81,12 @@ func TestHibernationSchedule_CreateContext(t *testing.T) {
 				firstAffinity := (*nodeConfig.NodeAffinity.Affinity)[0]
 				r.Equal("key1", firstAffinity.Key)
 				r.Equal([]string{"value1"}, firstAffinity.Values)
-				r.Equal(cluster_autoscaler.IN, firstAffinity.Operator)
+				r.Equal(cluster_autoscaler.KubernetesNodeAffinityOperatorIN, firstAffinity.Operator)
 
 				secondAffinity := (*nodeConfig.NodeAffinity.Affinity)[1]
 				r.Equal("key2", secondAffinity.Key)
 				r.Equal([]string{"value2"}, secondAffinity.Values)
-				r.Equal(cluster_autoscaler.IN, secondAffinity.Operator)
+				r.Equal(cluster_autoscaler.KubernetesNodeAffinityOperatorIN, secondAffinity.Operator)
 
 				r.Equal(true, *nodeConfig.SpotConfig.Spot)
 				r.Equal("0.5", *nodeConfig.SpotConfig.PriceHourly)

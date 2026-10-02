@@ -1260,7 +1260,7 @@ func toAKSSConfig(obj map[string]interface{}) *sdk.NodeconfigV1AKSConfig {
 func toAKSAcceleratedNetworkingMode(v string) *sdk.NodeconfigV1AKSConfigAcceleratedNetworkingMode {
 	switch v {
 	case aksAcceleratedNetworkingDisabled:
-		return toPtr(sdk.ACCELERATEDNETWORKINGMODEDISABLED)
+		return toPtr(sdk.NodeconfigV1AKSConfigAcceleratedNetworkingModeACCELERATEDNETWORKINGMODEDISABLED)
 	default:
 		return nil
 	}
@@ -1268,7 +1268,7 @@ func toAKSAcceleratedNetworkingMode(v string) *sdk.NodeconfigV1AKSConfigAccelera
 
 func fromAKSAcceleratedNetworkingMode(v sdk.NodeconfigV1AKSConfigAcceleratedNetworkingMode) string {
 	switch v {
-	case sdk.ACCELERATEDNETWORKINGMODEDISABLED:
+	case sdk.NodeconfigV1AKSConfigAcceleratedNetworkingModeACCELERATEDNETWORKINGMODEDISABLED:
 		return aksAcceleratedNetworkingDisabled
 	default:
 		return ""
@@ -1398,11 +1398,11 @@ func toAKSOSDiskType(v string) *sdk.NodeconfigV1AKSConfigOsDiskType {
 
 	switch v {
 	case "standard":
-		return toPtr(sdk.OSDISKTYPESTANDARD)
+		return toPtr(sdk.NodeconfigV1AKSConfigOsDiskTypeOSDISKTYPESTANDARD)
 	case "standard-ssd":
-		return toPtr(sdk.OSDISKTYPESTANDARDSSD)
+		return toPtr(sdk.NodeconfigV1AKSConfigOsDiskTypeOSDISKTYPESTANDARDSSD)
 	case "premium-ssd":
-		return toPtr(sdk.OSDISKTYPEPREMIUMSSD)
+		return toPtr(sdk.NodeconfigV1AKSConfigOsDiskTypeOSDISKTYPEPREMIUMSSD)
 	default:
 		return nil
 	}
@@ -1592,11 +1592,11 @@ func fromAKSDiskType(osDiskType *sdk.NodeconfigV1AKSConfigOsDiskType) string {
 		return ""
 	}
 	switch *osDiskType {
-	case sdk.OSDISKTYPESTANDARD:
+	case sdk.NodeconfigV1AKSConfigOsDiskTypeOSDISKTYPESTANDARD:
 		return "standard"
-	case sdk.OSDISKTYPESTANDARDSSD:
+	case sdk.NodeconfigV1AKSConfigOsDiskTypeOSDISKTYPESTANDARDSSD:
 		return "standard-ssd"
-	case sdk.OSDISKTYPEPREMIUMSSD:
+	case sdk.NodeconfigV1AKSConfigOsDiskTypeOSDISKTYPEPREMIUMSSD:
 		return "premium-ssd"
 	default:
 		return ""

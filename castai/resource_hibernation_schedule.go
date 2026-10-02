@@ -58,12 +58,12 @@ const (
 )
 
 var supportedAffinityOperators = []string{
-	string(cluster_autoscaler.DOESNOTEXIST),
-	string(cluster_autoscaler.EXISTS),
-	string(cluster_autoscaler.GT),
-	string(cluster_autoscaler.IN),
-	string(cluster_autoscaler.LT),
-	string(cluster_autoscaler.NOTIN),
+	string(cluster_autoscaler.KubernetesNodeAffinityOperatorDOESNOTEXIST),
+	string(cluster_autoscaler.KubernetesNodeAffinityOperatorEXISTS),
+	string(cluster_autoscaler.KubernetesNodeAffinityOperatorGT),
+	string(cluster_autoscaler.KubernetesNodeAffinityOperatorIN),
+	string(cluster_autoscaler.KubernetesNodeAffinityOperatorLT),
+	string(cluster_autoscaler.KubernetesNodeAffinityOperatorNOTIN),
 }
 var scheduleSchema = &schema.Schema{
 	Type:     schema.TypeList,
