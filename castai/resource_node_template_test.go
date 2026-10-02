@@ -769,7 +769,9 @@ func TestNodeTemplateResourceReadContext_StuckPodResizeReconciliation(t *testing
 			    "enabled": null
 			  }
 			}`,
-			expectEnabled: nil,
+			// Optional+Computed: the object being present means the block is populated (null treated as false),
+			// and a server-populated value never diffs against a config which omits the block.
+			expectEnabled: lo.ToPtr(false),
 		},
 	}
 
@@ -891,6 +893,71 @@ func TestNodeTemplateResourceCreate_StuckPodResizeReconciliation(t *testing.T) {
 	blocks := data.Get(FieldNodeTemplateStuckPodResizeReconciliation).([]any)
 	r.Len(blocks, 1)
 	r.True(blocks[0].(map[string]any)[FieldNodeTemplateStuckPodResizeEnabled].(bool))
+}
+
+func TestNodeTemplateResourceCreate_StuckPodResizeReconciliationDefaultFalse(t *testing.T) {
+	r := require.New(t)
+	mockctrl := gomock.NewController(t)
+	mockClient := mock_sdk.NewMockClientInterface(mockctrl)
+
+	ctx := context.Background()
+	provider := &ProviderConfig{
+		api: &sdk.ClientWithResponses{
+			ClientInterface: mockClient,
+		},
+	}
+
+	name := "custom-template"
+	clusterId := "b6bfc074-a267-400f-b8f1-db0850c369b1"
+	templateResponse := `
+		{
+		  "name": "custom-template",
+		  "isEnabled": true,
+		  "stuckPodResizeReconciliation": {
+		    "enabled": false
+		  }
+		}`
+
+	templateBody := io.NopCloser(bytes.NewReader([]byte(templateResponse)))
+	listBody := io.NopCloser(bytes.NewReader([]byte(fmt.Sprintf(`
+		{
+		  "items": [
+            {
+              "template": %s
+            }
+		  ]
+		}`, templateResponse))))
+
+	var capturedBody sdk.NodeTemplatesAPICreateNodeTemplateJSONRequestBody
+	mockClient.EXPECT().
+		NodeTemplatesAPICreateNodeTemplate(gomock.Any(), clusterId, gomock.Any()).
+		DoAndReturn(func(_ context.Context, _ string, body sdk.NodeTemplatesAPICreateNodeTemplateJSONRequestBody, _ ...sdk.RequestEditorFn) (*http.Response, error) {
+			capturedBody = body
+			return &http.Response{StatusCode: 200, Body: templateBody, Header: map[string][]string{"Content-Type": {"json"}}}, nil
+		})
+	mockClient.EXPECT().
+		NodeTemplatesAPIListNodeTemplates(gomock.Any(), clusterId, &sdk.NodeTemplatesAPIListNodeTemplatesParams{IncludeDefault: lo.ToPtr(true)}).
+		Return(&http.Response{StatusCode: 200, Body: listBody, Header: map[string][]string{"Content-Type": {"json"}}}, nil)
+
+	resource := resourceNodeTemplate()
+	// Block present with `enabled` omitted: at the SDK layer this is indistinguishable from
+	// an explicit false (the block map arrives with the zero value), and the provider must send enabled=false.
+	val := cty.ObjectVal(map[string]cty.Value{
+		FieldClusterId:                               cty.StringVal(clusterId),
+		FieldNodeTemplateName:                        cty.StringVal(name),
+		FieldNodeTemplateStuckPodResizeReconciliation: cty.ListVal([]cty.Value{cty.ObjectVal(map[string]cty.Value{FieldNodeTemplateStuckPodResizeEnabled: cty.False})}),
+	})
+	state := sdkterraform.NewInstanceStateShimmedFromValue(val, 0)
+	state.ID = name
+
+	data := resource.Data(state)
+	result := resource.CreateContext(ctx, data, provider)
+	r.Nil(result)
+	r.False(result.HasError())
+
+	r.NotNil(capturedBody.StuckPodResizeReconciliation)
+	r.NotNil(capturedBody.StuckPodResizeReconciliation.Enabled)
+	r.False(*capturedBody.StuckPodResizeReconciliation.Enabled)
 }
 
 func TestNodeTemplateResourceDelete_defaultNodeTemplate(t *testing.T) {

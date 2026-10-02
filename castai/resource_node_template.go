@@ -888,17 +888,19 @@ func resourceNodeTemplate() *schema.Resource {
 				Type:     schema.TypeList,
 				MaxItems: 1,
 				Optional: true,
+				Computed: true,
 				Description: "Stuck Pod Resize Reconciliation (SPR) configuration for nodes created from this template. " +
 					"When enabled, the autoscaler discovers pods whose woop-initiated in-place resize failed or got stuck, " +
-					"protects them from woop's eviction fallback, and live-migrates them via a rebalancing plan. " +
-					"Omitting this block leaves the setting unset (SPR is off by default).",
+					"protects them from woop's eviction, and partially or fully drains the node to enable the resize. " +
+					"Omitting this block leaves the setting to the API default (SPR is off); to disable it explicitly, " +
+					"set the block with `enabled = false`.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						FieldNodeTemplateStuckPodResizeEnabled: {
 							Type:        schema.TypeBool,
 							Optional:    true,
-							Default:     false,
-							Description: "Enable/disable Stuck Pod Resize Reconciliation. Defaults to false.",
+							Computed:    true,
+							Description: "Enable/disable Stuck Pod Resize Reconciliation. When the block is present but this field is omitted, it is sent as false.",
 						},
 					},
 				},
@@ -1019,13 +1021,13 @@ func resourceNodeTemplateRead(ctx context.Context, d *schema.ResourceData, meta 
 		return diag.FromErr(fmt.Errorf("setting clm enabled: %w", err))
 	}
 
-	// Only populate the block when the API returns an object with a non-null `enabled` value, so that
-	// clusters where SPR is unset (either the whole object is absent or `enabled` is null) don't drift
-	// against configurations which omit the block.
-	if spr := nodeTemplate.StuckPodResizeReconciliation; spr != nil && spr.Enabled != nil {
+	// The block is Optional+Computed, so a server-populated value never diffs against a configuration
+	// which omits it. Populate it whenever the API returns the object (even with a null `enabled`),
+	// treating null as false.
+	if spr := nodeTemplate.StuckPodResizeReconciliation; spr != nil {
 		if err := d.Set(FieldNodeTemplateStuckPodResizeReconciliation, []map[string]any{
 			{
-				FieldNodeTemplateStuckPodResizeEnabled: *spr.Enabled,
+				FieldNodeTemplateStuckPodResizeEnabled: lo.FromPtrOr(spr.Enabled, false),
 			},
 		}); err != nil {
 			return diag.FromErr(fmt.Errorf("setting stuck pod resize reconciliation: %w", err))
@@ -1527,12 +1529,10 @@ func updateNodeTemplate(ctx context.Context, d *schema.ResourceData, meta any, s
 		req.ClmEnabled = lo.ToPtr(v.(bool))
 	}
 
+	// With the block being Optional+Computed, a configuration which omits it keeps the
+	// server-populated value, so there is no "removed" case to reset here.
 	if v, ok := d.Get(FieldNodeTemplateStuckPodResizeReconciliation).([]any); ok && len(v) > 0 {
 		req.StuckPodResizeReconciliation = toStuckPodResizeReconciliation(v[0])
-	} else if d.HasChange(FieldNodeTemplateStuckPodResizeReconciliation) {
-		// Block was removed from the configuration: reset SPR to the backend default by sending
-		// an object with a null `enabled` value.
-		req.StuckPodResizeReconciliation = &sdk.NodetemplatesV1StuckPodResizeReconciliation{}
 	}
 
 	if v, ok := d.Get(FieldNodeTemplateEdgeLocationIDs).([]any); ok && len(v) > 0 {
