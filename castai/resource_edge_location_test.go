@@ -198,6 +198,31 @@ func TestAccCloudAgnostic_ResourceEdgeLocationAWSImpersonation(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "liqo.gateway_replicas", "3"),
 				),
 			},
+			// Add control plane overrides and gateway server config.
+			{
+				Config: testAccEdgeLocationAWSImpersonationConfigWithOverrides(rName, clusterName, 6443, "platform"),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "control_plane.ha", "false"),
+					resource.TestCheckResourceAttr(resourceName, "control_plane.external_address", "api.edge.example.com"),
+					resource.TestCheckResourceAttr(resourceName, "control_plane.api_server_port", "6443"),
+					resource.TestCheckResourceAttr(resourceName, "control_plane.konnectivity_port", "8132"),
+					resource.TestCheckResourceAttr(resourceName, "control_plane.service_annotations.owner", "platform"),
+					resource.TestCheckResourceAttr(resourceName, "liqo.gateway_replicas", "2"),
+					resource.TestCheckResourceAttr(resourceName, "liqo.gateway_server.external_address", "gw.edge.example.com"),
+					resource.TestCheckResourceAttr(resourceName, "liqo.gateway_server.external_port", "51820"),
+					resource.TestCheckResourceAttr(resourceName, "liqo.gateway_server.service_labels.tier", "edge"),
+					resource.TestCheckResourceAttr(resourceName, "liqo.gateway_server.service_annotations.owner", "platform"),
+				),
+			},
+			// Update control plane and gateway server overrides.
+			{
+				Config: testAccEdgeLocationAWSImpersonationConfigWithOverrides(rName, clusterName, 7443, "updated"),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "control_plane.api_server_port", "7443"),
+					resource.TestCheckResourceAttr(resourceName, "control_plane.service_annotations.owner", "updated"),
+					resource.TestCheckResourceAttr(resourceName, "liqo.gateway_server.service_annotations.owner", "updated"),
+				),
+			},
 			// Remove liqo block entirely.
 			{
 				Config: testAccEdgeLocationAWSImpersonationConfig(rName, clusterName),
@@ -379,6 +404,59 @@ resource "castai_edge_location" "test" {
   }
 }
 `, rName, description, zonesConfig, subnetConfig, organizationID, roleArn, networkingBlock, controlPlaneBlock, liqoBlock))
+}
+
+func testAccEdgeLocationAWSImpersonationConfigWithOverrides(rName, clusterName string, apiServerPort int32, annotationValue string) string {
+	organizationID := testAccGetOrganizationID()
+
+	zonesConfig, subnetConfig := formatAWSZonesAndSubnets([]string{"us-east-1a", "us-east-1b"})
+
+	return ConfigCompose(testOmniClusterConfig(clusterName), fmt.Sprintf(`
+resource "castai_edge_location" "test" {
+  organization_id 	 = %[4]q
+  cluster_id      	 = castai_omni_cluster.test.id
+  name            	 = %[1]q
+  description     	 = "Test edge location impersonation"
+  region          	 = "us-east-1"
+  control_plane_mode = "SHARED"
+%[2]s
+
+  control_plane = {
+    ha                = false
+    external_address  = "api.edge.example.com"
+    api_server_port   = %[5]d
+    konnectivity_port = 8132
+    service_annotations = {
+      owner = %[6]q
+    }
+  }
+
+  liqo = {
+    gateway_replicas = 2
+    gateway_server = {
+      external_address = "gw.edge.example.com"
+      external_port    = 51820
+      service_labels = {
+        tier = "edge"
+      }
+      service_annotations = {
+        owner = %[6]q
+      }
+    }
+  }
+
+  aws = {
+    account_id        = "123456789012"
+    role_arn          = "arn:aws:iam::123456789012:role/castai-omni-edge"
+    vpc_id            = "vpc-12345678"
+    vpc_peered        = true
+    vpc_cidr          = "10.0.0.0/16"
+    security_group_id = "sg-12345678"
+    subnet_ids = {%[3]s
+    }
+  }
+}
+`, rName, zonesConfig, subnetConfig, organizationID, apiServerPort, annotationValue))
 }
 
 func testAccEdgeLocationGCPImpersonationConfig(rName, clusterName string) string {
