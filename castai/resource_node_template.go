@@ -1742,21 +1742,46 @@ func suppressResourceLimitsDiff(_, _, _ string, d *schema.ResourceData) bool {
 	return reflect.DeepEqual(old, new)
 }
 
-// The backend collapses stuckPodResizeReconciliation with enabled=false to an unset field, so a configured
-// enabled=false must not diff against an absent value in state.
-func suppressStuckPodResizeReconciliationDiff(_, _, _ string, d *schema.ResourceData) bool {
+// The backend collapses stuckPodResizeReconciliation with enabled=false to an unset field, so treat
+// an absent block and a block with enabled=false as equal on either side of the diff.
+// The backend collapses stuckPodResizeReconciliation with enabled=false to an unset field, so treat
+// an absent block and a block with enabled=false as equal on either side of the diff.
+func suppressStuckPodResizeReconciliationDiff(k, oldValue, newValue string, d *schema.ResourceData) bool {
+	// Diff of the nested enabled attribute: suppress only changes between unset and false.
+	if strings.HasSuffix(k, FieldNodeTemplateStuckPodResizeEnabled) {
+		return (oldValue == "" && newValue == "false") || (oldValue == "false" && newValue == "")
+	}
+
+	// Diff of the block count: "0" => "1" means the block is being added, "1" => "0" means removed.
+	// GetChange cannot be used for the new value here: when the block is removed from the config,
+	// it falls back to the state value, so the state and config values are read per branch.
 	oldBlocks, newBlocks := d.GetChange(FieldNodeTemplateStuckPodResizeReconciliation)
 	oldList, _ := oldBlocks.([]any)
 	newList, _ := newBlocks.([]any)
-	if len(oldList) != 0 || len(newList) != 1 {
-		return false
+	if oldValue == "0" {
+		disabled, err := stuckPodResizeDisabled(newList)
+		return err == nil && disabled
 	}
-	newBlock, ok := newList[0].(map[string]any)
+	if newValue == "0" {
+		disabled, err := stuckPodResizeDisabled(oldList)
+		return err == nil && disabled
+	}
+	return false
+}
+
+func stuckPodResizeDisabled(list []any) (bool, error) {
+	if len(list) == 0 {
+		return true, nil
+	}
+	block, ok := list[0].(map[string]any)
 	if !ok {
-		return false
+		return false, fmt.Errorf("unexpected stuck pod resize reconciliation block type %T", list[0])
 	}
-	enabled, ok := newBlock[FieldNodeTemplateStuckPodResizeEnabled].(bool)
-	return ok && !enabled
+	enabled, ok := block[FieldNodeTemplateStuckPodResizeEnabled].(bool)
+	if !ok {
+		return false, fmt.Errorf("unexpected stuck pod resize reconciliation enabled value type %T", block[FieldNodeTemplateStuckPodResizeEnabled])
+	}
+	return !enabled, nil
 }
 
 func toCustomTaintsWithOptionalEffect(objs []map[string]any) *[]sdk.NodetemplatesV1TaintWithOptionalEffect {

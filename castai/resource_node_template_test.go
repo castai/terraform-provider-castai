@@ -969,6 +969,7 @@ func TestNodeTemplateResourceDiff_StuckPodResizeReconciliation(t *testing.T) {
 	}{
 		{name: "config omitted, state unset", stateSPR: nil, configSPR: nil, expectDiff: false},
 		{name: "config enabled=false, state unset: suppressed", stateSPR: nil, configSPR: lo.ToPtr(false), expectDiff: false},
+		{name: "config omitted, state enabled=false: suppressed", stateSPR: lo.ToPtr(false), configSPR: nil, expectDiff: false},
 		{name: "config enabled=true, state unset", stateSPR: nil, configSPR: lo.ToPtr(true), expectDiff: true},
 		{name: "config enabled=false, state enabled=true", stateSPR: lo.ToPtr(true), configSPR: lo.ToPtr(false), expectDiff: true},
 		{name: "config omitted, state enabled=true", stateSPR: lo.ToPtr(true), configSPR: nil, expectDiff: true},
@@ -1020,6 +1021,37 @@ func TestNodeTemplateResourceDiff_StuckPodResizeReconciliation(t *testing.T) {
 			} else {
 				r.Empty(sprKeys)
 			}
+		})
+	}
+}
+
+func Test_stuckPodResizeDisabled(t *testing.T) {
+	testCases := []struct {
+		name          string
+		list          []any
+		expectDisabled bool
+		expectErr     bool
+	}{
+		{name: "empty list", list: []any{}, expectDisabled: true},
+		{name: "nil list", list: nil, expectDisabled: true},
+		{name: "block enabled=false", list: []any{map[string]any{FieldNodeTemplateStuckPodResizeEnabled: false}}, expectDisabled: true},
+		{name: "block enabled=true", list: []any{map[string]any{FieldNodeTemplateStuckPodResizeEnabled: true}}},
+		{name: "block not a map", list: []any{nil}, expectErr: true},
+		{name: "enabled not a bool", list: []any{map[string]any{FieldNodeTemplateStuckPodResizeEnabled: "false"}}, expectErr: true},
+		{name: "enabled missing", list: []any{map[string]any{}}, expectErr: true},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			r := require.New(t)
+
+			disabled, err := stuckPodResizeDisabled(tc.list)
+			if tc.expectErr {
+				r.Error(err)
+				return
+			}
+			r.NoError(err)
+			r.Equal(tc.expectDisabled, disabled)
 		})
 	}
 }
