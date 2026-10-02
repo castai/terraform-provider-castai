@@ -929,17 +929,22 @@ func (r *edgeLocationResource) Read(ctx context.Context, req resource.ReadReques
 		// Otherwise, we'd cause perpetual drift for users who never set the block.
 		if state.Liqo != nil && edgeLocation.EdgeClusterSpec.Liqo != nil {
 			apiLiqo := edgeLocation.EdgeClusterSpec.Liqo
-			state.Liqo = &liqoModel{
-				GatewayReplicas: types.Int32PointerValue(apiLiqo.GatewayReplicas),
-			}
+			// Only sync the gateway server if it was already managed in state, evaluated
+			// against the current state before state.Liqo is rebuilt below. Otherwise the
+			// check would run against the freshly allocated struct and always be false.
+			var gatewayServer *gatewayServerModel
 			if state.Liqo.GatewayServer != nil && apiLiqo.GatewayServer != nil {
 				apiGS := apiLiqo.GatewayServer
-				state.Liqo.GatewayServer = &gatewayServerModel{
+				gatewayServer = &gatewayServerModel{
 					ServiceLabels:      stringMapValue(ctx, apiGS.ServiceLabels, &resp.Diagnostics),
 					ServiceAnnotations: stringMapValue(ctx, apiGS.ServiceAnnotations, &resp.Diagnostics),
 					ExternalAddress:    types.StringPointerValue(apiGS.ExternalAddress),
 					ExternalPort:       types.Int32PointerValue(apiGS.ExternalPort),
 				}
+			}
+			state.Liqo = &liqoModel{
+				GatewayReplicas: types.Int32PointerValue(apiLiqo.GatewayReplicas),
+				GatewayServer:   gatewayServer,
 			}
 		}
 		if edgeLocation.EdgeClusterSpec.Addons != nil {
