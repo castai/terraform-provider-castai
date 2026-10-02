@@ -91,7 +91,7 @@ resource "castai_node_template" "default_by_castai" {
 - `price_adjustment_configuration` (Block List, Max: 1) Configuration for adjusting instance type prices during autoscaling. Adjustments only affect placement decisions, not cost reporting. (see [below for nested schema](#nestedblock--price_adjustment_configuration))
 - `rebalancing_config_min_nodes` (Number) Minimum nodes that will be kept when rebalancing nodes using this node template.
 - `should_taint` (Boolean) Marks whether the templated nodes will have a taint.
-- `stuck_pod_resize_reconciliation` (Block List, Max: 1) Stuck Pod Resize Reconciliation (SPR) configuration for nodes created from this template. When enabled, the autoscaler discovers pods whose woop-initiated in-place resize failed or got stuck, protects them from woop's eviction, and partially or fully drains the node to enable the resize. Omitting this block leaves the setting to the API default (SPR is off); to disable it explicitly, set the block with `enabled = false`. (see [below for nested schema](#nestedblock--stuck_pod_resize_reconciliation))
+- `stuck_pod_resize_reconciliation` (Block List, Max: 1) Stuck Pod Resize Reconciliation (SPR) configuration for nodes created from this template. When enabled, the autoscaler discovers pods whose woop-initiated in-place resize failed or got stuck, protects them from woop's eviction, and partially or fully drains the node to enable the resize. (see [below for nested schema](#nestedblock--stuck_pod_resize_reconciliation))
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
 ### Read-Only
@@ -286,7 +286,7 @@ Optional:
 
 Optional:
 
-- `enabled` (Boolean) Enable/disable Stuck Pod Resize Reconciliation. When the block is present but this field is omitted, it is sent as false.
+- `enabled` (Boolean) Enable/disable Stuck Pod Resize Reconciliation. Defaults to false.
 
 
 <a id="nestedblock--timeouts"></a>

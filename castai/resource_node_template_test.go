@@ -769,9 +769,7 @@ func TestNodeTemplateResourceReadContext_StuckPodResizeReconciliation(t *testing
 			    "enabled": null
 			  }
 			}`,
-			// Optional+Computed: the object being present means the block is populated (null treated as false),
-			// and a server-populated value never diffs against a config which omits the block.
-			expectEnabled: lo.ToPtr(false),
+			expectEnabled: nil,
 		},
 	}
 
@@ -940,8 +938,7 @@ func TestNodeTemplateResourceCreate_StuckPodResizeReconciliationDefaultFalse(t *
 		Return(&http.Response{StatusCode: 200, Body: listBody, Header: map[string][]string{"Content-Type": {"json"}}}, nil)
 
 	resource := resourceNodeTemplate()
-	// Block present with `enabled` omitted: at the SDK layer this is indistinguishable from
-	// an explicit false (the block map arrives with the zero value), and the provider must send enabled=false.
+	// An omitted `enabled` in a present block is indistinguishable from an explicit false at the SDK layer.
 	val := cty.ObjectVal(map[string]cty.Value{
 		FieldClusterId:                               cty.StringVal(clusterId),
 		FieldNodeTemplateName:                        cty.StringVal(name),
