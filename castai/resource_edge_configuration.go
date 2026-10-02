@@ -673,7 +673,6 @@ func (r *edgeConfigurationResource) toGCPConfiguration(ctx context.Context, plan
 	config := &omni.GCPConfiguration{
 		ImageId:         lo.ToPtr(""),
 		BootDiskSizeGib: lo.ToPtr(int32(0)),
-		Labels:          lo.ToPtr(map[string]string{}),
 	}
 
 	if !plan.ImageID.IsNull() {
@@ -737,7 +736,6 @@ func (r *edgeConfigurationResource) toAWSConfiguration(ctx context.Context, plan
 	config := &omni.AWSConfiguration{
 		ImageId:         lo.ToPtr(""),
 		BootDiskSizeGib: lo.ToPtr(int32(0)),
-		Tags:            lo.ToPtr(map[string]string{}),
 	}
 
 	if !plan.ImageID.IsNull() {
@@ -800,7 +798,6 @@ func (r *edgeConfigurationResource) toOCIConfiguration(ctx context.Context, plan
 	config := &omni.OCIConfiguration{
 		ImageId:         lo.ToPtr(""),
 		BootDiskSizeGib: lo.ToPtr(int32(0)),
-		Tags:            lo.ToPtr(map[string]string{}),
 	}
 
 	if !plan.ImageID.IsNull() {
@@ -860,7 +857,6 @@ func (r *edgeConfigurationResource) toNebiusConfiguration(ctx context.Context, p
 	}
 
 	config := &omni.NebiusConfiguration{
-		Labels:          lo.ToPtr(map[string]string{}),
 		ImageId:         lo.ToPtr(""),
 		BootDiskSizeGib: lo.ToPtr(int32(0)),
 		ReservationIds:  lo.ToPtr([]string{}),

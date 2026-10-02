@@ -1741,6 +1741,58 @@ resource "castai_edge_configuration" "test_2" {
 `, organizationID)
 }
 
+// testAccNodeTemplateConstraints mirrors the constraints block of testAccNodeTemplateConfig,
+// whose values round-trip cleanly against the real API. Node template acceptance test
+// configs must include it: without a constraints block the read populates API defaults
+// into state and every subsequent plan is non-empty.
+const testAccNodeTemplateConstraints = `
+			constraints {
+				fallback_restore_rate_seconds = 1800
+				spot = true
+				enable_spot_diversity = true
+				spot_diversity_price_increase_limit_percent = 21
+				spot_interruption_predictions_enabled = true
+				spot_interruption_predictions_type = "interruption-predictions"
+				use_spot_fallbacks = true
+				storage_optimized_state = "disabled"
+				burstable_instances = "enabled"
+				customer_specific = "enabled"
+				min_cpu = 4
+				max_cpu = 100
+				instance_families {
+				  exclude = ["m5"]
+				}
+				azs = ["eu-central-1a", "eu-central-1b"]
+				gpu {
+					include_names = []
+					exclude_names = []
+					manufacturers = ["NVIDIA"]
+					fractional_gpus = "enabled"
+				}
+
+				custom_priority {
+					instance_families = ["c", "d"]
+					spot = true
+					on_demand = true
+				}
+
+				resource_limits {
+					cpu_limit_enabled = false
+					cpu_limit_max_cores = 0
+				}
+
+				cpu_manufacturers = ["INTEL", "AMD"]
+				architecture_priority = ["amd64"]
+
+				aws {
+					capacity_reservations {
+						id   = "cr-12345678901234567"
+						type = "ON_DEMAND_CAPACITY_RESERVATION"
+					}
+				}
+			}
+`
+
 func testAccNodeTemplateEdgeLocationConfigConfig(rName, clusterName string) string {
 	return ConfigCompose(testAccEKSClusterConfig(rName, clusterName), testAccNodeConfig(rName), testAccEdgeLocationsConfig(rName, clusterName), testAccEdgeConfigurationsConfig(), fmt.Sprintf(`
 		resource "castai_node_template" "test" {
@@ -1758,8 +1810,9 @@ func testAccNodeTemplateEdgeLocationConfigConfig(rName, clusterName string) stri
 			edge_location_config {
 				edge_location_id = castai_edge_location.test_2.id
 			}
+%[2]s
 		}
-	`, rName))
+	`, rName, testAccNodeTemplateConstraints))
 }
 
 func testAccNodeTemplateEdgeLocationConfigUpdatedConfig(rName, clusterName string) string {
@@ -1780,8 +1833,9 @@ func testAccNodeTemplateEdgeLocationConfigUpdatedConfig(rName, clusterName strin
 				edge_location_id = castai_edge_location.test_2.id
 				edge_config_id   = castai_edge_configuration.test_2.id
 			}
+%[2]s
 		}
-	`, rName))
+	`, rName, testAccNodeTemplateConstraints))
 }
 
 func testAccNodeTemplateEdgeLocationIDsConfig(rName, clusterName string) string {
@@ -1794,8 +1848,9 @@ func testAccNodeTemplateEdgeLocationIDsConfig(rName, clusterName string) string 
 			clm_enabled = false
 
 			edge_location_ids = [castai_edge_location.test_1.id, castai_edge_location.test_2.id]
+%[2]s
 		}
-	`, rName))
+	`, rName, testAccNodeTemplateConstraints))
 }
 
 func testAccNodeTemplateEdgeLocationIDsSwitchedConfig(rName, clusterName string) string {
@@ -1811,8 +1866,9 @@ func testAccNodeTemplateEdgeLocationIDsSwitchedConfig(rName, clusterName string)
 				edge_location_id = castai_edge_location.test_1.id
 				edge_config_id   = castai_edge_configuration.test_1.id
 			}
+%[2]s
 		}
-	`, rName))
+	`, rName, testAccNodeTemplateConstraints))
 }
 
 func testAccNodeTemplateConfig(rName, clusterName string) string {
