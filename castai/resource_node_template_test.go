@@ -565,6 +565,85 @@ func TestNodeTemplateResourceReadContextEmptyList(t *testing.T) {
 	r.Nil(result)
 }
 
+func TestNodeTemplateResourceReadContext_edgeLocationConfig(t *testing.T) {
+	r := require.New(t)
+	mockctrl := gomock.NewController(t)
+	mockClient := mock_sdk.NewMockClientInterface(mockctrl)
+
+	ctx := context.Background()
+	provider := &ProviderConfig{
+		api: &sdk.ClientWithResponses{
+			ClientInterface: mockClient,
+		},
+	}
+
+	clusterId := "b6bfc074-a267-400f-b8f1-db0850c369b1"
+	edgeLocation1 := "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+	edgeLocation2 := "b2c3d4e5-f6a7-8901-bcde-f12345678901"
+	edgeConfig1 := "c3d4e5f6-a7b8-9012-cdef-234567890123"
+
+	// The response lists the entries in reverse order compared to the state.
+	templateResponse := fmt.Sprintf(`
+		{
+		  "name": "gpu",
+		  "isEnabled": true,
+		  "edgeLocationConfigs": [
+		    {"edgeLocationId": %q},
+		    {"edgeLocationId": %q, "edgeConfigId": %q}
+		  ]
+	    }
+	`, edgeLocation2, edgeLocation1, edgeConfig1)
+
+	body := io.NopCloser(bytes.NewReader([]byte(fmt.Sprintf(`
+		{
+		  "items": [
+            {
+              "template": %s
+            }
+		  ]
+		}
+	`, templateResponse))))
+	mockClient.EXPECT().
+		NodeTemplatesAPIListNodeTemplates(gomock.Any(), clusterId, &sdk.NodeTemplatesAPIListNodeTemplatesParams{IncludeDefault: lo.ToPtr(true)}).
+		Return(&http.Response{StatusCode: 200, Body: body, Header: map[string][]string{"Content-Type": {"json"}}}, nil)
+
+	resource := resourceNodeTemplate()
+	val := cty.ObjectVal(map[string]cty.Value{
+		FieldClusterId:        cty.StringVal(clusterId),
+		FieldNodeTemplateName: cty.StringVal("gpu"),
+		FieldNodeTemplateEdgeLocationConfig: cty.ListVal([]cty.Value{
+			cty.ObjectVal(map[string]cty.Value{
+				FieldNodeTemplateEdgeLocationId: cty.StringVal(edgeLocation1),
+				FieldNodeTemplateEdgeConfigId:   cty.StringVal(edgeConfig1),
+			}),
+			cty.ObjectVal(map[string]cty.Value{
+				FieldNodeTemplateEdgeLocationId: cty.StringVal(edgeLocation2),
+				FieldNodeTemplateEdgeConfigId:   cty.StringVal(""),
+			}),
+		}),
+	})
+	state := sdkterraform.NewInstanceStateShimmedFromValue(val, 0)
+	state.ID = "gpu"
+
+	data := resource.Data(state)
+	result := resource.ReadContext(ctx, data, provider)
+	r.Nil(result)
+	r.False(result.HasError())
+
+	// The read maps the reordered API response back into edge_location_config in the
+	// state's order, with the unset edge config stored as an empty string so plans stay clean.
+	r.Equal([]any{
+		map[string]any{
+			FieldNodeTemplateEdgeLocationId: edgeLocation1,
+			FieldNodeTemplateEdgeConfigId:   edgeConfig1,
+		},
+		map[string]any{
+			FieldNodeTemplateEdgeLocationId: edgeLocation2,
+			FieldNodeTemplateEdgeConfigId:   "",
+		},
+	}, data.Get(FieldNodeTemplateEdgeLocationConfig))
+}
+
 func TestNodeTemplateResourceCreate_defaultNodeTemplate(t *testing.T) {
 	r := require.New(t)
 	mockctrl := gomock.NewController(t)
