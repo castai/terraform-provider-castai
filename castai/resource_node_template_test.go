@@ -1324,6 +1324,203 @@ func TestAccEKS_ResourceNodeTemplate_basic(t *testing.T) {
 	})
 }
 
+func TestAccEKS_ResourceNodeTemplate_edgeLocationConfig(t *testing.T) {
+	rName := fmt.Sprintf("%v-node-template-%v", ResourcePrefix, acctest.RandString(8))
+	resourceName := "castai_node_template.test"
+	clusterName, _ := lo.Coalesce(os.Getenv("CLUSTER_NAME"), "cost-terraform")
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		CheckDestroy:             testAccCheckNodeTemplateDestroy(rName),
+		Steps: []resource.TestStep{
+			{
+				// New block only: one entry with an edge config, one without.
+				Config: testAccNodeTemplateEdgeLocationConfigConfig(rName, clusterName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "name", rName),
+					resource.TestCheckResourceAttr(resourceName, "edge_location_ids.#", "0"),
+					resource.TestCheckResourceAttr(resourceName, "edge_location_config.#", "2"),
+					resource.TestCheckResourceAttrPair(resourceName, "edge_location_config.0.edge_location_id", "castai_edge_location.test_1", "id"),
+					resource.TestCheckResourceAttrPair(resourceName, "edge_location_config.0.edge_config_id", "castai_edge_configuration.test_1", "id"),
+					resource.TestCheckResourceAttrPair(resourceName, "edge_location_config.1.edge_location_id", "castai_edge_location.test_2", "id"),
+					resource.TestCheckResourceAttr(resourceName, "edge_location_config.1.edge_config_id", ""),
+				),
+			},
+			{
+				// The previously unset edge config is now set.
+				Config: testAccNodeTemplateEdgeLocationConfigUpdatedConfig(rName, clusterName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "name", rName),
+					resource.TestCheckResourceAttr(resourceName, "edge_location_ids.#", "0"),
+					resource.TestCheckResourceAttr(resourceName, "edge_location_config.#", "2"),
+					resource.TestCheckResourceAttrPair(resourceName, "edge_location_config.0.edge_location_id", "castai_edge_location.test_1", "id"),
+					resource.TestCheckResourceAttrPair(resourceName, "edge_location_config.0.edge_config_id", "castai_edge_configuration.test_1", "id"),
+					resource.TestCheckResourceAttrPair(resourceName, "edge_location_config.1.edge_location_id", "castai_edge_location.test_2", "id"),
+					resource.TestCheckResourceAttrPair(resourceName, "edge_location_config.1.edge_config_id", "castai_edge_configuration.test_2", "id"),
+				),
+			},
+		},
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"aws": {
+				Source:            "hashicorp/aws",
+				VersionConstraint: "~> 4.0",
+			},
+		},
+	})
+}
+
+func TestAccEKS_ResourceNodeTemplate_edgeLocationConfigSwitch(t *testing.T) {
+	rName := fmt.Sprintf("%v-node-template-%v", ResourcePrefix, acctest.RandString(8))
+	resourceName := "castai_node_template.test"
+	clusterName, _ := lo.Coalesce(os.Getenv("CLUSTER_NAME"), "cost-terraform")
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		CheckDestroy:             testAccCheckNodeTemplateDestroy(rName),
+		Steps: []resource.TestStep{
+			{
+				// Deprecated field only: legacy edge_location_ids still work unchanged.
+				Config: testAccNodeTemplateEdgeLocationIDsConfig(rName, clusterName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "name", rName),
+					resource.TestCheckResourceAttr(resourceName, "edge_location_config.#", "0"),
+					resource.TestCheckResourceAttr(resourceName, "edge_location_ids.#", "2"),
+					resource.TestCheckResourceAttrPair(resourceName, "edge_location_ids.0", "castai_edge_location.test_1", "id"),
+					resource.TestCheckResourceAttrPair(resourceName, "edge_location_ids.1", "castai_edge_location.test_2", "id"),
+				),
+			},
+			{
+				// Switch from the deprecated field to the new block.
+				Config: testAccNodeTemplateEdgeLocationIDsSwitchedConfig(rName, clusterName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "name", rName),
+					resource.TestCheckResourceAttr(resourceName, "edge_location_ids.#", "0"),
+					resource.TestCheckResourceAttr(resourceName, "edge_location_config.#", "1"),
+					resource.TestCheckResourceAttrPair(resourceName, "edge_location_config.0.edge_location_id", "castai_edge_location.test_1", "id"),
+					resource.TestCheckResourceAttrPair(resourceName, "edge_location_config.0.edge_config_id", "castai_edge_configuration.test_1", "id"),
+				),
+			},
+		},
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"aws": {
+				Source:            "hashicorp/aws",
+				VersionConstraint: "~> 4.0",
+			},
+		},
+	})
+}
+
+func testAccEdgeConfigurationsConfig() string {
+	organizationID := testAccGetOrganizationID()
+	return fmt.Sprintf(`
+resource "castai_edge_configuration" "test_1" {
+  organization_id  = %[1]q
+  cluster_id       = castai_omni_cluster.test_omni.id
+  edge_location_id = castai_edge_location.test_1.id
+  name             = "test-edge-config-1"
+
+  aws = {
+    image_id = "al2023-ami-ecs-hvm-*"
+  }
+
+  cri = {
+    socket = "unix:///run/containerd/containerd.sock"
+  }
+}
+
+resource "castai_edge_configuration" "test_2" {
+  organization_id  = %[1]q
+  cluster_id       = castai_omni_cluster.test_omni.id
+  edge_location_id = castai_edge_location.test_2.id
+  name             = "test-edge-config-2"
+
+  aws = {
+    image_id = "al2023-ami-ecs-hvm-*"
+  }
+
+  cri = {
+    socket = "unix:///run/containerd/containerd.sock"
+  }
+}
+`, organizationID)
+}
+
+func testAccNodeTemplateEdgeLocationConfigConfig(rName, clusterName string) string {
+	return ConfigCompose(testAccEKSClusterConfig(rName, clusterName), testAccNodeConfig(rName), testAccEdgeLocationsConfig(rName, clusterName), testAccEdgeConfigurationsConfig(), fmt.Sprintf(`
+		resource "castai_node_template" "test" {
+			cluster_id        = castai_eks_cluster.test.id
+			name = %[1]q
+			configuration_id = castai_node_configuration.test.id
+			should_taint = true
+			clm_enabled = false
+
+			edge_location_config {
+				edge_location_id = castai_edge_location.test_1.id
+				edge_config_id   = castai_edge_configuration.test_1.id
+			}
+
+			edge_location_config {
+				edge_location_id = castai_edge_location.test_2.id
+			}
+		}
+	`, rName))
+}
+
+func testAccNodeTemplateEdgeLocationConfigUpdatedConfig(rName, clusterName string) string {
+	return ConfigCompose(testAccEKSClusterConfig(rName, clusterName), testAccNodeConfig(rName), testAccEdgeLocationsConfig(rName, clusterName), testAccEdgeConfigurationsConfig(), fmt.Sprintf(`
+		resource "castai_node_template" "test" {
+			cluster_id        = castai_eks_cluster.test.id
+			name = %[1]q
+			configuration_id = castai_node_configuration.test.id
+			should_taint = true
+			clm_enabled = false
+
+			edge_location_config {
+				edge_location_id = castai_edge_location.test_1.id
+				edge_config_id   = castai_edge_configuration.test_1.id
+			}
+
+			edge_location_config {
+				edge_location_id = castai_edge_location.test_2.id
+				edge_config_id   = castai_edge_configuration.test_2.id
+			}
+		}
+	`, rName))
+}
+
+func testAccNodeTemplateEdgeLocationIDsConfig(rName, clusterName string) string {
+	return ConfigCompose(testAccEKSClusterConfig(rName, clusterName), testAccNodeConfig(rName), testAccEdgeLocationsConfig(rName, clusterName), fmt.Sprintf(`
+		resource "castai_node_template" "test" {
+			cluster_id        = castai_eks_cluster.test.id
+			name = %[1]q
+			configuration_id = castai_node_configuration.test.id
+			should_taint = true
+			clm_enabled = false
+
+			edge_location_ids = [castai_edge_location.test_1.id, castai_edge_location.test_2.id]
+		}
+	`, rName))
+}
+
+func testAccNodeTemplateEdgeLocationIDsSwitchedConfig(rName, clusterName string) string {
+	return ConfigCompose(testAccEKSClusterConfig(rName, clusterName), testAccNodeConfig(rName), testAccEdgeLocationsConfig(rName, clusterName), testAccEdgeConfigurationsConfig(), fmt.Sprintf(`
+		resource "castai_node_template" "test" {
+			cluster_id        = castai_eks_cluster.test.id
+			name = %[1]q
+			configuration_id = castai_node_configuration.test.id
+			should_taint = true
+			clm_enabled = false
+
+			edge_location_config {
+				edge_location_id = castai_edge_location.test_1.id
+				edge_config_id   = castai_edge_configuration.test_1.id
+			}
+		}
+	`, rName))
+}
+
 func testAccNodeTemplateConfig(rName, clusterName string) string {
 	return ConfigCompose(testAccEKSClusterConfig(rName, clusterName), testAccNodeConfig(rName), testAccEdgeLocationsConfig(rName, clusterName), fmt.Sprintf(`
 		resource "castai_node_template" "test" {
