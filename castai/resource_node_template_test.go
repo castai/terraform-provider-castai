@@ -724,7 +724,7 @@ func TestNodeTemplateResourceReadContext_StuckPodResizeReconciliation(t *testing
 	testCases := []struct {
 		name             string
 		templateResponse string
-		expectEnabled   *bool // nil means the block should not be populated in state
+		expectEnabled    *bool // nil means the block should not be populated in state
 	}{
 		{
 			name: "spr enabled",
@@ -880,7 +880,7 @@ func TestNodeTemplateResourceCreate_StuckPodResizeReconciliation(t *testing.T) {
 				NodeTemplatesAPICreateNodeTemplate(gomock.Any(), clusterId, gomock.Any()).
 				DoAndReturn(func(_ context.Context, _ string, body sdk.NodeTemplatesAPICreateNodeTemplateJSONRequestBody, _ ...sdk.RequestEditorFn) (*http.Response, error) {
 					capturedBody = body
-				return &http.Response{StatusCode: 200, Body: templateBody, Header: map[string][]string{"Content-Type": {"json"}}}, nil
+					return &http.Response{StatusCode: 200, Body: templateBody, Header: map[string][]string{"Content-Type": {"json"}}}, nil
 				})
 			mockClient.EXPECT().
 				NodeTemplatesAPIListNodeTemplates(gomock.Any(), clusterId, &sdk.NodeTemplatesAPIListNodeTemplatesParams{IncludeDefault: lo.ToPtr(true)}).
@@ -985,10 +985,10 @@ func TestNodeTemplateResourceDiff_StuckPodResizeReconciliation(t *testing.T) {
 
 func Test_stuckPodResizeDisabled(t *testing.T) {
 	testCases := []struct {
-		name          string
-		list          []any
+		name           string
+		list           []any
 		expectDisabled bool
-		expectErr     bool
+		expectErr      bool
 	}{
 		{name: "empty list", list: []any{}, expectDisabled: true},
 		{name: "nil list", list: nil, expectDisabled: true},

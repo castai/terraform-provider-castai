@@ -63,7 +63,7 @@ const (
 	FieldNodeTemplateSpotReliabilityPriceIncreaseLimitPercent = "spot_reliability_price_increase_limit_percent"
 	FieldNodeTemplateSpotInterruptionPredictionsEnabled       = "spot_interruption_predictions_enabled"
 	FieldNodeTemplateSpotInterruptionPredictionsType          = "spot_interruption_predictions_type"
-	FieldNodeTemplateStuckPodResizeReconciliation            = "stuck_pod_resize_reconciliation"
+	FieldNodeTemplateStuckPodResizeReconciliation             = "stuck_pod_resize_reconciliation"
 	FieldNodeTemplateStuckPodResizeEnabled                    = "enabled"
 	FieldNodeTemplateStorageOptimized                         = "storage_optimized"
 	FieldNodeTemplateStorageOptimizedState                    = "storage_optimized_state"
