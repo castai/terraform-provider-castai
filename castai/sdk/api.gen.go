@@ -402,6 +402,7 @@ const (
 	DboV1RegistrationTypeUninstallCache     DboV1RegistrationType = "UninstallCache"
 	DboV1RegistrationTypeUninstallDBAgent   DboV1RegistrationType = "UninstallDBAgent"
 	DboV1RegistrationTypeUninstallDBO       DboV1RegistrationType = "UninstallDBO"
+	DboV1RegistrationTypeUpgradeDBO         DboV1RegistrationType = "UpgradeDBO"
 )
 
 // Defines values for DboV1RuleType.
@@ -5784,6 +5785,7 @@ type DboV1Registration struct {
 	UninstallCache   *DboV1UninstallCacheParams   `json:"uninstallCache,omitempty"`
 	UninstallDbAgent *DboV1UninstallDBAgentParams `json:"uninstallDbAgent,omitempty"`
 	UninstallDbo     *DboV1UninstallDBOParams     `json:"uninstallDbo,omitempty"`
+	UpgradeDbo       *DboV1UpgradeDBOParams       `json:"upgradeDbo,omitempty"`
 }
 
 // DboV1RegistrationStatus - InProgress: Arbitrary number of InProgress states can be emitted
@@ -5851,6 +5853,12 @@ type DboV1UninstallDBAgentParams struct {
 // DboV1UninstallDBOParams defines model for dbo.v1.UninstallDBOParams.
 type DboV1UninstallDBOParams struct {
 	DatabaseInstanceId string `json:"databaseInstanceId"`
+}
+
+// DboV1UpgradeDBOParams defines model for dbo.v1.UpgradeDBOParams.
+type DboV1UpgradeDBOParams struct {
+	DatabaseInstanceId   string  `json:"databaseInstanceId"`
+	ManualExecuteCommand *string `json:"manualExecuteCommand,omitempty"`
 }
 
 // ExternalclusterV1AKSClusterParams AKSClusterParams defines AKS-specific arguments.
@@ -9205,6 +9213,13 @@ type ScheduledrebalancingV1RebalancingOptions struct {
 
 	// MinNodes Minimum number of nodes that should be kept in the cluster after rebalancing.
 	MinNodes *int32 `json:"minNodes,omitempty"`
+
+	// SplitNodesInBatchesOf If set, the rebalancing plan is executed in batches such that at most this
+	// many additional nodes (nodes created minus nodes drained) are alive at any
+	// moment during execution, and a node is only drained after its replacement
+	// node exists. Zero and negative values are accepted and treated as unset:
+	// the plan executes in a single batch.
+	SplitNodesInBatchesOf *int32 `json:"splitNodesInBatchesOf"`
 }
 
 // ScheduledrebalancingV1RebalancingSchedule defines model for scheduledrebalancing.v1.RebalancingSchedule.

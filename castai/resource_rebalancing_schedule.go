@@ -137,6 +137,12 @@ func resourceRebalancingSchedule() *schema.Resource {
 							ValidateDiagFunc: validation.ToDiagFunc(validation.IntAtLeast(0)),
 							Description:      "Number of nodes to drain simultaneously. When unspecified, defaults to unlimited.",
 						},
+						"split_nodes_in_batches_of": {
+							Type:             schema.TypeInt,
+							Optional:         true,
+							ValidateDiagFunc: validation.ToDiagFunc(validation.IntAtLeast(1)),
+							Description:      "If set, the rebalancing plan is executed in batches such that at most this many additional nodes (nodes created minus nodes drained) are alive at any moment during execution, and a node is only drained after its replacement node exists. When unset, the plan executes in a single batch.",
+						},
 						"aggressive_mode": {
 							Type:        schema.TypeBool,
 							Optional:    true,
@@ -480,6 +486,7 @@ func stateToSchedule(d *schema.ResourceData) (*sdk.ScheduledrebalancingV1Rebalan
 				KeepDrainTimeoutNodes: optionalLaunchConfigBool(d, launchConfigurationData, "keep_drain_timeout_nodes"), //nolint:staticcheck // SA1019: deprecated but still sent for backward compatibility
 				EvictGracefully:       optionalLaunchConfigBool(d, launchConfigurationData, "evict_gracefully"),
 				MaxSimultaneousDrains: optionalLaunchConfigInt32(d, launchConfigurationData, "max_simultaneous_drains"),
+				SplitNodesInBatchesOf: optionalLaunchConfigInt32(d, launchConfigurationData, "split_nodes_in_batches_of"),
 				ExecutionConditions:   executionConditions,
 				AggressiveMode:        aggressiveMode, //nolint:staticcheck // SA1019: deprecated but still used for backward compatibility
 				AggressiveModeConfig:  aggressiveModeConfig,
@@ -521,6 +528,7 @@ func scheduleToState(schedule *sdk.ScheduledrebalancingV1RebalancingSchedule, d 
 		launchConfig["keep_drain_timeout_nodes"] = keepDrainTimeoutNodes
 		launchConfig["evict_gracefully"] = schedule.LaunchConfiguration.RebalancingOptions.EvictGracefully
 		launchConfig["max_simultaneous_drains"] = schedule.LaunchConfiguration.RebalancingOptions.MaxSimultaneousDrains
+		launchConfig["split_nodes_in_batches_of"] = schedule.LaunchConfiguration.RebalancingOptions.SplitNodesInBatchesOf
 		launchConfig["aggressive_mode"] = schedule.LaunchConfiguration.RebalancingOptions.AggressiveMode //nolint:staticcheck // AggressiveMode is deprecated but still supported for backwards compatibility
 		launchConfig["target_node_selection_algorithm"] = schedule.LaunchConfiguration.TargetNodeSelectionAlgorithm
 		if schedule.LaunchConfiguration.RebalancingOptions.AggressiveModeConfig != nil {

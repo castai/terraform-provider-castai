@@ -12,6 +12,10 @@ resource "castai_rebalancing_schedule" "spots" {
     num_targeted_nodes    = 3
     rebalancing_min_nodes = 2
     evict_gracefully      = true
+    # Execute the rebalancing plan in batches: at most 2 additional nodes
+    # (created minus drained) are alive at any moment during execution,
+    # and a node is only drained after its replacement node exists.
+    split_nodes_in_batches_of = 2
     # When evict_gracefully is true, configure how drain-failed nodes are handled.
     drain_failure_config {
       # Set to true to leave drain-failed nodes cordoned indefinitely (no auto-uncordon).
