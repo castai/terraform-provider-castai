@@ -885,19 +885,21 @@ func resourceNodeTemplate() *schema.Resource {
 				Description: "Marks whether Container Live Migration (CLM) should be enabled for nodes created from this template. Supported on EKS, GKE, and AKS clusters. CLM-enabled nodes participate in live workload migration during rebalancing, scale-down, and node lifecycle events.",
 			},
 			FieldNodeTemplateStuckPodResizeReconciliation: {
-				Type:     schema.TypeList,
-				MaxItems: 1,
-				Optional: true,
+				Type:             schema.TypeList,
+				MaxItems:         1,
+				Optional:         true,
+				DiffSuppressFunc: suppressStuckPodResizeReconciliationDiff,
 				Description: "Stuck Pod Resize Reconciliation (SPR) configuration for nodes created from this template. " +
 					"When enabled, the autoscaler discovers pods whose woop-initiated in-place resize failed or got stuck, " +
 					"protects them from woop's eviction, and partially or fully drains the node to enable the resize.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						FieldNodeTemplateStuckPodResizeEnabled: {
-							Type:        schema.TypeBool,
-							Optional:    true,
-							Default:     false,
-							Description: "Enable/disable Stuck Pod Resize Reconciliation. Defaults to false.",
+							Type:             schema.TypeBool,
+							Optional:         true,
+							Default:          false,
+							Description:      "Enable/disable Stuck Pod Resize Reconciliation. Defaults to false. Setting it to false is equivalent to omitting the block.",
+							DiffSuppressFunc: suppressStuckPodResizeReconciliationDiff,
 						},
 					},
 				},
@@ -1738,6 +1740,23 @@ func suppressResourceLimitsDiff(_, _, _ string, d *schema.ResourceData) bool {
 	resourceLimitsPath := fmt.Sprintf("%s.0.%s.0", FieldNodeTemplateConstraints, FieldNodeTemplateResourceLimits)
 	old, new := d.GetChange(resourceLimitsPath)
 	return reflect.DeepEqual(old, new)
+}
+
+// The backend collapses stuckPodResizeReconciliation with enabled=false to an unset field, so a configured
+// enabled=false must not diff against an absent value in state.
+func suppressStuckPodResizeReconciliationDiff(_, _, _ string, d *schema.ResourceData) bool {
+	oldBlocks, newBlocks := d.GetChange(FieldNodeTemplateStuckPodResizeReconciliation)
+	oldList, _ := oldBlocks.([]any)
+	newList, _ := newBlocks.([]any)
+	if len(oldList) != 0 || len(newList) != 1 {
+		return false
+	}
+	newBlock, ok := newList[0].(map[string]any)
+	if !ok {
+		return false
+	}
+	enabled, ok := newBlock[FieldNodeTemplateStuckPodResizeEnabled].(bool)
+	return ok && !enabled
 }
 
 func toCustomTaintsWithOptionalEffect(objs []map[string]any) *[]sdk.NodetemplatesV1TaintWithOptionalEffect {

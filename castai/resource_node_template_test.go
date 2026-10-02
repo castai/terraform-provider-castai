@@ -957,6 +957,73 @@ func TestNodeTemplateResourceCreate_StuckPodResizeReconciliationDefaultFalse(t *
 	r.False(*capturedBody.StuckPodResizeReconciliation.Enabled)
 }
 
+func TestNodeTemplateResourceDiff_StuckPodResizeReconciliation(t *testing.T) {
+	clusterId := "b6bfc074-a267-400f-b8f1-db0850c369b1"
+	name := "custom-template"
+
+	testCases := []struct {
+		name       string
+		stateSPR   *bool
+		configSPR  *bool
+		expectDiff bool
+	}{
+		{name: "config omitted, state unset", stateSPR: nil, configSPR: nil, expectDiff: false},
+		{name: "config enabled=false, state unset: suppressed", stateSPR: nil, configSPR: lo.ToPtr(false), expectDiff: false},
+		{name: "config enabled=true, state unset", stateSPR: nil, configSPR: lo.ToPtr(true), expectDiff: true},
+		{name: "config enabled=false, state enabled=true", stateSPR: lo.ToPtr(true), configSPR: lo.ToPtr(false), expectDiff: true},
+		{name: "config omitted, state enabled=true", stateSPR: lo.ToPtr(true), configSPR: nil, expectDiff: true},
+		{name: "config enabled=true, state enabled=true", stateSPR: lo.ToPtr(true), configSPR: lo.ToPtr(true), expectDiff: false},
+		{name: "config enabled=false, state enabled=false", stateSPR: lo.ToPtr(false), configSPR: lo.ToPtr(false), expectDiff: false},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			r := require.New(t)
+
+			stateAttrs := map[string]cty.Value{
+				FieldClusterId:        cty.StringVal(clusterId),
+				FieldNodeTemplateName: cty.StringVal(name),
+			}
+			if tc.stateSPR != nil {
+				stateAttrs[FieldNodeTemplateStuckPodResizeReconciliation] = cty.ListVal([]cty.Value{
+					cty.ObjectVal(map[string]cty.Value{FieldNodeTemplateStuckPodResizeEnabled: cty.BoolVal(*tc.stateSPR)}),
+				})
+			}
+			state := sdkterraform.NewInstanceStateShimmedFromValue(cty.ObjectVal(stateAttrs), 0)
+			state.ID = name
+
+			configRaw := map[string]interface{}{
+				FieldClusterId:        clusterId,
+				FieldNodeTemplateName: name,
+			}
+			if tc.configSPR != nil {
+				configRaw[FieldNodeTemplateStuckPodResizeReconciliation] = []interface{}{
+					map[string]interface{}{FieldNodeTemplateStuckPodResizeEnabled: *tc.configSPR},
+				}
+			}
+			config := sdkterraform.NewResourceConfigRaw(configRaw)
+
+			diff, err := resourceNodeTemplate().Diff(context.Background(), state, config, nil)
+			r.NoError(err)
+
+			var sprKeys []string
+			if diff != nil {
+				for k := range diff.Attributes {
+					if strings.HasPrefix(k, FieldNodeTemplateStuckPodResizeReconciliation) {
+						sprKeys = append(sprKeys, k)
+					}
+				}
+			}
+
+			if tc.expectDiff {
+				r.NotEmpty(sprKeys)
+			} else {
+				r.Empty(sprKeys)
+			}
+		})
+	}
+}
+
 func TestNodeTemplateResourceDelete_defaultNodeTemplate(t *testing.T) {
 	r := require.New(t)
 	mockctrl := gomock.NewController(t)

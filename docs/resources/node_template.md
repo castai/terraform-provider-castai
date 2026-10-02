@@ -286,7 +286,7 @@ Optional:
 
 Optional:
 
-- `enabled` (Boolean) Enable/disable Stuck Pod Resize Reconciliation. Defaults to false.
+- `enabled` (Boolean) Enable/disable Stuck Pod Resize Reconciliation. Defaults to false. Setting it to false is equivalent to omitting the block.
 
 
 <a id="nestedblock--timeouts"></a>
