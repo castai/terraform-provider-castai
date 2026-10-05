@@ -61,7 +61,7 @@ Optional:
 
 ## Importing
 
-Import is supported using the following syntax:
+Importing is supported using the following syntax:
 
 ```shell
 # Import EKS cluster by specifying the CAST AI cluster ID.
