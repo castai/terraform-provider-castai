@@ -223,14 +223,16 @@ func TestAccCloudAgnostic_ResourceEdgeLocationAWSImpersonation(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "liqo.gateway_server.service_annotations.owner", "updated"),
 				),
 			},
-			// Unset ports and gateway_replicas must not drift: the API always returns them.
+			// Unset ports and gateway_replicas stay null (not API defaults) and must not drift.
 			{
 				Config: testAccEdgeLocationAWSImpersonationConfigOverridesMinimal(rName, clusterName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "control_plane.external_address", "api.edge.example.com"),
+					resource.TestCheckNoResourceAttr(resourceName, "control_plane.api_server_port"),
+					resource.TestCheckNoResourceAttr(resourceName, "control_plane.konnectivity_port"),
 					resource.TestCheckResourceAttr(resourceName, "liqo.gateway_server.external_address", "gw.edge.example.com"),
 					resource.TestCheckResourceAttr(resourceName, "liqo.gateway_server.service_labels.tier", "edge"),
-					resource.TestCheckResourceAttr(resourceName, "liqo.gateway_replicas", "1"),
+					resource.TestCheckNoResourceAttr(resourceName, "liqo.gateway_replicas"),
 				),
 			},
 			// Remove liqo block entirely.

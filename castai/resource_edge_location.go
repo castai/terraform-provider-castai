@@ -17,7 +17,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int32planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
@@ -408,19 +407,11 @@ func (r *edgeLocationResource) Schema(_ context.Context, _ resource.SchemaReques
 					},
 					"api_server_port": schema.Int32Attribute{
 						Optional:    true,
-						Computed:    true,
 						Description: "The port used for the API server. Defaults to the system value when unset.",
-						PlanModifiers: []planmodifier.Int32{
-							int32planmodifier.UseStateForUnknown(),
-						},
 					},
 					"konnectivity_port": schema.Int32Attribute{
 						Optional:    true,
-						Computed:    true,
 						Description: "The port used for the konnectivity server. Defaults to the system value when unset.",
-						PlanModifiers: []planmodifier.Int32{
-							int32planmodifier.UseStateForUnknown(),
-						},
 					},
 					"service_annotations": schema.MapAttribute{
 						Optional:    true,
@@ -475,11 +466,7 @@ func (r *edgeLocationResource) Schema(_ context.Context, _ resource.SchemaReques
 				Attributes: map[string]schema.Attribute{
 					"gateway_replicas": schema.Int32Attribute{
 						Optional:    true,
-						Computed:    true,
 						Description: "Number of active replicas for the Liqo gateway servers and clients. Defaults to 1 when unset.",
-						PlanModifiers: []planmodifier.Int32{
-							int32planmodifier.UseStateForUnknown(),
-						},
 					},
 					"gateway_server": schema.SingleNestedAttribute{
 						Optional:    true,
@@ -959,17 +946,31 @@ func (r *edgeLocationResource) Read(ctx context.Context, req resource.ReadReques
 		// Otherwise, we'd cause perpetual drift for users who never set the block.
 		if state.Liqo != nil && edgeLocation.EdgeClusterSpec.Liqo != nil {
 			apiLiqo := edgeLocation.EdgeClusterSpec.Liqo
-			// Only sync the gateway server if it was already managed in state, evaluated
-			// against the current state before state.Liqo is rebuilt below. Otherwise the
-			// check would run against the freshly allocated struct and always be false.
+			// Only sync the gateway server (and its attributes) that were already managed
+			// in state, evaluated against the current state before state.Liqo is rebuilt
+			// below. Otherwise the check would run against the freshly allocated struct and
+			// always be false, and API-assigned defaults would be written to state for
+			// attributes absent from the config, causing perpetual drift.
 			var gatewayServer *gatewayServerModel
 			if state.Liqo.GatewayServer != nil && apiLiqo.GatewayServer != nil {
 				apiGS := apiLiqo.GatewayServer
 				gatewayServer = &gatewayServerModel{
-					ServiceLabels:      stringMapValue(ctx, apiGS.ServiceLabels, &resp.Diagnostics),
-					ServiceAnnotations: stringMapValue(ctx, apiGS.ServiceAnnotations, &resp.Diagnostics),
-					ExternalAddress:    types.StringPointerValue(apiGS.ExternalAddress),
-					ExternalPort:       types.Int32PointerValue(apiGS.ExternalPort),
+					ServiceLabels:      state.Liqo.GatewayServer.ServiceLabels,
+					ServiceAnnotations: state.Liqo.GatewayServer.ServiceAnnotations,
+					ExternalAddress:    state.Liqo.GatewayServer.ExternalAddress,
+					ExternalPort:       state.Liqo.GatewayServer.ExternalPort,
+				}
+				if !gatewayServer.ServiceLabels.IsNull() {
+					gatewayServer.ServiceLabels = stringMapValue(ctx, apiGS.ServiceLabels, &resp.Diagnostics)
+				}
+				if !gatewayServer.ServiceAnnotations.IsNull() {
+					gatewayServer.ServiceAnnotations = stringMapValue(ctx, apiGS.ServiceAnnotations, &resp.Diagnostics)
+				}
+				if !gatewayServer.ExternalAddress.IsNull() {
+					gatewayServer.ExternalAddress = types.StringPointerValue(apiGS.ExternalAddress)
+				}
+				if !gatewayServer.ExternalPort.IsNull() {
+					gatewayServer.ExternalPort = types.Int32PointerValue(apiGS.ExternalPort)
 				}
 			}
 			// gateway_replicas is Optional-only: only refresh it if the user configured it,
