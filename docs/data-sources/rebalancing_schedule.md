@@ -42,6 +42,7 @@ Read-Only:
 - `num_targeted_nodes` (Number)
 - `rebalancing_min_nodes` (Number)
 - `selector` (String)
+- `split_nodes_in_batches_of` (Number)
 - `target_node_selection_algorithm` (String)
 
 <a id="nestedobjatt--launch_configuration--aggressive_mode_config"></a>

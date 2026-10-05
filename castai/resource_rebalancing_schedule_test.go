@@ -25,9 +25,10 @@ func TestRebalancingSchedule_stateToSchedule_EvictGracefullyAndDrainOptions(t *t
 			"ignore_savings":     cty.BoolVal(false),
 		})}),
 		"launch_configuration": cty.ListVal([]cty.Value{cty.ObjectVal(map[string]cty.Value{
-			"evict_gracefully":         cty.BoolVal(true),
-			"keep_drain_timeout_nodes": cty.BoolVal(true),
-			"max_simultaneous_drains":  cty.NumberIntVal(5),
+			"evict_gracefully":          cty.BoolVal(true),
+			"keep_drain_timeout_nodes":  cty.BoolVal(true),
+			"max_simultaneous_drains":   cty.NumberIntVal(5),
+			"split_nodes_in_batches_of": cty.NumberIntVal(3),
 			"aggressive_mode_config": cty.ListVal([]cty.Value{cty.ObjectVal(map[string]cty.Value{
 				"ignore_local_persistent_volumes":        cty.BoolVal(true),
 				"ignore_problem_job_pods":                cty.BoolVal(true),
@@ -40,9 +41,10 @@ func TestRebalancingSchedule_stateToSchedule_EvictGracefullyAndDrainOptions(t *t
 	// Raw config sets the fields explicitly (aliases set to the same value).
 	state.RawConfig = cty.ObjectVal(map[string]cty.Value{
 		"launch_configuration": cty.ListVal([]cty.Value{cty.ObjectVal(map[string]cty.Value{
-			"evict_gracefully":         cty.BoolVal(true),
-			"keep_drain_timeout_nodes": cty.BoolVal(true),
-			"max_simultaneous_drains":  cty.NumberIntVal(5),
+			"evict_gracefully":          cty.BoolVal(true),
+			"keep_drain_timeout_nodes":  cty.BoolVal(true),
+			"max_simultaneous_drains":   cty.NumberIntVal(5),
+			"split_nodes_in_batches_of": cty.NumberIntVal(3),
 			"aggressive_mode_config": cty.ListVal([]cty.Value{cty.ObjectVal(map[string]cty.Value{
 				"ignore_problem_prevented_drain_pods": cty.BoolVal(true),
 			})}),
@@ -58,6 +60,8 @@ func TestRebalancingSchedule_stateToSchedule_EvictGracefullyAndDrainOptions(t *t
 	r.True(*opts.EvictGracefully)
 	r.NotNil(opts.MaxSimultaneousDrains)
 	r.Equal(int32(5), *opts.MaxSimultaneousDrains)
+	r.NotNil(opts.SplitNodesInBatchesOf)
+	r.Equal(int32(3), *opts.SplitNodesInBatchesOf)
 	r.NotNil(opts.AggressiveModeConfig)
 	r.NotNil(opts.AggressiveModeConfig.IgnoreProblemPreventedDrainPods)
 	r.True(*opts.AggressiveModeConfig.IgnoreProblemPreventedDrainPods)
@@ -87,8 +91,9 @@ func TestRebalancingSchedule_stateToSchedule_EvictGracefullyAndDrainOptions(t *t
 	// Raw config leaves the fields unset (null).
 	unsetState.RawConfig = cty.ObjectVal(map[string]cty.Value{
 		"launch_configuration": cty.ListVal([]cty.Value{cty.ObjectVal(map[string]cty.Value{
-			"evict_gracefully":        cty.NullVal(cty.Bool),
-			"max_simultaneous_drains": cty.NullVal(cty.Number),
+			"evict_gracefully":          cty.NullVal(cty.Bool),
+			"max_simultaneous_drains":   cty.NullVal(cty.Number),
+			"split_nodes_in_batches_of": cty.NullVal(cty.Number),
 			"aggressive_mode_config": cty.ListVal([]cty.Value{cty.ObjectVal(map[string]cty.Value{
 				"ignore_problem_prevented_drain_pods": cty.NullVal(cty.Bool),
 			})}),
@@ -104,6 +109,7 @@ func TestRebalancingSchedule_stateToSchedule_EvictGracefullyAndDrainOptions(t *t
 	// Unset optional fields stay nil.
 	r.Nil(unsetOpts.EvictGracefully)
 	r.Nil(unsetOpts.MaxSimultaneousDrains)
+	r.Nil(unsetOpts.SplitNodesInBatchesOf)
 }
 
 func TestRebalancingSchedule_validateDrainOptionsAlias(t *testing.T) {
@@ -168,6 +174,7 @@ func TestAccCloudAgnostic_ResourceRebalancingSchedule_basic(t *testing.T) {
 					resource.TestCheckResourceAttr("castai_rebalancing_schedule.test", "launch_configuration.0.aggressive_mode_config.0.ignore_problem_job_pods", "true"),
 					resource.TestCheckResourceAttr("castai_rebalancing_schedule.test", "launch_configuration.0.aggressive_mode_config.0.ignore_problem_removal_disabled_pods", "true"),
 					resource.TestCheckResourceAttr("castai_rebalancing_schedule.test", "launch_configuration.0.aggressive_mode_config.0.ignore_problem_pods_without_controller", "true"),
+					resource.TestCheckResourceAttr("castai_rebalancing_schedule.test", "launch_configuration.0.split_nodes_in_batches_of", "2"),
 				),
 			},
 			{
@@ -244,6 +251,7 @@ resource "castai_rebalancing_schedule" "test" {
 		num_targeted_nodes = 3
 		rebalancing_min_nodes = 2
 		evict_gracefully = true
+		split_nodes_in_batches_of = 2
 		aggressive_mode = true
 		aggressive_mode_config {
       		ignore_local_persistent_volumes = true
