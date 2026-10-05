@@ -63,6 +63,8 @@ const (
 	FieldNodeTemplateSpotReliabilityPriceIncreaseLimitPercent = "spot_reliability_price_increase_limit_percent"
 	FieldNodeTemplateSpotInterruptionPredictionsEnabled       = "spot_interruption_predictions_enabled"
 	FieldNodeTemplateSpotInterruptionPredictionsType          = "spot_interruption_predictions_type"
+	FieldNodeTemplateStuckPodResizeReconciliation             = "stuck_pod_resize_reconciliation"
+	FieldNodeTemplateStuckPodResizeEnabled                    = "enabled"
 	FieldNodeTemplateStorageOptimized                         = "storage_optimized"
 	FieldNodeTemplateStorageOptimizedState                    = "storage_optimized_state"
 	FieldNodeTemplateUseSpotFallbacks                         = "use_spot_fallbacks"
@@ -882,6 +884,26 @@ func resourceNodeTemplate() *schema.Resource {
 				Default:     false,
 				Description: "Marks whether Container Live Migration (CLM) should be enabled for nodes created from this template. Supported on EKS, GKE, and AKS clusters. CLM-enabled nodes participate in live workload migration during rebalancing, scale-down, and node lifecycle events.",
 			},
+			FieldNodeTemplateStuckPodResizeReconciliation: {
+				Type:             schema.TypeList,
+				MaxItems:         1,
+				Optional:         true,
+				DiffSuppressFunc: suppressStuckPodResizeReconciliationDiff,
+				Description: "Stuck Pod Resize Reconciliation (SPR) configuration for nodes created from this template. " +
+					"When enabled, the autoscaler discovers pods whose woop-initiated in-place resize failed or got stuck, " +
+					"protects them from woop's eviction, and partially or fully drains the node to enable the resize.",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						FieldNodeTemplateStuckPodResizeEnabled: {
+							Type:             schema.TypeBool,
+							Optional:         true,
+							Default:          false,
+							Description:      "Enable/disable Stuck Pod Resize Reconciliation. Defaults to false. Setting it to false is equivalent to omitting the block.",
+							DiffSuppressFunc: suppressStuckPodResizeReconciliationDiff,
+						},
+					},
+				},
+			},
 			FieldNodeTemplateEdgeLocationIDs: {
 				Type:     schema.TypeList,
 				Optional: true,
@@ -996,6 +1018,18 @@ func resourceNodeTemplateRead(ctx context.Context, d *schema.ResourceData, meta 
 
 	if err := d.Set(FieldNodeTemplateClmEnabled, nodeTemplate.ClmEnabled); err != nil {
 		return diag.FromErr(fmt.Errorf("setting clm enabled: %w", err))
+	}
+
+	// Only populate the block when the API returns a non-null `enabled` value, so unset SPR doesn't drift
+	// against configurations which omit the block.
+	if spr := nodeTemplate.StuckPodResizeReconciliation; spr != nil && spr.Enabled != nil {
+		if err := d.Set(FieldNodeTemplateStuckPodResizeReconciliation, []map[string]any{
+			{
+				FieldNodeTemplateStuckPodResizeEnabled: *spr.Enabled,
+			},
+		}); err != nil {
+			return diag.FromErr(fmt.Errorf("setting stuck pod resize reconciliation: %w", err))
+		}
 	}
 
 	if nodeTemplate.EdgeLocationIds != nil {
@@ -1409,6 +1443,7 @@ func updateNodeTemplate(ctx context.Context, d *schema.ResourceData, meta any, s
 		FieldNodeTemplateSharedGpuName,
 		FieldNodeTemplateSharedClientsPerGpu,
 		FieldNodeTemplateClmEnabled,
+		FieldNodeTemplateStuckPodResizeReconciliation,
 		FieldNodeTemplateEdgeLocationIDs,
 		FieldNodeTemplatePriceAdjustmentConfiguration,
 		FieldNodeTemplateUserManagedGPUDrivers,
@@ -1490,6 +1525,13 @@ func updateNodeTemplate(ctx context.Context, d *schema.ResourceData, meta any, s
 
 	if v, _ := d.GetOk(FieldNodeTemplateClmEnabled); v != nil {
 		req.ClmEnabled = lo.ToPtr(v.(bool))
+	}
+
+	if v, ok := d.Get(FieldNodeTemplateStuckPodResizeReconciliation).([]any); ok && len(v) > 0 {
+		req.StuckPodResizeReconciliation = toStuckPodResizeReconciliation(v[0])
+	} else if d.HasChange(FieldNodeTemplateStuckPodResizeReconciliation) {
+		// The block was removed from the configuration: reset SPR to the backend default by sending a null `enabled`.
+		req.StuckPodResizeReconciliation = &sdk.NodetemplatesV1StuckPodResizeReconciliation{}
 	}
 
 	if v, ok := d.Get(FieldNodeTemplateEdgeLocationIDs).([]any); ok && len(v) > 0 {
@@ -1581,6 +1623,10 @@ func resourceNodeTemplateCreate(ctx context.Context, d *schema.ResourceData, met
 
 	if v, ok := d.Get(FieldNodeTemplateGpu).([]any); ok && len(v) > 0 {
 		req.Gpu = toTemplateGpu(v[0].(map[string]any))
+	}
+
+	if v, ok := d.Get(FieldNodeTemplateStuckPodResizeReconciliation).([]any); ok && len(v) > 0 {
+		req.StuckPodResizeReconciliation = toStuckPodResizeReconciliation(v[0])
 	}
 
 	if v, ok := d.Get(FieldNodeTemplatePriceAdjustmentConfiguration).([]any); ok && len(v) > 0 {
@@ -1694,6 +1740,48 @@ func suppressResourceLimitsDiff(_, _, _ string, d *schema.ResourceData) bool {
 	resourceLimitsPath := fmt.Sprintf("%s.0.%s.0", FieldNodeTemplateConstraints, FieldNodeTemplateResourceLimits)
 	old, new := d.GetChange(resourceLimitsPath)
 	return reflect.DeepEqual(old, new)
+}
+
+// The backend collapses stuckPodResizeReconciliation with enabled=false to an unset field, so treat
+// an absent block and a block with enabled=false as equal on either side of the diff.
+// The backend collapses stuckPodResizeReconciliation with enabled=false to an unset field, so treat
+// an absent block and a block with enabled=false as equal on either side of the diff.
+func suppressStuckPodResizeReconciliationDiff(k, oldValue, newValue string, d *schema.ResourceData) bool {
+	// Diff of the nested enabled attribute: suppress only changes between unset and false.
+	if strings.HasSuffix(k, FieldNodeTemplateStuckPodResizeEnabled) {
+		return (oldValue == "" && newValue == "false") || (oldValue == "false" && newValue == "")
+	}
+
+	// Diff of the block count: "0" => "1" means the block is being added, "1" => "0" means removed.
+	// GetChange cannot be used for the new value here: when the block is removed from the config,
+	// it falls back to the state value, so the state and config values are read per branch.
+	oldBlocks, newBlocks := d.GetChange(FieldNodeTemplateStuckPodResizeReconciliation)
+	oldList, _ := oldBlocks.([]any)
+	newList, _ := newBlocks.([]any)
+	if oldValue == "0" {
+		disabled, err := stuckPodResizeDisabled(newList)
+		return err == nil && disabled
+	}
+	if newValue == "0" {
+		disabled, err := stuckPodResizeDisabled(oldList)
+		return err == nil && disabled
+	}
+	return false
+}
+
+func stuckPodResizeDisabled(list []any) (bool, error) {
+	if len(list) == 0 {
+		return true, nil
+	}
+	block, ok := list[0].(map[string]any)
+	if !ok {
+		return false, fmt.Errorf("unexpected stuck pod resize reconciliation block type %T", list[0])
+	}
+	enabled, ok := block[FieldNodeTemplateStuckPodResizeEnabled].(bool)
+	if !ok {
+		return false, fmt.Errorf("unexpected stuck pod resize reconciliation enabled value type %T", block[FieldNodeTemplateStuckPodResizeEnabled])
+	}
+	return !enabled, nil
 }
 
 func toCustomTaintsWithOptionalEffect(objs []map[string]any) *[]sdk.NodetemplatesV1TaintWithOptionalEffect {
@@ -2191,6 +2279,20 @@ func toPriceAdjustmentConfiguration(obj map[string]any) *sdk.NodetemplatesV1Pric
 			adjustments[k] = val.(string)
 		}
 		out.InstanceTypeAdjustments = &adjustments
+	}
+
+	return out
+}
+
+func toStuckPodResizeReconciliation(obj any) *sdk.NodetemplatesV1StuckPodResizeReconciliation {
+	m, ok := obj.(map[string]any)
+	if !ok {
+		return nil
+	}
+
+	out := &sdk.NodetemplatesV1StuckPodResizeReconciliation{}
+	if v, ok := m[FieldNodeTemplateStuckPodResizeEnabled].(bool); ok {
+		out.Enabled = toPtr(v)
 	}
 
 	return out
