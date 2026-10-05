@@ -565,6 +565,37 @@ func TestNodeTemplateResourceReadContextEmptyList(t *testing.T) {
 	r.Nil(result)
 }
 
+const (
+	nodeTemplateTestClusterID       = "b6bfc074-a267-400f-b8f1-db0850c369b1"
+	nodeTemplateTestEdgeLocation1ID = "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+	nodeTemplateTestEdgeLocation2ID = "b2c3d4e5-f6a7-8901-bcde-f12345678901"
+	nodeTemplateTestEdgeConfig1ID   = "c3d4e5f6-a7b8-9012-cdef-234567890123"
+)
+
+// nodeTemplateListResponse wraps a node template JSON body in the
+// list-node-templates API response.
+func nodeTemplateListResponse(template string) *http.Response {
+	body := io.NopCloser(bytes.NewReader([]byte(fmt.Sprintf(`{"items": [{"template": %s}]}`, template))))
+	return &http.Response{StatusCode: 200, Body: body, Header: map[string][]string{"Content-Type": {"json"}}}
+}
+
+// edgeLocationConfigValue builds the cty representation of one edge_location_config block.
+func edgeLocationConfigValue(edgeLocationID, edgeConfigID string) cty.Value {
+	return cty.ObjectVal(map[string]cty.Value{
+		FieldNodeTemplateEdgeLocationId: cty.StringVal(edgeLocationID),
+		FieldNodeTemplateEdgeConfigId:   cty.StringVal(edgeConfigID),
+	})
+}
+
+// edgeLocationConfigState builds the expected state representation of one
+// edge_location_config block.
+func edgeLocationConfigState(edgeLocationID, edgeConfigID string) map[string]any {
+	return map[string]any{
+		FieldNodeTemplateEdgeLocationId: edgeLocationID,
+		FieldNodeTemplateEdgeConfigId:   edgeConfigID,
+	}
+}
+
 func TestNodeTemplateResourceReadContext_edgeLocationConfig(t *testing.T) {
 	r := require.New(t)
 	mockctrl := gomock.NewController(t)
@@ -577,10 +608,10 @@ func TestNodeTemplateResourceReadContext_edgeLocationConfig(t *testing.T) {
 		},
 	}
 
-	clusterId := "b6bfc074-a267-400f-b8f1-db0850c369b1"
-	edgeLocation1 := "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
-	edgeLocation2 := "b2c3d4e5-f6a7-8901-bcde-f12345678901"
-	edgeConfig1 := "c3d4e5f6-a7b8-9012-cdef-234567890123"
+	clusterId := nodeTemplateTestClusterID
+	edgeLocation1 := nodeTemplateTestEdgeLocation1ID
+	edgeLocation2 := nodeTemplateTestEdgeLocation2ID
+	edgeConfig1 := nodeTemplateTestEdgeConfig1ID
 
 	// The response lists the entries in reverse order compared to the state.
 	templateResponse := fmt.Sprintf(`
@@ -594,32 +625,17 @@ func TestNodeTemplateResourceReadContext_edgeLocationConfig(t *testing.T) {
 	    }
 	`, edgeLocation2, edgeLocation1, edgeConfig1)
 
-	body := io.NopCloser(bytes.NewReader([]byte(fmt.Sprintf(`
-		{
-		  "items": [
-            {
-              "template": %s
-            }
-		  ]
-		}
-	`, templateResponse))))
 	mockClient.EXPECT().
 		NodeTemplatesAPIListNodeTemplates(gomock.Any(), clusterId, &sdk.NodeTemplatesAPIListNodeTemplatesParams{IncludeDefault: lo.ToPtr(true)}).
-		Return(&http.Response{StatusCode: 200, Body: body, Header: map[string][]string{"Content-Type": {"json"}}}, nil)
+		Return(nodeTemplateListResponse(templateResponse), nil)
 
 	resource := resourceNodeTemplate()
 	val := cty.ObjectVal(map[string]cty.Value{
 		FieldClusterId:        cty.StringVal(clusterId),
 		FieldNodeTemplateName: cty.StringVal("gpu"),
 		FieldNodeTemplateEdgeLocationConfig: cty.ListVal([]cty.Value{
-			cty.ObjectVal(map[string]cty.Value{
-				FieldNodeTemplateEdgeLocationId: cty.StringVal(edgeLocation1),
-				FieldNodeTemplateEdgeConfigId:   cty.StringVal(edgeConfig1),
-			}),
-			cty.ObjectVal(map[string]cty.Value{
-				FieldNodeTemplateEdgeLocationId: cty.StringVal(edgeLocation2),
-				FieldNodeTemplateEdgeConfigId:   cty.StringVal(""),
-			}),
+			edgeLocationConfigValue(edgeLocation1, edgeConfig1),
+			edgeLocationConfigValue(edgeLocation2, ""),
 		}),
 	})
 	state := sdkterraform.NewInstanceStateShimmedFromValue(val, 0)
@@ -633,14 +649,8 @@ func TestNodeTemplateResourceReadContext_edgeLocationConfig(t *testing.T) {
 	// The read maps the reordered API response back into edge_location_config in the
 	// state's order, with the unset edge config stored as an empty string so plans stay clean.
 	r.Equal([]any{
-		map[string]any{
-			FieldNodeTemplateEdgeLocationId: edgeLocation1,
-			FieldNodeTemplateEdgeConfigId:   edgeConfig1,
-		},
-		map[string]any{
-			FieldNodeTemplateEdgeLocationId: edgeLocation2,
-			FieldNodeTemplateEdgeConfigId:   "",
-		},
+		edgeLocationConfigState(edgeLocation1, edgeConfig1),
+		edgeLocationConfigState(edgeLocation2, ""),
 	}, data.Get(FieldNodeTemplateEdgeLocationConfig))
 }
 
@@ -1107,10 +1117,10 @@ func TestNodeTemplateResourceCreate_edgeLocationConfig(t *testing.T) {
 	}
 
 	name := "custom-template"
-	clusterId := "b6bfc074-a267-400f-b8f1-db0850c369b1"
-	edgeLocation1 := "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
-	edgeLocation2 := "b2c3d4e5-f6a7-8901-bcde-f12345678901"
-	edgeConfig1 := "c3d4e5f6-a7b8-9012-cdef-234567890123"
+	clusterId := nodeTemplateTestClusterID
+	edgeLocation1 := nodeTemplateTestEdgeLocation1ID
+	edgeLocation2 := nodeTemplateTestEdgeLocation2ID
+	edgeConfig1 := nodeTemplateTestEdgeConfig1ID
 
 	// The response lists the entries in reverse order compared to the configuration.
 	templateResponse := fmt.Sprintf(`
@@ -1137,32 +1147,17 @@ func TestNodeTemplateResourceCreate_edgeLocationConfig(t *testing.T) {
 			return &http.Response{StatusCode: 200, Body: io.NopCloser(bytes.NewReader([]byte(templateResponse))), Header: map[string][]string{"Content-Type": {"json"}}}, nil
 		})
 
-	listBody := io.NopCloser(bytes.NewReader([]byte(fmt.Sprintf(`
-		{
-		  "items": [
-            {
-              "template": %s
-            }
-		  ]
-		}
-	`, templateResponse))))
 	mockClient.EXPECT().
 		NodeTemplatesAPIListNodeTemplates(gomock.Any(), clusterId, &sdk.NodeTemplatesAPIListNodeTemplatesParams{IncludeDefault: lo.ToPtr(true)}).
-		Return(&http.Response{StatusCode: 200, Body: listBody, Header: map[string][]string{"Content-Type": {"json"}}}, nil)
+		Return(nodeTemplateListResponse(templateResponse), nil)
 
 	resource := resourceNodeTemplate()
 	val := cty.ObjectVal(map[string]cty.Value{
 		FieldClusterId:        cty.StringVal(clusterId),
 		FieldNodeTemplateName: cty.StringVal(name),
 		FieldNodeTemplateEdgeLocationConfig: cty.ListVal([]cty.Value{
-			cty.ObjectVal(map[string]cty.Value{
-				FieldNodeTemplateEdgeLocationId: cty.StringVal(edgeLocation1),
-				FieldNodeTemplateEdgeConfigId:   cty.StringVal(edgeConfig1),
-			}),
-			cty.ObjectVal(map[string]cty.Value{
-				FieldNodeTemplateEdgeLocationId: cty.StringVal(edgeLocation2),
-				FieldNodeTemplateEdgeConfigId:   cty.StringVal(""),
-			}),
+			edgeLocationConfigValue(edgeLocation1, edgeConfig1),
+			edgeLocationConfigValue(edgeLocation2, ""),
 		}),
 	})
 	state := sdkterraform.NewInstanceStateShimmedFromValue(val, 0)
@@ -1184,14 +1179,8 @@ func TestNodeTemplateResourceCreate_edgeLocationConfig(t *testing.T) {
 	// The read maps the reordered API response back into edge_location_config in the
 	// configuration's order, with the unset edge config stored as an empty string.
 	r.Equal([]any{
-		map[string]any{
-			FieldNodeTemplateEdgeLocationId: edgeLocation1,
-			FieldNodeTemplateEdgeConfigId:   edgeConfig1,
-		},
-		map[string]any{
-			FieldNodeTemplateEdgeLocationId: edgeLocation2,
-			FieldNodeTemplateEdgeConfigId:   "",
-		},
+		edgeLocationConfigState(edgeLocation1, edgeConfig1),
+		edgeLocationConfigState(edgeLocation2, ""),
 	}, data.Get(FieldNodeTemplateEdgeLocationConfig))
 }
 
@@ -1208,9 +1197,9 @@ func TestNodeTemplateResourceUpdate_edgeLocationConfig(t *testing.T) {
 	}
 
 	name := "custom-template"
-	clusterId := "b6bfc074-a267-400f-b8f1-db0850c369b1"
-	edgeLocation1 := "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
-	edgeConfig1 := "c3d4e5f6-a7b8-9012-cdef-234567890123"
+	clusterId := nodeTemplateTestClusterID
+	edgeLocation1 := nodeTemplateTestEdgeLocation1ID
+	edgeConfig1 := nodeTemplateTestEdgeConfig1ID
 
 	templateResponse := fmt.Sprintf(`
 		{
@@ -1235,18 +1224,9 @@ func TestNodeTemplateResourceUpdate_edgeLocationConfig(t *testing.T) {
 			return &http.Response{StatusCode: 200, Body: io.NopCloser(bytes.NewReader([]byte(templateResponse))), Header: map[string][]string{"Content-Type": {"json"}}}, nil
 		})
 
-	listBody := io.NopCloser(bytes.NewReader([]byte(fmt.Sprintf(`
-		{
-		  "items": [
-            {
-              "template": %s
-            }
-		  ]
-		}
-	`, templateResponse))))
 	mockClient.EXPECT().
 		NodeTemplatesAPIListNodeTemplates(gomock.Any(), clusterId, &sdk.NodeTemplatesAPIListNodeTemplatesParams{IncludeDefault: lo.ToPtr(true)}).
-		Return(&http.Response{StatusCode: 200, Body: listBody, Header: map[string][]string{"Content-Type": {"json"}}}, nil)
+		Return(nodeTemplateListResponse(templateResponse), nil)
 
 	resource := resourceNodeTemplate()
 	data := schema.TestResourceDataRaw(t, resource.Schema, map[string]any{
@@ -1274,10 +1254,7 @@ func TestNodeTemplateResourceUpdate_edgeLocationConfig(t *testing.T) {
 
 	// The read populates edge_location_config from the API response.
 	r.Equal([]any{
-		map[string]any{
-			FieldNodeTemplateEdgeLocationId: edgeLocation1,
-			FieldNodeTemplateEdgeConfigId:   edgeConfig1,
-		},
+		edgeLocationConfigState(edgeLocation1, edgeConfig1),
 	}, data.Get(FieldNodeTemplateEdgeLocationConfig))
 }
 
@@ -1294,9 +1271,9 @@ func TestNodeTemplateResourceUpdate_edgeLocationIDs(t *testing.T) {
 	}
 
 	name := "custom-template"
-	clusterId := "b6bfc074-a267-400f-b8f1-db0850c369b1"
-	edgeLocation1 := "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
-	edgeLocation2 := "b2c3d4e5-f6a7-8901-bcde-f12345678901"
+	clusterId := nodeTemplateTestClusterID
+	edgeLocation1 := nodeTemplateTestEdgeLocation1ID
+	edgeLocation2 := nodeTemplateTestEdgeLocation2ID
 
 	// The response lists the locations in reverse order compared to the configuration.
 	templateResponse := fmt.Sprintf(`
@@ -1320,18 +1297,9 @@ func TestNodeTemplateResourceUpdate_edgeLocationIDs(t *testing.T) {
 			return &http.Response{StatusCode: 200, Body: io.NopCloser(bytes.NewReader([]byte(templateResponse))), Header: map[string][]string{"Content-Type": {"json"}}}, nil
 		})
 
-	listBody := io.NopCloser(bytes.NewReader([]byte(fmt.Sprintf(`
-		{
-		  "items": [
-            {
-              "template": %s
-            }
-		  ]
-		}
-	`, templateResponse))))
 	mockClient.EXPECT().
 		NodeTemplatesAPIListNodeTemplates(gomock.Any(), clusterId, &sdk.NodeTemplatesAPIListNodeTemplatesParams{IncludeDefault: lo.ToPtr(true)}).
-		Return(&http.Response{StatusCode: 200, Body: listBody, Header: map[string][]string{"Content-Type": {"json"}}}, nil)
+		Return(nodeTemplateListResponse(templateResponse), nil)
 
 	resource := resourceNodeTemplate()
 	data := schema.TestResourceDataRaw(t, resource.Schema, map[string]any{
@@ -1741,10 +1709,10 @@ resource "castai_edge_configuration" "test_2" {
 `, organizationID)
 }
 
-// testAccNodeTemplateConstraints mirrors the constraints block of testAccNodeTemplateConfig,
-// whose values round-trip cleanly against the real API. Node template acceptance test
-// configs must include it: without a constraints block the read populates API defaults
-// into state and every subsequent plan is non-empty.
+// testAccNodeTemplateConstraints is the constraints block shared by the node template
+// acceptance test configs. Its values round-trip cleanly against the real API, and the
+// block must be present: without it the read populates API defaults into state and
+// every subsequent plan is non-empty.
 const testAccNodeTemplateConstraints = `
 			constraints {
 				fallback_restore_rate_seconds = 1800
@@ -1793,8 +1761,20 @@ const testAccNodeTemplateConstraints = `
 			}
 `
 
-func testAccNodeTemplateEdgeLocationConfigConfig(rName, clusterName string) string {
-	return ConfigCompose(testAccEKSClusterConfig(rName, clusterName), testAccNodeConfig(rName), testAccEdgeLocationsConfig(rName, clusterName), testAccEdgeConfigurationsConfig(), fmt.Sprintf(`
+// testAccNodeTemplateEdgeLocationConfigBase builds a node template acceptance config
+// carrying the given edge-location argument block and the shared constraints block.
+// withEdgeConfigurations controls whether edge configuration resources (slow to create
+// against the real API) are composed in as well.
+func testAccNodeTemplateEdgeLocationConfigBase(rName, clusterName, edgeArg string, withEdgeConfigurations bool) string {
+	configs := []string{
+		testAccEKSClusterConfig(rName, clusterName),
+		testAccNodeConfig(rName),
+		testAccEdgeLocationsConfig(rName, clusterName),
+	}
+	if withEdgeConfigurations {
+		configs = append(configs, testAccEdgeConfigurationsConfig())
+	}
+	return ConfigCompose(append(configs, fmt.Sprintf(`
 		resource "castai_node_template" "test" {
 			cluster_id        = castai_eks_cluster.test.id
 			name = %[1]q
@@ -1802,6 +1782,14 @@ func testAccNodeTemplateEdgeLocationConfigConfig(rName, clusterName string) stri
 			should_taint = true
 			clm_enabled = false
 
+%[2]s
+%[3]s
+		}
+	`, rName, edgeArg, testAccNodeTemplateConstraints))...)
+}
+
+func testAccNodeTemplateEdgeLocationConfigConfig(rName, clusterName string) string {
+	return testAccNodeTemplateEdgeLocationConfigBase(rName, clusterName, `
 			edge_location_config {
 				edge_location_id = castai_edge_location.test_1.id
 				edge_config_id   = castai_edge_configuration.test_1.id
@@ -1810,20 +1798,11 @@ func testAccNodeTemplateEdgeLocationConfigConfig(rName, clusterName string) stri
 			edge_location_config {
 				edge_location_id = castai_edge_location.test_2.id
 			}
-%[2]s
-		}
-	`, rName, testAccNodeTemplateConstraints))
+	`, true)
 }
 
 func testAccNodeTemplateEdgeLocationConfigUpdatedConfig(rName, clusterName string) string {
-	return ConfigCompose(testAccEKSClusterConfig(rName, clusterName), testAccNodeConfig(rName), testAccEdgeLocationsConfig(rName, clusterName), testAccEdgeConfigurationsConfig(), fmt.Sprintf(`
-		resource "castai_node_template" "test" {
-			cluster_id        = castai_eks_cluster.test.id
-			name = %[1]q
-			configuration_id = castai_node_configuration.test.id
-			should_taint = true
-			clm_enabled = false
-
+	return testAccNodeTemplateEdgeLocationConfigBase(rName, clusterName, `
 			edge_location_config {
 				edge_location_id = castai_edge_location.test_1.id
 				edge_config_id   = castai_edge_configuration.test_1.id
@@ -1833,42 +1812,22 @@ func testAccNodeTemplateEdgeLocationConfigUpdatedConfig(rName, clusterName strin
 				edge_location_id = castai_edge_location.test_2.id
 				edge_config_id   = castai_edge_configuration.test_2.id
 			}
-%[2]s
-		}
-	`, rName, testAccNodeTemplateConstraints))
+	`, true)
 }
 
 func testAccNodeTemplateEdgeLocationIDsConfig(rName, clusterName string) string {
-	return ConfigCompose(testAccEKSClusterConfig(rName, clusterName), testAccNodeConfig(rName), testAccEdgeLocationsConfig(rName, clusterName), fmt.Sprintf(`
-		resource "castai_node_template" "test" {
-			cluster_id        = castai_eks_cluster.test.id
-			name = %[1]q
-			configuration_id = castai_node_configuration.test.id
-			should_taint = true
-			clm_enabled = false
-
+	return testAccNodeTemplateEdgeLocationConfigBase(rName, clusterName, `
 			edge_location_ids = [castai_edge_location.test_1.id, castai_edge_location.test_2.id]
-%[2]s
-		}
-	`, rName, testAccNodeTemplateConstraints))
+	`, false)
 }
 
 func testAccNodeTemplateEdgeLocationIDsSwitchedConfig(rName, clusterName string) string {
-	return ConfigCompose(testAccEKSClusterConfig(rName, clusterName), testAccNodeConfig(rName), testAccEdgeLocationsConfig(rName, clusterName), testAccEdgeConfigurationsConfig(), fmt.Sprintf(`
-		resource "castai_node_template" "test" {
-			cluster_id        = castai_eks_cluster.test.id
-			name = %[1]q
-			configuration_id = castai_node_configuration.test.id
-			should_taint = true
-			clm_enabled = false
-
+	return testAccNodeTemplateEdgeLocationConfigBase(rName, clusterName, `
 			edge_location_config {
 				edge_location_id = castai_edge_location.test_1.id
 				edge_config_id   = castai_edge_configuration.test_1.id
 			}
-%[2]s
-		}
-	`, rName, testAccNodeTemplateConstraints))
+	`, true)
 }
 
 func testAccNodeTemplateConfig(rName, clusterName string) string {
@@ -1915,54 +1874,9 @@ func testAccNodeTemplateConfig(rName, clusterName string) string {
 					"c5.xlarge"  = "0.95"
 				}
 			}
-
-			constraints {
-				fallback_restore_rate_seconds = 1800
-				spot = true
-				enable_spot_diversity = true
-				spot_diversity_price_increase_limit_percent = 21
-				spot_interruption_predictions_enabled = true
-				spot_interruption_predictions_type = "interruption-predictions"
-				use_spot_fallbacks = true
-				storage_optimized_state = "disabled"
-				burstable_instances = "enabled"
-				customer_specific = "enabled"
-				min_cpu = 4
-				max_cpu = 100
-				instance_families {
-				  exclude = ["m5"]
-				}
-				azs = ["eu-central-1a", "eu-central-1b"]
-				gpu {
-					include_names = []
-					exclude_names = []
-					manufacturers = ["NVIDIA"]
-					fractional_gpus = "enabled"
-				}
-
-				custom_priority {
-					instance_families = ["c", "d"]
-					spot = true
-					on_demand = true
-				}
-
-				resource_limits {
-					cpu_limit_enabled = false
-					cpu_limit_max_cores = 0
-				}
-
-				cpu_manufacturers = ["INTEL", "AMD"]
-				architecture_priority = ["amd64"]
-
-				aws {
-					capacity_reservations {
-						id   = "cr-12345678901234567"
-						type = "ON_DEMAND_CAPACITY_RESERVATION"
-					}
-				}
-			}
+%[2]s
 		}
-	`, rName))
+	`, rName, testAccNodeTemplateConstraints))
 }
 
 func testAccEdgeLocationsConfig(rName, clusterName string) string {
