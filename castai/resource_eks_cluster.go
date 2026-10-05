@@ -28,6 +28,10 @@ func resourceEKSCluster() *schema.Resource {
 		DeleteContext: resourceCastaiClusterDelete,
 		Description:   "EKS cluster resource allows connecting an existing EKS cluster to CAST AI.",
 
+		Importer: &schema.ResourceImporter{
+			StateContext: resourceEKSClusterImporter,
+		},
+
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(5 * time.Minute),
 			Update: schema.DefaultTimeout(1 * time.Minute),
@@ -178,6 +182,18 @@ func resourceCastaiEKSClusterRead(ctx context.Context, data *schema.ResourceData
 	}
 
 	return nil
+}
+
+func resourceEKSClusterImporter(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	clusterID := d.Id()
+	tkn, err := createClusterToken(ctx, meta.(*ProviderConfig).api, clusterID)
+	if err != nil {
+		return nil, fmt.Errorf("creating cluster token during import: %w", err)
+	}
+	if err := d.Set(FieldClusterToken, tkn); err != nil {
+		return nil, fmt.Errorf("setting cluster token: %w", err)
+	}
+	return []*schema.ResourceData{d}, nil
 }
 
 func resourceCastaiEKSClusterUpdate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {

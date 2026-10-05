@@ -23,6 +23,11 @@ func resourceEKSClusterUserARN() *schema.Resource {
 		CreateContext: resourceEKSUserARNCreate,
 		DeleteContext: resourceEKSUserARNDelete,
 		Description:   "Retrieve EKS Cluster User ARN",
+
+		Importer: &schema.ResourceImporter{
+			StateContext: resourceEKSClusterUserARNImporter,
+		},
+
 		Schema: map[string]*schema.Schema{
 			EKSClusterUserARNFieldClusterID: {
 				Type:             schema.TypeString,
@@ -56,6 +61,13 @@ func resourceEKSUserARNRead(ctx context.Context, data *schema.ResourceData, meta
 	}
 
 	return nil
+}
+
+func resourceEKSClusterUserARNImporter(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	if err := d.Set(EKSClusterUserARNFieldClusterID, d.Id()); err != nil {
+		return nil, fmt.Errorf("setting cluster id: %w", err)
+	}
+	return []*schema.ResourceData{d}, nil
 }
 
 func resourceEKSUserARNCreate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {

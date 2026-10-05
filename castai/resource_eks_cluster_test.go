@@ -208,6 +208,70 @@ Tainted = false
 
 }
 
+func TestEKSClusterImporter(t *testing.T) {
+	ctx := context.Background()
+	clusterID := "b6bfc074-a267-400f-b8f1-db0850c369b1"
+
+	t.Run("import should create and set a fresh cluster token", func(t *testing.T) {
+		r := require.New(t)
+		mockctrl := gomock.NewController(t)
+		mockClient := mock_sdk.NewMockClientInterface(mockctrl)
+
+		provider := &ProviderConfig{
+			api: &sdk.ClientWithResponses{
+				ClientInterface: mockClient,
+			},
+		}
+
+		body := io.NopCloser(bytes.NewReader([]byte(`{"token": "imported-cluster-token"}`)))
+		mockClient.EXPECT().
+			ExternalClusterAPICreateClusterToken(gomock.Any(), clusterID).
+			Return(&http.Response{StatusCode: 200, Body: body, Header: map[string][]string{"Content-Type": {"json"}}}, nil)
+
+		resource := resourceEKSCluster()
+
+		state := terraform.NewInstanceStateShimmedFromValue(cty.ObjectVal(map[string]cty.Value{}), 0)
+		state.ID = clusterID
+		data := resource.Data(state)
+
+		result, err := resource.Importer.StateContext(ctx, data, provider)
+
+		r.NoError(err)
+		r.Len(result, 1)
+		r.Equal(clusterID, data.Id())
+		r.Equal("imported-cluster-token", data.Get(FieldClusterToken))
+	})
+
+	t.Run("import should fail when cluster token creation fails", func(t *testing.T) {
+		r := require.New(t)
+		mockctrl := gomock.NewController(t)
+		mockClient := mock_sdk.NewMockClientInterface(mockctrl)
+
+		provider := &ProviderConfig{
+			api: &sdk.ClientWithResponses{
+				ClientInterface: mockClient,
+			},
+		}
+
+		body := io.NopCloser(bytes.NewReader([]byte(`{"message":"Cluster not found"}`)))
+		mockClient.EXPECT().
+			ExternalClusterAPICreateClusterToken(gomock.Any(), clusterID).
+			Return(&http.Response{StatusCode: 404, Body: body, Header: map[string][]string{"Content-Type": {"json"}}}, nil)
+
+		resource := resourceEKSCluster()
+
+		state := terraform.NewInstanceStateShimmedFromValue(cty.ObjectVal(map[string]cty.Value{}), 0)
+		state.ID = clusterID
+		data := resource.Data(state)
+
+		result, err := resource.Importer.StateContext(ctx, data, provider)
+
+		r.Nil(result)
+		r.Error(err)
+		r.Contains(err.Error(), "creating cluster token during import")
+	})
+}
+
 func TestEKSClusterResourceReadContextArchived(t *testing.T) {
 	r := require.New(t)
 	mockctrl := gomock.NewController(t)

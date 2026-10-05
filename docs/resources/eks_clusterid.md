@@ -34,4 +34,11 @@ resource "castai_eks_clusterid" "cluster_id" {
 - `id` (String) The ID of this resource.
 - `organization_id` (String) CAST AI organization ID
 
+## Import
 
+Import is supported using the following syntax:
+
+```shell
+# Import EKS clusterid resource by specifying the CAST AI cluster ID.
+terraform import castai_eks_clusterid.example <castai_cluster_id>
+```

@@ -30,4 +30,11 @@ resource "castai_eks_user_arn" "castai_user_arn" {
 - `arn` (String)
 - `id` (String) The ID of this resource.
 
+## Import
 
+Import is supported using the following syntax:
+
+```shell
+# Import EKS cluster user ARN resource by specifying the CAST AI cluster ID.
+terraform import castai_eks_user_arn.example <castai_cluster_id>
+```
