@@ -777,7 +777,7 @@ func (r *edgeConfigurationResource) toAWSConfigurationModel(ctx context.Context,
 		model.BootDiskSizeGiB = types.Int64Value(int64(*config.BootDiskSizeGib))
 	}
 
-	if config.Tags != nil {
+	if config.Tags != nil && len(*config.Tags) > 0 {
 		tags, tagDiags := types.MapValueFrom(ctx, types.StringType, *config.Tags)
 		diags.Append(tagDiags...)
 		if !tagDiags.HasError() {
@@ -838,7 +838,7 @@ func (r *edgeConfigurationResource) toOCIConfigurationModel(ctx context.Context,
 		model.BootDiskSizeGiB = types.Int64Value(int64(*config.BootDiskSizeGib))
 	}
 
-	if config.Tags != nil {
+	if config.Tags != nil && len(*config.Tags) > 0 {
 		tags, diags := types.MapValueFrom(ctx, types.StringType, *config.Tags)
 		if diags.HasError() {
 			return model
