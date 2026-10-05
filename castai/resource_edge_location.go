@@ -17,6 +17,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int32planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
@@ -407,11 +408,19 @@ func (r *edgeLocationResource) Schema(_ context.Context, _ resource.SchemaReques
 					},
 					"api_server_port": schema.Int32Attribute{
 						Optional:    true,
-						Description: "The port used for the API server.",
+						Computed:    true,
+						Description: "The port used for the API server. Defaults to the system value when unset.",
+						PlanModifiers: []planmodifier.Int32{
+							int32planmodifier.UseStateForUnknown(),
+						},
 					},
 					"konnectivity_port": schema.Int32Attribute{
 						Optional:    true,
-						Description: "The port used for the konnectivity server.",
+						Computed:    true,
+						Description: "The port used for the konnectivity server. Defaults to the system value when unset.",
+						PlanModifiers: []planmodifier.Int32{
+							int32planmodifier.UseStateForUnknown(),
+						},
 					},
 					"service_annotations": schema.MapAttribute{
 						Optional:    true,
@@ -466,7 +475,11 @@ func (r *edgeLocationResource) Schema(_ context.Context, _ resource.SchemaReques
 				Attributes: map[string]schema.Attribute{
 					"gateway_replicas": schema.Int32Attribute{
 						Optional:    true,
+						Computed:    true,
 						Description: "Number of active replicas for the Liqo gateway servers and clients. Defaults to 1 when unset.",
+						PlanModifiers: []planmodifier.Int32{
+							int32planmodifier.UseStateForUnknown(),
+						},
 					},
 					"gateway_server": schema.SingleNestedAttribute{
 						Optional:    true,

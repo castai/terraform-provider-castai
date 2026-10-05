@@ -223,6 +223,16 @@ func TestAccCloudAgnostic_ResourceEdgeLocationAWSImpersonation(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "liqo.gateway_server.service_annotations.owner", "updated"),
 				),
 			},
+			// Unset ports and gateway_replicas must not drift: the API always returns them.
+			{
+				Config: testAccEdgeLocationAWSImpersonationConfigOverridesMinimal(rName, clusterName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "control_plane.external_address", "api.edge.example.com"),
+					resource.TestCheckResourceAttr(resourceName, "liqo.gateway_server.external_address", "gw.edge.example.com"),
+					resource.TestCheckResourceAttr(resourceName, "liqo.gateway_server.service_labels.tier", "edge"),
+					resource.TestCheckResourceAttr(resourceName, "liqo.gateway_replicas", "1"),
+				),
+			},
 			// Remove liqo block entirely.
 			{
 				Config: testAccEdgeLocationAWSImpersonationConfig(rName, clusterName),
@@ -457,6 +467,49 @@ resource "castai_edge_location" "test" {
   }
 }
 `, rName, zonesConfig, subnetConfig, organizationID, apiServerPort, annotationValue))
+}
+
+func testAccEdgeLocationAWSImpersonationConfigOverridesMinimal(rName, clusterName string) string {
+	organizationID := testAccGetOrganizationID()
+
+	zonesConfig, subnetConfig := formatAWSZonesAndSubnets([]string{"us-east-1a", "us-east-1b"})
+
+	return ConfigCompose(testOmniClusterConfig(clusterName), fmt.Sprintf(`
+resource "castai_edge_location" "test" {
+  organization_id 	 = %[4]q
+  cluster_id      	 = castai_omni_cluster.test.id
+  name            	 = %[1]q
+  description     	 = "Test edge location impersonation"
+  region          	 = "us-east-1"
+  control_plane_mode = "SHARED"
+%[2]s
+
+  control_plane = {
+    ha               = false
+    external_address = "api.edge.example.com"
+  }
+
+  liqo = {
+    gateway_server = {
+      external_address = "gw.edge.example.com"
+      service_labels = {
+        tier = "edge"
+      }
+    }
+  }
+
+  aws = {
+    account_id        = "123456789012"
+    role_arn          = "arn:aws:iam::123456789012:role/castai-omni-edge"
+    vpc_id            = "vpc-12345678"
+    vpc_peered        = true
+    vpc_cidr          = "10.0.0.0/16"
+    security_group_id = "sg-12345678"
+    subnet_ids = {%[3]s
+    }
+  }
+}
+`, rName, zonesConfig, subnetConfig, organizationID))
 }
 
 func testAccEdgeLocationGCPImpersonationConfig(rName, clusterName string) string {

@@ -216,10 +216,10 @@ Optional:
 
 Optional:
 
-- `api_server_port` (Number) The port used for the API server.
+- `api_server_port` (Number) The port used for the API server. Defaults to the system value when unset.
 - `external_address` (String) The IP address or hostname used to reach the API server from outside the cluster, if in-cluster LoadBalancer services are not reachable (e.g. cluster is hidden behind an external LoadBalancer).
 - `ha` (Boolean) Whether to use HA mode for control plane. If not set, default is HA.
-- `konnectivity_port` (Number) The port used for the konnectivity server.
+- `konnectivity_port` (Number) The port used for the konnectivity server. Defaults to the system value when unset.
 - `service_annotations` (Map of String) Custom annotations to apply to the control plane service.
 
 
