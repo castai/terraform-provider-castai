@@ -1327,6 +1327,185 @@ func TestNodeTemplateResourceUpdate_edgeLocationIDs(t *testing.T) {
 	r.Equal([]any{edgeLocation1, edgeLocation2}, data.Get(FieldNodeTemplateEdgeLocationIDs))
 }
 
+func TestNodeTemplateResourceReadContext_edgeLocationConfigImport(t *testing.T) {
+	r := require.New(t)
+	mockctrl := gomock.NewController(t)
+	mockClient := mock_sdk.NewMockClientInterface(mockctrl)
+
+	ctx := context.Background()
+	provider := &ProviderConfig{
+		api: &sdk.ClientWithResponses{
+			ClientInterface: mockClient,
+		},
+	}
+
+	clusterId := nodeTemplateTestClusterID
+	edgeLocation1 := nodeTemplateTestEdgeLocation1ID
+	edgeConfig1 := nodeTemplateTestEdgeConfig1ID
+
+	// A freshly imported template carries no edge location state, so entries that pair
+	// locations with edge configurations are surfaced as edge_location_config.
+	templateResponse := fmt.Sprintf(`
+		{
+		  "name": "gpu",
+		  "isEnabled": true,
+		  "edgeLocationConfigs": [
+		    {"edgeLocationId": %q, "edgeConfigId": %q}
+		  ]
+	    }
+	`, edgeLocation1, edgeConfig1)
+
+	mockClient.EXPECT().
+		NodeTemplatesAPIListNodeTemplates(gomock.Any(), clusterId, &sdk.NodeTemplatesAPIListNodeTemplatesParams{IncludeDefault: lo.ToPtr(true)}).
+		Return(nodeTemplateListResponse(templateResponse), nil)
+
+	resource := resourceNodeTemplate()
+	val := cty.ObjectVal(map[string]cty.Value{
+		FieldClusterId:        cty.StringVal(clusterId),
+		FieldNodeTemplateName: cty.StringVal("gpu"),
+	})
+	state := sdkterraform.NewInstanceStateShimmedFromValue(val, 0)
+	state.ID = "gpu"
+
+	data := resource.Data(state)
+	result := resource.ReadContext(ctx, data, provider)
+	r.Nil(result)
+	r.False(result.HasError())
+
+	r.Equal([]any{
+		edgeLocationConfigState(edgeLocation1, edgeConfig1),
+	}, data.Get(FieldNodeTemplateEdgeLocationConfig))
+	r.Empty(data.Get(FieldNodeTemplateEdgeLocationIDs))
+}
+
+func TestNodeTemplateResourceReadContext_edgeLocationIDsOutOfBandConfig(t *testing.T) {
+	r := require.New(t)
+	mockctrl := gomock.NewController(t)
+	mockClient := mock_sdk.NewMockClientInterface(mockctrl)
+
+	ctx := context.Background()
+	provider := &ProviderConfig{
+		api: &sdk.ClientWithResponses{
+			ClientInterface: mockClient,
+		},
+	}
+
+	clusterId := nodeTemplateTestClusterID
+	edgeLocation1 := nodeTemplateTestEdgeLocation1ID
+	edgeLocation2 := nodeTemplateTestEdgeLocation2ID
+	edgeConfig1 := nodeTemplateTestEdgeConfig1ID
+
+	// The template gained an edge configuration out of band while the configuration
+	// still uses the deprecated edge_location_ids form.
+	templateResponse := fmt.Sprintf(`
+		{
+		  "name": "gpu",
+		  "isEnabled": true,
+		  "edgeLocationConfigs": [
+		    {"edgeLocationId": %q, "edgeConfigId": %q},
+		    {"edgeLocationId": %q}
+		  ]
+	    }
+	`, edgeLocation1, edgeConfig1, edgeLocation2)
+
+	mockClient.EXPECT().
+		NodeTemplatesAPIListNodeTemplates(gomock.Any(), clusterId, &sdk.NodeTemplatesAPIListNodeTemplatesParams{IncludeDefault: lo.ToPtr(true)}).
+		Return(nodeTemplateListResponse(templateResponse), nil)
+
+	resource := resourceNodeTemplate()
+	val := cty.ObjectVal(map[string]cty.Value{
+		FieldClusterId:        cty.StringVal(clusterId),
+		FieldNodeTemplateName: cty.StringVal("gpu"),
+		FieldNodeTemplateEdgeLocationIDs: cty.ListVal([]cty.Value{
+			cty.StringVal(edgeLocation1),
+			cty.StringVal(edgeLocation2),
+		}),
+	})
+	state := sdkterraform.NewInstanceStateShimmedFromValue(val, 0)
+	state.ID = "gpu"
+
+	data := resource.Data(state)
+	result := resource.ReadContext(ctx, data, provider)
+	r.Nil(result)
+	r.False(result.HasError())
+
+	// The out-of-band edge configuration cannot be represented by edge_location_ids, so it
+	// is surfaced as edge_location_config where the next plan shows it being removed.
+	r.Equal([]any{
+		edgeLocationConfigState(edgeLocation1, edgeConfig1),
+		edgeLocationConfigState(edgeLocation2, ""),
+	}, data.Get(FieldNodeTemplateEdgeLocationConfig))
+	// The configured legacy field keeps its values.
+	r.Equal([]any{edgeLocation1, edgeLocation2}, data.Get(FieldNodeTemplateEdgeLocationIDs))
+}
+
+func TestNodeTemplateResourceUpdate_edgeLocationConfigCleared(t *testing.T) {
+	r := require.New(t)
+	mockctrl := gomock.NewController(t)
+	mockClient := mock_sdk.NewMockClientInterface(mockctrl)
+
+	ctx := context.Background()
+	provider := &ProviderConfig{
+		api: &sdk.ClientWithResponses{
+			ClientInterface: mockClient,
+		},
+	}
+
+	name := "custom-template"
+	clusterId := nodeTemplateTestClusterID
+	edgeLocation1 := nodeTemplateTestEdgeLocation1ID
+	edgeConfig1 := nodeTemplateTestEdgeConfig1ID
+
+	templateResponse := fmt.Sprintf(`
+		{
+		  "configurationId": "7dc4f922-29c9-4377-889c-0c8c5fb8d497",
+		  "name": %q,
+		  "isEnabled": true,
+		  "shouldTaint": true,
+		  "rebalancingConfig": {
+		    "minNodes": 0
+		  }
+	    }
+	`, name)
+
+	var capturedUpdateBody sdk.NodeTemplatesAPIUpdateNodeTemplateJSONRequestBody
+	mockClient.EXPECT().
+		NodeTemplatesAPIUpdateNodeTemplate(gomock.Any(), clusterId, name, gomock.Any()).
+		DoAndReturn(func(ctx context.Context, clusterId, nodeTemplateName string, body sdk.NodeTemplatesAPIUpdateNodeTemplateJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+			capturedUpdateBody = body
+			return &http.Response{StatusCode: 200, Body: io.NopCloser(bytes.NewReader([]byte(templateResponse))), Header: map[string][]string{"Content-Type": {"json"}}}, nil
+		})
+
+	mockClient.EXPECT().
+		NodeTemplatesAPIListNodeTemplates(gomock.Any(), clusterId, &sdk.NodeTemplatesAPIListNodeTemplatesParams{IncludeDefault: lo.ToPtr(true)}).
+		Return(nodeTemplateListResponse(templateResponse), nil)
+
+	resource := resourceNodeTemplate()
+	data := schema.TestResourceDataRaw(t, resource.Schema, map[string]any{
+		FieldClusterId:        clusterId,
+		FieldNodeTemplateName: name,
+		FieldNodeTemplateEdgeLocationConfig: []any{
+			map[string]any{
+				FieldNodeTemplateEdgeLocationId: edgeLocation1,
+				FieldNodeTemplateEdgeConfigId:   edgeConfig1,
+			},
+		},
+	})
+	data.SetId(name)
+
+	// Simulate the diff produced by removing every edge_location_config block.
+	r.NoError(data.Set(FieldNodeTemplateEdgeLocationConfig, []any{}))
+
+	result := resource.UpdateContext(ctx, data, provider)
+	r.Nil(result)
+	r.False(result.HasError())
+
+	// The update sends an empty list so the API drops the associations instead of
+	// leaving them stale in state.
+	r.NotNil(capturedUpdateBody.EdgeLocationConfigs)
+	r.Empty(*capturedUpdateBody.EdgeLocationConfigs)
+}
+
 func TestNodeTemplateResourceDelete_defaultNodeTemplate(t *testing.T) {
 	r := require.New(t)
 	mockctrl := gomock.NewController(t)
@@ -1620,6 +1799,15 @@ func TestAccEKS_ResourceNodeTemplate_edgeLocationConfig(t *testing.T) {
 					resource.TestCheckResourceAttrPair(resourceName, "edge_location_config.0.edge_config_id", "castai_edge_configuration.test_1", "id"),
 					resource.TestCheckResourceAttrPair(resourceName, "edge_location_config.1.edge_location_id", "castai_edge_location.test_2", "id"),
 					resource.TestCheckResourceAttrPair(resourceName, "edge_location_config.1.edge_config_id", "castai_edge_configuration.test_2", "id"),
+				),
+			},
+			{
+				// Every edge location is removed from the configuration.
+				Config: testAccNodeTemplateEdgeLocationConfigBase(rName, clusterName, "", false),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "name", rName),
+					resource.TestCheckResourceAttr(resourceName, "edge_location_ids.#", "0"),
+					resource.TestCheckResourceAttr(resourceName, "edge_location_config.#", "0"),
 				),
 			},
 		},

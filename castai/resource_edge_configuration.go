@@ -715,7 +715,7 @@ func (r *edgeConfigurationResource) toGCPConfigurationModel(ctx context.Context,
 		model.BootDiskSizeGiB = types.Int64Value(int64(*config.BootDiskSizeGib))
 	}
 
-	if config.Labels != nil {
+	if config.Labels != nil && len(*config.Labels) > 0 {
 		labels, labelDiagnostic := types.MapValueFrom(ctx, types.StringType, *config.Labels)
 		diags.Append(labelDiagnostic...)
 		if !diags.HasError() {
