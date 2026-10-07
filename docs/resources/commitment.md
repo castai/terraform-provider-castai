@@ -124,6 +124,29 @@ resource "castai_commitment" "aws_odcr" {
   }
 }
 
+# AWS Savings Plan.
+resource "castai_commitment" "aws_savings_plan" {
+  name               = "prod-sp-us-east-1"
+  cloud              = "AWS"
+  region             = "us-east-1"
+  type               = "SAVINGS_PLAN"
+  start_time         = "2026-01-01T00:00:00Z"
+  end_time           = "2027-01-01T00:00:00Z"
+  autoscaling_status = "ACTIVE"
+  allowed_usage      = 1.0
+
+  aws_savings_plan_details = {
+    id                = "sp-abcdef01234567890"
+    offering_id       = "12345678-1234-1234-1234-123456789012"
+    type              = "Compute"
+    state             = "active"
+    region            = "us-east-1"
+    commitment_amount = 5.0
+    commitment_term   = "COMMITMENT_TERM_UNIT_ONE_YEAR"
+    payment_option    = "NO_UPFRONT"
+  }
+}
+
 # Bulk upload from a JSON file using for_each. Terraform parallelises the API
 # calls (-parallelism, default 10); raise it for large fleets, e.g.
 # terraform apply -parallelism=50
