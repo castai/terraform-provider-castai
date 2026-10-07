@@ -213,6 +213,7 @@ func TestAccCloudAgnostic_ResourceEdgeConfigurationNebius(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "nebius.reservation_ids.0", "res-1"),
 					resource.TestCheckResourceAttr(resourceName, "nebius.reservation_ids.1", "res-2"),
 					resource.TestCheckResourceAttr(resourceName, "nebius.gpu_cluster", "gpu-cluster-a"),
+					resource.TestCheckResourceAttr(resourceName, "ssh_public_key", "c3NoLWVkMjU1MTkgQUFBQUMzTnphQzFsWkRJMU5URTVPUzB4InRlc3RAaW5pdGlhbCI="),
 					resource.TestCheckResourceAttr(resourceName, "cri.socket", "unix:///run/containerd/containerd.sock"),
 				),
 			},
@@ -239,6 +240,7 @@ func TestAccCloudAgnostic_ResourceEdgeConfigurationNebius(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "nebius.reservation_ids.#", "1"),
 					resource.TestCheckResourceAttr(resourceName, "nebius.reservation_ids.0", "res-updated"),
 					resource.TestCheckResourceAttr(resourceName, "nebius.gpu_cluster", "gpu-cluster-updated"),
+					resource.TestCheckResourceAttr(resourceName, "ssh_public_key", "c3NoLWVkMjU1MTkgQUFBQUMzTnphQzFsWkRJMU5URTVPUzB4InRlc3RAaXBkYXRlZCI="),
 					resource.TestCheckResourceAttr(resourceName, "cri.socket", "unix:///run/containerd/containerd-updated.sock"),
 				),
 			},
@@ -430,6 +432,162 @@ func TestEdgeConfigurationResource_toNebiusConfigurationModel(t *testing.T) {
 			model, diag := r.toNebiusConfigurationModel(ctx, tc.config)
 			assert.Equal(t, tc.expected, model)
 			assert.False(t, diag.HasError())
+		})
+	}
+}
+
+func TestEdgeConfigurationResource_SSHPublicKey_Conversions(t *testing.T) {
+	t.Parallel()
+
+	r := &edgeConfigurationResource{}
+	ctx := context.Background()
+
+	orgID := types.StringValue("org-123")
+	clusterID := types.StringValue("cluster-123")
+	configID := "cfg-123"
+	locationID := "loc-123"
+
+	baselineModel := edgeConfigurationModel{
+		ID:             types.StringValue(configID),
+		OrganizationID: orgID,
+		ClusterID:      clusterID,
+		Name:           types.StringValue("cfg"),
+		EdgeLocationID: types.StringValue(locationID),
+		Default:        types.BoolValue(false),
+		UserDataBase64: types.StringNull(),
+		SSHPublicKey:   types.StringNull(),
+	}
+
+	tests := map[string]struct {
+		config   *omni.EdgeConfiguration
+		expected edgeConfigurationModel
+	}{
+		"SSH key nil produces null": {
+			config: &omni.EdgeConfiguration{
+				Id:             lo.ToPtr(configID),
+				Name:           "cfg",
+				EdgeLocationId: lo.ToPtr(locationID),
+				Default:        lo.ToPtr(false),
+			},
+			expected: baselineModel,
+		},
+		"SSH key empty string produces null": {
+			config: &omni.EdgeConfiguration{
+				Id:             lo.ToPtr(configID),
+				Name:           "cfg",
+				EdgeLocationId: lo.ToPtr(locationID),
+				Default:        lo.ToPtr(false),
+				SshPublicKey:   lo.ToPtr(""),
+			},
+			expected: baselineModel,
+		},
+		"SSH key populated": {
+			config: &omni.EdgeConfiguration{
+				Id:             lo.ToPtr(configID),
+				Name:           "cfg",
+				EdgeLocationId: lo.ToPtr(locationID),
+				Default:        lo.ToPtr(false),
+				SshPublicKey:   lo.ToPtr("c3NoLWVkMjU1MTkgYXNzaC1kaWdlc3Q="),
+			},
+			expected: edgeConfigurationModel{
+				ID:             types.StringValue(configID),
+				OrganizationID: orgID,
+				ClusterID:      clusterID,
+				Name:           types.StringValue("cfg"),
+				EdgeLocationID: types.StringValue(locationID),
+				Default:        types.BoolValue(false),
+				UserDataBase64: types.StringNull(),
+				SSHPublicKey:   types.StringValue("c3NoLWVkMjU1MTkgYXNzaC1kaWdlc3Q="),
+			},
+		},
+		"user_data_base64 populated": {
+			config: &omni.EdgeConfiguration{
+				Id:             lo.ToPtr(configID),
+				Name:           "cfg",
+				EdgeLocationId: lo.ToPtr(locationID),
+				Default:        lo.ToPtr(false),
+				UserDataBase64: lo.ToPtr("I2Nsb3VkLWNvbmZpZwo="),
+			},
+			expected: edgeConfigurationModel{
+				ID:             types.StringValue(configID),
+				OrganizationID: orgID,
+				ClusterID:      clusterID,
+				Name:           types.StringValue("cfg"),
+				EdgeLocationID: types.StringValue(locationID),
+				Default:        types.BoolValue(false),
+				UserDataBase64: types.StringValue("I2Nsb3VkLWNvbmZpZwo="),
+				SSHPublicKey:   types.StringNull(),
+			},
+		},
+		"user_data_base64 empty string produces null": {
+			config: &omni.EdgeConfiguration{
+				Id:             lo.ToPtr(configID),
+				Name:           "cfg",
+				EdgeLocationId: lo.ToPtr(locationID),
+				Default:        lo.ToPtr(false),
+				UserDataBase64: lo.ToPtr(""),
+			},
+			expected: baselineModel,
+		},
+		"default true": {
+			config: &omni.EdgeConfiguration{
+				Id:             lo.ToPtr(configID),
+				Name:           "cfg",
+				EdgeLocationId: lo.ToPtr(locationID),
+				Default:        lo.ToPtr(true),
+			},
+			expected: edgeConfigurationModel{
+				ID:             types.StringValue(configID),
+				OrganizationID: orgID,
+				ClusterID:      clusterID,
+				Name:           types.StringValue("cfg"),
+				EdgeLocationID: types.StringValue(locationID),
+				Default:        types.BoolValue(true),
+				UserDataBase64: types.StringNull(),
+				SSHPublicKey:   types.StringNull(),
+			},
+		},
+		"all fields populated round-trip": {
+			config: &omni.EdgeConfiguration{
+				Id:             lo.ToPtr(configID),
+				Name:           "cfg",
+				EdgeLocationId: lo.ToPtr(locationID),
+				Default:        lo.ToPtr(true),
+				SshPublicKey:   lo.ToPtr("c3NoLWVkMjU1MTkgYXNzaC1kaWdlc3Q="),
+				UserDataBase64: lo.ToPtr("I2Nsb3VkLWNvbmZpZwo="),
+				Gcp: &omni.GCPConfiguration{
+					ImageId:         lo.ToPtr("projects/x/global/images/y"),
+					BootDiskSizeGib: lo.ToPtr(int32(100)),
+					Labels:          &map[string]string{"env": "prod"},
+				},
+			},
+			expected: edgeConfigurationModel{
+				ID:             types.StringValue(configID),
+				OrganizationID: orgID,
+				ClusterID:      clusterID,
+				Name:           types.StringValue("cfg"),
+				EdgeLocationID: types.StringValue(locationID),
+				Default:        types.BoolValue(true),
+				UserDataBase64: types.StringValue("I2Nsb3VkLWNvbmZpZwo="),
+				SSHPublicKey:   types.StringValue("c3NoLWVkMjU1MTkgYXNzaC1kaWdlc3Q="),
+				GCP: &gcpConfigurationModel{
+					Labels: func() types.Map {
+						m, _ := types.MapValueFrom(ctx, types.StringType, map[string]string{"env": "prod"})
+						return m
+					}(),
+					ImageID:         types.StringValue("projects/x/global/images/y"),
+					BootDiskSizeGiB: types.Int64Value(100),
+				},
+			},
+		},
+	}
+
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+			model, diags := r.edgeConfigurationToTFModel(ctx, tc.config, orgID, clusterID)
+			require.False(t, diags.HasError(), "unexpected diagnostics: %v", diags)
+			assert.Equal(t, tc.expected, model)
 		})
 	}
 }
@@ -629,6 +787,7 @@ resource "castai_edge_configuration" "test" {
   edge_location_id = castai_edge_location.test.id
   name             = %[2]q
   user_data_base64 = "I2Nsb3VkLWNvbmZpZwojIFVzZXIgZGF0YQ=="
+  ssh_public_key   = "c3NoLWVkMjU1MTkgQUFBQUMzTnphQzFsWkRJMU5URTVPUzB4InRlc3RAaW5pdGlhbCI="
 
   cri = {
     socket = "unix:///run/containerd/containerd.sock"
@@ -660,6 +819,7 @@ resource "castai_edge_configuration" "test" {
   edge_location_id = castai_edge_location.test.id
   name             = "%[2]s-updated"
   user_data_base64 = "I2Nsb3VkLWNvbmZpZy11cGRhdGVkCg=="
+  ssh_public_key   = "c3NoLWVkMjU1MTkgQUFBQUMzTnphQzFsWkRJMU5URTVPUzB4InRlc3RAaXBkYXRlZCI="
 
   cri = {
     socket = "unix:///run/containerd/containerd-updated.sock"

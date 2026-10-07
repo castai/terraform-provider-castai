@@ -30,6 +30,7 @@ Manage CAST AI Edge Configuration for edge computing deployments
 - `gcp` (Attributes) GCP specific configuration (see [below for nested schema](#nestedatt--gcp))
 - `nebius` (Attributes) Nebius specific configuration (see [below for nested schema](#nestedatt--nebius))
 - `oci` (Attributes) OCI specific configuration (see [below for nested schema](#nestedatt--oci))
+- `ssh_public_key` (String) Base64 encoded SSH public key to be used for provisioned nodes.
 - `user_data_base64` (String) Base64 encoded user data to run on the edge as part of bootstrap. The payload must start with either `#cloud-config` (cloud-init YAML) or `#!` (shell script with a shebang)
 
 ### Read-Only
