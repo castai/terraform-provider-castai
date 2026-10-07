@@ -287,8 +287,10 @@ func TestEdgeConfigurationResource_toNebiusConfiguration_Conversions(t *testing.
 				ReservationIDs:  types.ListNull(types.StringType),
 				GpuCluster:      types.StringNull(),
 			},
+			// Labels stay nil so the field is omitted from the request instead of
+			// being sent as an empty map, which the API would echo back and break
+			// apply consistency (null plan value vs empty map in state).
 			expected: &omni.NebiusConfiguration{
-				Labels:          lo.ToPtr(map[string]string{}),
 				ImageId:         lo.ToPtr(""),
 				BootDiskSizeGib: lo.ToPtr(int32(0)),
 				ReservationIds:  lo.ToPtr([]string{}),
@@ -307,7 +309,6 @@ func TestEdgeConfigurationResource_toNebiusConfiguration_Conversions(t *testing.
 			},
 			expected: &omni.NebiusConfiguration{
 				ImageId:         lo.ToPtr("img"),
-				Labels:          lo.ToPtr(map[string]string{}),
 				BootDiskSizeGib: lo.ToPtr(int32(0)),
 				ReservationIds:  lo.ToPtr([]string{}),
 				GpuCluster:      lo.ToPtr(""),

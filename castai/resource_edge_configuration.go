@@ -673,7 +673,6 @@ func (r *edgeConfigurationResource) toGCPConfiguration(ctx context.Context, plan
 	config := &omni.GCPConfiguration{
 		ImageId:         lo.ToPtr(""),
 		BootDiskSizeGib: lo.ToPtr(int32(0)),
-		Labels:          lo.ToPtr(map[string]string{}),
 	}
 
 	if !plan.ImageID.IsNull() {
@@ -716,7 +715,7 @@ func (r *edgeConfigurationResource) toGCPConfigurationModel(ctx context.Context,
 		model.BootDiskSizeGiB = types.Int64Value(int64(*config.BootDiskSizeGib))
 	}
 
-	if config.Labels != nil {
+	if config.Labels != nil && len(*config.Labels) > 0 {
 		labels, labelDiagnostic := types.MapValueFrom(ctx, types.StringType, *config.Labels)
 		diags.Append(labelDiagnostic...)
 		if !diags.HasError() {
@@ -737,7 +736,6 @@ func (r *edgeConfigurationResource) toAWSConfiguration(ctx context.Context, plan
 	config := &omni.AWSConfiguration{
 		ImageId:         lo.ToPtr(""),
 		BootDiskSizeGib: lo.ToPtr(int32(0)),
-		Tags:            lo.ToPtr(map[string]string{}),
 	}
 
 	if !plan.ImageID.IsNull() {
@@ -779,7 +777,7 @@ func (r *edgeConfigurationResource) toAWSConfigurationModel(ctx context.Context,
 		model.BootDiskSizeGiB = types.Int64Value(int64(*config.BootDiskSizeGib))
 	}
 
-	if config.Tags != nil {
+	if config.Tags != nil && len(*config.Tags) > 0 {
 		tags, tagDiags := types.MapValueFrom(ctx, types.StringType, *config.Tags)
 		diags.Append(tagDiags...)
 		if !tagDiags.HasError() {
@@ -800,7 +798,6 @@ func (r *edgeConfigurationResource) toOCIConfiguration(ctx context.Context, plan
 	config := &omni.OCIConfiguration{
 		ImageId:         lo.ToPtr(""),
 		BootDiskSizeGib: lo.ToPtr(int32(0)),
-		Tags:            lo.ToPtr(map[string]string{}),
 	}
 
 	if !plan.ImageID.IsNull() {
@@ -841,7 +838,7 @@ func (r *edgeConfigurationResource) toOCIConfigurationModel(ctx context.Context,
 		model.BootDiskSizeGiB = types.Int64Value(int64(*config.BootDiskSizeGib))
 	}
 
-	if config.Tags != nil {
+	if config.Tags != nil && len(*config.Tags) > 0 {
 		tags, diags := types.MapValueFrom(ctx, types.StringType, *config.Tags)
 		if diags.HasError() {
 			return model
@@ -860,7 +857,6 @@ func (r *edgeConfigurationResource) toNebiusConfiguration(ctx context.Context, p
 	}
 
 	config := &omni.NebiusConfiguration{
-		Labels:          lo.ToPtr(map[string]string{}),
 		ImageId:         lo.ToPtr(""),
 		BootDiskSizeGib: lo.ToPtr(int32(0)),
 		ReservationIds:  lo.ToPtr([]string{}),
