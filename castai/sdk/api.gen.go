@@ -1751,6 +1751,99 @@ type CastaiAuthtokenV1beta1ListAuthTokensResponse struct {
 	Items *[]CastaiAuthtokenV1beta1AuthToken `json:"items,omitempty"`
 }
 
+// CastaiAutoscalerV1beta1AggressiveModeConfig defines model for castai.autoscaler.v1beta1.AggressiveModeConfig.
+type CastaiAutoscalerV1beta1AggressiveModeConfig struct {
+	// IgnoreLocalPersistentVolumes Rebalance workloads that use local-path Persistent Volumes.
+	// WARNING: THIS WILL RESULT IN DATA LOSS.
+	IgnoreLocalPersistentVolumes *bool `json:"ignoreLocalPersistentVolumes,omitempty"`
+
+	// IgnoreProblemJobPods Pods spawned by Jobs or CronJobs will not prevent the Rebalancer from deleting a node on which they run.
+	// WARNING: When true, pods spawned by Jobs or CronJobs will be terminated if the Rebalancer picks a node that runs them.
+	// As such, they are likely to lose their progress.
+	IgnoreProblemJobPods *bool `json:"ignoreProblemJobPods,omitempty"`
+
+	// IgnoreProblemPodsWithoutController Pods that don't have a controller (bare pods) will not prevent the Rebalancer from deleting a node on which they run.
+	// WARNING: When true, such pods might not restart, since they have no controller to do it.
+	IgnoreProblemPodsWithoutController *bool `json:"ignoreProblemPodsWithoutController,omitempty"`
+
+	// IgnoreProblemPreventedDrainPods Pods annotated with rebalancing.cast.ai/prevented-drain=true will not prevent the Rebalancer from deleting a node on which they run.
+	IgnoreProblemPreventedDrainPods *bool `json:"ignoreProblemPreventedDrainPods,omitempty"`
+
+	// IgnoreProblemRemovalDisabledPods Pods that are marked with "removal disabled" will not prevent the Rebalancer from deleting a node on which they run.
+	// WARNING: When true, such pods will be evicted and disrupted.
+	IgnoreProblemRemovalDisabledPods *bool `json:"ignoreProblemRemovalDisabledPods,omitempty"`
+}
+
+// CastaiAutoscalerV1beta1DrainFailureConfig Defines configuration for drain failure recovery behavior.
+type CastaiAutoscalerV1beta1DrainFailureConfig struct {
+	// DisableUncordon When true, drain-failed nodes will NOT be automatically uncordoned.
+	DisableUncordon *bool `json:"disableUncordon"`
+
+	// UncordonAfterSeconds Time in seconds after which a drain-failed node should be automatically uncordoned.
+	// Clamped to [60, 259200] (1m–72h). Defaults to 1800 (30 minutes).
+	UncordonAfterSeconds *int32 `json:"uncordonAfterSeconds,omitempty"`
+}
+
+// CastaiAutoscalerV1beta1ExecutionConditions Defines the conditions which must be met in order to fully execute the plan.
+type CastaiAutoscalerV1beta1ExecutionConditions struct {
+	// AchievedSavingsPercentage Identifies the minimum percentage of cost savings relative to the original (blue) cost that should be achieved.
+	// The rebalancing plan will not proceed after creating the nodes if the achieved savings percentage
+	// is not achieved. This field's value will not be considered if the initially predicted savings are negative.
+	AchievedSavingsPercentage *int32 `json:"achievedSavingsPercentage,omitempty"`
+	Enabled                   *bool  `json:"enabled,omitempty"`
+}
+
+// CastaiAutoscalerV1beta1PausedDrainConfig Defines configuration of a paused draining feature.
+type CastaiAutoscalerV1beta1PausedDrainConfig struct {
+	Enabled *bool `json:"enabled,omitempty"`
+
+	// TimeoutSeconds Maximum time in seconds for which nodes will stay cordoned during paused draining phase.
+	// After that time, nodes will be automatically uncordoned by the Autoscaler's node deletion policy (if enabled).
+	TimeoutSeconds *int32 `json:"timeoutSeconds"`
+}
+
+// CastaiAutoscalerV1beta1RebalancingOptions defines model for castai.autoscaler.v1beta1.RebalancingOptions.
+type CastaiAutoscalerV1beta1RebalancingOptions struct {
+	// AggressiveMode When enabled will also consider rebalancing problematic pods (pods without controller, job pods, pods with removal-disabled annotation).
+	//
+	// Deprecated: use AggressiveModeConfig instead.
+	// If set to true, this overrides all settings in AggressiveModeConfig to true.
+	// Deprecated:
+	AggressiveMode       *bool                                        `json:"aggressiveMode"`
+	AggressiveModeConfig *CastaiAutoscalerV1beta1AggressiveModeConfig `json:"aggressiveModeConfig,omitempty"`
+
+	// DrainFailureConfig Defines configuration for drain failure recovery behavior.
+	DrainFailureConfig *CastaiAutoscalerV1beta1DrainFailureConfig `json:"drainFailureConfig,omitempty"`
+
+	// EvictGracefully Defines whether the nodes that failed to get drained until a predefined timeout, will be kept with a
+	// rebalancing.cast.ai/status=drain-failed annotation instead of forcefully drained.
+	EvictGracefully *bool `json:"evictGracefully"`
+
+	// ExecutionConditions Defines the conditions which must be met in order to fully execute the plan.
+	ExecutionConditions *CastaiAutoscalerV1beta1ExecutionConditions `json:"executionConditions,omitempty"`
+
+	// KeepDrainTimeoutNodes Deprecated: use evictGracefully instead.
+	// Deprecated:
+	KeepDrainTimeoutNodes *bool `json:"keepDrainTimeoutNodes"`
+
+	// MaxSimultaneousDrains Number of nodes to drain simultaniously.
+	// when unspecified, defaults to unlimited.
+	MaxSimultaneousDrains *int32 `json:"maxSimultaneousDrains"`
+
+	// MinNodes Minimum number of nodes that should be kept in the cluster after rebalancing.
+	MinNodes *int32 `json:"minNodes,omitempty"`
+
+	// PausedDrainConfig Defines configuration of a paused draining feature.
+	PausedDrainConfig *CastaiAutoscalerV1beta1PausedDrainConfig `json:"pausedDrainConfig,omitempty"`
+
+	// SplitNodesInBatchesOf If set, the rebalancing plan is executed in batches such that at most this
+	// many additional nodes (nodes created minus nodes drained) are alive at any
+	// moment during execution, and a node is only drained after its replacement
+	// node exists. Zero and negative values are accepted and treated as unset:
+	// the plan executes in a single batch.
+	SplitNodesInBatchesOf *int32 `json:"splitNodesInBatchesOf"`
+}
+
 // CastaiEvictorV1AdvancedConfig AdvancedConfig the evictor advanced configuration.
 type CastaiEvictorV1AdvancedConfig struct {
 	EvictionConfig []CastaiEvictorV1EvictionConfig `json:"evictionConfig"`
@@ -9054,53 +9147,11 @@ type RuntimeV1WorkloadNetflowDestination struct {
 	Zone         *string   `json:"zone,omitempty"`
 }
 
-// ScheduledrebalancingV1AggressiveModeConfig defines model for scheduledrebalancing.v1.AggressiveModeConfig.
-type ScheduledrebalancingV1AggressiveModeConfig struct {
-	// IgnoreLocalPersistentVolumes Rebalance workloads that use local-path Persistent Volumes.
-	// WARNING: THIS WILL RESULT IN DATA LOSS.
-	IgnoreLocalPersistentVolumes *bool `json:"ignoreLocalPersistentVolumes,omitempty"`
-
-	// IgnoreProblemJobPods Pods spawned by Jobs or CronJobs will not prevent the Rebalancer from deleting a node on which they run.
-	// WARNING: When true, pods spawned by Jobs or CronJobs will be terminated if the Rebalancer picks a node that runs them.
-	// As such, they are likely to lose their progress.
-	IgnoreProblemJobPods *bool `json:"ignoreProblemJobPods,omitempty"`
-
-	// IgnoreProblemPodsWithoutController Pods that don't have a controller (bare pods) will not prevent the Rebalancer from deleting a node on which they run.
-	// WARNING: When true, such pods might not restart, since they have no controller to do it.
-	IgnoreProblemPodsWithoutController *bool `json:"ignoreProblemPodsWithoutController,omitempty"`
-
-	// IgnoreProblemPreventedDrainPods Pods annotated with rebalancing.cast.ai/prevented-drain=true will not prevent the Rebalancer from deleting a node on which they run.
-	IgnoreProblemPreventedDrainPods *bool `json:"ignoreProblemPreventedDrainPods,omitempty"`
-
-	// IgnoreProblemRemovalDisabledPods Pods that are marked with "removal disabled" will not prevent the Rebalancer from deleting a node on which they run.
-	// WARNING: When true, such pods will be evicted and disrupted.
-	IgnoreProblemRemovalDisabledPods *bool `json:"ignoreProblemRemovalDisabledPods,omitempty"`
-}
-
 // ScheduledrebalancingV1DeleteRebalancingJobResponse defines model for scheduledrebalancing.v1.DeleteRebalancingJobResponse.
 type ScheduledrebalancingV1DeleteRebalancingJobResponse = map[string]interface{}
 
 // ScheduledrebalancingV1DeleteRebalancingScheduleResponse defines model for scheduledrebalancing.v1.DeleteRebalancingScheduleResponse.
 type ScheduledrebalancingV1DeleteRebalancingScheduleResponse = map[string]interface{}
-
-// ScheduledrebalancingV1DrainFailureConfig Defines configuration for drain failure recovery behavior.
-type ScheduledrebalancingV1DrainFailureConfig struct {
-	// DisableUncordon When true, drain-failed nodes will NOT be automatically uncordoned.
-	DisableUncordon *bool `json:"disableUncordon"`
-
-	// UncordonAfterSeconds Time in seconds after which a drain-failed node should be automatically uncordoned.
-	// Clamped to [60, 259200] (1m–72h). Defaults to 1800 (30 minutes).
-	UncordonAfterSeconds *int32 `json:"uncordonAfterSeconds,omitempty"`
-}
-
-// ScheduledrebalancingV1ExecutionConditions Defines the conditions which must be met in order to fully execute the plan.
-type ScheduledrebalancingV1ExecutionConditions struct {
-	// AchievedSavingsPercentage Identifies the minimum percentage of cost savings relative to the original (blue) cost that should be achieved.
-	// The rebalancing plan will not proceed after creating the nodes if the achieved savings percentage
-	// is not achieved. This field's value will not be considered if the initially predicted savings are negative.
-	AchievedSavingsPercentage *int32 `json:"achievedSavingsPercentage,omitempty"`
-	Enabled                   *bool  `json:"enabled,omitempty"`
-}
 
 // ScheduledrebalancingV1JobStatus JobStatus defines rebalancing job's last execution status.
 type ScheduledrebalancingV1JobStatus string
@@ -9112,7 +9163,7 @@ type ScheduledrebalancingV1LaunchConfiguration struct {
 
 	// NumTargetedNodes Maximum number of nodes that will be selected for rebalancing.
 	NumTargetedNodes             *int32                                              `json:"numTargetedNodes,omitempty"`
-	RebalancingOptions           *ScheduledrebalancingV1RebalancingOptions           `json:"rebalancingOptions,omitempty"`
+	RebalancingOptions           *CastaiAutoscalerV1beta1RebalancingOptions          `json:"rebalancingOptions,omitempty"`
 	Selector                     *ScheduledrebalancingV1NodeSelector                 `json:"selector,omitempty"`
 	TargetNodeSelectionAlgorithm *ScheduledrebalancingV1TargetNodeSelectionAlgorithm `json:"targetNodeSelectionAlgorithm,omitempty"`
 }
@@ -9181,45 +9232,6 @@ type ScheduledrebalancingV1RebalancingJob struct {
 
 	// Status JobStatus defines rebalancing job's last execution status.
 	Status *ScheduledrebalancingV1JobStatus `json:"status,omitempty"`
-}
-
-// ScheduledrebalancingV1RebalancingOptions defines model for scheduledrebalancing.v1.RebalancingOptions.
-type ScheduledrebalancingV1RebalancingOptions struct {
-	// AggressiveMode When enabled will also consider rebalancing problematic pods (pods without controller, job pods, pods with removal-disabled annotation).
-	//
-	// Deprecated: use AggressiveModeConfig instead.
-	// If set to true, this overrides all settings in AggressiveModeConfig to true.
-	// Deprecated:
-	AggressiveMode       *bool                                       `json:"aggressiveMode"`
-	AggressiveModeConfig *ScheduledrebalancingV1AggressiveModeConfig `json:"aggressiveModeConfig,omitempty"`
-
-	// DrainFailureConfig Defines configuration for drain failure recovery behavior.
-	DrainFailureConfig *ScheduledrebalancingV1DrainFailureConfig `json:"drainFailureConfig,omitempty"`
-
-	// EvictGracefully Defines whether the nodes that failed to get drained until a predefined timeout, will be kept with a
-	// rebalancing.cast.ai/status=drain-failed annotation instead of forcefully drained.
-	EvictGracefully *bool `json:"evictGracefully"`
-
-	// ExecutionConditions Defines the conditions which must be met in order to fully execute the plan.
-	ExecutionConditions *ScheduledrebalancingV1ExecutionConditions `json:"executionConditions,omitempty"`
-
-	// KeepDrainTimeoutNodes Deprecated: use evictGracefully instead.
-	// Deprecated:
-	KeepDrainTimeoutNodes *bool `json:"keepDrainTimeoutNodes"`
-
-	// MaxSimultaneousDrains Number of nodes to drain simultaniously.
-	// when unspecified, defaults to unlimited.
-	MaxSimultaneousDrains *int32 `json:"maxSimultaneousDrains"`
-
-	// MinNodes Minimum number of nodes that should be kept in the cluster after rebalancing.
-	MinNodes *int32 `json:"minNodes,omitempty"`
-
-	// SplitNodesInBatchesOf If set, the rebalancing plan is executed in batches such that at most this
-	// many additional nodes (nodes created minus nodes drained) are alive at any
-	// moment during execution, and a node is only drained after its replacement
-	// node exists. Zero and negative values are accepted and treated as unset:
-	// the plan executes in a single batch.
-	SplitNodesInBatchesOf *int32 `json:"splitNodesInBatchesOf"`
 }
 
 // ScheduledrebalancingV1RebalancingSchedule defines model for scheduledrebalancing.v1.RebalancingSchedule.

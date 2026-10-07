@@ -437,10 +437,10 @@ func stateToSchedule(d *schema.ResourceData) (*sdk.ScheduledrebalancingV1Rebalan
 			return nil, fmt.Errorf("parsing selector: %w", err)
 		}
 
-		var executionConditions *sdk.ScheduledrebalancingV1ExecutionConditions
+		var executionConditions *sdk.CastaiAutoscalerV1beta1ExecutionConditions
 		executionConditionsData := launchConfigurationData["execution_conditions"].([]any)
 		if len(executionConditionsData) != 0 {
-			executionConditions = &sdk.ScheduledrebalancingV1ExecutionConditions{
+			executionConditions = &sdk.CastaiAutoscalerV1beta1ExecutionConditions{
 				Enabled:                   lo.ToPtr(executionConditionsData[0].(map[string]any)["enabled"].(bool)),
 				AchievedSavingsPercentage: lo.ToPtr(int32(executionConditionsData[0].(map[string]any)["achieved_savings_percentage"].(int))),
 			}
@@ -448,11 +448,11 @@ func stateToSchedule(d *schema.ResourceData) (*sdk.ScheduledrebalancingV1Rebalan
 
 		aggressiveMode := readOptionalValue[bool](launchConfigurationData, "aggressive_mode")
 
-		var aggressiveModeConfig *sdk.ScheduledrebalancingV1AggressiveModeConfig
+		var aggressiveModeConfig *sdk.CastaiAutoscalerV1beta1AggressiveModeConfig
 		aggressiveModeConfigSection := launchConfigurationData["aggressive_mode_config"].([]any)
 		if len(aggressiveModeConfigSection) != 0 {
 			aggressiveModeConfigData := aggressiveModeConfigSection[0].(map[string]any)
-			aggressiveModeConfig = &sdk.ScheduledrebalancingV1AggressiveModeConfig{
+			aggressiveModeConfig = &sdk.CastaiAutoscalerV1beta1AggressiveModeConfig{
 				IgnoreLocalPersistentVolumes:       lo.ToPtr(aggressiveModeConfigData["ignore_local_persistent_volumes"].(bool)),
 				IgnoreProblemJobPods:               lo.ToPtr(aggressiveModeConfigData["ignore_problem_job_pods"].(bool)),
 				IgnoreProblemRemovalDisabledPods:   lo.ToPtr(aggressiveModeConfigData["ignore_problem_removal_disabled_pods"].(bool)),
@@ -464,11 +464,11 @@ func stateToSchedule(d *schema.ResourceData) (*sdk.ScheduledrebalancingV1Rebalan
 			}
 		}
 
-		var drainFailureConfig *sdk.ScheduledrebalancingV1DrainFailureConfig
+		var drainFailureConfig *sdk.CastaiAutoscalerV1beta1DrainFailureConfig
 		drainFailureConfigSection := launchConfigurationData["drain_failure_config"].([]any)
 		if len(drainFailureConfigSection) != 0 {
 			drainFailureConfigData := drainFailureConfigSection[0].(map[string]any)
-			drainFailureConfig = &sdk.ScheduledrebalancingV1DrainFailureConfig{
+			drainFailureConfig = &sdk.CastaiAutoscalerV1beta1DrainFailureConfig{
 				DisableUncordon: readOptionalValue[bool](drainFailureConfigData, "disable_uncordon"),
 			}
 			// Only send uncordon_after_seconds if it is populated.
@@ -481,7 +481,7 @@ func stateToSchedule(d *schema.ResourceData) (*sdk.ScheduledrebalancingV1Rebalan
 		result.LaunchConfiguration = sdk.ScheduledrebalancingV1LaunchConfiguration{
 			NodeTtlSeconds:   readOptionalNumber[int, int32](launchConfigurationData, "node_ttl_seconds"),
 			NumTargetedNodes: readOptionalNumber[int, int32](launchConfigurationData, "num_targeted_nodes"),
-			RebalancingOptions: &sdk.ScheduledrebalancingV1RebalancingOptions{
+			RebalancingOptions: &sdk.CastaiAutoscalerV1beta1RebalancingOptions{
 				MinNodes:              readOptionalNumber[int, int32](launchConfigurationData, "rebalancing_min_nodes"),
 				KeepDrainTimeoutNodes: optionalLaunchConfigBool(d, launchConfigurationData, "keep_drain_timeout_nodes"), //nolint:staticcheck // SA1019: deprecated but still sent for backward compatibility
 				EvictGracefully:       optionalLaunchConfigBool(d, launchConfigurationData, "evict_gracefully"),
