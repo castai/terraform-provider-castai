@@ -94,11 +94,11 @@ V1→V2 internal translation (CO-4291) was marked **Won't Do** — the V1 API wi
 
 ### Optional
 
-- `cluster_limits` (List of Object) Defines minimum and maximum amount of CPU the cluster can have. cluster_limits { enabled = true, cpu { max_cores = 100, min_cores = 1 } }. (see [below for nested schema](#nestedatt--cluster_limits))
+- `cluster_limits` (Attributes List) Defines minimum and maximum amount of CPU the cluster can have. cluster_limits { enabled = true, cpu { max_cores = 100, min_cores = 1 } }. (see [below for nested schema](#nestedatt--cluster_limits))
 - `enabled` (Boolean) Enable/disable all policies (global master switch).
-- `node_downscaler` (List of Object) Node Downscaler defines policies for removing nodes based on the configured conditions. node_downscaler { empty_nodes_enabled = true, empty_nodes_delay = "5m" }. (see [below for nested schema](#nestedatt--node_downscaler))
+- `node_downscaler` (Attributes List) Node Downscaler defines policies for removing nodes based on the configured conditions. node_downscaler { empty_nodes_enabled = true, empty_nodes_delay = "5m" }. (see [below for nested schema](#nestedatt--node_downscaler))
 - `scoped_mode` (Boolean) Run the node autoscaler in scoped mode.
-- `unschedulable_pods` (List of Object) Policy defining autoscaler's behavior when unschedulable pods were detected. unschedulable_pods { enabled = true, partial_template_matching_enabled = false, pod_pinner { enabled = true } }. (see [below for nested schema](#nestedatt--unschedulable_pods))
+- `unschedulable_pods` (Attributes List) Policy defining autoscaler's behavior when unschedulable pods were detected. unschedulable_pods { enabled = true, partial_template_matching_enabled = false, pod_pinner { enabled = true } }. (see [below for nested schema](#nestedatt--unschedulable_pods))
 
 ### Read-Only
 
@@ -108,28 +108,34 @@ V1→V2 internal translation (CO-4291) was marked **Won't Do** — the V1 API wi
 <a id="nestedatt--cluster_limits"></a>
 ### Nested Schema for `cluster_limits`
 
+Required:
+
+- `cpu` (Attributes List) Minimum and maximum amount of vCPUs the cluster may have. (see [below for nested schema](#nestedatt--cluster_limits--cpu))
+
 Optional:
 
-- `cpu` (List of Object) (see [below for nested schema](#nestedobjatt--cluster_limits--cpu))
-- `enabled` (Boolean)
+- `enabled` (Boolean) Enable/disable the cluster_limits policy.
 
-<a id="nestedobjatt--cluster_limits--cpu"></a>
+<a id="nestedatt--cluster_limits--cpu"></a>
 ### Nested Schema for `cluster_limits.cpu`
 
+Required:
+
+- `max_cores` (Number) Maximum vCPUs allowed cluster-wide.
+
 Optional:
 
-- `max_cores` (Number)
-- `min_cores` (Number)
+- `min_cores` (Number) Minimum vCPUs allowed cluster-wide.
 
 
 
 <a id="nestedatt--node_downscaler"></a>
 ### Nested Schema for `node_downscaler`
 
-Optional:
+Required:
 
-- `empty_nodes_delay` (String)
-- `empty_nodes_enabled` (Boolean)
+- `empty_nodes_delay` (String) How long a node must be empty before it becomes eligible for downscaling (e.g. "5m").
+- `empty_nodes_enabled` (Boolean) Enable downscaling of empty nodes.
 
 
 <a id="nestedatt--unschedulable_pods"></a>
@@ -137,13 +143,13 @@ Optional:
 
 Optional:
 
-- `enabled` (Boolean)
-- `partial_template_matching_enabled` (Boolean)
-- `pod_pinner` (List of Object) (see [below for nested schema](#nestedobjatt--unschedulable_pods--pod_pinner))
+- `enabled` (Boolean) Enable the unschedulable pods policy.
+- `partial_template_matching_enabled` (Boolean) Use partial template matching when deciding which custom node template to select.
+- `pod_pinner` (Attributes List) Pod Pinner component settings. (see [below for nested schema](#nestedatt--unschedulable_pods--pod_pinner))
 
-<a id="nestedobjatt--unschedulable_pods--pod_pinner"></a>
+<a id="nestedatt--unschedulable_pods--pod_pinner"></a>
 ### Nested Schema for `unschedulable_pods.pod_pinner`
 
 Optional:
 
-- `enabled` (Boolean)
+- `enabled` (Boolean) Enable the Pod Pinner component.
