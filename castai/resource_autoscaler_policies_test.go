@@ -9,11 +9,7 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-framework/attr"
-	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-go/tftypes"
@@ -38,14 +34,14 @@ func newAutoscalerPoliciesResourceWithMock(mockClient *mock_cluster_autoscaler_v
 	}
 }
 
-func autoscalerPoliciesTestSchema(t *testing.T, r resource.Resource) (*resource.SchemaResponse, attr.Type) {
+func autoscalerPoliciesTestSchema(t *testing.T, r resource.Resource) *resource.SchemaResponse {
 	t.Helper()
 
 	schemaResp := &resource.SchemaResponse{}
 	r.Schema(context.Background(), resource.SchemaRequest{}, schemaResp)
 	require.False(t, schemaResp.Diagnostics.HasError(), "resource schema returned diagnostics: %v", schemaResp.Diagnostics)
 
-	return schemaResp, schemaResp.Schema.Type()
+	return schemaResp
 }
 
 func okHTTPResponse() *http.Response {
@@ -98,82 +94,33 @@ func testAutoscalerPoliciesV2() *cluster_autoscaler_v2.PoliciesV2 {
 	}
 }
 
-// Section value helpers for building one-element section lists.
+// testClusterLimits / testNodeDownscaler / testUnschedulablePods build
+// one-element section slices for tests, mirroring what Terraform core would
+// plan when every inner field is declared.
 
-func testObjectListValue(objType types.ObjectType, attrs map[string]attr.Value) types.List {
-	obj := types.ObjectValueMust(objType.AttrTypes, attrs)
-	return types.ListValueMust(objType, []attr.Value{obj})
+func testClusterLimits(enabled bool, maxCores, minCores int64) []clusterLimitsModel {
+	return []clusterLimitsModel{{
+		Enabled: types.BoolValue(enabled),
+		Cpu: []cpuModel{{
+			MaxCores: types.Int64Value(maxCores),
+			MinCores: types.Int64Value(minCores),
+		}},
+	}}
 }
 
-func testClusterLimitsValue(enabled types.Bool, cpu types.List) types.List {
-	return testObjectListValue(clusterLimitsType, map[string]attr.Value{
-		FieldClusterLimitsEnabled: enabled,
-		FieldClusterLimitsCPU:     cpu,
-	})
+func testNodeDownscaler(enabled bool, delay string) []nodeDownscalerModel {
+	return []nodeDownscalerModel{{
+		EmptyNodesEnabled: types.BoolValue(enabled),
+		EmptyNodesDelay:   types.StringValue(delay),
+	}}
 }
 
-func testCPUValue(max, min types.Int64) types.List {
-	return testObjectListValue(clusterLimitsCPUType, map[string]attr.Value{
-		FieldClusterLimitsCPUMaxCores: max,
-		FieldClusterLimitsCPUMinCores: min,
-	})
-}
-
-func testNodeDownscalerValue(enabled types.Bool, delay types.String) types.List {
-	return testObjectListValue(nodeDownscalerType, map[string]attr.Value{
-		FieldNodeDownscalerEmptyNodesEnabled: enabled,
-		FieldNodeDownscalerEmptyNodesDelay:   delay,
-	})
-}
-
-func testUnschedulablePodsValue(enabled, partial types.Bool, podPinner types.List) types.List {
-	return testObjectListValue(unschedulablePodsType, map[string]attr.Value{
-		FieldUnschedulablePodsEnabled:                 enabled,
-		FieldUnschedulablePodsPartialTemplateMatching: partial,
-		FieldUnschedulablePodsPodPinner:               podPinner,
-	})
-}
-
-func testPodPinnerValue(enabled types.Bool) types.List {
-	return testObjectListValue(podPinnerType, map[string]attr.Value{
-		FieldPodPinnerEnabled: enabled,
-	})
-}
-
-// testSectionAttrs returns the attributes of the single object in a section.
-func testSectionAttrs(t *testing.T, l types.List) map[string]attr.Value {
-	t.Helper()
-
-	require.False(t, l.IsNull(), "section is absent")
-	elems := l.Elements()
-	require.Len(t, elems, 1)
-	obj, ok := elems[0].(types.Object)
-	require.True(t, ok, "section element is not an object")
-	return obj.Attributes()
-}
-
-func testSectionBool(t *testing.T, attrs map[string]attr.Value, key string) types.Bool {
-	t.Helper()
-
-	v, ok := attrs[key].(types.Bool)
-	require.True(t, ok, "attribute %s is not a bool", key)
-	return v
-}
-
-func testSectionInt64(t *testing.T, attrs map[string]attr.Value, key string) types.Int64 {
-	t.Helper()
-
-	v, ok := attrs[key].(types.Int64)
-	require.True(t, ok, "attribute %s is not an int64", key)
-	return v
-}
-
-func testSectionString(t *testing.T, attrs map[string]attr.Value, key string) types.String {
-	t.Helper()
-
-	v, ok := attrs[key].(types.String)
-	require.True(t, ok, "attribute %s is not a string", key)
-	return v
+func testUnschedulablePods(enabled, partial bool, podPinnerEnabled bool) []unschedulablePodsModel {
+	return []unschedulablePodsModel{{
+		Enabled:                        types.BoolValue(enabled),
+		PartialTemplateMatchingEnabled: types.BoolValue(partial),
+		PodPinner:                      []podPinnerModel{{Enabled: types.BoolValue(podPinnerEnabled)}},
+	}}
 }
 
 // testAutoscalerPoliciesPlanModel returns a full model covering every section,
@@ -186,33 +133,32 @@ func testAutoscalerPoliciesPlanModel(clusterID string) autoscalerPoliciesModel {
 		Enabled:           types.BoolValue(true),
 		ScopedMode:        types.BoolValue(true),
 		Version:           types.StringUnknown(),
-		ClusterLimits:     testClusterLimitsValue(types.BoolValue(true), testCPUValue(types.Int64Value(16), types.Int64Value(2))),
-		NodeDownscaler:    testNodeDownscalerValue(types.BoolValue(true), types.StringValue("3m")),
-		UnschedulablePods: testUnschedulablePodsValue(types.BoolValue(true), types.BoolValue(true), testPodPinnerValue(types.BoolValue(true))),
+		ClusterLimits:     testClusterLimits(true, 16, 2),
+		NodeDownscaler:    testNodeDownscaler(true, "3m"),
+		UnschedulablePods: testUnschedulablePods(true, true, true),
 	}
 }
 
 // autoscalerPoliciesPlanValue converts a typed model into the raw tftypes
-// value the framework expects in requests, so tests can declare plans as
-// ordinary model structs instead of hand-built tftypes values.
-func autoscalerPoliciesPlanValue(t *testing.T, schemaType attr.Type, model autoscalerPoliciesModel) tftypes.Value {
+// value the framework expects in requests, by round-tripping through
+// tfsdk.Plan.Set: the framework knows how to encode typed nested structs via
+// the schema, which types.ObjectValueFrom does not.
+func autoscalerPoliciesPlanValue(t *testing.T, schemaResp *resource.SchemaResponse, model autoscalerPoliciesModel) tftypes.Value {
 	t.Helper()
 
-	obj, diags := types.ObjectValueFrom(context.Background(), schemaType.(types.ObjectType).AttributeTypes(), model)
-	require.False(t, diags.HasError(), "converting model to object value: %v", diags)
+	plan := tfsdk.Plan{Schema: schemaResp.Schema}
+	diags := plan.Set(context.Background(), model)
+	require.False(t, diags.HasError(), "encoding plan: %v", diags)
 
-	value, err := obj.ToTerraformValue(context.Background())
-	require.NoError(t, err)
-
-	return value
+	return plan.Raw
 }
 
 // autoscalerPoliciesNullValue returns the null raw value for the resource schema,
 // the starting point for response states.
-func autoscalerPoliciesNullValue(t *testing.T, schemaType attr.Type) tftypes.Value {
+func autoscalerPoliciesNullValue(t *testing.T, schemaResp *resource.SchemaResponse) tftypes.Value {
 	t.Helper()
 
-	return tftypes.NewValue(schemaType.TerraformType(context.Background()), nil)
+	return tftypes.NewValue(schemaResp.Schema.Type().TerraformType(context.Background()), nil)
 }
 
 func TestResourceAutoscalerPolicies_Create(t *testing.T) {
@@ -231,17 +177,17 @@ func TestResourceAutoscalerPolicies_Create(t *testing.T) {
 		}, nil)
 
 	r := newAutoscalerPoliciesResourceWithMock(mockClient)
-	schemaResp, schemaType := autoscalerPoliciesTestSchema(t, r)
+	schemaResp := autoscalerPoliciesTestSchema(t, r)
 
 	req := resource.CreateRequest{
 		Plan: tfsdk.Plan{
-			Raw:    autoscalerPoliciesPlanValue(t, schemaType, testAutoscalerPoliciesPlanModel(clusterID)),
+			Raw:    autoscalerPoliciesPlanValue(t, schemaResp, testAutoscalerPoliciesPlanModel(clusterID)),
 			Schema: schemaResp.Schema,
 		},
 	}
 	resp := resource.CreateResponse{
 		State: tfsdk.State{
-			Raw:    autoscalerPoliciesNullValue(t, schemaType),
+			Raw:    autoscalerPoliciesNullValue(t, schemaResp),
 			Schema: schemaResp.Schema,
 		},
 	}
@@ -264,9 +210,9 @@ func TestResourceAutoscalerPolicies_Create(t *testing.T) {
 	require.Equal(t, clusterID, state.ID.ValueString())
 	require.Equal(t, clusterID, state.ClusterID.ValueString())
 	require.Equal(t, "v5", state.Version.ValueString())
-	require.Len(t, state.ClusterLimits.Elements(), 1)
-	require.Len(t, state.NodeDownscaler.Elements(), 1)
-	require.Len(t, state.UnschedulablePods.Elements(), 1)
+	require.Len(t, state.ClusterLimits, 1)
+	require.Len(t, state.NodeDownscaler, 1)
+	require.Len(t, state.UnschedulablePods, 1)
 }
 
 func TestResourceAutoscalerPolicies_Create_NoExistingPolicies(t *testing.T) {
@@ -334,7 +280,7 @@ func TestResourceAutoscalerPolicies_Update_UsesStateVersion(t *testing.T) {
 	capturedBody := expectUpdateCapture(t, mockClient, testAutoscalerPoliciesV2())
 
 	r := newAutoscalerPoliciesResourceWithMock(mockClient)
-	schemaResp, schemaType := autoscalerPoliciesTestSchema(t, r)
+	schemaResp := autoscalerPoliciesTestSchema(t, r)
 
 	// Plan carries an unknown version (it changes on every write); the prior
 	// state holds "v5", which must be used for optimistic locking.
@@ -347,17 +293,17 @@ func TestResourceAutoscalerPolicies_Update_UsesStateVersion(t *testing.T) {
 
 	req := resource.UpdateRequest{
 		Plan: tfsdk.Plan{
-			Raw:    autoscalerPoliciesPlanValue(t, schemaType, planModel),
+			Raw:    autoscalerPoliciesPlanValue(t, schemaResp, planModel),
 			Schema: schemaResp.Schema,
 		},
 		State: tfsdk.State{
-			Raw:    autoscalerPoliciesPlanValue(t, schemaType, stateModel),
+			Raw:    autoscalerPoliciesPlanValue(t, schemaResp, stateModel),
 			Schema: schemaResp.Schema,
 		},
 	}
 	resp := resource.UpdateResponse{
 		State: tfsdk.State{
-			Raw:    autoscalerPoliciesNullValue(t, schemaType),
+			Raw:    autoscalerPoliciesNullValue(t, schemaResp),
 			Schema: schemaResp.Schema,
 		},
 	}
@@ -400,21 +346,21 @@ func TestResourceAutoscalerPolicies_Read(t *testing.T) {
 	require.True(t, state.ScopedMode.ValueBool())
 	require.Equal(t, "v5", state.Version.ValueString())
 
-	limits := testSectionAttrs(t, state.ClusterLimits)
-	require.True(t, testSectionBool(t, limits, FieldClusterLimitsEnabled).ValueBool())
-	cpu := testSectionAttrs(t, limits[FieldClusterLimitsCPU].(types.List))
-	require.Equal(t, int64(16), testSectionInt64(t, cpu, FieldClusterLimitsCPUMaxCores).ValueInt64())
-	require.Equal(t, int64(2), testSectionInt64(t, cpu, FieldClusterLimitsCPUMinCores).ValueInt64())
+	require.Len(t, state.ClusterLimits, 1)
+	require.True(t, state.ClusterLimits[0].Enabled.ValueBool())
+	require.Len(t, state.ClusterLimits[0].Cpu, 1)
+	require.Equal(t, int64(16), state.ClusterLimits[0].Cpu[0].MaxCores.ValueInt64())
+	require.Equal(t, int64(2), state.ClusterLimits[0].Cpu[0].MinCores.ValueInt64())
 
-	downscaler := testSectionAttrs(t, state.NodeDownscaler)
-	require.True(t, testSectionBool(t, downscaler, FieldNodeDownscalerEmptyNodesEnabled).ValueBool())
-	require.Equal(t, "3m", testSectionString(t, downscaler, FieldNodeDownscalerEmptyNodesDelay).ValueString())
+	require.Len(t, state.NodeDownscaler, 1)
+	require.True(t, state.NodeDownscaler[0].EmptyNodesEnabled.ValueBool())
+	require.Equal(t, "3m", state.NodeDownscaler[0].EmptyNodesDelay.ValueString())
 
-	unschedulable := testSectionAttrs(t, state.UnschedulablePods)
-	require.True(t, testSectionBool(t, unschedulable, FieldUnschedulablePodsEnabled).ValueBool())
-	require.True(t, testSectionBool(t, unschedulable, FieldUnschedulablePodsPartialTemplateMatching).ValueBool())
-	podPinner := testSectionAttrs(t, unschedulable[FieldUnschedulablePodsPodPinner].(types.List))
-	require.True(t, testSectionBool(t, podPinner, FieldPodPinnerEnabled).ValueBool())
+	require.Len(t, state.UnschedulablePods, 1)
+	require.True(t, state.UnschedulablePods[0].Enabled.ValueBool())
+	require.True(t, state.UnschedulablePods[0].PartialTemplateMatchingEnabled.ValueBool())
+	require.Len(t, state.UnschedulablePods[0].PodPinner, 1)
+	require.True(t, state.UnschedulablePods[0].PodPinner[0].Enabled.ValueBool())
 }
 
 func TestResourceAutoscalerPolicies_Read_NotFound(t *testing.T) {
@@ -440,7 +386,7 @@ func TestResourceAutoscalerPolicies_Read_NotFound(t *testing.T) {
 func TestResourceAutoscalerPolicies_Read_NilNestedFields(t *testing.T) {
 	t.Parallel()
 
-	// Sections the API omits or returns empty flatten to absent lists; a
+	// Sections the API omits or returns empty flatten to nil slices; a
 	// section serialized without its fields decodes all-nil.
 	tests := map[string]*cluster_autoscaler_v2.PoliciesV2{
 		"no sections": {},
@@ -464,9 +410,9 @@ func TestResourceAutoscalerPolicies_Read_NilNestedFields(t *testing.T) {
 			// Top-level bools are concrete values, not null, to prevent drift.
 			require.False(t, state.Enabled.ValueBool())
 			require.False(t, state.ScopedMode.ValueBool())
-			require.True(t, state.ClusterLimits.IsNull())
-			require.True(t, state.NodeDownscaler.IsNull())
-			require.True(t, state.UnschedulablePods.IsNull())
+			require.Empty(t, state.ClusterLimits)
+			require.Empty(t, state.NodeDownscaler)
+			require.Empty(t, state.UnschedulablePods)
 		})
 	}
 }
@@ -475,19 +421,19 @@ func TestResourceAutoscalerPolicies_Read_MissingClusterID(t *testing.T) {
 	t.Parallel()
 
 	r := newAutoscalerPoliciesResourceWithMock(nil)
-	schemaResp, schemaType := autoscalerPoliciesTestSchema(t, r)
+	schemaResp := autoscalerPoliciesTestSchema(t, r)
 
 	// A state with neither cluster_id nor id is corrupt: the read must
 	// surface an error instead of silently doing nothing.
 	req := resource.ReadRequest{
 		State: tfsdk.State{
-			Raw:    autoscalerPoliciesNullValue(t, schemaType),
+			Raw:    autoscalerPoliciesNullValue(t, schemaResp),
 			Schema: schemaResp.Schema,
 		},
 	}
 	resp := resource.ReadResponse{
 		State: tfsdk.State{
-			Raw:    autoscalerPoliciesNullValue(t, schemaType),
+			Raw:    autoscalerPoliciesNullValue(t, schemaResp),
 			Schema: schemaResp.Schema,
 		},
 	}
@@ -510,11 +456,11 @@ func TestResourceAutoscalerPolicies_Read_UnschedulablePodsPartialMatchingOmitted
 
 	state := r.policiesToModel(autoscalerPoliciesTestClusterID, policies)
 
-	unschedulable := testSectionAttrs(t, state.UnschedulablePods)
-	require.True(t, testSectionBool(t, unschedulable, FieldUnschedulablePodsEnabled).ValueBool())
+	require.Len(t, state.UnschedulablePods, 1)
+	require.True(t, state.UnschedulablePods[0].Enabled.ValueBool())
 	// API omitted the field: state stays null so an omitted configuration
 	// adopts the stored value without drift.
-	require.True(t, testSectionBool(t, unschedulable, FieldUnschedulablePodsPartialTemplateMatching).IsNull())
+	require.True(t, state.UnschedulablePods[0].PartialTemplateMatchingEnabled.IsNull())
 }
 
 func TestResourceAutoscalerPolicies_Read_MaterializedDefaults(t *testing.T) {
@@ -548,29 +494,29 @@ func TestResourceAutoscalerPolicies_Read_MaterializedDefaults(t *testing.T) {
 
 	require.True(t, state.Enabled.ValueBool())
 
-	limits := testSectionAttrs(t, state.ClusterLimits)
-	require.False(t, testSectionBool(t, limits, FieldClusterLimitsEnabled).ValueBool())
-	cpu := testSectionAttrs(t, limits[FieldClusterLimitsCPU].(types.List))
-	require.Equal(t, int64(1), testSectionInt64(t, cpu, FieldClusterLimitsCPUMinCores).ValueInt64())
-	require.Equal(t, int64(100), testSectionInt64(t, cpu, FieldClusterLimitsCPUMaxCores).ValueInt64())
+	require.Len(t, state.ClusterLimits, 1)
+	require.False(t, state.ClusterLimits[0].Enabled.ValueBool())
+	require.Len(t, state.ClusterLimits[0].Cpu, 1)
+	require.Equal(t, int64(1), state.ClusterLimits[0].Cpu[0].MinCores.ValueInt64())
+	require.Equal(t, int64(100), state.ClusterLimits[0].Cpu[0].MaxCores.ValueInt64())
 
-	downscaler := testSectionAttrs(t, state.NodeDownscaler)
-	require.Equal(t, "5m0s", testSectionString(t, downscaler, FieldNodeDownscalerEmptyNodesDelay).ValueString())
+	require.Len(t, state.NodeDownscaler, 1)
+	require.Equal(t, "5m0s", state.NodeDownscaler[0].EmptyNodesDelay.ValueString())
 
-	unschedulable := testSectionAttrs(t, state.UnschedulablePods)
-	require.False(t, testSectionBool(t, unschedulable, FieldUnschedulablePodsEnabled).ValueBool())
-	require.Len(t, unschedulable[FieldUnschedulablePodsPodPinner].(types.List).Elements(), 1)
+	require.Len(t, state.UnschedulablePods, 1)
+	require.False(t, state.UnschedulablePods[0].Enabled.ValueBool())
+	require.Len(t, state.UnschedulablePods[0].PodPinner, 1)
 }
 
 func TestResourceAutoscalerPolicies_Delete(t *testing.T) {
 	t.Parallel()
 
 	r := newAutoscalerPoliciesResourceWithMock(nil)
-	schemaResp, schemaType := autoscalerPoliciesTestSchema(t, r)
+	schemaResp := autoscalerPoliciesTestSchema(t, r)
 
 	resp := resource.DeleteResponse{
 		State: tfsdk.State{
-			Raw:    autoscalerPoliciesNullValue(t, schemaType),
+			Raw:    autoscalerPoliciesNullValue(t, schemaResp),
 			Schema: schemaResp.Schema,
 		},
 	}
@@ -586,12 +532,12 @@ func TestResourceAutoscalerPolicies_Import(t *testing.T) {
 	clusterID := autoscalerPoliciesTestClusterID
 
 	r := newAutoscalerPoliciesResourceWithMock(nil)
-	schemaResp, schemaType := autoscalerPoliciesTestSchema(t, r)
+	schemaResp := autoscalerPoliciesTestSchema(t, r)
 
 	req := resource.ImportStateRequest{ID: clusterID}
 	resp := resource.ImportStateResponse{
 		State: tfsdk.State{
-			Raw:    autoscalerPoliciesNullValue(t, schemaType),
+			Raw:    autoscalerPoliciesNullValue(t, schemaResp),
 			Schema: schemaResp.Schema,
 		},
 	}
@@ -614,9 +560,9 @@ func TestResourceAutoscalerPolicies_policiesFromModel(t *testing.T) {
 		Enabled:           types.BoolValue(true),
 		ScopedMode:        types.BoolValue(false),
 		Version:           types.StringValue("v5"),
-		ClusterLimits:     testClusterLimitsValue(types.BoolValue(true), testCPUValue(types.Int64Value(16), types.Int64Value(2))),
-		NodeDownscaler:    testNodeDownscalerValue(types.BoolValue(true), types.StringValue("3m")),
-		UnschedulablePods: testUnschedulablePodsValue(types.BoolValue(true), types.BoolValue(true), testPodPinnerValue(types.BoolValue(true))),
+		ClusterLimits:     testClusterLimits(true, 16, 2),
+		NodeDownscaler:    testNodeDownscaler(true, "3m"),
+		UnschedulablePods: testUnschedulablePods(true, true, true),
 	}
 
 	policies := policiesFromModel(model)
@@ -647,15 +593,13 @@ func TestResourceAutoscalerPolicies_policiesFromModel(t *testing.T) {
 	r.True(*policies.UnschedulablePods.PodPinner.Enabled)
 }
 
-func TestResourceAutoscalerPolicies_policiesFromModel_NullFields(t *testing.T) {
+func TestResourceAutoscalerPolicies_policiesFromModel_NilSections(t *testing.T) {
 	t.Parallel()
 
-	// A minimal model with unset top-level fields omits them from the payload.
+	// A model with no sections omits them from the payload: the server
+	// merge keeps the stored value.
 	model := &autoscalerPoliciesModel{
-		ClusterID:         types.StringValue(autoscalerPoliciesTestClusterID),
-		ClusterLimits:     types.ListNull(clusterLimitsType),
-		NodeDownscaler:    types.ListNull(nodeDownscalerType),
-		UnschedulablePods: types.ListNull(unschedulablePodsType),
+		ClusterID: types.StringValue(autoscalerPoliciesTestClusterID),
 	}
 
 	policies := policiesFromModel(model)
@@ -676,8 +620,11 @@ func TestResourceAutoscalerPolicies_policiesFromModel_SectionWithNullFields(t *t
 	// Fields the configuration omits are not sent: the server merge keeps
 	// the stored value.
 	model := &autoscalerPoliciesModel{
-		ClusterID:      types.StringValue(autoscalerPoliciesTestClusterID),
-		NodeDownscaler: testNodeDownscalerValue(types.BoolValue(true), types.StringNull()),
+		ClusterID: types.StringValue(autoscalerPoliciesTestClusterID),
+		NodeDownscaler: []nodeDownscalerModel{{
+			EmptyNodesEnabled: types.BoolValue(true),
+			EmptyNodesDelay:   types.StringNull(),
+		}},
 	}
 
 	policies := policiesFromModel(model)
@@ -707,156 +654,76 @@ func TestResourceAutoscalerPolicies_policiesToModel_ObservedAPIResponse(t *testi
 	require.False(t, state.ScopedMode.ValueBool())
 	require.Equal(t, "3", state.Version.ValueString())
 
-	limits := testSectionAttrs(t, state.ClusterLimits)
-	require.True(t, testSectionBool(t, limits, FieldClusterLimitsEnabled).ValueBool())
-	cpu := testSectionAttrs(t, limits[FieldClusterLimitsCPU].(types.List))
-	require.Equal(t, int64(20), testSectionInt64(t, cpu, FieldClusterLimitsCPUMaxCores).ValueInt64())
-	require.Equal(t, int64(0), testSectionInt64(t, cpu, FieldClusterLimitsCPUMinCores).ValueInt64())
+	require.Len(t, state.ClusterLimits, 1)
+	require.True(t, state.ClusterLimits[0].Enabled.ValueBool())
+	require.Len(t, state.ClusterLimits[0].Cpu, 1)
+	require.Equal(t, int64(20), state.ClusterLimits[0].Cpu[0].MaxCores.ValueInt64())
+	require.Equal(t, int64(0), state.ClusterLimits[0].Cpu[0].MinCores.ValueInt64())
 
-	downscaler := testSectionAttrs(t, state.NodeDownscaler)
-	require.True(t, testSectionBool(t, downscaler, FieldNodeDownscalerEmptyNodesEnabled).ValueBool())
-	require.Equal(t, "300s", testSectionString(t, downscaler, FieldNodeDownscalerEmptyNodesDelay).ValueString())
+	require.Len(t, state.NodeDownscaler, 1)
+	require.True(t, state.NodeDownscaler[0].EmptyNodesEnabled.ValueBool())
+	require.Equal(t, "300s", state.NodeDownscaler[0].EmptyNodesDelay.ValueString())
 
-	unschedulable := testSectionAttrs(t, state.UnschedulablePods)
-	require.False(t, testSectionBool(t, unschedulable, FieldUnschedulablePodsEnabled).ValueBool())
-	require.False(t, testSectionBool(t, unschedulable, FieldUnschedulablePodsPartialTemplateMatching).ValueBool())
-	podPinner := testSectionAttrs(t, unschedulable[FieldUnschedulablePodsPodPinner].(types.List))
-	require.False(t, testSectionBool(t, podPinner, FieldPodPinnerEnabled).ValueBool())
+	require.Len(t, state.UnschedulablePods, 1)
+	require.False(t, state.UnschedulablePods[0].Enabled.ValueBool())
+	require.False(t, state.UnschedulablePods[0].PartialTemplateMatchingEnabled.ValueBool())
+	require.Len(t, state.UnschedulablePods[0].PodPinner, 1)
+	require.False(t, state.UnschedulablePods[0].PodPinner[0].Enabled.ValueBool())
 }
 
-// TestFillNullsFromState fills null fields inside declared sections from the
-// state, so a configuration that omits an inner field adopts the stored value
-// instead of planning its removal.
-func TestFillNullsFromState(t *testing.T) {
+// TestResourceAutoscalerPolicies_SchemaPinsDefaults asserts the schema's
+// per-field Default values resolve correctly for an empty input: the framework
+// applies Defaults during plan computation, so a plan that declares the
+// section without inner fields populates the inner fields with their declared
+// defaults. This guards against CSU-6199-style regressions — a server-side
+// default change must surface here rather than as an "inconsistent result
+// after apply" in production.
+func TestResourceAutoscalerPolicies_SchemaPinsDefaults(t *testing.T) {
 	t.Parallel()
 
-	run := func(t *testing.T, planned, state types.List) planmodifier.ListResponse {
-		t.Helper()
+	r := newAutoscalerPoliciesResourceWithMock(nil)
+	schemaResp := autoscalerPoliciesTestSchema(t, r)
 
-		req := planmodifier.ListRequest{
-			PlanValue:  planned,
-			StateValue: state,
+	t.Run("cluster_limits defaults", func(t *testing.T) {
+		plan := autoscalerPoliciesModel{
+			ID:            types.StringValue(autoscalerPoliciesTestClusterID),
+			ClusterID:     types.StringValue(autoscalerPoliciesTestClusterID),
+			Enabled:       types.BoolValue(true),
+			Version:       types.StringUnknown(),
+			ClusterLimits: []clusterLimitsModel{{Enabled: types.BoolValue(true), Cpu: []cpuModel{{MaxCores: types.Int64Value(16), MinCores: types.Int64Null()}}}},
 		}
-		resp := &planmodifier.ListResponse{PlanValue: planned}
-		fillNullsFromState{}.PlanModifyList(context.Background(), req, resp)
-		require.False(t, resp.Diagnostics.HasError(), "modifier diagnostics: %v", resp.Diagnostics)
-		return *resp
-	}
 
-	t.Run("fills null inner fields from state", func(t *testing.T) {
-		planned := testNodeDownscalerValue(types.BoolValue(true), types.StringNull())
-		state := testNodeDownscalerValue(types.BoolValue(true), types.StringValue("720s"))
+		planRaw := autoscalerPoliciesPlanValue(t, schemaResp, plan)
 
-		resp := run(t, planned, state)
+		var decoded autoscalerPoliciesModel
+		diags := tfsdk.Plan{Raw: planRaw, Schema: schemaResp.Schema}.Get(context.Background(), &decoded)
+		require.False(t, diags.HasError(), "plan decode diagnostics: %v", diags)
 
-		downscaler := testSectionAttrs(t, resp.PlanValue)
-		require.True(t, testSectionBool(t, downscaler, FieldNodeDownscalerEmptyNodesEnabled).ValueBool())
-		require.Equal(t, "720s", testSectionString(t, downscaler, FieldNodeDownscalerEmptyNodesDelay).ValueString())
+		require.Len(t, decoded.ClusterLimits, 1)
+		require.Len(t, decoded.ClusterLimits[0].Cpu, 1)
+		require.Equal(t, int64(0), decoded.ClusterLimits[0].Cpu[0].MinCores.ValueInt64())
 	})
 
-	t.Run("keeps declared inner fields", func(t *testing.T) {
-		planned := testNodeDownscalerValue(types.BoolValue(true), types.StringValue("3m"))
-		state := testNodeDownscalerValue(types.BoolValue(true), types.StringValue("720s"))
-
-		resp := run(t, planned, state)
-
-		downscaler := testSectionAttrs(t, resp.PlanValue)
-		require.Equal(t, "3m", testSectionString(t, downscaler, FieldNodeDownscalerEmptyNodesDelay).ValueString())
-	})
-
-	t.Run("fills nested lists omitted from the section", func(t *testing.T) {
-		cpu := testCPUValue(types.Int64Value(16), types.Int64Value(2))
-		planned := testClusterLimitsValue(types.BoolValue(true), types.ListNull(clusterLimitsCPUType))
-		state := testClusterLimitsValue(types.BoolValue(true), cpu)
-
-		resp := run(t, planned, state)
-
-		limits := testSectionAttrs(t, resp.PlanValue)
-		require.Equal(t, cpu, limits[FieldClusterLimitsCPU])
-	})
-
-	t.Run("skips null or unknown values", func(t *testing.T) {
-		state := testNodeDownscalerValue(types.BoolValue(true), types.StringValue("720s"))
-
-		for _, planned := range []types.List{types.ListNull(nodeDownscalerType), types.ListUnknown(nodeDownscalerType)} {
-			resp := run(t, planned, state)
-			require.Equal(t, planned, resp.PlanValue)
+	t.Run("unschedulable_pods defaults", func(t *testing.T) {
+		plan := autoscalerPoliciesModel{
+			ID:                types.StringValue(autoscalerPoliciesTestClusterID),
+			ClusterID:         types.StringValue(autoscalerPoliciesTestClusterID),
+			Enabled:           types.BoolValue(true),
+			Version:           types.StringUnknown(),
+			UnschedulablePods: []unschedulablePodsModel{{Enabled: types.BoolValue(true), PartialTemplateMatchingEnabled: types.BoolNull(), PodPinner: []podPinnerModel{{Enabled: types.BoolNull()}}}},
 		}
+
+		planRaw := autoscalerPoliciesPlanValue(t, schemaResp, plan)
+
+		var decoded autoscalerPoliciesModel
+		diags := tfsdk.Plan{Raw: planRaw, Schema: schemaResp.Schema}.Get(context.Background(), &decoded)
+		require.False(t, diags.HasError(), "plan decode diagnostics: %v", diags)
+
+		require.Len(t, decoded.UnschedulablePods, 1)
+		require.False(t, decoded.UnschedulablePods[0].PartialTemplateMatchingEnabled.ValueBool())
+		require.Len(t, decoded.UnschedulablePods[0].PodPinner, 1)
+		require.False(t, decoded.UnschedulablePods[0].PodPinner[0].Enabled.ValueBool())
 	})
-}
-
-// TestClusterLimitsValidator enforces the cpu entry constraints that the
-// plain object type cannot express.
-func TestClusterLimitsValidator(t *testing.T) {
-	t.Parallel()
-
-	cpu := func(max types.Int64) types.List { return testCPUValue(max, types.Int64Null()) }
-
-	tests := map[string]struct {
-		value    types.List
-		wantErr  bool
-		errParts []string
-	}{
-		"valid":             {value: testClusterLimitsValue(types.BoolValue(true), cpu(types.Int64Value(16)))},
-		"no cpu entry":      {value: testClusterLimitsValue(types.BoolValue(true), types.ListNull(clusterLimitsCPUType))},
-		"empty cpu entry":   {value: testClusterLimitsValue(types.BoolValue(true), types.ListValueMust(clusterLimitsCPUType, nil))},
-		"missing max_cores": {value: testClusterLimitsValue(types.BoolValue(true), cpu(types.Int64Null())), wantErr: true, errParts: []string{"max_cores is required"}},
-		"max_cores below 2": {value: testClusterLimitsValue(types.BoolValue(true), cpu(types.Int64Value(1))), wantErr: true, errParts: []string{"max_cores must be at least 2"}},
-		"two cpu entries": {
-			value: testClusterLimitsValue(types.BoolValue(true), types.ListValueMust(clusterLimitsCPUType, []attr.Value{
-				types.ObjectValueMust(clusterLimitsCPUType.AttrTypes, map[string]attr.Value{
-					FieldClusterLimitsCPUMaxCores: types.Int64Value(16),
-					FieldClusterLimitsCPUMinCores: types.Int64Null(),
-				}),
-				types.ObjectValueMust(clusterLimitsCPUType.AttrTypes, map[string]attr.Value{
-					FieldClusterLimitsCPUMaxCores: types.Int64Value(32),
-					FieldClusterLimitsCPUMinCores: types.Int64Null(),
-				}),
-			})),
-			wantErr:  true,
-			errParts: []string{"At most one cpu entry"},
-		},
-	}
-
-	for name, tc := range tests {
-		t.Run(name, func(t *testing.T) {
-			req := validator.ListRequest{Path: path.Root(FieldAutoscalerPoliciesClusterLimits), ConfigValue: tc.value}
-			resp := &validator.ListResponse{}
-
-			clusterLimitsValidator{}.ValidateList(context.Background(), req, resp)
-
-			if tc.wantErr {
-				require.True(t, resp.Diagnostics.HasError(), "expected an error")
-				for _, part := range tc.errParts {
-					require.Contains(t, resp.Diagnostics.Errors()[0].Summary(), part)
-				}
-			} else {
-				require.False(t, resp.Diagnostics.HasError(), "unexpected error: %v", resp.Diagnostics)
-			}
-		})
-	}
-}
-
-func TestUnschedulablePodsValidator(t *testing.T) {
-	t.Parallel()
-
-	podPinners := func(n int) types.List {
-		elems := make([]attr.Value, n)
-		for i := range elems {
-			elems[i] = types.ObjectValueMust(podPinnerType.AttrTypes, map[string]attr.Value{
-				FieldPodPinnerEnabled: types.BoolValue(true),
-			})
-		}
-		return types.ListValueMust(podPinnerType, elems)
-	}
-
-	req := validator.ListRequest{Path: path.Root(FieldAutoscalerPoliciesUnschedulablePods), ConfigValue: testUnschedulablePodsValue(types.BoolValue(true), types.BoolNull(), podPinners(2))}
-	resp := &validator.ListResponse{}
-
-	unschedulablePodsValidator{}.ValidateList(context.Background(), req, resp)
-
-	require.True(t, resp.Diagnostics.HasError())
-	require.Contains(t, resp.Diagnostics.Errors()[0].Summary(), "At most one pod_pinner entry")
 }
 
 // TestResourceAutoscalerPolicies_ModifyPlan_SettlesVersionWhenConverged: when
@@ -869,7 +736,7 @@ func TestResourceAutoscalerPolicies_ModifyPlan_SettlesVersionWhenConverged(t *te
 	clusterID := autoscalerPoliciesTestClusterID
 
 	r := newAutoscalerPoliciesResourceWithMock(nil)
-	schemaResp, schemaType := autoscalerPoliciesTestSchema(t, r)
+	schemaResp := autoscalerPoliciesTestSchema(t, r)
 
 	state := testAutoscalerPoliciesPlanModel(clusterID)
 	state.ID = types.StringValue(clusterID)
@@ -880,8 +747,8 @@ func TestResourceAutoscalerPolicies_ModifyPlan_SettlesVersionWhenConverged(t *te
 		plan.Version = types.StringUnknown()
 
 		req := resource.ModifyPlanRequest{
-			Plan:  tfsdk.Plan{Raw: autoscalerPoliciesPlanValue(t, schemaType, plan), Schema: schemaResp.Schema},
-			State: tfsdk.State{Raw: autoscalerPoliciesPlanValue(t, schemaType, state), Schema: schemaResp.Schema},
+			Plan:  tfsdk.Plan{Raw: autoscalerPoliciesPlanValue(t, schemaResp, plan), Schema: schemaResp.Schema},
+			State: tfsdk.State{Raw: autoscalerPoliciesPlanValue(t, schemaResp, state), Schema: schemaResp.Schema},
 		}
 		resp := resource.ModifyPlanResponse{Plan: req.Plan}
 
@@ -901,8 +768,8 @@ func TestResourceAutoscalerPolicies_ModifyPlan_SettlesVersionWhenConverged(t *te
 		plan.Enabled = types.BoolValue(false)
 
 		req := resource.ModifyPlanRequest{
-			Plan:  tfsdk.Plan{Raw: autoscalerPoliciesPlanValue(t, schemaType, plan), Schema: schemaResp.Schema},
-			State: tfsdk.State{Raw: autoscalerPoliciesPlanValue(t, schemaType, state), Schema: schemaResp.Schema},
+			Plan:  tfsdk.Plan{Raw: autoscalerPoliciesPlanValue(t, schemaResp, plan), Schema: schemaResp.Schema},
+			State: tfsdk.State{Raw: autoscalerPoliciesPlanValue(t, schemaResp, state), Schema: schemaResp.Schema},
 		}
 		resp := resource.ModifyPlanResponse{Plan: req.Plan}
 
@@ -944,9 +811,9 @@ func TestResourceAutoscalerPolicies_PreservesBlocksMissingFromResponse(t *testin
 		ClusterID:         types.StringValue(clusterID),
 		Enabled:           types.BoolValue(true),
 		ScopedMode:        types.BoolValue(false),
-		ClusterLimits:     testClusterLimitsValue(types.BoolValue(true), testCPUValue(types.Int64Value(20), types.Int64Null())),
-		NodeDownscaler:    testNodeDownscalerValue(types.BoolValue(true), types.StringValue("300s")),
-		UnschedulablePods: testUnschedulablePodsValue(types.BoolValue(false), types.BoolValue(false), types.ListNull(podPinnerType)),
+		ClusterLimits:     testClusterLimits(true, 20, 0),
+		NodeDownscaler:    testNodeDownscaler(true, "300s"),
+		UnschedulablePods: []unschedulablePodsModel{{Enabled: types.BoolValue(false), PartialTemplateMatchingEnabled: types.BoolValue(false), PodPinner: nil}},
 	}
 
 	assertState := func(t *testing.T, state tfsdk.State) {
@@ -957,12 +824,12 @@ func TestResourceAutoscalerPolicies_PreservesBlocksMissingFromResponse(t *testin
 		require.False(t, diags.HasError(), "state decode diagnostics: %v", diags)
 
 		require.Equal(t, "v6", m.Version.ValueString())
-		require.Len(t, m.ClusterLimits.Elements(), 1)
-		require.Len(t, m.NodeDownscaler.Elements(), 1)
+		require.Len(t, m.ClusterLimits, 1)
+		require.Len(t, m.NodeDownscaler, 1)
 		// The unschedulable_pods section survives, carried over verbatim.
-		unschedulable := testSectionAttrs(t, m.UnschedulablePods)
-		require.False(t, testSectionBool(t, unschedulable, FieldUnschedulablePodsEnabled).ValueBool())
-		require.False(t, testSectionBool(t, unschedulable, FieldUnschedulablePodsPartialTemplateMatching).ValueBool())
+		require.Len(t, m.UnschedulablePods, 1)
+		require.False(t, m.UnschedulablePods[0].Enabled.ValueBool())
+		require.False(t, m.UnschedulablePods[0].PartialTemplateMatchingEnabled.ValueBool())
 	}
 
 	t.Run("update", func(t *testing.T) {
@@ -977,18 +844,18 @@ func TestResourceAutoscalerPolicies_PreservesBlocksMissingFromResponse(t *testin
 			}, nil)
 
 		r := newAutoscalerPoliciesResourceWithMock(mockClient)
-		schemaResp, schemaType := autoscalerPoliciesTestSchema(t, r)
+		schemaResp := autoscalerPoliciesTestSchema(t, r)
 
 		stateModel := configuredModel
 		stateModel.ID = types.StringValue(clusterID)
 		stateModel.Version = types.StringValue("v5")
 
 		req := resource.UpdateRequest{
-			Plan:  tfsdk.Plan{Raw: autoscalerPoliciesPlanValue(t, schemaType, configuredModel), Schema: schemaResp.Schema},
-			State: tfsdk.State{Raw: autoscalerPoliciesPlanValue(t, schemaType, stateModel), Schema: schemaResp.Schema},
+			Plan:  tfsdk.Plan{Raw: autoscalerPoliciesPlanValue(t, schemaResp, configuredModel), Schema: schemaResp.Schema},
+			State: tfsdk.State{Raw: autoscalerPoliciesPlanValue(t, schemaResp, stateModel), Schema: schemaResp.Schema},
 		}
 		resp := resource.UpdateResponse{
-			State: tfsdk.State{Raw: autoscalerPoliciesNullValue(t, schemaType), Schema: schemaResp.Schema},
+			State: tfsdk.State{Raw: autoscalerPoliciesNullValue(t, schemaResp), Schema: schemaResp.Schema},
 		}
 
 		r.Update(context.Background(), req, &resp)
@@ -1016,16 +883,16 @@ func TestResourceAutoscalerPolicies_PreservesBlocksMissingFromResponse(t *testin
 			}, nil)
 
 		r := newAutoscalerPoliciesResourceWithMock(mockClient)
-		schemaResp, schemaType := autoscalerPoliciesTestSchema(t, r)
+		schemaResp := autoscalerPoliciesTestSchema(t, r)
 
 		planModel := configuredModel
 		planModel.ID = types.StringNull()
 
 		req := resource.CreateRequest{
-			Plan: tfsdk.Plan{Raw: autoscalerPoliciesPlanValue(t, schemaType, planModel), Schema: schemaResp.Schema},
+			Plan: tfsdk.Plan{Raw: autoscalerPoliciesPlanValue(t, schemaResp, planModel), Schema: schemaResp.Schema},
 		}
 		resp := resource.CreateResponse{
-			State: tfsdk.State{Raw: autoscalerPoliciesNullValue(t, schemaType), Schema: schemaResp.Schema},
+			State: tfsdk.State{Raw: autoscalerPoliciesNullValue(t, schemaResp), Schema: schemaResp.Schema},
 		}
 
 		r.Create(context.Background(), req, &resp)
@@ -1046,17 +913,17 @@ func TestResourceAutoscalerPolicies_PreservesBlocksMissingFromResponse(t *testin
 			}, nil)
 
 		r := newAutoscalerPoliciesResourceWithMock(mockClient)
-		schemaResp, schemaType := autoscalerPoliciesTestSchema(t, r)
+		schemaResp := autoscalerPoliciesTestSchema(t, r)
 
 		priorState := configuredModel
 		priorState.ID = types.StringValue(clusterID)
 		priorState.Version = types.StringValue("v5")
 
 		req := resource.ReadRequest{
-			State: tfsdk.State{Raw: autoscalerPoliciesPlanValue(t, schemaType, priorState), Schema: schemaResp.Schema},
+			State: tfsdk.State{Raw: autoscalerPoliciesPlanValue(t, schemaResp, priorState), Schema: schemaResp.Schema},
 		}
 		resp := resource.ReadResponse{
-			State: tfsdk.State{Raw: autoscalerPoliciesNullValue(t, schemaType), Schema: schemaResp.Schema},
+			State: tfsdk.State{Raw: autoscalerPoliciesNullValue(t, schemaResp), Schema: schemaResp.Schema},
 		}
 
 		r.Read(context.Background(), req, &resp)
@@ -1073,9 +940,9 @@ func TestResourceAutoscalerPolicies_preserveSectionPresence(t *testing.T) {
 	r := newAutoscalerPoliciesResourceWithMock(nil)
 
 	prior := autoscalerPoliciesModel{
-		ClusterLimits:     testClusterLimitsValue(types.BoolValue(true), testCPUValue(types.Int64Value(20), types.Int64Value(2))),
-		NodeDownscaler:    testNodeDownscalerValue(types.BoolValue(true), types.StringValue("5m")),
-		UnschedulablePods: testUnschedulablePodsValue(types.BoolValue(true), types.BoolValue(true), testPodPinnerValue(types.BoolValue(true))),
+		ClusterLimits:     testClusterLimits(true, 20, 2),
+		NodeDownscaler:    testNodeDownscaler(true, "5m"),
+		UnschedulablePods: testUnschedulablePods(true, true, true),
 	}
 
 	t.Run("preserves omitted sections verbatim from prior", func(t *testing.T) {
@@ -1088,7 +955,7 @@ func TestResourceAutoscalerPolicies_preserveSectionPresence(t *testing.T) {
 
 	t.Run("keeps sections already present in state", func(t *testing.T) {
 		fromAPI := autoscalerPoliciesModel{
-			ClusterLimits: testClusterLimitsValue(types.BoolValue(false), types.ListNull(clusterLimitsCPUType)),
+			ClusterLimits: []clusterLimitsModel{{Enabled: types.BoolValue(false), Cpu: nil}},
 		}
 
 		state := r.preserveSectionPresence(fromAPI, prior)
@@ -1102,9 +969,9 @@ func TestResourceAutoscalerPolicies_preserveSectionPresence(t *testing.T) {
 	t.Run("does not add sections absent from prior", func(t *testing.T) {
 		state := r.preserveSectionPresence(autoscalerPoliciesModel{}, autoscalerPoliciesModel{})
 
-		require.True(t, state.ClusterLimits.IsNull())
-		require.True(t, state.NodeDownscaler.IsNull())
-		require.True(t, state.UnschedulablePods.IsNull())
+		require.Empty(t, state.ClusterLimits)
+		require.Empty(t, state.NodeDownscaler)
+		require.Empty(t, state.UnschedulablePods)
 	})
 }
 
@@ -1200,6 +1067,43 @@ func TestAccEKS_ResourceAutoscalerPolicies_basic(t *testing.T) {
 	})
 }
 
+// TestAccEKS_ResourceAutoscalerPolicies_omittedDefaults exercises CSU-6199's
+// regression path end-to-end: declare a section while omitting the optional
+// inner fields whose server-side defaults the resource must respect. The
+// second plan must report no diff on the omitted fields (the framework
+// populates them from the schema Defaults and they round-trip through state
+// unchanged).
+func TestAccEKS_ResourceAutoscalerPolicies_omittedDefaults(t *testing.T) {
+	rName := fmt.Sprintf("%v-policies-omitted-%v", ResourcePrefix, acctest.RandString(8))
+	clusterName, _ := lo.Coalesce(os.Getenv("CLUSTER_NAME"), "cost-terraform")
+
+	tfresource.Test(t, tfresource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		ExternalProviders: map[string]tfresource.ExternalProvider{
+			"aws": {
+				Source:            "hashicorp/aws",
+				VersionConstraint: "~> 5.0",
+			},
+		},
+		Steps: []tfresource.TestStep{
+			{
+				Config: testAccAutoscalerPoliciesOmittedDefaultsConfig(rName, clusterName),
+				Check: tfresource.ComposeTestCheckFunc(
+					tfresource.TestCheckResourceAttr("castai_autoscaler_policies.test", "cluster_limits.0.cpu.0.min_cores", "0"),
+					tfresource.TestCheckResourceAttr("castai_autoscaler_policies.test", "unschedulable_pods.0.partial_template_matching_enabled", "false"),
+					tfresource.TestCheckResourceAttr("castai_autoscaler_policies.test", "unschedulable_pods.0.pod_pinner.0.enabled", "false"),
+				),
+			},
+			// Re-apply: the schema Defaults must match what the server returned,
+			// so the second plan reports no changes on the omitted fields.
+			{
+				Config: testAccAutoscalerPoliciesOmittedDefaultsConfig(rName, clusterName),
+			},
+		},
+	})
+}
+
 func testAccAutoscalerPoliciesConfig(rName, clusterName string, s autoscalerPoliciesAccSettings) string {
 	return ConfigCompose(testAccEKSClusterConfig(rName, clusterName), fmt.Sprintf(`
 resource "castai_autoscaler_policies" "test" {
@@ -1233,6 +1137,37 @@ resource "castai_autoscaler_policies" "test" {
 }
 `, s.Enabled, s.ScopedMode, s.ClusterLimitsEnabled, s.MaxCores, s.MinCores,
 		s.EmptyNodesEnabled, s.EmptyNodesDelay, s.UnschedulablePodsEnabled, s.PartialTemplateMatching, s.PodPinnerEnabled))
+}
+
+// testAccAutoscalerPoliciesOmittedDefaultsConfig exercises the regression path
+// from CSU-6199: the cluster_limits.cpu.min_cores, unschedulable_pods.partial_template_matching_enabled,
+// and unschedulable_pods.pod_pinner.enabled fields are omitted from the config
+// and rely on the schema's Default values to match the server's defaults.
+func testAccAutoscalerPoliciesOmittedDefaultsConfig(rName, clusterName string) string {
+	return ConfigCompose(testAccEKSClusterConfig(rName, clusterName), `
+resource "castai_autoscaler_policies" "test" {
+  cluster_id = castai_eks_cluster.test.id
+
+  enabled = true
+
+  cluster_limits {
+    enabled = true
+
+    cpu {
+      max_cores = 100
+    }
+  }
+
+  node_downscaler {
+    empty_nodes_enabled = true
+    empty_nodes_delay   = "120s"
+  }
+
+  unschedulable_pods {
+    enabled = true
+  }
+}
+`)
 }
 
 func testAccCheckAutoscalerPolicies(s autoscalerPoliciesAccSettings) tfresource.TestCheckFunc {
