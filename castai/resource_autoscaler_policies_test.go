@@ -783,6 +783,75 @@ func TestFillNullsFromState(t *testing.T) {
 			require.Equal(t, planned, resp.PlanValue)
 		}
 	})
+
+	t.Run("fills null inner fields from configured defaults on first create", func(t *testing.T) {
+		// CSU-6199: with no prior state, the modifier must substitute the
+		// server-side defaults for omitted inner fields so the plan matches
+		// the new state and the apply does not report an inconsistent result.
+		planned := testUnschedulablePodsValue(
+			types.BoolValue(true),
+			types.BoolNull(),              // partial_template_matching_enabled omitted
+			types.ListNull(podPinnerType), // pod_pinner omitted
+		)
+
+		req := planmodifier.ListRequest{
+			PlanValue:  planned,
+			StateValue: types.ListNull(unschedulablePodsType),
+		}
+		resp := &planmodifier.ListResponse{PlanValue: planned}
+		fillNullsFromState{defaults: unschedulablePodsDefaults}.PlanModifyList(context.Background(), req, resp)
+		require.False(t, resp.Diagnostics.HasError(), "modifier diagnostics: %v", resp.Diagnostics)
+
+		unschedulable := testSectionAttrs(t, resp.PlanValue)
+		require.True(t, testSectionBool(t, unschedulable, FieldUnschedulablePodsEnabled).ValueBool())
+		require.False(t, testSectionBool(t, unschedulable, FieldUnschedulablePodsPartialTemplateMatching).ValueBool())
+
+		podPinnerList := unschedulable[FieldUnschedulablePodsPodPinner].(types.List)
+		require.Len(t, podPinnerList.Elements(), 1)
+		podPinner := testSectionAttrs(t, podPinnerList)
+		require.False(t, testSectionBool(t, podPinner, FieldPodPinnerEnabled).ValueBool())
+	})
+
+	t.Run("fills cluster_limits min_cores default on first create", func(t *testing.T) {
+		planned := testClusterLimitsValue(
+			types.BoolValue(true),
+			testCPUValue(types.Int64Value(16), types.Int64Null()), // min_cores omitted
+		)
+
+		req := planmodifier.ListRequest{
+			PlanValue:  planned,
+			StateValue: types.ListNull(clusterLimitsType),
+		}
+		resp := &planmodifier.ListResponse{PlanValue: planned}
+		fillNullsFromState{defaults: clusterLimitsDefaults}.PlanModifyList(context.Background(), req, resp)
+		require.False(t, resp.Diagnostics.HasError(), "modifier diagnostics: %v", resp.Diagnostics)
+
+		limits := testSectionAttrs(t, resp.PlanValue)
+		cpu := testSectionAttrs(t, limits[FieldClusterLimitsCPU].(types.List))
+		require.Equal(t, int64(16), testSectionInt64(t, cpu, FieldClusterLimitsCPUMaxCores).ValueInt64())
+		require.Equal(t, int64(0), testSectionInt64(t, cpu, FieldClusterLimitsCPUMinCores).ValueInt64())
+	})
+
+	t.Run("does not overwrite declared values with defaults on first create", func(t *testing.T) {
+		planned := testUnschedulablePodsValue(
+			types.BoolValue(true),
+			types.BoolValue(true),                     // partial_template_matching_enabled declared true
+			testPodPinnerValue(types.BoolValue(true)), // pod_pinner declared
+		)
+
+		req := planmodifier.ListRequest{
+			PlanValue:  planned,
+			StateValue: types.ListNull(unschedulablePodsType),
+		}
+		resp := &planmodifier.ListResponse{PlanValue: planned}
+		fillNullsFromState{defaults: unschedulablePodsDefaults}.PlanModifyList(context.Background(), req, resp)
+		require.False(t, resp.Diagnostics.HasError(), "modifier diagnostics: %v", resp.Diagnostics)
+
+		unschedulable := testSectionAttrs(t, resp.PlanValue)
+		require.True(t, testSectionBool(t, unschedulable, FieldUnschedulablePodsPartialTemplateMatching).ValueBool())
+		podPinner := testSectionAttrs(t, unschedulable[FieldUnschedulablePodsPodPinner].(types.List))
+		require.True(t, testSectionBool(t, podPinner, FieldPodPinnerEnabled).ValueBool())
+	})
 }
 
 // TestClusterLimitsValidator enforces the cpu entry constraints that the

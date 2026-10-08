@@ -99,6 +99,25 @@ var (
 	}
 )
 
+// sectionDefaults describes the inner-field values the API returns when the
+// configuration omits them. They mirror the server-side defaults so the plan
+// matches the new state on first create / import (CSU-6199).
+var (
+	// clusterLimitsDefaults: the API fills an omitted min_cores with 0. The
+	// other inner fields are required and validated, so omitting them is not
+	// a valid configuration.
+	clusterLimitsDefaults = map[string]attr.Value{
+		FieldClusterLimitsCPUMinCores: types.Int64Value(0),
+	}
+
+	// unschedulablePodsDefaults: the API fills omitted partial_template_matching
+	// and pod_pinner with false / {enabled=false}.
+	unschedulablePodsDefaults = map[string]attr.Value{
+		FieldUnschedulablePodsPartialTemplateMatching: types.BoolValue(false),
+		FieldUnschedulablePodsPodPinner:               types.ListValueMust(podPinnerType, []attr.Value{types.ObjectValueMust(podPinnerType.AttrTypes, map[string]attr.Value{FieldPodPinnerEnabled: types.BoolValue(false)})}),
+	}
+)
+
 var (
 	_ resource.Resource                = (*autoscalerPoliciesResource)(nil)
 	_ resource.ResourceWithConfigure   = (*autoscalerPoliciesResource)(nil)
@@ -174,7 +193,7 @@ func (r *autoscalerPoliciesResource) Schema(_ context.Context, _ resource.Schema
 				Description:   "Defines minimum and maximum amount of CPU the cluster can have. cluster_limits { enabled = true, cpu { max_cores = 100, min_cores = 1 } }.",
 				ElementType:   clusterLimitsType,
 				Validators:    []validator.List{listvalidator.SizeAtMost(1), clusterLimitsValidator{}},
-				PlanModifiers: []planmodifier.List{listplanmodifier.UseStateForUnknown(), fillNullsFromState{}},
+				PlanModifiers: []planmodifier.List{listplanmodifier.UseStateForUnknown(), fillNullsFromState{defaults: clusterLimitsDefaults}},
 			},
 			FieldAutoscalerPoliciesNodeDownscaler: schema.ListAttribute{
 				Optional:      true,
@@ -190,7 +209,7 @@ func (r *autoscalerPoliciesResource) Schema(_ context.Context, _ resource.Schema
 				Description:   "Policy defining autoscaler's behavior when unschedulable pods were detected. unschedulable_pods { enabled = true, partial_template_matching_enabled = false, pod_pinner { enabled = true } }.",
 				ElementType:   unschedulablePodsType,
 				Validators:    []validator.List{listvalidator.SizeAtMost(1), unschedulablePodsValidator{}},
-				PlanModifiers: []planmodifier.List{listplanmodifier.UseStateForUnknown(), fillNullsFromState{}},
+				PlanModifiers: []planmodifier.List{listplanmodifier.UseStateForUnknown(), fillNullsFromState{defaults: unschedulablePodsDefaults}},
 			},
 		},
 	}
