@@ -595,6 +595,13 @@ const (
 	NodeconfigV1EKSConfigImageFamilyFamilyBottlerocket NodeconfigV1EKSConfigImageFamily = "family_bottlerocket"
 )
 
+// Defines values for NodeconfigV1EKSConfigNestedVirtualisationMode.
+const (
+	NodeconfigV1EKSConfigNestedVirtualisationModeNESTEDVIRTUALISATIONMODEDISABLED    NodeconfigV1EKSConfigNestedVirtualisationMode = "NESTED_VIRTUALISATION_MODE_DISABLED"
+	NodeconfigV1EKSConfigNestedVirtualisationModeNESTEDVIRTUALISATIONMODEENABLED     NodeconfigV1EKSConfigNestedVirtualisationMode = "NESTED_VIRTUALISATION_MODE_ENABLED"
+	NodeconfigV1EKSConfigNestedVirtualisationModeNESTEDVIRTUALISATIONMODEUNSPECIFIED NodeconfigV1EKSConfigNestedVirtualisationMode = "NESTED_VIRTUALISATION_MODE_UNSPECIFIED"
+)
+
 // Defines values for NodeconfigV1GKEConfigOnHostMaintenance.
 const (
 	NodeconfigV1GKEConfigOnHostMaintenanceMIGRATE   NodeconfigV1GKEConfigOnHostMaintenance = "MIGRATE"
@@ -7500,6 +7507,13 @@ type NodeconfigV1EKSConfig struct {
 	KeyPairId             *string `json:"keyPairId"`
 	MaxPodsPerNodeFormula *string `json:"maxPodsPerNodeFormula"`
 
+	// NestedVirtualisation NestedVirtualisationMode controls EC2 nested virtualisation on provisioned nodes.
+	//
+	//  - NESTED_VIRTUALISATION_MODE_UNSPECIFIED: Nested virtualisation stays off (EC2 default).
+	//  - NESTED_VIRTUALISATION_MODE_ENABLED: Enable nested virtualisation.
+	//  - NESTED_VIRTUALISATION_MODE_DISABLED: Disable nested virtualisation.
+	NestedVirtualisation *NodeconfigV1EKSConfigNestedVirtualisationMode `json:"nestedVirtualisation,omitempty"`
+
 	// NodeGroupArn Is used to create temporary cloud native pools.
 	NodeGroupArn *string `json:"nodeGroupArn"`
 
@@ -7530,6 +7544,13 @@ type NodeconfigV1EKSConfig struct {
 //   - FAMILY_AL2023: Amazon Linux 2023 (https://aws.amazon.com/linux/amazon-linux-2023/).
 //   - FAMILY_BOTTLEROCKET: Bottlerocket (https://aws.amazon.com/bottlerocket/).
 type NodeconfigV1EKSConfigImageFamily string
+
+// NodeconfigV1EKSConfigNestedVirtualisationMode NestedVirtualisationMode controls EC2 nested virtualisation on provisioned nodes.
+//
+//   - NESTED_VIRTUALISATION_MODE_UNSPECIFIED: Nested virtualisation stays off (EC2 default).
+//   - NESTED_VIRTUALISATION_MODE_ENABLED: Enable nested virtualisation.
+//   - NESTED_VIRTUALISATION_MODE_DISABLED: Disable nested virtualisation.
+type NodeconfigV1EKSConfigNestedVirtualisationMode string
 
 // NodeconfigV1FallbackConfiguration Contains the configuration of fallback node pools.
 type NodeconfigV1FallbackConfiguration struct {

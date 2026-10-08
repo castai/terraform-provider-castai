@@ -32,6 +32,7 @@ Retrieve information about a CAST AI edge configuration
 - `id` (String) The ID of the edge configuration
 - `nebius` (Attributes) Nebius specific configuration (see [below for nested schema](#nestedatt--nebius))
 - `oci` (Attributes) OCI specific configuration (see [below for nested schema](#nestedatt--oci))
+- `ssh_public_key` (String) Base64 encoded SSH public key for provisioned nodes
 - `user_data_base64` (String) Base64 encoded user data for edge bootstrap
 
 <a id="nestedatt--aws"></a>

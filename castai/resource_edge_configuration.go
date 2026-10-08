@@ -50,6 +50,7 @@ type edgeConfigurationModel struct {
 	Nebius         *nebiusConfigurationModel `tfsdk:"nebius"`
 	Custom         *customConfigurationModel `tfsdk:"custom"`
 	CRI            *criConfigurationModel    `tfsdk:"cri"`
+	SSHPublicKey   types.String              `tfsdk:"ssh_public_key"`
 }
 
 type gcpConfigurationModel struct {
@@ -152,6 +153,10 @@ func (r *edgeConfigurationResource) Schema(_ context.Context, _ resource.SchemaR
 			"user_data_base64": schema.StringAttribute{
 				Optional:    true,
 				Description: "Base64 encoded user data to run on the edge as part of bootstrap. The payload must start with either `#cloud-config` (cloud-init YAML) or `#!` (shell script with a shebang)",
+			},
+			"ssh_public_key": schema.StringAttribute{
+				Optional:    true,
+				Description: "Base64 encoded SSH public key to be used for provisioned nodes.",
 			},
 
 			"gcp": schema.SingleNestedAttribute{
@@ -328,6 +333,7 @@ func (r *edgeConfigurationResource) Create(ctx context.Context, req resource.Cre
 		Name:           plan.Name.ValueString(),
 		Default:        lo.ToPtr(false),
 		UserDataBase64: lo.ToPtr(plan.UserDataBase64.ValueString()),
+		SshPublicKey:   lo.ToPtr(plan.SSHPublicKey.ValueString()),
 		Gcp:            gcpConfig,
 		Aws:            awsConfig,
 		Oci:            ociConfig,
@@ -468,6 +474,7 @@ func (r *edgeConfigurationResource) Update(ctx context.Context, req resource.Upd
 	updateReq := omni.EdgeConfigurationUpdate{
 		Name:           lo.ToPtr(plan.Name.ValueString()),
 		UserDataBase64: lo.ToPtr(plan.UserDataBase64.ValueString()),
+		SshPublicKey:   lo.ToPtr(plan.SSHPublicKey.ValueString()),
 		Gcp:            gcpConfig,
 		Aws:            awsConfig,
 		Oci:            ociConfig,
@@ -652,6 +659,7 @@ func (r *edgeConfigurationResource) edgeConfigurationToTFModel(ctx context.Conte
 		EdgeLocationID: types.StringValue(lo.FromPtr(config.EdgeLocationId)),
 		Default:        types.BoolValue(lo.FromPtr(config.Default)),
 		UserDataBase64: normalizeStringPtr(config.UserDataBase64),
+		SSHPublicKey:   normalizeStringPtr(config.SshPublicKey),
 		GCP:            gcpCfg,
 		AWS:            awsCfg,
 		OCI:            r.toOCIConfigurationModel(ctx, config.Oci),
