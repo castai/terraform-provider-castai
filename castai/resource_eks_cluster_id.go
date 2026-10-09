@@ -17,6 +17,11 @@ func resourceEKSClusterID() *schema.Resource {
 		ReadContext:   resourceEKSClusterIDRead,
 		DeleteContext: resourceEKSClusterIDDelete,
 		Description:   "Retrieve CAST AI clusterid",
+
+		Importer: &schema.ResourceImporter{
+			StateContext: schema.ImportStatePassthroughContext,
+		},
+
 		Schema: map[string]*schema.Schema{
 			"account_id": {
 				Type:             schema.TypeString,
