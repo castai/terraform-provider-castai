@@ -6,21 +6,22 @@ import (
 	"net/http"
 	"regexp"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
-	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/samber/lo"
+	"reflect"
 
 	"github.com/castai/terraform-provider-castai/castai/sdk/cluster_autoscaler_v2"
 )
@@ -55,50 +56,6 @@ const (
 	FieldPodPinnerEnabled = "enabled"
 )
 
-// The sections are Optional + Computed plain list-of-object attributes rather
-// than nested blocks or nested attributes: the API always returns a fully
-// materialized object, so a configuration that omits a section must adopt the
-// reported value instead of planning its removal, while the existing block
-// syntax keeps working (Terraform accepts block syntax for object-typed
-// attributes since 1.1.5). Declared values still win; removing a section from
-// the configuration stops managing it rather than resetting it.
-var (
-	clusterLimitsCPUType = types.ObjectType{
-		AttrTypes: map[string]attr.Type{
-			FieldClusterLimitsCPUMaxCores: types.Int64Type,
-			FieldClusterLimitsCPUMinCores: types.Int64Type,
-		},
-	}
-
-	clusterLimitsType = types.ObjectType{
-		AttrTypes: map[string]attr.Type{
-			FieldClusterLimitsEnabled: types.BoolType,
-			FieldClusterLimitsCPU:     types.ListType{ElemType: clusterLimitsCPUType},
-		},
-	}
-
-	nodeDownscalerType = types.ObjectType{
-		AttrTypes: map[string]attr.Type{
-			FieldNodeDownscalerEmptyNodesEnabled: types.BoolType,
-			FieldNodeDownscalerEmptyNodesDelay:   types.StringType,
-		},
-	}
-
-	podPinnerType = types.ObjectType{
-		AttrTypes: map[string]attr.Type{
-			FieldPodPinnerEnabled: types.BoolType,
-		},
-	}
-
-	unschedulablePodsType = types.ObjectType{
-		AttrTypes: map[string]attr.Type{
-			FieldUnschedulablePodsEnabled:                 types.BoolType,
-			FieldUnschedulablePodsPartialTemplateMatching: types.BoolType,
-			FieldUnschedulablePodsPodPinner:               types.ListType{ElemType: podPinnerType},
-		},
-	}
-)
-
 var (
 	_ resource.Resource                = (*autoscalerPoliciesResource)(nil)
 	_ resource.ResourceWithConfigure   = (*autoscalerPoliciesResource)(nil)
@@ -108,19 +65,51 @@ var (
 
 // autoscalerPoliciesResource implements the castai_autoscaler_policies resource
 // using the terraform-plugin-framework.
+//
+// Each policy section is a ListNestedBlock with SizeAtMost(1), decoding to
+// a slice on the typed model: nil slice means absent, a single-element slice
+// means declared. Per-field Default / Required / validators replace the
+// hand-written plan modifier and custom validators used in earlier versions.
+// The List-of-one shape is preserved on the wire and in state, so existing
+// state files load without upgraders.
 type autoscalerPoliciesResource struct {
 	client *ProviderConfig
 }
 
 type autoscalerPoliciesModel struct {
-	ID                types.String `tfsdk:"id"`
-	ClusterID         types.String `tfsdk:"cluster_id"`
-	Enabled           types.Bool   `tfsdk:"enabled"`
-	ScopedMode        types.Bool   `tfsdk:"scoped_mode"`
-	Version           types.String `tfsdk:"version"`
-	ClusterLimits     types.List   `tfsdk:"cluster_limits"`
-	NodeDownscaler    types.List   `tfsdk:"node_downscaler"`
-	UnschedulablePods types.List   `tfsdk:"unschedulable_pods"`
+	ID                types.String             `tfsdk:"id"`
+	ClusterID         types.String             `tfsdk:"cluster_id"`
+	Enabled           types.Bool               `tfsdk:"enabled"`
+	ScopedMode        types.Bool               `tfsdk:"scoped_mode"`
+	Version           types.String             `tfsdk:"version"`
+	ClusterLimits     []clusterLimitsModel     `tfsdk:"cluster_limits"`
+	NodeDownscaler    []nodeDownscalerModel    `tfsdk:"node_downscaler"`
+	UnschedulablePods []unschedulablePodsModel `tfsdk:"unschedulable_pods"`
+}
+
+type clusterLimitsModel struct {
+	Enabled types.Bool `tfsdk:"enabled"`
+	Cpu     []cpuModel `tfsdk:"cpu"`
+}
+
+type cpuModel struct {
+	MaxCores types.Int64 `tfsdk:"max_cores"`
+	MinCores types.Int64 `tfsdk:"min_cores"`
+}
+
+type nodeDownscalerModel struct {
+	EmptyNodesEnabled types.Bool   `tfsdk:"empty_nodes_enabled"`
+	EmptyNodesDelay   types.String `tfsdk:"empty_nodes_delay"`
+}
+
+type unschedulablePodsModel struct {
+	Enabled                        types.Bool       `tfsdk:"enabled"`
+	PartialTemplateMatchingEnabled types.Bool       `tfsdk:"partial_template_matching_enabled"`
+	PodPinner                      []podPinnerModel `tfsdk:"pod_pinner"`
+}
+
+type podPinnerModel struct {
+	Enabled types.Bool `tfsdk:"enabled"`
 }
 
 func newAutoscalerPoliciesResource() resource.Resource {
@@ -168,29 +157,92 @@ func (r *autoscalerPoliciesResource) Schema(_ context.Context, _ resource.Schema
 				Computed:    true,
 				Description: "Policy version for optimistic locking.",
 			},
-			FieldAutoscalerPoliciesClusterLimits: schema.ListAttribute{
-				Optional:      true,
-				Computed:      true,
-				Description:   "Defines minimum and maximum amount of CPU the cluster can have. cluster_limits { enabled = true, cpu { max_cores = 100, min_cores = 1 } }.",
-				ElementType:   clusterLimitsType,
-				Validators:    []validator.List{listvalidator.SizeAtMost(1), clusterLimitsValidator{}},
-				PlanModifiers: []planmodifier.List{listplanmodifier.UseStateForUnknown(), fillNullsFromState{}},
+		},
+		Blocks: map[string]schema.Block{
+			FieldAutoscalerPoliciesClusterLimits: schema.ListNestedBlock{
+				Description: "Defines minimum and maximum amount of CPU the cluster can have. cluster_limits { enabled = true, cpu { max_cores = 100, min_cores = 1 } }.",
+				Validators:  []validator.List{listvalidator.SizeAtMost(1)},
+				NestedObject: schema.NestedBlockObject{
+					Attributes: map[string]schema.Attribute{
+						FieldClusterLimitsEnabled: schema.BoolAttribute{
+							Optional:    true,
+							Computed:    true,
+							Default:     booldefault.StaticBool(false),
+							Description: "Enable/disable the cluster_limits policy.",
+						},
+					},
+					Blocks: map[string]schema.Block{
+						FieldClusterLimitsCPU: schema.ListNestedBlock{
+							NestedObject: schema.NestedBlockObject{
+								Attributes: map[string]schema.Attribute{
+									FieldClusterLimitsCPUMaxCores: schema.Int64Attribute{
+										Required:    true,
+										Description: "Maximum vCPUs allowed cluster-wide.",
+										Validators:  []validator.Int64{int64validator.AtLeast(2)},
+									},
+									FieldClusterLimitsCPUMinCores: schema.Int64Attribute{
+										Optional:    true,
+										Computed:    true,
+										Default:     int64default.StaticInt64(0),
+										Description: "Minimum vCPUs allowed cluster-wide.",
+									},
+								},
+							},
+						},
+					},
+				},
 			},
-			FieldAutoscalerPoliciesNodeDownscaler: schema.ListAttribute{
-				Optional:      true,
-				Computed:      true,
-				Description:   "Node Downscaler defines policies for removing nodes based on the configured conditions. node_downscaler { empty_nodes_enabled = true, empty_nodes_delay = \"5m\" }.",
-				ElementType:   nodeDownscalerType,
-				Validators:    []validator.List{listvalidator.SizeAtMost(1)},
-				PlanModifiers: []planmodifier.List{listplanmodifier.UseStateForUnknown(), fillNullsFromState{}},
+			FieldAutoscalerPoliciesNodeDownscaler: schema.ListNestedBlock{
+				Description: "Node Downscaler defines policies for removing nodes based on the configured conditions. node_downscaler { empty_nodes_enabled = true, empty_nodes_delay = \"5m\" }.",
+				Validators:  []validator.List{listvalidator.SizeAtMost(1)},
+				NestedObject: schema.NestedBlockObject{
+					Attributes: map[string]schema.Attribute{
+						FieldNodeDownscalerEmptyNodesEnabled: schema.BoolAttribute{
+							Required:    true,
+							Description: "Enable downscaling of empty nodes.",
+						},
+						FieldNodeDownscalerEmptyNodesDelay: schema.StringAttribute{
+							Required:    true,
+							Description: "How long a node must be empty before it becomes eligible for downscaling (e.g. \"5m\").",
+						},
+					},
+				},
 			},
-			FieldAutoscalerPoliciesUnschedulablePods: schema.ListAttribute{
-				Optional:      true,
-				Computed:      true,
-				Description:   "Policy defining autoscaler's behavior when unschedulable pods were detected. unschedulable_pods { enabled = true, partial_template_matching_enabled = false, pod_pinner { enabled = true } }.",
-				ElementType:   unschedulablePodsType,
-				Validators:    []validator.List{listvalidator.SizeAtMost(1), unschedulablePodsValidator{}},
-				PlanModifiers: []planmodifier.List{listplanmodifier.UseStateForUnknown(), fillNullsFromState{}},
+			FieldAutoscalerPoliciesUnschedulablePods: schema.ListNestedBlock{
+				Description: "Policy defining autoscaler's behavior when unschedulable pods were detected. unschedulable_pods { enabled = true, partial_template_matching_enabled = false, pod_pinner { enabled = true } }.",
+				Validators:  []validator.List{listvalidator.SizeAtMost(1)},
+				NestedObject: schema.NestedBlockObject{
+					Attributes: map[string]schema.Attribute{
+						FieldUnschedulablePodsEnabled: schema.BoolAttribute{
+							Optional:    true,
+							Computed:    true,
+							Default:     booldefault.StaticBool(false),
+							Description: "Enable the unschedulable pods policy.",
+						},
+						FieldUnschedulablePodsPartialTemplateMatching: schema.BoolAttribute{
+							Optional:    true,
+							Computed:    true,
+							Default:     booldefault.StaticBool(false),
+							Description: "Use partial template matching when deciding which custom node template to select.",
+						},
+					},
+					Blocks: map[string]schema.Block{
+						FieldUnschedulablePodsPodPinner: schema.ListNestedBlock{
+							Description: "Pod Pinner component settings.",
+							Validators:  []validator.List{listvalidator.SizeAtMost(1)},
+							NestedObject: schema.NestedBlockObject{
+								Attributes: map[string]schema.Attribute{
+									FieldPodPinnerEnabled: schema.BoolAttribute{
+										Optional:    true,
+										Computed:    true,
+										Default:     booldefault.StaticBool(false),
+										Description: "Enable the Pod Pinner component.",
+									},
+								},
+							},
+						},
+					},
+				},
 			},
 		},
 	}
@@ -337,12 +389,22 @@ func (r *autoscalerPoliciesResource) ModifyPlan(ctx context.Context, req resourc
 		plan.ClusterID.Equal(state.ClusterID) &&
 		plan.Enabled.Equal(state.Enabled) &&
 		plan.ScopedMode.Equal(state.ScopedMode) &&
-		plan.ClusterLimits.Equal(state.ClusterLimits) &&
-		plan.NodeDownscaler.Equal(state.NodeDownscaler) &&
-		plan.UnschedulablePods.Equal(state.UnschedulablePods) {
+		equalNestedSections(plan.ClusterLimits, state.ClusterLimits) &&
+		equalNestedSections(plan.NodeDownscaler, state.NodeDownscaler) &&
+		equalNestedSections(plan.UnschedulablePods, state.UnschedulablePods) {
 		plan.Version = state.Version
 		resp.Diagnostics.Append(resp.Plan.Set(ctx, plan)...)
 	}
+}
+
+// equalNestedSections returns true when both slice-shaped sections are equal
+// in length and content. Used in ModifyPlan to compare typed nested structs
+// without dereferencing nil pointers (the typed model uses slices since the
+// schema uses ListNestedBlock). The inner fields are framework types
+// (types.Bool, types.Int64, etc.) and slices of nested structs, all of which
+// reflect.DeepEqual handles correctly.
+func equalNestedSections[T any](a, b []T) bool {
+	return reflect.DeepEqual(a, b)
 }
 
 // upsert pushes the plan to the API and returns the stored policies from
@@ -424,6 +486,8 @@ func (r *autoscalerPoliciesResource) readPolicies(ctx context.Context, clusterID
 }
 
 // policiesFromModel converts the Terraform plan model to the SDK policies payload.
+// Empty / nil section slices produce nil SDK pointers; defaulted inner fields
+// stay populated because the framework fills them at plan time.
 func policiesFromModel(m *autoscalerPoliciesModel) *cluster_autoscaler_v2.PoliciesV2 {
 	policies := &cluster_autoscaler_v2.PoliciesV2{}
 
@@ -435,9 +499,9 @@ func policiesFromModel(m *autoscalerPoliciesModel) *cluster_autoscaler_v2.Polici
 		policies.ScopedMode = lo.ToPtr(m.ScopedMode.ValueBool())
 	}
 
-	policies.ClusterLimits = clusterLimitsFromValue(m.ClusterLimits)
-	policies.NodeDownscaler = nodeDownscalerFromValue(m.NodeDownscaler)
-	policies.UnschedulablePods = unschedulablePodsFromValue(m.UnschedulablePods)
+	policies.ClusterLimits = clusterLimitsFromModel(m.ClusterLimits)
+	policies.NodeDownscaler = nodeDownscalerFromModel(m.NodeDownscaler)
+	policies.UnschedulablePods = unschedulablePodsFromModel(m.UnschedulablePods)
 
 	// Include version from plan for optimistic locking on updates.
 	if !m.Version.IsNull() && m.Version.ValueString() != "" {
@@ -447,197 +511,169 @@ func policiesFromModel(m *autoscalerPoliciesModel) *cluster_autoscaler_v2.Polici
 	return policies
 }
 
-func clusterLimitsFromValue(v types.List) *cluster_autoscaler_v2.ClusterLimitsPolicy {
-	if v.IsNull() || len(v.Elements()) == 0 {
+func clusterLimitsFromModel(s []clusterLimitsModel) *cluster_autoscaler_v2.ClusterLimitsPolicy {
+	if len(s) == 0 {
 		return nil
 	}
-
-	attrs := v.Elements()[0].(types.Object).Attributes()
+	m := s[0]
 	out := &cluster_autoscaler_v2.ClusterLimitsPolicy{}
 
-	if e, ok := attrs[FieldClusterLimitsEnabled].(types.Bool); ok && !e.IsNull() {
-		out.Enabled = lo.ToPtr(e.ValueBool())
+	if !m.Enabled.IsNull() {
+		out.Enabled = lo.ToPtr(m.Enabled.ValueBool())
 	}
-	if c, ok := attrs[FieldClusterLimitsCPU].(types.List); ok {
-		out.Cpu = cpuFromValue(c)
-	}
+	out.Cpu = cpuFromModel(m.Cpu)
 
 	return out
 }
 
-func cpuFromValue(v types.List) *cluster_autoscaler_v2.ClusterLimitsCpu {
-	if v.IsNull() || len(v.Elements()) == 0 {
+func cpuFromModel(s []cpuModel) *cluster_autoscaler_v2.ClusterLimitsCpu {
+	if len(s) == 0 {
 		return nil
 	}
-
-	attrs := v.Elements()[0].(types.Object).Attributes()
+	m := s[0]
 	cpu := &cluster_autoscaler_v2.ClusterLimitsCpu{}
 
-	if m, ok := attrs[FieldClusterLimitsCPUMaxCores].(types.Int64); ok && !m.IsNull() {
-		cpu.MaxCores = int32(m.ValueInt64())
+	if !m.MaxCores.IsNull() {
+		cpu.MaxCores = int32(m.MaxCores.ValueInt64())
 	}
-	if m, ok := attrs[FieldClusterLimitsCPUMinCores].(types.Int64); ok && !m.IsNull() {
-		cpu.MinCores = lo.ToPtr(int32(m.ValueInt64()))
+	if !m.MinCores.IsNull() {
+		cpu.MinCores = lo.ToPtr(int32(m.MinCores.ValueInt64()))
 	}
 
 	return cpu
 }
 
-func nodeDownscalerFromValue(v types.List) *cluster_autoscaler_v2.NodeDownscalerPolicy {
-	if v.IsNull() || len(v.Elements()) == 0 {
+func nodeDownscalerFromModel(s []nodeDownscalerModel) *cluster_autoscaler_v2.NodeDownscalerPolicy {
+	if len(s) == 0 {
 		return nil
 	}
-
-	attrs := v.Elements()[0].(types.Object).Attributes()
+	m := s[0]
 	out := &cluster_autoscaler_v2.NodeDownscalerPolicy{}
 
-	if d, ok := attrs[FieldNodeDownscalerEmptyNodesDelay].(types.String); ok && !d.IsNull() && d.ValueString() != "" {
-		out.EmptyNodesDelay = lo.ToPtr(d.ValueString())
+	if !m.EmptyNodesEnabled.IsNull() {
+		out.EmptyNodesEnabled = lo.ToPtr(m.EmptyNodesEnabled.ValueBool())
 	}
-	if e, ok := attrs[FieldNodeDownscalerEmptyNodesEnabled].(types.Bool); ok && !e.IsNull() {
-		out.EmptyNodesEnabled = lo.ToPtr(e.ValueBool())
+	if !m.EmptyNodesDelay.IsNull() && m.EmptyNodesDelay.ValueString() != "" {
+		out.EmptyNodesDelay = lo.ToPtr(m.EmptyNodesDelay.ValueString())
 	}
 
 	return out
 }
 
-func unschedulablePodsFromValue(v types.List) *cluster_autoscaler_v2.UnschedulablePodsPolicy {
-	if v.IsNull() || len(v.Elements()) == 0 {
+func unschedulablePodsFromModel(s []unschedulablePodsModel) *cluster_autoscaler_v2.UnschedulablePodsPolicy {
+	if len(s) == 0 {
 		return nil
 	}
-
-	attrs := v.Elements()[0].(types.Object).Attributes()
+	m := s[0]
 	out := &cluster_autoscaler_v2.UnschedulablePodsPolicy{}
 
-	if e, ok := attrs[FieldUnschedulablePodsEnabled].(types.Bool); ok && !e.IsNull() {
-		out.Enabled = lo.ToPtr(e.ValueBool())
+	if !m.Enabled.IsNull() {
+		out.Enabled = lo.ToPtr(m.Enabled.ValueBool())
 	}
-	if p, ok := attrs[FieldUnschedulablePodsPartialTemplateMatching].(types.Bool); ok && !p.IsNull() {
-		out.PartialTemplateMatchingEnabled = lo.ToPtr(p.ValueBool())
+	if !m.PartialTemplateMatchingEnabled.IsNull() {
+		out.PartialTemplateMatchingEnabled = lo.ToPtr(m.PartialTemplateMatchingEnabled.ValueBool())
 	}
-	if p, ok := attrs[FieldUnschedulablePodsPodPinner].(types.List); ok {
-		out.PodPinner = podPinnerFromValue(p)
-	}
+	out.PodPinner = podPinnerFromModel(m.PodPinner)
 
 	return out
 }
 
-func podPinnerFromValue(v types.List) *cluster_autoscaler_v2.PodPinner {
-	if v.IsNull() || len(v.Elements()) == 0 {
+func podPinnerFromModel(s []podPinnerModel) *cluster_autoscaler_v2.PodPinner {
+	if len(s) == 0 {
 		return nil
 	}
+	m := s[0]
+	out := &cluster_autoscaler_v2.PodPinner{}
 
-	attrs := v.Elements()[0].(types.Object).Attributes()
-	podPinner := &cluster_autoscaler_v2.PodPinner{}
-
-	if e, ok := attrs[FieldPodPinnerEnabled].(types.Bool); ok && !e.IsNull() {
-		podPinner.Enabled = lo.ToPtr(e.ValueBool())
+	if !m.Enabled.IsNull() {
+		out.Enabled = lo.ToPtr(m.Enabled.ValueBool())
 	}
 
-	return podPinner
+	return out
 }
 
 // policiesToModel converts the SDK policies response to the Terraform state
-// model. Fields the API omits flatten to null so a configuration that omits
-// them adopts the stored value.
+// model. Nil SDK pointers flatten to nil section slices, so a section the
+// configuration omits becomes absent and a section the API omits is dropped
+// from state — preserveSectionPresence carries prior sections over for the
+// latter case.
 func (r *autoscalerPoliciesResource) policiesToModel(clusterID string, policies *cluster_autoscaler_v2.PoliciesV2) autoscalerPoliciesModel {
 	return autoscalerPoliciesModel{
-		ID:         types.StringValue(clusterID),
-		ClusterID:  types.StringValue(clusterID),
-		Enabled:    boolPtrToValue(policies.Enabled),
-		ScopedMode: boolPtrToValue(policies.ScopedMode),
-		Version:    stringPtrToValue(policies.Version),
-
-		ClusterLimits:     clusterLimitsToValue(policies.ClusterLimits),
-		NodeDownscaler:    nodeDownscalerToValue(policies.NodeDownscaler),
-		UnschedulablePods: unschedulablePodsToValue(policies.UnschedulablePods),
+		ID:                types.StringValue(clusterID),
+		ClusterID:         types.StringValue(clusterID),
+		Enabled:           boolPtrToValue(policies.Enabled),
+		ScopedMode:        boolPtrToValue(policies.ScopedMode),
+		Version:           stringPtrToValue(policies.Version),
+		ClusterLimits:     clusterLimitsToModel(policies.ClusterLimits),
+		NodeDownscaler:    nodeDownscalerToModel(policies.NodeDownscaler),
+		UnschedulablePods: unschedulablePodsToModel(policies.UnschedulablePods),
 	}
 }
 
 // preserveSectionPresence carries sections the flatten did not produce over
-// from the prior model, so an apply never loses a declared section to a sparse
-// response. Sections are carried verbatim, never fabricated.
+// from the prior model, so an apply never loses a declared section to a
+// sparse response. Sections are carried verbatim, never fabricated.
 func (r *autoscalerPoliciesResource) preserveSectionPresence(state, prior autoscalerPoliciesModel) autoscalerPoliciesModel {
-	if state.ClusterLimits.IsNull() && !prior.ClusterLimits.IsNull() {
+	if len(state.ClusterLimits) == 0 && len(prior.ClusterLimits) > 0 {
 		state.ClusterLimits = prior.ClusterLimits
 	}
-	if state.NodeDownscaler.IsNull() && !prior.NodeDownscaler.IsNull() {
+	if len(state.NodeDownscaler) == 0 && len(prior.NodeDownscaler) > 0 {
 		state.NodeDownscaler = prior.NodeDownscaler
 	}
-	if state.UnschedulablePods.IsNull() && !prior.UnschedulablePods.IsNull() {
+	if len(state.UnschedulablePods) == 0 && len(prior.UnschedulablePods) > 0 {
 		state.UnschedulablePods = prior.UnschedulablePods
 	}
 	return state
 }
 
-func clusterLimitsToValue(in *cluster_autoscaler_v2.ClusterLimitsPolicy) types.List {
+func clusterLimitsToModel(in *cluster_autoscaler_v2.ClusterLimitsPolicy) []clusterLimitsModel {
 	if in == nil || (in.Enabled == nil && in.Cpu == nil) {
-		return types.ListNull(clusterLimitsType)
+		return nil
 	}
-
-	return objectListValue(clusterLimitsType, map[string]attr.Value{
-		FieldClusterLimitsEnabled: boolPtrToAttr(in.Enabled),
-		FieldClusterLimitsCPU:     cpuToValue(in.Cpu),
-	})
+	return []clusterLimitsModel{{
+		Enabled: boolPtrToAttr(in.Enabled),
+		Cpu:     cpuToModel(in.Cpu),
+	}}
 }
 
-func cpuToValue(in *cluster_autoscaler_v2.ClusterLimitsCpu) types.List {
+func cpuToModel(in *cluster_autoscaler_v2.ClusterLimitsCpu) []cpuModel {
 	if in == nil {
-		return types.ListNull(clusterLimitsCPUType)
+		return nil
 	}
-
-	min := types.Int64Null()
-	if in.MinCores != nil {
-		min = types.Int64Value(int64(*in.MinCores))
-	}
-
-	return objectListValue(clusterLimitsCPUType, map[string]attr.Value{
-		FieldClusterLimitsCPUMaxCores: types.Int64Value(int64(in.MaxCores)),
-		FieldClusterLimitsCPUMinCores: min,
-	})
+	return []cpuModel{{
+		MaxCores: types.Int64Value(int64(in.MaxCores)),
+		MinCores: int32PtrToInt64Value(in.MinCores),
+	}}
 }
 
-func nodeDownscalerToValue(in *cluster_autoscaler_v2.NodeDownscalerPolicy) types.List {
+func nodeDownscalerToModel(in *cluster_autoscaler_v2.NodeDownscalerPolicy) []nodeDownscalerModel {
 	if in == nil || (in.EmptyNodesDelay == nil && in.EmptyNodesEnabled == nil) {
-		return types.ListNull(nodeDownscalerType)
+		return nil
 	}
-
-	delay := types.StringNull()
-	if in.EmptyNodesDelay != nil {
-		delay = types.StringValue(*in.EmptyNodesDelay)
-	}
-
-	return objectListValue(nodeDownscalerType, map[string]attr.Value{
-		FieldNodeDownscalerEmptyNodesEnabled: boolPtrToAttr(in.EmptyNodesEnabled),
-		FieldNodeDownscalerEmptyNodesDelay:   delay,
-	})
+	return []nodeDownscalerModel{{
+		EmptyNodesEnabled: boolPtrToAttr(in.EmptyNodesEnabled),
+		EmptyNodesDelay:   stringPtrToAttr(in.EmptyNodesDelay),
+	}}
 }
 
-func unschedulablePodsToValue(in *cluster_autoscaler_v2.UnschedulablePodsPolicy) types.List {
+func unschedulablePodsToModel(in *cluster_autoscaler_v2.UnschedulablePodsPolicy) []unschedulablePodsModel {
 	if in == nil || (in.Enabled == nil && in.PartialTemplateMatchingEnabled == nil && in.PodPinner == nil) {
-		return types.ListNull(unschedulablePodsType)
+		return nil
 	}
-
-	return objectListValue(unschedulablePodsType, map[string]attr.Value{
-		FieldUnschedulablePodsEnabled:                 boolPtrToAttr(in.Enabled),
-		FieldUnschedulablePodsPartialTemplateMatching: boolPtrToAttr(in.PartialTemplateMatchingEnabled),
-		FieldUnschedulablePodsPodPinner:               podPinnerToValue(in.PodPinner),
-	})
+	return []unschedulablePodsModel{{
+		Enabled:                        boolPtrToAttr(in.Enabled),
+		PartialTemplateMatchingEnabled: boolPtrToAttr(in.PartialTemplateMatchingEnabled),
+		PodPinner:                      podPinnerToModel(in.PodPinner),
+	}}
 }
 
-func podPinnerToValue(in *cluster_autoscaler_v2.PodPinner) types.List {
-	if in == nil || in.Enabled == nil {
-		return types.ListNull(podPinnerType)
+func podPinnerToModel(in *cluster_autoscaler_v2.PodPinner) []podPinnerModel {
+	if in == nil {
+		return nil
 	}
-
-	return objectListValue(podPinnerType, map[string]attr.Value{
-		FieldPodPinnerEnabled: boolPtrToAttr(in.Enabled),
-	})
-}
-
-func objectListValue(objType types.ObjectType, attrs map[string]attr.Value) types.List {
-	obj := types.ObjectValueMust(objType.AttrTypes, attrs)
-	return types.ListValueMust(objType, []attr.Value{obj})
+	return []podPinnerModel{{
+		Enabled: boolPtrToAttr(in.Enabled),
+	}}
 }
 
 func boolPtrToAttr(b *bool) types.Bool {
@@ -654,9 +690,23 @@ func boolPtrToValue(b *bool) types.Bool {
 	return types.BoolValue(*b)
 }
 
+func stringPtrToAttr(s *string) types.String {
+	if s == nil {
+		return types.StringNull()
+	}
+	return types.StringValue(*s)
+}
+
 func stringPtrToValue(s *string) types.String {
 	if s == nil {
 		return types.StringValue("")
 	}
 	return types.StringValue(*s)
+}
+
+func int32PtrToInt64Value(v *int32) types.Int64 {
+	if v == nil {
+		return types.Int64Null()
+	}
+	return types.Int64Value(int64(*v))
 }
