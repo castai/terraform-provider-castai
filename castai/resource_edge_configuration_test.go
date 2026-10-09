@@ -299,6 +299,46 @@ func TestEdgeConfigurationResource_toNebiusConfiguration_Conversions(t *testing.
 				GpuCluster:      lo.ToPtr(""),
 			},
 		},
+		"filesystems populated only": {
+			plan: &nebiusConfigurationModel{
+				Filesystems: []filesysAttachmentModel{
+					{FilesystemID: types.StringValue("computefilesystem-xyz"), MountPath: types.StringValue("/mnt/one")},
+				},
+			},
+			expected: &omni.NebiusConfiguration{
+				ImageId:         lo.ToPtr(""),
+				BootDiskSizeGib: lo.ToPtr(int32(0)),
+				ReservationIds:  lo.ToPtr([]string{}),
+				GpuCluster:      lo.ToPtr(""),
+				Filesystems: &[]omni.FilesystemAttachment{
+					{FilesystemId: "computefilesystem-xyz", MountPath: "/mnt/one"},
+				},
+			},
+		},
+		"filesystems appended alongside other fields": {
+			plan: &nebiusConfigurationModel{
+				ImageID:         types.StringValue("nebius-image-123"),
+				BootDiskSizeGiB: types.Int64Value(100),
+				Labels:          labelsMap,
+				ReservationIDs:  reservationList,
+				GpuCluster:      types.StringValue("gpu-cluster-a"),
+				Filesystems: []filesysAttachmentModel{
+					{FilesystemID: types.StringValue("computefilesystem-aaa"), MountPath: types.StringValue("/mnt/data")},
+					{FilesystemID: types.StringValue("computefilesystem-bbb"), MountPath: types.StringValue("/mnt/cache")},
+				},
+			},
+			expected: &omni.NebiusConfiguration{
+				ImageId:         lo.ToPtr("nebius-image-123"),
+				BootDiskSizeGib: lo.ToPtr(int32(100)),
+				Labels:          &map[string]string{"env": "prod", "team": "platform"},
+				ReservationIds:  &[]string{"res-1", "res-2"},
+				GpuCluster:      lo.ToPtr("gpu-cluster-a"),
+				Filesystems: &[]omni.FilesystemAttachment{
+					{FilesystemId: "computefilesystem-aaa", MountPath: "/mnt/data"},
+					{FilesystemId: "computefilesystem-bbb", MountPath: "/mnt/cache"},
+				},
+			},
+		},
 		"labels with wrong element type produces diagnostics": {
 			plan: &nebiusConfigurationModel{
 				ImageID: types.StringValue("img"),
@@ -387,6 +427,25 @@ func TestEdgeConfigurationResource_toNebiusConfigurationModel(t *testing.T) {
 				Labels:          expectedLabels,
 				ReservationIDs:  expectedReservations,
 				GpuCluster:      types.StringValue("gpu-cluster-z"),
+			},
+		},
+		"filesystems populated produce attachment list": {
+			config: &omni.NebiusConfiguration{
+				Filesystems: &[]omni.FilesystemAttachment{
+					{FilesystemId: "computefilesystem-aaa", MountPath: "/mnt/data"},
+					{FilesystemId: "computefilesystem-bbb", MountPath: "/mnt/cache"},
+				},
+			},
+			expected: &nebiusConfigurationModel{
+				Labels:          types.MapNull(types.StringType),
+				ImageID:         types.StringNull(),
+				BootDiskSizeGiB: types.Int64Null(),
+				ReservationIDs:  types.ListNull(types.StringType),
+				GpuCluster:      types.StringNull(),
+				Filesystems: []filesysAttachmentModel{
+					{FilesystemID: types.StringValue("computefilesystem-aaa"), MountPath: types.StringValue("/mnt/data")},
+					{FilesystemID: types.StringValue("computefilesystem-bbb"), MountPath: types.StringValue("/mnt/cache")},
+				},
 			},
 		},
 		"empty string ImageId becomes null": {
