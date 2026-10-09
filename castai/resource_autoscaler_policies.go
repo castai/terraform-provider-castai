@@ -66,7 +66,7 @@ var (
 // autoscalerPoliciesResource implements the castai_autoscaler_policies resource
 // using the terraform-plugin-framework.
 //
-// Each policy section is a ListNestedAttribute with SizeAtMost(1), decoding to
+// Each policy section is a ListNestedBlock with SizeAtMost(1), decoding to
 // a slice on the typed model: nil slice means absent, a single-element slice
 // means declared. Per-field Default / Required / validators replace the
 // hand-written plan modifier and custom validators used in earlier versions.
@@ -157,12 +157,12 @@ func (r *autoscalerPoliciesResource) Schema(_ context.Context, _ resource.Schema
 				Computed:    true,
 				Description: "Policy version for optimistic locking.",
 			},
-			FieldAutoscalerPoliciesClusterLimits: schema.ListNestedAttribute{
-				Optional:    true,
-				Computed:    true,
+		},
+		Blocks: map[string]schema.Block{
+			FieldAutoscalerPoliciesClusterLimits: schema.ListNestedBlock{
 				Description: "Defines minimum and maximum amount of CPU the cluster can have. cluster_limits { enabled = true, cpu { max_cores = 100, min_cores = 1 } }.",
 				Validators:  []validator.List{listvalidator.SizeAtMost(1)},
-				NestedObject: schema.NestedAttributeObject{
+				NestedObject: schema.NestedBlockObject{
 					Attributes: map[string]schema.Attribute{
 						FieldClusterLimitsEnabled: schema.BoolAttribute{
 							Optional:    true,
@@ -170,11 +170,10 @@ func (r *autoscalerPoliciesResource) Schema(_ context.Context, _ resource.Schema
 							Default:     booldefault.StaticBool(false),
 							Description: "Enable/disable the cluster_limits policy.",
 						},
-						FieldClusterLimitsCPU: schema.ListNestedAttribute{
-							Required:    true,
-							Description: "Minimum and maximum amount of vCPUs the cluster may have.",
-							Validators:  []validator.List{listvalidator.SizeAtMost(1)},
-							NestedObject: schema.NestedAttributeObject{
+					},
+					Blocks: map[string]schema.Block{
+						FieldClusterLimitsCPU: schema.ListNestedBlock{
+							NestedObject: schema.NestedBlockObject{
 								Attributes: map[string]schema.Attribute{
 									FieldClusterLimitsCPUMaxCores: schema.Int64Attribute{
 										Required:    true,
@@ -193,12 +192,10 @@ func (r *autoscalerPoliciesResource) Schema(_ context.Context, _ resource.Schema
 					},
 				},
 			},
-			FieldAutoscalerPoliciesNodeDownscaler: schema.ListNestedAttribute{
-				Optional:    true,
-				Computed:    true,
+			FieldAutoscalerPoliciesNodeDownscaler: schema.ListNestedBlock{
 				Description: "Node Downscaler defines policies for removing nodes based on the configured conditions. node_downscaler { empty_nodes_enabled = true, empty_nodes_delay = \"5m\" }.",
 				Validators:  []validator.List{listvalidator.SizeAtMost(1)},
-				NestedObject: schema.NestedAttributeObject{
+				NestedObject: schema.NestedBlockObject{
 					Attributes: map[string]schema.Attribute{
 						FieldNodeDownscalerEmptyNodesEnabled: schema.BoolAttribute{
 							Required:    true,
@@ -211,12 +208,10 @@ func (r *autoscalerPoliciesResource) Schema(_ context.Context, _ resource.Schema
 					},
 				},
 			},
-			FieldAutoscalerPoliciesUnschedulablePods: schema.ListNestedAttribute{
-				Optional:    true,
-				Computed:    true,
+			FieldAutoscalerPoliciesUnschedulablePods: schema.ListNestedBlock{
 				Description: "Policy defining autoscaler's behavior when unschedulable pods were detected. unschedulable_pods { enabled = true, partial_template_matching_enabled = false, pod_pinner { enabled = true } }.",
 				Validators:  []validator.List{listvalidator.SizeAtMost(1)},
-				NestedObject: schema.NestedAttributeObject{
+				NestedObject: schema.NestedBlockObject{
 					Attributes: map[string]schema.Attribute{
 						FieldUnschedulablePodsEnabled: schema.BoolAttribute{
 							Optional:    true,
@@ -230,12 +225,12 @@ func (r *autoscalerPoliciesResource) Schema(_ context.Context, _ resource.Schema
 							Default:     booldefault.StaticBool(false),
 							Description: "Use partial template matching when deciding which custom node template to select.",
 						},
-						FieldUnschedulablePodsPodPinner: schema.ListNestedAttribute{
-							Optional:    true,
-							Computed:    true,
+					},
+					Blocks: map[string]schema.Block{
+						FieldUnschedulablePodsPodPinner: schema.ListNestedBlock{
 							Description: "Pod Pinner component settings.",
 							Validators:  []validator.List{listvalidator.SizeAtMost(1)},
-							NestedObject: schema.NestedAttributeObject{
+							NestedObject: schema.NestedBlockObject{
 								Attributes: map[string]schema.Attribute{
 									FieldPodPinnerEnabled: schema.BoolAttribute{
 										Optional:    true,
@@ -405,7 +400,7 @@ func (r *autoscalerPoliciesResource) ModifyPlan(ctx context.Context, req resourc
 // equalNestedSections returns true when both slice-shaped sections are equal
 // in length and content. Used in ModifyPlan to compare typed nested structs
 // without dereferencing nil pointers (the typed model uses slices since the
-// schema uses ListNestedAttribute). The inner fields are framework types
+// schema uses ListNestedBlock). The inner fields are framework types
 // (types.Bool, types.Int64, etc.) and slices of nested structs, all of which
 // reflect.DeepEqual handles correctly.
 func equalNestedSections[T any](a, b []T) bool {
