@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"regexp"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/resourcevalidator"
@@ -72,11 +73,17 @@ type ociConfigurationModel struct {
 }
 
 type nebiusConfigurationModel struct {
-	Labels          types.Map    `tfsdk:"labels"`
-	ImageID         types.String `tfsdk:"image_id"`
-	BootDiskSizeGiB types.Int64  `tfsdk:"boot_disk_size_gib"`
-	ReservationIDs  types.List   `tfsdk:"reservation_ids"`
-	GpuCluster      types.String `tfsdk:"gpu_cluster"`
+	Labels          types.Map                `tfsdk:"labels"`
+	ImageID         types.String             `tfsdk:"image_id"`
+	BootDiskSizeGiB types.Int64              `tfsdk:"boot_disk_size_gib"`
+	ReservationIDs  types.List               `tfsdk:"reservation_ids"`
+	GpuCluster      types.String             `tfsdk:"gpu_cluster"`
+	Filesystems     []filesysAttachmentModel `tfsdk:"filesystems"`
+}
+
+type filesysAttachmentModel struct {
+	FilesystemID types.String `tfsdk:"filesystem_id"`
+	MountPath    types.String `tfsdk:"mount_path"`
 }
 
 type customConfigurationModel struct {
@@ -241,6 +248,31 @@ func (r *edgeConfigurationResource) Schema(_ context.Context, _ resource.SchemaR
 					"gpu_cluster": schema.StringAttribute{
 						Optional:    true,
 						Description: "GPU cluster info",
+					},
+					"filesystems": schema.ListNestedAttribute{
+						Optional:    true,
+						Description: "Shared filesystems to attach to each VM created from this configuration",
+						NestedObject: schema.NestedAttributeObject{
+							Attributes: map[string]schema.Attribute{
+								"filesystem_id": schema.StringAttribute{
+									Required:    true,
+									Description: "ID of an existing Nebius shared filesystem. Example: computefilesystem-e00yt3n68egnzr50nz",
+									Validators: []validator.String{
+										stringvalidator.LengthAtLeast(1),
+									},
+								},
+								"mount_path": schema.StringAttribute{
+									Required:    true,
+									Description: "Mount path inside the VM. Must be an absolute path (start with `/`).",
+									Validators: []validator.String{
+										stringvalidator.RegexMatches(
+											regexp.MustCompile(`^/`),
+											"must be an absolute path starting with `/`",
+										),
+									},
+								},
+							},
+						},
 					},
 				},
 			},
@@ -902,6 +934,17 @@ func (r *edgeConfigurationResource) toNebiusConfiguration(ctx context.Context, p
 		config.GpuCluster = lo.ToPtr(plan.GpuCluster.ValueString())
 	}
 
+	if len(plan.Filesystems) > 0 {
+		filesystems := make([]omni.FilesystemAttachment, 0, len(plan.Filesystems))
+		for _, fs := range plan.Filesystems {
+			filesystems = append(filesystems, omni.FilesystemAttachment{
+				FilesystemId: fs.FilesystemID.ValueString(),
+				MountPath:    fs.MountPath.ValueString(),
+			})
+		}
+		config.Filesystems = &filesystems
+	}
+
 	return config, diags
 }
 
@@ -946,6 +989,17 @@ func (r *edgeConfigurationResource) toNebiusConfigurationModel(ctx context.Conte
 
 	if config.GpuCluster != nil && *config.GpuCluster != "" {
 		model.GpuCluster = types.StringValue(*config.GpuCluster)
+	}
+
+	if config.Filesystems != nil && len(*config.Filesystems) > 0 {
+		filesystems := make([]filesysAttachmentModel, 0, len(*config.Filesystems))
+		for _, fs := range *config.Filesystems {
+			filesystems = append(filesystems, filesysAttachmentModel{
+				FilesystemID: types.StringValue(fs.FilesystemId),
+				MountPath:    types.StringValue(fs.MountPath),
+			})
+		}
+		model.Filesystems = filesystems
 	}
 
 	return model, diags

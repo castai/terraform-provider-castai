@@ -80,10 +80,20 @@ Optional:
 Optional:
 
 - `boot_disk_size_gib` (Number) Boot disk size in GiB
+- `filesystems` (Attributes List) Shared filesystems to attach to each VM created from this configuration (see [below for nested schema](#nestedatt--nebius--filesystems))
 - `gpu_cluster` (String) GPU cluster info
 - `image_id` (String) ImageID to be used for edge creation. It can be an image ID or a name filter
 - `labels` (Map of String) Instance/VM labels
 - `reservation_ids` (List of String) Capacity block reservation IDs
+
+<a id="nestedatt--nebius--filesystems"></a>
+### Nested Schema for `nebius.filesystems`
+
+Required:
+
+- `filesystem_id` (String) ID of an existing Nebius shared filesystem. Example: computefilesystem-e00yt3n68egnzr50nz
+- `mount_path` (String) Mount path inside the VM. Must be an absolute path (start with `/`).
+
 
 
 <a id="nestedatt--oci"></a>
