@@ -339,7 +339,16 @@ func TestResourceAutoscalerPolicies_Read(t *testing.T) {
 	require.New(t).False(diags.HasError())
 	require.True(t, found)
 
-	state := r.policiesToModel(clusterID, policies)
+	prior := autoscalerPoliciesModel{
+		ID:                types.StringValue(clusterID),
+		ClusterID:         types.StringValue(clusterID),
+		Enabled:           types.BoolValue(true),
+		ScopedMode:        types.BoolValue(true),
+		ClusterLimits:     testClusterLimits(true, 100, 50), // declared with placeholder values
+		NodeDownscaler:    testNodeDownscaler(true, "placeholder"),
+		UnschedulablePods: testUnschedulablePods(true, true, true),
+	}
+	state := refreshedState(clusterID, policies, prior)
 	require.Equal(t, clusterID, state.ID.ValueString())
 	require.Equal(t, clusterID, state.ClusterID.ValueString())
 	require.True(t, state.Enabled.ValueBool())
@@ -446,27 +455,38 @@ func TestResourceAutoscalerPolicies_Read_MissingClusterID(t *testing.T) {
 func TestResourceAutoscalerPolicies_Read_UnschedulablePodsPartialMatchingOmitted(t *testing.T) {
 	t.Parallel()
 
-	r := newAutoscalerPoliciesResourceWithMock(nil)
-
+	// Server returns unschedulable_pods with only `enabled` set; the prior
+	// state declared the section but left `partial_template_matching_enabled`
+	// and `pod_pinner` unset. The refresh filters per-field, so the unset
+	// fields stay at their declared null values (which the framework then
+	// plans as the schema default on the next apply).
 	policies := &cluster_autoscaler_v2.PoliciesV2{
 		UnschedulablePods: &cluster_autoscaler_v2.UnschedulablePodsPolicy{
 			Enabled: lo.ToPtr(true),
 		},
 	}
+	prior := autoscalerPoliciesModel{
+		ID: types.StringValue(autoscalerPoliciesTestClusterID),
+		UnschedulablePods: []unschedulablePodsModel{{
+			Enabled:                        types.BoolValue(true),
+			PartialTemplateMatchingEnabled: types.BoolNull(),
+			PodPinner:                      nil, // omitted in prior — should not appear
+		}},
+	}
 
-	state := r.policiesToModel(autoscalerPoliciesTestClusterID, policies)
+	state := refreshedState(autoscalerPoliciesTestClusterID, policies, prior)
 
 	require.Len(t, state.UnschedulablePods, 1)
 	require.True(t, state.UnschedulablePods[0].Enabled.ValueBool())
 	// API omitted the field: state stays null so an omitted configuration
 	// adopts the stored value without drift.
 	require.True(t, state.UnschedulablePods[0].PartialTemplateMatchingEnabled.IsNull())
+	// pod_pinner was not in the prior either: should stay absent.
+	require.Empty(t, state.UnschedulablePods[0].PodPinner)
 }
 
 func TestResourceAutoscalerPolicies_Read_MaterializedDefaults(t *testing.T) {
 	t.Parallel()
-
-	r := newAutoscalerPoliciesResourceWithMock(nil)
 
 	policies := &cluster_autoscaler_v2.PoliciesV2{
 		Enabled:    lo.ToPtr(true),
@@ -489,8 +509,16 @@ func TestResourceAutoscalerPolicies_Read_MaterializedDefaults(t *testing.T) {
 			PodPinner:                      &cluster_autoscaler_v2.PodPinner{Enabled: lo.ToPtr(false)},
 		},
 	}
+	prior := autoscalerPoliciesModel{
+		ID: types.StringValue(autoscalerPoliciesTestClusterID),
+		// Declare every section so the refresh adopts the response values
+		// for the fields the user is managing.
+		ClusterLimits:     testClusterLimits(true, 0, 0),
+		NodeDownscaler:    testNodeDownscaler(true, ""),
+		UnschedulablePods: testUnschedulablePods(true, true, true),
+	}
 
-	state := r.policiesToModel(autoscalerPoliciesTestClusterID, policies)
+	state := refreshedState(autoscalerPoliciesTestClusterID, policies, prior)
 
 	require.True(t, state.Enabled.ValueBool())
 
@@ -636,9 +664,10 @@ func TestResourceAutoscalerPolicies_policiesFromModel_SectionWithNullFields(t *t
 	r.Nil(policies.NodeDownscaler.EmptyNodesDelay)
 }
 
-// TestResourceAutoscalerPolicies_policiesToModel_ObservedAPIResponse pins the
-// flatten against a payload observed from the V2 policies endpoint.
-func TestResourceAutoscalerPolicies_policiesToModel_ObservedAPIResponse(t *testing.T) {
+// TestResourceAutoscalerPolicies_refreshedState_ObservedAPIResponse pins the
+// refresh against a payload observed from the V2 policies endpoint. Prior
+// state declares every section so the refresh adopts the response values.
+func TestResourceAutoscalerPolicies_refreshedState_ObservedAPIResponse(t *testing.T) {
 	t.Parallel()
 
 	// Payload captured from GET /cluster-autoscaler/v2/clusters/{id}/policies.
@@ -647,8 +676,13 @@ func TestResourceAutoscalerPolicies_policiesToModel_ObservedAPIResponse(t *testi
 	var policies cluster_autoscaler_v2.PoliciesV2
 	require.NoError(t, json.Unmarshal([]byte(body), &policies))
 
-	r := newAutoscalerPoliciesResourceWithMock(nil)
-	state := r.policiesToModel(autoscalerPoliciesTestClusterID, &policies)
+	prior := autoscalerPoliciesModel{
+		ID:                types.StringValue(autoscalerPoliciesTestClusterID),
+		ClusterLimits:     testClusterLimits(true, 0, 0),
+		NodeDownscaler:    testNodeDownscaler(true, ""),
+		UnschedulablePods: testUnschedulablePods(true, true, true),
+	}
+	state := refreshedState(autoscalerPoliciesTestClusterID, &policies, prior)
 
 	require.True(t, state.Enabled.ValueBool())
 	require.False(t, state.ScopedMode.ValueBool())
@@ -669,61 +703,6 @@ func TestResourceAutoscalerPolicies_policiesToModel_ObservedAPIResponse(t *testi
 	require.False(t, state.UnschedulablePods[0].PartialTemplateMatchingEnabled.ValueBool())
 	require.Len(t, state.UnschedulablePods[0].PodPinner, 1)
 	require.False(t, state.UnschedulablePods[0].PodPinner[0].Enabled.ValueBool())
-}
-
-// TestResourceAutoscalerPolicies_SchemaPinsDefaults asserts the schema's
-// per-field Default values resolve correctly for an empty input: the framework
-// applies Defaults during plan computation, so a plan that declares the
-// section without inner fields populates the inner fields with their declared
-// defaults. This guards against CSU-6199-style regressions — a server-side
-// default change must surface here rather than as an "inconsistent result
-// after apply" in production.
-func TestResourceAutoscalerPolicies_SchemaPinsDefaults(t *testing.T) {
-	t.Parallel()
-
-	r := newAutoscalerPoliciesResourceWithMock(nil)
-	schemaResp := autoscalerPoliciesTestSchema(t, r)
-
-	t.Run("cluster_limits defaults", func(t *testing.T) {
-		plan := autoscalerPoliciesModel{
-			ID:            types.StringValue(autoscalerPoliciesTestClusterID),
-			ClusterID:     types.StringValue(autoscalerPoliciesTestClusterID),
-			Enabled:       types.BoolValue(true),
-			Version:       types.StringUnknown(),
-			ClusterLimits: []clusterLimitsModel{{Enabled: types.BoolValue(true), Cpu: []cpuModel{{MaxCores: types.Int64Value(16), MinCores: types.Int64Null()}}}},
-		}
-
-		planRaw := autoscalerPoliciesPlanValue(t, schemaResp, plan)
-
-		var decoded autoscalerPoliciesModel
-		diags := tfsdk.Plan{Raw: planRaw, Schema: schemaResp.Schema}.Get(context.Background(), &decoded)
-		require.False(t, diags.HasError(), "plan decode diagnostics: %v", diags)
-
-		require.Len(t, decoded.ClusterLimits, 1)
-		require.Len(t, decoded.ClusterLimits[0].Cpu, 1)
-		require.Equal(t, int64(0), decoded.ClusterLimits[0].Cpu[0].MinCores.ValueInt64())
-	})
-
-	t.Run("unschedulable_pods defaults", func(t *testing.T) {
-		plan := autoscalerPoliciesModel{
-			ID:                types.StringValue(autoscalerPoliciesTestClusterID),
-			ClusterID:         types.StringValue(autoscalerPoliciesTestClusterID),
-			Enabled:           types.BoolValue(true),
-			Version:           types.StringUnknown(),
-			UnschedulablePods: []unschedulablePodsModel{{Enabled: types.BoolValue(true), PartialTemplateMatchingEnabled: types.BoolNull(), PodPinner: []podPinnerModel{{Enabled: types.BoolNull()}}}},
-		}
-
-		planRaw := autoscalerPoliciesPlanValue(t, schemaResp, plan)
-
-		var decoded autoscalerPoliciesModel
-		diags := tfsdk.Plan{Raw: planRaw, Schema: schemaResp.Schema}.Get(context.Background(), &decoded)
-		require.False(t, diags.HasError(), "plan decode diagnostics: %v", diags)
-
-		require.Len(t, decoded.UnschedulablePods, 1)
-		require.False(t, decoded.UnschedulablePods[0].PartialTemplateMatchingEnabled.ValueBool())
-		require.Len(t, decoded.UnschedulablePods[0].PodPinner, 1)
-		require.False(t, decoded.UnschedulablePods[0].PodPinner[0].Enabled.ValueBool())
-	})
 }
 
 // TestResourceAutoscalerPolicies_ModifyPlan_SettlesVersionWhenConverged: when
@@ -933,46 +912,194 @@ func TestResourceAutoscalerPolicies_PreservesBlocksMissingFromResponse(t *testin
 	})
 }
 
-// TestResourceAutoscalerPolicies_preserveSectionPresence covers the helper.
-func TestResourceAutoscalerPolicies_preserveSectionPresence(t *testing.T) {
+// TestResourceAutoscalerPolicies_stateFromResponse pins the post-apply
+// state shape: sections come from the plan verbatim (Terraform core enforces
+// plan block count == apply result block count), computed attributes come
+// from the server response.
+func TestResourceAutoscalerPolicies_stateFromResponse(t *testing.T) {
 	t.Parallel()
 
-	r := newAutoscalerPoliciesResourceWithMock(nil)
+	t.Run("sections mirror the plan verbatim", func(t *testing.T) {
+		plan := autoscalerPoliciesModel{
+			Enabled:           types.BoolValue(true),
+			ScopedMode:        types.BoolValue(false),
+			ClusterLimits:     testClusterLimits(true, 100, 0),
+			NodeDownscaler:    testNodeDownscaler(true, "120s"),
+			UnschedulablePods: testUnschedulablePods(true, false, false),
+		}
+		response := testAutoscalerPoliciesV2()
 
-	prior := autoscalerPoliciesModel{
-		ClusterLimits:     testClusterLimits(true, 20, 2),
-		NodeDownscaler:    testNodeDownscaler(true, "5m"),
-		UnschedulablePods: testUnschedulablePods(true, true, true),
-	}
+		got := stateFromResponse(autoscalerPoliciesTestClusterID, response, plan)
 
-	t.Run("preserves omitted sections verbatim from prior", func(t *testing.T) {
-		state := r.preserveSectionPresence(autoscalerPoliciesModel{}, prior)
-
-		require.Equal(t, prior.ClusterLimits, state.ClusterLimits)
-		require.Equal(t, prior.NodeDownscaler, state.NodeDownscaler)
-		require.Equal(t, prior.UnschedulablePods, state.UnschedulablePods)
+		require.Equal(t, plan.ClusterLimits, got.ClusterLimits)
+		require.Equal(t, plan.NodeDownscaler, got.NodeDownscaler)
+		require.Equal(t, plan.UnschedulablePods, got.UnschedulablePods)
+		// Computed attributes come from the response.
+		require.Equal(t, autoscalerPoliciesTestClusterID, got.ID.ValueString())
+		require.Equal(t, autoscalerPoliciesTestClusterID, got.ClusterID.ValueString())
+		require.Equal(t, "v5", got.Version.ValueString())
+		require.True(t, got.Enabled.ValueBool())
 	})
 
-	t.Run("keeps sections already present in state", func(t *testing.T) {
-		fromAPI := autoscalerPoliciesModel{
-			ClusterLimits: []clusterLimitsModel{{Enabled: types.BoolValue(false), Cpu: nil}},
+	t.Run("omitted sections stay absent regardless of response", func(t *testing.T) {
+		plan := autoscalerPoliciesModel{Enabled: types.BoolValue(true)}
+		response := testAutoscalerPoliciesV2() // server materializes every section
+
+		got := stateFromResponse(autoscalerPoliciesTestClusterID, response, plan)
+
+		require.Empty(t, got.ClusterLimits)
+		require.Empty(t, got.NodeDownscaler)
+		require.Empty(t, got.UnschedulablePods)
+	})
+}
+
+// TestResourceAutoscalerPolicies_refreshedState pins the post-Read state
+// shape: the always-materialized server response is filtered against the
+// prior state's declared shape so server defaults don't leak in for
+// unmanaged sections.
+func TestResourceAutoscalerPolicies_refreshedState(t *testing.T) {
+	t.Parallel()
+
+	t.Run("undeclared sections are dropped from the materialized response", func(t *testing.T) {
+		prior := autoscalerPoliciesModel{
+			Enabled: types.BoolValue(true),
+		}
+		response := testAutoscalerPoliciesV2() // materializes all three
+
+		got := refreshedState(autoscalerPoliciesTestClusterID, response, prior)
+
+		require.Empty(t, got.ClusterLimits)
+		require.Empty(t, got.NodeDownscaler)
+		require.Empty(t, got.UnschedulablePods)
+	})
+
+	t.Run("declared section adopts response values", func(t *testing.T) {
+		prior := autoscalerPoliciesModel{
+			ClusterLimits: testClusterLimits(true, 100, 5), // declared with min_cores=5
+		}
+		// Server responds with min_cores=10, simulating server-side drift.
+		response := &cluster_autoscaler_v2.PoliciesV2{
+			Version: lo.ToPtr("v5"),
+			ClusterLimits: &cluster_autoscaler_v2.ClusterLimitsPolicy{
+				Enabled: lo.ToPtr(true),
+				Cpu: &cluster_autoscaler_v2.ClusterLimitsCpu{
+					MaxCores: 100,
+					MinCores: lo.ToPtr(int32(10)),
+				},
+			},
 		}
 
-		state := r.preserveSectionPresence(fromAPI, prior)
+		got := refreshedState(autoscalerPoliciesTestClusterID, response, prior)
 
-		// The section the API returned wins; only omitted ones are carried over.
-		require.Equal(t, fromAPI.ClusterLimits, state.ClusterLimits)
-		require.Equal(t, prior.NodeDownscaler, state.NodeDownscaler)
-		require.Equal(t, prior.UnschedulablePods, state.UnschedulablePods)
+		require.Len(t, got.ClusterLimits, 1)
+		require.Equal(t, int64(10), got.ClusterLimits[0].Cpu[0].MinCores.ValueInt64())
+		require.Empty(t, got.NodeDownscaler)
+		require.Empty(t, got.UnschedulablePods)
 	})
 
-	t.Run("does not add sections absent from prior", func(t *testing.T) {
-		state := r.preserveSectionPresence(autoscalerPoliciesModel{}, autoscalerPoliciesModel{})
+	t.Run("sparse response: declared section missing from response carries over", func(t *testing.T) {
+		prior := autoscalerPoliciesModel{
+			ClusterLimits: testClusterLimits(true, 100, 5),
+		}
+		// Server returns only a non-section field.
+		response := &cluster_autoscaler_v2.PoliciesV2{
+			Version: lo.ToPtr("v5"),
+		}
 
-		require.Empty(t, state.ClusterLimits)
-		require.Empty(t, state.NodeDownscaler)
-		require.Empty(t, state.UnschedulablePods)
+		got := refreshedState(autoscalerPoliciesTestClusterID, response, prior)
+
+		require.Len(t, got.ClusterLimits, 1)
+		require.Equal(t, prior.ClusterLimits, got.ClusterLimits)
 	})
+
+	t.Run("nested pod_pinner declared, omitted in response: carries over verbatim", func(t *testing.T) {
+		prior := autoscalerPoliciesModel{
+			UnschedulablePods: testUnschedulablePods(true, true, true),
+		}
+		// Server returns the section but omits pod_pinner.
+		response := &cluster_autoscaler_v2.PoliciesV2{
+			Version: lo.ToPtr("v5"),
+			UnschedulablePods: &cluster_autoscaler_v2.UnschedulablePodsPolicy{
+				Enabled:                        lo.ToPtr(true),
+				PartialTemplateMatchingEnabled: lo.ToPtr(true),
+				// PodPinner intentionally absent.
+			},
+		}
+
+		got := refreshedState(autoscalerPoliciesTestClusterID, response, prior)
+
+		require.Len(t, got.UnschedulablePods, 1)
+		require.Len(t, got.UnschedulablePods[0].PodPinner, 1)
+		require.Equal(t, prior.UnschedulablePods[0].PodPinner, got.UnschedulablePods[0].PodPinner)
+	})
+
+	t.Run("import state: id-only prior adopts the full response", func(t *testing.T) {
+		prior := autoscalerPoliciesModel{
+			ID: types.StringValue(autoscalerPoliciesTestClusterID),
+			// ClusterID, sections: all absent (the post-import shape).
+		}
+		response := testAutoscalerPoliciesV2()
+
+		got := refreshedState(autoscalerPoliciesTestClusterID, response, prior)
+
+		require.Equal(t, autoscalerPoliciesTestClusterID, got.ID.ValueString())
+		require.Equal(t, autoscalerPoliciesTestClusterID, got.ClusterID.ValueString())
+		require.Len(t, got.ClusterLimits, 1)
+		require.Len(t, got.NodeDownscaler, 1)
+		require.Len(t, got.UnschedulablePods, 1)
+	})
+}
+
+// TestResourceAutoscalerPolicies_Read_AfterImport covers the documented
+// import-then-plan flow: state has only id (cluster id passthrough), and the
+// first Read adopts the server's materialized response so the user can run
+// `terraform plan` and see a stable diff against their config.
+func TestResourceAutoscalerPolicies_Read_AfterImport(t *testing.T) {
+	t.Parallel()
+
+	clusterID := autoscalerPoliciesTestClusterID
+
+	mockClient := mock_cluster_autoscaler_v2.NewMockClientWithResponsesInterface(t)
+	mockClient.EXPECT().
+		PoliciesV2APIGetClusterPoliciesWithResponse(mock.Anything, clusterID).
+		Return(&cluster_autoscaler_v2.PoliciesV2APIGetClusterPoliciesResponse{
+			HTTPResponse: okHTTPResponse(),
+			JSON200:      testAutoscalerPoliciesV2(),
+		}, nil)
+
+	r := newAutoscalerPoliciesResourceWithMock(mockClient)
+	schemaResp := autoscalerPoliciesTestSchema(t, r)
+
+	// Post-ImportStatePassthroughID: id is set, everything else is null/empty.
+	importedState := autoscalerPoliciesModel{
+		ID: types.StringValue(clusterID),
+	}
+
+	req := resource.ReadRequest{
+		State: tfsdk.State{
+			Raw:    autoscalerPoliciesPlanValue(t, schemaResp, importedState),
+			Schema: schemaResp.Schema,
+		},
+	}
+	resp := resource.ReadResponse{
+		State: tfsdk.State{
+			Raw:    autoscalerPoliciesNullValue(t, schemaResp),
+			Schema: schemaResp.Schema,
+		},
+	}
+
+	r.Read(context.Background(), req, &resp)
+
+	require.False(t, resp.Diagnostics.HasError(), "read diagnostics: %v", resp.Diagnostics)
+
+	var state autoscalerPoliciesModel
+	stateDiags := resp.State.Get(context.Background(), &state)
+	require.False(t, stateDiags.HasError(), "state decode diagnostics: %v", stateDiags)
+	require.Equal(t, clusterID, state.ID.ValueString())
+	require.Equal(t, clusterID, state.ClusterID.ValueString())
+	require.Len(t, state.ClusterLimits, 1)
+	require.Len(t, state.NodeDownscaler, 1)
+	require.Len(t, state.UnschedulablePods, 1)
 }
 
 // autoscalerPoliciesAccSettings holds the knobs for the V2 policies acceptance
