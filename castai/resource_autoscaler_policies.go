@@ -173,6 +173,7 @@ func (r *autoscalerPoliciesResource) Schema(_ context.Context, _ resource.Schema
 					},
 					Blocks: map[string]schema.Block{
 						FieldClusterLimitsCPU: schema.ListNestedBlock{
+							Validators: []validator.List{listvalidator.SizeAtMost(1)},
 							NestedObject: schema.NestedBlockObject{
 								Attributes: map[string]schema.Attribute{
 									FieldClusterLimitsCPUMaxCores: schema.Int64Attribute{
@@ -280,22 +281,24 @@ func (r *autoscalerPoliciesResource) Create(ctx context.Context, req resource.Cr
 		return
 	}
 
-	state := r.preserveSectionPresence(r.policiesToModel(clusterID, policies), plan)
+	// Plan must mirror state for sections (core rejects mismatched block
+	// counts); computed attributes come from the server response.
+	state := stateFromResponse(clusterID, policies, plan)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
 }
 
 func (r *autoscalerPoliciesResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var state autoscalerPoliciesModel
-	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
+	var prior autoscalerPoliciesModel
+	resp.Diagnostics.Append(req.State.Get(ctx, &prior)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
 	// Fall back to the resource id (import passthrough) when cluster_id is not
 	// yet in state; the id equals the cluster id.
-	clusterID := state.ClusterID.ValueString()
+	clusterID := prior.ClusterID.ValueString()
 	if clusterID == "" {
-		clusterID = state.ID.ValueString()
+		clusterID = prior.ID.ValueString()
 	}
 	if clusterID == "" {
 		resp.Diagnostics.AddError(
@@ -318,8 +321,10 @@ func (r *autoscalerPoliciesResource) Read(ctx context.Context, req resource.Read
 		return
 	}
 
-	prior := state
-	state = r.preserveSectionPresence(r.policiesToModel(clusterID, policies), prior)
+	// Filter the always-materialized response against the prior state's
+	// declared shape so server-defaulted values don't leak into state and
+	// server drift on managed fields stays visible.
+	state := refreshedState(clusterID, policies, prior)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
 }
 
@@ -351,7 +356,7 @@ func (r *autoscalerPoliciesResource) Update(ctx context.Context, req resource.Up
 		return
 	}
 
-	newState := r.preserveSectionPresence(r.policiesToModel(clusterID, policies), plan)
+	newState := stateFromResponse(clusterID, policies, plan)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &newState)...)
 }
 
@@ -593,50 +598,110 @@ func podPinnerFromModel(s []podPinnerModel) *cluster_autoscaler_v2.PodPinner {
 }
 
 // policiesToModel converts the SDK policies response to the Terraform state
-// model. Nil SDK pointers flatten to nil section slices, so a section the
-// configuration omits becomes absent and a section the API omits is dropped
-// from state — preserveSectionPresence carries prior sections over for the
-// latter case.
+// model used by tests that don't exercise the plan-aware helpers below.
+// Production code paths use stateFromResponse (post-apply) and refreshedState
+// (post-Read) instead.
 func (r *autoscalerPoliciesResource) policiesToModel(clusterID string, policies *cluster_autoscaler_v2.PoliciesV2) autoscalerPoliciesModel {
+	return stateFromResponse(clusterID, policies, autoscalerPoliciesModel{
+		ID:        types.StringValue(clusterID),
+		ClusterID: types.StringValue(clusterID),
+	})
+}
+
+// stateFromResponse produces post-apply state. Computed attributes come from
+// the server response; sections are taken verbatim from the plan because
+// Terraform core enforces plan block count == apply result block count.
+// Sections the plan omitted stay absent in state, so the server's
+// always-materialized response does not leak unmanaged values into state.
+func stateFromResponse(clusterID string, policies *cluster_autoscaler_v2.PoliciesV2, plan autoscalerPoliciesModel) autoscalerPoliciesModel {
 	return autoscalerPoliciesModel{
 		ID:                types.StringValue(clusterID),
 		ClusterID:         types.StringValue(clusterID),
 		Enabled:           boolPtrToValue(policies.Enabled),
 		ScopedMode:        boolPtrToValue(policies.ScopedMode),
 		Version:           stringPtrToValue(policies.Version),
-		ClusterLimits:     clusterLimitsToModel(policies.ClusterLimits),
-		NodeDownscaler:    nodeDownscalerToModel(policies.NodeDownscaler),
-		UnschedulablePods: unschedulablePodsToModel(policies.UnschedulablePods),
+		ClusterLimits:     plan.ClusterLimits,
+		NodeDownscaler:    plan.NodeDownscaler,
+		UnschedulablePods: plan.UnschedulablePods,
 	}
 }
 
-// preserveSectionPresence carries sections the flatten did not produce over
-// from the prior model, so an apply never loses a declared section to a
-// sparse response. Sections are carried verbatim, never fabricated.
-func (r *autoscalerPoliciesResource) preserveSectionPresence(state, prior autoscalerPoliciesModel) autoscalerPoliciesModel {
-	if len(state.ClusterLimits) == 0 && len(prior.ClusterLimits) > 0 {
-		state.ClusterLimits = prior.ClusterLimits
+// refreshedState produces post-Read state. The server always returns fully
+// materialized policies; this helper filters the response against the prior
+// state's declared shape so server-defaulted values don't pollute state for
+// sections and nested blocks the user is not managing.
+//
+// Rules:
+//   - Computed attributes (id, cluster_id, enabled, scoped_mode, version)
+//     come from the response.
+//   - A section the prior state declared adopts the response's values for
+//     fields the user is managing — server-side drift stays visible on
+//     refresh.
+//   - A section the prior state did not declare is dropped from state even
+//     if the server materialized it.
+//   - A declared section missing from a sparse response is carried over
+//     verbatim from prior state.
+//   - The same rules recurse into nested blocks (cluster_limits.cpu,
+//     unschedulable_pods.pod_pinner).
+//   - When prior state has no cluster_id (the post-import shape, with only
+//     id set), there is no declared shape to filter against — adopt the
+//     full response so the user can run the documented import-then-plan
+//     flow.
+func refreshedState(clusterID string, policies *cluster_autoscaler_v2.PoliciesV2, prior autoscalerPoliciesModel) autoscalerPoliciesModel {
+	out := autoscalerPoliciesModel{
+		ID:         types.StringValue(clusterID),
+		ClusterID:  types.StringValue(clusterID),
+		Enabled:    boolPtrToValue(policies.Enabled),
+		ScopedMode: boolPtrToValue(policies.ScopedMode),
+		Version:    stringPtrToValue(policies.Version),
 	}
-	if len(state.NodeDownscaler) == 0 && len(prior.NodeDownscaler) > 0 {
-		state.NodeDownscaler = prior.NodeDownscaler
+
+	if isImportOnlyState(prior) {
+		out.ClusterLimits = clusterLimitsFromResponse(policies.ClusterLimits)
+		out.NodeDownscaler = nodeDownscalerFromResponse(policies.NodeDownscaler)
+		out.UnschedulablePods = unschedulablePodsFromResponse(policies.UnschedulablePods)
+		return out
 	}
-	if len(state.UnschedulablePods) == 0 && len(prior.UnschedulablePods) > 0 {
-		state.UnschedulablePods = prior.UnschedulablePods
+
+	if len(prior.ClusterLimits) > 0 {
+		out.ClusterLimits = clusterLimitsRefreshed(policies.ClusterLimits, prior.ClusterLimits[0])
 	}
-	return state
+	if len(prior.NodeDownscaler) > 0 {
+		out.NodeDownscaler = nodeDownscalerRefreshed(policies.NodeDownscaler, prior.NodeDownscaler[0])
+	}
+	if len(prior.UnschedulablePods) > 0 {
+		out.UnschedulablePods = unschedulablePodsRefreshed(policies.UnschedulablePods, prior.UnschedulablePods[0])
+	}
+	return out
 }
 
-func clusterLimitsToModel(in *cluster_autoscaler_v2.ClusterLimitsPolicy) []clusterLimitsModel {
+// isImportOnlyState reports whether prior state came from ImportStatePassthroughID:
+// id is set (to the cluster id) but cluster_id is empty, and the user has
+// not yet committed a configuration. The refresh path adopts the full
+// response so the subsequent plan can show the user a stable diff against
+// their config.
+func isImportOnlyState(prior autoscalerPoliciesModel) bool {
+	if !prior.ID.IsNull() && prior.ID.ValueString() != "" &&
+		(prior.ClusterID.IsNull() || prior.ClusterID.ValueString() == "") {
+		return true
+	}
+	return false
+}
+
+// clusterLimitsFromResponse / nodeDownscalerFromResponse / unschedulablePodsFromResponse
+// flatten the API response without filtering — used only by the import path
+// and by tests that exercise the response shape directly.
+func clusterLimitsFromResponse(in *cluster_autoscaler_v2.ClusterLimitsPolicy) []clusterLimitsModel {
 	if in == nil || (in.Enabled == nil && in.Cpu == nil) {
 		return nil
 	}
 	return []clusterLimitsModel{{
 		Enabled: boolPtrToAttr(in.Enabled),
-		Cpu:     cpuToModel(in.Cpu),
+		Cpu:     cpuFromResponse(in.Cpu),
 	}}
 }
 
-func cpuToModel(in *cluster_autoscaler_v2.ClusterLimitsCpu) []cpuModel {
+func cpuFromResponse(in *cluster_autoscaler_v2.ClusterLimitsCpu) []cpuModel {
 	if in == nil {
 		return nil
 	}
@@ -646,7 +711,7 @@ func cpuToModel(in *cluster_autoscaler_v2.ClusterLimitsCpu) []cpuModel {
 	}}
 }
 
-func nodeDownscalerToModel(in *cluster_autoscaler_v2.NodeDownscalerPolicy) []nodeDownscalerModel {
+func nodeDownscalerFromResponse(in *cluster_autoscaler_v2.NodeDownscalerPolicy) []nodeDownscalerModel {
 	if in == nil || (in.EmptyNodesDelay == nil && in.EmptyNodesEnabled == nil) {
 		return nil
 	}
@@ -656,20 +721,77 @@ func nodeDownscalerToModel(in *cluster_autoscaler_v2.NodeDownscalerPolicy) []nod
 	}}
 }
 
-func unschedulablePodsToModel(in *cluster_autoscaler_v2.UnschedulablePodsPolicy) []unschedulablePodsModel {
+func unschedulablePodsFromResponse(in *cluster_autoscaler_v2.UnschedulablePodsPolicy) []unschedulablePodsModel {
 	if in == nil || (in.Enabled == nil && in.PartialTemplateMatchingEnabled == nil && in.PodPinner == nil) {
 		return nil
 	}
 	return []unschedulablePodsModel{{
 		Enabled:                        boolPtrToAttr(in.Enabled),
 		PartialTemplateMatchingEnabled: boolPtrToAttr(in.PartialTemplateMatchingEnabled),
-		PodPinner:                      podPinnerToModel(in.PodPinner),
+		PodPinner:                      podPinnerFromResponse(in.PodPinner),
 	}}
 }
 
-func podPinnerToModel(in *cluster_autoscaler_v2.PodPinner) []podPinnerModel {
+func podPinnerFromResponse(in *cluster_autoscaler_v2.PodPinner) []podPinnerModel {
 	if in == nil {
 		return nil
+	}
+	return []podPinnerModel{{
+		Enabled: boolPtrToAttr(in.Enabled),
+	}}
+}
+
+// clusterLimitsRefreshed / nodeDownscalerRefreshed / unschedulablePodsRefreshed
+// filter the always-materialized response against the prior state's
+// declared shape.
+func clusterLimitsRefreshed(in *cluster_autoscaler_v2.ClusterLimitsPolicy, prior clusterLimitsModel) []clusterLimitsModel {
+	if in == nil {
+		return []clusterLimitsModel{prior}
+	}
+	out := clusterLimitsModel{Enabled: boolPtrToAttr(in.Enabled)}
+	if len(prior.Cpu) > 0 {
+		out.Cpu = cpuRefreshed(in.Cpu, prior.Cpu[0])
+	}
+	return []clusterLimitsModel{out}
+}
+
+func cpuRefreshed(in *cluster_autoscaler_v2.ClusterLimitsCpu, prior cpuModel) []cpuModel {
+	if in == nil {
+		return []cpuModel{prior}
+	}
+	return []cpuModel{{
+		MaxCores: types.Int64Value(int64(in.MaxCores)),
+		MinCores: int32PtrToInt64Value(in.MinCores),
+	}}
+}
+
+func nodeDownscalerRefreshed(in *cluster_autoscaler_v2.NodeDownscalerPolicy, prior nodeDownscalerModel) []nodeDownscalerModel {
+	if in == nil {
+		return []nodeDownscalerModel{prior}
+	}
+	return []nodeDownscalerModel{{
+		EmptyNodesEnabled: boolPtrToAttr(in.EmptyNodesEnabled),
+		EmptyNodesDelay:   stringPtrToAttr(in.EmptyNodesDelay),
+	}}
+}
+
+func unschedulablePodsRefreshed(in *cluster_autoscaler_v2.UnschedulablePodsPolicy, prior unschedulablePodsModel) []unschedulablePodsModel {
+	if in == nil {
+		return []unschedulablePodsModel{prior}
+	}
+	out := unschedulablePodsModel{
+		Enabled:                        boolPtrToAttr(in.Enabled),
+		PartialTemplateMatchingEnabled: boolPtrToAttr(in.PartialTemplateMatchingEnabled),
+	}
+	if len(prior.PodPinner) > 0 {
+		out.PodPinner = podPinnerRefreshed(in.PodPinner, prior.PodPinner[0])
+	}
+	return []unschedulablePodsModel{out}
+}
+
+func podPinnerRefreshed(in *cluster_autoscaler_v2.PodPinner, prior podPinnerModel) []podPinnerModel {
+	if in == nil {
+		return []podPinnerModel{prior}
 	}
 	return []podPinnerModel{{
 		Enabled: boolPtrToAttr(in.Enabled),
