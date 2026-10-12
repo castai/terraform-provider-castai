@@ -1044,6 +1044,7 @@ const (
 	WorkloadoptimizationV1RecommendationErrorTypeERRORDEPLOYFAILED                     WorkloadoptimizationV1RecommendationErrorType = "ERROR_DEPLOY_FAILED"
 	WorkloadoptimizationV1RecommendationErrorTypeERRORHPASTATUSUNHEALTHY               WorkloadoptimizationV1RecommendationErrorType = "ERROR_HPA_STATUS_UNHEALTHY"
 	WorkloadoptimizationV1RecommendationErrorTypeERRORIMMEDIATEAPPLYBLOCKED            WorkloadoptimizationV1RecommendationErrorType = "ERROR_IMMEDIATE_APPLY_BLOCKED"
+	WorkloadoptimizationV1RecommendationErrorTypeERRORPODCONSTRAINTSVIOLATED           WorkloadoptimizationV1RecommendationErrorType = "ERROR_POD_CONSTRAINTS_VIOLATED"
 	WorkloadoptimizationV1RecommendationErrorTypeERRORRECOMMENDATIONGENERATION         WorkloadoptimizationV1RecommendationErrorType = "ERROR_RECOMMENDATION_GENERATION"
 	WorkloadoptimizationV1RecommendationErrorTypeERRORUNKNOWN                          WorkloadoptimizationV1RecommendationErrorType = "ERROR_UNKNOWN"
 )
@@ -11288,6 +11289,8 @@ type WorkloadoptimizationV1RecommendationError struct {
 	//
 	//  - ERROR_IMMEDIATE_APPLY_BLOCKED: Workload-autoscaler has blocked immediate applies due to too many consecutive failed attempts (circuit breaker).
 	//  - ERROR_HPA_STATUS_UNHEALTHY: The HPA recommendation status propagated from the in-cluster state.
+	//  - ERROR_POD_CONSTRAINTS_VIOLATED: The generated recommendation violates the pod-level resource constraints
+	// configured on the workload (min/max on the pod's total requests).
 	Type WorkloadoptimizationV1RecommendationErrorType `json:"type"`
 }
 
@@ -11295,6 +11298,9 @@ type WorkloadoptimizationV1RecommendationError struct {
 //
 //   - ERROR_IMMEDIATE_APPLY_BLOCKED: Workload-autoscaler has blocked immediate applies due to too many consecutive failed attempts (circuit breaker).
 //   - ERROR_HPA_STATUS_UNHEALTHY: The HPA recommendation status propagated from the in-cluster state.
+//   - ERROR_POD_CONSTRAINTS_VIOLATED: The generated recommendation violates the pod-level resource constraints
+//
+// configured on the workload (min/max on the pod's total requests).
 type WorkloadoptimizationV1RecommendationErrorType string
 
 // WorkloadoptimizationV1RecommendationEvent defines model for workloadoptimization.v1.RecommendationEvent.
@@ -11434,11 +11440,12 @@ type WorkloadoptimizationV1RecommendedPodCountChangedEvent struct {
 
 // WorkloadoptimizationV1RecommendedRequestsChangedEvent defines model for workloadoptimization.v1.RecommendedRequestsChangedEvent.
 type WorkloadoptimizationV1RecommendedRequestsChangedEvent struct {
-	ApplyType WorkloadoptimizationV1ApplyType                             `json:"applyType"`
-	Current   WorkloadoptimizationV1RecommendedRequestsChangedEventChange `json:"current"`
-	DebugData *map[string]interface{}                                     `json:"debugData,omitempty"`
-	Origins   *[]WorkloadoptimizationV1RecommendationOrigin               `json:"origins,omitempty"`
-	Previous  WorkloadoptimizationV1RecommendedRequestsChangedEventChange `json:"previous"`
+	ApplyType WorkloadoptimizationV1ApplyType                                             `json:"applyType"`
+	Current   WorkloadoptimizationV1RecommendedRequestsChangedEventChange                 `json:"current"`
+	DebugData *map[string]interface{}                                                     `json:"debugData,omitempty"`
+	Origins   *[]WorkloadoptimizationV1RecommendationOrigin                               `json:"origins,omitempty"`
+	Previous  WorkloadoptimizationV1RecommendedRequestsChangedEventChange                 `json:"previous"`
+	Scope     *WorkloadoptimizationV1RecommendedRequestsChangedEventScopedRequestsChanged `json:"scope,omitempty"`
 
 	// Summary RecommendationSummary describes the overall outcome and per-container calculation steps
 	// for a workload recommendation event.
@@ -11449,6 +11456,30 @@ type WorkloadoptimizationV1RecommendedRequestsChangedEvent struct {
 // WorkloadoptimizationV1RecommendedRequestsChangedEventChange defines model for workloadoptimization.v1.RecommendedRequestsChangedEvent.Change.
 type WorkloadoptimizationV1RecommendedRequestsChangedEventChange struct {
 	Containers *[]WorkloadoptimizationV1EventContainer `json:"containers,omitempty"`
+}
+
+// WorkloadoptimizationV1RecommendedRequestsChangedEventScopedGroup defines model for workloadoptimization.v1.RecommendedRequestsChangedEvent.ScopedGroup.
+type WorkloadoptimizationV1RecommendedRequestsChangedEventScopedGroup struct {
+	// Previous Current pod-request average across the group's pods.
+	Previous *[]WorkloadoptimizationV1EventContainer `json:"previous,omitempty"`
+
+	// Recommendation New recommended requests per container for the group's pods.
+	Recommendation *[]WorkloadoptimizationV1EventContainer `json:"recommendation,omitempty"`
+
+	// Value Scope label value identifying the group.
+	Value *string `json:"value,omitempty"`
+}
+
+// WorkloadoptimizationV1RecommendedRequestsChangedEventScopedRequestsChanged defines model for workloadoptimization.v1.RecommendedRequestsChangedEvent.ScopedRequestsChanged.
+type WorkloadoptimizationV1RecommendedRequestsChangedEventScopedRequestsChanged struct {
+	// Groups Per-scope-group before & after pairs, ordered by scope value.
+	Groups *[]WorkloadoptimizationV1RecommendedRequestsChangedEventScopedGroup `json:"groups,omitempty"`
+
+	// Key Scope label key.
+	Key *string `json:"key,omitempty"`
+
+	// Type Scope config type backing the grouping.
+	Type *string `json:"type,omitempty"`
 }
 
 // WorkloadoptimizationV1ResetSystemOverridesRequestTarget Specifies which type of system override should be reset for the workload.
