@@ -16,6 +16,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -177,15 +178,16 @@ func (r *autoscalerPoliciesResource) Schema(_ context.Context, _ resource.Schema
 							NestedObject: schema.NestedBlockObject{
 								Attributes: map[string]schema.Attribute{
 									FieldClusterLimitsCPUMaxCores: schema.Int64Attribute{
-										Required:    true,
+										Optional:    true,
+										Computed:    true,
 										Description: "Maximum vCPUs allowed cluster-wide.",
 										Validators:  []validator.Int64{int64validator.AtLeast(2)},
 									},
 									FieldClusterLimitsCPUMinCores: schema.Int64Attribute{
 										Optional:    true,
 										Computed:    true,
-										Default:     int64default.StaticInt64(0),
-										Description: "Minimum vCPUs allowed cluster-wide.",
+										Default:     int64default.StaticInt64(1),
+										Description: "Minimum vCPUs allowed cluster-wide. Matches the server default when omitted.",
 									},
 								},
 							},
@@ -199,12 +201,16 @@ func (r *autoscalerPoliciesResource) Schema(_ context.Context, _ resource.Schema
 				NestedObject: schema.NestedBlockObject{
 					Attributes: map[string]schema.Attribute{
 						FieldNodeDownscalerEmptyNodesEnabled: schema.BoolAttribute{
-							Required:    true,
-							Description: "Enable downscaling of empty nodes.",
+							Optional:    true,
+							Computed:    true,
+							Default:     booldefault.StaticBool(false),
+							Description: "Enable downscaling of empty nodes. The server treats absence as false; matching that here keeps plan and apply result in agreement.",
 						},
 						FieldNodeDownscalerEmptyNodesDelay: schema.StringAttribute{
-							Required:    true,
-							Description: "How long a node must be empty before it becomes eligible for downscaling (e.g. \"5m\").",
+							Optional:    true,
+							Computed:    true,
+							Default:     stringdefault.StaticString("300s"),
+							Description: "How long a node must be empty before it becomes eligible for downscaling, as a duration in seconds (e.g. \"300s\" for 5 minutes). Matches the server default when omitted.",
 						},
 					},
 				},
