@@ -1,0 +1,54 @@
+---
+page_title: "{{.Name}} {{.Type}} - {{.ProviderName}}"
+subcategory: ""
+description: |-
+{{ .Description | plainmarkdown | trimspace | prefixlines "  " }}
+---
+
+# {{.Name}} ({{.Type}})
+
+{{ .Description | trimspace }}
+
+~> **DEPRECATED** Superseded by `castai_gke_cluster` with the `credentials` block.
+
+## Migration
+
+`castai_gke_cluster_id` registers the cluster and, when `client_service_account` is set, creates
+the CAST AI delegate service account that impersonates it. All of that is now expressed
+declaratively on `castai_gke_cluster` via `credentials { target_service_account, target_project,
+castai_service_account }`.
+
+The CAST AI delegate service account id can be fetched from the `castai_impersonation_service_account`
+data source (currently AKS-only, GKE support pending) or from a dedicated CAST AI service account resource.
+
+To migrate an existing cluster managed by both `castai_gke_cluster_id` and `castai_gke_cluster`:
+
+1. Move the cluster state entry to the `castai_gke_cluster` resource:
+
+```shell
+terraform state mv castai_gke_cluster_id.cluster_id castai_gke_cluster.this
+```
+
+2. Replace the `castai_gke_cluster_id` block and the `credentials_json = "{}"` argument with the
+   `credentials` block on `castai_gke_cluster`:
+
+```terraform
+resource "castai_gke_cluster" "this" {
+  project_id = var.project_id
+  location   = module.gke.location
+  name       = var.gke_cluster_name
+
+  credentials {
+    target_service_account = google_service_account.client.email
+    target_project         = var.project_id
+    castai_service_account = castai_impersonation_service_account.this.id
+  }
+}
+```
+
+3. `terraform apply` to re-apply the impersonation credentials.
+
+> **CAUTION**: deleting `castai_gke_cluster_id` from the configuration without moving its state first
+> archives the cluster. Always use `terraform state mv` before removing the resource block.
+
+{{ .SchemaMarkdown | trimspace }}
