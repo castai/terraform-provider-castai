@@ -17,7 +17,11 @@ resource "castai_gke_cluster" "this" {
   location                   = module.gke.location
   name                       = var.gke_cluster_name
   delete_nodes_on_disconnect = var.delete_nodes_on_disconnect
-  credentials_json           = var.gke_credentials
+
+  credentials {
+    target_service_account  = google_service_account.target.email
+    castai_service_account = castai_impersonation_service_account.this.id
+  }
 }
 ```
 
@@ -32,7 +36,8 @@ resource "castai_gke_cluster" "this" {
 
 ### Optional
 
-- `credentials_json` (String, Sensitive) GCP credentials.json from ServiceAccount with credentials for CAST AI
+- `credentials` (Block List, Max: 1) GKE cluster credentials. Configure GKE service account impersonation. (see [below for nested schema](#nestedblock--credentials))
+- `credentials_json` (String, Sensitive, Deprecated) GCP credentials.json from ServiceAccount with credentials for CAST AI
 - `delete_nodes_on_disconnect` (Boolean) Should CAST AI remove nodes managed by CAST.AI on disconnect
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
@@ -42,6 +47,15 @@ resource "castai_gke_cluster" "this" {
 - `credentials_id` (String) CAST AI credentials id for cluster
 - `id` (String) The ID of this resource.
 - `organization_id` (String) CAST AI organization ID
+
+<a id="nestedblock--credentials"></a>
+### Nested Schema for `credentials`
+
+Optional:
+
+- `castai_service_account` (String) CAST AI service account email used to access the target project
+- `target_service_account` (String) Service account email in the target GCP project that CAST AI impersonates
+
 
 <a id="nestedblock--timeouts"></a>
 ### Nested Schema for `timeouts`
