@@ -3,12 +3,12 @@
 page_title: "castai_impersonation_service_account Data Source - CAST AI"
 subcategory: ""
 description: |-
-  Retrieve impersonation service account ID for AKS or GKE clusters
+  Retrieve impersonation service account ID and email for AKS or GKE clusters
 ---
 
 # castai_impersonation_service_account (Data Source)
 
-Retrieve impersonation service account ID for AKS or GKE clusters
+Retrieve impersonation service account ID and email for AKS or GKE clusters
 
 
 
@@ -22,3 +22,5 @@ Retrieve impersonation service account ID for AKS or GKE clusters
 ### Read-Only
 
 - `id` (String) ID of the impersonation service account
+- `email` (String) Email of the impersonation service account
+
