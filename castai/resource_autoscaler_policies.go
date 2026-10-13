@@ -196,7 +196,7 @@ func (r *autoscalerPoliciesResource) Schema(_ context.Context, _ resource.Schema
 				},
 			},
 			FieldAutoscalerPoliciesNodeDownscaler: schema.ListNestedBlock{
-				Description: "Node Downscaler defines policies for removing nodes based on the configured conditions. node_downscaler { empty_nodes_enabled = true, empty_nodes_delay = \"5m\" }.",
+				Description: "Node Downscaler defines policies for removing nodes based on the configured conditions. node_downscaler { empty_nodes_enabled = true, empty_nodes_delay = \"300s\" }.",
 				Validators:  []validator.List{listvalidator.SizeAtMost(1)},
 				NestedObject: schema.NestedBlockObject{
 					Attributes: map[string]schema.Attribute{

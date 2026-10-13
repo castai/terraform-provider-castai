@@ -92,7 +92,7 @@ The following V1 fields have no V2 equivalent. If you depend on them, continue u
 
 - `cluster_limits` (Block List) Defines minimum and maximum amount of CPU the cluster can have. cluster_limits { enabled = true, cpu { max_cores = 100, min_cores = 1 } }. (see [below for nested schema](#nestedblock--cluster_limits))
 - `enabled` (Boolean) Enable/disable all policies (global master switch).
-- `node_downscaler` (Block List) Node Downscaler defines policies for removing nodes based on the configured conditions. node_downscaler { empty_nodes_enabled = true, empty_nodes_delay = "5m" }. (see [below for nested schema](#nestedblock--node_downscaler))
+- `node_downscaler` (Block List) Node Downscaler defines policies for removing nodes based on the configured conditions. node_downscaler { empty_nodes_enabled = true, empty_nodes_delay = "300s" }. (see [below for nested schema](#nestedblock--node_downscaler))
 - `scoped_mode` (Boolean) Run the node autoscaler in scoped mode.
 - `unschedulable_pods` (Block List) Policy defining autoscaler's behavior when unschedulable pods were detected. unschedulable_pods { enabled = true, partial_template_matching_enabled = false, pod_pinner { enabled = true } }. (see [below for nested schema](#nestedblock--unschedulable_pods))
 
