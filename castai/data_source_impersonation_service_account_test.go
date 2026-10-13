@@ -22,6 +22,7 @@ func TestImpersonationServiceAccountDataSourceRead(t *testing.T) {
 	tests := []struct {
 		name          string
 		clusterType   string
+		expectedEmail string
 		responseBody  string
 		statusCode    int
 		expectedID    string
@@ -29,8 +30,9 @@ func TestImpersonationServiceAccountDataSourceRead(t *testing.T) {
 		errorContains string
 	}{
 		{
-			name:        "successful response with id and email",
-			clusterType: "aks",
+			name:          "successful response with id and email",
+			clusterType:   "aks",
+			expectedEmail: "test@example.com",
 			responseBody: `{
   "id": "test-service-account-id",
   "email": "test@example.com"
@@ -111,6 +113,9 @@ func TestImpersonationServiceAccountDataSourceRead(t *testing.T) {
 				r.False(result.HasError())
 				r.Equal(tt.expectedID, data.Id())
 				r.Equal(tt.expectedID, data.Get(FieldImpersonationServiceAccountId))
+				if tt.expectedEmail != "" {
+					r.Equal(tt.expectedEmail, data.Get(FieldImpersonationServiceAccountEmail))
+				}
 			}
 		})
 	}

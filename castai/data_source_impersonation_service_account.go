@@ -15,12 +15,13 @@ import (
 const (
 	FieldImpersonationServiceAccountClusterType = "cluster_type"
 	FieldImpersonationServiceAccountId          = "id"
+	FieldImpersonationServiceAccountEmail       = "email"
 )
 
 func dataSourceImpersonationServiceAccount() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: dataSourceImpersonationServiceAccountRead,
-		Description: "Retrieve impersonation service account ID for AKS or GKE clusters",
+		Description: "Retrieve impersonation service account ID and email for AKS or GKE clusters",
 		Schema: map[string]*schema.Schema{
 			FieldImpersonationServiceAccountClusterType: {
 				Type:             schema.TypeString,
@@ -32,6 +33,11 @@ func dataSourceImpersonationServiceAccount() *schema.Resource {
 				Type:        schema.TypeString,
 				Computed:    true,
 				Description: "ID of the impersonation service account",
+			},
+			FieldImpersonationServiceAccountEmail: {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "Email of the impersonation service account",
 			},
 		},
 	}
@@ -60,6 +66,12 @@ func dataSourceImpersonationServiceAccountRead(ctx context.Context, data *schema
 		data.SetId(*resp.JSON200.Id)
 		if err := data.Set(FieldImpersonationServiceAccountId, *resp.JSON200.Id); err != nil {
 			return diag.FromErr(fmt.Errorf("setting id: %w", err))
+		}
+	}
+
+	if resp.JSON200.Email != nil {
+		if err := data.Set(FieldImpersonationServiceAccountEmail, *resp.JSON200.Email); err != nil {
+			return diag.FromErr(fmt.Errorf("setting email: %w", err))
 		}
 	}
 
