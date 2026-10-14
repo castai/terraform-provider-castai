@@ -2,3 +2,8 @@ castai_api_token    = "PLACEHOLDER"
 project_id          = "PLACEHOLDER"
 cluster_name        = "PLACEHOLDER"
 castai_api_url      = "PLACEHOLDER"
+
+# Optional: set to "impersonation" to grant the CAST AI delegate service account
+# roles/iam.serviceAccountTokenCreator on the created service account instead of
+# provisioning a JSON private key.
+# authentication_method = "impersonation"

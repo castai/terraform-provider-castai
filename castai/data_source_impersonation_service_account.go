@@ -13,9 +13,9 @@ import (
 )
 
 const (
-	FieldImpersonationServiceAccountClusterType = "cluster_type"
-	FieldImpersonationServiceAccountId          = "id"
-	FieldImpersonationServiceAccountEmail       = "email"
+	FieldImpersonationServiceAccountProviderType = "provider_type"
+	FieldImpersonationServiceAccountId           = "id"
+	FieldImpersonationServiceAccountEmail        = "email"
 )
 
 func dataSourceImpersonationServiceAccount() *schema.Resource {
@@ -23,11 +23,11 @@ func dataSourceImpersonationServiceAccount() *schema.Resource {
 		ReadContext: dataSourceImpersonationServiceAccountRead,
 		Description: "Retrieve impersonation service account ID and email for AKS or GKE clusters",
 		Schema: map[string]*schema.Schema{
-			FieldImpersonationServiceAccountClusterType: {
+			FieldImpersonationServiceAccountProviderType: {
 				Type:             schema.TypeString,
 				Required:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"gke", "aks"}, false)),
-				Description:      "Type of the cluster the impersonation service account is used for: \"gke\" or \"aks\"",
+				Description:      "Type of the provider the impersonation service account is used for: \"gke\" or \"aks\"",
 			},
 			FieldImpersonationServiceAccountId: {
 				Type:        schema.TypeString,
@@ -46,9 +46,9 @@ func dataSourceImpersonationServiceAccount() *schema.Resource {
 func dataSourceImpersonationServiceAccountRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*ProviderConfig).api
 
-	clusterType, ok := data.Get(FieldImpersonationServiceAccountClusterType).(string)
+	clusterType, ok := data.Get(FieldImpersonationServiceAccountProviderType).(string)
 	if !ok || strings.TrimSpace(clusterType) == "" {
-		return diag.FromErr(fmt.Errorf("%q must not be empty", FieldImpersonationServiceAccountClusterType))
+		return diag.FromErr(fmt.Errorf("%q must not be empty", FieldImpersonationServiceAccountProviderType))
 	}
 	resp, err := client.ExternalClusterAPIImpersonationServiceAccountWithResponse(ctx,
 		sdk.ExternalclusterV1ImpersonationServiceAccountRequest{

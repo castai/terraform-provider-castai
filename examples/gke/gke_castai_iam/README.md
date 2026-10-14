@@ -5,6 +5,30 @@ Following example shows how to create GCP IAM resources required to connect GKE 
 When creating a service account you can enforce conditional, attribute-based access on `iam.serviceAccountUser` role.
 It can access and act as all other service accounts or be scoped to the ones used by node pools in the GKE cluster, which is more secure and therefore recommended.
 
+## Impersonation
+
+Set `authentication_method = "impersonation"` to onboard via GKE service account impersonation instead of a service account JSON private key. The module then grants the CAST AI delegate service account `roles/iam.serviceAccountTokenCreator` on the created service account and exposes the values for the `castai_gke_cluster` `credentials` block:
+
+```hcl
+module "castai-gke-iam" {
+  source                = "castai/gke-iam/castai"
+  version               = "~> 0.6"
+
+  project_id            = var.project_id
+  gke_cluster_name      = var.cluster_name
+  authentication_method = "impersonation"
+}
+
+resource "castai_gke_cluster" "castai_cluster" {
+  # ...
+
+  credentials {
+    target_service_account = module.castai-gke-iam.target_service_account_email
+    castai_service_account = module.castai-gke-iam.castai_impersonation_service_account_email
+  }
+}
+```
+
 ### Steps to take to successfully create GCP IAM resources with `iam.serviceAccountUser` role and custom condition.
 
 Prerequisites:
