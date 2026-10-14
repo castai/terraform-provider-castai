@@ -34,6 +34,7 @@ type edgeConfigurationSingleDataModel struct {
 	Name           types.String              `tfsdk:"name"`
 	Default        types.Bool                `tfsdk:"default"`
 	UserDataBase64 types.String              `tfsdk:"user_data_base64"`
+	SSHPublicKey   types.String              `tfsdk:"ssh_public_key"`
 	Aws            *awsConfigurationModel    `tfsdk:"aws"`
 	Gcp            *gcpConfigurationModel    `tfsdk:"gcp"`
 	Oci            *ociConfigurationModel    `tfsdk:"oci"`
@@ -97,6 +98,10 @@ func (d *edgeConfigurationDataSource) Schema(_ context.Context, _ datasource.Sch
 			"user_data_base64": schema.StringAttribute{
 				Computed:    true,
 				Description: "Base64 encoded user data for edge bootstrap",
+			},
+			"ssh_public_key": schema.StringAttribute{
+				Computed:    true,
+				Description: "Base64 encoded SSH public key for provisioned nodes",
 			},
 			"aws": schema.SingleNestedAttribute{
 				Computed:    true,
@@ -277,6 +282,7 @@ func (d *edgeConfigurationDataSource) Read(ctx context.Context, req datasource.R
 		data.Default = types.BoolValue(*config.Default)
 	}
 	data.UserDataBase64 = normalizeStringPtr(config.UserDataBase64)
+	data.SSHPublicKey = normalizeStringPtr(config.SshPublicKey)
 
 	if config.Cri != nil {
 		data.CRI = &criConfigurationModel{

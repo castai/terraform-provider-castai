@@ -185,7 +185,7 @@ func resourceOrganizationMembersRead(ctx context.Context, data *schema.ResourceD
 
 	tflog.Debug(ctx, "listing role bindings")
 	roleBindingsResp, err := client.RbacServiceAPIListRoleBindingsWithResponse(ctx, organizationID, &sdk.RbacServiceAPIListRoleBindingsParams{
-		SubjectType: &[]sdk.RbacServiceAPIListRoleBindingsParamsSubjectType{sdk.SUBJECTUSER},
+		SubjectType: &[]sdk.RbacServiceAPIListRoleBindingsParamsSubjectType{sdk.RbacServiceAPIListRoleBindingsParamsSubjectTypeSUBJECTUSER},
 		ScopeType:   &[]sdk.RbacServiceAPIListRoleBindingsParamsScopeType{sdk.RbacServiceAPIListRoleBindingsParamsScopeTypeORGANIZATION},
 	})
 

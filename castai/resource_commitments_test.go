@@ -90,7 +90,7 @@ func TestCommitmentsResourceCreateAndUpdate(t *testing.T) {
 					AllowedUsage:    lo.ToPtr[float32](0.6),
 					AutoAssignment:  lo.ToPtr(true),
 					Prioritization:  lo.ToPtr(true),
-					ScalingStrategy: lo.ToPtr(sdk.CPUBased),
+					ScalingStrategy: lo.ToPtr(sdk.CastaiInventoryV1beta1CommitmentScalingStrategyCPUBased),
 					Status:          lo.ToPtr(sdk.CastaiInventoryV1beta1CommitmentStatusActive),
 				},
 				mockImportedCommitment: sdk.CastaiInventoryV1beta1Commitment{
@@ -160,7 +160,7 @@ test,3b3de39c-bc44-4d69-be2d-69527dfe9958,630226bb-5170-4b95-90b0-f222757130c1,S
 					AllowedUsage:    lo.ToPtr[float32](0.7),
 					AutoAssignment:  lo.ToPtr(true),
 					Prioritization:  lo.ToPtr(true),
-					ScalingStrategy: lo.ToPtr(sdk.Default),
+					ScalingStrategy: lo.ToPtr(sdk.CastaiInventoryV1beta1CommitmentScalingStrategyDefault),
 					Status:          lo.ToPtr(sdk.CastaiInventoryV1beta1CommitmentStatusActive),
 				},
 				mockImportedCommitment: sdk.CastaiInventoryV1beta1Commitment{
@@ -432,7 +432,7 @@ test,3b3de39c-bc44-4d69-be2d-69527dfe9958,630226bb-5170-4b95-90b0-f222757130c1,S
 					AllowedUsage:    lo.ToPtr[float32](0.7),
 					AutoAssignment:  lo.ToPtr(false),
 					Prioritization:  lo.ToPtr(true),
-					ScalingStrategy: lo.ToPtr(sdk.Default),
+					ScalingStrategy: lo.ToPtr(sdk.CastaiInventoryV1beta1CommitmentScalingStrategyDefault),
 					Status:          lo.ToPtr(sdk.CastaiInventoryV1beta1CommitmentStatusActive),
 				},
 			).Return(&sdk.CommitmentsAPIUpdateCommitmentResponse{

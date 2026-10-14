@@ -49,6 +49,7 @@ func TestRebalancingScheduleDataSourceRead(t *testing.T) {
                     "keepDrainTimeoutNodes": false,
                     "evictGracefully": false,
                     "aggressiveMode": false,
+                    "splitNodesInBatchesOf": 4,
                     "aggressiveModeConfig": {
                         "ignoreLocalPersistentVolumes": true,
                         "ignoreProblemJobPods": true,
@@ -149,6 +150,7 @@ launch_configuration.0.node_ttl_seconds = 350
 launch_configuration.0.num_targeted_nodes = 20
 launch_configuration.0.rebalancing_min_nodes = 2
 launch_configuration.0.selector = 
+launch_configuration.0.split_nodes_in_batches_of = 4
 launch_configuration.0.target_node_selection_algorithm = TargetNodeSelectionAlgorithmNormalizedPrice
 name = rebalancing schedule 1
 schedule.# = 1

@@ -256,9 +256,9 @@ func assignGroupData(group *sdk.CastaiRbacV1beta1Group, data *schema.ResourceDat
 		for _, member := range *group.Definition.Members {
 			var kind string
 			switch member.Kind {
-			case sdk.USER:
+			case sdk.CastaiRbacV1beta1KindUSER:
 				kind = GroupMemberKindUser
-			case sdk.SERVICEACCOUNT:
+			case sdk.CastaiRbacV1beta1KindSERVICEACCOUNT:
 				kind = GroupMemberKindServiceAccount
 			}
 			members = append(members, map[string]string{
@@ -288,9 +288,9 @@ func convertMembersToSDK(data *schema.ResourceData) []sdk.CastaiRbacV1beta1Membe
 			var kind sdk.CastaiRbacV1beta1Kind
 			switch dataMember.(map[string]any)[FieldOrganizationGroupMemberKind].(string) {
 			case GroupMemberKindUser:
-				kind = sdk.USER
+				kind = sdk.CastaiRbacV1beta1KindUSER
 			case GroupMemberKindServiceAccount:
-				kind = sdk.SERVICEACCOUNT
+				kind = sdk.CastaiRbacV1beta1KindSERVICEACCOUNT
 			}
 			members = append(members, sdk.CastaiRbacV1beta1Member{
 				Kind:  kind,

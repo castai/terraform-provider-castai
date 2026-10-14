@@ -137,7 +137,7 @@ and usage `data.castai_eks_clusterid.cluster_id.id`
 
 New configuration will look like:
 
-```terrafrom
+```terraform
 resource "castai_eks_clusterid" "cluster_id" {
   account_id   = data.aws_caller_identity.current.account_id
   region       = var.cluster_region
@@ -172,7 +172,7 @@ resource "castai_eks_cluster" "this" {
 ```
 and usage `castai_eks_cluster.this.cluster_token`
 
-* default value for `imds_v1` was change to `true`, in case that your configuration didn't had this specified
+* default value for `imds_v1` was changed to `true`, in case that your configuration didn't have this specified
 please explicitly set this value to `false`
 
 Migrating from 4.x.x to 5.x.x
@@ -533,7 +533,7 @@ Releasing the provider
 This repository contains a github action to automatically build and publish assets for release when
 tag is pushed with pattern `v*` (ie. `v0.1.0`).
 
-[Gorelaser](https://goreleaser.com/) is used to produce build artifacts matching
+[GoReleaser](https://goreleaser.com/) is used to produce build artifacts matching
 the [layout required](https://www.terraform.io/docs/registry/providers/publishing.html#manually-preparing-a-release)
 to publish the provider in the Terraform Registry.
 

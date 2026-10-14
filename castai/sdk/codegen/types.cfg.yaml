@@ -1,0 +1,15 @@
+# Shared oapi-codegen config for all types-generation passes (every package
+# passes its name via the -package flag).
+#
+# always-prefix-enum-values keeps enum constant names stable. oapi-codegen
+# normally emits short constants (e.g. AMD) and only switches to type-prefixed
+# names (e.g. NodetemplatesV1TemplateConstraintsCPUManufacturerAMD) once
+# another enum in the same package collides. Because the generated set is
+# tag-filtered (-include-tags), adding tags or new spec enums changes the
+# collision set and silently renames constants between regenerations,
+# breaking callers (as happened in #615). This option is only settable via
+# a config file (no CLI flag exists for it), hence this single shared config.
+generate:
+  models: true
+compatibility:
+  always-prefix-enum-values: true

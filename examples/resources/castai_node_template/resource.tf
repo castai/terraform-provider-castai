@@ -11,6 +11,18 @@ resource "castai_node_template" "default_by_castai" {
     env = "production"
   }
 
+  # Edge locations to place nodes in, optionally paired with an edge
+  # configuration (castai_edge_configuration). Replaces the deprecated
+  # edge_location_ids argument.
+  edge_location_config {
+    edge_location_id = castai_edge_location.example_1.id
+    edge_config_id   = castai_edge_configuration.example_1.id
+  }
+
+  edge_location_config {
+    edge_location_id = castai_edge_location.example_2.id
+  }
+
   custom_taints {
     key    = "dedicated"
     value  = "backend"

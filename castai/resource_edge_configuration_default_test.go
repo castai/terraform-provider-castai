@@ -69,7 +69,6 @@ resource "castai_edge_configuration" "test" {
 
   gcp = {
     image_id = "projects/castai/global/images/castai-edge-v1"
-    labels  = {}
   }
 
   cri = {
@@ -101,7 +100,6 @@ resource "castai_edge_configuration" "test" {
 
   gcp = {
     image_id = "projects/castai/global/images/castai-edge-v1"
-    labels  = {}
   }
 
   cri = {
@@ -117,7 +115,6 @@ resource "castai_edge_configuration" "test2" {
 
   gcp = {
     image_id = "projects/castai/global/images/castai-edge-v2"
-    labels  = {}
   }
 
   cri = {

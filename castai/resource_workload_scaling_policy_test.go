@@ -1136,7 +1136,7 @@ func Test_toRolloutBehavior(t *testing.T) {
 				FieldRolloutBehaviorType: FieldRolloutBehaviorNoDisruptionType,
 			},
 			exp: &sdk.WorkloadoptimizationV1RolloutBehaviorSettings{
-				Type: lo.ToPtr(sdk.NODISRUPTION),
+				Type: lo.ToPtr(sdk.WorkloadoptimizationV1RolloutBehaviorTypeNODISRUPTION),
 			},
 		},
 		"should return rollout behavior settings with UNSPECIFIED type": {
@@ -1144,7 +1144,7 @@ func Test_toRolloutBehavior(t *testing.T) {
 				FieldRolloutBehaviorType: FieldRolloutBehaviorUnspecifiedType,
 			},
 			exp: &sdk.WorkloadoptimizationV1RolloutBehaviorSettings{
-				Type: lo.ToPtr(sdk.UNSPECIFIED),
+				Type: lo.ToPtr(sdk.WorkloadoptimizationV1RolloutBehaviorTypeUNSPECIFIED),
 			},
 		},
 		"should return rollout behavior settings with prefer_one_by_one": {
@@ -1153,7 +1153,7 @@ func Test_toRolloutBehavior(t *testing.T) {
 				FieldRolloutBehaviorPreferOneByOneType: true,
 			},
 			exp: &sdk.WorkloadoptimizationV1RolloutBehaviorSettings{
-				Type:           lo.ToPtr(sdk.NODISRUPTION),
+				Type:           lo.ToPtr(sdk.WorkloadoptimizationV1RolloutBehaviorTypeNODISRUPTION),
 				PreferOneByOne: lo.ToPtr(true),
 			},
 		},
@@ -1163,7 +1163,7 @@ func Test_toRolloutBehavior(t *testing.T) {
 				FieldRolloutBehaviorPreferOneByOneType: false,
 			},
 			exp: &sdk.WorkloadoptimizationV1RolloutBehaviorSettings{
-				Type:           lo.ToPtr(sdk.NODISRUPTION),
+				Type:           lo.ToPtr(sdk.WorkloadoptimizationV1RolloutBehaviorTypeNODISRUPTION),
 				PreferOneByOne: lo.ToPtr(false),
 			},
 		},
@@ -1189,7 +1189,7 @@ func Test_toRolloutBehavior(t *testing.T) {
 				FieldRolloutBehaviorDelaySeconds: 60,
 			},
 			exp: &sdk.WorkloadoptimizationV1RolloutBehaviorSettings{
-				Type:         lo.ToPtr(sdk.NODISRUPTION),
+				Type:         lo.ToPtr(sdk.WorkloadoptimizationV1RolloutBehaviorTypeNODISRUPTION),
 				DelaySeconds: lo.ToPtr(int32(60)),
 			},
 		},
@@ -1222,34 +1222,34 @@ func Test_toRolloutBehaviorMap(t *testing.T) {
 	}{
 		"should return rollout behavior map": {
 			args: &sdk.WorkloadoptimizationV1RolloutBehaviorSettings{
-				Type: lo.ToPtr(sdk.NODISRUPTION),
+				Type: lo.ToPtr(sdk.WorkloadoptimizationV1RolloutBehaviorTypeNODISRUPTION),
 			},
 			exp: []map[string]any{
 				{
-					FieldRolloutBehaviorType: string(sdk.NODISRUPTION),
+					FieldRolloutBehaviorType: string(sdk.WorkloadoptimizationV1RolloutBehaviorTypeNODISRUPTION),
 				},
 			},
 		},
 		"should return rollout behavior map with prefer_one_by_one": {
 			args: &sdk.WorkloadoptimizationV1RolloutBehaviorSettings{
-				Type:           lo.ToPtr(sdk.NODISRUPTION),
+				Type:           lo.ToPtr(sdk.WorkloadoptimizationV1RolloutBehaviorTypeNODISRUPTION),
 				PreferOneByOne: lo.ToPtr(true),
 			},
 			exp: []map[string]any{
 				{
-					FieldRolloutBehaviorType:               string(sdk.NODISRUPTION),
+					FieldRolloutBehaviorType:               string(sdk.WorkloadoptimizationV1RolloutBehaviorTypeNODISRUPTION),
 					FieldRolloutBehaviorPreferOneByOneType: true,
 				},
 			},
 		},
 		"should return rollout behavior map with prefer_one_by_one false": {
 			args: &sdk.WorkloadoptimizationV1RolloutBehaviorSettings{
-				Type:           lo.ToPtr(sdk.NODISRUPTION),
+				Type:           lo.ToPtr(sdk.WorkloadoptimizationV1RolloutBehaviorTypeNODISRUPTION),
 				PreferOneByOne: lo.ToPtr(false),
 			},
 			exp: []map[string]any{
 				{
-					FieldRolloutBehaviorType:               string(sdk.NODISRUPTION),
+					FieldRolloutBehaviorType:               string(sdk.WorkloadoptimizationV1RolloutBehaviorTypeNODISRUPTION),
 					FieldRolloutBehaviorPreferOneByOneType: false,
 				},
 			},
@@ -1276,12 +1276,12 @@ func Test_toRolloutBehaviorMap(t *testing.T) {
 		},
 		"should return rollout behavior map with delay_seconds": {
 			args: &sdk.WorkloadoptimizationV1RolloutBehaviorSettings{
-				Type:         lo.ToPtr(sdk.NODISRUPTION),
+				Type:         lo.ToPtr(sdk.WorkloadoptimizationV1RolloutBehaviorTypeNODISRUPTION),
 				DelaySeconds: lo.ToPtr(int32(60)),
 			},
 			exp: []map[string]any{
 				{
-					FieldRolloutBehaviorType:         string(sdk.NODISRUPTION),
+					FieldRolloutBehaviorType:         string(sdk.WorkloadoptimizationV1RolloutBehaviorTypeNODISRUPTION),
 					FieldRolloutBehaviorDelaySeconds: 60,
 				},
 			},

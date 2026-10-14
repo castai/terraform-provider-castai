@@ -132,7 +132,7 @@ func TestOrganizationResourceReadContext(t *testing.T) {
 	}`)))
 		mockClient.EXPECT().
 			RbacServiceAPIListRoleBindings(gomock.Any(), organizationID, &sdk.RbacServiceAPIListRoleBindingsParams{
-				SubjectType: &[]sdk.RbacServiceAPIListRoleBindingsParamsSubjectType{sdk.SUBJECTUSER},
+				SubjectType: &[]sdk.RbacServiceAPIListRoleBindingsParamsSubjectType{sdk.RbacServiceAPIListRoleBindingsParamsSubjectTypeSUBJECTUSER},
 				ScopeType:   &[]sdk.RbacServiceAPIListRoleBindingsParamsScopeType{sdk.RbacServiceAPIListRoleBindingsParamsScopeTypeORGANIZATION},
 			}).
 			Return(&http.Response{StatusCode: 200, Body: listRoleBindingsBody, Header: map[string][]string{"Content-Type": {"json"}}}, nil)
@@ -190,7 +190,7 @@ Tainted = false
 
 		mockClient.EXPECT().
 			RbacServiceAPIListRoleBindings(gomock.Any(), organizationID, &sdk.RbacServiceAPIListRoleBindingsParams{
-				SubjectType: &[]sdk.RbacServiceAPIListRoleBindingsParamsSubjectType{sdk.SUBJECTUSER},
+				SubjectType: &[]sdk.RbacServiceAPIListRoleBindingsParamsSubjectType{sdk.RbacServiceAPIListRoleBindingsParamsSubjectTypeSUBJECTUSER},
 				ScopeType:   &[]sdk.RbacServiceAPIListRoleBindingsParamsScopeType{sdk.RbacServiceAPIListRoleBindingsParamsScopeTypeORGANIZATION},
 			}).
 			Return(&http.Response{StatusCode: 200, Body: listRoleBindingsBody, Header: map[string][]string{"Content-Type": {"json"}}}, nil)
@@ -293,7 +293,7 @@ Tainted = false
 		}`)))
 		mockClient.EXPECT().
 			RbacServiceAPIListRoleBindings(gomock.Any(), organizationID, &sdk.RbacServiceAPIListRoleBindingsParams{
-				SubjectType: &[]sdk.RbacServiceAPIListRoleBindingsParamsSubjectType{sdk.SUBJECTUSER},
+				SubjectType: &[]sdk.RbacServiceAPIListRoleBindingsParamsSubjectType{sdk.RbacServiceAPIListRoleBindingsParamsSubjectTypeSUBJECTUSER},
 				ScopeType:   &[]sdk.RbacServiceAPIListRoleBindingsParamsScopeType{sdk.RbacServiceAPIListRoleBindingsParamsScopeTypeORGANIZATION},
 			}).
 			Return(&http.Response{StatusCode: 200, Body: listRoleBindingsBody, Header: map[string][]string{"Content-Type": {"json"}}}, nil)
@@ -395,7 +395,7 @@ Tainted = false
 }`)))
 		mockClient.EXPECT().
 			RbacServiceAPIListRoleBindings(gomock.Any(), organizationID, &sdk.RbacServiceAPIListRoleBindingsParams{
-				SubjectType: &[]sdk.RbacServiceAPIListRoleBindingsParamsSubjectType{sdk.SUBJECTUSER},
+				SubjectType: &[]sdk.RbacServiceAPIListRoleBindingsParamsSubjectType{sdk.RbacServiceAPIListRoleBindingsParamsSubjectTypeSUBJECTUSER},
 				ScopeType:   &[]sdk.RbacServiceAPIListRoleBindingsParamsScopeType{sdk.RbacServiceAPIListRoleBindingsParamsScopeTypeORGANIZATION},
 			}).
 			Return(&http.Response{StatusCode: 200, Body: listRoleBindingsBody, Header: map[string][]string{"Content-Type": {"json"}}}, nil)

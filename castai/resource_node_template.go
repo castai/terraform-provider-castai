@@ -63,6 +63,8 @@ const (
 	FieldNodeTemplateSpotReliabilityPriceIncreaseLimitPercent = "spot_reliability_price_increase_limit_percent"
 	FieldNodeTemplateSpotInterruptionPredictionsEnabled       = "spot_interruption_predictions_enabled"
 	FieldNodeTemplateSpotInterruptionPredictionsType          = "spot_interruption_predictions_type"
+	FieldNodeTemplateStuckPodResizeReconciliation             = "stuck_pod_resize_reconciliation"
+	FieldNodeTemplateStuckPodResizeEnabled                    = "enabled"
 	FieldNodeTemplateStorageOptimized                         = "storage_optimized"
 	FieldNodeTemplateStorageOptimizedState                    = "storage_optimized_state"
 	FieldNodeTemplateUseSpotFallbacks                         = "use_spot_fallbacks"
@@ -92,6 +94,9 @@ const (
 	FieldNodeTemplateSharingStrategy                          = "sharing_strategy"
 	FieldNodeTemplateClmEnabled                               = "clm_enabled"
 	FieldNodeTemplateEdgeLocationIDs                          = "edge_location_ids"
+	FieldNodeTemplateEdgeLocationConfig                       = "edge_location_config"
+	FieldNodeTemplateEdgeLocationId                           = "edge_location_id"
+	FieldNodeTemplateEdgeConfigId                             = "edge_config_id"
 	FieldNodeTemplatePriceAdjustmentConfiguration             = "price_adjustment_configuration"
 	FieldNodeTemplateInstanceTypeAdjustments                  = "instance_type_adjustments"
 	FieldNodeTemplateUserManagedGPUDrivers                    = "user_managed_gpu_drivers"
@@ -882,6 +887,26 @@ func resourceNodeTemplate() *schema.Resource {
 				Default:     false,
 				Description: "Marks whether Container Live Migration (CLM) should be enabled for nodes created from this template. Supported on EKS, GKE, and AKS clusters. CLM-enabled nodes participate in live workload migration during rebalancing, scale-down, and node lifecycle events.",
 			},
+			FieldNodeTemplateStuckPodResizeReconciliation: {
+				Type:             schema.TypeList,
+				MaxItems:         1,
+				Optional:         true,
+				DiffSuppressFunc: suppressStuckPodResizeReconciliationDiff,
+				Description: "Stuck Pod Resize Reconciliation (SPR) configuration for nodes created from this template. " +
+					"When enabled, the autoscaler discovers pods whose woop-initiated in-place resize failed or got stuck, " +
+					"protects them from woop's eviction, and partially or fully drains the node to enable the resize.",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						FieldNodeTemplateStuckPodResizeEnabled: {
+							Type:             schema.TypeBool,
+							Optional:         true,
+							Default:          false,
+							Description:      "Enable/disable Stuck Pod Resize Reconciliation. Defaults to false. Setting it to false is equivalent to omitting the block.",
+							DiffSuppressFunc: suppressStuckPodResizeReconciliationDiff,
+						},
+					},
+				},
+			},
 			FieldNodeTemplateEdgeLocationIDs: {
 				Type:     schema.TypeList,
 				Optional: true,
@@ -889,7 +914,31 @@ func resourceNodeTemplate() *schema.Resource {
 					Type:             schema.TypeString,
 					ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
 				},
-				Description: "List of edge location IDs to associate with this node template. Must be valid UUIDs referencing castai_edge_location resources.",
+				Deprecated:    "The 'edge_location_ids' field is deprecated. Use 'edge_location_config' instead to associate edge locations, optionally with an edge configuration, with this node template.",
+				ConflictsWith: []string{FieldNodeTemplateEdgeLocationConfig},
+				Description:   "List of edge location IDs to associate with this node template. Must be valid UUIDs referencing castai_edge_location resources.",
+			},
+			FieldNodeTemplateEdgeLocationConfig: {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Description: "List of edge location configurations to associate with this node template. Each entry pairs an edge location with an optional edge configuration. Conflicts with edge_location_ids.",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						FieldNodeTemplateEdgeLocationId: {
+							Type:             schema.TypeString,
+							Required:         true,
+							ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
+							Description:      "Edge location ID to associate with this node template. Must be a valid UUID referencing a castai_edge_location resource.",
+						},
+						FieldNodeTemplateEdgeConfigId: {
+							Type:             schema.TypeString,
+							Optional:         true,
+							ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
+							Description:      "Optional edge configuration ID to apply at this edge location. Must be a valid UUID referencing a castai_edge_configuration resource.",
+						},
+					},
+				},
+				ConflictsWith: []string{FieldNodeTemplateEdgeLocationIDs},
 			},
 			FieldNodeTemplatePriceAdjustmentConfiguration: {
 				Type:        schema.TypeList,
@@ -998,10 +1047,20 @@ func resourceNodeTemplateRead(ctx context.Context, d *schema.ResourceData, meta 
 		return diag.FromErr(fmt.Errorf("setting clm enabled: %w", err))
 	}
 
-	if nodeTemplate.EdgeLocationIds != nil {
-		if err := d.Set(FieldNodeTemplateEdgeLocationIDs, lo.FromPtr(nodeTemplate.EdgeLocationIds)); err != nil {
-			return diag.FromErr(fmt.Errorf("setting edge location ids: %w", err))
+	// Only populate the block when the API returns a non-null `enabled` value, so unset SPR doesn't drift
+	// against configurations which omit the block.
+	if spr := nodeTemplate.StuckPodResizeReconciliation; spr != nil && spr.Enabled != nil {
+		if err := d.Set(FieldNodeTemplateStuckPodResizeReconciliation, []map[string]any{
+			{
+				FieldNodeTemplateStuckPodResizeEnabled: *spr.Enabled,
+			},
+		}); err != nil {
+			return diag.FromErr(fmt.Errorf("setting stuck pod resize reconciliation: %w", err))
 		}
+	}
+
+	if err := setEdgeLocationState(d, nodeTemplate); err != nil {
+		return diag.FromErr(fmt.Errorf("setting edge locations: %w", err))
 	}
 
 	if nodeTemplate.PriceAdjustmentConfiguration != nil {
@@ -1012,6 +1071,190 @@ func resourceNodeTemplateRead(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	return nil
+}
+
+// setEdgeLocationState maps the API response into the edge location field used by the
+// configuration, so neither the deprecated edge_location_ids form nor the edge_location_config
+// form produces a perpetual diff (CO-4843).
+func setEdgeLocationState(d *schema.ResourceData, nodeTemplate *sdk.NodetemplatesV1NodeTemplate) error {
+	var entries []sdk.NodetemplatesV1EdgeLocationConfig
+	if nodeTemplate.EdgeLocationConfigs != nil {
+		entries = *nodeTemplate.EdgeLocationConfigs
+	} else if nodeTemplate.EdgeLocationIds != nil {
+		// The API may still respond with the deprecated field only.
+		ids := *nodeTemplate.EdgeLocationIds
+		entries = make([]sdk.NodetemplatesV1EdgeLocationConfig, 0, len(ids))
+		for _, id := range ids {
+			entries = append(entries, sdk.NodetemplatesV1EdgeLocationConfig{EdgeLocationId: toPtr(id)})
+		}
+	}
+
+	// Entries carrying an edge configuration can only be represented by the
+	// edge_location_config form.
+	hasEdgeConfig := anyEdgeConfig(entries)
+
+	switch {
+	case len(d.Get(FieldNodeTemplateEdgeLocationConfig).([]any)) > 0:
+		// The configuration uses the new form: populate edge_location_config from the response.
+		// An unset edge config is stored as an empty string so it never produces a diff, and
+		// entries follow the configuration order so a server-side reordering never diffs.
+		configured := d.Get(FieldNodeTemplateEdgeLocationConfig).([]any)
+		if err := d.Set(FieldNodeTemplateEdgeLocationConfig, flattenEdgeLocationConfigs(orderEdgeLocationConfigs(entries, configured))); err != nil {
+			return fmt.Errorf("setting edge location configs: %w", err)
+		}
+	case len(d.Get(FieldNodeTemplateEdgeLocationIDs).([]any)) > 0 && !hasEdgeConfig:
+		// The configuration uses the deprecated form: map the response back into edge_location_ids.
+		ids := orderStrings(edgeLocationIDsFromConfigs(entries), toStringList(d.Get(FieldNodeTemplateEdgeLocationIDs).([]any)))
+		if err := d.Set(FieldNodeTemplateEdgeLocationIDs, ids); err != nil {
+			return fmt.Errorf("setting edge location ids: %w", err)
+		}
+	case hasEdgeConfig:
+		// The response carries edge configurations that the deprecated edge_location_ids
+		// form cannot represent: out-of-band changes on a legacy configuration, or a fresh
+		// import. Surface them as edge_location_config in state so the next plan shows the
+		// change instead of silently overriding it on the next apply.
+		if err := d.Set(FieldNodeTemplateEdgeLocationConfig, flattenEdgeLocationConfigs(entries)); err != nil {
+			return fmt.Errorf("setting edge location configs: %w", err)
+		}
+	default:
+		if err := d.Set(FieldNodeTemplateEdgeLocationIDs, edgeLocationIDsFromConfigs(entries)); err != nil {
+			return fmt.Errorf("setting edge location ids: %w", err)
+		}
+	}
+	return nil
+}
+
+// anyEdgeConfig reports whether any API edge location configuration entry carries an edge
+// configuration.
+func anyEdgeConfig(entries []sdk.NodetemplatesV1EdgeLocationConfig) bool {
+	for _, entry := range entries {
+		if lo.FromPtr(entry.EdgeConfigId) != "" {
+			return true
+		}
+	}
+	return false
+}
+
+// flattenEdgeLocationConfigs maps API edge location configuration entries into
+// edge_location_config state values. Unset edge configurations flatten to an empty string.
+func flattenEdgeLocationConfigs(entries []sdk.NodetemplatesV1EdgeLocationConfig) []map[string]any {
+	out := make([]map[string]any, 0, len(entries))
+	for _, entry := range entries {
+		out = append(out, map[string]any{
+			FieldNodeTemplateEdgeLocationId: lo.FromPtr(entry.EdgeLocationId),
+			FieldNodeTemplateEdgeConfigId:   lo.FromPtr(entry.EdgeConfigId),
+		})
+	}
+	return out
+}
+
+// edgeLocationIDsFromConfigs maps API edge location configuration entries into the deprecated
+// edge_location_ids state values.
+func edgeLocationIDsFromConfigs(entries []sdk.NodetemplatesV1EdgeLocationConfig) []string {
+	ids := make([]string, 0, len(entries))
+	for _, entry := range entries {
+		ids = append(ids, lo.FromPtr(entry.EdgeLocationId))
+	}
+	return ids
+}
+
+// orderStrings returns ids in the order used by the current configuration, so a server-side
+// reordering of the API response never produces a diff. IDs missing from the configuration
+// are appended in ascending order.
+func orderStrings(ids []string, configured []string) []string {
+	known := make(map[string]struct{}, len(ids))
+	for _, id := range ids {
+		known[id] = struct{}{}
+	}
+
+	out := make([]string, 0, len(ids))
+	used := make(map[string]struct{}, len(ids))
+	for _, id := range configured {
+		if _, ok := known[id]; !ok {
+			continue
+		}
+		if _, ok := used[id]; ok {
+			continue
+		}
+		out = append(out, id)
+		used[id] = struct{}{}
+	}
+
+	rest := make([]string, 0, len(ids)-len(out))
+	for _, id := range ids {
+		if _, ok := used[id]; !ok {
+			rest = append(rest, id)
+			used[id] = struct{}{}
+		}
+	}
+	sort.Strings(rest)
+	return append(out, rest...)
+}
+
+// orderEdgeLocationConfigs returns the API entries in the order used by the current
+// configuration (keyed by edge location ID), so a server-side reordering of the API
+// response never produces a diff. Entries missing from the configuration are appended
+// in ascending edge location ID order.
+func orderEdgeLocationConfigs(entries []sdk.NodetemplatesV1EdgeLocationConfig, configured []any) []sdk.NodetemplatesV1EdgeLocationConfig {
+	configuredIDs := make([]string, 0, len(configured))
+	for _, item := range configured {
+		obj, ok := item.(map[string]any)
+		if !ok {
+			continue
+		}
+		if id, ok := obj[FieldNodeTemplateEdgeLocationId].(string); ok {
+			configuredIDs = append(configuredIDs, id)
+		}
+	}
+
+	ids := make([]string, 0, len(entries))
+	byID := make(map[string]sdk.NodetemplatesV1EdgeLocationConfig, len(entries))
+	for _, entry := range entries {
+		id := lo.FromPtr(entry.EdgeLocationId)
+		ids = append(ids, id)
+		if _, ok := byID[id]; !ok {
+			byID[id] = entry
+		}
+	}
+
+	out := make([]sdk.NodetemplatesV1EdgeLocationConfig, 0, len(entries))
+	for _, id := range orderStrings(ids, configuredIDs) {
+		if entry, ok := byID[id]; ok {
+			out = append(out, entry)
+		}
+	}
+	return out
+}
+
+// toEdgeLocationConfigs maps edge_location_config state values into API edge location
+// configuration entries.
+func toEdgeLocationConfigs(items []any) *[]sdk.NodetemplatesV1EdgeLocationConfig {
+	out := make([]sdk.NodetemplatesV1EdgeLocationConfig, 0, len(items))
+	for _, item := range items {
+		obj, ok := item.(map[string]any)
+		if !ok {
+			continue
+		}
+		edgeLocationID, _ := obj[FieldNodeTemplateEdgeLocationId].(string)
+		entry := sdk.NodetemplatesV1EdgeLocationConfig{
+			EdgeLocationId: toPtr(edgeLocationID),
+		}
+		if edgeConfigID, ok := obj[FieldNodeTemplateEdgeConfigId].(string); ok && edgeConfigID != "" {
+			entry.EdgeConfigId = toPtr(edgeConfigID)
+		}
+		out = append(out, entry)
+	}
+	return &out
+}
+
+// toEdgeLocationConfigsFromIDs maps the deprecated edge_location_ids values into location-only
+// API edge location configuration entries.
+func toEdgeLocationConfigsFromIDs(ids []string) *[]sdk.NodetemplatesV1EdgeLocationConfig {
+	out := make([]sdk.NodetemplatesV1EdgeLocationConfig, 0, len(ids))
+	for _, id := range ids {
+		out = append(out, sdk.NodetemplatesV1EdgeLocationConfig{EdgeLocationId: toPtr(id)})
+	}
+	return &out
 }
 
 func flattenPriceAdjustmentConfiguration(pac *sdk.NodetemplatesV1PriceAdjustmentConfiguration) []map[string]any {
@@ -1193,11 +1436,11 @@ func flattenConstraints(c *sdk.NodetemplatesV1TemplateConstraints) ([]map[string
 func setStateConstraintValue(value *sdk.NodetemplatesV1TemplateConstraintsConstraintState, key string, values map[string]any) map[string]any {
 	if value != nil {
 		switch lo.FromPtr(value) {
-		case sdk.ENABLED:
+		case sdk.NodetemplatesV1TemplateConstraintsConstraintStateENABLED:
 			values[key] = Enabled
-		case sdk.DISABLED:
+		case sdk.NodetemplatesV1TemplateConstraintsConstraintStateDISABLED:
 			values[key] = Disabled
-		case sdk.NOTSET:
+		case sdk.NodetemplatesV1TemplateConstraintsConstraintStateNOTSET:
 			values[key] = ""
 		default:
 			values[key] = ""
@@ -1409,7 +1652,9 @@ func updateNodeTemplate(ctx context.Context, d *schema.ResourceData, meta any, s
 		FieldNodeTemplateSharedGpuName,
 		FieldNodeTemplateSharedClientsPerGpu,
 		FieldNodeTemplateClmEnabled,
+		FieldNodeTemplateStuckPodResizeReconciliation,
 		FieldNodeTemplateEdgeLocationIDs,
+		FieldNodeTemplateEdgeLocationConfig,
 		FieldNodeTemplatePriceAdjustmentConfiguration,
 		FieldNodeTemplateUserManagedGPUDrivers,
 	) {
@@ -1492,8 +1737,23 @@ func updateNodeTemplate(ctx context.Context, d *schema.ResourceData, meta any, s
 		req.ClmEnabled = lo.ToPtr(v.(bool))
 	}
 
-	if v, ok := d.Get(FieldNodeTemplateEdgeLocationIDs).([]any); ok && len(v) > 0 {
-		req.EdgeLocationIds = toPtr(toStringList(v))
+	if v, ok := d.Get(FieldNodeTemplateStuckPodResizeReconciliation).([]any); ok && len(v) > 0 {
+		req.StuckPodResizeReconciliation = toStuckPodResizeReconciliation(v[0])
+	} else if d.HasChange(FieldNodeTemplateStuckPodResizeReconciliation) {
+		// The block was removed from the configuration: reset SPR to the backend default by sending a null `enabled`.
+		req.StuckPodResizeReconciliation = &sdk.NodetemplatesV1StuckPodResizeReconciliation{}
+	}
+
+	if v, ok := d.Get(FieldNodeTemplateEdgeLocationConfig).([]any); ok && len(v) > 0 {
+		req.EdgeLocationConfigs = toEdgeLocationConfigs(v)
+	} else if v, ok := d.Get(FieldNodeTemplateEdgeLocationIDs).([]any); ok && len(v) > 0 {
+		// The deprecated edge_location_ids values are sent as location-only entries of the
+		// EdgeLocationConfigs field which replaced edgeLocationIds in the API (CO-4602).
+		req.EdgeLocationConfigs = toEdgeLocationConfigsFromIDs(toStringList(v))
+	} else if d.HasChange(FieldNodeTemplateEdgeLocationConfig) || d.HasChange(FieldNodeTemplateEdgeLocationIDs) {
+		// Every edge location was removed from the configuration: send an empty list so the
+		// API drops the associations instead of leaving them stale in state.
+		req.EdgeLocationConfigs = &[]sdk.NodetemplatesV1EdgeLocationConfig{}
 	}
 
 	if v, ok := d.Get(FieldNodeTemplatePriceAdjustmentConfiguration).([]any); ok && len(v) > 0 {
@@ -1533,8 +1793,12 @@ func resourceNodeTemplateCreate(ctx context.Context, d *schema.ResourceData, met
 		ClmEnabled:      lo.ToPtr(d.Get(FieldNodeTemplateClmEnabled).(bool)),
 	}
 
-	if v, ok := d.Get(FieldNodeTemplateEdgeLocationIDs).([]any); ok && len(v) > 0 {
-		req.EdgeLocationIds = toPtr(toStringList(v))
+	if v, ok := d.Get(FieldNodeTemplateEdgeLocationConfig).([]any); ok && len(v) > 0 {
+		req.EdgeLocationConfigs = toEdgeLocationConfigs(v)
+	} else if v, ok := d.Get(FieldNodeTemplateEdgeLocationIDs).([]any); ok && len(v) > 0 {
+		// The deprecated edge_location_ids values are sent as location-only entries of the
+		// EdgeLocationConfigs field which replaced edgeLocationIds in the API (CO-4602).
+		req.EdgeLocationConfigs = toEdgeLocationConfigsFromIDs(toStringList(v))
 	}
 
 	//nolint:staticcheck // Currently no other way to reliably get the value and determine if it is set
@@ -1581,6 +1845,10 @@ func resourceNodeTemplateCreate(ctx context.Context, d *schema.ResourceData, met
 
 	if v, ok := d.Get(FieldNodeTemplateGpu).([]any); ok && len(v) > 0 {
 		req.Gpu = toTemplateGpu(v[0].(map[string]any))
+	}
+
+	if v, ok := d.Get(FieldNodeTemplateStuckPodResizeReconciliation).([]any); ok && len(v) > 0 {
+		req.StuckPodResizeReconciliation = toStuckPodResizeReconciliation(v[0])
 	}
 
 	if v, ok := d.Get(FieldNodeTemplatePriceAdjustmentConfiguration).([]any); ok && len(v) > 0 {
@@ -1694,6 +1962,48 @@ func suppressResourceLimitsDiff(_, _, _ string, d *schema.ResourceData) bool {
 	resourceLimitsPath := fmt.Sprintf("%s.0.%s.0", FieldNodeTemplateConstraints, FieldNodeTemplateResourceLimits)
 	old, new := d.GetChange(resourceLimitsPath)
 	return reflect.DeepEqual(old, new)
+}
+
+// The backend collapses stuckPodResizeReconciliation with enabled=false to an unset field, so treat
+// an absent block and a block with enabled=false as equal on either side of the diff.
+// The backend collapses stuckPodResizeReconciliation with enabled=false to an unset field, so treat
+// an absent block and a block with enabled=false as equal on either side of the diff.
+func suppressStuckPodResizeReconciliationDiff(k, oldValue, newValue string, d *schema.ResourceData) bool {
+	// Diff of the nested enabled attribute: suppress only changes between unset and false.
+	if strings.HasSuffix(k, FieldNodeTemplateStuckPodResizeEnabled) {
+		return (oldValue == "" && newValue == "false") || (oldValue == "false" && newValue == "")
+	}
+
+	// Diff of the block count: "0" => "1" means the block is being added, "1" => "0" means removed.
+	// GetChange cannot be used for the new value here: when the block is removed from the config,
+	// it falls back to the state value, so the state and config values are read per branch.
+	oldBlocks, newBlocks := d.GetChange(FieldNodeTemplateStuckPodResizeReconciliation)
+	oldList, _ := oldBlocks.([]any)
+	newList, _ := newBlocks.([]any)
+	if oldValue == "0" {
+		disabled, err := stuckPodResizeDisabled(newList)
+		return err == nil && disabled
+	}
+	if newValue == "0" {
+		disabled, err := stuckPodResizeDisabled(oldList)
+		return err == nil && disabled
+	}
+	return false
+}
+
+func stuckPodResizeDisabled(list []any) (bool, error) {
+	if len(list) == 0 {
+		return true, nil
+	}
+	block, ok := list[0].(map[string]any)
+	if !ok {
+		return false, fmt.Errorf("unexpected stuck pod resize reconciliation block type %T", list[0])
+	}
+	enabled, ok := block[FieldNodeTemplateStuckPodResizeEnabled].(bool)
+	if !ok {
+		return false, fmt.Errorf("unexpected stuck pod resize reconciliation enabled value type %T", block[FieldNodeTemplateStuckPodResizeEnabled])
+	}
+	return !enabled, nil
 }
 
 func toCustomTaintsWithOptionalEffect(objs []map[string]any) *[]sdk.NodetemplatesV1TaintWithOptionalEffect {
@@ -1878,18 +2188,18 @@ func toTemplateConstraints(obj map[string]any) *sdk.NodetemplatesV1TemplateConst
 	if v, ok := obj[FieldNodeTemplateBurstableInstances].(string); ok {
 		switch v {
 		case Enabled:
-			out.Burstable = toPtr(sdk.ENABLED)
+			out.Burstable = toPtr(sdk.NodetemplatesV1TemplateConstraintsConstraintStateENABLED)
 		case Disabled:
-			out.Burstable = toPtr(sdk.DISABLED)
+			out.Burstable = toPtr(sdk.NodetemplatesV1TemplateConstraintsConstraintStateDISABLED)
 		}
 	}
 
 	if v, ok := obj[FieldNodeTemplateCustomerSpecific].(string); ok {
 		switch v {
 		case Enabled:
-			out.CustomerSpecific = toPtr(sdk.ENABLED)
+			out.CustomerSpecific = toPtr(sdk.NodetemplatesV1TemplateConstraintsConstraintStateENABLED)
 		case Disabled:
-			out.CustomerSpecific = toPtr(sdk.DISABLED)
+			out.CustomerSpecific = toPtr(sdk.NodetemplatesV1TemplateConstraintsConstraintStateDISABLED)
 		}
 	}
 
@@ -2104,9 +2414,9 @@ func toTemplateConstraintsGpuConstraints(o map[string]any) *sdk.NodetemplatesV1T
 	if v, ok := o[FieldNodeTemplateFractionalGPUs].(string); ok {
 		switch v {
 		case Enabled:
-			out.FractionalGpus = toPtr(sdk.ENABLED)
+			out.FractionalGpus = toPtr(sdk.NodetemplatesV1TemplateConstraintsConstraintStateENABLED)
 		case Disabled:
-			out.FractionalGpus = toPtr(sdk.DISABLED)
+			out.FractionalGpus = toPtr(sdk.NodetemplatesV1TemplateConstraintsConstraintStateDISABLED)
 		}
 	}
 
@@ -2196,6 +2506,20 @@ func toPriceAdjustmentConfiguration(obj map[string]any) *sdk.NodetemplatesV1Pric
 	return out
 }
 
+func toStuckPodResizeReconciliation(obj any) *sdk.NodetemplatesV1StuckPodResizeReconciliation {
+	m, ok := obj.(map[string]any)
+	if !ok {
+		return nil
+	}
+
+	out := &sdk.NodetemplatesV1StuckPodResizeReconciliation{}
+	if v, ok := m[FieldNodeTemplateStuckPodResizeEnabled].(bool); ok {
+		out.Enabled = toPtr(v)
+	}
+
+	return out
+}
+
 // compareLists compares state of two lists
 // inspired by https://github.com/hashicorp/terraform-plugin-sdk/issues/477#issuecomment-1238807249
 func compareLists(key, oldValue, newValue string, d *schema.ResourceData) bool {
@@ -2234,20 +2558,20 @@ func compareLists(key, oldValue, newValue string, d *schema.ResourceData) bool {
 func gpuSharingStrategyToAPI(s string) sdk.NodetemplatesV1GPUSharingStrategy {
 	switch s {
 	case "mps":
-		return sdk.GPUSHARINGSTRATEGYMPS
+		return sdk.NodetemplatesV1GPUSharingStrategyGPUSHARINGSTRATEGYMPS
 	case "time-slicing":
-		return sdk.GPUSHARINGSTRATEGYTIMESLICING
+		return sdk.NodetemplatesV1GPUSharingStrategyGPUSHARINGSTRATEGYTIMESLICING
 	default:
-		return sdk.GPUSHARINGSTRATEGYUNSPECIFIED
+		return sdk.NodetemplatesV1GPUSharingStrategyGPUSHARINGSTRATEGYUNSPECIFIED
 	}
 }
 
 // gpuSharingStrategyToTerraform converts the API enum value to a terraform-friendly string.
 func gpuSharingStrategyToTerraform(s sdk.NodetemplatesV1GPUSharingStrategy) string {
 	switch s {
-	case sdk.GPUSHARINGSTRATEGYMPS:
+	case sdk.NodetemplatesV1GPUSharingStrategyGPUSHARINGSTRATEGYMPS:
 		return "mps"
-	case sdk.GPUSHARINGSTRATEGYTIMESLICING:
+	case sdk.NodetemplatesV1GPUSharingStrategyGPUSHARINGSTRATEGYTIMESLICING:
 		return "time-slicing"
 	default:
 		return ""

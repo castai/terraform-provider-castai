@@ -63,6 +63,8 @@ generate-omni-sdk:
 .PHONY: generate-sdk-new
 # Internal target: run oapi-codegen for the given SPECS variable.
 # Not meant to be called directly; use generate-sdk or generate-omni-sdk.
+# All packages share castai/sdk/codegen/types.cfg.yaml (always-prefix-enum-values)
+# and pass their package name via the -package flag.
 generate-sdk-new:
 	@echo "==> Generating api sdk clients"
 	@go install github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen@v2.4.1
@@ -72,8 +74,8 @@ generate-sdk-new:
 		[ -z "$$pkg" ] && continue; \
 		echo "generating sdk for: $$tag from $$loc"; \
 		mkdir -p $$pkg/mock && \
-		oapi-codegen -o $$pkg/api.gen.go --old-config-style -generate types -include-tags $$tag -package $$pkg $$loc && \
-		oapi-codegen -o $$pkg/client.gen.go --old-config-style -templates codegen/templates -generate client -include-tags $$tag -package $$pkg $$loc && \
+		oapi-codegen -config codegen/types.cfg.yaml -package $$pkg -o $$pkg/api.gen.go -include-tags $$tag $$loc && \
+		oapi-codegen -o $$pkg/client.gen.go -templates codegen/templates -generate client -include-tags $$tag -package $$pkg $$loc && \
 		mockgen -source $$pkg/client.gen.go -destination $$pkg/mock/client.go . ClientInterface; \
 	done
 

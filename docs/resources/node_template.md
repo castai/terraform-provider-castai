@@ -26,6 +26,18 @@ resource "castai_node_template" "default_by_castai" {
     env = "production"
   }
 
+  # Edge locations to place nodes in, optionally paired with an edge
+  # configuration (castai_edge_configuration). Replaces the deprecated
+  # edge_location_ids argument.
+  edge_location_config {
+    edge_location_id = castai_edge_location.example_1.id
+    edge_config_id   = castai_edge_configuration.example_1.id
+  }
+
+  edge_location_config {
+    edge_location_id = castai_edge_location.example_2.id
+  }
+
   custom_taints {
     key    = "dedicated"
     value  = "backend"
@@ -84,13 +96,15 @@ resource "castai_node_template" "default_by_castai" {
 - `custom_instances_with_extended_memory_enabled` (Boolean) Marks whether custom instances with extended memory should be used when deciding which parts of inventory are available. Custom instances are only supported in GCP.
 - `custom_labels` (Map of String) Custom labels to be added to nodes created from this template.
 - `custom_taints` (Block List) Custom taints to be added to the nodes created from this template. `shouldTaint` has to be `true` in order to create/update the node template with custom taints. If `shouldTaint` is `true`, but no custom taints are provided, the nodes will be tainted with the default node template taint. (see [below for nested schema](#nestedblock--custom_taints))
-- `edge_location_ids` (List of String) List of edge location IDs to associate with this node template. Must be valid UUIDs referencing castai_edge_location resources.
+- `edge_location_config` (Block List) List of edge location configurations to associate with this node template. Each entry pairs an edge location with an optional edge configuration. Conflicts with edge_location_ids. (see [below for nested schema](#nestedblock--edge_location_config))
+- `edge_location_ids` (List of String, Deprecated) List of edge location IDs to associate with this node template. Must be valid UUIDs referencing castai_edge_location resources.
 - `gpu` (Block List, Max: 1) GPU configuration. (see [below for nested schema](#nestedblock--gpu))
 - `is_default` (Boolean, Deprecated) Flag whether the node template is default. It's is always set to 'true' on 'default-by-castai' node template and 'false' otherwise.
 - `is_enabled` (Boolean) Flag whether the node template is enabled and considered for autoscaling.
 - `price_adjustment_configuration` (Block List, Max: 1) Configuration for adjusting instance type prices during autoscaling. Adjustments only affect placement decisions, not cost reporting. (see [below for nested schema](#nestedblock--price_adjustment_configuration))
 - `rebalancing_config_min_nodes` (Number) Minimum nodes that will be kept when rebalancing nodes using this node template.
 - `should_taint` (Boolean) Marks whether the templated nodes will have a taint.
+- `stuck_pod_resize_reconciliation` (Block List, Max: 1) Stuck Pod Resize Reconciliation (SPR) configuration for nodes created from this template. When enabled, the autoscaler discovers pods whose woop-initiated in-place resize failed or got stuck, protects them from woop's eviction, and partially or fully drains the node to enable the resize. (see [below for nested schema](#nestedblock--stuck_pod_resize_reconciliation))
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
 ### Read-Only
@@ -251,6 +265,18 @@ Optional:
 - `value` (String) Value of a taint to be added to nodes created from this template.
 
 
+<a id="nestedblock--edge_location_config"></a>
+### Nested Schema for `edge_location_config`
+
+Required:
+
+- `edge_location_id` (String) Edge location ID to associate with this node template. Must be a valid UUID referencing a castai_edge_location resource.
+
+Optional:
+
+- `edge_config_id` (String) Optional edge configuration ID to apply at this edge location. Must be a valid UUID referencing a castai_edge_configuration resource.
+
+
 <a id="nestedblock--gpu"></a>
 ### Nested Schema for `gpu`
 
@@ -278,6 +304,14 @@ Required:
 Optional:
 
 - `instance_type_adjustments` (Map of String) Map of instance type names to price adjustment multipliers (as strings). Example: {"r7a.xlarge": "1.0", "r7i.xlarge": "1.20"}
+
+
+<a id="nestedblock--stuck_pod_resize_reconciliation"></a>
+### Nested Schema for `stuck_pod_resize_reconciliation`
+
+Optional:
+
+- `enabled` (Boolean) Enable/disable Stuck Pod Resize Reconciliation. Defaults to false. Setting it to false is equivalent to omitting the block.
 
 
 <a id="nestedblock--timeouts"></a>

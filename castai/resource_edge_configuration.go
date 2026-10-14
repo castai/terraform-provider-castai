@@ -50,6 +50,7 @@ type edgeConfigurationModel struct {
 	Nebius         *nebiusConfigurationModel `tfsdk:"nebius"`
 	Custom         *customConfigurationModel `tfsdk:"custom"`
 	CRI            *criConfigurationModel    `tfsdk:"cri"`
+	SSHPublicKey   types.String              `tfsdk:"ssh_public_key"`
 }
 
 type gcpConfigurationModel struct {
@@ -152,6 +153,10 @@ func (r *edgeConfigurationResource) Schema(_ context.Context, _ resource.SchemaR
 			"user_data_base64": schema.StringAttribute{
 				Optional:    true,
 				Description: "Base64 encoded user data to run on the edge as part of bootstrap. The payload must start with either `#cloud-config` (cloud-init YAML) or `#!` (shell script with a shebang)",
+			},
+			"ssh_public_key": schema.StringAttribute{
+				Optional:    true,
+				Description: "Base64 encoded SSH public key to be used for provisioned nodes.",
 			},
 
 			"gcp": schema.SingleNestedAttribute{
@@ -328,6 +333,7 @@ func (r *edgeConfigurationResource) Create(ctx context.Context, req resource.Cre
 		Name:           plan.Name.ValueString(),
 		Default:        lo.ToPtr(false),
 		UserDataBase64: lo.ToPtr(plan.UserDataBase64.ValueString()),
+		SshPublicKey:   lo.ToPtr(plan.SSHPublicKey.ValueString()),
 		Gcp:            gcpConfig,
 		Aws:            awsConfig,
 		Oci:            ociConfig,
@@ -468,6 +474,7 @@ func (r *edgeConfigurationResource) Update(ctx context.Context, req resource.Upd
 	updateReq := omni.EdgeConfigurationUpdate{
 		Name:           lo.ToPtr(plan.Name.ValueString()),
 		UserDataBase64: lo.ToPtr(plan.UserDataBase64.ValueString()),
+		SshPublicKey:   lo.ToPtr(plan.SSHPublicKey.ValueString()),
 		Gcp:            gcpConfig,
 		Aws:            awsConfig,
 		Oci:            ociConfig,
@@ -652,6 +659,7 @@ func (r *edgeConfigurationResource) edgeConfigurationToTFModel(ctx context.Conte
 		EdgeLocationID: types.StringValue(lo.FromPtr(config.EdgeLocationId)),
 		Default:        types.BoolValue(lo.FromPtr(config.Default)),
 		UserDataBase64: normalizeStringPtr(config.UserDataBase64),
+		SSHPublicKey:   normalizeStringPtr(config.SshPublicKey),
 		GCP:            gcpCfg,
 		AWS:            awsCfg,
 		OCI:            r.toOCIConfigurationModel(ctx, config.Oci),
@@ -673,7 +681,6 @@ func (r *edgeConfigurationResource) toGCPConfiguration(ctx context.Context, plan
 	config := &omni.GCPConfiguration{
 		ImageId:         lo.ToPtr(""),
 		BootDiskSizeGib: lo.ToPtr(int32(0)),
-		Labels:          lo.ToPtr(map[string]string{}),
 	}
 
 	if !plan.ImageID.IsNull() {
@@ -716,7 +723,7 @@ func (r *edgeConfigurationResource) toGCPConfigurationModel(ctx context.Context,
 		model.BootDiskSizeGiB = types.Int64Value(int64(*config.BootDiskSizeGib))
 	}
 
-	if config.Labels != nil {
+	if config.Labels != nil && len(*config.Labels) > 0 {
 		labels, labelDiagnostic := types.MapValueFrom(ctx, types.StringType, *config.Labels)
 		diags.Append(labelDiagnostic...)
 		if !diags.HasError() {
@@ -737,7 +744,6 @@ func (r *edgeConfigurationResource) toAWSConfiguration(ctx context.Context, plan
 	config := &omni.AWSConfiguration{
 		ImageId:         lo.ToPtr(""),
 		BootDiskSizeGib: lo.ToPtr(int32(0)),
-		Tags:            lo.ToPtr(map[string]string{}),
 	}
 
 	if !plan.ImageID.IsNull() {
@@ -779,7 +785,7 @@ func (r *edgeConfigurationResource) toAWSConfigurationModel(ctx context.Context,
 		model.BootDiskSizeGiB = types.Int64Value(int64(*config.BootDiskSizeGib))
 	}
 
-	if config.Tags != nil {
+	if config.Tags != nil && len(*config.Tags) > 0 {
 		tags, tagDiags := types.MapValueFrom(ctx, types.StringType, *config.Tags)
 		diags.Append(tagDiags...)
 		if !tagDiags.HasError() {
@@ -800,7 +806,6 @@ func (r *edgeConfigurationResource) toOCIConfiguration(ctx context.Context, plan
 	config := &omni.OCIConfiguration{
 		ImageId:         lo.ToPtr(""),
 		BootDiskSizeGib: lo.ToPtr(int32(0)),
-		Tags:            lo.ToPtr(map[string]string{}),
 	}
 
 	if !plan.ImageID.IsNull() {
@@ -841,7 +846,7 @@ func (r *edgeConfigurationResource) toOCIConfigurationModel(ctx context.Context,
 		model.BootDiskSizeGiB = types.Int64Value(int64(*config.BootDiskSizeGib))
 	}
 
-	if config.Tags != nil {
+	if config.Tags != nil && len(*config.Tags) > 0 {
 		tags, diags := types.MapValueFrom(ctx, types.StringType, *config.Tags)
 		if diags.HasError() {
 			return model
@@ -860,7 +865,6 @@ func (r *edgeConfigurationResource) toNebiusConfiguration(ctx context.Context, p
 	}
 
 	config := &omni.NebiusConfiguration{
-		Labels:          lo.ToPtr(map[string]string{}),
 		ImageId:         lo.ToPtr(""),
 		BootDiskSizeGib: lo.ToPtr(int32(0)),
 		ReservationIds:  lo.ToPtr([]string{}),

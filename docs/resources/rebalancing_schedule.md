@@ -27,6 +27,10 @@ resource "castai_rebalancing_schedule" "spots" {
     num_targeted_nodes    = 3
     rebalancing_min_nodes = 2
     evict_gracefully      = true
+    # Execute the rebalancing plan in batches: at most 2 additional nodes
+    # (created minus drained) are alive at any moment during execution,
+    # and a node is only drained after its replacement node exists.
+    split_nodes_in_batches_of = 2
     # When evict_gracefully is true, configure how drain-failed nodes are handled.
     drain_failure_config {
       # Set to true to leave drain-failed nodes cordoned indefinitely (no auto-uncordon).
@@ -94,6 +98,7 @@ Optional:
 - `num_targeted_nodes` (Number) Maximum number of nodes that will be selected for rebalancing. 0 means all nodes in the cluster can be selected.
 - `rebalancing_min_nodes` (Number) Minimum number of nodes that should be kept in the cluster after rebalancing.
 - `selector` (String) Node selector in JSON format.
+- `split_nodes_in_batches_of` (Number) If set, the rebalancing plan is executed in batches such that at most this many additional nodes (nodes created minus nodes drained) are alive at any moment during execution, and a node is only drained after its replacement node exists. When unset, the plan executes in a single batch.
 - `target_node_selection_algorithm` (String) Defines the algorithm used to select the target nodes for rebalancing.
 
 <a id="nestedblock--launch_configuration--aggressive_mode_config"></a>

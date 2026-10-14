@@ -62,6 +62,57 @@ resource "castai_edge_location" "aws_example_custom_addons" {
   }
 }
 
+# AWS Edge Location with control plane and Liqo gateway server overrides
+resource "castai_edge_location" "aws_example_overrides" {
+  organization_id    = "your-org-id"
+  cluster_id         = castai_omni_cluster.example.id
+  name               = "aws-edge-us-east-shared"
+  region             = "us-east-1"
+  control_plane_mode = "SHARED"
+
+  zones = [
+    {
+      id   = "us-east-1a"
+      name = "us-east-1a"
+    }
+  ]
+
+  control_plane = {
+    ha                = false
+    external_address  = "api.edge.example.com"
+    api_server_port   = 6443
+    konnectivity_port = 8132
+    service_annotations = {
+      "example.com/owner" = "platform"
+    }
+  }
+
+  liqo = {
+    gateway_replicas = 2
+    gateway_server = {
+      external_address = "gw.edge.example.com"
+      external_port    = 51820
+      service_labels = {
+        "example.com/tier" = "edge"
+      }
+      service_annotations = {
+        "example.com/owner" = "platform"
+      }
+    }
+  }
+
+  aws = {
+    account_id           = "123456789012"
+    access_key_id_wo     = "AKIAIOSFODNN7EXAMPLE"
+    secret_access_key_wo = "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
+    vpc_id               = "vpc-12345678"
+    security_group_id    = "sg-12345678"
+    subnet_ids = {
+      "us-east-1a" = "subnet-12345678"
+    }
+  }
+}
+
 # AWS Edge Location with no addons
 resource "castai_edge_location" "aws_example_no_addons" {
   organization_id = "your-org-id"

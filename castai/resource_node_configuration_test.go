@@ -438,7 +438,7 @@ func TestToAKSSConfig_AcceleratedNetworking(t *testing.T) {
 		{
 			name:     "disabled",
 			input:    "disabled",
-			expected: toPtr(sdk.ACCELERATEDNETWORKINGMODEDISABLED),
+			expected: toPtr(sdk.NodeconfigV1AKSConfigAcceleratedNetworkingModeACCELERATEDNETWORKINGMODEDISABLED),
 		},
 		{
 			name:     "empty string",
@@ -462,7 +462,7 @@ func TestToAKSSConfig_AcceleratedNetworking(t *testing.T) {
 }
 
 func TestFlattenAKSConfig_AcceleratedNetworking(t *testing.T) {
-	disabled := sdk.ACCELERATEDNETWORKINGMODEDISABLED
+	disabled := sdk.NodeconfigV1AKSConfigAcceleratedNetworkingModeACCELERATEDNETWORKINGMODEDISABLED
 	tests := []struct {
 		name     string
 		input    *sdk.NodeconfigV1AKSConfigAcceleratedNetworkingMode
