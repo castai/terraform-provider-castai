@@ -215,6 +215,11 @@ func TestAccCloudAgnostic_ResourceEdgeConfigurationNebius(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "nebius.gpu_cluster", "gpu-cluster-a"),
 					resource.TestCheckResourceAttr(resourceName, "ssh_public_key", "c3NoLWVkMjU1MTkgQUFBQUMzTnphQzFsWkRJMU5URTVPUzB4InRlc3RAaW5pdGlhbCI="),
 					resource.TestCheckResourceAttr(resourceName, "cri.socket", "unix:///run/containerd/containerd.sock"),
+					resource.TestCheckResourceAttr(resourceName, "nebius.filesystems.#", "2"),
+					resource.TestCheckResourceAttr(resourceName, "nebius.filesystems.0.filesystem_id", "computefilesystem-aaa"),
+					resource.TestCheckResourceAttr(resourceName, "nebius.filesystems.0.mount_path", "/mnt/data"),
+					resource.TestCheckResourceAttr(resourceName, "nebius.filesystems.1.filesystem_id", "computefilesystem-bbb"),
+					resource.TestCheckResourceAttr(resourceName, "nebius.filesystems.1.mount_path", "/mnt/cache"),
 				),
 			},
 			{
@@ -242,6 +247,18 @@ func TestAccCloudAgnostic_ResourceEdgeConfigurationNebius(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "nebius.gpu_cluster", "gpu-cluster-updated"),
 					resource.TestCheckResourceAttr(resourceName, "ssh_public_key", "c3NoLWVkMjU1MTkgQUFBQUMzTnphQzFsWkRJMU5URTVPUzB4InRlc3RAaXBkYXRlZCI="),
 					resource.TestCheckResourceAttr(resourceName, "cri.socket", "unix:///run/containerd/containerd-updated.sock"),
+					resource.TestCheckResourceAttr(resourceName, "nebius.filesystems.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "nebius.filesystems.0.filesystem_id", "computefilesystem-updated"),
+					resource.TestCheckResourceAttr(resourceName, "nebius.filesystems.0.mount_path", "/mnt/updated"),
+				),
+			},
+			{
+				// Clearing the filesystems block must remove every attachment and
+				// leave the list empty in state (not the previously applied values).
+				Config: testAccEdgeConfigurationNebiusFilesystemsCleared(rName, clusterName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "name", rName+"-updated"),
+					resource.TestCheckResourceAttr(resourceName, "nebius.filesystems.#", "0"),
 				),
 			},
 		},
@@ -860,6 +877,16 @@ resource "castai_edge_configuration" "test" {
     }
     reservation_ids = ["res-1", "res-2"]
     gpu_cluster     = "gpu-cluster-a"
+    filesystems = [
+      {
+        filesystem_id = "computefilesystem-aaa"
+        mount_path    = "/mnt/data"
+      },
+      {
+        filesystem_id = "computefilesystem-bbb"
+        mount_path    = "/mnt/cache"
+      }
+    ]
   }
 }
 `, organizationID, rName),
@@ -867,6 +894,45 @@ resource "castai_edge_configuration" "test" {
 }
 
 func testAccEdgeConfigurationNebiusUpdated(rName, clusterName string) string {
+	organizationID := testAccGetOrganizationID()
+
+	return ConfigCompose(
+		testAccEdgeLocationNebiusWIFConfig(rName, clusterName),
+		fmt.Sprintf(`
+resource "castai_edge_configuration" "test" {
+  organization_id  = %[1]q
+  cluster_id       = castai_omni_cluster.test.id
+  edge_location_id = castai_edge_location.test.id
+  name             = "%[2]s-updated"
+  user_data_base64 = "I2Nsb3VkLWNvbmZpZy11cGRhdGVkCg=="
+  ssh_public_key   = "c3NoLWVkMjU1MTkgQUFBQUMzTnphQzFsWkRJMU5URTVPUzB4InRlc3RAaXBkYXRlZCI="
+
+  cri = {
+    socket = "unix:///run/containerd/containerd-updated.sock"
+  }
+
+  nebius = {
+    image_id           = "projects/nebius/global/images/nebius-edge-v2"
+    boot_disk_size_gib = 200
+    labels = {
+      key1   = "updated-value1"
+      newkey = "newvalue"
+    }
+    reservation_ids = ["res-updated"]
+    gpu_cluster     = "gpu-cluster-updated"
+    filesystems = [
+      {
+        filesystem_id = "computefilesystem-updated"
+        mount_path    = "/mnt/updated"
+      }
+    ]
+  }
+}
+`, organizationID, rName),
+	)
+}
+
+func testAccEdgeConfigurationNebiusFilesystemsCleared(rName, clusterName string) string {
 	organizationID := testAccGetOrganizationID()
 
 	return ConfigCompose(
