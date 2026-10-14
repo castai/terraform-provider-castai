@@ -1,6 +1,6 @@
 locals {
   karpenter_namespace     = "karpenter"
-  karpenter_chart_version = "1.7.1"
+  karpenter_chart_version = "1.15.0"
 }
 
 # Karpenter IAM, instance profile, SQS interruption queue, EventBridge rules.
@@ -77,6 +77,7 @@ resource "helm_release" "karpenter" {
       clusterName       = module.eks.cluster_name
       clusterEndpoint   = module.eks.cluster_endpoint
       interruptionQueue = module.karpenter.queue_name
+      enableDRA = true
     }
     webhook = {
       enabled = false
