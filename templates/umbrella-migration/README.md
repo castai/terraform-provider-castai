@@ -32,6 +32,8 @@ your cluster with `castctl`, you can choose Option B with no downtime instead.
    migration.
 2. If you're using [Container Live Migration](https://docs.cast.ai/docs/clm-overview), you need to disable Evictor, by
    setting `autoscaler_settings.node_downscaler.evictor=false` in the cluster Terraform module's variables.
+3. If you're using [Pod mutations](https://docs.cast.ai/docs/pod-mutations-overview), and choosing "Option A",
+   you need to back up all `podmutation` resources and recreate them after the migration was finished.
 
 These changes **need to be applied before proceeding** with the migration.
 
@@ -184,6 +186,8 @@ This command concludes the migration.
 ## Post-migration
 
 If you've changed rebalancing schedules or Evictor settings during the prerequisites, you can now revert those changes.
+
+If you had to back up `podmutation` resources during the prerequisites, you need to restore them now.
 
 ## Appendix: Module versions
 
