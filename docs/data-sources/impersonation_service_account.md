@@ -17,7 +17,7 @@ Retrieve impersonation service account ID and email for AKS or GKE clusters
 
 ### Required
 
-- `cluster_type` (String) Type of the cluster the impersonation service account is used for: "gke" or "aks"
+- `provider_type` (String) Type of the provider the impersonation service account is used for: "gke" or "aks"
 
 ### Read-Only
 

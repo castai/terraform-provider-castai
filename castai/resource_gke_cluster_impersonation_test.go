@@ -72,7 +72,7 @@ func TestAccGKE_ClusterImpersonation(t *testing.T) {
 func testAccGKEImpersonationConfig(rName, clusterName, location, projectID string) string {
 	return fmt.Sprintf(`
 data "castai_impersonation_service_account" "gke" {
-  cluster_type = "gke"
+  provider_type = "gke"
 }
 
 data "castai_gke_user_policies" "gke" {}
