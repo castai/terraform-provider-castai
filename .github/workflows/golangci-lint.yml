@@ -4,7 +4,24 @@ on:
 permissions:
   contents: read
 jobs:
+  files-changed:
+    name: detect files changed
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    outputs:
+      go-lint: ${{ steps.changes.outputs.go-lint }}
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v6
+      - name: Check for file changes
+        uses: dorny/paths-filter@v2
+        id: changes
+        with:
+          token: ${{ github.token }}
+          filters: .github/file-filters.yml
   golangci:
+    needs: files-changed
+    if: needs.files-changed.outputs.go-lint == 'true'
     name: lint
     runs-on: ubuntu-latest
     steps:

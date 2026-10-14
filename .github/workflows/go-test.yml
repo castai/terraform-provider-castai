@@ -3,12 +3,25 @@ name: Go Tests
 on:
   pull_request:
     branches: [ '*' ]
-    paths-ignore:
-      - '**.md'
-      - '**.md.tmpl'
-      - 'examples/**'
 jobs:
+  files-changed:
+    name: detect files changed
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    outputs:
+      go-tests: ${{ steps.changes.outputs.go-tests }}
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v6
+      - name: Check for file changes
+        uses: dorny/paths-filter@v2
+        id: changes
+        with:
+          token: ${{ github.token }}
+          filters: .github/file-filters.yml
   gotests:
+    needs: files-changed
+    if: needs.files-changed.outputs.go-tests == 'true'
     name: Go Tests
     runs-on: ubuntu-latest
     steps:

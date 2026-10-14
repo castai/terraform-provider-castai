@@ -1,0 +1,44 @@
+# This file is consumed by the `dorny/paths-filter` GH action to
+# parse changed files in a Pull Request and run other actions based
+# on what's changed.
+#
+# This is necessary to get around having "required" tests that are
+# conditional. Not being able to define them is a known limitation of
+# GitHub actions tracked in: https://github.com/orgs/community/discussions/44490
+
+##################################################
+# Groups of files used as building blocks in rules
+##################################################
+documentation-files: &documentation-files
+  - "README.md"
+  - "docs/**"
+  - "templates/**"
+provider-code-files: &provider-code-files
+  - "**/*.go"
+  - "go.mod"
+  - "go.sum"
+examples-files: &example-files
+  - "examples/**"
+
+###############################
+# Rules referenced from actions
+###############################
+acceptance-tests:
+  - *provider-code-files
+
+go-tests:
+  - *provider-code-files
+
+go-lint:
+  - *provider-code-files
+
+generate-sdk:
+  - *provider-code-files
+
+generate-docs:
+  - *documentation-files
+  - *provider-code-files
+
+validate-examples:
+  - *provider-code-files
+  - *example-files
