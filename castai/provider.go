@@ -113,6 +113,7 @@ func Provider(version string) *schema.Provider {
 			"castai_workload_scaling_policy_order": dataSourceWorkloadScalingPolicyOrder(),
 			"castai_cache_group":                   dataSourceCacheGroup(),
 			"castai_impersonation_service_account": dataSourceImpersonationServiceAccount(),
+			"castai_roles":                         dataSourceRoles(),
 		},
 
 		ConfigureContextFunc: providerConfigure(version),
