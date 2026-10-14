@@ -82,7 +82,7 @@ generate-sdk-new:
 # The following command also rewrites existing documentation
 .PHONY: generate-docs
 generate-docs:
-	go install github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs@v0.14.1
+	go install github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs@v0.25.0
 	tfplugindocs generate --rendered-provider-name "CAST AI" --ignore-deprecated --provider-name terraform-provider-castai
 
 .PHONY: generate-all
