@@ -96,7 +96,7 @@ func TestImpersonationServiceAccountDataSourceRead(t *testing.T) {
 				}, nil)
 
 			state := terraform.NewInstanceStateShimmedFromValue(cty.ObjectVal(map[string]cty.Value{}), 0)
-			state.Attributes = map[string]string{FieldImpersonationServiceAccountClusterType: tt.clusterType}
+			state.Attributes = map[string]string{FieldImpersonationServiceAccountProviderType: tt.clusterType}
 
 			resource := dataSourceImpersonationServiceAccount()
 			data := resource.Data(state)
