@@ -2289,7 +2289,7 @@ resource "castai_node_configuration" "test" {
   eks {
 	instance_profile_arn = aws_iam_instance_profile.test.arn
     dns_cluster_ip       = "10.100.0.10"
-	security_groups      = [aws_security_group.test.id]
+	security_groups      = [data.aws_security_group.test.id]
   }
 }
 

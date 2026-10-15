@@ -243,59 +243,28 @@ resource "castai_gke_cluster" "test" {
 `, projectID, clusterName))
 }
 
-func testAccGCPConfig(rName, clusterName, projectID string) string {
+// CAST AI SA, custom role and bindings are pre-created by IaC
+// e2e-core/gke-tf-acc.tf.
+func testAccGCPConfig(_ string, clusterName, projectID string) string {
 
 	return fmt.Sprintf(`
 
 locals {
-  service_account_id    = %[3]q
   cluster_name = %[1]q
-  service_account_email = "${local.service_account_id}@$%[2]s.iam.gserviceaccount.com"
-  custom_role_id        = "castai.tfAcc.${substr(sha1(local.service_account_id),0,8)}.tf"
-  subnet_id = "projects/%[2]s/regions/us-central1/subnetworks/%[4]s"
+  subnet_id = "projects/%[2]s/regions/us-central1/subnetworks/%[3]s"
 }
 
-resource "google_service_account" "castai_service_account" {
-  account_id   = local.service_account_id
-  display_name = "Terraform acceptance tests for GKE cluster %[1]s"
-  project      = %[2]q
-}
-
-data "castai_gke_user_policies" "gke" {}
-
-resource "google_project_iam_custom_role" "castai_role" {
-  role_id     = local.custom_role_id
-  title       = "Terraform acceptance tests for GKE cluster %[1]s"
-  description = "Role to manage GKE cluster via CAST AI"
-  permissions = toset(data.castai_gke_user_policies.gke.policy)
-  project     = %[2]q
-  stage       = "GA"
-}
-
-resource "google_project_iam_member" "project_developer" {
-  project = %[2]q
-  role    = "roles/container.developer"
-  member = google_service_account.castai_service_account.member
-}
-
-resource "google_project_iam_member" "project_sa" {
-  project = %[2]q
-  role    = "roles/iam.serviceAccountUser"
-  member = google_service_account.castai_service_account.member
-}
-
-resource "google_project_iam_member" "project_castai" {
-  project = %[2]q
-  role    = "projects/%[2]s/roles/${local.custom_role_id}"
-  member = google_service_account.castai_service_account.member
+data "google_service_account" "castai_service_account" {
+  account_id = "tf-acc-castai"
+  project    = %[2]q
 }
 
 resource "google_service_account_key" "castai_key" {
-  service_account_id = google_service_account.castai_service_account.name
+  service_account_id = data.google_service_account.castai_service_account.name
   public_key_type    = "TYPE_X509_PEM_FILE"
 }
 
-`, clusterName, projectID, rName, acceptanceTestClusterSubnetworkName)
+`, clusterName, projectID, acceptanceTestClusterSubnetworkName)
 }
 
 func TestGKEConfigSecondaryBootDisksMapping(t *testing.T) {
