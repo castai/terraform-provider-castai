@@ -19,11 +19,10 @@ resource "castai_enterprise_role_binding" "enterprise_rb" {
   }
 }
 
-# RBAC roles of the child organization — used to resolve the built-in Member role.
-data "castai_roles" "child_member" {
+# Looks up the built-in Member role of the child organization by its unique name.
+data "castai_role" "child_member" {
   organization_id = "76452f30-9b42-4847-a33e-9bc39e80ead2"
   name            = "Member"
-  type            = "DEFAULT"
 }
 
 resource "castai_enterprise_role_binding" "child_rb" {
@@ -32,14 +31,7 @@ resource "castai_enterprise_role_binding" "child_rb" {
 
   name        = "Child Role Binding - Member"
   description = "Child Role Binding for Member role"
-  role_id     = one(data.castai_roles.child_member.roles[*].id)
-
-  lifecycle {
-    precondition {
-      condition     = length(data.castai_roles.child_member.roles) == 1
-      error_message = "Expected 1 role 'Member', got: ${jsonencode(data.castai_roles.child_member.roles)}"
-    }
-  }
+  role_id     = data.castai_role.child_member.id
 
   scopes {
     organization {

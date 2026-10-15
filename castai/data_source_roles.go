@@ -25,10 +25,8 @@ const (
 func dataSourceRoles() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: dataSourceRolesRead,
-		Description: "Lists RBAC roles in a Cast AI organization. Useful for resolving built-in role IDs " +
-			"(Owner, Member, Viewer) without maintaining a hardcoded UUID map. Note that role names are not " +
-			"guaranteed to be unique: custom roles may share a name with a default role, so a name filter can " +
-			"return multiple roles.",
+		Description: "Lists RBAC roles in a Cast AI organization. To look up a single role by its name, " +
+			"use the castai_role data source.",
 		Schema: map[string]*schema.Schema{
 			FieldRolesOrganizationID: {
 				Type:             schema.TypeString,
@@ -36,12 +34,6 @@ func dataSourceRoles() *schema.Resource {
 				ForceNew:         true,
 				Description:      "Cast AI organization ID.",
 				ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
-			},
-			FieldRolesName: {
-				Type:     schema.TypeString,
-				Optional: true,
-				Description: "Filter roles by exact, case-sensitive name. When several roles share the name," +
-					" all of them are returned.",
 			},
 			FieldRolesType: {
 				Type:             schema.TypeString,
@@ -54,66 +46,7 @@ func dataSourceRoles() *schema.Resource {
 				Type:        schema.TypeList,
 				Computed:    true,
 				Description: "List of roles matching the filters.",
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"id": {
-							Type:        schema.TypeString,
-							Computed:    true,
-							Description: "Role UUID.",
-						},
-						"name": {
-							Type:        schema.TypeString,
-							Computed:    true,
-							Description: "Role name.",
-						},
-						"description": {
-							Type:        schema.TypeString,
-							Computed:    true,
-							Description: "Role description.",
-						},
-						"default": {
-							Type:        schema.TypeBool,
-							Computed:    true,
-							Description: "Whether this is a default (built-in) role.",
-						},
-						"deprecated": {
-							Type:        schema.TypeBool,
-							Computed:    true,
-							Description: "Whether this role is deprecated.",
-						},
-						"level": {
-							Type:        schema.TypeInt,
-							Computed:    true,
-							Description: "Priority level of the role (higher is more important).",
-						},
-						"permissions": {
-							Type:        schema.TypeList,
-							Computed:    true,
-							Description: "Permissions granted by the role.",
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"effect": {
-										Type:        schema.TypeString,
-										Computed:    true,
-										Description: "Effect of the permission, e.g. EFFECT_ALLOW.",
-									},
-									"endpoints": {
-										Type:        schema.TypeList,
-										Computed:    true,
-										Description: "API endpoints the permission applies to.",
-										Elem:        &schema.Schema{Type: schema.TypeString},
-									},
-									"groups": {
-										Type:        schema.TypeList,
-										Computed:    true,
-										Description: "API groups the permission applies to.",
-										Elem:        &schema.Schema{Type: schema.TypeString},
-									},
-								},
-							},
-						},
-					},
-				},
+				Elem:        roleSchemaResource(),
 			},
 		},
 	}
@@ -123,27 +56,45 @@ func dataSourceRolesRead(ctx context.Context, d *schema.ResourceData, meta any) 
 	client := meta.(*ProviderConfig).api
 
 	organizationID := d.Get(FieldRolesOrganizationID).(string)
-	nameFilter := d.Get(FieldRolesName).(string)
 	roleType := d.Get(FieldRolesType).(string)
 
-	roles := make([]map[string]any, 0)
+	roles, err := listRoles(ctx, client, organizationID, "", roleType)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	mapped := make([]map[string]any, 0, len(roles))
+	for _, role := range roles {
+		mapped = append(mapped, roleToMap(role))
+	}
+
+	d.SetId(organizationID)
+	if err := d.Set(FieldRolesRoles, mapped); err != nil {
+		return diag.FromErr(fmt.Errorf("setting roles: %w", err))
+	}
+
+	return nil
+}
+
+func listRoles(ctx context.Context, client sdk.ClientWithResponsesInterface, organizationID, nameFilter, roleType string) ([]sdk.CastaiRbacV1beta1Role, error) {
+	roles := make([]sdk.CastaiRbacV1beta1Role, 0)
 	seenRoleIDs := make(map[string]bool)
 	var cursor *string
 	pages := 0
 	for {
 		pages++
 		if pages > rolesListMaxPages {
-			return diag.FromErr(fmt.Errorf("listing roles: exceeded maximum of %d pages", rolesListMaxPages))
+			return nil, fmt.Errorf("listing roles: exceeded maximum of %d pages", rolesListMaxPages)
 		}
 		resp, err := client.RbacServiceAPIListRolesWithResponse(ctx, organizationID, &sdk.RbacServiceAPIListRolesParams{
 			PageCursor: cursor,
 			Type:       lo.ToPtr(sdk.RbacServiceAPIListRolesParamsType(roleType)),
 		})
 		if e := sdk.CheckOKResponse(resp, err); e != nil {
-			return diag.FromErr(fmt.Errorf("listing roles: %w", e))
+			return nil, fmt.Errorf("listing roles: %w", e)
 		}
 		if resp.JSON200 == nil {
-			return diag.FromErr(fmt.Errorf("unexpected empty response from listing roles"))
+			return nil, fmt.Errorf("unexpected empty response from listing roles")
 		}
 
 		added := 0
@@ -157,7 +108,7 @@ func dataSourceRolesRead(ctx context.Context, d *schema.ResourceData, meta any) 
 			}
 			seenRoleIDs[roleID] = true
 			added++
-			roles = append(roles, roleToMap(role))
+			roles = append(roles, role)
 		}
 
 		next := ""
@@ -170,12 +121,74 @@ func dataSourceRolesRead(ctx context.Context, d *schema.ResourceData, meta any) 
 		cursor = &next
 	}
 
-	d.SetId(organizationID)
-	if err := d.Set(FieldRolesRoles, roles); err != nil {
-		return diag.FromErr(fmt.Errorf("setting roles: %w", err))
-	}
+	return roles, nil
+}
 
-	return nil
+func roleSchemaResource() *schema.Resource {
+	return &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			"id": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "Role UUID.",
+			},
+			"name": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "Role name.",
+			},
+			"description": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "Role description.",
+			},
+			"default": {
+				Type:        schema.TypeBool,
+				Computed:    true,
+				Description: "Whether this is a default (built-in) role.",
+			},
+			"deprecated": {
+				Type:        schema.TypeBool,
+				Computed:    true,
+				Description: "Whether this role is deprecated.",
+			},
+			"level": {
+				Type:        schema.TypeInt,
+				Computed:    true,
+				Description: "Priority level of the role (higher is more important).",
+			},
+			"permissions": {
+				Type:        schema.TypeList,
+				Computed:    true,
+				Description: "Permissions granted by the role.",
+				Elem:        rolePermissionsSchemaResource(),
+			},
+		},
+	}
+}
+
+func rolePermissionsSchemaResource() *schema.Resource {
+	return &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			"effect": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "Effect of the permission, e.g. EFFECT_ALLOW.",
+			},
+			"endpoints": {
+				Type:        schema.TypeList,
+				Computed:    true,
+				Description: "API endpoints the permission applies to.",
+				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
+			"groups": {
+				Type:        schema.TypeList,
+				Computed:    true,
+				Description: "API groups the permission applies to.",
+				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
+		},
+	}
 }
 
 func roleToMap(role sdk.CastaiRbacV1beta1Role) map[string]any {

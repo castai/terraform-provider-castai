@@ -2,16 +2,15 @@ data "castai_organization" "test" {
   name = "My test organization name"
 }
 
-data "castai_roles" "owner" {
+# Role names are unique per organization, so the name identifies the role.
+data "castai_role" "owner" {
   organization_id = data.castai_organization.test.id
   name            = "Owner"
-  type            = "DEFAULT"
 }
 
-data "castai_roles" "viewer" {
+data "castai_role" "viewer" {
   organization_id = data.castai_organization.test.id
   name            = "Viewer"
-  type            = "DEFAULT"
 }
 
 resource "castai_role_bindings" "owner_test" {
@@ -19,14 +18,7 @@ resource "castai_role_bindings" "owner_test" {
   name            = "Role binding owner"
   description     = "Owner access for whole organization."
 
-  role_id = one(data.castai_roles.owner.roles[*].id)
-
-  lifecycle {
-    precondition {
-      condition     = length(data.castai_roles.owner.roles) == 1
-      error_message = "Expected 1 role 'Owner', got: ${jsonencode(data.castai_roles.owner.roles)}"
-    }
-  }
+  role_id = data.castai_role.owner.id
 
   scopes {
     kind        = "organization"
@@ -57,14 +49,7 @@ resource "castai_role_bindings" "viewer_test" {
   name            = "Role binding viewer for cluster 7063d31c-897e-48ef-a322-bdfda6fdbcfb"
   description     = "Viewer access for on of the clusters."
 
-  role_id = one(data.castai_roles.viewer.roles[*].id)
-
-  lifecycle {
-    precondition {
-      condition     = length(data.castai_roles.viewer.roles) == 1
-      error_message = "Expected 1 role 'Viewer', got: ${jsonencode(data.castai_roles.viewer.roles)}"
-    }
-  }
+  role_id = data.castai_role.viewer.id
 
   scopes {
     kind        = "cluster"

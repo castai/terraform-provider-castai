@@ -114,6 +114,7 @@ func Provider(version string) *schema.Provider {
 			"castai_cache_group":                   dataSourceCacheGroup(),
 			"castai_impersonation_service_account": dataSourceImpersonationServiceAccount(),
 			"castai_roles":                         dataSourceRoles(),
+			"castai_role":                          dataSourceRole(),
 		},
 
 		ConfigureContextFunc: providerConfigure(version),

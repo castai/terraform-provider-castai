@@ -10,6 +10,7 @@ import (
 
 	"github.com/golang/mock/gomock"
 	"github.com/hashicorp/go-cty/cty"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/stretchr/testify/require"
@@ -23,11 +24,14 @@ const rolesTestOrganizationID = "d09389f9-6a95-46a1-9ded-5aa76e7cbfa5"
 func rolesTestState(t *testing.T, name, roleType string) *terraform.InstanceState {
 	t.Helper()
 
-	return terraform.NewInstanceStateShimmedFromValue(cty.ObjectVal(map[string]cty.Value{
+	attrs := map[string]cty.Value{
 		FieldRolesOrganizationID: cty.StringVal(rolesTestOrganizationID),
-		FieldRolesName:           cty.StringVal(name),
 		FieldRolesType:           cty.StringVal(roleType),
-	}), 0)
+	}
+	if name != "" {
+		attrs[FieldRolesName] = cty.StringVal(name)
+	}
+	return terraform.NewInstanceStateShimmedFromValue(cty.ObjectVal(attrs), 0)
 }
 
 func rolesTestResponse(t *testing.T, body string) *http.Response {
@@ -64,17 +68,18 @@ func rolesTestRole(id, name string, deprecated bool) string {
 	}`, id, name, name, deprecated)
 }
 
-func rolesTestRead(t *testing.T, state *terraform.InstanceState, mockClient *mock_sdk.MockClientInterface) *schema.ResourceData {
+// rolesTestRead reads either roles data source (castai_roles or castai_role)
+// against the mocked API and fails the test on unexpected diagnostics.
+func rolesTestRead(t *testing.T, resource *schema.Resource, state *terraform.InstanceState, mockClient *mock_sdk.MockClientInterface) (*schema.ResourceData, diag.Diagnostics) {
 	t.Helper()
 
-	resource := dataSourceRoles()
 	data := resource.Data(state)
 	result := resource.ReadContext(context.Background(), data, &ProviderConfig{
 		api: &sdk.ClientWithResponses{ClientInterface: mockClient},
 	})
 	require.False(t, result.HasError(), "unexpected diagnostics: %v", result)
 
-	return data
+	return data, result
 }
 
 func rolesFromState(t *testing.T, data *schema.ResourceData) []map[string]any {
@@ -92,81 +97,6 @@ func rolesFromState(t *testing.T, data *schema.ResourceData) []map[string]any {
 	return roles
 }
 
-func TestRolesDataSource_NameMatchReturnsRole(t *testing.T) {
-	t.Parallel()
-
-	r := require.New(t)
-	ctrl := gomock.NewController(t)
-	mockClient := mock_sdk.NewMockClientInterface(ctrl)
-
-	mockClient.EXPECT().
-		RbacServiceAPIListRoles(gomock.Any(), rolesTestOrganizationID, gomock.Any()).
-		Return(rolesTestResponse(t, rolesTestPage(
-			rolesTestRole("owner-id", "Owner", false)+","+rolesTestRole("viewer-id", "Viewer", false),
-			"",
-		)), nil)
-
-	data := rolesTestRead(t, rolesTestState(t, "Viewer", "ALL"), mockClient)
-	roles := rolesFromState(t, data)
-
-	r.Len(roles, 1)
-	r.Equal("viewer-id", roles[0]["id"])
-	r.Equal("Viewer", roles[0]["name"])
-	r.Equal("description of Viewer", roles[0]["description"])
-	r.Equal(true, roles[0]["default"])
-	r.Equal(false, roles[0]["deprecated"])
-	r.Equal(10, roles[0]["level"])
-
-	permissions, ok := roles[0]["permissions"].([]interface{})
-	r.True(ok, "permissions should be a list")
-	r.Len(permissions, 1)
-	permission, ok := permissions[0].(map[string]any)
-	r.True(ok, "permission should be a map")
-	r.Equal("EFFECT_ALLOW", permission["effect"])
-	r.Equal([]interface{}{"/v1/organizations"}, permission["endpoints"])
-	r.Equal([]interface{}{"rbac"}, permission["groups"])
-
-	r.Equal(rolesTestOrganizationID, data.Id())
-}
-
-func TestRolesDataSource_NameCaseMismatchReturnsEmpty(t *testing.T) {
-	t.Parallel()
-
-	r := require.New(t)
-	ctrl := gomock.NewController(t)
-	mockClient := mock_sdk.NewMockClientInterface(ctrl)
-
-	mockClient.EXPECT().
-		RbacServiceAPIListRoles(gomock.Any(), rolesTestOrganizationID, gomock.Any()).
-		Return(rolesTestResponse(t, rolesTestPage(rolesTestRole("viewer-id", "Viewer", false), "")), nil)
-
-	data := rolesTestRead(t, rolesTestState(t, "viewer", "ALL"), mockClient)
-
-	r.Empty(rolesFromState(t, data))
-}
-
-func TestRolesDataSource_TwoRolesWithSameNameBothReturned(t *testing.T) {
-	t.Parallel()
-
-	r := require.New(t)
-	ctrl := gomock.NewController(t)
-	mockClient := mock_sdk.NewMockClientInterface(ctrl)
-
-	mockClient.EXPECT().
-		RbacServiceAPIListRoles(gomock.Any(), rolesTestOrganizationID, gomock.Any()).
-		Return(rolesTestResponse(t, rolesTestPage(
-			rolesTestRole("default-operator-id", "Operator", false)+","+rolesTestRole("custom-operator-id", "Operator", false),
-			"",
-		)), nil)
-
-	data := rolesTestRead(t, rolesTestState(t, "Operator", "ALL"), mockClient)
-	roles := rolesFromState(t, data)
-
-	r.Len(roles, 2)
-	ids := []string{roles[0]["id"].(string), roles[1]["id"].(string)}
-	r.ElementsMatch([]string{"default-operator-id", "custom-operator-id"}, ids)
-}
-
 func TestRolesDataSource_TypeReachesParams(t *testing.T) {
 	t.Parallel()
 
@@ -182,7 +112,7 @@ func TestRolesDataSource_TypeReachesParams(t *testing.T) {
 			return rolesTestResponse(t, rolesTestPage(rolesTestRole("viewer-id", "Viewer", false), "")), nil
 		})
 
-	rolesTestRead(t, rolesTestState(t, "Viewer", "DEFAULT"), mockClient)
+	rolesTestRead(t, dataSourceRoles(), rolesTestState(t, "", "DEFAULT"), mockClient)
 
 	r.NotNil(capturedParams)
 	r.NotNil(capturedParams.Type)
@@ -210,7 +140,7 @@ func TestRolesDataSource_CursorLoop(t *testing.T) {
 			return rolesTestResponse(t, rolesTestPage(rolesTestRole("role-page2", "Viewer", false), "")), nil
 		})
 
-	data := rolesTestRead(t, rolesTestState(t, "", "ALL"), mockClient)
+	data, _ := rolesTestRead(t, dataSourceRoles(), rolesTestState(t, "", "ALL"), mockClient)
 	roles := rolesFromState(t, data)
 
 	r.Len(roles, 2)
@@ -240,7 +170,7 @@ func TestRolesDataSource_RepeatingCursorStopsWithoutDuplicates(t *testing.T) {
 		}).
 		Times(2)
 
-	data := rolesTestRead(t, rolesTestState(t, "", "ALL"), mockClient)
+	data, _ := rolesTestRead(t, dataSourceRoles(), rolesTestState(t, "", "ALL"), mockClient)
 	roles := rolesFromState(t, data)
 
 	r.Len(roles, 2)

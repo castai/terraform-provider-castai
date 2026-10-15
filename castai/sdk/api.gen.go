@@ -269,9 +269,9 @@ const (
 
 // Defines values for CastaiRbacV1beta1ProductType.
 const (
-	CastaiRbacV1beta1ProductTypePRODUCTTYPEBOTH        CastaiRbacV1beta1ProductType = "PRODUCT_TYPE_BOTH"
 	CastaiRbacV1beta1ProductTypePRODUCTTYPECASTAI      CastaiRbacV1beta1ProductType = "PRODUCT_TYPE_CASTAI"
 	CastaiRbacV1beta1ProductTypePRODUCTTYPEKIMCHI      CastaiRbacV1beta1ProductType = "PRODUCT_TYPE_KIMCHI"
+	CastaiRbacV1beta1ProductTypePRODUCTTYPEPLATFORM    CastaiRbacV1beta1ProductType = "PRODUCT_TYPE_PLATFORM"
 	CastaiRbacV1beta1ProductTypePRODUCTTYPEUNSPECIFIED CastaiRbacV1beta1ProductType = "PRODUCT_TYPE_UNSPECIFIED"
 )
 
@@ -1197,9 +1197,9 @@ const (
 
 // Defines values for RbacServiceAPIListPermissionGroupsParamsProduct.
 const (
-	RbacServiceAPIListPermissionGroupsParamsProductPRODUCTTYPEBOTH        RbacServiceAPIListPermissionGroupsParamsProduct = "PRODUCT_TYPE_BOTH"
 	RbacServiceAPIListPermissionGroupsParamsProductPRODUCTTYPECASTAI      RbacServiceAPIListPermissionGroupsParamsProduct = "PRODUCT_TYPE_CASTAI"
 	RbacServiceAPIListPermissionGroupsParamsProductPRODUCTTYPEKIMCHI      RbacServiceAPIListPermissionGroupsParamsProduct = "PRODUCT_TYPE_KIMCHI"
+	RbacServiceAPIListPermissionGroupsParamsProductPRODUCTTYPEPLATFORM    RbacServiceAPIListPermissionGroupsParamsProduct = "PRODUCT_TYPE_PLATFORM"
 	RbacServiceAPIListPermissionGroupsParamsProductPRODUCTTYPEUNSPECIFIED RbacServiceAPIListPermissionGroupsParamsProduct = "PRODUCT_TYPE_UNSPECIFIED"
 )
 

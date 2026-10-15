@@ -3,49 +3,30 @@
 page_title: "castai_roles Data Source - CAST AI"
 subcategory: ""
 description: |-
-  Lists RBAC roles in a Cast AI organization. Useful for resolving built-in role IDs (Owner, Member, Viewer) without maintaining a hardcoded UUID map. Note that role names are not guaranteed to be unique: custom roles may share a name with a default role, so a name filter can return multiple roles.
+  Lists RBAC roles in a Cast AI organization. To look up a single role by its name, use the castai_role data source.
 ---
 
 # castai_roles (Data Source)
 
-Lists RBAC roles in a Cast AI organization. Useful for resolving built-in role IDs (Owner, Member, Viewer) without maintaining a hardcoded UUID map. Note that role names are not guaranteed to be unique: custom roles may share a name with a default role, so a name filter can return multiple roles.
+Lists RBAC roles in a Cast AI organization. To look up a single role by its name, use the castai_role data source.
 
 ## Example Usage
 
 ```terraform
-# Resolve built-in role IDs by name instead of hardcoding role UUIDs.
-data "castai_roles" "viewer" {
+# List all roles in the organization and index them by name. Role names are
+# unique per organization, so the map has one entry per name. To bind a single
+# role into a resource, prefer the castai_role data source, which looks a role
+# up by name directly.
+data "castai_roles" "all" {
   organization_id = var.organization_id
-  name            = "Viewer"
-  type            = "DEFAULT"
 }
 
-# one() fails the plan when the name matches multiple roles (role names are
-# not guaranteed to be unique), so bind the role safely:
-resource "castai_role_bindings" "viewer_test" {
-  organization_id = var.organization_id
-  name            = "Role binding viewer"
+locals {
+  roles_by_name = { for role in data.castai_roles.all.roles : role.name => role }
+}
 
-  role_id = one(data.castai_roles.viewer.roles[*].id)
-
-  lifecycle {
-    precondition {
-      condition     = length(data.castai_roles.viewer.roles) == 1
-      error_message = "Expected 1 role 'Viewer', got: ${jsonencode(data.castai_roles.viewer.roles)}"
-    }
-  }
-
-  scopes {
-    kind        = "cluster"
-    resource_id = var.cluster_id
-  }
-
-  subjects {
-    subject {
-      kind    = "user"
-      user_id = var.user_id
-    }
-  }
+output "viewer_role_id" {
+  value = local.roles_by_name["Viewer"].id
 }
 ```
 
@@ -58,7 +39,6 @@ resource "castai_role_bindings" "viewer_test" {
 
 ### Optional
 
-- `name` (String) Filter roles by exact, case-sensitive name. When several roles share the name, all of them are returned.
 - `type` (String) Server-side role type filter. One of: ALL (default), DEFAULT, ENTERPRISE.
 
 ### Read-Only
