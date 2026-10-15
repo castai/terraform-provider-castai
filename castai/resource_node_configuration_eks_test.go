@@ -134,7 +134,7 @@ resource "castai_node_configuration" "test" {
 	  instance_profile_arn = aws_iam_instance_profile.test.arn
     node_group_arn = "arn:aws:iam::000000000000:role/aws_node_group"
     dns_cluster_ip       = "10.100.0.10"
-	  security_groups      = [aws_security_group.test.id]
+	  security_groups      = [data.aws_security_group.test.id]
 	  volume_type 		 = "gp3"
     volume_iops		     = 3100
 	  volume_throughput 	 = 131
@@ -172,7 +172,7 @@ resource "castai_node_configuration" "test" {
   })
   eks {
 	instance_profile_arn = aws_iam_instance_profile.test.arn
-    security_groups      = [aws_security_group.test.id]
+    security_groups      = [data.aws_security_group.test.id]
     volume_throughput 	 = 130
     max_pods_per_node_formula = "NUM_IP_PER_PREFIX+NUM_MAX_NET_INTERFACES"
 	ips_per_prefix = 3
@@ -214,12 +214,15 @@ provider "aws" {
 
 data "aws_caller_identity" "current" {}
 
-resource "aws_vpc" "test" {
-  cidr_block           = "10.0.0.0/16"
-  enable_dns_hostnames = true
-  enable_dns_support   = true
+# Pre-created by IaC e2e-core/eks-tf-acc.tf.
+data "aws_iam_policy" "castai" {
+  name = "terraform-provider-acc-castai"
+}
+
+# Pre-created by IaC e2e-core/eks-tf-acc.tf in the shared e2e VPC.
+data "aws_security_group" "test" {
   tags = {
-    name = %[1]q
+    Name = "terraform-provider-acc"
   }
 }
 
@@ -227,26 +230,6 @@ data "aws_subnets" "core" {
 	tags = {
 		Name = "*core-tf-acc-21-08-2025-private*" # private subnet is the one with NAT gateway for internet access.
 	}
-}
-
-resource "aws_security_group" "test" {
-  name        = %[1]q
-  vpc_id      = aws_vpc.test.id
-
-  ingress {
-    from_port        = 443
-    to_port          = 443
-    protocol         = "tcp"
-    cidr_blocks      = [aws_vpc.test.cidr_block]
-  }
-
-  egress {
-    from_port        = 0
-    to_port          = 0
-    protocol         = "-1"
-    cidr_blocks      = ["0.0.0.0/0"]
-    ipv6_cidr_blocks = ["::/0"]
-  }
 }
 
 resource "aws_iam_role" "test" {
@@ -272,9 +255,19 @@ resource "aws_iam_role" "test" {
   }
 }
 
-resource "aws_iam_role_policy_attachment" "test" {
+resource "aws_iam_role_policy_attachment" "test_castai" {
   role       = aws_iam_role.test.name
-  policy_arn = "arn:aws:iam::aws:policy/AdministratorAccess"
+  policy_arn = data.aws_iam_policy.castai.arn
+}
+
+resource "aws_iam_role_policy_attachment" "test_ec2_readonly" {
+  role       = aws_iam_role.test.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ReadOnlyAccess"
+}
+
+resource "aws_iam_role_policy_attachment" "test_iam_readonly" {
+  role       = aws_iam_role.test.name
+  policy_arn = "arn:aws:iam::aws:policy/IAMReadOnlyAccess"
 }
 
 resource "aws_iam_instance_profile" "test" {
