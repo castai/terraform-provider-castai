@@ -34,9 +34,9 @@ func dataSourceRole() *schema.Resource {
 			FieldRolesType: {
 				Type:             schema.TypeString,
 				Optional:         true,
-				Default:          "ALL",
+				Default:          roleTypeAll,
 				Description:      "Server-side role type filter. One of: ALL (default), DEFAULT, ENTERPRISE.",
-				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"ALL", "DEFAULT", "ENTERPRISE"}, false)),
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{roleTypeAll, roleTypeDefault, roleTypeEnterprise}, false)),
 			},
 			"description": {
 				Type:        schema.TypeString,
@@ -71,11 +71,17 @@ func dataSourceRole() *schema.Resource {
 func dataSourceRoleRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(*ProviderConfig).api
 
-	organizationID := d.Get(FieldRolesOrganizationID).(string)
-	name := d.Get(FieldRolesName).(string)
+	organizationID, ok := d.GetOk(FieldRolesOrganizationID)
+	if !ok {
+		return diag.Errorf("%q is not set", FieldRolesOrganizationID)
+	}
+	name, ok := d.GetOk(FieldRolesName)
+	if !ok {
+		return diag.Errorf("%q is not set", FieldRolesName)
+	}
 	roleType := d.Get(FieldRolesType).(string)
 
-	roles, err := listRoles(ctx, client, organizationID, name, roleType)
+	roles, err := listRoles(ctx, client, organizationID.(string), name.(string), roleType)
 	if err != nil {
 		return diag.FromErr(err)
 	}

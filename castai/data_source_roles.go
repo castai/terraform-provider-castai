@@ -18,6 +18,10 @@ const (
 	FieldRolesType           = "type"
 	FieldRolesRoles          = "roles"
 
+	roleTypeAll        = "ALL"
+	roleTypeDefault    = "DEFAULT"
+	roleTypeEnterprise = "ENTERPRISE"
+
 	// rolesListMaxPages caps pagination
 	rolesListMaxPages = 500
 )
@@ -38,9 +42,9 @@ func dataSourceRoles() *schema.Resource {
 			FieldRolesType: {
 				Type:             schema.TypeString,
 				Optional:         true,
-				Default:          "ALL",
+				Default:          roleTypeAll,
 				Description:      "Server-side role type filter. One of: ALL (default), DEFAULT, ENTERPRISE.",
-				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"ALL", "DEFAULT", "ENTERPRISE"}, false)),
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{roleTypeAll, roleTypeDefault, roleTypeEnterprise}, false)),
 			},
 			FieldRolesRoles: {
 				Type:        schema.TypeList,
@@ -55,10 +59,13 @@ func dataSourceRoles() *schema.Resource {
 func dataSourceRolesRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(*ProviderConfig).api
 
-	organizationID := d.Get(FieldRolesOrganizationID).(string)
+	organizationID, ok := d.GetOk(FieldRolesOrganizationID)
+	if !ok {
+		return diag.Errorf("%q is not set", FieldRolesOrganizationID)
+	}
 	roleType := d.Get(FieldRolesType).(string)
 
-	roles, err := listRoles(ctx, client, organizationID, "", roleType)
+	roles, err := listRoles(ctx, client, organizationID.(string), "", roleType)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -68,7 +75,7 @@ func dataSourceRolesRead(ctx context.Context, d *schema.ResourceData, meta any) 
 		mapped = append(mapped, roleToMap(role))
 	}
 
-	d.SetId(organizationID)
+	d.SetId(organizationID.(string))
 	if err := d.Set(FieldRolesRoles, mapped); err != nil {
 		return diag.FromErr(fmt.Errorf("setting roles: %w", err))
 	}
