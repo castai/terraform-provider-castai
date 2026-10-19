@@ -184,16 +184,35 @@ func resourceCastaiEKSClusterRead(ctx context.Context, data *schema.ResourceData
 	return nil
 }
 
-func resourceEKSClusterImporter(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	clusterID := d.Id()
-	tkn, err := createClusterToken(ctx, meta.(*ProviderConfig).api, clusterID)
+func resourceEKSClusterImporter(ctx context.Context, data *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	client := meta.(*ProviderConfig).api
+
+	// Fetch cluster token
+	clusterID := data.Id()
+	tkn, err := createClusterToken(ctx, client, clusterID)
 	if err != nil {
 		return nil, fmt.Errorf("creating cluster token during import: %w", err)
 	}
-	if err := d.Set(FieldClusterToken, tkn); err != nil {
+	if err := data.Set(FieldClusterToken, tkn); err != nil {
 		return nil, fmt.Errorf("setting cluster token: %w", err)
 	}
-	return []*schema.ResourceData{d}, nil
+
+	// Fetch CredentialsId of the cluster. This is done so the subsequent ReadContext won't trigger
+	// the `credentials-drift-detected-force-apply` check for drift in credentials.
+	resp, err := fetchClusterData(ctx, client, data.Id())
+	if err != nil {
+		return nil, err
+	}
+
+	if resp == nil {
+		data.SetId("")
+		return nil, fmt.Errorf("empty cluster response: %s", clusterID)
+	}
+
+	if err := data.Set(FieldClusterCredentialsId, *resp.JSON200.CredentialsId); err != nil {
+		return nil, fmt.Errorf("setting credentials id: %w", err)
+	}
+	return []*schema.ResourceData{data}, nil
 }
 
 func resourceCastaiEKSClusterUpdate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
