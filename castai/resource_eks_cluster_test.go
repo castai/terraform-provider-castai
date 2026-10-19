@@ -228,6 +228,12 @@ func TestEKSClusterImporter(t *testing.T) {
 			ExternalClusterAPICreateClusterToken(gomock.Any(), clusterID).
 			Return(&http.Response{StatusCode: 200, Body: body, Header: map[string][]string{"Content-Type": {"json"}}}, nil)
 
+		credentialsId := "imported-credentials-id"
+		clusterBody := io.NopCloser(bytes.NewReader([]byte(fmt.Sprintf(`{"credentialsId": "%s"}`, credentialsId))))
+		mockClient.EXPECT().
+			ExternalClusterAPIGetCluster(gomock.Any(), clusterID).
+			Return(&http.Response{StatusCode: 200, Body: clusterBody, Header: map[string][]string{"Content-Type": {"json"}}}, nil)
+
 		resource := resourceEKSCluster()
 
 		state := terraform.NewInstanceStateShimmedFromValue(cty.ObjectVal(map[string]cty.Value{}), 0)
@@ -240,6 +246,7 @@ func TestEKSClusterImporter(t *testing.T) {
 		r.Len(result, 1)
 		r.Equal(clusterID, data.Id())
 		r.Equal("imported-cluster-token", data.Get(FieldClusterToken))
+		r.Equal(credentialsId, data.Get(FieldClusterCredentialsId))
 	})
 
 	t.Run("import should fail when cluster token creation fails", func(t *testing.T) {
