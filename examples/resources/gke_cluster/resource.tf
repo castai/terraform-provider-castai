@@ -3,5 +3,9 @@ resource "castai_gke_cluster" "this" {
   location                   = module.gke.location
   name                       = var.gke_cluster_name
   delete_nodes_on_disconnect = var.delete_nodes_on_disconnect
-  credentials_json           = var.gke_credentials
+
+  credentials {
+    target_service_account  = google_service_account.target.email
+    castai_service_account = castai_impersonation_service_account.this.id
+  }
 }
