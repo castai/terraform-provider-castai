@@ -316,6 +316,9 @@ func TestAccGKE_DataSourceWorkloadScalingPolicy(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
+			if os.Getenv("CASTAI_GCP_CREDENTIALS") == "" {
+				t.Skipf("missing required env var: CASTAI_GCP_CREDENTIALS")
+			}
 			cleanupLeftoverHelmReleases(t)
 		},
 		ProviderFactories: providerFactories,

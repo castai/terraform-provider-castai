@@ -39,6 +39,7 @@ jobs:
         uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3.0.0
         with:
           workload_identity_provider: projects/883821977796/locations/global/workloadIdentityPools/onyx-github-pool/providers/onyx-github-terraform-provider
+          project_id: onyx-fyvd
 
       - name: Read secrets from onyx
         uses: google-github-actions/get-secretmanager-secrets@bc9c54b29fdffb8a47776820a7d26e77b379d262 # v3.0.0
@@ -70,11 +71,11 @@ jobs:
 
       - name: Acceptance test
         env:
-          ARM_CLIENT_ID: ${{ vars.AZURE_TF_ACCEPTANCE_TEST_ARM_CLIENT_ID_V2 }}
-          ARM_SUBSCRIPTION_ID: ${{ vars.AZURE_TF_ACCEPTANCE_TEST_ARM_SUBSCRIPTION_ID_V2 }}
-          ARM_TENANT_ID: ${{ vars.AZURE_TF_ACCEPTANCE_TEST_ARM_TENANT_ID_V2 }}
+          ARM_CLIENT_ID: ${{ vars.AZURE_TF_ACCEPTANCE_TEST_ARM_CLIENT_ID }}
+          ARM_SUBSCRIPTION_ID: ${{ vars.AZURE_TF_ACCEPTANCE_TEST_ARM_SUBSCRIPTION_ID }}
+          ARM_TENANT_ID: ${{ vars.AZURE_TF_ACCEPTANCE_TEST_ARM_TENANT_ID }}
           AZURE_TF_ACCEPTANCE_TEST_FEDERATION_ID: ${{ vars.AZURE_TF_ACCEPTANCE_TEST_FEDERATION_ID }}
-          AZURE_TF_ACCEPTANCE_TEST_FEDERATION_TENANT_ID: ${{ vars.AZURE_TF_ACCEPTANCE_TEST_ARM_TENANT_ID_V2 }}
+          AZURE_TF_ACCEPTANCE_TEST_FEDERATION_TENANT_ID: ${{ vars.AZURE_TF_ACCEPTANCE_TEST_ARM_TENANT_ID }}
           AZURE_TF_ACCEPTANCE_TEST_FEDERATION_CLIENT_ID: ${{ vars.AZURE_TF_ACCEPTANCE_TEST_FEDERATION_CLIENT_ID }}
           SSO_CLIENT_ID: ${{ vars.SSO_CLIENT_ID }}
           SSO_DOMAIN: ${{ vars.SSO_DOMAIN }}
@@ -99,6 +100,7 @@ jobs:
         uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3.0.0
         with:
           workload_identity_provider: projects/883821977796/locations/global/workloadIdentityPools/onyx-github-pool/providers/onyx-github-terraform-provider
+          project_id: onyx-fyvd
 
       - name: Read secrets from onyx
         uses: google-github-actions/get-secretmanager-secrets@bc9c54b29fdffb8a47776820a7d26e77b379d262 # v3.0.0
@@ -154,6 +156,7 @@ jobs:
         uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3.0.0
         with:
           workload_identity_provider: projects/883821977796/locations/global/workloadIdentityPools/onyx-github-pool/providers/onyx-github-terraform-provider
+          project_id: onyx-fyvd
 
       - name: Read secrets from onyx
         uses: google-github-actions/get-secretmanager-secrets@bc9c54b29fdffb8a47776820a7d26e77b379d262 # v3.0.0
@@ -162,6 +165,7 @@ jobs:
           secrets: |-
             CASTAI_API_TOKEN:onyx-fyvd/terraform-provider-castai-token-dev
             GOOGLE_CREDENTIALS:onyx-fyvd/terraform-provider-google-credentials
+            CASTAI_GCP_CREDENTIALS:onyx-fyvd/terraform-provider-castai-google-credentials
             SSO_CLIENT_SECRET:onyx-fyvd/terraform-provider-sso-client-secret
 
       - name: Setup Go
@@ -223,6 +227,7 @@ jobs:
         uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3.0.0
         with:
           workload_identity_provider: projects/883821977796/locations/global/workloadIdentityPools/onyx-github-pool/providers/onyx-github-terraform-provider
+          project_id: onyx-fyvd
 
       - name: Read secrets from onyx
         uses: google-github-actions/get-secretmanager-secrets@bc9c54b29fdffb8a47776820a7d26e77b379d262 # v3.0.0

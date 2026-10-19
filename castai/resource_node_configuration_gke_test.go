@@ -26,7 +26,12 @@ func TestAccGKE_ResourceNodeConfiguration(t *testing.T) {
 	projectID := os.Getenv("GOOGLE_PROJECT_ID")
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:          func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			if os.Getenv("CASTAI_GCP_CREDENTIALS") == "" {
+				t.Skipf("missing required env var: CASTAI_GCP_CREDENTIALS")
+			}
+		},
 		ProviderFactories: providerFactories,
 		CheckDestroy:      testAccCheckNodeConfigurationDestroy,
 		Steps: []resource.TestStep{
@@ -232,15 +237,16 @@ resource "castai_node_configuration" "test" {
 `, rName))
 }
 func testAccGKEClusterConfig(rName string, clusterName string, projectID string) string {
+	castaiCreds := os.Getenv("CASTAI_GCP_CREDENTIALS")
 	return ConfigCompose(testAccGCPConfig(rName, clusterName, projectID), fmt.Sprintf(`
 resource "castai_gke_cluster" "test" {
-  project_id                 = %[1]q
-  location                   = "us-central1-c" 
-  name                       = %[2]q 
-  credentials_json           = base64decode(google_service_account_key.castai_key.private_key)
+  project_id       = %[1]q
+  location         = "us-central1-c"
+  name             = %[2]q
+  credentials_json = %[3]q
 }
 
-`, projectID, clusterName))
+`, projectID, clusterName, castaiCreds))
 }
 
 // CAST AI SA, custom role and bindings are pre-created by IaC
@@ -252,16 +258,6 @@ func testAccGCPConfig(_ string, clusterName, projectID string) string {
 locals {
   cluster_name = %[1]q
   subnet_id = "projects/%[2]s/regions/us-central1/subnetworks/%[3]s"
-}
-
-data "google_service_account" "castai_service_account" {
-  account_id = "tf-acc-castai"
-  project    = %[2]q
-}
-
-resource "google_service_account_key" "castai_key" {
-  service_account_id = data.google_service_account.castai_service_account.name
-  public_key_type    = "TYPE_X509_PEM_FILE"
 }
 
 `, clusterName, projectID, acceptanceTestClusterSubnetworkName)
