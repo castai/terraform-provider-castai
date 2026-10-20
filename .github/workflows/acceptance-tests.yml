@@ -71,14 +71,14 @@ jobs:
 
       - name: Acceptance test
         env:
-          ARM_CLIENT_ID: ${{ vars.AZURE_TF_ACCEPTANCE_TEST_ARM_CLIENT_ID }}
-          ARM_SUBSCRIPTION_ID: ${{ vars.AZURE_TF_ACCEPTANCE_TEST_ARM_SUBSCRIPTION_ID }}
-          ARM_TENANT_ID: ${{ vars.AZURE_TF_ACCEPTANCE_TEST_ARM_TENANT_ID }}
-          AZURE_TF_ACCEPTANCE_TEST_FEDERATION_ID: ${{ vars.AZURE_TF_ACCEPTANCE_TEST_FEDERATION_ID }}
-          AZURE_TF_ACCEPTANCE_TEST_FEDERATION_TENANT_ID: ${{ vars.AZURE_TF_ACCEPTANCE_TEST_ARM_TENANT_ID }}
-          AZURE_TF_ACCEPTANCE_TEST_FEDERATION_CLIENT_ID: ${{ vars.AZURE_TF_ACCEPTANCE_TEST_FEDERATION_CLIENT_ID }}
-          SSO_CLIENT_ID: ${{ vars.SSO_CLIENT_ID }}
-          SSO_DOMAIN: ${{ vars.SSO_DOMAIN }}
+          ARM_CLIENT_ID: ${{ secrets.AZURE_TF_ACCEPTANCE_TEST_ARM_CLIENT_ID }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_TF_ACCEPTANCE_TEST_ARM_SUBSCRIPTION_ID }}
+          ARM_TENANT_ID: ${{ secrets.AZURE_TF_ACCEPTANCE_TEST_ARM_TENANT_ID }}
+          AZURE_TF_ACCEPTANCE_TEST_FEDERATION_ID: ${{ secrets.AZURE_TF_ACCEPTANCE_TEST_FEDERATION_ID }}
+          AZURE_TF_ACCEPTANCE_TEST_FEDERATION_TENANT_ID: ${{ secrets.AZURE_TF_ACCEPTANCE_TEST_ARM_TENANT_ID }}
+          AZURE_TF_ACCEPTANCE_TEST_FEDERATION_CLIENT_ID: ${{ secrets.AZURE_TF_ACCEPTANCE_TEST_FEDERATION_CLIENT_ID }}
+          SSO_CLIENT_ID: ${{ secrets.SSO_CLIENT_ID }}
+          SSO_DOMAIN: ${{ secrets.SSO_DOMAIN }}
           ACCEPTANCE_TEST_ORGANIZATION_ID: ${{ vars.TF_ACCEPTANCE_TEST_ORGANIZATION_ID }}
         run: make testacc-aks
   eks:
@@ -133,8 +133,8 @@ jobs:
 
       - name: Acceptance test
         env:
-          SSO_CLIENT_ID: ${{ vars.SSO_CLIENT_ID }}
-          SSO_DOMAIN: ${{ vars.SSO_DOMAIN }}
+          SSO_CLIENT_ID: ${{ secrets.SSO_CLIENT_ID }}
+          SSO_DOMAIN: ${{ secrets.SSO_DOMAIN }}
           ACCEPTANCE_TEST_ORGANIZATION_ID: ${{ vars.TF_ACCEPTANCE_TEST_ORGANIZATION_ID }}
         run: make testacc-eks
   gke:
@@ -199,13 +199,13 @@ jobs:
         with:
           cluster_name: tf-core-acc-20230723
           location: us-central1-c
-          project_id: ${{ vars.GOOGLE_TF_ACCEPTANCE_PROJECT_ID }}
+          project_id: ${{ secrets.GOOGLE_TF_ACCEPTANCE_PROJECT_ID }}
 
       - name: Acceptance test
         env:
-          GOOGLE_PROJECT_ID: ${{ vars.GOOGLE_TF_ACCEPTANCE_PROJECT_ID }}
-          SSO_CLIENT_ID: ${{ vars.SSO_CLIENT_ID }}
-          SSO_DOMAIN: ${{ vars.SSO_DOMAIN }}
+          GOOGLE_PROJECT_ID: ${{ secrets.GOOGLE_TF_ACCEPTANCE_PROJECT_ID }}
+          SSO_CLIENT_ID: ${{ secrets.SSO_CLIENT_ID }}
+          SSO_DOMAIN: ${{ secrets.SSO_DOMAIN }}
           ACCEPTANCE_TEST_ORGANIZATION_ID: ${{ vars.TF_ACCEPTANCE_TEST_ORGANIZATION_ID }}
         run: make testacc-gke
   cloud-agnostic:
@@ -258,8 +258,8 @@ jobs:
 
       - name: Acceptance test
         env:
-          SSO_CLIENT_ID: ${{ vars.SSO_CLIENT_ID }}
-          SSO_DOMAIN: ${{ vars.SSO_DOMAIN }}
+          SSO_CLIENT_ID: ${{ secrets.SSO_CLIENT_ID }}
+          SSO_DOMAIN: ${{ secrets.SSO_DOMAIN }}
           ACCEPTANCE_TEST_ORGANIZATION_ID: ${{ vars.TF_ACCEPTANCE_TEST_ORGANIZATION_ID }}
         run: make testacc-cloud-agnostic
 
