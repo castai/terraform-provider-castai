@@ -4,18 +4,20 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"os"
 	"testing"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
+	"github.com/samber/lo"
 )
 
 func TestAccEKS_ResourceNodeConfiguration(t *testing.T) {
 	rName := fmt.Sprintf("%v-node-config-%v", ResourcePrefix, acctest.RandString(8))
 	resourceName := "castai_node_configuration.test"
-	clusterName := "core-tf-acc-21-08-2025"
+	clusterName, _ := lo.Coalesce(os.Getenv("CLUSTER_NAME"), "core-tf-acc-21-08-2025")
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
@@ -228,7 +230,7 @@ data "aws_security_group" "test" {
 
 data "aws_subnets" "core" {
 	tags = {
-		Name = "*core-tf-acc-21-08-2025-private*" # private subnet is the one with NAT gateway for internet access.
+		Name = "e2e-clusters-private-*" # private subnet is the one with NAT gateway for internet access.
 	}
 }
 

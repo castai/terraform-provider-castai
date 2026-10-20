@@ -1125,13 +1125,13 @@ type autoscalerPoliciesAccSettings struct {
 
 // TestAccEKS_ResourceAutoscalerPolicies_basic covers the V2 autoscaler policies
 // resource end-to-end against a real cluster. It registers the same EKS
-// cluster as the V1 autoscaler acceptance test ("cost-terraform" by default,
+// cluster as the V1 autoscaler acceptance test ("core-tf-acc-21-08-2025" by default,
 // overridable via CLUSTER_NAME), and both resources manage autoscaling policies
 // on that cluster, so it must not run in parallel with the V1 test: neither
 // test calls t.Parallel(), which keeps them sequential within the package.
 func TestAccEKS_ResourceAutoscalerPolicies_basic(t *testing.T) {
 	rName := fmt.Sprintf("%v-policies-%v", ResourcePrefix, acctest.RandString(8))
-	clusterName, _ := lo.Coalesce(os.Getenv("CLUSTER_NAME"), "cost-terraform")
+	clusterName, _ := lo.Coalesce(os.Getenv("CLUSTER_NAME"), "core-tf-acc-21-08-2025")
 
 	initial := autoscalerPoliciesAccSettings{
 		Enabled:                  true,

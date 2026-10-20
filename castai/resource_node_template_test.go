@@ -1580,7 +1580,7 @@ func TestNodeTemplateResourceDelete_defaultNodeTemplate(t *testing.T) {
 func TestAccEKS_ResourceNodeTemplate_basic(t *testing.T) {
 	rName := fmt.Sprintf("%v-node-template-%v", ResourcePrefix, acctest.RandString(8))
 	resourceName := "castai_node_template.test"
-	clusterName, _ := lo.Coalesce(os.Getenv("CLUSTER_NAME"), "cost-terraform")
+	clusterName, _ := lo.Coalesce(os.Getenv("CLUSTER_NAME"), "core-tf-acc-21-08-2025")
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
@@ -1768,7 +1768,7 @@ func TestAccEKS_ResourceNodeTemplate_basic(t *testing.T) {
 func TestAccEKS_ResourceNodeTemplate_edgeLocationConfig(t *testing.T) {
 	rName := fmt.Sprintf("%v-node-template-%v", ResourcePrefix, acctest.RandString(8))
 	resourceName := "castai_node_template.test"
-	clusterName, _ := lo.Coalesce(os.Getenv("CLUSTER_NAME"), "cost-terraform")
+	clusterName, _ := lo.Coalesce(os.Getenv("CLUSTER_NAME"), "core-tf-acc-21-08-2025")
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
@@ -1823,7 +1823,7 @@ func TestAccEKS_ResourceNodeTemplate_edgeLocationConfig(t *testing.T) {
 func TestAccEKS_ResourceNodeTemplate_edgeLocationConfigSwitch(t *testing.T) {
 	rName := fmt.Sprintf("%v-node-template-%v", ResourcePrefix, acctest.RandString(8))
 	resourceName := "castai_node_template.test"
-	clusterName, _ := lo.Coalesce(os.Getenv("CLUSTER_NAME"), "cost-terraform")
+	clusterName, _ := lo.Coalesce(os.Getenv("CLUSTER_NAME"), "core-tf-acc-21-08-2025")
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
@@ -2273,7 +2273,7 @@ func testAccNodeConfig(rName string) string {
 	return ConfigCompose(fmt.Sprintf(`
 data "aws_subnets" "cost" {
 	tags = {
-		Name = "*cost-terraform-cluster/SubnetPublic*"
+		Name = "e2e-clusters-private-*"
 	}
 }
 
