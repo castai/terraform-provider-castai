@@ -108,9 +108,16 @@ jobs:
           export_to_environment: true
           secrets: |-
             CASTAI_API_TOKEN:onyx-fyvd/terraform-provider-castai-token-dev
-            AWS_ACCESS_KEY_ID:onyx-fyvd/terraform-provider-aws-access-key-id
-            AWS_SECRET_ACCESS_KEY:onyx-fyvd/terraform-provider-aws-secret-access-key
             SSO_CLIENT_SECRET:onyx-fyvd/terraform-provider-sso-client-secret
+
+      - name: Configure AWS credentials
+        # Role from IaC e2e-core/eks-tf-acc.tf; short-lived STS credentials
+        # for the AWS provider blocks of the acceptance test configs.
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: arn:aws:iam::038471709730:role/terraform-provider-acc-github
+          aws-region: eu-central-1
+          role-duration-seconds: 14400
 
       - name: Setup Go
         uses: actions/setup-go@v6
