@@ -52,7 +52,7 @@ func TestAccGKE_ResourceNodeConfiguration(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "gke.0.network_tags.1", "bc"),
 					resource.TestCheckResourceAttr(resourceName, "gke.0.zones.#", "0"),
 					resource.TestCheckResourceAttr(resourceName, "gke.0.secondary_boot_disks.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "gke.0.secondary_boot_disks.0.disk_image", "projects/end2end-313309/global/images/ep-e2e-images-cache"),
+					resource.TestCheckResourceAttr(resourceName, "gke.0.secondary_boot_disks.0.disk_image", fmt.Sprintf("projects/%s/global/images/tf-acc-secondary-boot-cache", projectID)),
 					resource.TestCheckResourceAttr(resourceName, "gke.0.secondary_boot_disks.0.mode", "CONTAINER_IMAGE_CACHE"),
 					resource.TestCheckResourceAttr(resourceName, "gke.0.on_host_maintenance", "MIGRATE"),
 				),
@@ -112,7 +112,7 @@ func TestAccGKE_ResourceNodeConfiguration(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "gke.0.zones.0", "us-central1-c"),
 					resource.TestCheckResourceAttr(resourceName, "gke.0.use_ephemeral_storage_local_ssd", "true"),
 					resource.TestCheckResourceAttr(resourceName, "gke.0.secondary_boot_disks.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "gke.0.secondary_boot_disks.0.disk_image", "projects/end2end-313309/global/images/ep-e2e-images-cache"),
+					resource.TestCheckResourceAttr(resourceName, "gke.0.secondary_boot_disks.0.disk_image", fmt.Sprintf("projects/%s/global/images/tf-acc-secondary-boot-cache", projectID)),
 					resource.TestCheckResourceAttr(resourceName, "gke.0.secondary_boot_disks.0.mode", "MODE_UNSPECIFIED"),
 					resource.TestCheckResourceAttr(resourceName, "gke.0.loadbalancers.0.target_backend_pools.0.name", "tg-1"),
 					resource.TestCheckResourceAttr(resourceName, "gke.0.loadbalancers.0.unmanaged_instance_groups.0.name", "ig-1"),
@@ -127,16 +127,16 @@ func TestAccGKE_ResourceNodeConfiguration(t *testing.T) {
 }
 
 func testAccGKENodeConfigurationConfig(rName, clusterName, projectID string) string {
-	const gkeParams = `
+	gkeParams := fmt.Sprintf(`
 		max_pods_per_node = 31
 		network_tags = ["ab", "bc"]
 		disk_type = "pd-balanced"
 		on_host_maintenance = "MIGRATE"
 		secondary_boot_disks {
-			disk_image = "projects/end2end-313309/global/images/ep-e2e-images-cache"
+			disk_image = "projects/%[1]s/global/images/tf-acc-secondary-boot-cache"
 			mode = "CONTAINER_IMAGE_CACHE"
 		}
-	`
+	`, projectID)
 	return testAccGKENodeConfigurationConfigWithGKEConfig(rName, clusterName, projectID, gkeParams)
 }
 
@@ -201,7 +201,7 @@ resource "castai_node_configuration" "test" {
     zones = ["us-central1-c"]
     use_ephemeral_storage_local_ssd = true
 	secondary_boot_disks {
-		disk_image = "projects/end2end-313309/global/images/ep-e2e-images-cache"
+		disk_image = "projects/%[2]s/global/images/tf-acc-secondary-boot-cache"
 		mode = "MODE_UNSPECIFIED"
 	}
 	loadbalancers {
@@ -224,7 +224,7 @@ resource "castai_node_configuration" "test" {
   	}
   }
 }
-`, rName))
+`, rName, projectID))
 }
 func testAccGKEClusterConfig(rName string, clusterName string, projectID string) string {
 	castaiCreds := os.Getenv("CASTAI_GCP_CREDENTIALS")
