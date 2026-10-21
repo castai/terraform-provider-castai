@@ -608,7 +608,7 @@ type ClientInterface interface {
 	RbacServiceAPIGetGroup(ctx context.Context, organizationId string, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// UsersAPILeaveOrganization request
-	UsersAPILeaveOrganization(ctx context.Context, organizationId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+	UsersAPILeaveOrganization(ctx context.Context, organizationId string, params *UsersAPILeaveOrganizationParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// InventoryAPIGetReservations request
 	InventoryAPIGetReservations(ctx context.Context, organizationId string, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -707,7 +707,7 @@ type ClientInterface interface {
 	UsersAPIAddUserToOrganization(ctx context.Context, organizationId string, body UsersAPIAddUserToOrganizationJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// UsersAPIRemoveUserFromOrganization request
-	UsersAPIRemoveUserFromOrganization(ctx context.Context, organizationId string, userId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+	UsersAPIRemoveUserFromOrganization(ctx context.Context, organizationId string, userId string, params *UsersAPIRemoveUserFromOrganizationParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// UsersAPIListUserGroups request
 	UsersAPIListUserGroups(ctx context.Context, organizationId string, userId string, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -3327,8 +3327,8 @@ func (c *Client) RbacServiceAPIGetGroup(ctx context.Context, organizationId stri
 	return c.Client.Do(req)
 }
 
-func (c *Client) UsersAPILeaveOrganization(ctx context.Context, organizationId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewUsersAPILeaveOrganizationRequest(c.Server, organizationId)
+func (c *Client) UsersAPILeaveOrganization(ctx context.Context, organizationId string, params *UsersAPILeaveOrganizationParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUsersAPILeaveOrganizationRequest(c.Server, organizationId, params)
 	if err != nil {
 		return nil, err
 	}
@@ -3759,8 +3759,8 @@ func (c *Client) UsersAPIAddUserToOrganization(ctx context.Context, organization
 	return c.Client.Do(req)
 }
 
-func (c *Client) UsersAPIRemoveUserFromOrganization(ctx context.Context, organizationId string, userId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewUsersAPIRemoveUserFromOrganizationRequest(c.Server, organizationId, userId)
+func (c *Client) UsersAPIRemoveUserFromOrganization(ctx context.Context, organizationId string, userId string, params *UsersAPIRemoveUserFromOrganizationParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUsersAPIRemoveUserFromOrganizationRequest(c.Server, organizationId, userId, params)
 	if err != nil {
 		return nil, err
 	}
@@ -14087,7 +14087,7 @@ func NewRbacServiceAPIGetGroupRequest(server string, organizationId string, id s
 }
 
 // NewUsersAPILeaveOrganizationRequest generates requests for UsersAPILeaveOrganization
-func NewUsersAPILeaveOrganizationRequest(server string, organizationId string) (*http.Request, error) {
+func NewUsersAPILeaveOrganizationRequest(server string, organizationId string, params *UsersAPILeaveOrganizationParams) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -14110,6 +14110,28 @@ func NewUsersAPILeaveOrganizationRequest(server string, organizationId string) (
 	queryURL, err := serverURL.Parse(operationPath)
 	if err != nil {
 		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if params.Product != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "product", runtime.ParamLocationQuery, *params.Product); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
 	}
 
 	req, err := http.NewRequest("DELETE", queryURL.String(), nil)
@@ -15488,6 +15510,22 @@ func NewUsersAPIRemoveOrganizationUsersRequest(server string, organizationId str
 			}
 		}
 
+		if params.Product != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "product", runtime.ParamLocationQuery, *params.Product); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
 		queryURL.RawQuery = queryValues.Encode()
 	}
 
@@ -15560,6 +15598,22 @@ func NewUsersAPIListOrganizationUsersRequest(server string, organizationId strin
 
 		}
 
+		if params.Product != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "product", runtime.ParamLocationQuery, *params.Product); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
 		queryURL.RawQuery = queryValues.Encode()
 	}
 
@@ -15619,7 +15673,7 @@ func NewUsersAPIAddUserToOrganizationRequestWithBody(server string, organization
 }
 
 // NewUsersAPIRemoveUserFromOrganizationRequest generates requests for UsersAPIRemoveUserFromOrganization
-func NewUsersAPIRemoveUserFromOrganizationRequest(server string, organizationId string, userId string) (*http.Request, error) {
+func NewUsersAPIRemoveUserFromOrganizationRequest(server string, organizationId string, userId string, params *UsersAPIRemoveUserFromOrganizationParams) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -15649,6 +15703,28 @@ func NewUsersAPIRemoveUserFromOrganizationRequest(server string, organizationId 
 	queryURL, err := serverURL.Parse(operationPath)
 	if err != nil {
 		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if params.Product != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "product", runtime.ParamLocationQuery, *params.Product); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
 	}
 
 	req, err := http.NewRequest("DELETE", queryURL.String(), nil)
@@ -22782,7 +22858,7 @@ type ClientWithResponsesInterface interface {
 	RbacServiceAPIGetGroupWithResponse(ctx context.Context, organizationId string, id string) (*RbacServiceAPIGetGroupResponse, error)
 
 	// UsersAPILeaveOrganization request
-	UsersAPILeaveOrganizationWithResponse(ctx context.Context, organizationId string) (*UsersAPILeaveOrganizationResponse, error)
+	UsersAPILeaveOrganizationWithResponse(ctx context.Context, organizationId string, params *UsersAPILeaveOrganizationParams) (*UsersAPILeaveOrganizationResponse, error)
 
 	// InventoryAPIGetReservations request
 	InventoryAPIGetReservationsWithResponse(ctx context.Context, organizationId string) (*InventoryAPIGetReservationsResponse, error)
@@ -22881,7 +22957,7 @@ type ClientWithResponsesInterface interface {
 	UsersAPIAddUserToOrganizationWithResponse(ctx context.Context, organizationId string, body UsersAPIAddUserToOrganizationJSONRequestBody) (*UsersAPIAddUserToOrganizationResponse, error)
 
 	// UsersAPIRemoveUserFromOrganization request
-	UsersAPIRemoveUserFromOrganizationWithResponse(ctx context.Context, organizationId string, userId string) (*UsersAPIRemoveUserFromOrganizationResponse, error)
+	UsersAPIRemoveUserFromOrganizationWithResponse(ctx context.Context, organizationId string, userId string, params *UsersAPIRemoveUserFromOrganizationParams) (*UsersAPIRemoveUserFromOrganizationResponse, error)
 
 	// UsersAPIListUserGroups request
 	UsersAPIListUserGroupsWithResponse(ctx context.Context, organizationId string, userId string) (*UsersAPIListUserGroupsResponse, error)
@@ -32938,8 +33014,8 @@ func (c *ClientWithResponses) RbacServiceAPIGetGroupWithResponse(ctx context.Con
 }
 
 // UsersAPILeaveOrganizationWithResponse request returning *UsersAPILeaveOrganizationResponse
-func (c *ClientWithResponses) UsersAPILeaveOrganizationWithResponse(ctx context.Context, organizationId string) (*UsersAPILeaveOrganizationResponse, error) {
-	rsp, err := c.UsersAPILeaveOrganization(ctx, organizationId)
+func (c *ClientWithResponses) UsersAPILeaveOrganizationWithResponse(ctx context.Context, organizationId string, params *UsersAPILeaveOrganizationParams) (*UsersAPILeaveOrganizationResponse, error) {
+	rsp, err := c.UsersAPILeaveOrganization(ctx, organizationId, params)
 	if err != nil {
 		return nil, err
 	}
@@ -33253,8 +33329,8 @@ func (c *ClientWithResponses) UsersAPIAddUserToOrganizationWithResponse(ctx cont
 }
 
 // UsersAPIRemoveUserFromOrganizationWithResponse request returning *UsersAPIRemoveUserFromOrganizationResponse
-func (c *ClientWithResponses) UsersAPIRemoveUserFromOrganizationWithResponse(ctx context.Context, organizationId string, userId string) (*UsersAPIRemoveUserFromOrganizationResponse, error) {
-	rsp, err := c.UsersAPIRemoveUserFromOrganization(ctx, organizationId, userId)
+func (c *ClientWithResponses) UsersAPIRemoveUserFromOrganizationWithResponse(ctx context.Context, organizationId string, userId string, params *UsersAPIRemoveUserFromOrganizationParams) (*UsersAPIRemoveUserFromOrganizationResponse, error) {
+	rsp, err := c.UsersAPIRemoveUserFromOrganization(ctx, organizationId, userId, params)
 	if err != nil {
 		return nil, err
 	}
