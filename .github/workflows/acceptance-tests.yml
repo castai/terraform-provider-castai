@@ -80,10 +80,6 @@ jobs:
           SSO_CLIENT_ID: ${{ secrets.SSO_CLIENT_ID }}
           SSO_DOMAIN: ${{ secrets.SSO_DOMAIN }}
           ACCEPTANCE_TEST_ORGANIZATION_ID: ${{ vars.TF_ACCEPTANCE_TEST_ORGANIZATION_ID }}
-          CASTAI_CLUSTER_WATCH: "1"
-          TF_LOG: DEBUG
-          TF_LOG_PROVIDER: TRACE
-          TF_LOG_SDK: TRACE
         run: make testacc-aks
   eks:
     needs: files-changed

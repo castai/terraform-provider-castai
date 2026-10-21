@@ -537,16 +537,13 @@ func TestAccAKS_ResourceAKSCluster(t *testing.T) {
 		nodeConfResourceName = "castai_node_configuration.test"
 	)
 
-	testAccPreCheck(t)
-	watchClusterDuringTest(t, clusterName)
-
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
 		ProviderFactories: providerFactories,
 		// Destroy of the cluster is not working properly. Cluster wasn't full onboarded and it's getting destroyed.
 		// https://castai.atlassian.net/browse/CORE-2868 should solve the issue
 		//CheckDestroy:      testAccCheckAKSClusterDestroy,
-		Steps: withStepLogging([]resource.TestStep{
+		Steps: []resource.TestStep{
 			{
 				Config: testAccAKSWithClientSecretConfig(clusterName),
 				Check: resource.ComposeTestCheckFunc(
@@ -630,7 +627,7 @@ func TestAccAKS_ResourceAKSCluster(t *testing.T) {
 					resource.TestCheckResourceAttr(nodeConfResourceName, "gke.#", "0"),
 				),
 			},
-		}),
+		},
 		ExternalProviders: map[string]resource.ExternalProvider{
 			"azurerm": {
 				Source:            "hashicorp/azurerm",
