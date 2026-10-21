@@ -243,6 +243,7 @@ jobs:
           export_to_environment: true
           secrets: |-
             CASTAI_API_TOKEN:onyx-fyvd/terraform-provider-castai-token-dev
+            CASTAI_ENTERPRISE_API_TOKEN:onyx-fyvd/terraform-provider-castai-enterprise-token-dev
             SSO_CLIENT_SECRET:onyx-fyvd/terraform-provider-sso-client-secret
 
       - name: Setup Go
