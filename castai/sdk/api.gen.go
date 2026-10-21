@@ -269,9 +269,9 @@ const (
 
 // Defines values for CastaiRbacV1beta1ProductType.
 const (
-	CastaiRbacV1beta1ProductTypePRODUCTTYPEBOTH        CastaiRbacV1beta1ProductType = "PRODUCT_TYPE_BOTH"
 	CastaiRbacV1beta1ProductTypePRODUCTTYPECASTAI      CastaiRbacV1beta1ProductType = "PRODUCT_TYPE_CASTAI"
 	CastaiRbacV1beta1ProductTypePRODUCTTYPEKIMCHI      CastaiRbacV1beta1ProductType = "PRODUCT_TYPE_KIMCHI"
+	CastaiRbacV1beta1ProductTypePRODUCTTYPEPLATFORM    CastaiRbacV1beta1ProductType = "PRODUCT_TYPE_PLATFORM"
 	CastaiRbacV1beta1ProductTypePRODUCTTYPEUNSPECIFIED CastaiRbacV1beta1ProductType = "PRODUCT_TYPE_UNSPECIFIED"
 )
 
@@ -1197,9 +1197,9 @@ const (
 
 // Defines values for RbacServiceAPIListPermissionGroupsParamsProduct.
 const (
-	RbacServiceAPIListPermissionGroupsParamsProductPRODUCTTYPEBOTH        RbacServiceAPIListPermissionGroupsParamsProduct = "PRODUCT_TYPE_BOTH"
 	RbacServiceAPIListPermissionGroupsParamsProductPRODUCTTYPECASTAI      RbacServiceAPIListPermissionGroupsParamsProduct = "PRODUCT_TYPE_CASTAI"
 	RbacServiceAPIListPermissionGroupsParamsProductPRODUCTTYPEKIMCHI      RbacServiceAPIListPermissionGroupsParamsProduct = "PRODUCT_TYPE_KIMCHI"
+	RbacServiceAPIListPermissionGroupsParamsProductPRODUCTTYPEPLATFORM    RbacServiceAPIListPermissionGroupsParamsProduct = "PRODUCT_TYPE_PLATFORM"
 	RbacServiceAPIListPermissionGroupsParamsProductPRODUCTTYPEUNSPECIFIED RbacServiceAPIListPermissionGroupsParamsProduct = "PRODUCT_TYPE_UNSPECIFIED"
 )
 
@@ -1334,6 +1334,14 @@ const (
 	ExternalClusterAPITriggerResumeClusterParamsModeOPERATIONMODEUNSPECIFIED ExternalClusterAPITriggerResumeClusterParamsMode = "OPERATION_MODE_UNSPECIFIED"
 )
 
+// Defines values for UsersAPILeaveOrganizationParamsProduct.
+const (
+	UsersAPILeaveOrganizationParamsProductPRODUCTTYPECASTAI      UsersAPILeaveOrganizationParamsProduct = "PRODUCT_TYPE_CASTAI"
+	UsersAPILeaveOrganizationParamsProductPRODUCTTYPEKIMCHI      UsersAPILeaveOrganizationParamsProduct = "PRODUCT_TYPE_KIMCHI"
+	UsersAPILeaveOrganizationParamsProductPRODUCTTYPEPLATFORM    UsersAPILeaveOrganizationParamsProduct = "PRODUCT_TYPE_PLATFORM"
+	UsersAPILeaveOrganizationParamsProductPRODUCTTYPEUNSPECIFIED UsersAPILeaveOrganizationParamsProduct = "PRODUCT_TYPE_UNSPECIFIED"
+)
+
 // Defines values for RbacServiceAPIListRoleBindingsParamsScopeType.
 const (
 	RbacServiceAPIListRoleBindingsParamsScopeTypeCLUSTER      RbacServiceAPIListRoleBindingsParamsScopeType = "CLUSTER"
@@ -1352,6 +1360,30 @@ const (
 	RbacServiceAPIListRolesParamsTypeALL        RbacServiceAPIListRolesParamsType = "ALL"
 	RbacServiceAPIListRolesParamsTypeDEFAULT    RbacServiceAPIListRolesParamsType = "DEFAULT"
 	RbacServiceAPIListRolesParamsTypeENTERPRISE RbacServiceAPIListRolesParamsType = "ENTERPRISE"
+)
+
+// Defines values for UsersAPIRemoveOrganizationUsersParamsProduct.
+const (
+	UsersAPIRemoveOrganizationUsersParamsProductPRODUCTTYPECASTAI      UsersAPIRemoveOrganizationUsersParamsProduct = "PRODUCT_TYPE_CASTAI"
+	UsersAPIRemoveOrganizationUsersParamsProductPRODUCTTYPEKIMCHI      UsersAPIRemoveOrganizationUsersParamsProduct = "PRODUCT_TYPE_KIMCHI"
+	UsersAPIRemoveOrganizationUsersParamsProductPRODUCTTYPEPLATFORM    UsersAPIRemoveOrganizationUsersParamsProduct = "PRODUCT_TYPE_PLATFORM"
+	UsersAPIRemoveOrganizationUsersParamsProductPRODUCTTYPEUNSPECIFIED UsersAPIRemoveOrganizationUsersParamsProduct = "PRODUCT_TYPE_UNSPECIFIED"
+)
+
+// Defines values for UsersAPIListOrganizationUsersParamsProduct.
+const (
+	UsersAPIListOrganizationUsersParamsProductPRODUCTTYPECASTAI      UsersAPIListOrganizationUsersParamsProduct = "PRODUCT_TYPE_CASTAI"
+	UsersAPIListOrganizationUsersParamsProductPRODUCTTYPEKIMCHI      UsersAPIListOrganizationUsersParamsProduct = "PRODUCT_TYPE_KIMCHI"
+	UsersAPIListOrganizationUsersParamsProductPRODUCTTYPEPLATFORM    UsersAPIListOrganizationUsersParamsProduct = "PRODUCT_TYPE_PLATFORM"
+	UsersAPIListOrganizationUsersParamsProductPRODUCTTYPEUNSPECIFIED UsersAPIListOrganizationUsersParamsProduct = "PRODUCT_TYPE_UNSPECIFIED"
+)
+
+// Defines values for UsersAPIRemoveUserFromOrganizationParamsProduct.
+const (
+	UsersAPIRemoveUserFromOrganizationParamsProductPRODUCTTYPECASTAI      UsersAPIRemoveUserFromOrganizationParamsProduct = "PRODUCT_TYPE_CASTAI"
+	UsersAPIRemoveUserFromOrganizationParamsProductPRODUCTTYPEKIMCHI      UsersAPIRemoveUserFromOrganizationParamsProduct = "PRODUCT_TYPE_KIMCHI"
+	UsersAPIRemoveUserFromOrganizationParamsProductPRODUCTTYPEPLATFORM    UsersAPIRemoveUserFromOrganizationParamsProduct = "PRODUCT_TYPE_PLATFORM"
+	UsersAPIRemoveUserFromOrganizationParamsProductPRODUCTTYPEUNSPECIFIED UsersAPIRemoveUserFromOrganizationParamsProduct = "PRODUCT_TYPE_UNSPECIFIED"
 )
 
 // Defines values for CommitmentsAPIImportAzureReservationsParamsBehaviour.
@@ -1834,7 +1866,7 @@ type CastaiAutoscalerV1beta1RebalancingOptions struct {
 	// Deprecated:
 	KeepDrainTimeoutNodes *bool `json:"keepDrainTimeoutNodes"`
 
-	// MaxSimultaneousDrains Number of nodes to drain simultaniously.
+	// MaxSimultaneousDrains Number of nodes to drain simultaneously.
 	// when unspecified, defaults to unlimited.
 	MaxSimultaneousDrains *int32 `json:"maxSimultaneousDrains"`
 
@@ -4359,6 +4391,9 @@ type CastaiUsersV1beta1Membership struct {
 	CreatedAt *time.Time                    `json:"createdAt,omitempty"`
 	Groups    *[]CastaiUsersV1beta1GroupRef `json:"groups,omitempty"`
 	LoginAt   *time.Time                    `json:"loginAt,omitempty"`
+
+	// Products Products the member has access to in the organization.
+	Products *[]CastaiRbacV1beta1ProductType `json:"products,omitempty"`
 	// Deprecated:
 	Role *interface{} `json:"role,omitempty"`
 
@@ -6538,7 +6573,9 @@ type ExternalclusterV1HttpProxyConfig struct {
 	NoProxy    *[]string `json:"noProxy,omitempty"`
 }
 
-// ExternalclusterV1ImpersonationServiceAccountRequest defines model for externalcluster.v1.ImpersonationServiceAccountRequest.
+// ExternalclusterV1ImpersonationServiceAccountRequest ImpersonationServiceAccountRequest is the request message for creating the organization-level service account used for cloud identity
+// impersonation (workload identity federation for AKS, service account impersonation for GKE)
+// Calls to this endpoint can produce the same service account and the service account can be shared between clusters.
 type ExternalclusterV1ImpersonationServiceAccountRequest struct {
 	Provider *string `json:"provider,omitempty"`
 }
@@ -7102,11 +7139,20 @@ type ExternalclusterV1UpdateEKSClusterParams struct {
 
 // ExternalclusterV1UpdateGKEClusterParams UpdateGKEClusterParams defines updatable GKE cluster configuration.
 type ExternalclusterV1UpdateGKEClusterParams struct {
-	// GkeSaImpersonate service account email to impersonate.
+	// CastServiceAccountEmail CAST AI-side service account email used as the impersonation source
+	// (the per-org jumper service account whose email is returned by ImpersonationServiceAccount).
+	CastServiceAccountEmail *string `json:"castServiceAccountEmail,omitempty"`
+
+	// GkeSaImpersonate Deprecated. Use target_service_account_email instead.
 	GkeSaImpersonate *string `json:"gkeSaImpersonate,omitempty"`
 
-	// ProjectId GCP target project where cluster runs.
+	// ProjectId Deprecated. Do not use.
 	ProjectId *string `json:"projectId,omitempty"`
+
+	// TargetServiceAccountEmail Customer-side service account email to impersonate.
+	// Setting both target_service_account_email and cast_service_account_email enables
+	// the GKE impersonation flow; gke_sa_impersonate/project_id must not be set together with these.
+	TargetServiceAccountEmail *string `json:"targetServiceAccountEmail,omitempty"`
 }
 
 // ExternalclusterV1UpdateSelfHostedWithEC2NodesParams defines model for externalcluster.v1.UpdateSelfHostedWithEC2NodesParams.
@@ -13202,6 +13248,15 @@ type RbacServiceAPIListGroupsParams struct {
 // RbacServiceAPIUpdateGroupsJSONBody defines parameters for RbacServiceAPIUpdateGroups.
 type RbacServiceAPIUpdateGroupsJSONBody = []CastaiRbacV1beta1GroupUpdate
 
+// UsersAPILeaveOrganizationParams defines parameters for UsersAPILeaveOrganization.
+type UsersAPILeaveOrganizationParams struct {
+	// Product Product the leave applies to. Accepted for forward compatibility; currently not applied.
+	Product *UsersAPILeaveOrganizationParamsProduct `form:"product,omitempty" json:"product,omitempty"`
+}
+
+// UsersAPILeaveOrganizationParamsProduct defines parameters for UsersAPILeaveOrganization.
+type UsersAPILeaveOrganizationParamsProduct string
+
 // RbacServiceAPIListRoleBindingsParams defines parameters for RbacServiceAPIListRoleBindings.
 type RbacServiceAPIListRoleBindingsParams struct {
 	PageLimit *string `form:"page.limit,omitempty" json:"page.limit,omitempty"`
@@ -13304,7 +13359,13 @@ type ServiceAccountsAPIListServiceAccountKeysParams struct {
 type UsersAPIRemoveOrganizationUsersParams struct {
 	// Users Users is the list of user ids to remove.
 	Users []string `form:"users" json:"users"`
+
+	// Product Product the removal applies to. Accepted for forward compatibility; currently not applied.
+	Product *UsersAPIRemoveOrganizationUsersParamsProduct `form:"product,omitempty" json:"product,omitempty"`
 }
+
+// UsersAPIRemoveOrganizationUsersParamsProduct defines parameters for UsersAPIRemoveOrganizationUsers.
+type UsersAPIRemoveOrganizationUsersParamsProduct string
 
 // UsersAPIListOrganizationUsersParams defines parameters for UsersAPIListOrganizationUsers.
 type UsersAPIListOrganizationUsersParams struct {
@@ -13314,7 +13375,23 @@ type UsersAPIListOrganizationUsersParams struct {
 	// RoleId Filter by role ID. Multiple values can be passed as query parameters (e.g.,
 	// &role_id=x&role_id=y)
 	RoleId *[]string `form:"roleId,omitempty" json:"roleId,omitempty"`
+
+	// Product Filter by product. Only members having the given product are returned.
+	// When empty, no product filtering is applied (users of all products are returned).
+	Product *UsersAPIListOrganizationUsersParamsProduct `form:"product,omitempty" json:"product,omitempty"`
 }
+
+// UsersAPIListOrganizationUsersParamsProduct defines parameters for UsersAPIListOrganizationUsers.
+type UsersAPIListOrganizationUsersParamsProduct string
+
+// UsersAPIRemoveUserFromOrganizationParams defines parameters for UsersAPIRemoveUserFromOrganization.
+type UsersAPIRemoveUserFromOrganizationParams struct {
+	// Product Product the removal applies to. Accepted for forward compatibility; currently not applied.
+	Product *UsersAPIRemoveUserFromOrganizationParamsProduct `form:"product,omitempty" json:"product,omitempty"`
+}
+
+// UsersAPIRemoveUserFromOrganizationParamsProduct defines parameters for UsersAPIRemoveUserFromOrganization.
+type UsersAPIRemoveUserFromOrganizationParamsProduct string
 
 // ScheduledRebalancingAPIUpdateRebalancingScheduleParams defines parameters for ScheduledRebalancingAPIUpdateRebalancingSchedule.
 type ScheduledRebalancingAPIUpdateRebalancingScheduleParams struct {
