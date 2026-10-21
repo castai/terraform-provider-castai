@@ -675,6 +675,8 @@ func testAccAKSWithFederationIDConfig(clusterName string) string {
 	clientID := os.Getenv("AZURE_TF_ACCEPTANCE_TEST_FEDERATION_CLIENT_ID")
 
 	return fmt.Sprintf(`
+data "castai_impersonation_service_account" "imp" {}
+
 resource "castai_aks_cluster" "test" {
   name = %[3]q
 

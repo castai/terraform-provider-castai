@@ -33,7 +33,7 @@ func resourceCastaiClusterDelete(ctx context.Context, data *schema.ResourceData,
 	err := retry.RetryContext(ctx, data.Timeout(schema.TimeoutDelete), func() *retry.RetryError {
 		clusterResponse, err := client.ExternalClusterAPIGetClusterWithResponse(ctx, clusterId)
 		if checkErr := sdk.CheckOKResponse(clusterResponse, err); checkErr != nil {
-			return retry.NonRetryableError(err)
+			return retry.NonRetryableError(checkErr)
 		}
 
 		clusterStatus := *clusterResponse.JSON200.Status
