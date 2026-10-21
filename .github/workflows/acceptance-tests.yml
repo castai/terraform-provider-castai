@@ -171,7 +171,6 @@ jobs:
           export_to_environment: true
           secrets: |-
             CASTAI_API_TOKEN:onyx-fyvd/terraform-provider-castai-token-dev
-            GOOGLE_CREDENTIALS:onyx-fyvd/terraform-provider-google-credentials
             CASTAI_GCP_CREDENTIALS:onyx-fyvd/terraform-provider-castai-google-credentials
             SSO_CLIENT_SECRET:onyx-fyvd/terraform-provider-sso-client-secret
 
@@ -194,12 +193,14 @@ jobs:
           terraform_version: '1.11.*'
           terraform_wrapper: false
 
-      # Re-authenticates as the acceptance-test service account: the onyx WIF
-      # principal from the steps above has no access to the tf-acc GCP project.
+      # Federates onto the acceptance-test service account (IaC
+      # e2e-core/gke-tf-acc.tf); short-lived credentials for fetching the
+      # cluster kubeconfig used by the tests' helm releases.
       - name: Authenticate to GCP
         uses: google-github-actions/auth@v3
         with:
-          credentials_json: ${{ env.GOOGLE_CREDENTIALS }}
+          workload_identity_provider: projects/1021023109524/locations/global/workloadIdentityPools/github-tf-acc/providers/github
+          service_account: terraform-provider-acc@end2end-w1p4.iam.gserviceaccount.com
 
       - name: Get GKE credentials
         uses: google-github-actions/get-gke-credentials@v3

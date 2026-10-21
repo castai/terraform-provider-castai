@@ -123,16 +123,6 @@ func TestAccGKE_ResourceNodeConfiguration(t *testing.T) {
 				),
 			},
 		},
-		ExternalProviders: map[string]resource.ExternalProvider{
-			"google": {
-				Source:            "hashicorp/google",
-				VersionConstraint: "> 4.75.0",
-			},
-			"google-beta": {
-				Source:            "hashicorp/google-beta",
-				VersionConstraint: "> 4.75.0",
-			},
-		},
 	})
 }
 
