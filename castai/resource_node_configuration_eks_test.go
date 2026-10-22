@@ -118,7 +118,7 @@ resource "castai_node_configuration" "test" {
   cluster_id        = castai_eks_cluster.test.id
   disk_cpu_ratio    = 35
   min_disk_size     = 122
-  subnets   	    = data.aws_subnets.core.ids
+  subnets   	    = data.aws_eks_cluster.core.vpc_config[0].subnet_ids
   init_script       = base64encode(var.init_script)
   docker_config     = jsonencode({
     "insecure-registries"      = ["registry.com:5000"],
@@ -166,7 +166,7 @@ resource "castai_node_configuration" "test" {
   name   		    = %[1]q
   cluster_id        = castai_eks_cluster.test.id
   drain_timeout_sec = 120
-  subnets   	    = data.aws_subnets.core.ids
+  subnets   	    = data.aws_eks_cluster.core.vpc_config[0].subnet_ids
   image             = "amazon-eks-node-al2023-x86_64-standard-1.36-v20260810" 
   container_runtime = "containerd"
   kubelet_config     = jsonencode({
@@ -189,6 +189,10 @@ resource "castai_node_configuration" "test" {
 
 func testAccEKSClusterConfig(rName string, clusterName string) string {
 	return ConfigCompose(testAccAWSConfig(rName), fmt.Sprintf(`
+data "aws_eks_cluster" "core" {
+  name = %[1]q
+}
+
 resource "castai_eks_clusterid" "test" {
   account_id   = data.aws_caller_identity.current.account_id
   region       = "eu-central-1"
@@ -226,12 +230,6 @@ data "aws_security_group" "test" {
   tags = {
     Name = "terraform-provider-acc"
   }
-}
-
-data "aws_subnets" "core" {
-	tags = {
-		Name = "e2e-clusters-private-*" # private subnet is the one with NAT gateway for internet access.
-	}
 }
 
 resource "aws_iam_role" "test" {
