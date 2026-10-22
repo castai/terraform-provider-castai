@@ -52,7 +52,7 @@ func TestAccGKE_ResourceNodeConfiguration(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "gke.0.network_tags.1", "bc"),
 					resource.TestCheckResourceAttr(resourceName, "gke.0.zones.#", "0"),
 					resource.TestCheckResourceAttr(resourceName, "gke.0.secondary_boot_disks.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "gke.0.secondary_boot_disks.0.disk_image", fmt.Sprintf("projects/%s/global/images/tf-acc-secondary-boot-cache", projectID)),
+					resource.TestCheckResourceAttr(resourceName, "gke.0.secondary_boot_disks.0.disk_image", fmt.Sprintf("projects/%s/global/images/ep-e2e-2dary-images-cache", projectID)),
 					resource.TestCheckResourceAttr(resourceName, "gke.0.secondary_boot_disks.0.mode", "CONTAINER_IMAGE_CACHE"),
 					resource.TestCheckResourceAttr(resourceName, "gke.0.on_host_maintenance", "MIGRATE"),
 				),
@@ -112,7 +112,7 @@ func TestAccGKE_ResourceNodeConfiguration(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "gke.0.zones.0", "us-central1-c"),
 					resource.TestCheckResourceAttr(resourceName, "gke.0.use_ephemeral_storage_local_ssd", "true"),
 					resource.TestCheckResourceAttr(resourceName, "gke.0.secondary_boot_disks.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "gke.0.secondary_boot_disks.0.disk_image", fmt.Sprintf("projects/%s/global/images/tf-acc-secondary-boot-cache", projectID)),
+					resource.TestCheckResourceAttr(resourceName, "gke.0.secondary_boot_disks.0.disk_image", fmt.Sprintf("projects/%s/global/images/ep-e2e-2dary-images-cache", projectID)),
 					resource.TestCheckResourceAttr(resourceName, "gke.0.secondary_boot_disks.0.mode", "MODE_UNSPECIFIED"),
 					resource.TestCheckResourceAttr(resourceName, "gke.0.loadbalancers.0.target_backend_pools.0.name", "tg-1"),
 					resource.TestCheckResourceAttr(resourceName, "gke.0.loadbalancers.0.unmanaged_instance_groups.0.name", "ig-1"),
@@ -133,7 +133,7 @@ func testAccGKENodeConfigurationConfig(rName, clusterName, projectID string) str
 		disk_type = "pd-balanced"
 		on_host_maintenance = "MIGRATE"
 		secondary_boot_disks {
-			disk_image = "projects/%[1]s/global/images/tf-acc-secondary-boot-cache"
+			disk_image = "projects/%[1]s/global/images/ep-e2e-2dary-images-cache"
 			mode = "CONTAINER_IMAGE_CACHE"
 		}
 	`, projectID)
@@ -201,7 +201,7 @@ resource "castai_node_configuration" "test" {
     zones = ["us-central1-c"]
     use_ephemeral_storage_local_ssd = true
 	secondary_boot_disks {
-		disk_image = "projects/%[2]s/global/images/tf-acc-secondary-boot-cache"
+		disk_image = "projects/%[2]s/global/images/ep-e2e-2dary-images-cache"
 		mode = "MODE_UNSPECIFIED"
 	}
 	loadbalancers {
