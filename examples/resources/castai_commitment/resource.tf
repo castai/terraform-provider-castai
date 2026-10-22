@@ -19,6 +19,41 @@ resource "castai_commitment" "gcp_cud" {
   }
 }
 
+# GCP committed use discount (resource CUD) explicitly assigned to specific
+# clusters. The list order encodes the assignment priority (first = highest);
+# it is only meaningful when prioritization = true. auto_assignment must be
+# false when assignments is set: the server would otherwise append
+# auto-matching cluster assignments on every update, causing perpetual drift.
+# Clusters must be in the commitment's region (region-agnostic types such as
+# SAVINGS_PLAN and FLEX_CUD are exempt).
+resource "castai_commitment" "gcp_cud_assigned" {
+  name               = "prod-cud-us-central1"
+  cloud              = "GCP"
+  region             = "us-central1"
+  type               = "RESOURCE_CUD"
+  start_time         = "2026-01-01T00:00:00Z"
+  end_time           = "2027-01-01T00:00:00Z"
+  autoscaling_status = "ACTIVE"
+  allowed_usage      = 1.0
+  prioritization     = true
+  auto_assignment    = false
+
+  # Ordered by priority: the primary cluster is covered first.
+  assignments = [
+    { cluster_id = "11111111-1111-1111-1111-111111111111" },
+    { cluster_id = "22222222-2222-2222-2222-222222222222" },
+  ]
+
+  gcp_resource_cud_details = {
+    cud_id    = "123456789"
+    plan      = "TWELVE_MONTH"
+    type      = "GENERAL_PURPOSE_E2"
+    cpu       = 32
+    memory_mb = 131072
+    status    = "ACTIVE"
+  }
+}
+
 # AWS reserved instances.
 resource "castai_commitment" "aws_ri" {
   name       = "prod-ri-us-east-1"
