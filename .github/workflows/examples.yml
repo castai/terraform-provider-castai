@@ -59,7 +59,6 @@ jobs:
           export_to_environment: true
           secrets: |-
             CASTAI_API_TOKEN:onyx-fyvd/terraform-provider-castai-token-dev
-            ARM_CLIENT_SECRET:onyx-fyvd/terraform-provider-azure-client-secret
 
       - name: Validate Terraform examples
         id: validate_examples
@@ -98,7 +97,8 @@ jobs:
 
       - name: Plan an AKS example
         env:
-          ARM_CLIENT_ID: ${{ secrets.AZURE_TF_ACCEPTANCE_TEST_ARM_CLIENT_ID }}
+          ARM_USE_OIDC: true
+          ARM_CLIENT_ID: ${{ secrets.AZURE_TF_ACCEPTANCE_TEST_GITHUB_MI_CLIENT_ID }}
           ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_TF_ACCEPTANCE_TEST_ARM_SUBSCRIPTION_ID }}
           ARM_TENANT_ID: ${{ secrets.AZURE_TF_ACCEPTANCE_TEST_ARM_TENANT_ID }}
           TF_VAR_cluster_name: gh-aks
