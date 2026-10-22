@@ -76,7 +76,7 @@ jobs:
           TF_VAR_cluster_name: gh-eks
           TF_VAR_cluster_region: us-east-1
           TF_VAR_castai_api_token: ${{ env.CASTAI_API_TOKEN }}
-          TF_VAR_castai_api_url: https://api.cast.ai
+          TF_VAR_castai_api_url: https://api.dev-master.cast.ai
         id: eks_plan_examples
         run: make plan-terraform-example EXAMPLE_DIR=examples/eks/eks_clusters
 
@@ -91,7 +91,7 @@ jobs:
           TF_VAR_project_id: ${{ secrets.GOOGLE_TF_ACCEPTANCE_PROJECT_ID }}
           TF_VAR_cluster_name: gh-gke
           TF_VAR_castai_api_token: ${{ env.CASTAI_API_TOKEN }}
-          TF_VAR_castai_api_url: https://api.cast.ai
+          TF_VAR_castai_api_url: https://api.dev-master.cast.ai
         id: gke_plan_examples
         run: make plan-terraform-example EXAMPLE_DIR=examples/gke/gke_castai_iam
 
@@ -103,7 +103,7 @@ jobs:
           ARM_TENANT_ID: ${{ secrets.AZURE_TF_ACCEPTANCE_TEST_ARM_TENANT_ID }}
           TF_VAR_cluster_name: gh-aks
           TF_VAR_castai_api_token: ${{ env.CASTAI_API_TOKEN }}
-          TF_VAR_castai_api_url: https://api.cast.ai
+          TF_VAR_castai_api_url: https://api.dev-master.cast.ai
           TF_VAR_cluster_region: "germanywestcentral"
           TF_VAR_subscription_id: ${{ secrets.AZURE_TF_ACCEPTANCE_TEST_ARM_SUBSCRIPTION_ID }}
         id: aks_plan_examples
