@@ -34,6 +34,41 @@ resource "castai_commitment" "gcp_cud" {
   }
 }
 
+# GCP committed use discount (resource CUD) explicitly assigned to specific
+# clusters. The list order encodes the assignment priority (first = highest);
+# it is only meaningful when prioritization = true. auto_assignment must be
+# false when assignments is set: the server would otherwise append
+# auto-matching cluster assignments on every update, causing perpetual drift.
+# Clusters must be in the commitment's region (region-agnostic types such as
+# SAVINGS_PLAN and FLEX_CUD are exempt).
+resource "castai_commitment" "gcp_cud_assigned" {
+  name               = "prod-cud-us-central1"
+  cloud              = "GCP"
+  region             = "us-central1"
+  type               = "RESOURCE_CUD"
+  start_time         = "2026-01-01T00:00:00Z"
+  end_time           = "2027-01-01T00:00:00Z"
+  autoscaling_status = "ACTIVE"
+  allowed_usage      = 1.0
+  prioritization     = true
+  auto_assignment    = false
+
+  # Ordered by priority: the primary cluster is covered first.
+  assignments = [
+    { cluster_id = "11111111-1111-1111-1111-111111111111" },
+    { cluster_id = "22222222-2222-2222-2222-222222222222" },
+  ]
+
+  gcp_resource_cud_details = {
+    cud_id    = "123456789"
+    plan      = "TWELVE_MONTH"
+    type      = "GENERAL_PURPOSE_E2"
+    cpu       = 32
+    memory_mb = 131072
+    status    = "ACTIVE"
+  }
+}
+
 # AWS reserved instances.
 resource "castai_commitment" "aws_ri" {
   name       = "prod-ri-us-east-1"
@@ -165,6 +200,7 @@ resource "castai_commitment" "bulk_gcp_cuds" {
 ### Optional
 
 - `allowed_usage` (Number) Allowed usage of the commitment (0.0-1.0). 1.0 means 100%. Defaults to 1.0.
+- `assignments` (Attributes List) Clusters assigned to this commitment, in priority order (first = highest priority; only meaningful when prioritization = true). Requires auto_assignment = false: the server otherwise appends auto-matching cluster assignments on every update, causing perpetual drift. Removing this block unassigns all clusters. Clusters must be in the commitment's region, except for region-agnostic savings plans (AWS Compute Savings Plans, Azure Savings Plans). (see [below for nested schema](#nestedatt--assignments))
 - `auto_assignment` (Boolean) Auto-assign the commitment to all matching clusters in the commitment's region. If not set, the server's auto-assignment logic determines the value at creation time. Set to false to explicitly disable auto-assignment. Not supported for CAPACITY_BLOCK or targeted ON_DEMAND_CAPACITY_RESERVATION commitments.
 - `autoscaling_status` (String) Controls whether the autoscaler can use this commitment. One of: ACTIVE, INACTIVE. Defaults to INACTIVE (matches the API default); set to ACTIVE for the autoscaler to use the commitment.
 - `aws_capacity_block_details` (Attributes) AWS Capacity Block details. Required when type is CAPACITY_BLOCK. (see [below for nested schema](#nestedatt--aws_capacity_block_details))
@@ -188,6 +224,18 @@ resource "castai_commitment" "bulk_gcp_cuds" {
 - `id` (String) Commitment ID.
 - `state` (String) Computed lifecycle state of the commitment.
 - `update_time` (String) Last update time.
+
+<a id="nestedatt--assignments"></a>
+### Nested Schema for `assignments`
+
+Required:
+
+- `cluster_id` (String) Cluster ID to assign the commitment to.
+
+Read-Only:
+
+- `priority` (Number) Server-assigned priority of the assignment; 1 is the highest. Equals the position in the list.
+
 
 <a id="nestedatt--aws_capacity_block_details"></a>
 ### Nested Schema for `aws_capacity_block_details`
