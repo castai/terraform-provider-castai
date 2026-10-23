@@ -20,12 +20,17 @@ provider "helm" {
 # Configure AKS cluster connection to CAST AI using CAST AI aks-cluster module.
 module "castai-aks-cluster" {
   source  = "castai/aks/castai"
-  version = "~> 12.0"
+  version = "~> 12.1"
 
   api_url                = var.castai_api_url
   castai_api_token       = var.castai_api_token
   grpc_url               = var.castai_grpc_url
   wait_for_cluster_ready = true
+
+  # Fresh cluster with no workload-identity resources to migrate from; the
+  # module's "prepare" default eagerly reads the AKS cluster at plan time,
+  # which fails on a cluster that does not exist yet.
+  authentication_method_migration = "none"
 
   workload_autoscaler_keep_crds = true
   umbrella_enabled              = true

@@ -2,16 +2,18 @@ package castai
 
 import (
 	"fmt"
+	"os"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
+	"github.com/samber/lo"
 )
 
 func TestAccEKS_ResourceRebalancingJob(t *testing.T) {
 	rName := fmt.Sprintf("%v-rebalancing-job-%v", ResourcePrefix, acctest.RandString(8))
-	clusterName := "core-tf-acc-21-08-2025"
+	clusterName, _ := lo.Coalesce(os.Getenv("CLUSTER_NAME"), "core-tf-acc-21-08-2025")
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() { testAccPreCheck(t) },
 
@@ -85,7 +87,7 @@ func makeUpdatedRebalancingJobConfig(rName, clusterName string) string {
 
 func TestAccEKS_ResourceRebalancingJobWithDataSource(t *testing.T) {
 	rName := fmt.Sprintf("%v-rebalancing-job-with-data-source-%v", ResourcePrefix, acctest.RandString(8))
-	clusterName := "core-tf-acc-21-08-2025"
+	clusterName, _ := lo.Coalesce(os.Getenv("CLUSTER_NAME"), "core-tf-acc-21-08-2025")
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() { testAccPreCheck(t) },
 

@@ -316,6 +316,9 @@ func TestAccGKE_DataSourceWorkloadScalingPolicy(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
+			if os.Getenv("CASTAI_GCP_CREDENTIALS") == "" {
+				t.Skipf("missing required env var: CASTAI_GCP_CREDENTIALS")
+			}
 			cleanupLeftoverHelmReleases(t)
 		},
 		ProviderFactories: providerFactories,
@@ -347,14 +350,6 @@ func TestAccGKE_DataSourceWorkloadScalingPolicy(t *testing.T) {
 			},
 		},
 		ExternalProviders: map[string]resource.ExternalProvider{
-			"google": {
-				Source:            "hashicorp/google",
-				VersionConstraint: "> 4.75.0",
-			},
-			"google-beta": {
-				Source:            "hashicorp/google-beta",
-				VersionConstraint: "> 4.75.0",
-			},
 			"helm": {
 				Source:            "hashicorp/helm",
 				VersionConstraint: "~> 2.17.0",

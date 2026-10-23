@@ -28,9 +28,27 @@ jobs:
       group: testacc-aks
     name: aks
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
     steps:
       - name: Checkout source
         uses: actions/checkout@v6
+
+      - name: Authenticate to onyx
+        uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3.0.0
+        with:
+          workload_identity_provider: projects/883821977796/locations/global/workloadIdentityPools/onyx-github-pool/providers/onyx-github-terraform-provider
+          project_id: onyx-fyvd
+
+      - name: Read secrets from onyx
+        uses: google-github-actions/get-secretmanager-secrets@bc9c54b29fdffb8a47776820a7d26e77b379d262 # v3.0.0
+        with:
+          export_to_environment: true
+          secrets: |-
+            CASTAI_API_TOKEN:onyx-fyvd/terraform-provider-castai-token-dev
+            ARM_CLIENT_SECRET:onyx-fyvd/terraform-provider-azure-client-secret
+            SSO_CLIENT_SECRET:onyx-fyvd/terraform-provider-sso-client-secret
 
       - name: Setup Go
         uses: actions/setup-go@v6
@@ -53,16 +71,13 @@ jobs:
 
       - name: Acceptance test
         env:
-          CASTAI_API_TOKEN: ${{ secrets.CASTAI_DEV_MASTER_TOKEN }}
-          ARM_CLIENT_ID: ${{ secrets.AZURE_TF_ACCEPTANCE_TEST_ARM_CLIENT_ID_V2 }}
-          ARM_CLIENT_SECRET: ${{ secrets.AZURE_TF_ACCEPTANCE_TEST_ARM_CLIENT_SECRET_V2 }}
-          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_TF_ACCEPTANCE_TEST_ARM_SUBSCRIPTION_ID_V2 }}
-          ARM_TENANT_ID: ${{ secrets.AZURE_TF_ACCEPTANCE_TEST_ARM_TENANT_ID_V2 }}
+          ARM_CLIENT_ID: ${{ secrets.AZURE_TF_ACCEPTANCE_TEST_ARM_CLIENT_ID }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_TF_ACCEPTANCE_TEST_ARM_SUBSCRIPTION_ID }}
+          ARM_TENANT_ID: ${{ secrets.AZURE_TF_ACCEPTANCE_TEST_ARM_TENANT_ID }}
           AZURE_TF_ACCEPTANCE_TEST_FEDERATION_ID: ${{ secrets.AZURE_TF_ACCEPTANCE_TEST_FEDERATION_ID }}
-          AZURE_TF_ACCEPTANCE_TEST_FEDERATION_TENANT_ID: ${{ secrets.AZURE_TF_ACCEPTANCE_TEST_ARM_TENANT_ID_V2 }}
+          AZURE_TF_ACCEPTANCE_TEST_ARM_TENANT_ID: ${{ secrets.AZURE_TF_ACCEPTANCE_TEST_ARM_TENANT_ID }}
           AZURE_TF_ACCEPTANCE_TEST_FEDERATION_CLIENT_ID: ${{ secrets.AZURE_TF_ACCEPTANCE_TEST_FEDERATION_CLIENT_ID }}
           SSO_CLIENT_ID: ${{ secrets.SSO_CLIENT_ID }}
-          SSO_CLIENT_SECRET: ${{ secrets.SSO_CLIENT_SECRET }}
           SSO_DOMAIN: ${{ secrets.SSO_DOMAIN }}
           ACCEPTANCE_TEST_ORGANIZATION_ID: ${{ vars.TF_ACCEPTANCE_TEST_ORGANIZATION_ID }}
         run: make testacc-aks
@@ -74,9 +89,35 @@ jobs:
       group: testacc-eks
     name: eks
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
     steps:
       - name: Checkout source
         uses: actions/checkout@v6
+
+      - name: Authenticate to onyx
+        uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3.0.0
+        with:
+          workload_identity_provider: projects/883821977796/locations/global/workloadIdentityPools/onyx-github-pool/providers/onyx-github-terraform-provider
+          project_id: onyx-fyvd
+
+      - name: Read secrets from onyx
+        uses: google-github-actions/get-secretmanager-secrets@bc9c54b29fdffb8a47776820a7d26e77b379d262 # v3.0.0
+        with:
+          export_to_environment: true
+          secrets: |-
+            CASTAI_API_TOKEN:onyx-fyvd/terraform-provider-castai-token-dev
+            SSO_CLIENT_SECRET:onyx-fyvd/terraform-provider-sso-client-secret
+
+      - name: Configure AWS credentials
+        # Role from IaC e2e-core/eks-tf-acc.tf; short-lived STS credentials
+        # for the AWS provider blocks of the acceptance test configs.
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: arn:aws:iam::038471709730:role/terraform-provider-acc-github
+          aws-region: eu-central-1
+          role-duration-seconds: 14400
 
       - name: Setup Go
         uses: actions/setup-go@v6
@@ -99,11 +140,7 @@ jobs:
 
       - name: Acceptance test
         env:
-          CASTAI_API_TOKEN: ${{ secrets.CASTAI_DEV_MASTER_TOKEN }}
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_TF_ACCEPTANCE_TEST_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_TF_ACCEPTANCE_TEST_SECRET_KEY_ID }}
           SSO_CLIENT_ID: ${{ secrets.SSO_CLIENT_ID }}
-          SSO_CLIENT_SECRET: ${{ secrets.SSO_CLIENT_SECRET }}
           SSO_DOMAIN: ${{ secrets.SSO_DOMAIN }}
           ACCEPTANCE_TEST_ORGANIZATION_ID: ${{ vars.TF_ACCEPTANCE_TEST_ORGANIZATION_ID }}
         run: make testacc-eks
@@ -115,9 +152,27 @@ jobs:
       group: testacc-gke
     name: gke
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
     steps:
       - name: Checkout source
         uses: actions/checkout@v6
+
+      - name: Authenticate to onyx
+        uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3.0.0
+        with:
+          workload_identity_provider: projects/883821977796/locations/global/workloadIdentityPools/onyx-github-pool/providers/onyx-github-terraform-provider
+          project_id: onyx-fyvd
+
+      - name: Read secrets from onyx
+        uses: google-github-actions/get-secretmanager-secrets@bc9c54b29fdffb8a47776820a7d26e77b379d262 # v3.0.0
+        with:
+          export_to_environment: true
+          secrets: |-
+            CASTAI_API_TOKEN:onyx-fyvd/terraform-provider-castai-token-dev
+            CASTAI_GCP_CREDENTIALS:onyx-fyvd/terraform-provider-castai-google-credentials
+            SSO_CLIENT_SECRET:onyx-fyvd/terraform-provider-sso-client-secret
 
       - name: Setup Go
         uses: actions/setup-go@v6
@@ -138,10 +193,14 @@ jobs:
           terraform_version: '1.11.*'
           terraform_wrapper: false
 
+      # Federates onto the acceptance-test service account (IaC
+      # e2e-core/gke-tf-acc.tf); short-lived credentials for fetching the
+      # cluster kubeconfig used by the tests' helm releases.
       - name: Authenticate to GCP
         uses: google-github-actions/auth@v3
         with:
-          credentials_json: ${{ secrets.GOOGLE_TF_ACCEPTANCE_TEST_CREDENTIALS }}
+          workload_identity_provider: projects/1021023109524/locations/global/workloadIdentityPools/github-tf-acc/providers/github
+          service_account: terraform-provider-acc@end2end-w1p4.iam.gserviceaccount.com
 
       - name: Get GKE credentials
         uses: google-github-actions/get-gke-credentials@v3
@@ -152,14 +211,15 @@ jobs:
 
       - name: Acceptance test
         env:
-          CASTAI_API_TOKEN: ${{ secrets.CASTAI_DEV_MASTER_TOKEN }}
-          GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_TF_ACCEPTANCE_TEST_CREDENTIALS }}
           GOOGLE_PROJECT_ID: ${{ secrets.GOOGLE_TF_ACCEPTANCE_PROJECT_ID }}
           SSO_CLIENT_ID: ${{ secrets.SSO_CLIENT_ID }}
-          SSO_CLIENT_SECRET: ${{ secrets.SSO_CLIENT_SECRET }}
           SSO_DOMAIN: ${{ secrets.SSO_DOMAIN }}
           ACCEPTANCE_TEST_ORGANIZATION_ID: ${{ vars.TF_ACCEPTANCE_TEST_ORGANIZATION_ID }}
-        run: make testacc-gke
+        # TEMP: run only the failing test for faster feedback; revert to
+        # "make testacc-gke" once it is green.
+        run: |
+          make build
+          TF_ACC=1 go test ./castai/... '-run=^TestAccGKE_ResourceWorkloadScalingPolicy$' -v -timeout 50m
   cloud-agnostic:
     needs: files-changed
     if: needs.files-changed.outputs.acceptance-tests == 'true'
@@ -168,9 +228,27 @@ jobs:
       group: testacc-cloud-agnostic
     name: cloud-agnostic
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
     steps:
       - name: Checkout source
         uses: actions/checkout@v6
+
+      - name: Authenticate to onyx
+        uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3.0.0
+        with:
+          workload_identity_provider: projects/883821977796/locations/global/workloadIdentityPools/onyx-github-pool/providers/onyx-github-terraform-provider
+          project_id: onyx-fyvd
+
+      - name: Read secrets from onyx
+        uses: google-github-actions/get-secretmanager-secrets@bc9c54b29fdffb8a47776820a7d26e77b379d262 # v3.0.0
+        with:
+          export_to_environment: true
+          secrets: |-
+            CASTAI_API_TOKEN:onyx-fyvd/terraform-provider-castai-token-dev
+            CASTAI_ENTERPRISE_API_TOKEN:onyx-fyvd/terraform-provider-castai-enterprise-token-dev
+            SSO_CLIENT_SECRET:onyx-fyvd/terraform-provider-sso-client-secret
 
       - name: Setup Go
         uses: actions/setup-go@v6
@@ -193,9 +271,7 @@ jobs:
 
       - name: Acceptance test
         env:
-          CASTAI_API_TOKEN: ${{ secrets.CASTAI_DEV_MASTER_TOKEN }}
           SSO_CLIENT_ID: ${{ secrets.SSO_CLIENT_ID }}
-          SSO_CLIENT_SECRET: ${{ secrets.SSO_CLIENT_SECRET }}
           SSO_DOMAIN: ${{ secrets.SSO_DOMAIN }}
           ACCEPTANCE_TEST_ORGANIZATION_ID: ${{ vars.TF_ACCEPTANCE_TEST_ORGANIZATION_ID }}
         run: make testacc-cloud-agnostic

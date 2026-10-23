@@ -35,16 +35,17 @@ func TestAccCloudAgnostic_ResourceSSOConnection(t *testing.T) {
 	clientID := os.Getenv("SSO_CLIENT_ID")
 	clientSecret := os.Getenv("SSO_CLIENT_SECRET")
 	domain := os.Getenv("SSO_DOMAIN")
+	enterpriseToken := os.Getenv("CASTAI_ENTERPRISE_API_TOKEN")
+
+	var enterpriseClient *sdk.ClientWithResponses
 
 	t.Cleanup(func() {
-		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-		defer cancel()
-		meta := testAccProvider.Meta()
-		if meta == nil {
+		if enterpriseClient == nil {
 			return
 		}
-		client := meta.(*ProviderConfig).api
-		if err := sweepSSOConnection(ctx, client); err != nil {
+		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+		defer cancel()
+		if err := sweepSSOConnection(ctx, enterpriseClient); err != nil {
 			t.Logf("warning: failed to sweep SSO connection after test: %v", err)
 		}
 	})
@@ -61,23 +62,35 @@ func TestAccCloudAgnostic_ResourceSSOConnection(t *testing.T) {
 			if domain == "" {
 				t.Skipf("missing required env var: SSO_DOMAIN")
 			}
+			// The SSO API requires an enterprise organisation; CASTAI_API_TOKEN belongs to the standard acceptance test org.
+			if enterpriseToken == "" {
+				t.Skipf("missing required env var: CASTAI_ENTERPRISE_API_TOKEN")
+			}
+
+			client, err := sdk.CreateClient(os.Getenv("CASTAI_API_URL"), enterpriseToken, "castai-terraform-provider-acc-test")
+			if err != nil {
+				t.Fatalf("failed to create enterprise API client: %v", err)
+			}
+			enterpriseClient = client
 
 			ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 			defer cancel()
-			meta := testAccProvider.Meta()
-			if meta == nil {
-				return
-			}
-			client := meta.(*ProviderConfig).api
-			if err := sweepSSOConnection(ctx, client); err != nil {
+			if err := sweepSSOConnection(ctx, enterpriseClient); err != nil {
 				t.Logf("warning: failed to sweep SSO connection before test: %v", err)
 			}
 		},
-		ProviderFactories: providerFactories,
-		CheckDestroy:      testAccSSOConnectionConfigurationDestroy,
+		// Fresh provider instances: the enterprise token in the config must not reconfigure the shared testAccProvider used by parallel tests.
+		ProviderFactories: map[string]func() (*schema.Provider, error){
+			ProviderName: func() (*schema.Provider, error) {
+				return Provider("v1.0.0"), nil
+			},
+		},
+		CheckDestroy: func(s *terraform.State) error {
+			return testAccSSOConnectionConfigurationDestroy(enterpriseClient, s)
+		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCreateSSOConnectionConfig(rName, clientID, clientSecret, domain),
+				Config: testAccCreateSSOConnectionConfig(rName, enterpriseToken, clientID, clientSecret, domain),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "name", rName),
 					resource.TestCheckResourceAttr(resourceName, "email_domain", "aad_connection@test.com"),
@@ -91,9 +104,9 @@ func TestAccCloudAgnostic_ResourceSSOConnection(t *testing.T) {
 }
 
 // sweepSSOConnection lists SSO connections and deletes the first one found.
-// The CAST AI test org enforces a quota of 1 SSO connection, so at most one can
-// exist. Any connection present before the test runs is stale from a previous
-// run and is removed to avoid exhausting the quota.
+// The acceptance test org enforces a quota of 1 SSO connection, so at most one
+// can exist. Any connection present before the test runs is stale from a
+// previous run and is removed to avoid exhausting the quota.
 func sweepSSOConnection(ctx context.Context, client sdk.ClientWithResponsesInterface) error {
 	resp, err := client.SSOAPIListSSOConnectionsWithResponse(ctx)
 	if err := sdk.CheckOKResponse(resp, err); err != nil {
@@ -980,24 +993,27 @@ func TestSSOConnection_ReadContext_IsSynced(t *testing.T) {
 	})
 }
 
-func testAccCreateSSOConnectionConfig(rName, clientID, clientSecret, adDomain string) string {
+func testAccCreateSSOConnectionConfig(rName, apiToken, clientID, clientSecret, adDomain string) string {
 	return fmt.Sprintf(`
+provider "castai" {
+  api_token = %[2]q
+}
+
 resource "castai_sso_connection" "test" {
   name            = %[1]q
   email_domain = "aad_connection@test.com"
   aad {
-    client_id     = %[2]q
-    client_secret = %[3]q
-    ad_domain     = %[4]q
+    client_id     = %[3]q
+    client_secret = %[4]q
+    ad_domain     = %[5]q
   }
-}`, rName, clientID, clientSecret, adDomain)
+}`, rName, apiToken, clientID, clientSecret, adDomain)
 }
 
-func testAccSSOConnectionConfigurationDestroy(s *terraform.State) error {
+func testAccSSOConnectionConfigurationDestroy(client sdk.ClientWithResponsesInterface, s *terraform.State) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	client := testAccProvider.Meta().(*ProviderConfig).api
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "castai_sso_connection" {
 			continue

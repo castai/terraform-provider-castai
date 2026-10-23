@@ -1156,7 +1156,7 @@ func JSONBytesEqual(a, b []byte) (bool, error) {
 
 func TestAccEKS_ResourceAutoscaler_basic(t *testing.T) {
 	rName := fmt.Sprintf("%v-autoscaler-%v", ResourcePrefix, acctest.RandString(8))
-	clusterName, _ := lo.Coalesce(os.Getenv("CLUSTER_NAME"), "cost-terraform")
+	clusterName, _ := lo.Coalesce(os.Getenv("CLUSTER_NAME"), "core-tf-acc-21-08-2025")
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
