@@ -50,7 +50,7 @@ func resourceRoleBindings() *schema.Resource {
 		CreateContext: resourceRoleBindingsCreate,
 		UpdateContext: resourceRoleBindingsUpdate,
 		DeleteContext: resourceRoleBindingsDelete,
-		Description:   "CAST AI organization group resource to manage organization groups",
+		Description:   "CAST AI role binding resource to manage role bindings",
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},

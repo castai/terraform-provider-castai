@@ -2,12 +2,24 @@ data "castai_organization" "test" {
   name = "My test organization name"
 }
 
+# Role names are unique per organization, so the name identifies the role.
+data "castai_role" "owner" {
+  organization_id = data.castai_organization.test.id
+  name            = "Owner"
+}
+
+data "castai_role" "viewer" {
+  organization_id = data.castai_organization.test.id
+  name            = "Viewer"
+}
+
 resource "castai_role_bindings" "owner_test" {
   organization_id = data.castai_organization.test.id
   name            = "Role binding owner"
   description     = "Owner access for whole organization."
 
-  role_id = "3e1050c7-6593-4298-94bb-154637911d78" # Role "Owner"
+  role_id = data.castai_role.owner.id
+
   scopes {
     kind        = "organization"
     resource_id = data.castai_organization.test.id
@@ -37,7 +49,8 @@ resource "castai_role_bindings" "viewer_test" {
   name            = "Role binding viewer for cluster 7063d31c-897e-48ef-a322-bdfda6fdbcfb"
   description     = "Viewer access for on of the clusters."
 
-  role_id = "6fc95bd7-6049-4735-80b0-ce5ccde71cb1" # Role "Viewer"
+  role_id = data.castai_role.viewer.id
+
   scopes {
     kind        = "cluster"
     resource_id = "7063d31c-897e-48ef-a322-bdfda6fdbcfb"
