@@ -321,7 +321,7 @@ func resourceOrganizationMembersUpdate(ctx context.Context, data *schema.Resourc
 
 	tflog.Debug(ctx, "deleting users from organization")
 	for _, userID := range manipulations.membersToDelete {
-		resp, err := client.UsersAPIRemoveUserFromOrganizationWithResponse(ctx, organizationID, userID)
+		resp, err := client.UsersAPIRemoveUserFromOrganizationWithResponse(ctx, organizationID, userID, &sdk.UsersAPIRemoveUserFromOrganizationParams{})
 		if err := sdk.CheckOKResponse(resp, err); err != nil {
 			return diag.FromErr(fmt.Errorf("deleting user: %w", err))
 		}
@@ -355,7 +355,7 @@ func resourceOrganizationMembersUpdate(ctx context.Context, data *schema.Resourc
 	}
 
 	for userID, roleID := range manipulations.membersToUpdate {
-		rmUserResp, err := client.UsersAPIRemoveUserFromOrganizationWithResponse(ctx, organizationID, userID)
+		rmUserResp, err := client.UsersAPIRemoveUserFromOrganizationWithResponse(ctx, organizationID, userID, &sdk.UsersAPIRemoveUserFromOrganizationParams{})
 		if err := sdk.CheckOKResponse(rmUserResp, err); err != nil {
 			return diag.FromErr(fmt.Errorf("deleting user: %w", err))
 		}
@@ -468,7 +468,7 @@ func resourceOrganizationMembersDelete(ctx context.Context, data *schema.Resourc
 
 	tflog.Debug(ctx, "deleting users from organization")
 	for _, userID := range usersIDsToDelete {
-		resp, err := client.UsersAPIRemoveUserFromOrganizationWithResponse(ctx, organizationID, userID)
+		resp, err := client.UsersAPIRemoveUserFromOrganizationWithResponse(ctx, organizationID, userID, &sdk.UsersAPIRemoveUserFromOrganizationParams{})
 		if err := sdk.CheckOKResponse(resp, err); err != nil {
 			return diag.FromErr(fmt.Errorf("deleting user: %w", err))
 		}
