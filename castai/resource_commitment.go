@@ -222,8 +222,7 @@ func (r *genericCommitmentResource) Schema(_ context.Context, _ resource.SchemaR
 			"assignments": schema.ListNestedAttribute{
 				Optional: true,
 				Description: "Clusters assigned to this commitment, in priority order (first = highest priority; " +
-					"only meaningful when prioritization = true). Requires auto_assignment = false: the server " +
-					"otherwise appends auto-matching cluster assignments on every update, causing perpetual drift. " +
+					"only meaningful when prioritization = true). Requires auto_assignment = false. " +
 					"Removing this block unassigns all clusters. Clusters must be in the commitment's region, " +
 					"except for region-agnostic savings plans (AWS Compute Savings Plans, Azure Savings Plans).",
 				NestedObject: schema.NestedAttributeObject{
