@@ -197,12 +197,12 @@ func clusterComponentsConfig(clusterName, projectID, name string) string {
 	
 		set_sensitive {
 			name  = "apiKey"
-			value = %[1]q
+			value = castai_gke_cluster.test.cluster_token
 		}
 	
 		set {
 			name  = "apiURL"
-			value = %[2]q
+			value = %[1]q
 		}
 	
 		set {
@@ -226,12 +226,12 @@ func clusterComponentsConfig(clusterName, projectID, name string) string {
 
 		set_sensitive {
 			name  = "castai.apiKey"
-			value = %[1]q
+			value = castai_gke_cluster.test.cluster_token
 		}
 	
 		set {
 			name  = "castai.apiURL"
-			value = %[2]q
+			value = %[1]q
 		}
 	
 		set {
@@ -258,19 +258,19 @@ func clusterComponentsConfig(clusterName, projectID, name string) string {
 
 		set_sensitive {
 			name  = "castai.apiKey"
-			value = %[1]q
+			value = castai_gke_cluster.test.cluster_token
 		}
 	
 		set {
 			name  = "castai.apiURL"
-			value = %[2]q
+			value = %[1]q
 		}
 	
 		set {
 			name  = "castai.clusterID"
 			value = castai_gke_cluster.test.id
 		}
-	}`, getAPIToken(), getAPIUrl())
+	}`, getAPIUrl())
 	return ConfigCompose(clusterConnectConfig(clusterName, projectID, name), cfg)
 }
 
@@ -515,10 +515,6 @@ func testAccCheckScalingPolicyDestroy(s *terraform.State) error {
 	}
 
 	return nil
-}
-
-func getAPIToken() string {
-	return os.Getenv("CASTAI_API_TOKEN")
 }
 
 func getAPIUrl() string {
