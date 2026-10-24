@@ -3,12 +3,14 @@ package castai
 import (
 	"context"
 	"fmt"
+	"sort"
 	"strconv"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
+	"github.com/castai/terraform-provider-castai/castai/sdk"
 	"github.com/castai/terraform-provider-castai/castai/sdk/pricing"
 )
 
@@ -31,6 +33,11 @@ type commitmentModel struct {
 	CreateTime        types.String  `tfsdk:"create_time"`
 	UpdateTime        types.String  `tfsdk:"update_time"`
 
+	// Assignments is nil when unmanaged (attribute absent, or apply failed —
+	// nil makes the next apply retry); empty-but-non-nil means "managed, zero
+	// assignments". Only populated from the API when non-null in plan/state.
+	Assignments []commitmentAssignmentModel `tfsdk:"assignments"`
+
 	AWSReservedInstancesDetails   *awsReservedInstancesDetailsModel   `tfsdk:"aws_reserved_instances_details"`
 	AzureReservationDetails       *azureReservationDetailsModel       `tfsdk:"azure_reservation_details"`
 	GCPResourceCUDDetails         *gcpResourceCUDDetailsModel         `tfsdk:"gcp_resource_cud_details"`
@@ -40,6 +47,15 @@ type commitmentModel struct {
 	GCPFlexCUDDetails             *gcpFlexCUDDetailsModel             `tfsdk:"gcp_flex_cud_details"`
 	AzureSavingsPlanDetails       *azureSavingsPlanDetailsModel       `tfsdk:"azure_savings_plan_details"`
 	GCPCapacityReservationDetails *gcpCapacityReservationDetailsModel `tfsdk:"gcp_capacity_reservation_details"`
+}
+
+// commitmentAssignmentModel is the nested model for the assignments
+// attribute of the castai_commitment resource. The list order encodes the
+// assignment priority (first = highest); the server-assigned priority is
+// reflected in the computed Priority field.
+type commitmentAssignmentModel struct {
+	ClusterID types.String `tfsdk:"cluster_id"`
+	Priority  types.Int64  `tfsdk:"priority"`
 }
 
 type awsReservedInstancesDetailsModel struct {
@@ -328,6 +344,97 @@ func syncTime(state types.String, api *time.Time) types.String {
 
 func ptr[T any](v T) *T {
 	return &v
+}
+
+// ---------------------------------------------------------------------------
+// Assignment helpers.
+// ---------------------------------------------------------------------------
+
+// assignmentsClusterIDs returns the cluster IDs of the assignments in list
+// order. The order encodes the priority sent to the API.
+func assignmentsClusterIDs(a []commitmentAssignmentModel) []string {
+	ids := make([]string, len(a))
+	for i, m := range a {
+		ids[i] = m.ClusterID.ValueString()
+	}
+	return ids
+}
+
+// assignmentsEqual compares two assignment lists by their ordered cluster
+// IDs. Priorities are computed values and excluded from the comparison. A nil
+// list and an empty list are distinguished: nil means the attribute is not
+// managed, while empty means "assign to no clusters".
+func assignmentsEqual(a, b []commitmentAssignmentModel) bool {
+	if (a == nil) != (b == nil) {
+		return false
+	}
+	if len(a) != len(b) {
+		return false
+	}
+	for i := range a {
+		if a[i].ClusterID.ValueString() != b[i].ClusterID.ValueString() {
+			return false
+		}
+	}
+	return true
+}
+
+// assignmentsChanged reports whether the assignments in the plan differ from
+// the state and need to be replaced server-side.
+func assignmentsChanged(plan, state *commitmentModel) bool {
+	return !assignmentsEqual(plan.Assignments, state.Assignments)
+}
+
+// assignmentsFromReplaceResponse maps the ReplaceCommitmentAssignments API
+// response to the assignments model, ordered by server-assigned priority.
+func assignmentsFromReplaceResponse(resp *sdk.CommitmentsAPIReplaceCommitmentAssignmentsResponse) []commitmentAssignmentModel {
+	if resp == nil || resp.JSON200 == nil || resp.JSON200.Assignments == nil {
+		return nil
+	}
+	return assignmentsFromInventory(*resp.JSON200.Assignments)
+}
+
+// assignmentsFromInventory maps inventory API assignments to the assignments
+// model, ordered by server-assigned priority.
+func assignmentsFromInventory(items []sdk.CastaiInventoryV1beta1CommitmentAssignment) []commitmentAssignmentModel {
+	res := make([]commitmentAssignmentModel, 0, len(items))
+	for _, a := range items {
+		res = append(res, commitmentAssignmentModel{
+			ClusterID: strOrNull(a.ClusterId),
+			Priority:  int64FromInt32(a.Priority),
+		})
+	}
+	sortAssignmentsByPriority(res)
+	return res
+}
+
+// assignmentsFromPricing maps pricing API assignments to the assignments
+// model, ordered by server-assigned priority.
+func assignmentsFromPricing(items []pricing.CommitmentAssignment) []commitmentAssignmentModel {
+	res := make([]commitmentAssignmentModel, 0, len(items))
+	for _, a := range items {
+		res = append(res, commitmentAssignmentModel{
+			ClusterID: strOrNull(a.ClusterId),
+			Priority:  int64FromInt32(a.Priority),
+		})
+	}
+	sortAssignmentsByPriority(res)
+	return res
+}
+
+// sortAssignmentsByPriority sorts assignments by their server-assigned
+// priority (ascending; null/unknown priorities sort first).
+func sortAssignmentsByPriority(a []commitmentAssignmentModel) {
+	sort.SliceStable(a, func(i, j int) bool {
+		return assignmentPriority(a[i]) < assignmentPriority(a[j])
+	})
+}
+
+func assignmentPriority(m commitmentAssignmentModel) int64 {
+	if m.Priority.IsNull() || m.Priority.IsUnknown() {
+		return 0
+	}
+	return m.Priority.ValueInt64()
 }
 
 // ---------------------------------------------------------------------------

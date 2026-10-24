@@ -26,6 +26,7 @@ import (
 
 	"github.com/cenkalti/backoff/v4"
 
+	"github.com/castai/terraform-provider-castai/castai/sdk"
 	"github.com/castai/terraform-provider-castai/castai/sdk/pricing"
 )
 
@@ -217,6 +218,25 @@ func (r *genericCommitmentResource) Schema(_ context.Context, _ resource.SchemaR
 					"If not set, the server's auto-assignment logic determines the value at creation time. " +
 					"Set to false to explicitly disable auto-assignment. " +
 					"Not supported for CAPACITY_BLOCK or targeted ON_DEMAND_CAPACITY_RESERVATION commitments.",
+			},
+			"assignments": schema.ListNestedAttribute{
+				Optional: true,
+				Description: "Clusters assigned to this commitment, in priority order (first = highest priority; " +
+					"only meaningful when prioritization = true). Requires auto_assignment = false. " +
+					"Removing this block unassigns all clusters. Clusters must be in the commitment's region, " +
+					"except for region-agnostic savings plans (AWS Compute Savings Plans, Azure Savings Plans).",
+				NestedObject: schema.NestedAttributeObject{
+					Attributes: map[string]schema.Attribute{
+						"cluster_id": schema.StringAttribute{
+							Required:    true,
+							Description: "Cluster ID to assign the commitment to.",
+						},
+						"priority": schema.Int64Attribute{
+							Computed:    true,
+							Description: "Server-assigned priority of the assignment; 1 is the highest. Equals the position in the list.",
+						},
+					},
+				},
 			},
 			"state": schema.StringAttribute{
 				Computed:    true,
@@ -841,6 +861,15 @@ func (r *genericCommitmentResource) ValidateConfig(ctx context.Context, req reso
 		}
 	}
 
+	// Validate the assignments configuration.
+	for _, msg := range validateAssignments(&config) {
+		resp.Diagnostics.AddAttributeError(
+			path.Root("assignments"),
+			"Invalid assignments configuration",
+			msg,
+		)
+	}
+
 	// Validate that region is set for commitment types that are always
 	// region-scoped. SAVINGS_PLAN and FLEX_CUD can be region-agnostic and
 	// are excluded from this check.
@@ -852,6 +881,38 @@ func (r *genericCommitmentResource) ValidateConfig(ctx context.Context, req reso
 			fmt.Sprintf("commitment type %q requires a region; it is only optional for SAVINGS_PLAN and FLEX_CUD", config.Type.ValueString()),
 		)
 	}
+}
+
+// validateAssignments returns validation error messages for the assignments
+// attribute. assignments requires auto_assignment to be explicitly disabled
+// (the server otherwise appends auto-matching cluster assignments to every
+// replace call, causing perpetual drift) and cluster IDs must be unique.
+func validateAssignments(config *commitmentModel) []string {
+	if len(config.Assignments) == 0 {
+		return nil
+	}
+	var errs []string
+	// Skip the check when the value is unknown (e.g. a computed reference):
+	// plan-time validation must not block legitimate configurations.
+	if !config.AutoAssignment.IsUnknown() &&
+		(config.AutoAssignment.IsNull() || config.AutoAssignment.ValueBool()) {
+		errs = append(errs, "assignments requires auto_assignment to be explicitly set to false. "+
+			"When auto-assignment is enabled, the server appends auto-matching cluster assignments "+
+			"to the assignment list on every update, causing perpetual drift.")
+	}
+	seen := make(map[string]struct{}, len(config.Assignments))
+	for _, a := range config.Assignments {
+		if a.ClusterID.IsNull() || a.ClusterID.IsUnknown() {
+			continue
+		}
+		id := a.ClusterID.ValueString()
+		if _, ok := seen[id]; ok {
+			errs = append(errs, fmt.Sprintf("duplicate cluster_id %q in assignments", id))
+			continue
+		}
+		seen[id] = struct{}{}
+	}
+	return errs
 }
 
 func (r *genericCommitmentResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
@@ -922,20 +983,32 @@ func (r *genericCommitmentResource) Create(ctx context.Context, req resource.Cre
 		commitmentID = *created.Id
 	}
 
-	// PATCH only when the user explicitly set auto_assignment=false, to override
-	// the server's enableAutoAssignments flip. If not set or set to true, the
-	// POST response is authoritative.
-	needsPatch := !config.AutoAssignment.IsNull() && !config.AutoAssignment.IsUnknown() &&
-		!config.AutoAssignment.ValueBool()
+	// PATCH when the user explicitly set auto_assignment=false (to override the
+	// server's enableAutoAssignments flip), or when assignments are configured
+	// but the server still has auto-assignment enabled (covers values that were
+	// unknown at config-validation time). If not set or set to true, the POST
+	// response is authoritative.
+	patchInput := plan.toUpdateInput()
+	serverAutoAssignmentOn := created.AutoAssignment == nil || *created.AutoAssignment
+	if plan.Assignments != nil && serverAutoAssignmentOn && patchInput.AutoAssignment == nil {
+		patchInput.AutoAssignment = ptr(false)
+	}
+	needsPatch := (!config.AutoAssignment.IsNull() && !config.AutoAssignment.IsUnknown() &&
+		!config.AutoAssignment.ValueBool()) || (plan.Assignments != nil && serverAutoAssignmentOn)
 
 	if commitmentID != "" && needsPatch {
-		patchResp, patchErr := r.updateCommitmentWithRetry(ctx, organizationID, commitmentID, plan.toUpdateInput())
+		patchResp, patchErr := r.updateCommitmentWithRetry(ctx, organizationID, commitmentID, patchInput)
 		if patchErr != nil {
+			// The assignments were not applied yet; drop them from the saved state
+			// (their computed priorities are unknown and cannot be stored) so the
+			// next apply retries.
+			plan.Assignments = nil
 			saveCreatedState(ctx, resp, &plan, organizationID, created)
 			resp.Diagnostics.AddError("Failed to enforce commitment settings after create", patchErr.Error())
 			return
 		}
 		if patchResp.StatusCode() != http.StatusOK {
+			plan.Assignments = nil
 			saveCreatedState(ctx, resp, &plan, organizationID, created)
 			resp.Diagnostics.AddError(
 				"Failed to enforce commitment settings after create",
@@ -944,6 +1017,31 @@ func (r *genericCommitmentResource) Create(ctx context.Context, req resource.Cre
 			return
 		}
 		created = patchResp.JSON200
+	}
+
+	// Replace the cluster assignments when configured. This must run after the
+	// PATCH above: replacing while auto-assignment is enabled would make the
+	// server append auto-matching cluster assignments to the list.
+	if commitmentID != "" && plan.Assignments != nil {
+		replaceResp, replaceErr := r.replaceCommitmentAssignmentsWithRetry(ctx, commitmentID, assignmentsClusterIDs(plan.Assignments))
+		if replaceErr != nil {
+			// Assignments not applied; drop them from the saved state so the next
+			// apply retries.
+			plan.Assignments = nil
+			saveCreatedState(ctx, resp, &plan, organizationID, created)
+			resp.Diagnostics.AddError("Failed to create commitment assignments", replaceErr.Error())
+			return
+		}
+		if replaceResp.StatusCode() != http.StatusOK {
+			plan.Assignments = nil
+			saveCreatedState(ctx, resp, &plan, organizationID, created)
+			resp.Diagnostics.AddError(
+				"Failed to create commitment assignments",
+				fmt.Sprintf("unexpected status code: %d, body: %s", replaceResp.StatusCode(), string(replaceResp.Body)),
+			)
+			return
+		}
+		plan.Assignments = assignmentsFromReplaceResponse(replaceResp)
 	}
 
 	saveCreatedState(ctx, resp, &plan, organizationID, created)
@@ -1048,6 +1146,56 @@ func (r *genericCommitmentResource) updateCommitmentWithRetry(ctx context.Contex
 	return apiResp, err
 }
 
+func (r *genericCommitmentResource) replaceCommitmentAssignmentsWithRetry(ctx context.Context, commitmentID string, clusterIDs []string) (*sdk.CommitmentsAPIReplaceCommitmentAssignmentsResponse, error) {
+	b := newCommitmentBackoff(ctx)
+	var apiResp *sdk.CommitmentsAPIReplaceCommitmentAssignmentsResponse
+	err := backoff.Retry(func() error {
+		resp, err := r.client.api.CommitmentsAPIReplaceCommitmentAssignmentsWithResponse(ctx, commitmentID, clusterIDs)
+		if err != nil {
+			return err
+		}
+		if resp.StatusCode() >= 500 {
+			return fmt.Errorf("transient server error: status=%d body=%s", resp.StatusCode(), string(resp.Body))
+		}
+		apiResp = resp
+		return nil
+	}, b)
+	return apiResp, err
+}
+
+// listCommitmentAssignments fetches all assignments of a commitment from the
+// pricing API, following pagination cursors.
+func (r *genericCommitmentResource) listCommitmentAssignments(ctx context.Context, organizationID, commitmentID string) ([]pricing.CommitmentAssignment, error) {
+	var result []pricing.CommitmentAssignment
+	cursor := ""
+	for {
+		params := &pricing.CommitmentsAPIListCommitmentAssignmentsParams{
+			PageLimit: ptr("1000"),
+		}
+		if cursor != "" {
+			params.PageCursor = ptr(cursor)
+		}
+		resp, err := r.client.pricingClient.CommitmentsAPIListCommitmentAssignmentsWithResponse(ctx, organizationID, commitmentID, params)
+		if err != nil {
+			return nil, err
+		}
+		if resp.StatusCode() != http.StatusOK {
+			return nil, fmt.Errorf("unexpected status code: %d, body: %s", resp.StatusCode(), string(resp.Body))
+		}
+		if resp.JSON200 == nil {
+			return nil, fmt.Errorf("empty response body (status %d)", resp.StatusCode())
+		}
+		if resp.JSON200.CommitmentAssignments != nil {
+			result = append(result, *resp.JSON200.CommitmentAssignments...)
+		}
+		if resp.JSON200.NextPageToken == nil || *resp.JSON200.NextPageToken == "" {
+			break
+		}
+		cursor = *resp.JSON200.NextPageToken
+	}
+	return result, nil
+}
+
 func (r *genericCommitmentResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var state commitmentModel
 	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
@@ -1080,6 +1228,14 @@ func (r *genericCommitmentResource) Read(ctx context.Context, req resource.ReadR
 
 	state.OrganizationID = types.StringValue(organizationID)
 	resp.Diagnostics.Append(state.applyCommitment(ctx, apiResp.JSON200)...)
+	if state.Assignments != nil {
+		items, err := r.listCommitmentAssignments(ctx, organizationID, state.ID.ValueString())
+		if err != nil {
+			resp.Diagnostics.AddError("Failed to read commitment assignments", err.Error())
+			return
+		}
+		state.Assignments = assignmentsFromPricing(items)
+	}
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
 }
 
@@ -1195,6 +1351,28 @@ func (r *genericCommitmentResource) Update(ctx context.Context, req resource.Upd
 		}
 	}
 
+	// Replace the cluster assignments when they changed. This must run after the
+	// PATCH above: replacing while auto-assignment is enabled would make the
+	// server append auto-matching cluster assignments to the list.
+	if assignmentsChanged(&plan, &state) {
+		clusterIDs := []string{}
+		if plan.Assignments != nil {
+			clusterIDs = assignmentsClusterIDs(plan.Assignments)
+		}
+		replaceResp, replaceErr := r.replaceCommitmentAssignmentsWithRetry(ctx, commitmentID, clusterIDs)
+		if replaceErr != nil {
+			resp.Diagnostics.AddError("Failed to update commitment assignments", replaceErr.Error())
+			return
+		}
+		if replaceResp.StatusCode() != http.StatusOK {
+			resp.Diagnostics.AddError(
+				"Failed to update commitment assignments",
+				fmt.Sprintf("unexpected status code: %d, body: %s", replaceResp.StatusCode(), string(replaceResp.Body)),
+			)
+			return
+		}
+	}
+
 	// Read back for authoritative state.
 	getResp, err := r.getCommitmentWithRetry(ctx, organizationID, commitmentID)
 	if err != nil {
@@ -1211,6 +1389,14 @@ func (r *genericCommitmentResource) Update(ctx context.Context, req resource.Upd
 
 	plan.OrganizationID = types.StringValue(organizationID)
 	resp.Diagnostics.Append(plan.applyCommitment(ctx, getResp.JSON200)...)
+	if plan.Assignments != nil {
+		items, err := r.listCommitmentAssignments(ctx, organizationID, commitmentID)
+		if err != nil {
+			resp.Diagnostics.AddError("Failed to read commitment assignments", err.Error())
+			return
+		}
+		plan.Assignments = assignmentsFromPricing(items)
+	}
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
