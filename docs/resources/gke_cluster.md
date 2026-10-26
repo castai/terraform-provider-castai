@@ -60,6 +60,8 @@ Required:
 - `castai_service_account_email` (String) CAST AI service account email used to access the target project
 - `target_service_account_email` (String) Service account email in the GCP project that CAST AI impersonates
 
+~> **NOTE** Removing the `credentials` block does not disable an already configured impersonation; the existing cluster credentials remain active on the CAST AI side.
+
 
 <a id="nestedblock--timeouts"></a>
 ### Nested Schema for `timeouts`
