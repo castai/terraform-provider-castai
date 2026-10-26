@@ -7717,6 +7717,12 @@ type NodeconfigV1GKEConfig struct {
 	// UseEphemeralStorageLocalSsd Flag indicating whether to use local SSD storage for the node. Defaults to false.
 	UseEphemeralStorageLocalSsd *bool `json:"useEphemeralStorageLocalSsd,omitempty"`
 
+	// VolumeAttachLimitOverride Override of the default per-node persistent volume attach limit reported by the GCE PD
+	// CSI driver via the node label node-restriction.kubernetes.io/gke-volume-attach-limit-override.
+	// Applied to every node of this node configuration. Valid range is 1-127: the driver
+	// silently ignores values outside it and falls back to the machine-type default.
+	VolumeAttachLimitOverride *int64 `json:"volumeAttachLimitOverride"`
+
 	// Zones Zones is a preferred list of zones to choose from when adding a node.
 	Zones *[]string `json:"zones,omitempty"`
 }
