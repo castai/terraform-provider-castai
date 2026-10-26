@@ -53,10 +53,10 @@ func TestAccGKE_ClusterImpersonation(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "project_id", projectID),
 					resource.TestCheckResourceAttr(resourceName, "location", location),
 					resource.TestCheckResourceAttr(resourceName, "credentials.#", "1"),
-					resource.TestCheckResourceAttrSet(resourceName, "credentials.0.target_service_account"),
-					resource.TestCheckResourceAttrSet(resourceName, "credentials.0.castai_service_account"),
+					resource.TestCheckResourceAttrSet(resourceName, "credentials.0.target_service_account_email"),
+					resource.TestCheckResourceAttrSet(resourceName, "credentials.0.castai_service_account_email"),
 					resource.TestCheckResourceAttrPair(
-						resourceName, "credentials.0.castai_service_account",
+						resourceName, "credentials.0.castai_service_account_email",
 						"data.castai_impersonation_service_account.gke", "email",
 					),
 				),
@@ -111,8 +111,8 @@ resource "castai_gke_cluster" "test" {
   delete_nodes_on_disconnect = false
 
   credentials {
-    target_service_account  = google_service_account.target.email
-    castai_service_account = data.castai_impersonation_service_account.gke.email
+    target_service_account_email = google_service_account.target.email
+    castai_service_account_email = data.castai_impersonation_service_account.gke.email
   }
 
   depends_on = [
