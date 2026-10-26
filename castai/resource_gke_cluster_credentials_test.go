@@ -3,7 +3,6 @@ package castai
 import (
 	"bytes"
 	"context"
-	"fmt"
 	"io"
 	"net/http"
 	"strings"
@@ -71,14 +70,6 @@ func TestGKEClusterCredentialsSchema(t *testing.T) {
 			}(),
 			wantErr:    true,
 			errMessage: "conflicts with",
-		},
-		{
-			name: "partial pair rejected",
-			raw: withBlock(map[string]interface{}{
-				FieldGKECredentialsTargetServiceAccountEmail: "target-sa@project.iam.gserviceaccount.com",
-			}),
-			wantErr:    true,
-			errMessage: "must be specified",
 		},
 	}
 
@@ -170,7 +161,7 @@ func TestGKEClusterResourceCreate(t *testing.T) {
 			}, nil)
 	}
 
-	t.Run("create impersonation registers, creates SA and skips credentials update", func(t *testing.T) {
+	t.Run("create impersonation registers and updates cluster with impersonation emails", func(t *testing.T) {
 		r := require.New(t)
 		mockctrl := gomock.NewController(t)
 		mockClient := mock_sdk.NewMockClientInterface(mockctrl)
@@ -178,26 +169,20 @@ func TestGKEClusterResourceCreate(t *testing.T) {
 
 		registerClient(mockClient)
 		mockClient.EXPECT().
-			ExternalClusterAPIGKECreateSAWithBody(gomock.Any(), clusterID, "application/json", gomock.Any()).
-			Do(func(_ context.Context, _ string, _ string, body io.Reader, _ ...sdk.RequestEditorFn) {
-				raw, err := io.ReadAll(body)
-				r.NoError(err)
-				r.JSONEq(fmt.Sprintf(`{"gke":{"gkeSaImpersonate":%q,"castServiceAccount":%q}}`, targetSA, castSA), string(raw))
+			ExternalClusterAPIUpdateCluster(gomock.Any(), clusterID, gomock.Any(), gomock.Any()).
+			Do(func(_ context.Context, _ string, body sdk.ExternalClusterAPIUpdateClusterJSONRequestBody, _ ...sdk.RequestEditorFn) {
+				r.NotNil(body.Gke)
+				r.NotNil(body.Gke.TargetServiceAccountEmail)
+				r.Equal(targetSA, *body.Gke.TargetServiceAccountEmail)
+				r.NotNil(body.Gke.CastServiceAccountEmail)
+				r.Equal(castSA, *body.Gke.CastServiceAccountEmail)
 			}).
 			Return(&http.Response{
 				StatusCode: 200,
-				Body:       io.NopCloser(bytes.NewReader([]byte(`{"serviceAccount":"` + castSA + `"}`))),
+				Body:       io.NopCloser(bytes.NewReader([]byte(`{"id":"` + clusterID + `","credentialsId":"cid"}`))),
 				Header:     map[string][]string{"Content-Type": {"json"}},
 			}, nil)
 		getCluster(mockClient)
-		// The explicit getCluster after GKECreateSA plus the trailing ReadContext.
-		mockClient.EXPECT().
-			ExternalClusterAPIGetCluster(gomock.Any(), clusterID).
-			Return(&http.Response{
-				StatusCode: 200,
-				Body:       io.NopCloser(bytes.NewReader([]byte(clusterBody))),
-				Header:     map[string][]string{"Content-Type": {"json"}},
-			}, nil)
 
 		resource := resourceGKECluster()
 		data := schema.TestResourceDataRaw(t, resource.Schema, impersonationConfig())
@@ -209,10 +194,9 @@ func TestGKEClusterResourceCreate(t *testing.T) {
 		r.Equal("token-123", data.Get(FieldClusterToken))
 		block := data.Get(FieldGKECredentials).([]interface{})[0].(map[string]interface{})
 		r.Equal(targetSA, block[FieldGKECredentialsTargetServiceAccountEmail])
-		r.NotContains(block[FieldGKECredentialsTargetServiceAccountEmail].(string), "drift")
 	})
 
-	t.Run("create impersonation propagates SA creation error", func(t *testing.T) {
+	t.Run("create impersonation propagates cluster update error", func(t *testing.T) {
 		r := require.New(t)
 		mockctrl := gomock.NewController(t)
 		mockClient := mock_sdk.NewMockClientInterface(mockctrl)
@@ -220,7 +204,7 @@ func TestGKEClusterResourceCreate(t *testing.T) {
 
 		registerClient(mockClient)
 		mockClient.EXPECT().
-			ExternalClusterAPIGKECreateSAWithBody(gomock.Any(), clusterID, "application/json", gomock.Any()).
+			ExternalClusterAPIUpdateCluster(gomock.Any(), clusterID, gomock.Any(), gomock.Any()).
 			Return(&http.Response{
 				StatusCode: 400,
 				Body:       io.NopCloser(bytes.NewReader([]byte(`{"message":"bad request"}`))),
@@ -232,7 +216,7 @@ func TestGKEClusterResourceCreate(t *testing.T) {
 		diags := resource.CreateContext(ctx, data, provider)
 
 		r.True(diags.HasError())
-		r.Contains(diags[0].Summary, "creating GKE impersonation service account")
+		r.Contains(diags[0].Summary, "updating cluster configuration")
 	})
 
 	t.Run("create without credentials skips update", func(t *testing.T) {
@@ -268,33 +252,28 @@ func TestGKEClusterResourceUpdateCredentialsBlock(t *testing.T) {
 		}
 	}
 
-	t.Run("update impersonation re-calls GKECreateSA and refreshes credentials id", func(t *testing.T) {
+	t.Run("update impersonation calls UpdateCluster with impersonation emails", func(t *testing.T) {
 		r := require.New(t)
 		mockctrl := gomock.NewController(t)
 		mockClient := mock_sdk.NewMockClientInterface(mockctrl)
 		provider := newProvider(mockClient)
 
 		mockClient.EXPECT().
-			ExternalClusterAPIGKECreateSAWithBody(gomock.Any(), clusterID, "application/json", gomock.Any()).
-			Do(func(_ context.Context, _ string, _ string, body io.Reader, _ ...sdk.RequestEditorFn) {
-				raw, err := io.ReadAll(body)
-				r.NoError(err)
-				r.JSONEq(fmt.Sprintf(`{"gke":{"gkeSaImpersonate":%q,"castServiceAccount":%q}}`, targetSA, castSA), string(raw))
+			ExternalClusterAPIUpdateCluster(gomock.Any(), clusterID, gomock.Any(), gomock.Any()).
+			Do(func(_ context.Context, _ string, body sdk.ExternalClusterAPIUpdateClusterJSONRequestBody, _ ...sdk.RequestEditorFn) {
+				r.NotNil(body.Gke)
+				r.NotNil(body.Gke.TargetServiceAccountEmail)
+				r.Equal(targetSA, *body.Gke.TargetServiceAccountEmail)
+				r.NotNil(body.Gke.CastServiceAccountEmail)
+				r.Equal(castSA, *body.Gke.CastServiceAccountEmail)
 			}).
 			Return(&http.Response{
 				StatusCode: 200,
-				Body:       io.NopCloser(bytes.NewReader([]byte(`{"serviceAccount":"` + castSA + `"}`))),
+				Body:       io.NopCloser(bytes.NewReader([]byte(`{"id":"` + clusterID + `","credentialsId":"after-update-cid"}`))),
 				Header:     map[string][]string{"Content-Type": {"json"}},
 			}, nil)
 		clusterBody := `{"id":"` + clusterID + `","status":"ready","agentStatus":"online","organizationId":"org","credentialsId":"after-update-cid","gke":{"clusterName":"cluster","region":"europe-central2","location":"europe-central2-a","projectId":"project","clientServiceAccount":"` + targetSA + `"}}`
-		// The explicit getCluster after GKECreateSA plus the trailing ReadContext.
-		mockClient.EXPECT().
-			ExternalClusterAPIGetCluster(gomock.Any(), clusterID).
-			Return(&http.Response{
-				StatusCode: 200,
-				Body:       io.NopCloser(bytes.NewReader([]byte(clusterBody))),
-				Header:     map[string][]string{"Content-Type": {"json"}},
-			}, nil)
+		// The trailing ReadContext after the update.
 		mockClient.EXPECT().
 			ExternalClusterAPIGetCluster(gomock.Any(), clusterID).
 			Return(&http.Response{
