@@ -25,12 +25,13 @@ func TestGKEClusterCredentialsSchema(t *testing.T) {
 		FieldGKEClusterProjectId: "project",
 		FieldGKEClusterLocation:  "europe-central2-a",
 	}
-	withBlock := func(block map[string]interface{}) map[string]interface{} {
+	withFields := func(target, cast string) map[string]interface{} {
 		raw := map[string]interface{}{}
 		for k, v := range base {
 			raw[k] = v
 		}
-		raw[FieldGKECredentials] = []interface{}{block}
+		raw[FieldGKECredentialsTargetServiceAccountEmail] = target
+		raw[FieldGKECredentialsCastaiServiceAccountEmail] = cast
 		return raw
 	}
 
@@ -42,10 +43,10 @@ func TestGKEClusterCredentialsSchema(t *testing.T) {
 	}{
 		{
 			name: "valid impersonation",
-			raw: withBlock(map[string]interface{}{
-				FieldGKECredentialsTargetServiceAccountEmail: "target-sa@project.iam.gserviceaccount.com",
-				FieldGKECredentialsCastaiServiceAccountEmail: "cast-sa@cast-project.iam.gserviceaccount.com",
-			}),
+			raw: withFields(
+				"target-sa@project.iam.gserviceaccount.com",
+				"cast-sa@cast-project.iam.gserviceaccount.com",
+			),
 		},
 		{
 			name: "legacy empty object valid",
@@ -54,22 +55,35 @@ func TestGKEClusterCredentialsSchema(t *testing.T) {
 				for k, v := range base {
 					raw[k] = v
 				}
-				raw[FieldGKEClusterCredentials] = "{}"
+				raw[FieldGKEClusterLegacyCredentialsJSON] = "{}"
 				return raw
 			}(),
 		},
 		{
-			name: "block conflicts with credentials_json",
+			name: "impersonation fields conflict with credentials_json",
 			raw: func() map[string]interface{} {
-				raw := withBlock(map[string]interface{}{
-					FieldGKECredentialsTargetServiceAccountEmail: "target-sa@project.iam.gserviceaccount.com",
-					FieldGKECredentialsCastaiServiceAccountEmail: "cast-sa@cast-project.iam.gserviceaccount.com",
-				})
-				raw[FieldGKEClusterCredentials] = "{}"
+				raw := withFields(
+					"target-sa@project.iam.gserviceaccount.com",
+					"cast-sa@cast-project.iam.gserviceaccount.com",
+				)
+				raw[FieldGKEClusterLegacyCredentialsJSON] = "{}"
 				return raw
 			}(),
 			wantErr:    true,
 			errMessage: "conflicts with",
+		},
+		{
+			name: "target without castai service account",
+			raw: func() map[string]interface{} {
+				raw := map[string]interface{}{}
+				for k, v := range base {
+					raw[k] = v
+				}
+				raw[FieldGKECredentialsTargetServiceAccountEmail] = "target-sa@project.iam.gserviceaccount.com"
+				return raw
+			}(),
+			wantErr:    true,
+			errMessage: "must be specified",
 		},
 	}
 
@@ -114,15 +128,11 @@ func TestGKEClusterResourceCreate(t *testing.T) {
 
 	impersonationConfig := func() map[string]interface{} {
 		return map[string]interface{}{
-			FieldGKEClusterName:      "cluster",
-			FieldGKEClusterProjectId: "project",
-			FieldGKEClusterLocation:  "europe-central2-a",
-			FieldGKECredentials: []interface{}{
-				map[string]interface{}{
-					FieldGKECredentialsTargetServiceAccountEmail: targetSA,
-					FieldGKECredentialsCastaiServiceAccountEmail: castSA,
-				},
-			},
+			FieldGKEClusterName:                          "cluster",
+			FieldGKEClusterProjectId:                     "project",
+			FieldGKEClusterLocation:                      "europe-central2-a",
+			FieldGKECredentialsTargetServiceAccountEmail: targetSA,
+			FieldGKECredentialsCastaiServiceAccountEmail: castSA,
 		}
 	}
 	noneConfig := func() map[string]interface{} {
@@ -192,8 +202,7 @@ func TestGKEClusterResourceCreate(t *testing.T) {
 		r.Equal(clusterID, data.Id())
 		r.Equal("cid", data.Get(FieldClusterCredentialsId))
 		r.Equal("token-123", data.Get(FieldClusterToken))
-		block := data.Get(FieldGKECredentials).([]interface{})[0].(map[string]interface{})
-		r.Equal(targetSA, block[FieldGKECredentialsTargetServiceAccountEmail])
+		r.Equal(targetSA, data.Get(FieldGKECredentialsTargetServiceAccountEmail))
 	})
 
 	t.Run("create impersonation propagates cluster update error", func(t *testing.T) {
@@ -237,7 +246,7 @@ func TestGKEClusterResourceCreate(t *testing.T) {
 	})
 }
 
-func TestGKEClusterResourceUpdateCredentialsBlock(t *testing.T) {
+func TestGKEClusterResourceUpdateCredentials(t *testing.T) {
 	clusterID := "b6bfc074-a267-400f-b8f1-db0850c36gk3d"
 	ctx := context.Background()
 
@@ -284,12 +293,8 @@ func TestGKEClusterResourceUpdateCredentialsBlock(t *testing.T) {
 
 		gkeResource := resourceGKECluster()
 		raw := map[string]interface{}{
-			FieldGKECredentials: []interface{}{
-				map[string]interface{}{
-					FieldGKECredentialsTargetServiceAccountEmail: targetSA,
-					FieldGKECredentialsCastaiServiceAccountEmail: castSA,
-				},
-			},
+			FieldGKECredentialsTargetServiceAccountEmail: targetSA,
+			FieldGKECredentialsCastaiServiceAccountEmail: castSA,
 		}
 		data := schema.TestResourceDataRaw(t, gkeResource.Schema, raw)
 		data.SetId(clusterID)
@@ -329,7 +334,7 @@ func TestGKEClusterResourceUpdateCredentialsBlock(t *testing.T) {
 
 		gkeResource := resourceGKECluster()
 		raw := map[string]interface{}{
-			FieldGKEClusterCredentials: credentialsJSON,
+			FieldGKEClusterLegacyCredentialsJSON: credentialsJSON,
 		}
 		data := schema.TestResourceDataRaw(t, gkeResource.Schema, raw)
 		data.SetId(clusterID)
@@ -381,14 +386,12 @@ func TestGKEClusterResourceCredentialsDrift(t *testing.T) {
 		diags := resource.ReadContext(ctx, data, provider)
 
 		r.False(diags.HasError())
-		block := data.Get(FieldGKECredentials).([]interface{})[0].(map[string]interface{})
-		r.Equal(wantTarget, block[FieldGKECredentialsTargetServiceAccountEmail].(string))
+		r.Equal(wantTarget, data.Get(FieldGKECredentialsTargetServiceAccountEmail))
 	}
 
 	impersonationAttrs := map[string]string{
-		"credentials.#": "1",
-		"credentials.0.target_service_account_email": "cfg-sa@project.iam.gserviceaccount.com",
-		"credentials.0.castai_service_account_email": "cast-sa@cast-project.iam.gserviceaccount.com",
+		FieldGKECredentialsTargetServiceAccountEmail: "cfg-sa@project.iam.gserviceaccount.com",
+		FieldGKECredentialsCastaiServiceAccountEmail: "cast-sa@cast-project.iam.gserviceaccount.com",
 		FieldClusterCredentialsId:                    "local-cid",
 	}
 
