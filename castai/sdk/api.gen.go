@@ -296,6 +296,15 @@ const (
 	CastaiSsoV1beta1SSOConnectionStatusSTATUSUNKNOWN  CastaiSsoV1beta1SSOConnectionStatus = "STATUS_UNKNOWN"
 )
 
+// Defines values for CastaiSsoV1beta1SSOEmailDomainValidationStatus.
+const (
+	CastaiSsoV1beta1SSOEmailDomainValidationStatusSTATUSDENIED   CastaiSsoV1beta1SSOEmailDomainValidationStatus = "STATUS_DENIED"
+	CastaiSsoV1beta1SSOEmailDomainValidationStatusSTATUSEXPIRED  CastaiSsoV1beta1SSOEmailDomainValidationStatus = "STATUS_EXPIRED"
+	CastaiSsoV1beta1SSOEmailDomainValidationStatusSTATUSPENDING  CastaiSsoV1beta1SSOEmailDomainValidationStatus = "STATUS_PENDING"
+	CastaiSsoV1beta1SSOEmailDomainValidationStatusSTATUSUNKNOWN  CastaiSsoV1beta1SSOEmailDomainValidationStatus = "STATUS_UNKNOWN"
+	CastaiSsoV1beta1SSOEmailDomainValidationStatusSTATUSVERIFIED CastaiSsoV1beta1SSOEmailDomainValidationStatus = "STATUS_VERIFIED"
+)
+
 // Defines values for CastaiUsersV1beta1OrganizationType.
 const (
 	CastaiUsersV1beta1OrganizationTypeORGANIZATIONTYPECHILD      CastaiUsersV1beta1OrganizationType = "ORGANIZATION_TYPE_CHILD"
@@ -4207,6 +4216,9 @@ type CastaiSsoV1beta1SSOConnection struct {
 	// EmailDomain EmailDomain is the email domain of the connection.
 	EmailDomain string `json:"emailDomain"`
 
+	// EmailDomains EmailDomains holds the email-domain claim validation details for the connection's domains.
+	EmailDomains *[]CastaiSsoV1beta1SSOEmailDomainValidation `json:"emailDomains,omitempty"`
+
 	// Error Error is the error message of the connection.
 	Error *string `json:"error,omitempty"`
 
@@ -4247,6 +4259,51 @@ type CastaiSsoV1beta1SSOConnection struct {
 //   - STATUS_INACTIVE: StatusInactive is the inactive status.
 //   - STATUS_FAILED: StatusFailed is the failed status.
 type CastaiSsoV1beta1SSOConnectionStatus string
+
+// CastaiSsoV1beta1SSOEmailDomainTxtRecord SSOEmailDomainTxtRecord represents the DNS TXT record to publish for email-domain verification.
+type CastaiSsoV1beta1SSOEmailDomainTxtRecord struct {
+	// Name Name is the DNS TXT record name.
+	Name *string `json:"name,omitempty"`
+
+	// Value Value is the DNS TXT record value carrying the verification secret.
+	Value *string `json:"value,omitempty"`
+}
+
+// CastaiSsoV1beta1SSOEmailDomainValidation SSOEmailDomainValidation represents the verification state of a claimed SSO connection email domain.
+type CastaiSsoV1beta1SSOEmailDomainValidation struct {
+	// Domain Domain is the claimed email domain.
+	Domain *string `json:"domain,omitempty"`
+
+	// LastCheckedAt LastCheckedAt is the time the domain was last checked for the verification TXT record.
+	LastCheckedAt *time.Time `json:"lastCheckedAt,omitempty"`
+
+	// NextRetryAt NextRetryAt is the earliest time the next verification check may run.
+	NextRetryAt *time.Time `json:"nextRetryAt,omitempty"`
+
+	// Status Status is the verification status of the email-domain claim.
+	//
+	//  - STATUS_UNKNOWN: StatusUnknown is the default status.
+	//  - STATUS_PENDING: StatusPending means the claim waits for the verification TXT record.
+	//  - STATUS_VERIFIED: StatusVerified means the claim was verified.
+	//  - STATUS_EXPIRED: StatusExpired means the pending claim expired before verification.
+	//  - STATUS_DENIED: StatusDenied means the claim was denied (domain taken by another connection).
+	Status *CastaiSsoV1beta1SSOEmailDomainValidationStatus `json:"status,omitempty"`
+
+	// TxtRecord SSOEmailDomainTxtRecord represents the DNS TXT record to publish for email-domain verification.
+	TxtRecord *CastaiSsoV1beta1SSOEmailDomainTxtRecord `json:"txtRecord,omitempty"`
+
+	// VerifiedAt VerifiedAt is the time the domain was verified.
+	VerifiedAt *time.Time `json:"verifiedAt,omitempty"`
+}
+
+// CastaiSsoV1beta1SSOEmailDomainValidationStatus Status is the verification status of the email-domain claim.
+//
+//   - STATUS_UNKNOWN: StatusUnknown is the default status.
+//   - STATUS_PENDING: StatusPending means the claim waits for the verification TXT record.
+//   - STATUS_VERIFIED: StatusVerified means the claim was verified.
+//   - STATUS_EXPIRED: StatusExpired means the pending claim expired before verification.
+//   - STATUS_DENIED: StatusDenied means the claim was denied (domain taken by another connection).
+type CastaiSsoV1beta1SSOEmailDomainValidationStatus string
 
 // CastaiSsoV1beta1SetSyncForSSOConnectionResponse defines model for castai.sso.v1beta1.SetSyncForSSOConnectionResponse.
 type CastaiSsoV1beta1SetSyncForSSOConnectionResponse struct {
