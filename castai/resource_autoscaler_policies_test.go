@@ -1219,7 +1219,9 @@ func TestAccEKS_ResourceAutoscalerPolicies_omittedDefaults(t *testing.T) {
 				Check: tfresource.ComposeTestCheckFunc(
 					tfresource.TestCheckResourceAttr("castai_autoscaler_policies.test", "cluster_limits.0.cpu.0.min_cores", "1"),
 					tfresource.TestCheckResourceAttr("castai_autoscaler_policies.test", "unschedulable_pods.0.partial_template_matching_enabled", "false"),
-					tfresource.TestCheckResourceAttr("castai_autoscaler_policies.test", "unschedulable_pods.0.pod_pinner.0.enabled", "false"),
+					// An entirely omitted nested block stays absent from state; the
+					// server response is filtered to the plan shape on Read.
+					tfresource.TestCheckResourceAttr("castai_autoscaler_policies.test", "unschedulable_pods.0.pod_pinner.#", "0"),
 				),
 			},
 			// Re-apply: the schema Defaults must match what the server returned,
