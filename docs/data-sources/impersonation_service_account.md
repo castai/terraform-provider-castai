@@ -21,6 +21,5 @@ Retrieve impersonation service account ID and email for AKS or GKE clusters
 
 ### Read-Only
 
-- `id` (String) ID of the impersonation service account
 - `email` (String) Email of the impersonation service account
-
+- `id` (String) ID of the impersonation service account

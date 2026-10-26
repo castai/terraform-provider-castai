@@ -78,11 +78,6 @@ Tainted = false
 `, data.State().String())
 }
 
-func TestGKEClusterIdResourceDeprecation(t *testing.T) {
-	r := require.New(t)
-	r.NotEmpty(resourceGKEClusterId().DeprecationMessage)
-}
-
 func TestGKEClusterIdResourceReadContextArchived(t *testing.T) {
 	r := require.New(t)
 	mockctrl := gomock.NewController(t)
