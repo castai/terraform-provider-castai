@@ -1202,7 +1202,7 @@ func TestAccEKS_ResourceAutoscalerPolicies_basic(t *testing.T) {
 // unchanged).
 func TestAccEKS_ResourceAutoscalerPolicies_omittedDefaults(t *testing.T) {
 	rName := fmt.Sprintf("%v-policies-omitted-%v", ResourcePrefix, acctest.RandString(8))
-	clusterName, _ := lo.Coalesce(os.Getenv("CLUSTER_NAME"), "cost-terraform")
+	clusterName, _ := lo.Coalesce(os.Getenv("CLUSTER_NAME"), "core-tf-acc-21-08-2025")
 
 	tfresource.Test(t, tfresource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
