@@ -35,6 +35,9 @@ func TestAccGKE_ResourceWorkloadScalingPolicy(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
+			if os.Getenv("CASTAI_GCP_CREDENTIALS") == "" {
+				t.Skipf("missing required env var: CASTAI_GCP_CREDENTIALS")
+			}
 			cleanupLeftoverHelmReleases(t)
 		},
 		ProviderFactories: providerFactories,
@@ -161,14 +164,6 @@ func TestAccGKE_ResourceWorkloadScalingPolicy(t *testing.T) {
 			},
 		},
 		ExternalProviders: map[string]resource.ExternalProvider{
-			"google": {
-				Source:            "hashicorp/google",
-				VersionConstraint: "> 4.75.0",
-			},
-			"google-beta": {
-				Source:            "hashicorp/google-beta",
-				VersionConstraint: "> 4.75.0",
-			},
 			"helm": {
 				Source:            "hashicorp/helm",
 				VersionConstraint: "~> 2.17.0",
@@ -202,12 +197,12 @@ func clusterComponentsConfig(clusterName, projectID, name string) string {
 	
 		set_sensitive {
 			name  = "apiKey"
-			value = %[1]q
+			value = castai_gke_cluster.test.cluster_token
 		}
 	
 		set {
 			name  = "apiURL"
-			value = %[2]q
+			value = %[1]q
 		}
 	
 		set {
@@ -231,12 +226,12 @@ func clusterComponentsConfig(clusterName, projectID, name string) string {
 
 		set_sensitive {
 			name  = "castai.apiKey"
-			value = %[1]q
+			value = castai_gke_cluster.test.cluster_token
 		}
 	
 		set {
 			name  = "castai.apiURL"
-			value = %[2]q
+			value = %[1]q
 		}
 	
 		set {
@@ -263,19 +258,19 @@ func clusterComponentsConfig(clusterName, projectID, name string) string {
 
 		set_sensitive {
 			name  = "castai.apiKey"
-			value = %[1]q
+			value = castai_gke_cluster.test.cluster_token
 		}
 	
 		set {
 			name  = "castai.apiURL"
-			value = %[2]q
+			value = %[1]q
 		}
 	
 		set {
 			name  = "castai.clusterID"
 			value = castai_gke_cluster.test.id
 		}
-	}`, getAPIToken(), getAPIUrl())
+	}`, getAPIUrl())
 	return ConfigCompose(clusterConnectConfig(clusterName, projectID, name), cfg)
 }
 
@@ -520,10 +515,6 @@ func testAccCheckScalingPolicyDestroy(s *terraform.State) error {
 	}
 
 	return nil
-}
-
-func getAPIToken() string {
-	return os.Getenv("CASTAI_API_TOKEN")
 }
 
 func getAPIUrl() string {

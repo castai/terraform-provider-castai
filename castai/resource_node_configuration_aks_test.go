@@ -7,7 +7,8 @@ import (
 func testAccAKSNodeConfigurationConfig(rName, clusterName, resourceGroupName string) string {
 	return ConfigCompose(testAccAKSWithFederationIDConfig(clusterName), fmt.Sprintf(`
 provider "azurerm" {
-	features {}		
+	features {}
+	skip_provider_registration = true
 }
 data "azurerm_subnet" "internal" {
   name                 =  "internal"
@@ -40,7 +41,8 @@ resource "castai_node_configuration_default" "test" {
 func testAccAKSNodeConfigurationUpdated(rName, clusterName, resourceGroupName string) string {
 	return ConfigCompose(testAccAKSWithFederationIDConfig(clusterName), fmt.Sprintf(`
 provider "azurerm" {
-	features {}		
+	features {}
+	skip_provider_registration = true
 }
 data "azurerm_subnet" "internal" {
   name                 =  "internal"
@@ -87,7 +89,8 @@ resource "castai_node_configuration" "test" {
 func testAccAKSNodeConfigurationConfigWithEphemeral(rName, clusterName, resourceGroupName string) string {
 	return ConfigCompose(testAccAKSWithFederationIDConfig(clusterName), fmt.Sprintf(`
 provider "azurerm" {
-	features {}		
+	features {}
+	skip_provider_registration = true
 }
 data "azurerm_subnet" "internal" {
   name                 =  "internal"
@@ -122,7 +125,8 @@ resource "castai_node_configuration_default" "test" {
 func testAccAKSNodeConfigurationConfigWithEphemeralNVME(rName, clusterName, resourceGroupName string) string {
 	return ConfigCompose(testAccAKSWithFederationIDConfig(clusterName), fmt.Sprintf(`
 provider "azurerm" {
-	features {}		
+	features {}
+	skip_provider_registration = true
 }
 data "azurerm_subnet" "internal" {
   name                 =  "internal"

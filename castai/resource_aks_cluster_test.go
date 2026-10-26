@@ -668,10 +668,12 @@ resource "castai_aks_cluster" "test" {
 func testAccAKSWithFederationIDConfig(clusterName string) string {
 	subscriptionID := os.Getenv("ARM_SUBSCRIPTION_ID")
 	federationID := os.Getenv("AZURE_TF_ACCEPTANCE_TEST_FEDERATION_ID")
-	tenantID := os.Getenv("AZURE_TF_ACCEPTANCE_TEST_FEDERATION_TENANT_ID")
+	tenantID := os.Getenv("AZURE_TF_ACCEPTANCE_TEST_ARM_TENANT_ID")
 	clientID := os.Getenv("AZURE_TF_ACCEPTANCE_TEST_FEDERATION_CLIENT_ID")
 
 	return fmt.Sprintf(`
+data "castai_impersonation_service_account" "imp" {}
+
 resource "castai_aks_cluster" "test" {
   name = %[3]q
 

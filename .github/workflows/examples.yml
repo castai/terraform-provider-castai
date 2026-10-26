@@ -22,6 +22,9 @@ jobs:
     needs: files-changed
     if: needs.files-changed.outputs.validate-examples == 'true'
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
 
     steps:
       - name: Checkout repository
@@ -44,42 +47,64 @@ jobs:
       - name: Build binary
         run: go build .
 
+      - name: Authenticate to onyx
+        uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3.0.0
+        with:
+          workload_identity_provider: projects/883821977796/locations/global/workloadIdentityPools/onyx-github-pool/providers/onyx-github-terraform-provider
+          project_id: onyx-fyvd
+
+      - name: Read secrets from onyx
+        uses: google-github-actions/get-secretmanager-secrets@bc9c54b29fdffb8a47776820a7d26e77b379d262 # v3.0.0
+        with:
+          export_to_environment: true
+          secrets: |-
+            CASTAI_API_TOKEN:onyx-fyvd/terraform-provider-castai-token-dev
+
       - name: Validate Terraform examples
         id: validate_examples
         run: make validate-terraform-examples
       
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: arn:aws:iam::038471709730:role/terraform-provider-acc-github
+          aws-region: eu-central-1
+          role-duration-seconds: 14400
+
       - name: Plan an EKS example
         env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_TF_ACCEPTANCE_TEST_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_TF_ACCEPTANCE_TEST_SECRET_KEY_ID }}
           TF_VAR_cluster_name: gh-eks
           TF_VAR_cluster_region: us-east-1
-          TF_VAR_castai_api_token: ${{ secrets.CASTAI_TOKEN }}
-          TF_VAR_castai_api_url:  ${{ secrets.CASTAI_URL }}
+          TF_VAR_castai_api_token: ${{ env.CASTAI_API_TOKEN }}
+          TF_VAR_castai_api_url: https://api.dev-master.cast.ai
         id: eks_plan_examples
         run: make plan-terraform-example EXAMPLE_DIR=examples/eks/eks_clusters
 
+      - name: Authenticate to GCP
+        uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3.0.0
+        with:
+          workload_identity_provider: projects/1021023109524/locations/global/workloadIdentityPools/github-tf-acc/providers/github
+          service_account: terraform-provider-acc@end2end-w1p4.iam.gserviceaccount.com
+
       - name: Plan a GKE example
         env:
-          GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_TF_ACCEPTANCE_TEST_CREDENTIALS }}
-          GOOGLE_PROJECT_ID: ${{ secrets.GOOGLE_TF_ACCEPTANCE_PROJECT_ID }}
           TF_VAR_project_id: ${{ secrets.GOOGLE_TF_ACCEPTANCE_PROJECT_ID }}
           TF_VAR_cluster_name: gh-gke
-          TF_VAR_castai_api_token: ${{ secrets.CASTAI_TOKEN }}
-          TF_VAR_castai_api_url:  ${{ secrets.CASTAI_URL }}
+          TF_VAR_castai_api_token: ${{ env.CASTAI_API_TOKEN }}
+          TF_VAR_castai_api_url: https://api.dev-master.cast.ai
         id: gke_plan_examples
         run: make plan-terraform-example EXAMPLE_DIR=examples/gke/gke_castai_iam
 
       - name: Plan an AKS example
         env:
-          ARM_CLIENT_ID: ${{ secrets.AZURE_TF_ACCEPTANCE_TEST_ARM_CLIENT_ID_V2 }}
-          ARM_CLIENT_SECRET: ${{ secrets.AZURE_TF_ACCEPTANCE_TEST_ARM_CLIENT_SECRET_V2 }}
-          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_TF_ACCEPTANCE_TEST_ARM_SUBSCRIPTION_ID_V2 }}
-          ARM_TENANT_ID: ${{ secrets.AZURE_TF_ACCEPTANCE_TEST_ARM_TENANT_ID_V2 }}
+          ARM_USE_OIDC: true
+          ARM_CLIENT_ID: ${{ secrets.AZURE_TF_ACCEPTANCE_TEST_GITHUB_MI_CLIENT_ID }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_TF_ACCEPTANCE_TEST_ARM_SUBSCRIPTION_ID }}
+          ARM_TENANT_ID: ${{ secrets.AZURE_TF_ACCEPTANCE_TEST_ARM_TENANT_ID }}
           TF_VAR_cluster_name: gh-aks
-          TF_VAR_castai_api_token: ${{ secrets.CASTAI_TOKEN }}
-          TF_VAR_castai_api_url:  ${{ secrets.CASTAI_URL }}
+          TF_VAR_castai_api_token: ${{ env.CASTAI_API_TOKEN }}
+          TF_VAR_castai_api_url: https://api.dev-master.cast.ai
           TF_VAR_cluster_region: "germanywestcentral"
-          TF_VAR_subscription_id: ${{ secrets.AZURE_TF_ACCEPTANCE_TEST_ARM_SUBSCRIPTION_ID_V2 }}
+          TF_VAR_subscription_id: ${{ secrets.AZURE_TF_ACCEPTANCE_TEST_ARM_SUBSCRIPTION_ID }}
         id: aks_plan_examples
         run: make plan-terraform-example EXAMPLE_DIR=examples/aks/aks_cluster
