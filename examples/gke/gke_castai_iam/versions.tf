@@ -4,7 +4,6 @@ terraform {
   required_providers {
     castai = {
       source  = "castai/castai"
-      version = ">= 5.1.0"
     }
   }
 }

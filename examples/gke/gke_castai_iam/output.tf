@@ -10,3 +10,15 @@ output "service_account_id" {
 output "service_account_email" {
   value = module.castai-gke-iam.service_account_email
 }
+
+output "castai_impersonation_service_account_id" {
+  value = module.castai-gke-iam.castai_impersonation_service_account_id
+}
+
+output "castai_impersonation_service_account_email" {
+  value = module.castai-gke-iam.castai_impersonation_service_account_email
+}
+
+output "target_service_account_email" {
+  value = module.castai-gke-iam.target_service_account_email
+}
