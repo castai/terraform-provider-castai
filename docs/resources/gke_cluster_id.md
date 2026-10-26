@@ -16,11 +16,10 @@ GKE cluster resource allows connecting an existing GKE cluster to CAST AI.
 
 `castai_gke_cluster_id` registers the cluster and, when `client_service_account` is set, creates
 the CAST AI delegate service account that impersonates it. All of that is now expressed
-declaratively on `castai_gke_cluster` via `credentials { target_service_account, target_project,
-castai_service_account }`.
+declaratively on `castai_gke_cluster` via `credentials { target_service_account_email, castai_service_account_email }`.
 
-The CAST AI delegate service account id can be fetched from the `castai_impersonation_service_account`
-data source (currently AKS-only, GKE support pending) or from a dedicated CAST AI service account resource.
+The CAST AI impersonation service account email can be fetched from the `castai_impersonation_service_account`
+data source (`provider_type = "gke"`).
 
 To migrate an existing cluster managed by both `castai_gke_cluster_id` and `castai_gke_cluster`:
 
@@ -34,15 +33,18 @@ terraform state mv castai_gke_cluster_id.cluster_id castai_gke_cluster.this
    `credentials` block on `castai_gke_cluster`:
 
 ```terraform
+data "castai_impersonation_service_account" "this" {
+  provider_type = "gke"
+}
+
 resource "castai_gke_cluster" "this" {
   project_id = var.project_id
   location   = module.gke.location
   name       = var.gke_cluster_name
 
   credentials {
-    target_service_account = google_service_account.client.email
-    target_project         = var.project_id
-    castai_service_account = castai_impersonation_service_account.this.id
+    target_service_account_email = google_service_account.client.email
+    castai_service_account_email = data.castai_impersonation_service_account.this.email
   }
 }
 ```

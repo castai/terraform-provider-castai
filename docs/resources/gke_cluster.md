@@ -12,6 +12,10 @@ GKE cluster resource allows connecting an existing GKE cluster to CAST AI.
 ## Example Usage
 
 ```terraform
+data "castai_impersonation_service_account" "this" {
+  provider_type = "gke"
+}
+
 resource "castai_gke_cluster" "this" {
   project_id                 = var.project_id
   location                   = module.gke.location
@@ -19,8 +23,8 @@ resource "castai_gke_cluster" "this" {
   delete_nodes_on_disconnect = var.delete_nodes_on_disconnect
 
   credentials {
-    target_service_account  = google_service_account.target.email
-    castai_service_account = castai_impersonation_service_account.this.id
+    target_service_account_email = google_service_account.target.email
+    castai_service_account_email = data.castai_impersonation_service_account.this.email
   }
 }
 ```
@@ -51,10 +55,10 @@ resource "castai_gke_cluster" "this" {
 <a id="nestedblock--credentials"></a>
 ### Nested Schema for `credentials`
 
-Optional:
+Required:
 
-- `castai_service_account` (String) CAST AI service account email used to access the target project
-- `target_service_account` (String) Service account email in the target GCP project that CAST AI impersonates
+- `castai_service_account_email` (String) CAST AI service account email used to access the target project
+- `target_service_account_email` (String) Service account email in the GCP project that CAST AI impersonates
 
 
 <a id="nestedblock--timeouts"></a>
