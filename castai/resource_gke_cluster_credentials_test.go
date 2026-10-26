@@ -55,7 +55,7 @@ func TestGKEClusterCredentialsSchema(t *testing.T) {
 				for k, v := range base {
 					raw[k] = v
 				}
-				raw[FieldGKEClusterLegacyCredentialsJSON] = "{}"
+				raw[FieldGKEClusterCredentials] = "{}"
 				return raw
 			}(),
 		},
@@ -66,7 +66,7 @@ func TestGKEClusterCredentialsSchema(t *testing.T) {
 					"target-sa@project.iam.gserviceaccount.com",
 					"cast-sa@cast-project.iam.gserviceaccount.com",
 				)
-				raw[FieldGKEClusterLegacyCredentialsJSON] = "{}"
+				raw[FieldGKEClusterCredentials] = "{}"
 				return raw
 			}(),
 			wantErr:    true,
@@ -336,7 +336,7 @@ func TestGKEClusterResourceUpdateCredentials(t *testing.T) {
 
 		gkeResource := resourceGKECluster()
 		raw := map[string]interface{}{
-			FieldGKEClusterLegacyCredentialsJSON: credentialsJSON,
+			FieldGKEClusterCredentials: credentialsJSON,
 		}
 		data := schema.TestResourceDataRaw(t, gkeResource.Schema, raw)
 		data.SetId(clusterID)
