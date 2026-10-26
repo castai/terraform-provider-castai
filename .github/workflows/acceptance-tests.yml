@@ -215,11 +215,7 @@ jobs:
           SSO_CLIENT_ID: ${{ secrets.SSO_CLIENT_ID }}
           SSO_DOMAIN: ${{ secrets.SSO_DOMAIN }}
           ACCEPTANCE_TEST_ORGANIZATION_ID: ${{ vars.TF_ACCEPTANCE_TEST_ORGANIZATION_ID }}
-        # TEMP: run only the failing test for faster feedback; revert to
-        # "make testacc-gke" once it is green.
-        run: |
-          make build
-          TF_ACC=1 go test ./castai/... '-run=^TestAccGKE_ResourceWorkloadScalingPolicy$' -v -timeout 50m
+        run: make testacc-gke
   cloud-agnostic:
     needs: files-changed
     if: needs.files-changed.outputs.acceptance-tests == 'true'
