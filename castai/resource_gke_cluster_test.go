@@ -6,12 +6,17 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"os"
+	"strings"
 	"testing"
 
 	"github.com/golang/mock/gomock"
 	"github.com/hashicorp/go-cty/cty"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/stretchr/testify/require"
 
 	"github.com/castai/terraform-provider-castai/castai/sdk"
@@ -358,4 +363,482 @@ func TestGKEClusterResourceUpdate(t *testing.T) {
 			r.Contains(valueAfter, "drift")
 		})
 	})
+}
+
+func newProvider(mockClient *mock_sdk.MockClientInterface) *ProviderConfig {
+	return &ProviderConfig{
+		api: &sdk.ClientWithResponses{
+			ClientInterface: mockClient,
+		},
+	}
+}
+
+func TestGKEClusterCredentialsSchema(t *testing.T) {
+	base := map[string]interface{}{
+		FieldGKEClusterName:      "cluster",
+		FieldGKEClusterProjectId: "project",
+		FieldGKEClusterLocation:  "europe-central2-a",
+	}
+	withFields := func(target, cast string) map[string]interface{} {
+		raw := map[string]interface{}{}
+		for k, v := range base {
+			raw[k] = v
+		}
+		raw[FieldGKECredentialsTargetServiceAccountEmail] = target
+		raw[FieldGKECredentialsCastaiServiceAccountEmail] = cast
+		return raw
+	}
+
+	tests := []struct {
+		name       string
+		raw        map[string]interface{}
+		wantErr    bool
+		errMessage string
+	}{
+		{
+			name: "valid impersonation",
+			raw: withFields(
+				"target-sa@project.iam.gserviceaccount.com",
+				"cast-sa@cast-project.iam.gserviceaccount.com",
+			),
+		},
+		{
+			name: "legacy empty object valid",
+			raw: func() map[string]interface{} {
+				raw := map[string]interface{}{}
+				for k, v := range base {
+					raw[k] = v
+				}
+				raw[FieldGKEClusterCredentials] = "{}"
+				return raw
+			}(),
+		},
+		{
+			name: "impersonation fields conflict with credentials_json",
+			raw: func() map[string]interface{} {
+				raw := withFields(
+					"target-sa@project.iam.gserviceaccount.com",
+					"cast-sa@cast-project.iam.gserviceaccount.com",
+				)
+				raw[FieldGKEClusterCredentials] = "{}"
+				return raw
+			}(),
+			wantErr:    true,
+			errMessage: "conflicts with",
+		},
+		{
+			name: "target without castai service account",
+			raw: func() map[string]interface{} {
+				raw := map[string]interface{}{}
+				for k, v := range base {
+					raw[k] = v
+				}
+				raw[FieldGKECredentialsTargetServiceAccountEmail] = "target-sa@project.iam.gserviceaccount.com"
+				return raw
+			}(),
+			wantErr:    true,
+			errMessage: "must be specified",
+		},
+	}
+
+	resource := resourceGKECluster()
+	require.NoError(t, resource.InternalValidate(nil, true))
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			cfg := terraform.NewResourceConfigRaw(tt.raw)
+			diags := resource.Validate(cfg)
+			if !tt.wantErr {
+				require.False(t, diags.HasError(), "unexpected errors: %v", diags)
+				return
+			}
+			require.True(t, diags.HasError())
+			var found string
+			for _, d := range diags {
+				if d.Severity == diag.Error && strings.Contains(d.Summary+" "+d.Detail, tt.errMessage) {
+					found = d.Summary + " " + d.Detail
+					break
+				}
+			}
+			require.NotEmpty(t, found, "expected error containing %q in %v", tt.errMessage, diags)
+		})
+	}
+}
+
+func TestGKEClusterResourceCreate(t *testing.T) {
+	clusterID := "b6bfc074-a267-400f-b8f1-db0850c36gke"
+	ctx := context.Background()
+
+	targetSA := "target-sa@project.iam.gserviceaccount.com"
+	castSA := "cast-sa@cast-project.iam.gserviceaccount.com"
+	noneConfig := map[string]interface{}{
+		FieldGKEClusterName:      "cluster",
+		FieldGKEClusterProjectId: "project",
+		FieldGKEClusterLocation:  "europe-central2-a",
+	}
+	impersonationConfig := map[string]interface{}{
+		FieldGKEClusterName:                          "cluster",
+		FieldGKEClusterProjectId:                     "project",
+		FieldGKEClusterLocation:                      "europe-central2-a",
+		FieldGKECredentialsTargetServiceAccountEmail: targetSA,
+		FieldGKECredentialsCastaiServiceAccountEmail: castSA,
+	}
+	clusterBody := func(clientSA string) string {
+		return fmt.Sprintf(`{"id":%q,"status":"ready","agentStatus":"online","organizationId":"org","credentialsId":"cid","gke":{"clusterName":"cluster","region":"europe-central2","location":"europe-central2-a","projectId":"project","clientServiceAccount":%q}}`, clusterID, clientSA)
+	}
+
+	registerClient := func(mockClient *mock_sdk.MockClientInterface) {
+		mockClient.EXPECT().
+			ExternalClusterAPIRegisterCluster(gomock.Any(), gomock.Any()).
+			Return(&http.Response{
+				StatusCode: 200,
+				Body:       io.NopCloser(bytes.NewReader([]byte(`{"id":"` + clusterID + `"}`))),
+				Header:     map[string][]string{"Content-Type": {"json"}},
+			}, nil)
+		mockClient.EXPECT().
+			ExternalClusterAPICreateClusterToken(gomock.Any(), clusterID).
+			Return(&http.Response{
+				StatusCode: 200,
+				Body:       io.NopCloser(bytes.NewReader([]byte(`{"token":"token-123"}`))),
+				Header:     map[string][]string{"Content-Type": {"json"}},
+			}, nil)
+	}
+	getCluster := func(mockClient *mock_sdk.MockClientInterface, clientSA string) {
+		mockClient.EXPECT().
+			ExternalClusterAPIGetCluster(gomock.Any(), clusterID).
+			Return(&http.Response{
+				StatusCode: 200,
+				Body:       io.NopCloser(bytes.NewReader([]byte(clusterBody(clientSA)))),
+				Header:     map[string][]string{"Content-Type": {"json"}},
+			}, nil)
+	}
+
+	tests := []struct {
+		name         string
+		raw          map[string]interface{}
+		updateStatus int
+		wantTargetSA string
+		wantCastSA   string
+		apiClientSA  string
+		wantErr      string
+	}{
+		{
+			name:         "create impersonation registers and updates cluster with impersonation emails",
+			raw:          impersonationConfig,
+			updateStatus: 200,
+			wantTargetSA: targetSA,
+			wantCastSA:   castSA,
+			apiClientSA:  targetSA,
+		},
+		{
+			name:         "create impersonation propagates cluster update error",
+			raw:          impersonationConfig,
+			updateStatus: 400,
+			wantTargetSA: targetSA,
+			wantCastSA:   castSA,
+			wantErr:      "updating cluster configuration",
+		},
+		{
+			name: "create without credentials skips update",
+			raw:  noneConfig,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			r := require.New(t)
+			mockctrl := gomock.NewController(t)
+			mockClient := mock_sdk.NewMockClientInterface(mockctrl)
+			provider := newProvider(mockClient)
+
+			registerClient(mockClient)
+			if tt.updateStatus != 0 {
+				mockClient.EXPECT().
+					ExternalClusterAPIUpdateCluster(gomock.Any(), clusterID, gomock.Any(), gomock.Any()).
+					Do(func(_ context.Context, _ string, body sdk.ExternalClusterAPIUpdateClusterJSONRequestBody, _ ...sdk.RequestEditorFn) {
+						r.NotNil(body.Gke)
+						r.Equal(tt.wantTargetSA, toString(body.Gke.TargetServiceAccountEmail))
+						r.Equal(tt.wantCastSA, toString(body.Gke.CastServiceAccountEmail))
+					}).
+					Return(&http.Response{
+						StatusCode: tt.updateStatus,
+						Body:       io.NopCloser(bytes.NewReader([]byte(`{"id":"` + clusterID + `","credentialsId":"cid"}`))),
+						Header:     map[string][]string{"Content-Type": {"json"}},
+					}, nil)
+			}
+			if tt.wantErr == "" {
+				getCluster(mockClient, tt.apiClientSA)
+			}
+
+			resource := resourceGKECluster()
+			data := schema.TestResourceDataRaw(t, resource.Schema, tt.raw)
+			diags := resource.CreateContext(ctx, data, provider)
+
+			if tt.wantErr != "" {
+				r.True(diags.HasError())
+				r.Contains(diags[0].Summary, tt.wantErr)
+				return
+			}
+			r.False(diags.HasError())
+			r.Equal(clusterID, data.Id())
+			r.Equal("cid", data.Get(FieldClusterCredentialsId))
+			r.Equal("token-123", data.Get(FieldClusterToken))
+			r.Equal(tt.wantTargetSA, data.Get(FieldGKECredentialsTargetServiceAccountEmail))
+		})
+	}
+}
+
+func TestGKEClusterResourceUpdateCredentials(t *testing.T) {
+	clusterID := "b6bfc074-a267-400f-b8f1-db0850c36gk3d"
+	ctx := context.Background()
+
+	targetSA := "target-sa@project.iam.gserviceaccount.com"
+	castSA := "cast-sa@cast-project.iam.gserviceaccount.com"
+	credentialsJSON := `{"type":"service_account"}`
+
+	tests := []struct {
+		name                string
+		raw                 map[string]interface{}
+		updateCredentialsID string
+		wantCredentials     string
+		wantTargetSA        string
+		wantCastSA          string
+		apiClientSA         string
+	}{
+		{
+			name: "update impersonation calls UpdateCluster with impersonation emails",
+			raw: map[string]interface{}{
+				FieldGKECredentialsTargetServiceAccountEmail: targetSA,
+				FieldGKECredentialsCastaiServiceAccountEmail: castSA,
+			},
+			updateCredentialsID: "after-update-cid",
+			wantTargetSA:        targetSA,
+			wantCastSA:          castSA,
+			apiClientSA:         targetSA,
+		},
+		{
+			name: "update legacy sends credentials json",
+			raw: map[string]interface{}{
+				FieldGKEClusterCredentials: credentialsJSON,
+			},
+			updateCredentialsID: "legacy-cid",
+			wantCredentials:     credentialsJSON,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			r := require.New(t)
+			mockctrl := gomock.NewController(t)
+			mockClient := mock_sdk.NewMockClientInterface(mockctrl)
+			provider := newProvider(mockClient)
+
+			mockClient.EXPECT().
+				ExternalClusterAPIUpdateCluster(gomock.Any(), clusterID, gomock.Any(), gomock.Any()).
+				Do(func(_ context.Context, _ string, body sdk.ExternalClusterAPIUpdateClusterJSONRequestBody, _ ...sdk.RequestEditorFn) {
+					r.Equal(tt.wantCredentials, toString(body.Credentials))
+					r.NotNil(body.Gke)
+					r.Equal(tt.wantTargetSA, toString(body.Gke.TargetServiceAccountEmail))
+					r.Equal(tt.wantCastSA, toString(body.Gke.CastServiceAccountEmail))
+				}).
+				Return(&http.Response{
+					StatusCode: 200,
+					Body:       io.NopCloser(bytes.NewReader([]byte(`{"id":"` + clusterID + `","credentialsId":"` + tt.updateCredentialsID + `"}`))),
+					Header:     map[string][]string{"Content-Type": {"json"}},
+				}, nil)
+			clusterBody := fmt.Sprintf(`{"id":%q,"status":"ready","agentStatus":"online","organizationId":"org","credentialsId":%q,"gke":{"clusterName":"cluster","region":"europe-central2","location":"europe-central2-a","projectId":"project","clientServiceAccount":%q}}`, clusterID, tt.updateCredentialsID, tt.apiClientSA)
+			mockClient.EXPECT().
+				ExternalClusterAPIGetCluster(gomock.Any(), clusterID).
+				Return(&http.Response{
+					StatusCode: 200,
+					Body:       io.NopCloser(bytes.NewReader([]byte(clusterBody))),
+					Header:     map[string][]string{"Content-Type": {"json"}},
+				}, nil)
+
+			gkeResource := resourceGKECluster()
+			data := schema.TestResourceDataRaw(t, gkeResource.Schema, tt.raw)
+			data.SetId(clusterID)
+			diags := gkeResource.UpdateContext(ctx, data, provider)
+
+			r.Empty(diags)
+			r.Equal(tt.updateCredentialsID, data.Get(FieldClusterCredentialsId))
+		})
+	}
+}
+
+func TestGKEClusterResourceCredentialsDrift(t *testing.T) {
+	ctx := context.Background()
+	clusterID := "b6bfc074-a267-400f-b8f1-db0850c36gke"
+
+	impersonationAttrs := map[string]string{
+		FieldGKECredentialsTargetServiceAccountEmail: "cfg-sa@project.iam.gserviceaccount.com",
+		FieldGKECredentialsCastaiServiceAccountEmail: "cast-sa@cast-project.iam.gserviceaccount.com",
+		FieldClusterCredentialsId:                    "local-cid",
+	}
+
+	tests := []struct {
+		name       string
+		attributes map[string]string
+		apiBody    string
+		wantTarget string
+	}{
+		{
+			name:       "impersonation credentials_id drift triggers no fake and keeps target",
+			attributes: impersonationAttrs,
+			apiBody:    `{"credentialsId":"remote-cid"}`,
+			wantTarget: "cfg-sa@project.iam.gserviceaccount.com",
+		},
+		{
+			name:       "impersonation drift surfaces target_service_account_email from API",
+			attributes: impersonationAttrs,
+			apiBody:    `{"credentialsId":"local-cid","gke":{"clientServiceAccount":"api-sa@project.iam.gserviceaccount.com"}}`,
+			wantTarget: "api-sa@project.iam.gserviceaccount.com",
+		},
+		{
+			name:       "impersonation no drift keeps target_service_account_email",
+			attributes: impersonationAttrs,
+			apiBody:    `{"credentialsId":"local-cid","gke":{"clientServiceAccount":"cfg-sa@project.iam.gserviceaccount.com"}}`,
+			wantTarget: "cfg-sa@project.iam.gserviceaccount.com",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			r := require.New(t)
+			mockctrl := gomock.NewController(t)
+			mockClient := mock_sdk.NewMockClientInterface(mockctrl)
+			provider := newProvider(mockClient)
+
+			mockClient.EXPECT().
+				ExternalClusterAPIGetCluster(gomock.Any(), clusterID).
+				Return(&http.Response{
+					StatusCode: 200,
+					Body:       io.NopCloser(bytes.NewReader([]byte(tt.apiBody))),
+					Header:     map[string][]string{"Content-Type": {"json"}},
+				}, nil)
+
+			resource := resourceGKECluster()
+			val := cty.ObjectVal(map[string]cty.Value{})
+			state := terraform.NewInstanceStateShimmedFromValue(val, 0)
+			state.ID = clusterID
+			state.Attributes = tt.attributes
+			data := resource.Data(state)
+
+			diags := resource.ReadContext(ctx, data, provider)
+
+			r.False(diags.HasError())
+			r.Equal(tt.wantTarget, data.Get(FieldGKECredentialsTargetServiceAccountEmail))
+		})
+	}
+}
+
+// TestAccGKE_ClusterImpersonation onboards a pre-existing GKE cluster to CAST AI
+// using service account impersonation instead of a service account key.
+//
+// Required environment variables:
+//   - CASTAI_API_TOKEN, ACCEPTANCE_TEST_ORGANIZATION_ID (testAccPreCheck)
+//   - GOOGLE_PROJECT_ID - GCP project containing the shared acceptance cluster
+//   - GOOGLE_CLUSTER_NAME - name of the pre-existing GKE cluster
+//   - GOOGLE_CLUSTER_LOCATION - zone or region of the cluster, e.g. us-central1-c
+func TestAccGKE_ClusterImpersonation(t *testing.T) {
+	projectID := os.Getenv("GOOGLE_PROJECT_ID")
+	clusterName := os.Getenv("GOOGLE_CLUSTER_NAME")
+	location := os.Getenv("GOOGLE_CLUSTER_LOCATION")
+	if projectID == "" || clusterName == "" || location == "" {
+		t.Skip("GOOGLE_PROJECT_ID, GOOGLE_CLUSTER_NAME and GOOGLE_CLUSTER_LOCATION must be set for this acceptance test")
+	}
+
+	rName := fmt.Sprintf("%v-gke-imp-%v", ResourcePrefix, acctest.RandString(8))
+	resourceName := "castai_gke_cluster.test"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: providerFactories,
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"google": {
+				Source:            "hashicorp/google",
+				VersionConstraint: "> 4.75.0",
+			},
+			"google-beta": {
+				Source:            "hashicorp/google-beta",
+				VersionConstraint: "> 4.75.0",
+			},
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccGKEImpersonationConfig(rName, clusterName, location, projectID),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet(resourceName, "id"),
+					resource.TestCheckResourceAttrSet(resourceName, "cluster_token"),
+					resource.TestCheckResourceAttrSet(resourceName, "credentials_id"),
+					resource.TestCheckResourceAttrSet(resourceName, "organization_id"),
+					resource.TestCheckResourceAttr(resourceName, "name", clusterName),
+					resource.TestCheckResourceAttr(resourceName, "project_id", projectID),
+					resource.TestCheckResourceAttr(resourceName, "location", location),
+					resource.TestCheckResourceAttrSet(resourceName, "target_service_account_email"),
+					resource.TestCheckResourceAttrSet(resourceName, "castai_service_account_email"),
+					resource.TestCheckResourceAttrPair(
+						resourceName, "castai_service_account_email",
+						"data.castai_impersonation_service_account.gke", "email",
+					),
+				),
+			},
+			{
+				Config:   testAccGKEImpersonationConfig(rName, clusterName, location, projectID),
+				PlanOnly: true,
+			},
+		},
+	})
+}
+
+func testAccGKEImpersonationConfig(rName, clusterName, location, projectID string) string {
+	return fmt.Sprintf(`
+data "castai_impersonation_service_account" "gke" {
+  provider_type = "gke"
+}
+
+data "castai_gke_user_policies" "gke" {}
+
+resource "google_service_account" "target" {
+  account_id   = "%[1]s"
+  display_name = "Terraform acceptance tests GKE impersonation target for %[2]s"
+  project      = %[4]q
+}
+
+resource "google_project_iam_custom_role" "castai_role" {
+  role_id     = "castai.tfAccGkeImp.${substr(sha1("%[1]s"), 0, 8)}"
+  title       = "Terraform acceptance tests GKE impersonation role for %[2]s"
+  description = "Role to manage GKE cluster via CAST AI"
+  permissions = toset(data.castai_gke_user_policies.gke.policy)
+  project     = %[4]q
+  stage       = "GA"
+}
+
+resource "google_project_iam_member" "castai_role_binding" {
+  project = %[4]q
+  role    = google_project_iam_custom_role.castai_role.id
+  member  = "serviceAccount:${google_service_account.target.email}"
+}
+
+resource "google_service_account_iam_member" "token_creator_binding" {
+  service_account_id = google_service_account.target.name
+  role               = "roles/iam.serviceAccountTokenCreator"
+  member             = "serviceAccount:${data.castai_impersonation_service_account.gke.email}"
+}
+
+resource "castai_gke_cluster" "test" {
+  project_id                 = %[4]q
+  location                   = %[3]q
+  name                       = %[2]q
+  delete_nodes_on_disconnect = false
+
+  target_service_account_email  = google_service_account.target.email
+  castai_service_account_email = data.castai_impersonation_service_account.gke.email
+
+  depends_on = [
+    google_project_iam_member.castai_role_binding,
+    google_service_account_iam_member.token_creator_binding,
+  ]
+}
+`, rName, clusterName, location, projectID)
 }
