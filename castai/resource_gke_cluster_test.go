@@ -681,24 +681,35 @@ func TestGKEClusterResourceCredentialsDrift(t *testing.T) {
 		attributes map[string]string
 		apiBody    string
 		wantTarget string
+		wantCast   string
 	}{
 		{
-			name:       "impersonation credentials_id drift triggers no fake and keeps target",
+			name:       "impersonation credentials_id drift forces re-apply of service account emails",
 			attributes: impersonationAttrs,
 			apiBody:    `{"credentialsId":"remote-cid"}`,
-			wantTarget: "cfg-sa@project.iam.gserviceaccount.com",
+			wantTarget: "credentials-drift-detected-force-apply",
+			wantCast:   "credentials-drift-detected-force-apply",
+		},
+		{
+			name:       "impersonation drift with emails already in API keeps mirrored values",
+			attributes: impersonationAttrs,
+			apiBody:    `{"credentialsId":"remote-cid","gke":{"clientServiceAccount":"api-sa@project.iam.gserviceaccount.com","castServiceAccount":"api-cast@cast-project.iam.gserviceaccount.com"}}`,
+			wantTarget: "api-sa@project.iam.gserviceaccount.com",
+			wantCast:   "api-cast@cast-project.iam.gserviceaccount.com",
 		},
 		{
 			name:       "impersonation drift surfaces target_service_account_email from API",
 			attributes: impersonationAttrs,
 			apiBody:    `{"credentialsId":"local-cid","gke":{"clientServiceAccount":"api-sa@project.iam.gserviceaccount.com"}}`,
 			wantTarget: "api-sa@project.iam.gserviceaccount.com",
+			wantCast:   "cast-sa@cast-project.iam.gserviceaccount.com",
 		},
 		{
 			name:       "impersonation no drift keeps target_service_account_email",
 			attributes: impersonationAttrs,
 			apiBody:    `{"credentialsId":"local-cid","gke":{"clientServiceAccount":"cfg-sa@project.iam.gserviceaccount.com"}}`,
 			wantTarget: "cfg-sa@project.iam.gserviceaccount.com",
+			wantCast:   "cast-sa@cast-project.iam.gserviceaccount.com",
 		},
 	}
 
@@ -728,6 +739,7 @@ func TestGKEClusterResourceCredentialsDrift(t *testing.T) {
 
 			r.False(diags.HasError())
 			r.Equal(tt.wantTarget, data.Get(FieldGKECredentialsTargetServiceAccountEmail))
+			r.Equal(tt.wantCast, data.Get(FieldGKECredentialsCastaiServiceAccountEmail))
 		})
 	}
 }
