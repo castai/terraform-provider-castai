@@ -28,7 +28,9 @@ func resourceGKEClusterId() *schema.Resource {
 		ReadContext:   resourceCastaiGKEClusterIdRead,
 		UpdateContext: resourceCastaiGKEClusterIdUpdate,
 		DeleteContext: resourceCastaiGKEClusterIdDelete,
-		Description:   "GKE cluster resource allows connecting an existing GKE cluster to CAST AI.",
+		Description:   "Legacy way to enable GKE onboarding using secretless impersonation. The resource passes the target service account info to be impersonated by CastAI.",
+		DeprecationMessage: "use castai_gke_cluster with target_service_account_email and castai_service_account_email instead. " +
+			"The CAST AI impersonation service account email can be obtained from the castai_impersonation_service_account data source (provider_type = \"gke\").",
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(5 * time.Minute),

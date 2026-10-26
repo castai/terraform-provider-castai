@@ -15,10 +15,10 @@ import (
 )
 
 const (
-	FieldGKEClusterName        = "name"
-	FieldGKEClusterProjectId   = "project_id"
-	FieldGKEClusterLocation    = "location"
-	FieldGKEClusterCredentials = "credentials_json"
+	FieldGKEClusterName                  = "name"
+	FieldGKEClusterProjectId             = "project_id"
+	FieldGKEClusterLocation              = "location"
+	FieldGKEClusterLegacyCredentialsJSON = "credentials_json"
 
 	FieldGKECredentialsTargetServiceAccountEmail = "target_service_account_email"
 	FieldGKECredentialsCastaiServiceAccountEmail = "castai_service_account_email"
@@ -71,10 +71,11 @@ func resourceGKECluster() *schema.Resource {
 				Sensitive:   true,
 				Description: "CAST.AI agent cluster token",
 			},
-			FieldGKEClusterCredentials: {
-				Type:      schema.TypeString,
-				Sensitive: true,
-				Optional:  true,
+			FieldGKEClusterLegacyCredentialsJSON: {
+				Type:       schema.TypeString,
+				Sensitive:  true,
+				Optional:   true,
+				Deprecated: "use target_service_account_email and castai_service_account_email instead",
 				ConflictsWith: []string{
 					FieldGKECredentialsTargetServiceAccountEmail,
 					FieldGKECredentialsCastaiServiceAccountEmail,
@@ -85,7 +86,7 @@ func resourceGKECluster() *schema.Resource {
 			FieldGKECredentialsTargetServiceAccountEmail: {
 				Type:             schema.TypeString,
 				Optional:         true,
-				ConflictsWith:    []string{FieldGKEClusterCredentials},
+				ConflictsWith:    []string{FieldGKEClusterLegacyCredentialsJSON},
 				RequiredWith:     []string{FieldGKECredentialsCastaiServiceAccountEmail},
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 				Description:      "Service account email in the GCP project that CAST AI impersonates",
@@ -93,7 +94,7 @@ func resourceGKECluster() *schema.Resource {
 			FieldGKECredentialsCastaiServiceAccountEmail: {
 				Type:             schema.TypeString,
 				Optional:         true,
-				ConflictsWith:    []string{FieldGKEClusterCredentials},
+				ConflictsWith:    []string{FieldGKEClusterLegacyCredentialsJSON},
 				RequiredWith:     []string{FieldGKECredentialsTargetServiceAccountEmail},
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 				Description:      "CAST AI service account email used to access the target project",
@@ -180,13 +181,13 @@ func resourceCastaiGKEClusterRead(ctx context.Context, data *schema.ResourceData
 	}
 
 	if resp.JSON200.CredentialsId != nil && *resp.JSON200.CredentialsId != data.Get(FieldClusterCredentialsId) {
-		_, usesLegacyCredentials := data.GetOk(FieldGKEClusterCredentials)
+		_, usesLegacyCredentials := data.GetOk(FieldGKEClusterLegacyCredentialsJSON)
 		_, hasTargetEmail := data.GetOk(FieldGKECredentialsTargetServiceAccountEmail)
 		_, hasCastEmail := data.GetOk(FieldGKECredentialsCastaiServiceAccountEmail)
 		if usesLegacyCredentials {
 			log.Printf("[WARN] Drift in credentials from state (%q) and in API (%q), resetting credentials JSON to force re-applying credentials from configuration",
 				data.Get(FieldClusterCredentialsId), *resp.JSON200.CredentialsId)
-			if err := data.Set(FieldGKEClusterCredentials, "credentials-drift-detected-force-apply"); err != nil {
+			if err := data.Set(FieldGKEClusterLegacyCredentialsJSON, "credentials-drift-detected-force-apply"); err != nil {
 				return diag.FromErr(fmt.Errorf("setting client ID: %w", err))
 			}
 		} else if hasTargetEmail || hasCastEmail {
@@ -244,7 +245,7 @@ func resourceCastaiGKEClusterUpdate(ctx context.Context, data *schema.ResourceDa
 
 func updateGKEClusterSettings(ctx context.Context, data *schema.ResourceData, client sdk.ClientWithResponsesInterface) error {
 	if !data.HasChanges(
-		FieldGKEClusterCredentials,
+		FieldGKEClusterLegacyCredentialsJSON,
 		FieldGKECredentialsTargetServiceAccountEmail,
 		FieldGKECredentialsCastaiServiceAccountEmail,
 		FieldClusterCredentialsId,
@@ -256,7 +257,7 @@ func updateGKEClusterSettings(ctx context.Context, data *schema.ResourceData, cl
 	log.Printf("[INFO] Updating cluster settings.")
 
 	req := sdk.ExternalClusterAPIUpdateClusterJSONRequestBody{}
-	if credentialsJSON, ok := data.GetOk(FieldGKEClusterCredentials); ok {
+	if credentialsJSON, ok := data.GetOk(FieldGKEClusterLegacyCredentialsJSON); ok {
 		req.Credentials = toPtr(credentialsJSON.(string))
 	}
 	req.Gke = &sdk.ExternalclusterV1UpdateGKEClusterParams{
