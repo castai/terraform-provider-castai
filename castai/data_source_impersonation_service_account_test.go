@@ -22,6 +22,7 @@ func TestImpersonationServiceAccountDataSourceRead(t *testing.T) {
 	tests := []struct {
 		name          string
 		clusterType   string
+		wantProvider  string
 		expectedEmail string
 		responseBody  string
 		statusCode    int
@@ -32,6 +33,7 @@ func TestImpersonationServiceAccountDataSourceRead(t *testing.T) {
 		{
 			name:          "successful response with id and email",
 			clusterType:   "aks",
+			wantProvider:  "aks",
 			expectedEmail: "test@example.com",
 			responseBody: `{
   "id": "test-service-account-id",
@@ -42,8 +44,9 @@ func TestImpersonationServiceAccountDataSourceRead(t *testing.T) {
 			expectedError: false,
 		},
 		{
-			name:        "successful response with id only",
-			clusterType: "gke",
+			name:         "successful response with id only",
+			clusterType:  "gke",
+			wantProvider: "gke",
 			responseBody: `{
   "id": "another-service-account-id"
 }`,
@@ -52,8 +55,19 @@ func TestImpersonationServiceAccountDataSourceRead(t *testing.T) {
 			expectedError: false,
 		},
 		{
+			name:         "defaults to aks when provider_type is not set",
+			wantProvider: "aks",
+			responseBody: `{
+  "id": "default-service-account-id"
+}`,
+			statusCode:    200,
+			expectedID:    "default-service-account-id",
+			expectedError: false,
+		},
+		{
 			name:          "api error response",
 			clusterType:   "aks",
+			wantProvider:  "aks",
 			responseBody:  `{"message": "Internal server error"}`,
 			statusCode:    500,
 			expectedError: true,
@@ -62,6 +76,7 @@ func TestImpersonationServiceAccountDataSourceRead(t *testing.T) {
 		{
 			name:          "unauthorized response",
 			clusterType:   "gke",
+			wantProvider:  "gke",
 			responseBody:  `{"message": "Unauthorized"}`,
 			statusCode:    401,
 			expectedError: true,
@@ -87,7 +102,7 @@ func TestImpersonationServiceAccountDataSourceRead(t *testing.T) {
 				ExternalClusterAPIImpersonationServiceAccount(gomock.Any(), gomock.Any(), gomock.Any()).
 				Do(func(_ context.Context, body sdk.ExternalClusterAPIImpersonationServiceAccountJSONRequestBody, _ ...sdk.RequestEditorFn) {
 					r.NotNil(body.Provider)
-					r.Equal(tt.clusterType, *body.Provider)
+					r.Equal(tt.wantProvider, *body.Provider)
 				}).
 				Return(&http.Response{
 					StatusCode: tt.statusCode,
@@ -96,7 +111,10 @@ func TestImpersonationServiceAccountDataSourceRead(t *testing.T) {
 				}, nil)
 
 			state := terraform.NewInstanceStateShimmedFromValue(cty.ObjectVal(map[string]cty.Value{}), 0)
-			state.Attributes = map[string]string{FieldImpersonationServiceAccountProviderType: tt.clusterType}
+			state.Attributes = map[string]string{}
+			if tt.clusterType != "" {
+				state.Attributes[FieldImpersonationServiceAccountProviderType] = tt.clusterType
+			}
 
 			resource := dataSourceImpersonationServiceAccount()
 			data := resource.Data(state)

@@ -22,7 +22,7 @@ resource "castai_gke_cluster" "this" {
   name                       = var.gke_cluster_name
   delete_nodes_on_disconnect = var.delete_nodes_on_disconnect
 
-  target_service_account_email  = google_service_account.target.email
+  target_service_account_email = google_service_account.target.email
   castai_service_account_email = data.castai_impersonation_service_account.this.email
 }
 ```
