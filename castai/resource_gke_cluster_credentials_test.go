@@ -316,7 +316,9 @@ func TestGKEClusterResourceUpdateCredentials(t *testing.T) {
 			Do(func(_ context.Context, _ string, body sdk.ExternalClusterAPIUpdateClusterJSONRequestBody, _ ...sdk.RequestEditorFn) {
 				r.NotNil(body.Credentials)
 				r.Equal(credentialsJSON, *body.Credentials)
-				r.Nil(body.Gke)
+				r.NotNil(body.Gke)
+				r.Nil(body.Gke.TargetServiceAccountEmail)
+				r.Nil(body.Gke.CastServiceAccountEmail)
 			}).
 			Return(&http.Response{
 				StatusCode: 200,
