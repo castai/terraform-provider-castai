@@ -24,14 +24,3 @@ variable "service_accounts_unique_ids" {
   description = "Service Accounts' unique IDs used by node pools in the cluster."
   default     = []
 }
-
-variable "authentication_method" {
-  type        = string
-  description = "Authentication method for CAST AI. Use 'service_account_key' for a service account with a JSON private key, or 'impersonation' for GKE service account impersonation."
-  default     = "service_account_key"
-
-  validation {
-    condition     = contains(["service_account_key", "impersonation"], var.authentication_method)
-    error_message = "authentication_method must be either 'service_account_key' or 'impersonation'."
-  }
-}
