@@ -22,10 +22,8 @@ resource "castai_gke_cluster" "this" {
   name                       = var.gke_cluster_name
   delete_nodes_on_disconnect = var.delete_nodes_on_disconnect
 
-  credentials {
-    target_service_account_email = google_service_account.target.email
-    castai_service_account_email = data.castai_impersonation_service_account.this.email
-  }
+  target_service_account_email  = google_service_account.target.email
+  castai_service_account_email = data.castai_impersonation_service_account.this.email
 }
 ```
 
@@ -40,9 +38,10 @@ resource "castai_gke_cluster" "this" {
 
 ### Optional
 
-- `credentials` (Block List, Max: 1) GKE cluster credentials. Configure GKE service account impersonation. (see [below for nested schema](#nestedblock--credentials))
+- `castai_service_account_email` (String) CAST AI service account email used to access the target project
 - `credentials_json` (String, Sensitive, Deprecated) GCP credentials.json from ServiceAccount with credentials for CAST AI
 - `delete_nodes_on_disconnect` (Boolean) Should CAST AI remove nodes managed by CAST.AI on disconnect
+- `target_service_account_email` (String) Service account email in the GCP project that CAST AI impersonates
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
 ### Read-Only
@@ -52,17 +51,6 @@ resource "castai_gke_cluster" "this" {
 - `id` (String) The ID of this resource.
 - `organization_id` (String) CAST AI organization ID
 
-<a id="nestedblock--credentials"></a>
-### Nested Schema for `credentials`
-
-Required:
-
-- `castai_service_account_email` (String) CAST AI service account email used to access the target project
-- `target_service_account_email` (String) Service account email in the GCP project that CAST AI impersonates
-
-~> **NOTE** Removing the `credentials` block does not disable an already configured impersonation; the existing cluster credentials remain active on the CAST AI side.
-
-
 <a id="nestedblock--timeouts"></a>
 ### Nested Schema for `timeouts`
 
@@ -71,3 +59,5 @@ Optional:
 - `create` (String)
 - `delete` (String)
 - `update` (String)
+
+~> **NOTE** Clearing `target_service_account_email` and `castai_service_account_email` does not disable an already configured impersonation; the existing cluster credentials remain active on the CAST AI side.

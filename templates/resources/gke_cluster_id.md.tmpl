@@ -9,13 +9,13 @@ description: |-
 
 {{ .Description | trimspace }}
 
-~> **DEPRECATED** Superseded by `castai_gke_cluster` with the `credentials` block.
+~> **DEPRECATED** Superseded by `castai_gke_cluster` with the `target_service_account_email` and `castai_service_account_email` arguments.
 
 ## Migration
 
 `castai_gke_cluster_id` registers the cluster and, when `client_service_account` is set, creates
 the CAST AI delegate service account that impersonates it. All of that is now expressed
-declaratively on `castai_gke_cluster` via `credentials { target_service_account_email, castai_service_account_email }`.
+declaratively on `castai_gke_cluster` via the `target_service_account_email` and `castai_service_account_email` arguments.
 
 The CAST AI impersonation service account email can be fetched from the `castai_impersonation_service_account`
 data source (`provider_type = "gke"`).
@@ -29,7 +29,7 @@ terraform state mv castai_gke_cluster_id.cluster_id castai_gke_cluster.this
 ```
 
 2. Replace the `castai_gke_cluster_id` block and the `credentials_json = "{}"` argument with the
-   `credentials` block on `castai_gke_cluster`:
+   `target_service_account_email` and `castai_service_account_email` arguments on `castai_gke_cluster`:
 
 ```terraform
 data "castai_impersonation_service_account" "this" {
@@ -41,10 +41,8 @@ resource "castai_gke_cluster" "this" {
   location   = module.gke.location
   name       = var.gke_cluster_name
 
-  credentials {
-    target_service_account_email = google_service_account.client.email
-    castai_service_account_email = data.castai_impersonation_service_account.this.email
-  }
+  target_service_account_email  = google_service_account.client.email
+  castai_service_account_email = data.castai_impersonation_service_account.this.email
 }
 ```
 

@@ -15,12 +15,11 @@ import (
 )
 
 const (
-	FieldGKEClusterName        = "name"
-	FieldGKEClusterProjectId   = "project_id"
-	FieldGKEClusterLocation    = "location"
-	FieldGKEClusterCredentials = "credentials_json"
+	FieldGKEClusterName                  = "name"
+	FieldGKEClusterProjectId             = "project_id"
+	FieldGKEClusterLocation              = "location"
+	FieldGKEClusterLegacyCredentialsJSON = "credentials_json"
 
-	FieldGKECredentials                          = "credentials"
 	FieldGKECredentialsTargetServiceAccountEmail = "target_service_account_email"
 	FieldGKECredentialsCastaiServiceAccountEmail = "castai_service_account_email"
 )
@@ -80,37 +79,33 @@ func resourceGKECluster() *schema.Resource {
 				Sensitive:   true,
 				Description: "CAST.AI agent cluster token",
 			},
-			FieldGKEClusterCredentials: {
-				Type:             schema.TypeString,
-				Sensitive:        true,
-				Optional:         true,
-				Deprecated:       "use the credentials block instead",
-				ConflictsWith:    []string{FieldGKECredentials},
+			FieldGKEClusterLegacyCredentialsJSON: {
+				Type:       schema.TypeString,
+				Sensitive:  true,
+				Optional:   true,
+				Deprecated: "use target_service_account_email and castai_service_account_email instead",
+				ConflictsWith: []string{
+					FieldGKECredentialsTargetServiceAccountEmail,
+					FieldGKECredentialsCastaiServiceAccountEmail,
+				},
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 				Description:      "GCP credentials.json from ServiceAccount with credentials for CAST AI",
 			},
-			FieldGKECredentials: {
-				Type:          schema.TypeList,
-				Optional:      true,
-				MaxItems:      1,
-				ConflictsWith: []string{FieldGKEClusterCredentials},
-				Description:   "GKE cluster credentials. Configure GKE service account impersonation.",
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						FieldGKECredentialsTargetServiceAccountEmail: {
-							Type:             schema.TypeString,
-							Required:         true,
-							ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
-							Description:      "Service account email in the GCP project that CAST AI impersonates",
-						},
-						FieldGKECredentialsCastaiServiceAccountEmail: {
-							Type:             schema.TypeString,
-							Required:         true,
-							ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
-							Description:      "CAST AI service account email used to access the target project",
-						},
-					},
-				},
+			FieldGKECredentialsTargetServiceAccountEmail: {
+				Type:             schema.TypeString,
+				Optional:         true,
+				ConflictsWith:    []string{FieldGKEClusterLegacyCredentialsJSON},
+				RequiredWith:     []string{FieldGKECredentialsCastaiServiceAccountEmail},
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
+				Description:      "Service account email in the GCP project that CAST AI impersonates",
+			},
+			FieldGKECredentialsCastaiServiceAccountEmail: {
+				Type:             schema.TypeString,
+				Optional:         true,
+				ConflictsWith:    []string{FieldGKEClusterLegacyCredentialsJSON},
+				RequiredWith:     []string{FieldGKECredentialsTargetServiceAccountEmail},
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
+				Description:      "CAST AI service account email used to access the target project",
 			},
 			FieldDeleteNodesOnDisconnect: {
 				Type:        schema.TypeBool,
@@ -128,37 +123,16 @@ func resourceGKECluster() *schema.Resource {
 
 // gkeCredentialsModeFromData reports which credentials configuration the resource uses.
 func gkeCredentialsModeFromData(data *schema.ResourceData) gkeCredentialsMode {
-	if _, ok := data.GetOk(FieldGKEClusterCredentials); ok {
+	if _, ok := data.GetOk(FieldGKEClusterLegacyCredentialsJSON); ok {
 		return gkeCredentialsModeLegacy
 	}
-	block := gkeCredentialsBlock(data)
-	if block == nil {
-		return gkeCredentialsModeNone
+	if _, ok := data.GetOk(FieldGKECredentialsTargetServiceAccountEmail); ok {
+		return gkeCredentialsModeImpersonation
 	}
-	// Values are read from either config or shimmed state; both may materialize
-	// all block fields with "" for unset ones, so match on non-empty values.
-	for _, field := range []string{FieldGKECredentialsTargetServiceAccountEmail, FieldGKECredentialsCastaiServiceAccountEmail} {
-		if v, _ := block[field].(string); v != "" {
-			return gkeCredentialsModeImpersonation
-		}
+	if _, ok := data.GetOk(FieldGKECredentialsCastaiServiceAccountEmail); ok {
+		return gkeCredentialsModeImpersonation
 	}
 	return gkeCredentialsModeNone
-}
-
-func gkeCredentialsBlock(data *schema.ResourceData) map[string]interface{} {
-	raw, ok := data.GetOk(FieldGKECredentials)
-	if !ok {
-		return nil
-	}
-	list, ok := raw.([]interface{})
-	if !ok || len(list) == 0 {
-		return nil
-	}
-	block, ok := list[0].(map[string]interface{})
-	if !ok {
-		return nil
-	}
-	return block
 }
 
 func resourceCastaiGKEClusterCreate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -233,7 +207,7 @@ func resourceCastaiGKEClusterRead(ctx context.Context, data *schema.ResourceData
 		case gkeCredentialsModeLegacy:
 			log.Printf("[WARN] Drift in credentials from state (%q) and in API (%q), resetting credentials JSON to force re-applying credentials from configuration",
 				data.Get(FieldClusterCredentialsId), *resp.JSON200.CredentialsId)
-			if err := data.Set(FieldGKEClusterCredentials, "credentials-drift-detected-force-apply"); err != nil {
+			if err := data.Set(FieldGKEClusterLegacyCredentialsJSON, "credentials-drift-detected-force-apply"); err != nil {
 				return diag.FromErr(fmt.Errorf("setting client ID: %w", err))
 			}
 		case gkeCredentialsModeImpersonation:
@@ -258,16 +232,16 @@ func resourceCastaiGKEClusterRead(ctx context.Context, data *schema.ResourceData
 		if err := data.Set(FieldGKEClusterName, toString(GKE.ClusterName)); err != nil {
 			return diag.FromErr(fmt.Errorf("setting cluster name: %w", err))
 		}
-		// Mirror API values into the credentials block state; a difference between
-		// configuration and API then shows up as a plan diff and is re-applied by Update.
+		// Mirror API values into state; a difference between configuration and API
+		// then shows up as a plan diff and is re-applied by Update.
 		if gkeCredentialsModeFromData(data) == gkeCredentialsModeImpersonation {
 			if apiTarget := toString(GKE.ClientServiceAccount); apiTarget != "" {
-				if err := setGKECredentialsBlockField(data, FieldGKECredentialsTargetServiceAccountEmail, apiTarget); err != nil {
+				if err := data.Set(FieldGKECredentialsTargetServiceAccountEmail, apiTarget); err != nil {
 					return diag.FromErr(fmt.Errorf("setting target service account: %w", err))
 				}
 			}
 			if apiCast := toString(GKE.CastServiceAccount); apiCast != "" {
-				if err := setGKECredentialsBlockField(data, FieldGKECredentialsCastaiServiceAccountEmail, apiCast); err != nil {
+				if err := data.Set(FieldGKECredentialsCastaiServiceAccountEmail, apiCast); err != nil {
 					return diag.FromErr(fmt.Errorf("setting castai service account: %w", err))
 				}
 			}
@@ -289,8 +263,9 @@ func resourceCastaiGKEClusterUpdate(ctx context.Context, data *schema.ResourceDa
 
 func updateGKEClusterSettings(ctx context.Context, data *schema.ResourceData, client sdk.ClientWithResponsesInterface) error {
 	if !data.HasChanges(
-		FieldGKEClusterCredentials,
-		FieldGKECredentials,
+		FieldGKEClusterLegacyCredentialsJSON,
+		FieldGKECredentialsTargetServiceAccountEmail,
+		FieldGKECredentialsCastaiServiceAccountEmail,
 		FieldClusterCredentialsId,
 	) {
 		log.Printf("[INFO] Nothing to update in cluster setttings.")
@@ -302,46 +277,28 @@ func updateGKEClusterSettings(ctx context.Context, data *schema.ResourceData, cl
 	req := sdk.ExternalClusterAPIUpdateClusterJSONRequestBody{}
 	switch gkeCredentialsModeFromData(data) {
 	case gkeCredentialsModeLegacy:
-		if credentialsJSON, ok := data.GetOk(FieldGKEClusterCredentials); ok {
+		if credentialsJSON, ok := data.GetOk(FieldGKEClusterLegacyCredentialsJSON); ok {
 			req.Credentials = toPtr(credentialsJSON.(string))
 		}
 	case gkeCredentialsModeImpersonation:
-		block := gkeCredentialsBlock(data)
 		req.Gke = &sdk.ExternalclusterV1UpdateGKEClusterParams{
-			TargetServiceAccountEmail: gkeCredentialsBlockValue(block, FieldGKECredentialsTargetServiceAccountEmail),
-			CastServiceAccountEmail:   gkeCredentialsBlockValue(block, FieldGKECredentialsCastaiServiceAccountEmail),
+			TargetServiceAccountEmail: getOkString(data, FieldGKECredentialsTargetServiceAccountEmail),
+			CastServiceAccountEmail:   getOkString(data, FieldGKECredentialsCastaiServiceAccountEmail),
 		}
 	case gkeCredentialsModeNone:
-		if data.HasChanges(FieldGKECredentials) {
-			log.Printf("[WARN] credentials block removed; existing cluster credentials and impersonation settings are left unchanged on the CAST AI side")
+		if data.HasChanges(FieldGKECredentialsTargetServiceAccountEmail, FieldGKECredentialsCastaiServiceAccountEmail) {
+			log.Printf("[WARN] impersonation fields removed; existing cluster credentials and impersonation settings are left unchanged on the CAST AI side")
 		}
 	}
 
 	return resourceCastaiClusterUpdate(ctx, client, data, &req)
 }
 
-func gkeCredentialsBlockValue(block map[string]interface{}, field string) *string {
-	if block == nil {
-		return nil
+func getOkString(data *schema.ResourceData, field string) *string {
+	if v, ok := data.GetOk(field); ok {
+		return toPtr(v.(string))
 	}
-	v, _ := block[field].(string)
-	if v == "" {
-		return nil
-	}
-	return &v
-}
-
-func setGKECredentialsBlockField(data *schema.ResourceData, field, value string) error {
-	block := gkeCredentialsBlock(data)
-	if block == nil {
-		return nil
-	}
-	updated := make(map[string]interface{}, len(block)+1)
-	for k, v := range block {
-		updated[k] = v
-	}
-	updated[field] = value
-	return data.Set(FieldGKECredentials, []interface{}{updated})
+	return nil
 }
 
 func resourceCastaiGKEClusterDelete(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {

@@ -126,14 +126,14 @@ Tainted = false
 				state := terraform.NewInstanceStateShimmedFromValue(val, 0)
 				state.ID = clusterID
 				state.Attributes[FieldClusterCredentialsId] = tc.stateValue
-				state.Attributes[FieldGKEClusterCredentials] = credentialsBeforeRead
+				state.Attributes[FieldGKEClusterLegacyCredentialsJSON] = credentialsBeforeRead
 
 				data := gkeResource.Data(state)
 				result := gkeResource.ReadContext(ctx, data, provider)
 				r.Nil(result)
 				r.False(result.HasError())
 
-				credentialsAfterRead := data.Get(FieldGKEClusterCredentials)
+				credentialsAfterRead := data.Get(FieldGKEClusterLegacyCredentialsJSON)
 
 				r.NotEqual(credentialsBeforeRead, credentialsAfterRead)
 				r.NotEmpty(credentialsAfterRead)
@@ -184,14 +184,14 @@ Tainted = false
 				state := terraform.NewInstanceStateShimmedFromValue(val, 0)
 				state.ID = clusterID
 				state.Attributes[FieldClusterCredentialsId] = tc.stateValue
-				state.Attributes[FieldGKEClusterCredentials] = credentialsBeforeRead
+				state.Attributes[FieldGKEClusterLegacyCredentialsJSON] = credentialsBeforeRead
 
 				data := gkeResource.Data(state)
 				result := gkeResource.ReadContext(ctx, data, provider)
 				r.Nil(result)
 				r.False(result.HasError())
 
-				credentialsAfterRead := data.Get(FieldGKEClusterCredentials)
+				credentialsAfterRead := data.Get(FieldGKEClusterLegacyCredentialsJSON)
 
 				r.Equal(credentialsBeforeRead, credentialsAfterRead)
 				r.NotEmpty(credentialsAfterRead)
@@ -277,10 +277,10 @@ func TestGKEClusterResourceUpdate(t *testing.T) {
 		resource := resourceGKECluster()
 
 		raw := make(map[string]interface{})
-		raw[FieldGKEClusterCredentials] = "something"
+		raw[FieldGKEClusterLegacyCredentialsJSON] = "something"
 
 		data := schema.TestResourceDataRaw(t, resource.Schema, raw)
-		_ = data.Set(FieldGKEClusterCredentials, "creds")
+		_ = data.Set(FieldGKEClusterLegacyCredentialsJSON, "creds")
 		data.SetId(clusterID)
 		result := resource.UpdateContext(ctx, data, provider)
 		r.NotNil(result)
@@ -314,8 +314,8 @@ func TestGKEClusterResourceUpdate(t *testing.T) {
 			gkeResource := resourceGKECluster()
 
 			diff := map[string]any{
-				FieldGKEClusterCredentials: googleCredentials,
-				FieldClusterCredentialsId:  "before-update-credentialsid",
+				FieldGKEClusterLegacyCredentialsJSON: googleCredentials,
+				FieldClusterCredentialsId:            "before-update-credentialsid",
 			}
 			data := schema.TestResourceDataRaw(t, gkeResource.Schema, diff)
 			data.SetId(clusterID)
@@ -324,7 +324,7 @@ func TestGKEClusterResourceUpdate(t *testing.T) {
 			r.Empty(diagnostics)
 
 			r.Equal(credentialsIDAfterUpdate, data.Get(FieldClusterCredentialsId))
-			r.Equal(googleCredentials, data.Get(FieldGKEClusterCredentials))
+			r.Equal(googleCredentials, data.Get(FieldGKEClusterLegacyCredentialsJSON))
 		})
 
 		t.Run("on failed update, should overwrite credentialsID to force drift on next read", func(t *testing.T) {
