@@ -298,6 +298,46 @@ func TestGKEClusterResourceUpdateCredentialsBlock(t *testing.T) {
 		r.Empty(diags)
 		r.Equal("after-update-cid", data.Get(FieldClusterCredentialsId))
 	})
+
+	t.Run("update legacy sends credentials json", func(t *testing.T) {
+		r := require.New(t)
+		mockctrl := gomock.NewController(t)
+		mockClient := mock_sdk.NewMockClientInterface(mockctrl)
+		provider := newProvider(mockClient)
+
+		credentialsJSON := `{"type":"service_account"}`
+		mockClient.EXPECT().
+			ExternalClusterAPIUpdateCluster(gomock.Any(), clusterID, gomock.Any(), gomock.Any()).
+			Do(func(_ context.Context, _ string, body sdk.ExternalClusterAPIUpdateClusterJSONRequestBody, _ ...sdk.RequestEditorFn) {
+				r.NotNil(body.Credentials)
+				r.Equal(credentialsJSON, *body.Credentials)
+				r.Nil(body.Gke)
+			}).
+			Return(&http.Response{
+				StatusCode: 200,
+				Body:       io.NopCloser(bytes.NewReader([]byte(`{"id":"` + clusterID + `","credentialsId":"legacy-cid"}`))),
+				Header:     map[string][]string{"Content-Type": {"json"}},
+			}, nil)
+		clusterBody := `{"id":"` + clusterID + `","status":"ready","agentStatus":"online","organizationId":"org","credentialsId":"legacy-cid","gke":{"clusterName":"cluster","region":"europe-central2","location":"europe-central2-a","projectId":"project"}}`
+		mockClient.EXPECT().
+			ExternalClusterAPIGetCluster(gomock.Any(), clusterID).
+			Return(&http.Response{
+				StatusCode: 200,
+				Body:       io.NopCloser(bytes.NewReader([]byte(clusterBody))),
+				Header:     map[string][]string{"Content-Type": {"json"}},
+			}, nil)
+
+		gkeResource := resourceGKECluster()
+		raw := map[string]interface{}{
+			FieldGKEClusterCredentials: credentialsJSON,
+		}
+		data := schema.TestResourceDataRaw(t, gkeResource.Schema, raw)
+		data.SetId(clusterID)
+		diags := gkeResource.UpdateContext(ctx, data, provider)
+
+		r.Empty(diags)
+		r.Equal("legacy-cid", data.Get(FieldClusterCredentialsId))
+	})
 }
 
 func TestGKEClusterResourceCredentialsDrift(t *testing.T) {

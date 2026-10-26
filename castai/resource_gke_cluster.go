@@ -229,12 +229,16 @@ func resourceCastaiGKEClusterRead(ctx context.Context, data *schema.ResourceData
 	}
 
 	if resp.JSON200.CredentialsId != nil && *resp.JSON200.CredentialsId != data.Get(FieldClusterCredentialsId) {
-		if gkeCredentialsModeFromData(data) == gkeCredentialsModeLegacy {
+		switch gkeCredentialsModeFromData(data) {
+		case gkeCredentialsModeLegacy:
 			log.Printf("[WARN] Drift in credentials from state (%q) and in API (%q), resetting credentials JSON to force re-applying credentials from configuration",
 				data.Get(FieldClusterCredentialsId), *resp.JSON200.CredentialsId)
 			if err := data.Set(FieldGKEClusterCredentials, "credentials-drift-detected-force-apply"); err != nil {
 				return diag.FromErr(fmt.Errorf("setting client ID: %w", err))
 			}
+		case gkeCredentialsModeImpersonation:
+			log.Printf("[WARN] Drift in credentials id from state (%q) and in API (%q); impersonation drift is detected via the service account emails mirrored from the API",
+				data.Get(FieldClusterCredentialsId), *resp.JSON200.CredentialsId)
 		}
 	}
 
@@ -306,6 +310,10 @@ func updateGKEClusterSettings(ctx context.Context, data *schema.ResourceData, cl
 		req.Gke = &sdk.ExternalclusterV1UpdateGKEClusterParams{
 			TargetServiceAccountEmail: gkeCredentialsBlockValue(block, FieldGKECredentialsTargetServiceAccountEmail),
 			CastServiceAccountEmail:   gkeCredentialsBlockValue(block, FieldGKECredentialsCastaiServiceAccountEmail),
+		}
+	case gkeCredentialsModeNone:
+		if data.HasChanges(FieldGKECredentials) {
+			log.Printf("[WARN] credentials block removed; existing cluster credentials and impersonation settings are left unchanged on the CAST AI side")
 		}
 	}
 

@@ -3,12 +3,12 @@
 page_title: "castai_gke_cluster_id Resource - CAST AI"
 subcategory: ""
 description: |-
-  GKE cluster resource allows connecting an existing GKE cluster to CAST AI.
+  Legacy way to enable GKE onboarding using secretless impersonation. The resource passes the target service account info to be impersonated by CastAI.
 ---
 
 # castai_gke_cluster_id (Resource)
 
-GKE cluster resource allows connecting an existing GKE cluster to CAST AI.
+Legacy way to enable GKE onboarding using secretless impersonation. The resource passes the target service account info to be impersonated by CastAI.
 
 ~> **DEPRECATED** Superseded by `castai_gke_cluster` with the `credentials` block.
 
