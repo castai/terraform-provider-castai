@@ -17,6 +17,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/stretchr/testify/require"
 
+	"github.com/castai/terraform-provider-castai/castai/sdk"
+	mock_sdk "github.com/castai/terraform-provider-castai/castai/sdk/mock"
 	"github.com/castai/terraform-provider-castai/castai/sdk/pricing"
 	mock_pricing "github.com/castai/terraform-provider-castai/castai/sdk/pricing/mock"
 )
@@ -27,74 +29,93 @@ func TestAccCloudAgnostic_Commitment(t *testing.T) {
 	organizationID := os.Getenv("ACCEPTANCE_TEST_ORGANIZATION_ID")
 	resourceName := "castai_commitment.test"
 
+	steps := []resource.TestStep{
+		{
+			// Create with auto_assignment not set — server decides.
+			Config: testAccCommitmentConfig(rName, cudID, organizationID, "INACTIVE", 1.0, false, false),
+			Check: resource.ComposeTestCheckFunc(
+				resource.TestCheckResourceAttrSet(resourceName, "id"),
+				resource.TestCheckResourceAttrSet(resourceName, "organization_id"),
+				resource.TestCheckResourceAttr(resourceName, "name", rName),
+				resource.TestCheckResourceAttr(resourceName, "cloud", "GCP"),
+				resource.TestCheckResourceAttr(resourceName, "region", "us-central1"),
+				resource.TestCheckResourceAttr(resourceName, "type", "RESOURCE_CUD"),
+				resource.TestCheckResourceAttr(resourceName, "autoscaling_status", "INACTIVE"),
+				resource.TestCheckResourceAttr(resourceName, "allowed_usage", "1"),
+				resource.TestCheckResourceAttr(resourceName, "scaling_strategy", "DEFAULT"),
+				resource.TestCheckResourceAttr(resourceName, "auto_assignment", "true"),
+				resource.TestCheckResourceAttr(resourceName, "gcp_resource_cud_details.cud_id", cudID),
+				resource.TestCheckResourceAttr(resourceName, "gcp_resource_cud_details.plan", "TWELVE_MONTH"),
+				resource.TestCheckResourceAttr(resourceName, "gcp_resource_cud_details.cpu", "32"),
+				resource.TestCheckResourceAttrSet(resourceName, "state"),
+				resource.TestCheckResourceAttrSet(resourceName, "create_time"),
+			),
+		},
+		{
+			// Patch-path update: operational settings only.
+			Config: testAccCommitmentConfig(rName, cudID, organizationID, "ACTIVE", 0.75, false, false),
+			Check: resource.ComposeTestCheckFunc(
+				resource.TestCheckResourceAttr(resourceName, "autoscaling_status", "ACTIVE"),
+				resource.TestCheckResourceAttr(resourceName, "allowed_usage", "0.75"),
+			),
+		},
+		{
+			// Upsert-path update: rename. ID must be preserved.
+			Config: testAccCommitmentConfig(rName+"-renamed", cudID, organizationID, "ACTIVE", 0.75, false, false),
+			Check: resource.ComposeTestCheckFunc(
+				resource.TestCheckResourceAttr(resourceName, "name", rName+"-renamed"),
+			),
+		},
+		{
+			// Switch to explicit auto_assignment=false.
+			Config: testAccCommitmentConfig(rName+"-renamed", cudID, organizationID, "ACTIVE", 0.75, true, false),
+			Check: resource.ComposeTestCheckFunc(
+				resource.TestCheckResourceAttr(resourceName, "auto_assignment", "false"),
+			),
+		},
+		{
+			// Upsert-path update with explicit false: auto_assignment must stay false.
+			Config: testAccCommitmentConfig(rName+"-renamed-2", cudID, organizationID, "ACTIVE", 0.75, true, false),
+			Check: resource.ComposeTestCheckFunc(
+				resource.TestCheckResourceAttr(resourceName, "name", rName+"-renamed-2"),
+				resource.TestCheckResourceAttr(resourceName, "auto_assignment", "false"),
+			),
+		},
+	}
+
+	// The assignments step requires a real cluster in the commitment's region
+	// (us-central1); it is skipped when no cluster ID is provided.
+	if clusterID := os.Getenv("ACCEPTANCE_TEST_CLUSTER_ID"); clusterID != "" {
+		steps = append(steps, resource.TestStep{
+			Config: testAccCommitmentConfigWithAssignments(rName+"-renamed-2", cudID, organizationID, clusterID),
+			Check: resource.ComposeTestCheckFunc(
+				resource.TestCheckResourceAttr(resourceName, "auto_assignment", "false"),
+				resource.TestCheckResourceAttr(resourceName, "assignments.0.cluster_id", clusterID),
+				resource.TestCheckResourceAttr(resourceName, "assignments.0.priority", "1"),
+			),
+		})
+	}
+
+	steps = append(steps, resource.TestStep{
+		ResourceName: resourceName,
+		ImportStateIdFunc: func(s *terraform.State) (string, error) {
+			rs, ok := s.RootModule().Resources[resourceName]
+			if !ok {
+				return "", fmt.Errorf("resource %s not found in state", resourceName)
+			}
+			return fmt.Sprintf("%s/%s", rs.Primary.Attributes["organization_id"], rs.Primary.ID), nil
+		},
+		ImportState:       true,
+		ImportStateVerify: true,
+		// Imported state does not manage assignments (opt-in attribute): they
+		// are only synced from the API when present in state.
+		ImportStateVerifyIgnore: []string{"assignments"},
+	})
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
-		Steps: []resource.TestStep{
-			{
-				// Create with auto_assignment not set — server decides.
-				Config: testAccCommitmentConfig(rName, cudID, organizationID, "INACTIVE", 1.0, false, false),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrSet(resourceName, "id"),
-					resource.TestCheckResourceAttrSet(resourceName, "organization_id"),
-					resource.TestCheckResourceAttr(resourceName, "name", rName),
-					resource.TestCheckResourceAttr(resourceName, "cloud", "GCP"),
-					resource.TestCheckResourceAttr(resourceName, "region", "us-central1"),
-					resource.TestCheckResourceAttr(resourceName, "type", "RESOURCE_CUD"),
-					resource.TestCheckResourceAttr(resourceName, "autoscaling_status", "INACTIVE"),
-					resource.TestCheckResourceAttr(resourceName, "allowed_usage", "1"),
-					resource.TestCheckResourceAttr(resourceName, "scaling_strategy", "DEFAULT"),
-					resource.TestCheckResourceAttr(resourceName, "auto_assignment", "true"),
-					resource.TestCheckResourceAttr(resourceName, "gcp_resource_cud_details.cud_id", cudID),
-					resource.TestCheckResourceAttr(resourceName, "gcp_resource_cud_details.plan", "TWELVE_MONTH"),
-					resource.TestCheckResourceAttr(resourceName, "gcp_resource_cud_details.cpu", "32"),
-					resource.TestCheckResourceAttrSet(resourceName, "state"),
-					resource.TestCheckResourceAttrSet(resourceName, "create_time"),
-				),
-			},
-			{
-				// Patch-path update: operational settings only.
-				Config: testAccCommitmentConfig(rName, cudID, organizationID, "ACTIVE", 0.75, false, false),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceName, "autoscaling_status", "ACTIVE"),
-					resource.TestCheckResourceAttr(resourceName, "allowed_usage", "0.75"),
-				),
-			},
-			{
-				// Upsert-path update: rename. ID must be preserved.
-				Config: testAccCommitmentConfig(rName+"-renamed", cudID, organizationID, "ACTIVE", 0.75, false, false),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceName, "name", rName+"-renamed"),
-				),
-			},
-			{
-				// Switch to explicit auto_assignment=false.
-				Config: testAccCommitmentConfig(rName+"-renamed", cudID, organizationID, "ACTIVE", 0.75, true, false),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceName, "auto_assignment", "false"),
-				),
-			},
-			{
-				// Upsert-path update with explicit false: auto_assignment must stay false.
-				Config: testAccCommitmentConfig(rName+"-renamed-2", cudID, organizationID, "ACTIVE", 0.75, true, false),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceName, "name", rName+"-renamed-2"),
-					resource.TestCheckResourceAttr(resourceName, "auto_assignment", "false"),
-				),
-			},
-			{
-				ResourceName: resourceName,
-				ImportStateIdFunc: func(s *terraform.State) (string, error) {
-					rs, ok := s.RootModule().Resources[resourceName]
-					if !ok {
-						return "", fmt.Errorf("resource %s not found in state", resourceName)
-					}
-					return fmt.Sprintf("%s/%s", rs.Primary.Attributes["organization_id"], rs.Primary.ID), nil
-				},
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-		},
+		Steps:                    steps,
 	})
 }
 
@@ -132,9 +153,20 @@ resource "castai_commitment" "test" {
 // Retry unit tests
 // ---------------------------------------------------------------------------
 func newCommitmentResourceWithMock(mockClient *mock_pricing.MockClientWithResponsesInterface) *genericCommitmentResource {
+	return newCommitmentResourceWithMocks(mockClient, nil)
+}
+
+// newCommitmentResourceWithMocks builds the resource with both API clients
+// mocked: the pricing client (commitment CRUD) and the inventory client
+// (assignment mutations).
+func newCommitmentResourceWithMocks(
+	pricingClient pricing.ClientWithResponsesInterface,
+	apiClient sdk.ClientWithResponsesInterface,
+) *genericCommitmentResource {
 	return &genericCommitmentResource{
 		client: &ProviderConfig{
-			pricingClient: mockClient,
+			pricingClient: pricingClient,
+			api:           apiClient,
 		},
 	}
 }
@@ -677,4 +709,337 @@ func TestValidateConfig_RegionRequiredForRegionScopedTypes(t *testing.T) {
 			require.Equal(t, tt.expectError, hasError)
 		})
 	}
+}
+
+// ---------------------------------------------------------------------------
+// Assignments unit tests.
+// ---------------------------------------------------------------------------
+
+func TestValidateConfig_Assignments(t *testing.T) {
+	ctx := context.Background()
+
+	clusterA := "11111111-1111-1111-1111-111111111111"
+	clusterB := "22222222-2222-2222-2222-222222222222"
+
+	assignments := []commitmentAssignmentModel{
+		{ClusterID: types.StringValue(clusterA)},
+		{ClusterID: types.StringValue(clusterB)},
+	}
+	base := func(autoAssignment types.Bool, assignments []commitmentAssignmentModel) commitmentModel {
+		return commitmentModel{
+			Name:           types.StringValue("test-sp"),
+			Cloud:          types.StringValue("AWS"),
+			Type:           types.StringValue(string(pricing.CommitmentTypeSAVINGSPLAN)),
+			StartTime:      types.StringValue("2026-01-01T00:00:00Z"),
+			AutoAssignment: autoAssignment,
+			Assignments:    assignments,
+		}
+	}
+
+	tests := []struct {
+		name        string
+		commitment  commitmentModel
+		expectError bool
+	}{
+		{
+			name:        "assignments without auto_assignment → error",
+			commitment:  base(types.BoolNull(), assignments),
+			expectError: true,
+		},
+		{
+			name:        "assignments with auto_assignment=true → error",
+			commitment:  base(types.BoolValue(true), assignments),
+			expectError: true,
+		},
+		{
+			name:        "assignments with auto_assignment=false → ok",
+			commitment:  base(types.BoolValue(false), assignments),
+			expectError: false,
+		},
+		{
+			name:        "assignments with unknown auto_assignment → skipped",
+			commitment:  base(types.BoolUnknown(), assignments),
+			expectError: false,
+		},
+		{
+			name: "duplicate cluster_id → error",
+			commitment: base(types.BoolValue(false), []commitmentAssignmentModel{
+				{ClusterID: types.StringValue(clusterA)},
+				{ClusterID: types.StringValue(clusterA)},
+			}),
+			expectError: true,
+		},
+		{
+			name: "unknown cluster_ids skipped in duplicate check → ok",
+			commitment: base(types.BoolValue(false), []commitmentAssignmentModel{
+				{ClusterID: types.StringUnknown()},
+				{ClusterID: types.StringUnknown()},
+				{ClusterID: types.StringValue(clusterA)},
+			}),
+			expectError: false,
+		},
+		{
+			name:        "no assignments, auto_assignment unset → ok",
+			commitment:  base(types.BoolNull(), nil),
+			expectError: false,
+		},
+		{
+			name:        "empty assignments list, auto_assignment unset → ok",
+			commitment:  base(types.BoolNull(), []commitmentAssignmentModel{}),
+			expectError: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			hasError := validateConfigForTest(t, ctx, tt.commitment)
+			require.Equal(t, tt.expectError, hasError)
+		})
+	}
+}
+
+func TestAssignmentsEqual(t *testing.T) {
+	a := types.StringValue("cluster-a")
+	b := types.StringValue("cluster-b")
+
+	tests := []struct {
+		name string
+		x, y []commitmentAssignmentModel
+		want bool
+	}{
+		{name: "nil vs nil", want: true},
+		{name: "nil vs empty", y: []commitmentAssignmentModel{}, want: false},
+		{name: "empty vs nil", x: []commitmentAssignmentModel{}, want: false},
+		{name: "empty vs empty", x: []commitmentAssignmentModel{}, y: []commitmentAssignmentModel{}, want: true},
+		{
+			name: "same members and order (priorities ignored)",
+			x:    []commitmentAssignmentModel{{ClusterID: a}, {ClusterID: b}},
+			y:    []commitmentAssignmentModel{{ClusterID: a, Priority: types.Int64Value(1)}, {ClusterID: b, Priority: types.Int64Value(2)}},
+			want: true,
+		},
+		{
+			name: "different order",
+			x:    []commitmentAssignmentModel{{ClusterID: a}, {ClusterID: b}},
+			y:    []commitmentAssignmentModel{{ClusterID: b}, {ClusterID: a}},
+			want: false,
+		},
+		{
+			name: "different members",
+			x:    []commitmentAssignmentModel{{ClusterID: a}},
+			y:    []commitmentAssignmentModel{{ClusterID: b}},
+			want: false,
+		},
+		{
+			name: "different length",
+			x:    []commitmentAssignmentModel{{ClusterID: a}},
+			y:    []commitmentAssignmentModel{{ClusterID: a}, {ClusterID: b}},
+			want: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			require.Equal(t, tt.want, assignmentsEqual(tt.x, tt.y))
+		})
+	}
+}
+
+func TestAssignmentsChanged(t *testing.T) {
+	plan := &commitmentModel{Assignments: []commitmentAssignmentModel{{ClusterID: types.StringValue("cluster-a")}}}
+
+	// state without assignments → replace
+	require.True(t, assignmentsChanged(plan, &commitmentModel{}))
+
+	// state with same assignments (computed priorities differ) → no replace
+	require.False(t, assignmentsChanged(plan, &commitmentModel{
+		Assignments: []commitmentAssignmentModel{{ClusterID: types.StringValue("cluster-a"), Priority: types.Int64Value(1)}},
+	}))
+
+	// removal (plan nil, state set) → replace
+	require.True(t, assignmentsChanged(&commitmentModel{}, plan))
+}
+
+func TestAssignmentsFromReplaceResponse(t *testing.T) {
+	resp := &sdk.CommitmentsAPIReplaceCommitmentAssignmentsResponse{
+		HTTPResponse: httpResp(http.StatusOK),
+		JSON200: &sdk.CastaiInventoryV1beta1ReplaceCommitmentAssignmentsResponse{
+			Assignments: &[]sdk.CastaiInventoryV1beta1CommitmentAssignment{
+				{ClusterId: ptr("cluster-b"), Priority: ptr(int32(2))},
+				{ClusterId: ptr("cluster-a"), Priority: ptr(int32(1))},
+				{ClusterId: ptr("cluster-c")}, // nil priority sorts first
+			},
+		},
+	}
+
+	got := assignmentsFromReplaceResponse(resp)
+	require.Len(t, got, 3)
+	// sorted by server-assigned priority (null = 0 sorts first)
+	require.Equal(t, "cluster-c", got[0].ClusterID.ValueString())
+	require.Equal(t, "cluster-a", got[1].ClusterID.ValueString())
+	require.Equal(t, int64(1), got[1].Priority.ValueInt64())
+	require.Equal(t, "cluster-b", got[2].ClusterID.ValueString())
+	require.Equal(t, int64(2), got[2].Priority.ValueInt64())
+
+	require.Nil(t, assignmentsFromReplaceResponse(nil))
+}
+
+func TestAssignmentsFromPricing_SortsByPriority(t *testing.T) {
+	items := []pricing.CommitmentAssignment{
+		{ClusterId: ptr("cluster-b"), Priority: ptr(int32(2))},
+		{ClusterId: ptr("cluster-a"), Priority: ptr(int32(1))},
+		{ClusterId: ptr("cluster-c")}, // nil priority
+	}
+
+	got := assignmentsFromPricing(items)
+	require.Len(t, got, 3)
+	require.Equal(t, "cluster-c", got[0].ClusterID.ValueString())
+	require.Equal(t, "cluster-a", got[1].ClusterID.ValueString())
+	require.Equal(t, "cluster-b", got[2].ClusterID.ValueString())
+
+	// empty result is a non-nil empty list (managed, zero assignments)
+	got = assignmentsFromPricing(nil)
+	require.NotNil(t, got)
+	require.Empty(t, got)
+}
+
+func TestReplaceCommitmentAssignmentsWithRetry_Retries5xxThenSucceeds(t *testing.T) {
+	t.Parallel()
+	r := require.New(t)
+	ctrl := gomock.NewController(t)
+	pricingMock := mock_pricing.NewMockClientWithResponsesInterface(ctrl)
+	apiMock := mock_sdk.NewMockClientWithResponsesInterface(ctrl)
+
+	commitmentID := "commit-1"
+	clusterIDs := []string{"cluster-a", "cluster-b"}
+
+	gomock.InOrder(
+		apiMock.EXPECT().
+			CommitmentsAPIReplaceCommitmentAssignmentsWithResponse(gomock.Any(), commitmentID, clusterIDs).
+			Return(&sdk.CommitmentsAPIReplaceCommitmentAssignmentsResponse{
+				HTTPResponse: httpResp(http.StatusInternalServerError),
+				Body:         []byte("server error"),
+			}, nil),
+		apiMock.EXPECT().
+			CommitmentsAPIReplaceCommitmentAssignmentsWithResponse(gomock.Any(), commitmentID, clusterIDs).
+			Return(&sdk.CommitmentsAPIReplaceCommitmentAssignmentsResponse{
+				HTTPResponse: httpResp(http.StatusOK),
+				JSON200: &sdk.CastaiInventoryV1beta1ReplaceCommitmentAssignmentsResponse{
+					Assignments: &[]sdk.CastaiInventoryV1beta1CommitmentAssignment{
+						{ClusterId: ptr("cluster-a"), Priority: ptr(int32(1))},
+						{ClusterId: ptr("cluster-b"), Priority: ptr(int32(2))},
+					},
+				},
+			}, nil),
+	)
+
+	res := newCommitmentResourceWithMocks(pricingMock, apiMock)
+	apiResp, err := res.replaceCommitmentAssignmentsWithRetry(context.Background(), commitmentID, clusterIDs)
+
+	r.NoError(err)
+	r.NotNil(apiResp)
+	r.Equal(http.StatusOK, apiResp.StatusCode())
+	r.Len(*apiResp.JSON200.Assignments, 2)
+}
+
+func TestReplaceCommitmentAssignmentsWithRetry_4xxStopsImmediately(t *testing.T) {
+	t.Parallel()
+	r := require.New(t)
+	ctrl := gomock.NewController(t)
+	pricingMock := mock_pricing.NewMockClientWithResponsesInterface(ctrl)
+	apiMock := mock_sdk.NewMockClientWithResponsesInterface(ctrl)
+
+	commitmentID := "commit-1"
+	clusterIDs := []string{"cluster-a"}
+
+	apiMock.EXPECT().
+		CommitmentsAPIReplaceCommitmentAssignmentsWithResponse(gomock.Any(), commitmentID, clusterIDs).
+		Return(&sdk.CommitmentsAPIReplaceCommitmentAssignmentsResponse{
+			HTTPResponse: httpResp(http.StatusBadRequest),
+			Body:         []byte(`cannot assign commitment in region "us-east-1" to cluster in region "europe-west1"`),
+		}, nil)
+
+	res := newCommitmentResourceWithMocks(pricingMock, apiMock)
+	apiResp, err := res.replaceCommitmentAssignmentsWithRetry(context.Background(), commitmentID, clusterIDs)
+
+	r.NoError(err)
+	r.NotNil(apiResp)
+	r.Equal(http.StatusBadRequest, apiResp.StatusCode())
+}
+
+func TestListCommitmentAssignments_Pagination(t *testing.T) {
+	t.Parallel()
+	r := require.New(t)
+	ctrl := gomock.NewController(t)
+	pricingMock := mock_pricing.NewMockClientWithResponsesInterface(ctrl)
+
+	orgID, commitmentID := "org-1", "commit-1"
+
+	page := func(nextToken string, items ...pricing.CommitmentAssignment) *pricing.CommitmentsAPIListCommitmentAssignmentsResponse {
+		var np *string
+		if nextToken != "" {
+			np = ptr(nextToken)
+		}
+		return &pricing.CommitmentsAPIListCommitmentAssignmentsResponse{
+			HTTPResponse: httpResp(http.StatusOK),
+			JSON200: &pricing.ListCommitmentAssignmentsResponse{
+				CommitmentAssignments: &items,
+				NextPageToken:         np,
+			},
+		}
+	}
+
+	gomock.InOrder(
+		pricingMock.EXPECT().
+			CommitmentsAPIListCommitmentAssignmentsWithResponse(gomock.Any(), orgID, commitmentID, gomock.Any()).
+			Return(page("page-2",
+				pricing.CommitmentAssignment{ClusterId: ptr("cluster-a"), Priority: ptr(int32(1))},
+				pricing.CommitmentAssignment{ClusterId: ptr("cluster-b"), Priority: ptr(int32(2))},
+			), nil),
+		pricingMock.EXPECT().
+			CommitmentsAPIListCommitmentAssignmentsWithResponse(gomock.Any(), orgID, commitmentID, gomock.Any()).
+			Return(page("",
+				pricing.CommitmentAssignment{ClusterId: ptr("cluster-c"), Priority: ptr(int32(3))},
+			), nil),
+	)
+
+	res := newCommitmentResourceWithMocks(pricingMock, nil)
+	items, err := res.listCommitmentAssignments(context.Background(), orgID, commitmentID)
+
+	r.NoError(err)
+	r.Len(items, 3)
+	r.Equal("cluster-a", *items[0].ClusterId)
+	r.Equal("cluster-b", *items[1].ClusterId)
+	r.Equal("cluster-c", *items[2].ClusterId)
+}
+
+func testAccCommitmentConfigWithAssignments(name, cudID, organizationID, clusterID string) string {
+	return fmt.Sprintf(`
+resource "castai_commitment" "test" {
+  name               = %[1]q
+  organization_id    = %[3]q
+  cloud              = "GCP"
+  region             = "us-central1"
+  type               = "RESOURCE_CUD"
+  start_time         = "2026-01-01T00:00:00Z"
+  end_time           = "2027-01-01T00:00:00Z"
+  autoscaling_status = "ACTIVE"
+  allowed_usage      = 0.75
+  auto_assignment    = false
+
+  assignments = [
+    {
+      cluster_id = %[4]q
+    },
+  ]
+
+  gcp_resource_cud_details = {
+    cud_id    = %[2]q
+    plan      = "TWELVE_MONTH"
+    type      = "GENERAL_PURPOSE_E2"
+    cpu       = 32
+    memory_mb = 131072
+    status    = "ACTIVE"
+  }
+}
+`, name, cudID, organizationID, clusterID)
 }
