@@ -1299,8 +1299,9 @@ func TestAccEKS_ResourceAutoscalerPolicies_invalidConfig(t *testing.T) {
 		{"cluster_limits {\n cpu {\n min_cores = 1\n }\n }", `The argument "max_cores" is required`},
 		{"cluster_limits {\n cpu {}\n }", `The argument "max_cores" is required`},
 		{"cluster_limits {\n cpu {\n max_cores = 10\n min_cores = -1\n }\n }", `min_cores value must be at least 0`},
-		{`node_downscaler { empty_nodes_delay = "5m" }`, `empty_nodes_delay must be a whole number`},
-		{`node_downscaler { empty_nodes_delay = "90.5s" }`, `empty_nodes_delay must be a whole number`},
+		// \s+: Terraform wraps the diagnostic text.
+		{`node_downscaler { empty_nodes_delay = "5m" }`, `empty_nodes_delay must be a whole number of\s+seconds`},
+		{`node_downscaler { empty_nodes_delay = "90.5s" }`, `empty_nodes_delay must be a whole number of\s+seconds`},
 	}
 
 	var testSteps []tfresource.TestStep
