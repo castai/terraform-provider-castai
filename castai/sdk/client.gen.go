@@ -977,6 +977,11 @@ type ClientInterface interface {
 	// WorkloadOptimizationAPIGetWorkloadScalingPolicy request
 	WorkloadOptimizationAPIGetWorkloadScalingPolicy(ctx context.Context, clusterId string, policyId string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// WorkloadOptimizationAPIPatchWorkloadScalingPolicyWithBody request with any body
+	WorkloadOptimizationAPIPatchWorkloadScalingPolicyWithBody(ctx context.Context, clusterId string, policyId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	WorkloadOptimizationAPIPatchWorkloadScalingPolicy(ctx context.Context, clusterId string, policyId string, body WorkloadOptimizationAPIPatchWorkloadScalingPolicyJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// WorkloadOptimizationAPIUpdateWorkloadScalingPolicyWithBody request with any body
 	WorkloadOptimizationAPIUpdateWorkloadScalingPolicyWithBody(ctx context.Context, clusterId string, policyId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -4937,6 +4942,30 @@ func (c *Client) WorkloadOptimizationAPIDeleteWorkloadScalingPolicy(ctx context.
 
 func (c *Client) WorkloadOptimizationAPIGetWorkloadScalingPolicy(ctx context.Context, clusterId string, policyId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewWorkloadOptimizationAPIGetWorkloadScalingPolicyRequest(c.Server, clusterId, policyId)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) WorkloadOptimizationAPIPatchWorkloadScalingPolicyWithBody(ctx context.Context, clusterId string, policyId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewWorkloadOptimizationAPIPatchWorkloadScalingPolicyRequestWithBody(c.Server, clusterId, policyId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) WorkloadOptimizationAPIPatchWorkloadScalingPolicy(ctx context.Context, clusterId string, policyId string, body WorkloadOptimizationAPIPatchWorkloadScalingPolicyJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewWorkloadOptimizationAPIPatchWorkloadScalingPolicyRequest(c.Server, clusterId, policyId, body)
 	if err != nil {
 		return nil, err
 	}
@@ -20134,6 +20163,60 @@ func NewWorkloadOptimizationAPIGetWorkloadScalingPolicyRequest(server string, cl
 	return req, nil
 }
 
+// NewWorkloadOptimizationAPIPatchWorkloadScalingPolicyRequest calls the generic WorkloadOptimizationAPIPatchWorkloadScalingPolicy builder with application/json body
+func NewWorkloadOptimizationAPIPatchWorkloadScalingPolicyRequest(server string, clusterId string, policyId string, body WorkloadOptimizationAPIPatchWorkloadScalingPolicyJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewWorkloadOptimizationAPIPatchWorkloadScalingPolicyRequestWithBody(server, clusterId, policyId, "application/json", bodyReader)
+}
+
+// NewWorkloadOptimizationAPIPatchWorkloadScalingPolicyRequestWithBody generates requests for WorkloadOptimizationAPIPatchWorkloadScalingPolicy with any type of body
+func NewWorkloadOptimizationAPIPatchWorkloadScalingPolicyRequestWithBody(server string, clusterId string, policyId string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "clusterId", runtime.ParamLocationPath, clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "policyId", runtime.ParamLocationPath, policyId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/workload-autoscaling/clusters/%s/policies/%s", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("PATCH", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
 // NewWorkloadOptimizationAPIUpdateWorkloadScalingPolicyRequest calls the generic WorkloadOptimizationAPIUpdateWorkloadScalingPolicy builder with application/json body
 func NewWorkloadOptimizationAPIUpdateWorkloadScalingPolicyRequest(server string, clusterId string, policyId string, body WorkloadOptimizationAPIUpdateWorkloadScalingPolicyJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
@@ -23226,6 +23309,11 @@ type ClientWithResponsesInterface interface {
 
 	// WorkloadOptimizationAPIGetWorkloadScalingPolicy request
 	WorkloadOptimizationAPIGetWorkloadScalingPolicyWithResponse(ctx context.Context, clusterId string, policyId string) (*WorkloadOptimizationAPIGetWorkloadScalingPolicyResponse, error)
+
+	// WorkloadOptimizationAPIPatchWorkloadScalingPolicy request  with any body
+	WorkloadOptimizationAPIPatchWorkloadScalingPolicyWithBodyWithResponse(ctx context.Context, clusterId string, policyId string, contentType string, body io.Reader) (*WorkloadOptimizationAPIPatchWorkloadScalingPolicyResponse, error)
+
+	WorkloadOptimizationAPIPatchWorkloadScalingPolicyWithResponse(ctx context.Context, clusterId string, policyId string, body WorkloadOptimizationAPIPatchWorkloadScalingPolicyJSONRequestBody) (*WorkloadOptimizationAPIPatchWorkloadScalingPolicyResponse, error)
 
 	// WorkloadOptimizationAPIUpdateWorkloadScalingPolicy request  with any body
 	WorkloadOptimizationAPIUpdateWorkloadScalingPolicyWithBodyWithResponse(ctx context.Context, clusterId string, policyId string, contentType string, body io.Reader) (*WorkloadOptimizationAPIUpdateWorkloadScalingPolicyResponse, error)
@@ -30558,6 +30646,36 @@ func (r WorkloadOptimizationAPIGetWorkloadScalingPolicyResponse) GetBody() []byt
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
+type WorkloadOptimizationAPIPatchWorkloadScalingPolicyResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *WorkloadoptimizationV1WorkloadScalingPolicy
+}
+
+// Status returns HTTPResponse.Status
+func (r WorkloadOptimizationAPIPatchWorkloadScalingPolicyResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r WorkloadOptimizationAPIPatchWorkloadScalingPolicyResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r WorkloadOptimizationAPIPatchWorkloadScalingPolicyResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
 type WorkloadOptimizationAPIUpdateWorkloadScalingPolicyResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -34191,6 +34309,23 @@ func (c *ClientWithResponses) WorkloadOptimizationAPIGetWorkloadScalingPolicyWit
 		return nil, err
 	}
 	return ParseWorkloadOptimizationAPIGetWorkloadScalingPolicyResponse(rsp)
+}
+
+// WorkloadOptimizationAPIPatchWorkloadScalingPolicyWithBodyWithResponse request with arbitrary body returning *WorkloadOptimizationAPIPatchWorkloadScalingPolicyResponse
+func (c *ClientWithResponses) WorkloadOptimizationAPIPatchWorkloadScalingPolicyWithBodyWithResponse(ctx context.Context, clusterId string, policyId string, contentType string, body io.Reader) (*WorkloadOptimizationAPIPatchWorkloadScalingPolicyResponse, error) {
+	rsp, err := c.WorkloadOptimizationAPIPatchWorkloadScalingPolicyWithBody(ctx, clusterId, policyId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseWorkloadOptimizationAPIPatchWorkloadScalingPolicyResponse(rsp)
+}
+
+func (c *ClientWithResponses) WorkloadOptimizationAPIPatchWorkloadScalingPolicyWithResponse(ctx context.Context, clusterId string, policyId string, body WorkloadOptimizationAPIPatchWorkloadScalingPolicyJSONRequestBody) (*WorkloadOptimizationAPIPatchWorkloadScalingPolicyResponse, error) {
+	rsp, err := c.WorkloadOptimizationAPIPatchWorkloadScalingPolicy(ctx, clusterId, policyId, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseWorkloadOptimizationAPIPatchWorkloadScalingPolicyResponse(rsp)
 }
 
 // WorkloadOptimizationAPIUpdateWorkloadScalingPolicyWithBodyWithResponse request with arbitrary body returning *WorkloadOptimizationAPIUpdateWorkloadScalingPolicyResponse
@@ -40704,6 +40839,32 @@ func ParseWorkloadOptimizationAPIGetWorkloadScalingPolicyResponse(rsp *http.Resp
 	}
 
 	response := &WorkloadOptimizationAPIGetWorkloadScalingPolicyResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest WorkloadoptimizationV1WorkloadScalingPolicy
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseWorkloadOptimizationAPIPatchWorkloadScalingPolicyResponse parses an HTTP response from a WorkloadOptimizationAPIPatchWorkloadScalingPolicyWithResponse call
+func ParseWorkloadOptimizationAPIPatchWorkloadScalingPolicyResponse(rsp *http.Response) (*WorkloadOptimizationAPIPatchWorkloadScalingPolicyResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &WorkloadOptimizationAPIPatchWorkloadScalingPolicyResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
