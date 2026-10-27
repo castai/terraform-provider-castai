@@ -289,6 +289,9 @@ func TestEdgeConfigurationResource_toNebiusConfiguration_Conversions(t *testing.
 				Labels:          labelsMap,
 				ReservationIDs:  reservationList,
 				GpuCluster:      types.StringValue("gpu-cluster-a"),
+				Filesystems: []filesysAttachmentModel{
+					{FilesystemID: types.StringValue("computefilesystem-all"), MountPath: types.StringValue("/mnt/all")},
+				},
 			},
 			expected: &omni.NebiusConfiguration{
 				ImageId:         lo.ToPtr("nebius-image-123"),
@@ -296,6 +299,9 @@ func TestEdgeConfigurationResource_toNebiusConfiguration_Conversions(t *testing.
 				Labels:          &map[string]string{"env": "prod", "team": "platform"},
 				ReservationIds:  &[]string{"res-1", "res-2"},
 				GpuCluster:      lo.ToPtr("gpu-cluster-a"),
+				Filesystems: lo.ToPtr([]omni.FilesystemAttachment{
+					{FilesystemId: "computefilesystem-all", MountPath: "/mnt/all"},
+				}),
 			},
 		},
 		"all null/zero values": {
@@ -305,6 +311,7 @@ func TestEdgeConfigurationResource_toNebiusConfiguration_Conversions(t *testing.
 				Labels:          types.MapNull(types.StringType),
 				ReservationIDs:  types.ListNull(types.StringType),
 				GpuCluster:      types.StringNull(),
+				Filesystems:     nil,
 			},
 			// Labels stay nil so the field is omitted from the request instead of
 			// being sent as an empty map, which the API would echo back and break
@@ -314,6 +321,7 @@ func TestEdgeConfigurationResource_toNebiusConfiguration_Conversions(t *testing.
 				BootDiskSizeGib: lo.ToPtr(int32(0)),
 				ReservationIds:  lo.ToPtr([]string{}),
 				GpuCluster:      lo.ToPtr(""),
+				Filesystems:     lo.ToPtr([]omni.FilesystemAttachment{}),
 			},
 		},
 		"filesystems populated only": {
@@ -327,9 +335,21 @@ func TestEdgeConfigurationResource_toNebiusConfiguration_Conversions(t *testing.
 				BootDiskSizeGib: lo.ToPtr(int32(0)),
 				ReservationIds:  lo.ToPtr([]string{}),
 				GpuCluster:      lo.ToPtr(""),
-				Filesystems: &[]omni.FilesystemAttachment{
+				Filesystems: lo.ToPtr([]omni.FilesystemAttachment{
 					{FilesystemId: "computefilesystem-xyz", MountPath: "/mnt/one"},
-				},
+				}),
+			},
+		},
+		"filesystems cleared produce explicit empty slice": {
+			plan: &nebiusConfigurationModel{
+				Filesystems: []filesysAttachmentModel{},
+			},
+			expected: &omni.NebiusConfiguration{
+				ImageId:         lo.ToPtr(""),
+				BootDiskSizeGib: lo.ToPtr(int32(0)),
+				ReservationIds:  lo.ToPtr([]string{}),
+				GpuCluster:      lo.ToPtr(""),
+				Filesystems:     lo.ToPtr([]omni.FilesystemAttachment{}),
 			},
 		},
 		"filesystems appended alongside other fields": {
@@ -350,10 +370,10 @@ func TestEdgeConfigurationResource_toNebiusConfiguration_Conversions(t *testing.
 				Labels:          &map[string]string{"env": "prod", "team": "platform"},
 				ReservationIds:  &[]string{"res-1", "res-2"},
 				GpuCluster:      lo.ToPtr("gpu-cluster-a"),
-				Filesystems: &[]omni.FilesystemAttachment{
+				Filesystems: lo.ToPtr([]omni.FilesystemAttachment{
 					{FilesystemId: "computefilesystem-aaa", MountPath: "/mnt/data"},
 					{FilesystemId: "computefilesystem-bbb", MountPath: "/mnt/cache"},
-				},
+				}),
 			},
 		},
 		"labels with wrong element type produces diagnostics": {
@@ -371,6 +391,7 @@ func TestEdgeConfigurationResource_toNebiusConfiguration_Conversions(t *testing.
 				BootDiskSizeGib: lo.ToPtr(int32(0)),
 				ReservationIds:  lo.ToPtr([]string{}),
 				GpuCluster:      lo.ToPtr(""),
+				Filesystems:     lo.ToPtr([]omni.FilesystemAttachment{}),
 			},
 			expError: "can't unmarshal tftypes.Number into *string, expected string",
 		},
@@ -424,6 +445,7 @@ func TestEdgeConfigurationResource_toNebiusConfigurationModel(t *testing.T) {
 		BootDiskSizeGiB: types.Int64Null(),
 		ReservationIDs:  types.ListNull(types.StringType),
 		GpuCluster:      types.StringNull(),
+		Filesystems:     nil,
 	}
 
 	tests := map[string]struct {
@@ -437,6 +459,9 @@ func TestEdgeConfigurationResource_toNebiusConfigurationModel(t *testing.T) {
 				Labels:          &map[string]string{"foo": "bar"},
 				ReservationIds:  &[]string{"r1", "r2", "r3"},
 				GpuCluster:      lo.ToPtr("gpu-cluster-z"),
+				Filesystems: lo.ToPtr([]omni.FilesystemAttachment{
+					{FilesystemId: "computefilesystem-all", MountPath: "/mnt/all"},
+				}),
 			},
 			expected: &nebiusConfigurationModel{
 				ImageID:         types.StringValue("nebius-image-xyz"),
@@ -444,14 +469,17 @@ func TestEdgeConfigurationResource_toNebiusConfigurationModel(t *testing.T) {
 				Labels:          expectedLabels,
 				ReservationIDs:  expectedReservations,
 				GpuCluster:      types.StringValue("gpu-cluster-z"),
+				Filesystems: []filesysAttachmentModel{
+					{FilesystemID: types.StringValue("computefilesystem-all"), MountPath: types.StringValue("/mnt/all")},
+				},
 			},
 		},
 		"filesystems populated produce attachment list": {
 			config: &omni.NebiusConfiguration{
-				Filesystems: &[]omni.FilesystemAttachment{
+				Filesystems: lo.ToPtr([]omni.FilesystemAttachment{
 					{FilesystemId: "computefilesystem-aaa", MountPath: "/mnt/data"},
 					{FilesystemId: "computefilesystem-bbb", MountPath: "/mnt/cache"},
-				},
+				}),
 			},
 			expected: &nebiusConfigurationModel{
 				Labels:          types.MapNull(types.StringType),

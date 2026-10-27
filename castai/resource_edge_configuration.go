@@ -901,6 +901,7 @@ func (r *edgeConfigurationResource) toNebiusConfiguration(ctx context.Context, p
 		BootDiskSizeGib: lo.ToPtr(int32(0)),
 		ReservationIds:  lo.ToPtr([]string{}),
 		GpuCluster:      lo.ToPtr(""),
+		Filesystems:     lo.ToPtr([]omni.FilesystemAttachment{}),
 	}
 
 	if !plan.ImageID.IsNull() && plan.ImageID.ValueString() != "" {
