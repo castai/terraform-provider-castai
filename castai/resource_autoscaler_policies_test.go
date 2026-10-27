@@ -6,10 +6,12 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"regexp"
 	"strconv"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-go/tftypes"
@@ -664,6 +666,28 @@ func TestResourceAutoscalerPolicies_policiesFromModel_SectionWithNullFields(t *t
 	r.Nil(policies.NodeDownscaler.EmptyNodesDelay)
 }
 
+// TestResourceAutoscalerPolicies_Schema_CPUMaxCoresRequired guards against a
+// cpu block that omits max_cores passing plan: the V2 policies API requires
+// max_cores (>= 1) and the SDK always serializes it, so an omitted value is
+// sent as 0 and rejected at apply time. Required lets Terraform core reject
+// the configuration at validate time instead.
+func TestResourceAutoscalerPolicies_Schema_CPUMaxCoresRequired(t *testing.T) {
+	t.Parallel()
+
+	schemaResp := autoscalerPoliciesTestSchema(t, newAutoscalerPoliciesResource())
+
+	r := require.New(t)
+	clusterLimits, ok := schemaResp.Schema.Blocks[FieldAutoscalerPoliciesClusterLimits].(schema.ListNestedBlock)
+	r.True(ok, "cluster_limits must be a list nested block")
+	cpu, ok := clusterLimits.NestedObject.Blocks[FieldClusterLimitsCPU].(schema.ListNestedBlock)
+	r.True(ok, "cluster_limits.cpu must be a list nested block")
+	maxCores, ok := cpu.NestedObject.Attributes[FieldClusterLimitsCPUMaxCores]
+	r.True(ok, "cluster_limits.cpu.max_cores must be declared")
+
+	r.True(maxCores.IsRequired(), "cluster_limits.cpu.max_cores must be required")
+	r.False(maxCores.IsComputed(), "cluster_limits.cpu.max_cores must not be computed: an unset value would stay unknown after apply")
+}
+
 // TestResourceAutoscalerPolicies_refreshedState_ObservedAPIResponse pins the
 // refresh against a payload observed from the V2 policies endpoint. Prior
 // state declares every section so the refresh adopts the response values.
@@ -1231,6 +1255,46 @@ func TestAccEKS_ResourceAutoscalerPolicies_omittedDefaults(t *testing.T) {
 			},
 		},
 	})
+}
+
+// TestAccEKS_ResourceAutoscalerPolicies_cpuRequiresMaxCores verifies that a
+// cpu block without max_cores is rejected at validate time, before any API
+// call. The configuration never reaches the provider's Configure, so no
+// cluster or credentials are needed.
+func TestAccEKS_ResourceAutoscalerPolicies_cpuRequiresMaxCores(t *testing.T) {
+	missingMaxCores := regexp.MustCompile(`The argument "max_cores" is required`)
+
+	tfresource.Test(t, tfresource.TestCase{
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		Steps: []tfresource.TestStep{
+			{
+				Config:      testAccAutoscalerPoliciesCPUConfig("min_cores = 1"),
+				PlanOnly:    true,
+				ExpectError: missingMaxCores,
+			},
+			{
+				Config:      testAccAutoscalerPoliciesCPUConfig(""),
+				PlanOnly:    true,
+				ExpectError: missingMaxCores,
+			},
+		},
+	})
+}
+
+func testAccAutoscalerPoliciesCPUConfig(cpuBody string) string {
+	return fmt.Sprintf(`
+resource "castai_autoscaler_policies" "test" {
+  cluster_id = %q
+
+  cluster_limits {
+    enabled = true
+
+    cpu {
+      %s
+    }
+  }
+}
+`, autoscalerPoliciesTestClusterID, cpuBody)
 }
 
 func testAccAutoscalerPoliciesConfig(rName, clusterName string, s autoscalerPoliciesAccSettings) string {

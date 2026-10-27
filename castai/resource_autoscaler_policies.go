@@ -177,10 +177,12 @@ func (r *autoscalerPoliciesResource) Schema(_ context.Context, _ resource.Schema
 							Validators: []validator.List{listvalidator.SizeAtMost(1)},
 							NestedObject: schema.NestedBlockObject{
 								Attributes: map[string]schema.Attribute{
+									// Required: the API requires max_cores and the SDK
+									// always serializes it, so an omitted value would
+									// be sent as 0 and rejected at apply time.
 									FieldClusterLimitsCPUMaxCores: schema.Int64Attribute{
-										Optional:    true,
-										Computed:    true,
-										Description: "Maximum vCPUs allowed cluster-wide.",
+										Required:    true,
+										Description: "Maximum vCPUs allowed cluster-wide. Required when the cpu block is declared.",
 										Validators:  []validator.Int64{int64validator.AtLeast(2)},
 									},
 									FieldClusterLimitsCPUMinCores: schema.Int64Attribute{
