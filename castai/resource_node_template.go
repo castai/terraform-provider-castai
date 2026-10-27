@@ -93,6 +93,7 @@ const (
 	FieldNodeTemplateSharedGpuName                            = "gpu_name"
 	FieldNodeTemplateSharingStrategy                          = "sharing_strategy"
 	FieldNodeTemplateClmEnabled                               = "clm_enabled"
+	FieldNodeTemplateClmNetworkingMode                        = "clm_networking_mode"
 	FieldNodeTemplateEdgeLocationIDs                          = "edge_location_ids"
 	FieldNodeTemplateEdgeLocationConfig                       = "edge_location_config"
 	FieldNodeTemplateEdgeLocationId                           = "edge_location_id"
@@ -887,6 +888,16 @@ func resourceNodeTemplate() *schema.Resource {
 				Default:     false,
 				Description: "Marks whether Container Live Migration (CLM) should be enabled for nodes created from this template. Supported on EKS, GKE, and AKS clusters. CLM-enabled nodes participate in live workload migration during rebalancing, scale-down, and node lifecycle events.",
 			},
+			FieldNodeTemplateClmNetworkingMode: {
+				Type:             schema.TypeString,
+				Optional:         true,
+				Computed:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"default", "none", "tc", "cni"}, false)),
+				Description: "CLM networking mode for nodes created from this template. " +
+					"`default` - auto-detect; `none` - no connection preservation during migration; " +
+					"`tc` - new pod IP on the destination node with eBPF traffic-control translation of the old IP, allows cross-subnet/zone migration on any provider; " +
+					"`cni` - pod IP preservation via the CNI (Calico / AWS VPC CNI fork), requires the same subnet/zone.",
+			},
 			FieldNodeTemplateStuckPodResizeReconciliation: {
 				Type:             schema.TypeList,
 				MaxItems:         1,
@@ -1045,6 +1056,10 @@ func resourceNodeTemplateRead(ctx context.Context, d *schema.ResourceData, meta 
 
 	if err := d.Set(FieldNodeTemplateClmEnabled, nodeTemplate.ClmEnabled); err != nil {
 		return diag.FromErr(fmt.Errorf("setting clm enabled: %w", err))
+	}
+
+	if err := d.Set(FieldNodeTemplateClmNetworkingMode, lo.FromPtr(nodeTemplate.ClmNetworkingMode)); err != nil {
+		return diag.FromErr(fmt.Errorf("setting clm networking mode: %w", err))
 	}
 
 	// Only populate the block when the API returns a non-null `enabled` value, so unset SPR doesn't drift
@@ -1652,6 +1667,7 @@ func updateNodeTemplate(ctx context.Context, d *schema.ResourceData, meta any, s
 		FieldNodeTemplateSharedGpuName,
 		FieldNodeTemplateSharedClientsPerGpu,
 		FieldNodeTemplateClmEnabled,
+		FieldNodeTemplateClmNetworkingMode,
 		FieldNodeTemplateStuckPodResizeReconciliation,
 		FieldNodeTemplateEdgeLocationIDs,
 		FieldNodeTemplateEdgeLocationConfig,
@@ -1737,6 +1753,10 @@ func updateNodeTemplate(ctx context.Context, d *schema.ResourceData, meta any, s
 		req.ClmEnabled = lo.ToPtr(v.(bool))
 	}
 
+	if v, ok := d.GetOk(FieldNodeTemplateClmNetworkingMode); ok {
+		req.ClmNetworkingMode = lo.ToPtr(v.(string))
+	}
+
 	if v, ok := d.Get(FieldNodeTemplateStuckPodResizeReconciliation).([]any); ok && len(v) > 0 {
 		req.StuckPodResizeReconciliation = toStuckPodResizeReconciliation(v[0])
 	} else if d.HasChange(FieldNodeTemplateStuckPodResizeReconciliation) {
@@ -1791,6 +1811,10 @@ func resourceNodeTemplateCreate(ctx context.Context, d *schema.ResourceData, met
 		ConfigurationId: lo.ToPtr(d.Get(FieldNodeTemplateConfigurationId).(string)),
 		ShouldTaint:     lo.ToPtr(d.Get(FieldNodeTemplateShouldTaint).(bool)),
 		ClmEnabled:      lo.ToPtr(d.Get(FieldNodeTemplateClmEnabled).(bool)),
+	}
+
+	if v, ok := d.GetOk(FieldNodeTemplateClmNetworkingMode); ok {
+		req.ClmNetworkingMode = lo.ToPtr(v.(string))
 	}
 
 	if v, ok := d.Get(FieldNodeTemplateEdgeLocationConfig).([]any); ok && len(v) > 0 {
