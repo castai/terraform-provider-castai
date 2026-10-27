@@ -12,6 +12,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-go/tftypes"
@@ -666,26 +667,58 @@ func TestResourceAutoscalerPolicies_policiesFromModel_SectionWithNullFields(t *t
 	r.Nil(policies.NodeDownscaler.EmptyNodesDelay)
 }
 
-// TestResourceAutoscalerPolicies_Schema_CPUMaxCoresRequired guards against a
-// cpu block that omits max_cores passing plan: the V2 policies API requires
-// max_cores (>= 1) and the SDK always serializes it, so an omitted value is
-// sent as 0 and rejected at apply time. Required lets Terraform core reject
-// the configuration at validate time instead.
+// autoscalerPoliciesNestedAttr returns the attribute at blocks.../attr.
+func autoscalerPoliciesNestedAttr(t *testing.T, path ...string) schema.Attribute {
+	t.Helper()
+
+	schemaResp := autoscalerPoliciesTestSchema(t, newAutoscalerPoliciesResource())
+	blocks := schemaResp.Schema.Blocks
+	var obj schema.NestedBlockObject
+	for _, name := range path[:len(path)-1] {
+		block, ok := blocks[name].(schema.ListNestedBlock)
+		require.True(t, ok, "%s must be a list nested block", name)
+		obj = block.NestedObject
+		blocks = obj.Blocks
+	}
+	attr, ok := obj.Attributes[path[len(path)-1]]
+	require.True(t, ok, "%v must be declared", path)
+	return attr
+}
+
+// The API requires max_cores; without it the provider sends 0 and the apply fails.
 func TestResourceAutoscalerPolicies_Schema_CPUMaxCoresRequired(t *testing.T) {
 	t.Parallel()
 
-	schemaResp := autoscalerPoliciesTestSchema(t, newAutoscalerPoliciesResource())
+	maxCores := autoscalerPoliciesNestedAttr(t, FieldAutoscalerPoliciesClusterLimits, FieldClusterLimitsCPU, FieldClusterLimitsCPUMaxCores)
 
 	r := require.New(t)
-	clusterLimits, ok := schemaResp.Schema.Blocks[FieldAutoscalerPoliciesClusterLimits].(schema.ListNestedBlock)
-	r.True(ok, "cluster_limits must be a list nested block")
-	cpu, ok := clusterLimits.NestedObject.Blocks[FieldClusterLimitsCPU].(schema.ListNestedBlock)
-	r.True(ok, "cluster_limits.cpu must be a list nested block")
-	maxCores, ok := cpu.NestedObject.Attributes[FieldClusterLimitsCPUMaxCores]
-	r.True(ok, "cluster_limits.cpu.max_cores must be declared")
+	r.True(maxCores.IsRequired())
+	r.False(maxCores.IsComputed())
+}
 
-	r.True(maxCores.IsRequired(), "cluster_limits.cpu.max_cores must be required")
-	r.False(maxCores.IsComputed(), "cluster_limits.cpu.max_cores must not be computed: an unset value would stay unknown after apply")
+// Values the API rejects or cannot store must fail at plan time.
+func TestResourceAutoscalerPolicies_Schema_InnerFieldValidators(t *testing.T) {
+	t.Parallel()
+
+	ctx := context.Background()
+
+	minCores := autoscalerPoliciesNestedAttr(t, FieldAutoscalerPoliciesClusterLimits, FieldClusterLimitsCPU, FieldClusterLimitsCPUMinCores).(schema.Int64Attribute)
+	for value, wantErr := range map[int64]bool{-1: true, 0: false, 1: false} {
+		resp := &validator.Int64Response{}
+		for _, v := range minCores.Validators {
+			v.ValidateInt64(ctx, validator.Int64Request{ConfigValue: types.Int64Value(value)}, resp)
+		}
+		require.Equal(t, wantErr, resp.Diagnostics.HasError(), "min_cores = %d", value)
+	}
+
+	delay := autoscalerPoliciesNestedAttr(t, FieldAutoscalerPoliciesNodeDownscaler, FieldNodeDownscalerEmptyNodesDelay).(schema.StringAttribute)
+	for value, wantErr := range map[string]bool{"300s": false, "0s": false, "5m": true, "300": true, "90.5s": true, "-5s": true} {
+		resp := &validator.StringResponse{}
+		for _, v := range delay.Validators {
+			v.ValidateString(ctx, validator.StringRequest{ConfigValue: types.StringValue(value)}, resp)
+		}
+		require.Equal(t, wantErr, resp.Diagnostics.HasError(), "empty_nodes_delay = %q", value)
+	}
 }
 
 // TestResourceAutoscalerPolicies_refreshedState_ObservedAPIResponse pins the
@@ -1257,44 +1290,41 @@ func TestAccEKS_ResourceAutoscalerPolicies_omittedDefaults(t *testing.T) {
 	})
 }
 
-// TestAccEKS_ResourceAutoscalerPolicies_cpuRequiresMaxCores verifies that a
-// cpu block without max_cores is rejected at validate time, before any API
-// call. The configuration never reaches the provider's Configure, so no
-// cluster or credentials are needed.
-func TestAccEKS_ResourceAutoscalerPolicies_cpuRequiresMaxCores(t *testing.T) {
-	missingMaxCores := regexp.MustCompile(`The argument "max_cores" is required`)
+// Invalid configs fail at validate time, before Configure: no cluster or credentials needed.
+func TestAccEKS_ResourceAutoscalerPolicies_invalidConfig(t *testing.T) {
+	steps := []struct {
+		body string
+		err  string
+	}{
+		{"cluster_limits {\n cpu {\n min_cores = 1\n }\n }", `The argument "max_cores" is required`},
+		{"cluster_limits {\n cpu {}\n }", `The argument "max_cores" is required`},
+		{"cluster_limits {\n cpu {\n max_cores = 10\n min_cores = -1\n }\n }", `min_cores value must be at least 0`},
+		{`node_downscaler { empty_nodes_delay = "5m" }`, `empty_nodes_delay must be a whole number`},
+		{`node_downscaler { empty_nodes_delay = "90.5s" }`, `empty_nodes_delay must be a whole number`},
+	}
+
+	var testSteps []tfresource.TestStep
+	for _, s := range steps {
+		testSteps = append(testSteps, tfresource.TestStep{
+			Config:      testAccAutoscalerPoliciesInvalidConfig(s.body),
+			PlanOnly:    true,
+			ExpectError: regexp.MustCompile(s.err),
+		})
+	}
 
 	tfresource.Test(t, tfresource.TestCase{
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
-		Steps: []tfresource.TestStep{
-			{
-				Config:      testAccAutoscalerPoliciesCPUConfig("min_cores = 1"),
-				PlanOnly:    true,
-				ExpectError: missingMaxCores,
-			},
-			{
-				Config:      testAccAutoscalerPoliciesCPUConfig(""),
-				PlanOnly:    true,
-				ExpectError: missingMaxCores,
-			},
-		},
+		Steps:                    testSteps,
 	})
 }
 
-func testAccAutoscalerPoliciesCPUConfig(cpuBody string) string {
+func testAccAutoscalerPoliciesInvalidConfig(body string) string {
 	return fmt.Sprintf(`
 resource "castai_autoscaler_policies" "test" {
   cluster_id = %q
-
-  cluster_limits {
-    enabled = true
-
-    cpu {
-      %s
-    }
-  }
+  %s
 }
-`, autoscalerPoliciesTestClusterID, cpuBody)
+`, autoscalerPoliciesTestClusterID, body)
 }
 
 func testAccAutoscalerPoliciesConfig(rName, clusterName string, s autoscalerPoliciesAccSettings) string {

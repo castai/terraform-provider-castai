@@ -30,6 +30,9 @@ import (
 // uuidRegex matches canonical 8-4-4-4-12 hexadecimal UUID strings.
 var uuidRegex = regexp.MustCompile(`^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$`)
 
+// wholeSecondsRegex matches durations the API stores without loss, e.g. "300s".
+var wholeSecondsRegex = regexp.MustCompile(`^\d+s$`)
+
 // Field name constants for the castai_autoscaler_policies resource. Struct
 // tags cannot reference constants, so tfsdk tags are the only place the names
 // appear as string literals.
@@ -177,9 +180,7 @@ func (r *autoscalerPoliciesResource) Schema(_ context.Context, _ resource.Schema
 							Validators: []validator.List{listvalidator.SizeAtMost(1)},
 							NestedObject: schema.NestedBlockObject{
 								Attributes: map[string]schema.Attribute{
-									// Required: the API requires max_cores and the SDK
-									// always serializes it, so an omitted value would
-									// be sent as 0 and rejected at apply time.
+									// Required by the API; an omitted value would be sent as 0.
 									FieldClusterLimitsCPUMaxCores: schema.Int64Attribute{
 										Required:    true,
 										Description: "Maximum vCPUs allowed cluster-wide. Required when the cpu block is declared.",
@@ -190,6 +191,7 @@ func (r *autoscalerPoliciesResource) Schema(_ context.Context, _ resource.Schema
 										Computed:    true,
 										Default:     int64default.StaticInt64(1),
 										Description: "Minimum vCPUs allowed cluster-wide. Matches the server default when omitted.",
+										Validators:  []validator.Int64{int64validator.AtLeast(0)},
 									},
 								},
 							},
@@ -213,6 +215,9 @@ func (r *autoscalerPoliciesResource) Schema(_ context.Context, _ resource.Schema
 							Computed:    true,
 							Default:     stringdefault.StaticString("300s"),
 							Description: "How long a node must be empty before it becomes eligible for downscaling, as a duration in seconds (e.g. \"300s\" for 5 minutes). Matches the server default when omitted.",
+							Validators: []validator.String{
+								stringvalidator.RegexMatches(wholeSecondsRegex, `must be a whole number of seconds, e.g. "300s"`),
+							},
 						},
 					},
 				},
