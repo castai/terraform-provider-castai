@@ -1702,6 +1702,12 @@ type WorkloadOptimizationAPIAssignScalingPolicyWorkloadsRequest struct {
 	WorkloadIds *[]string `json:"workloadIds,omitempty"`
 }
 
+// WorkloadOptimizationAPIPatchWorkloadScalingPolicyRequest defines model for WorkloadOptimizationAPI_PatchWorkloadScalingPolicy_request.
+type WorkloadOptimizationAPIPatchWorkloadScalingPolicyRequest struct {
+	Policy     *WorkloadoptimizationV1PatchWorkloadScalingPolicy `json:"policy,omitempty"`
+	UpdateMask string                                            `json:"updateMask"`
+}
+
 // WorkloadOptimizationAPIPatchWorkloadV2Request defines model for WorkloadOptimizationAPI_PatchWorkloadV2_request.
 type WorkloadOptimizationAPIPatchWorkloadV2Request struct {
 	// UpdateMask The update mask specifying which fields to update.
@@ -4356,6 +4362,9 @@ type CastaiUsersV1beta1ClaimInvitationResponse struct {
 type CastaiUsersV1beta1CreateInvitationsRequest struct {
 	// Members Memberships to create.
 	Members *[]CastaiUsersV1beta1NewMembershipByEmail `json:"members,omitempty"`
+
+	// Product ProductType represents which product a category belongs to.
+	Product *CastaiRbacV1beta1ProductType `json:"product,omitempty"`
 }
 
 // CastaiUsersV1beta1CreateInvitationsResponse defines model for castai.users.v1beta1.CreateInvitationsResponse.
@@ -4534,6 +4543,9 @@ type CastaiUsersV1beta1PendingInvitation struct {
 
 	// InviteEmail email of the invited person.
 	InviteEmail string `json:"inviteEmail"`
+
+	// Product ProductType represents which product a category belongs to.
+	Product *CastaiRbacV1beta1ProductType `json:"product,omitempty"`
 	// Deprecated:
 	Role *interface{} `json:"role,omitempty"`
 
@@ -11299,6 +11311,89 @@ type WorkloadoptimizationV1PSIPressureResolvedContainer struct {
 	StoppedAt time.Time `json:"stoppedAt"`
 }
 
+// WorkloadoptimizationV1PatchHorizontalSettings defines model for workloadoptimization.v1.PatchHorizontalSettings.
+type WorkloadoptimizationV1PatchHorizontalSettings struct {
+	// ManagementOption Defines possible options for workload management.
+	// READ_ONLY - workload watched (metrics collected), but no actions may be performed by CAST AI.
+	// MANAGED - workload watched (metrics collected), CAST AI may perform actions on the workload.
+	ManagementOption *WorkloadoptimizationV1ManagementOption           `json:"managementOption,omitempty"`
+	NativeHpaSpec    *WorkloadoptimizationV1ScalingPolicyNativeHPASpec `json:"nativeHpaSpec,omitempty"`
+
+	// TakeOwnership When true, CAST AI will take ownership of existing HPAs and manage them according to the policy settings.
+	TakeOwnership *bool `json:"takeOwnership"`
+}
+
+// WorkloadoptimizationV1PatchResourceSettings defines model for workloadoptimization.v1.PatchResourceSettings.
+type WorkloadoptimizationV1PatchResourceSettings struct {
+	ApplyThresholdStrategy *WorkloadoptimizationV1ApplyThresholdStrategy `json:"applyThresholdStrategy,omitempty"`
+
+	// Args The arguments for the function - i.e. for a quantile, this should be a [0, 1] float.
+	Args *[]string `json:"args,omitempty"`
+
+	// Constraints ConstraintsV2 defines min/max bounds for the recommendation.
+	// Each bound can be configured as a fixed constant value or as a percentage
+	// of the original pod-spec request.
+	Constraints *WorkloadoptimizationV1ConstraintsV2 `json:"constraints,omitempty"`
+
+	// Function The function which to use when calculating the resource recommendation.
+	// QUANTILE - the quantile function.
+	// MAX - the max function.
+	Function *WorkloadoptimizationV1ResourcePoliciesFunction `json:"function,omitempty"`
+	Limit    *WorkloadoptimizationV1ResourceLimitStrategy    `json:"limit,omitempty"`
+
+	// LookBackPeriodSeconds Period of time over which the resource recommendation is calculated (default value is 24 hours).
+	LookBackPeriodSeconds *int32 `json:"lookBackPeriodSeconds"`
+
+	// ManagementOption Defines possible options for workload management.
+	// READ_ONLY - workload watched (metrics collected), but no actions may be performed by CAST AI.
+	// MANAGED - workload watched (metrics collected), CAST AI may perform actions on the workload.
+	ManagementOption *WorkloadoptimizationV1ManagementOption `json:"managementOption,omitempty"`
+
+	// Overhead The overhead for the recommendation, the formula is: (1 + overhead) * function(args).
+	Overhead *float64 `json:"overhead"`
+}
+
+// WorkloadoptimizationV1PatchVerticalSettings defines model for workloadoptimization.v1.PatchVerticalSettings.
+type WorkloadoptimizationV1PatchVerticalSettings struct {
+	// AnomalyDetection AnomalyDetectionSettings configures how workload anomalies are detected and handled.
+	// Different anomaly types can have different detection thresholds based on the scaling policy.
+	AnomalyDetection   *WorkloadoptimizationV1AnomalyDetectionSettings `json:"anomalyDetection,omitempty"`
+	AntiAffinity       *WorkloadoptimizationV1AntiAffinitySettings     `json:"antiAffinity,omitempty"`
+	ApplyType          *WorkloadoptimizationV1ApplyType                `json:"applyType,omitempty"`
+	Confidence         *WorkloadoptimizationV1ConfidenceSettings       `json:"confidence,omitempty"`
+	Cpu                *WorkloadoptimizationV1PatchResourceSettings    `json:"cpu,omitempty"`
+	Downscaling        *WorkloadoptimizationV1DownscalingSettings      `json:"downscaling,omitempty"`
+	ExcludedContainers *[]string                                       `json:"excludedContainers,omitempty"`
+	Gpu                *WorkloadoptimizationV1GPUSettings              `json:"gpu,omitempty"`
+
+	// HpaConverters Configuration for converting existing HPAs when VPA is the sole optimization.
+	HpaConverters *[]WorkloadoptimizationV1HPAConverters `json:"hpaConverters,omitempty"`
+	Jvm           *WorkloadoptimizationV1JVMSettings     `json:"jvm,omitempty"`
+
+	// ManagementOption Defines possible options for workload management.
+	// READ_ONLY - workload watched (metrics collected), but no actions may be performed by CAST AI.
+	// MANAGED - workload watched (metrics collected), CAST AI may perform actions on the workload.
+	ManagementOption  *WorkloadoptimizationV1ManagementOption          `json:"managementOption,omitempty"`
+	Memory            *WorkloadoptimizationV1PatchResourceSettings     `json:"memory,omitempty"`
+	MemoryEvent       *WorkloadoptimizationV1MemoryEventSettings       `json:"memoryEvent,omitempty"`
+	PredictiveScaling *WorkloadoptimizationV1PredictiveScalingSettings `json:"predictiveScaling,omitempty"`
+	RolloutBehavior   *WorkloadoptimizationV1RolloutBehaviorSettings   `json:"rolloutBehavior,omitempty"`
+	Startup           *WorkloadoptimizationV1StartupSettings           `json:"startup,omitempty"`
+}
+
+// WorkloadoptimizationV1PatchWorkloadScalingPolicy defines model for workloadoptimization.v1.PatchWorkloadScalingPolicy.
+type WorkloadoptimizationV1PatchWorkloadScalingPolicy struct {
+	// AssignmentRules When covered by the update mask, the provided list replaces the stored rules;
+	// an empty list under the mask clears them.
+	AssignmentRules *[]WorkloadoptimizationV1ScalingPolicyAssignmentRule `json:"assignmentRules,omitempty"`
+	Horizontal      *WorkloadoptimizationV1PatchHorizontalSettings       `json:"horizontal,omitempty"`
+
+	// Name The scaling policy name must be unique within a cluster and adhere to the format
+	// guidelines of Kubernetes labels/annotations.
+	Name     *string                                      `json:"name"`
+	Vertical *WorkloadoptimizationV1PatchVerticalSettings `json:"vertical,omitempty"`
+}
+
 // WorkloadoptimizationV1PatchWorkloadV2 defines model for workloadoptimization.v1.PatchWorkloadV2.
 type WorkloadoptimizationV1PatchWorkloadV2 struct {
 	// ScalingPolicyId Defines the scaling policy ID assigned to the workload.
@@ -14290,6 +14385,9 @@ type WorkloadOptimizationAPICreateWorkloadScalingPolicyJSONRequestBody = Workloa
 
 // WorkloadOptimizationAPISetScalingPoliciesOrderJSONRequestBody defines body for WorkloadOptimizationAPISetScalingPoliciesOrder for application/json ContentType.
 type WorkloadOptimizationAPISetScalingPoliciesOrderJSONRequestBody = WorkloadOptimizationAPISetScalingPoliciesOrderRequest
+
+// WorkloadOptimizationAPIPatchWorkloadScalingPolicyJSONRequestBody defines body for WorkloadOptimizationAPIPatchWorkloadScalingPolicy for application/json ContentType.
+type WorkloadOptimizationAPIPatchWorkloadScalingPolicyJSONRequestBody = WorkloadOptimizationAPIPatchWorkloadScalingPolicyRequest
 
 // WorkloadOptimizationAPIUpdateWorkloadScalingPolicyJSONRequestBody defines body for WorkloadOptimizationAPIUpdateWorkloadScalingPolicy for application/json ContentType.
 type WorkloadOptimizationAPIUpdateWorkloadScalingPolicyJSONRequestBody = WorkloadoptimizationV1UpdateWorkloadScalingPolicy
