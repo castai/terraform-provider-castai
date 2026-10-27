@@ -296,6 +296,15 @@ const (
 	CastaiSsoV1beta1SSOConnectionStatusSTATUSUNKNOWN  CastaiSsoV1beta1SSOConnectionStatus = "STATUS_UNKNOWN"
 )
 
+// Defines values for CastaiSsoV1beta1SSOEmailDomainValidationStatus.
+const (
+	CastaiSsoV1beta1SSOEmailDomainValidationStatusSTATUSDENIED   CastaiSsoV1beta1SSOEmailDomainValidationStatus = "STATUS_DENIED"
+	CastaiSsoV1beta1SSOEmailDomainValidationStatusSTATUSEXPIRED  CastaiSsoV1beta1SSOEmailDomainValidationStatus = "STATUS_EXPIRED"
+	CastaiSsoV1beta1SSOEmailDomainValidationStatusSTATUSPENDING  CastaiSsoV1beta1SSOEmailDomainValidationStatus = "STATUS_PENDING"
+	CastaiSsoV1beta1SSOEmailDomainValidationStatusSTATUSUNKNOWN  CastaiSsoV1beta1SSOEmailDomainValidationStatus = "STATUS_UNKNOWN"
+	CastaiSsoV1beta1SSOEmailDomainValidationStatusSTATUSVERIFIED CastaiSsoV1beta1SSOEmailDomainValidationStatus = "STATUS_VERIFIED"
+)
+
 // Defines values for CastaiUsersV1beta1OrganizationType.
 const (
 	CastaiUsersV1beta1OrganizationTypeORGANIZATIONTYPECHILD      CastaiUsersV1beta1OrganizationType = "ORGANIZATION_TYPE_CHILD"
@@ -1334,6 +1343,14 @@ const (
 	ExternalClusterAPITriggerResumeClusterParamsModeOPERATIONMODEUNSPECIFIED ExternalClusterAPITriggerResumeClusterParamsMode = "OPERATION_MODE_UNSPECIFIED"
 )
 
+// Defines values for UsersAPILeaveOrganizationParamsProduct.
+const (
+	UsersAPILeaveOrganizationParamsProductPRODUCTTYPECASTAI      UsersAPILeaveOrganizationParamsProduct = "PRODUCT_TYPE_CASTAI"
+	UsersAPILeaveOrganizationParamsProductPRODUCTTYPEKIMCHI      UsersAPILeaveOrganizationParamsProduct = "PRODUCT_TYPE_KIMCHI"
+	UsersAPILeaveOrganizationParamsProductPRODUCTTYPEPLATFORM    UsersAPILeaveOrganizationParamsProduct = "PRODUCT_TYPE_PLATFORM"
+	UsersAPILeaveOrganizationParamsProductPRODUCTTYPEUNSPECIFIED UsersAPILeaveOrganizationParamsProduct = "PRODUCT_TYPE_UNSPECIFIED"
+)
+
 // Defines values for RbacServiceAPIListRoleBindingsParamsScopeType.
 const (
 	RbacServiceAPIListRoleBindingsParamsScopeTypeCLUSTER      RbacServiceAPIListRoleBindingsParamsScopeType = "CLUSTER"
@@ -1352,6 +1369,30 @@ const (
 	RbacServiceAPIListRolesParamsTypeALL        RbacServiceAPIListRolesParamsType = "ALL"
 	RbacServiceAPIListRolesParamsTypeDEFAULT    RbacServiceAPIListRolesParamsType = "DEFAULT"
 	RbacServiceAPIListRolesParamsTypeENTERPRISE RbacServiceAPIListRolesParamsType = "ENTERPRISE"
+)
+
+// Defines values for UsersAPIRemoveOrganizationUsersParamsProduct.
+const (
+	UsersAPIRemoveOrganizationUsersParamsProductPRODUCTTYPECASTAI      UsersAPIRemoveOrganizationUsersParamsProduct = "PRODUCT_TYPE_CASTAI"
+	UsersAPIRemoveOrganizationUsersParamsProductPRODUCTTYPEKIMCHI      UsersAPIRemoveOrganizationUsersParamsProduct = "PRODUCT_TYPE_KIMCHI"
+	UsersAPIRemoveOrganizationUsersParamsProductPRODUCTTYPEPLATFORM    UsersAPIRemoveOrganizationUsersParamsProduct = "PRODUCT_TYPE_PLATFORM"
+	UsersAPIRemoveOrganizationUsersParamsProductPRODUCTTYPEUNSPECIFIED UsersAPIRemoveOrganizationUsersParamsProduct = "PRODUCT_TYPE_UNSPECIFIED"
+)
+
+// Defines values for UsersAPIListOrganizationUsersParamsProduct.
+const (
+	UsersAPIListOrganizationUsersParamsProductPRODUCTTYPECASTAI      UsersAPIListOrganizationUsersParamsProduct = "PRODUCT_TYPE_CASTAI"
+	UsersAPIListOrganizationUsersParamsProductPRODUCTTYPEKIMCHI      UsersAPIListOrganizationUsersParamsProduct = "PRODUCT_TYPE_KIMCHI"
+	UsersAPIListOrganizationUsersParamsProductPRODUCTTYPEPLATFORM    UsersAPIListOrganizationUsersParamsProduct = "PRODUCT_TYPE_PLATFORM"
+	UsersAPIListOrganizationUsersParamsProductPRODUCTTYPEUNSPECIFIED UsersAPIListOrganizationUsersParamsProduct = "PRODUCT_TYPE_UNSPECIFIED"
+)
+
+// Defines values for UsersAPIRemoveUserFromOrganizationParamsProduct.
+const (
+	UsersAPIRemoveUserFromOrganizationParamsProductPRODUCTTYPECASTAI      UsersAPIRemoveUserFromOrganizationParamsProduct = "PRODUCT_TYPE_CASTAI"
+	UsersAPIRemoveUserFromOrganizationParamsProductPRODUCTTYPEKIMCHI      UsersAPIRemoveUserFromOrganizationParamsProduct = "PRODUCT_TYPE_KIMCHI"
+	UsersAPIRemoveUserFromOrganizationParamsProductPRODUCTTYPEPLATFORM    UsersAPIRemoveUserFromOrganizationParamsProduct = "PRODUCT_TYPE_PLATFORM"
+	UsersAPIRemoveUserFromOrganizationParamsProductPRODUCTTYPEUNSPECIFIED UsersAPIRemoveUserFromOrganizationParamsProduct = "PRODUCT_TYPE_UNSPECIFIED"
 )
 
 // Defines values for CommitmentsAPIImportAzureReservationsParamsBehaviour.
@@ -1735,9 +1776,13 @@ type CastaiAuthtokenV1beta1AuthToken struct {
 	// OrganizationId organization_id is the id of the organization this token belongs to.
 	OrganizationId *string `json:"organizationId,omitempty"`
 
-	// Readonly TODO: we need to think how to migrate away from this flag.
-	// whether token has readonly permissions.
-	Readonly bool `json:"readonly"`
+	// Product ProductType represents which product a category belongs to.
+	Product *CastaiRbacV1beta1ProductType `json:"product,omitempty"`
+
+	// Readonly Deprecated: not used anymore. Authorization is evaluated from the subject's RBAC
+	// policies; this flag is ignored. Scheduled for removal.
+	// Deprecated:
+	Readonly *bool `json:"readonly,omitempty"`
 
 	// Token (read only, visible once on creation) actual token used to authenticate via api.
 	Token *string `json:"token"`
@@ -1834,7 +1879,7 @@ type CastaiAutoscalerV1beta1RebalancingOptions struct {
 	// Deprecated:
 	KeepDrainTimeoutNodes *bool `json:"keepDrainTimeoutNodes"`
 
-	// MaxSimultaneousDrains Number of nodes to drain simultaniously.
+	// MaxSimultaneousDrains Number of nodes to drain simultaneously.
 	// when unspecified, defaults to unlimited.
 	MaxSimultaneousDrains *int32 `json:"maxSimultaneousDrains"`
 
@@ -4171,6 +4216,9 @@ type CastaiSsoV1beta1SSOConnection struct {
 	// EmailDomain EmailDomain is the email domain of the connection.
 	EmailDomain string `json:"emailDomain"`
 
+	// EmailDomains EmailDomains holds the email-domain claim validation details for the connection's domains.
+	EmailDomains *[]CastaiSsoV1beta1SSOEmailDomainValidation `json:"emailDomains,omitempty"`
+
 	// Error Error is the error message of the connection.
 	Error *string `json:"error,omitempty"`
 
@@ -4211,6 +4259,51 @@ type CastaiSsoV1beta1SSOConnection struct {
 //   - STATUS_INACTIVE: StatusInactive is the inactive status.
 //   - STATUS_FAILED: StatusFailed is the failed status.
 type CastaiSsoV1beta1SSOConnectionStatus string
+
+// CastaiSsoV1beta1SSOEmailDomainTxtRecord SSOEmailDomainTxtRecord represents the DNS TXT record to publish for email-domain verification.
+type CastaiSsoV1beta1SSOEmailDomainTxtRecord struct {
+	// Name Name is the DNS TXT record name.
+	Name *string `json:"name,omitempty"`
+
+	// Value Value is the DNS TXT record value carrying the verification secret.
+	Value *string `json:"value,omitempty"`
+}
+
+// CastaiSsoV1beta1SSOEmailDomainValidation SSOEmailDomainValidation represents the verification state of a claimed SSO connection email domain.
+type CastaiSsoV1beta1SSOEmailDomainValidation struct {
+	// Domain Domain is the claimed email domain.
+	Domain *string `json:"domain,omitempty"`
+
+	// LastCheckedAt LastCheckedAt is the time the domain was last checked for the verification TXT record.
+	LastCheckedAt *time.Time `json:"lastCheckedAt,omitempty"`
+
+	// NextRetryAt NextRetryAt is the earliest time the next verification check may run.
+	NextRetryAt *time.Time `json:"nextRetryAt,omitempty"`
+
+	// Status Status is the verification status of the email-domain claim.
+	//
+	//  - STATUS_UNKNOWN: StatusUnknown is the default status.
+	//  - STATUS_PENDING: StatusPending means the claim waits for the verification TXT record.
+	//  - STATUS_VERIFIED: StatusVerified means the claim was verified.
+	//  - STATUS_EXPIRED: StatusExpired means the pending claim expired before verification.
+	//  - STATUS_DENIED: StatusDenied means the claim was denied (domain taken by another connection).
+	Status *CastaiSsoV1beta1SSOEmailDomainValidationStatus `json:"status,omitempty"`
+
+	// TxtRecord SSOEmailDomainTxtRecord represents the DNS TXT record to publish for email-domain verification.
+	TxtRecord *CastaiSsoV1beta1SSOEmailDomainTxtRecord `json:"txtRecord,omitempty"`
+
+	// VerifiedAt VerifiedAt is the time the domain was verified.
+	VerifiedAt *time.Time `json:"verifiedAt,omitempty"`
+}
+
+// CastaiSsoV1beta1SSOEmailDomainValidationStatus Status is the verification status of the email-domain claim.
+//
+//   - STATUS_UNKNOWN: StatusUnknown is the default status.
+//   - STATUS_PENDING: StatusPending means the claim waits for the verification TXT record.
+//   - STATUS_VERIFIED: StatusVerified means the claim was verified.
+//   - STATUS_EXPIRED: StatusExpired means the pending claim expired before verification.
+//   - STATUS_DENIED: StatusDenied means the claim was denied (domain taken by another connection).
+type CastaiSsoV1beta1SSOEmailDomainValidationStatus string
 
 // CastaiSsoV1beta1SetSyncForSSOConnectionResponse defines model for castai.sso.v1beta1.SetSyncForSSOConnectionResponse.
 type CastaiSsoV1beta1SetSyncForSSOConnectionResponse struct {
@@ -4359,6 +4452,9 @@ type CastaiUsersV1beta1Membership struct {
 	CreatedAt *time.Time                    `json:"createdAt,omitempty"`
 	Groups    *[]CastaiUsersV1beta1GroupRef `json:"groups,omitempty"`
 	LoginAt   *time.Time                    `json:"loginAt,omitempty"`
+
+	// Products Products the member has access to in the organization.
+	Products *[]CastaiRbacV1beta1ProductType `json:"products,omitempty"`
 	// Deprecated:
 	Role *interface{} `json:"role,omitempty"`
 
@@ -6438,6 +6534,10 @@ type ExternalclusterV1GPUConfig struct {
 	// Mps MPS configures Multi-Process Service sharing strategy on NVIDIA GPUs.
 	Mps *ExternalclusterV1MPS `json:"mps,omitempty"`
 
+	// NvidiaDraDriver Disable the NVIDIA kubelet device plugin in favor of the NVIDIA DRA driver.
+	// Required for DRA on Bottlerocket.
+	NvidiaDraDriver *bool `json:"nvidiaDraDriver,omitempty"`
+
 	// TimeSharing GPUTimeSharing configures sharing strategy by splitting time of single GPU to several processes.
 	TimeSharing *ExternalclusterV1GPUTimeSharing `json:"timeSharing,omitempty"`
 
@@ -6538,7 +6638,9 @@ type ExternalclusterV1HttpProxyConfig struct {
 	NoProxy    *[]string `json:"noProxy,omitempty"`
 }
 
-// ExternalclusterV1ImpersonationServiceAccountRequest defines model for externalcluster.v1.ImpersonationServiceAccountRequest.
+// ExternalclusterV1ImpersonationServiceAccountRequest ImpersonationServiceAccountRequest is the request message for creating the organization-level service account used for cloud identity
+// impersonation (workload identity federation for AKS, service account impersonation for GKE)
+// Calls to this endpoint can produce the same service account and the service account can be shared between clusters.
 type ExternalclusterV1ImpersonationServiceAccountRequest struct {
 	Provider *string `json:"provider,omitempty"`
 }
@@ -7102,11 +7204,20 @@ type ExternalclusterV1UpdateEKSClusterParams struct {
 
 // ExternalclusterV1UpdateGKEClusterParams UpdateGKEClusterParams defines updatable GKE cluster configuration.
 type ExternalclusterV1UpdateGKEClusterParams struct {
-	// GkeSaImpersonate service account email to impersonate.
+	// CastServiceAccountEmail CAST AI-side service account email used as the impersonation source
+	// (the per-org jumper service account whose email is returned by ImpersonationServiceAccount).
+	CastServiceAccountEmail *string `json:"castServiceAccountEmail,omitempty"`
+
+	// GkeSaImpersonate Deprecated. Use target_service_account_email instead.
 	GkeSaImpersonate *string `json:"gkeSaImpersonate,omitempty"`
 
-	// ProjectId GCP target project where cluster runs.
+	// ProjectId Deprecated. Do not use.
 	ProjectId *string `json:"projectId,omitempty"`
+
+	// TargetServiceAccountEmail Customer-side service account email to impersonate.
+	// Setting both target_service_account_email and cast_service_account_email enables
+	// the GKE impersonation flow; gke_sa_impersonate/project_id must not be set together with these.
+	TargetServiceAccountEmail *string `json:"targetServiceAccountEmail,omitempty"`
 }
 
 // ExternalclusterV1UpdateSelfHostedWithEC2NodesParams defines model for externalcluster.v1.UpdateSelfHostedWithEC2NodesParams.
@@ -7605,6 +7716,12 @@ type NodeconfigV1GKEConfig struct {
 
 	// UseEphemeralStorageLocalSsd Flag indicating whether to use local SSD storage for the node. Defaults to false.
 	UseEphemeralStorageLocalSsd *bool `json:"useEphemeralStorageLocalSsd,omitempty"`
+
+	// VolumeAttachLimitOverride Override of the default per-node persistent volume attach limit reported by the GCE PD
+	// CSI driver via the node label node-restriction.kubernetes.io/gke-volume-attach-limit-override.
+	// Applied to every node of this node configuration. Valid range is 1-127: the driver
+	// silently ignores values outside it and falls back to the machine-type default.
+	VolumeAttachLimitOverride *int64 `json:"volumeAttachLimitOverride"`
 
 	// Zones Zones is a preferred list of zones to choose from when adding a node.
 	Zones *[]string `json:"zones,omitempty"`
@@ -13202,6 +13319,15 @@ type RbacServiceAPIListGroupsParams struct {
 // RbacServiceAPIUpdateGroupsJSONBody defines parameters for RbacServiceAPIUpdateGroups.
 type RbacServiceAPIUpdateGroupsJSONBody = []CastaiRbacV1beta1GroupUpdate
 
+// UsersAPILeaveOrganizationParams defines parameters for UsersAPILeaveOrganization.
+type UsersAPILeaveOrganizationParams struct {
+	// Product Product the leave applies to. Accepted for forward compatibility; currently not applied.
+	Product *UsersAPILeaveOrganizationParamsProduct `form:"product,omitempty" json:"product,omitempty"`
+}
+
+// UsersAPILeaveOrganizationParamsProduct defines parameters for UsersAPILeaveOrganization.
+type UsersAPILeaveOrganizationParamsProduct string
+
 // RbacServiceAPIListRoleBindingsParams defines parameters for RbacServiceAPIListRoleBindings.
 type RbacServiceAPIListRoleBindingsParams struct {
 	PageLimit *string `form:"page.limit,omitempty" json:"page.limit,omitempty"`
@@ -13304,7 +13430,13 @@ type ServiceAccountsAPIListServiceAccountKeysParams struct {
 type UsersAPIRemoveOrganizationUsersParams struct {
 	// Users Users is the list of user ids to remove.
 	Users []string `form:"users" json:"users"`
+
+	// Product Product the removal applies to. Accepted for forward compatibility; currently not applied.
+	Product *UsersAPIRemoveOrganizationUsersParamsProduct `form:"product,omitempty" json:"product,omitempty"`
 }
+
+// UsersAPIRemoveOrganizationUsersParamsProduct defines parameters for UsersAPIRemoveOrganizationUsers.
+type UsersAPIRemoveOrganizationUsersParamsProduct string
 
 // UsersAPIListOrganizationUsersParams defines parameters for UsersAPIListOrganizationUsers.
 type UsersAPIListOrganizationUsersParams struct {
@@ -13314,7 +13446,23 @@ type UsersAPIListOrganizationUsersParams struct {
 	// RoleId Filter by role ID. Multiple values can be passed as query parameters (e.g.,
 	// &role_id=x&role_id=y)
 	RoleId *[]string `form:"roleId,omitempty" json:"roleId,omitempty"`
+
+	// Product Filter by product. Only members having the given product are returned.
+	// When empty, no product filtering is applied (users of all products are returned).
+	Product *UsersAPIListOrganizationUsersParamsProduct `form:"product,omitempty" json:"product,omitempty"`
 }
+
+// UsersAPIListOrganizationUsersParamsProduct defines parameters for UsersAPIListOrganizationUsers.
+type UsersAPIListOrganizationUsersParamsProduct string
+
+// UsersAPIRemoveUserFromOrganizationParams defines parameters for UsersAPIRemoveUserFromOrganization.
+type UsersAPIRemoveUserFromOrganizationParams struct {
+	// Product Product the removal applies to. Accepted for forward compatibility; currently not applied.
+	Product *UsersAPIRemoveUserFromOrganizationParamsProduct `form:"product,omitempty" json:"product,omitempty"`
+}
+
+// UsersAPIRemoveUserFromOrganizationParamsProduct defines parameters for UsersAPIRemoveUserFromOrganization.
+type UsersAPIRemoveUserFromOrganizationParamsProduct string
 
 // ScheduledRebalancingAPIUpdateRebalancingScheduleParams defines parameters for ScheduledRebalancingAPIUpdateRebalancingSchedule.
 type ScheduledRebalancingAPIUpdateRebalancingScheduleParams struct {

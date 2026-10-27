@@ -58,3 +58,12 @@ Optional:
 - `create` (String)
 - `delete` (String)
 - `update` (String)
+
+## Importing
+
+Importing is supported using the following syntax:
+
+```shell
+# Import EKS cluster by specifying the CAST AI cluster ID.
+terraform import castai_eks_cluster.this e3daba12-2b5f-4c2e-9d3a-c7e91f2b8a11
+```
