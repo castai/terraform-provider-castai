@@ -1,6 +1,6 @@
 module "castai-aks-cluster" {
   source  = "castai/aks/castai"
-  version = "~> 12.0"
+  version = "~> 14.0"
 
   api_url                = var.castai_api_url
   castai_api_token       = var.castai_api_token
@@ -59,6 +59,9 @@ module "castai-aks-cluster" {
       is_enabled         = true
       should_taint       = true
       clm_enabled        = true
+
+      # https://docs.cast.ai/docs/clm-reference-traffic-control
+      clm_networking_mode = "tc"
 
       constraints = {
         instance_families = {

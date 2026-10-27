@@ -3,7 +3,7 @@ data "aws_caller_identity" "current" {}
 
 module "castai-eks-cluster" {
   source  = "castai/eks-cluster/castai"
-  version = "~> 15.0"
+  version = "~> 16.0"
 
   api_url                = var.castai_api_url
   castai_api_token       = var.castai_api_token
@@ -66,6 +66,10 @@ module "castai-eks-cluster" {
       is_enabled         = true
       should_taint       = true
       clm_enabled        = true
+
+      # https://docs.cast.ai/docs/clm-reference-aws-vpc-cni
+      clm_networking_mode = "cni"
+      # clm_networking_mode = "tc" # if you prefer the 'TC path' from documentation
 
       constraints = {
         on_demand          = true
