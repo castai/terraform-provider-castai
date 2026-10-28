@@ -181,22 +181,11 @@ func resourceCastaiGKEClusterRead(ctx context.Context, data *schema.ResourceData
 
 	if resp.JSON200.CredentialsId != nil && *resp.JSON200.CredentialsId != data.Get(FieldClusterCredentialsId) {
 		_, usesLegacyCredentials := data.GetOk(FieldGKEClusterCredentials)
-		_, hasTargetEmail := data.GetOk(FieldGKECredentialsTargetServiceAccountEmail)
-		_, hasCastEmail := data.GetOk(FieldGKECredentialsCastaiServiceAccountEmail)
 		if usesLegacyCredentials {
 			log.Printf("[WARN] Drift in credentials from state (%q) and in API (%q), resetting credentials JSON to force re-applying credentials from configuration",
 				data.Get(FieldClusterCredentialsId), *resp.JSON200.CredentialsId)
 			if err := data.Set(FieldGKEClusterCredentials, "credentials-drift-detected-force-apply"); err != nil {
 				return diag.FromErr(fmt.Errorf("setting client ID: %w", err))
-			}
-		} else if hasTargetEmail || hasCastEmail {
-			log.Printf("[WARN] Drift in credentials id from state (%q) and in API (%q), resetting impersonation service account emails to force re-applying credentials from configuration",
-				data.Get(FieldClusterCredentialsId), *resp.JSON200.CredentialsId)
-			if err := data.Set(FieldGKECredentialsTargetServiceAccountEmail, "credentials-drift-detected-force-apply"); err != nil {
-				return diag.FromErr(fmt.Errorf("setting target service account: %w", err))
-			}
-			if err := data.Set(FieldGKECredentialsCastaiServiceAccountEmail, "credentials-drift-detected-force-apply"); err != nil {
-				return diag.FromErr(fmt.Errorf("setting castai service account: %w", err))
 			}
 		}
 	}
@@ -217,15 +206,14 @@ func resourceCastaiGKEClusterRead(ctx context.Context, data *schema.ResourceData
 		if err := data.Set(FieldGKEClusterName, toString(GKE.ClusterName)); err != nil {
 			return diag.FromErr(fmt.Errorf("setting cluster name: %w", err))
 		}
-		if apiTarget := toString(GKE.ClientServiceAccount); apiTarget != "" {
-			if err := data.Set(FieldGKECredentialsTargetServiceAccountEmail, apiTarget); err != nil {
-				return diag.FromErr(fmt.Errorf("setting target service account: %w", err))
-			}
+		// TargetServiceAccountEmail and CastServiceAccountEmail echo the values
+		// sent to UpdateCluster, so setting them unconditionally (including empty)
+		// surfaces drift when a previous update never landed.
+		if err := data.Set(FieldGKECredentialsTargetServiceAccountEmail, toString(GKE.TargetServiceAccountEmail)); err != nil {
+			return diag.FromErr(fmt.Errorf("setting target service account: %w", err))
 		}
-		if apiCast := toString(GKE.CastServiceAccount); apiCast != "" {
-			if err := data.Set(FieldGKECredentialsCastaiServiceAccountEmail, apiCast); err != nil {
-				return diag.FromErr(fmt.Errorf("setting castai service account: %w", err))
-			}
+		if err := data.Set(FieldGKECredentialsCastaiServiceAccountEmail, toString(GKE.CastServiceAccountEmail)); err != nil {
+			return diag.FromErr(fmt.Errorf("setting castai service account: %w", err))
 		}
 	}
 

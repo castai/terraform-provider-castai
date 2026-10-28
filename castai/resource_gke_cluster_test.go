@@ -76,11 +76,13 @@ func TestGKEClusterResourceReadContext(t *testing.T) {
 		r.Nil(result)
 		r.False(result.HasError())
 		r.Equal(`ID = b6bfc074-a267-400f-b8f1-db0850c36gke
+castai_service_account_email = 
 credentials_id = 9b8d0456-177b-4a3d-b162-e68030d65GKE
 location = eu-central-1
 name = gke-cluster
 organization_id = 2836f775-aaaa-eeee-bbbb-3d3c29512GKE
 project_id = project-id
+target_service_account_email = 
 Tainted = false
 `, data.State().String())
 	})
@@ -484,7 +486,7 @@ func TestGKEClusterResourceCreate(t *testing.T) {
 		FieldGKECredentialsCastaiServiceAccountEmail: castSA,
 	}
 	clusterBody := func(clientSA string) string {
-		return fmt.Sprintf(`{"id":%q,"status":"ready","agentStatus":"online","organizationId":"org","credentialsId":"cid","gke":{"clusterName":"cluster","region":"europe-central2","location":"europe-central2-a","projectId":"project","clientServiceAccount":%q}}`, clusterID, clientSA)
+		return fmt.Sprintf(`{"id":%q,"status":"ready","agentStatus":"online","organizationId":"org","credentialsId":"cid","gke":{"clusterName":"cluster","region":"europe-central2","location":"europe-central2-a","projectId":"project","targetServiceAccountEmail":%q}}`, clusterID, clientSA)
 	}
 
 	registerClient := func(mockClient *mock_sdk.MockClientInterface) {
@@ -646,7 +648,7 @@ func TestGKEClusterResourceUpdateCredentials(t *testing.T) {
 					Body:       io.NopCloser(bytes.NewReader([]byte(`{"id":"` + clusterID + `","credentialsId":"` + tt.updateCredentialsID + `"}`))),
 					Header:     map[string][]string{"Content-Type": {"json"}},
 				}, nil)
-			clusterBody := fmt.Sprintf(`{"id":%q,"status":"ready","agentStatus":"online","organizationId":"org","credentialsId":%q,"gke":{"clusterName":"cluster","region":"europe-central2","location":"europe-central2-a","projectId":"project","clientServiceAccount":%q}}`, clusterID, tt.updateCredentialsID, tt.apiClientSA)
+			clusterBody := fmt.Sprintf(`{"id":%q,"status":"ready","agentStatus":"online","organizationId":"org","credentialsId":%q,"gke":{"clusterName":"cluster","region":"europe-central2","location":"europe-central2-a","projectId":"project","targetServiceAccountEmail":%q}}`, clusterID, tt.updateCredentialsID, tt.apiClientSA)
 			mockClient.EXPECT().
 				ExternalClusterAPIGetCluster(gomock.Any(), clusterID).
 				Return(&http.Response{
@@ -684,32 +686,32 @@ func TestGKEClusterResourceCredentialsDrift(t *testing.T) {
 		wantCast   string
 	}{
 		{
-			name:       "impersonation credentials_id drift forces re-apply of service account emails",
+			name:       "impersonation credentials_id drift with unset API emails clears state emails",
 			attributes: impersonationAttrs,
-			apiBody:    `{"credentialsId":"remote-cid"}`,
-			wantTarget: "credentials-drift-detected-force-apply",
-			wantCast:   "credentials-drift-detected-force-apply",
+			apiBody:    `{"credentialsId":"remote-cid","gke":{"clusterName":"cluster","region":"europe-central2","location":"europe-central2-a","projectId":"project"}}`,
+			wantTarget: "",
+			wantCast:   "",
 		},
 		{
-			name:       "impersonation drift with emails already in API keeps mirrored values",
+			name:       "impersonation emails mirrored from API override state",
 			attributes: impersonationAttrs,
-			apiBody:    `{"credentialsId":"remote-cid","gke":{"clientServiceAccount":"api-sa@project.iam.gserviceaccount.com","castServiceAccount":"api-cast@cast-project.iam.gserviceaccount.com"}}`,
+			apiBody:    `{"credentialsId":"remote-cid","gke":{"targetServiceAccountEmail":"api-sa@project.iam.gserviceaccount.com","castServiceAccountEmail":"api-cast@cast-project.iam.gserviceaccount.com"}}`,
 			wantTarget: "api-sa@project.iam.gserviceaccount.com",
 			wantCast:   "api-cast@cast-project.iam.gserviceaccount.com",
 		},
 		{
-			name:       "impersonation drift surfaces target_service_account_email from API",
+			name:       "impersonation target email mirrored from API",
 			attributes: impersonationAttrs,
-			apiBody:    `{"credentialsId":"local-cid","gke":{"clientServiceAccount":"api-sa@project.iam.gserviceaccount.com"}}`,
+			apiBody:    `{"credentialsId":"local-cid","gke":{"targetServiceAccountEmail":"api-sa@project.iam.gserviceaccount.com"}}`,
 			wantTarget: "api-sa@project.iam.gserviceaccount.com",
-			wantCast:   "cast-sa@cast-project.iam.gserviceaccount.com",
+			wantCast:   "",
 		},
 		{
-			name:       "impersonation no drift keeps target_service_account_email",
+			name:       "impersonation matching API echo keeps state emails",
 			attributes: impersonationAttrs,
-			apiBody:    `{"credentialsId":"local-cid","gke":{"clientServiceAccount":"cfg-sa@project.iam.gserviceaccount.com"}}`,
+			apiBody:    `{"credentialsId":"local-cid","gke":{"targetServiceAccountEmail":"cfg-sa@project.iam.gserviceaccount.com"}}`,
 			wantTarget: "cfg-sa@project.iam.gserviceaccount.com",
-			wantCast:   "cast-sa@cast-project.iam.gserviceaccount.com",
+			wantCast:   "",
 		},
 	}
 

@@ -6504,7 +6504,16 @@ type ExternalclusterV1GCPNodeConfigReservationAffinity struct {
 
 // ExternalclusterV1GKEClusterParams GKEClusterParams defines GKE-specific arguments.
 type ExternalclusterV1GKEClusterParams struct {
-	CastServiceAccount   *string `json:"castServiceAccount,omitempty"`
+	// CastServiceAccount CAST service account.
+	// Deprecated. Use cast_service_account_email instead.
+	CastServiceAccount *string `json:"castServiceAccount,omitempty"`
+
+	// CastServiceAccountEmail CAST AI-side service account email used as the impersonation source (per-org jumper SA). Same value as the UpdateCluster field.
+	// Omitted when the cluster is not onboarded with GKE impersonation, or when the binding predates tracking of this value.
+	CastServiceAccountEmail *string `json:"castServiceAccountEmail"`
+
+	// ClientServiceAccount Client service account.
+	// Deprecated. Use target_service_account_email instead.
 	ClientServiceAccount *string `json:"clientServiceAccount,omitempty"`
 
 	// ClusterName Name of the cluster.
@@ -6521,6 +6530,10 @@ type ExternalclusterV1GKEClusterParams struct {
 
 	// Region Region of the cluster.
 	Region *string `json:"region,omitempty"`
+
+	// TargetServiceAccountEmail Customer-side service account email impersonated by CAST AI. Same value as the UpdateCluster field.
+	// Omitted when the cluster is not onboarded with GKE impersonation.
+	TargetServiceAccountEmail *string `json:"targetServiceAccountEmail"`
 }
 
 // ExternalclusterV1GKECreateSAResponse defines model for externalcluster.v1.GKECreateSAResponse.
