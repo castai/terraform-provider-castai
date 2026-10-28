@@ -19,6 +19,9 @@ const (
 	FieldGKEClusterProjectId   = "project_id"
 	FieldGKEClusterLocation    = "location"
 	FieldGKEClusterCredentials = "credentials_json"
+
+	FieldGKECredentialsTargetServiceAccountEmail = "target_service_account_email"
+	FieldGKECredentialsCastaiServiceAccountEmail = "castai_service_account_email"
 )
 
 func resourceGKECluster() *schema.Resource {
@@ -31,7 +34,7 @@ func resourceGKECluster() *schema.Resource {
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(5 * time.Minute),
-			Update: schema.DefaultTimeout(1 * time.Minute),
+			Update: schema.DefaultTimeout(10 * time.Minute),
 			Delete: schema.DefaultTimeout(15 * time.Minute),
 		},
 
@@ -69,11 +72,31 @@ func resourceGKECluster() *schema.Resource {
 				Description: "CAST.AI agent cluster token",
 			},
 			FieldGKEClusterCredentials: {
-				Type:             schema.TypeString,
-				Sensitive:        true,
-				Optional:         true,
+				Type:      schema.TypeString,
+				Sensitive: true,
+				Optional:  true,
+				ConflictsWith: []string{
+					FieldGKECredentialsTargetServiceAccountEmail,
+					FieldGKECredentialsCastaiServiceAccountEmail,
+				},
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 				Description:      "GCP credentials.json from ServiceAccount with credentials for CAST AI",
+			},
+			FieldGKECredentialsTargetServiceAccountEmail: {
+				Type:             schema.TypeString,
+				Optional:         true,
+				ConflictsWith:    []string{FieldGKEClusterCredentials},
+				RequiredWith:     []string{FieldGKECredentialsCastaiServiceAccountEmail},
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
+				Description:      "Service account email in the GCP project that CAST AI impersonates",
+			},
+			FieldGKECredentialsCastaiServiceAccountEmail: {
+				Type:             schema.TypeString,
+				Optional:         true,
+				ConflictsWith:    []string{FieldGKEClusterCredentials},
+				RequiredWith:     []string{FieldGKECredentialsTargetServiceAccountEmail},
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
+				Description:      "CAST AI service account email used to access the target project",
 			},
 			FieldDeleteNodesOnDisconnect: {
 				Type:        schema.TypeBool,
@@ -127,6 +150,7 @@ func resourceCastaiGKEClusterCreate(ctx context.Context, data *schema.ResourceDa
 		return diag.FromErr(fmt.Errorf("setting cluster token: %w", err))
 	}
 	data.SetId(clusterID)
+
 	if err := updateGKEClusterSettings(ctx, data, client); err != nil {
 		return diag.FromErr(err)
 	}
@@ -156,10 +180,13 @@ func resourceCastaiGKEClusterRead(ctx context.Context, data *schema.ResourceData
 	}
 
 	if resp.JSON200.CredentialsId != nil && *resp.JSON200.CredentialsId != data.Get(FieldClusterCredentialsId) {
-		log.Printf("[WARN] Drift in credentials from state (%q) and in API (%q), resetting credentials JSON to force re-applying credentials from configuration",
-			data.Get(FieldClusterCredentialsId), *resp.JSON200.CredentialsId)
-		if err := data.Set(FieldGKEClusterCredentials, "credentials-drift-detected-force-apply"); err != nil {
-			return diag.FromErr(fmt.Errorf("setting client ID: %w", err))
+		_, usesLegacyCredentials := data.GetOk(FieldGKEClusterCredentials)
+		if usesLegacyCredentials {
+			log.Printf("[WARN] Drift in credentials from state (%q) and in API (%q), resetting credentials JSON to force re-applying credentials from configuration",
+				data.Get(FieldClusterCredentialsId), *resp.JSON200.CredentialsId)
+			if err := data.Set(FieldGKEClusterCredentials, "credentials-drift-detected-force-apply"); err != nil {
+				return diag.FromErr(fmt.Errorf("setting client ID: %w", err))
+			}
 		}
 	}
 
@@ -179,6 +206,15 @@ func resourceCastaiGKEClusterRead(ctx context.Context, data *schema.ResourceData
 		if err := data.Set(FieldGKEClusterName, toString(GKE.ClusterName)); err != nil {
 			return diag.FromErr(fmt.Errorf("setting cluster name: %w", err))
 		}
+		// TargetServiceAccountEmail and CastServiceAccountEmail echo the values
+		// sent to UpdateCluster, so setting them unconditionally (including empty)
+		// surfaces drift when a previous update never landed.
+		if err := data.Set(FieldGKECredentialsTargetServiceAccountEmail, toString(GKE.TargetServiceAccountEmail)); err != nil {
+			return diag.FromErr(fmt.Errorf("setting target service account: %w", err))
+		}
+		if err := data.Set(FieldGKECredentialsCastaiServiceAccountEmail, toString(GKE.CastServiceAccountEmail)); err != nil {
+			return diag.FromErr(fmt.Errorf("setting castai service account: %w", err))
+		}
 	}
 
 	return nil
@@ -197,6 +233,8 @@ func resourceCastaiGKEClusterUpdate(ctx context.Context, data *schema.ResourceDa
 func updateGKEClusterSettings(ctx context.Context, data *schema.ResourceData, client sdk.ClientWithResponsesInterface) error {
 	if !data.HasChanges(
 		FieldGKEClusterCredentials,
+		FieldGKECredentialsTargetServiceAccountEmail,
+		FieldGKECredentialsCastaiServiceAccountEmail,
 		FieldClusterCredentialsId,
 	) {
 		log.Printf("[INFO] Nothing to update in cluster setttings.")
@@ -206,13 +244,21 @@ func updateGKEClusterSettings(ctx context.Context, data *schema.ResourceData, cl
 	log.Printf("[INFO] Updating cluster settings.")
 
 	req := sdk.ExternalClusterAPIUpdateClusterJSONRequestBody{}
-
-	credentialsJSON, ok := data.GetOk(FieldGKEClusterCredentials)
-	if ok {
+	if credentialsJSON, ok := data.GetOk(FieldGKEClusterCredentials); ok {
 		req.Credentials = toPtr(credentialsJSON.(string))
 	}
-
+	req.Gke = &sdk.ExternalclusterV1UpdateGKEClusterParams{
+		TargetServiceAccountEmail: getOkString(data, FieldGKECredentialsTargetServiceAccountEmail),
+		CastServiceAccountEmail:   getOkString(data, FieldGKECredentialsCastaiServiceAccountEmail),
+	}
 	return resourceCastaiClusterUpdate(ctx, client, data, &req)
+}
+
+func getOkString(data *schema.ResourceData, field string) *string {
+	if v, ok := data.GetOk(field); ok {
+		return toPtr(v.(string))
+	}
+	return nil
 }
 
 func resourceCastaiGKEClusterDelete(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {

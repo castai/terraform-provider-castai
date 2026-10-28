@@ -12,12 +12,18 @@ GKE cluster resource allows connecting an existing GKE cluster to CAST AI.
 ## Example Usage
 
 ```terraform
+data "castai_impersonation_service_account" "this" {
+  provider_type = "gke"
+}
+
 resource "castai_gke_cluster" "this" {
   project_id                 = var.project_id
   location                   = module.gke.location
   name                       = var.gke_cluster_name
   delete_nodes_on_disconnect = var.delete_nodes_on_disconnect
-  credentials_json           = var.gke_credentials
+
+  target_service_account_email = google_service_account.target.email
+  castai_service_account_email = data.castai_impersonation_service_account.this.email
 }
 ```
 
@@ -32,8 +38,10 @@ resource "castai_gke_cluster" "this" {
 
 ### Optional
 
+- `castai_service_account_email` (String) CAST AI service account email used to access the target project
 - `credentials_json` (String, Sensitive) GCP credentials.json from ServiceAccount with credentials for CAST AI
 - `delete_nodes_on_disconnect` (Boolean) Should CAST AI remove nodes managed by CAST.AI on disconnect
+- `target_service_account_email` (String) Service account email in the GCP project that CAST AI impersonates
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
 ### Read-Only
@@ -51,3 +59,5 @@ Optional:
 - `create` (String)
 - `delete` (String)
 - `update` (String)
+
+~> **NOTE** Clearing `target_service_account_email` and `castai_service_account_email` does not disable an already configured impersonation; the existing cluster credentials remain active on the CAST AI side.
