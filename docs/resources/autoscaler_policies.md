@@ -112,9 +112,12 @@ Optional:
 <a id="nestedblock--cluster_limits--cpu"></a>
 ### Nested Schema for `cluster_limits.cpu`
 
+Required:
+
+- `max_cores` (Number) Maximum vCPUs allowed cluster-wide. Required when the cpu block is declared.
+
 Optional:
 
-- `max_cores` (Number) Maximum vCPUs allowed cluster-wide.
 - `min_cores` (Number) Minimum vCPUs allowed cluster-wide. Matches the server default when omitted.
 
 
