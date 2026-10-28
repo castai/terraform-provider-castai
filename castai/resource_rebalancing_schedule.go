@@ -110,6 +110,13 @@ func resourceRebalancingSchedule() *schema.Resource {
 							ValidateDiagFunc: validation.ToDiagFunc(validation.IntAtLeast(0)),
 							Description:      "Maximum number of nodes that will be selected for rebalancing. 0 means all nodes in the cluster can be selected.",
 						},
+						"targeted_nodes_percentage": {
+							Type:             schema.TypeInt,
+							Optional:         true,
+							ConflictsWith:    []string{"launch_configuration.0.num_targeted_nodes"},
+							ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(1, 100)),
+							Description:      "Maximum percentage (1-100) of the nodes eligible for selection (matching the launch configuration selector) that will be selected for rebalancing. Mutually exclusive with num_targeted_nodes.",
+						},
 						"rebalancing_min_nodes": {
 							Type:             schema.TypeInt,
 							Optional:         true,
@@ -479,8 +486,9 @@ func stateToSchedule(d *schema.ResourceData) (*sdk.ScheduledrebalancingV1Rebalan
 
 		targetAlgorithm := sdk.ScheduledrebalancingV1TargetNodeSelectionAlgorithm(*readOptionalValue[string](launchConfigurationData, "target_node_selection_algorithm"))
 		result.LaunchConfiguration = sdk.ScheduledrebalancingV1LaunchConfiguration{
-			NodeTtlSeconds:   readOptionalNumber[int, int32](launchConfigurationData, "node_ttl_seconds"),
-			NumTargetedNodes: readOptionalNumber[int, int32](launchConfigurationData, "num_targeted_nodes"),
+			NodeTtlSeconds:          readOptionalNumber[int, int32](launchConfigurationData, "node_ttl_seconds"),
+			NumTargetedNodes:        readOptionalNumber[int, int32](launchConfigurationData, "num_targeted_nodes"),
+			TargetedNodesPercentage: optionalLaunchConfigInt32(d, launchConfigurationData, "targeted_nodes_percentage"),
 			RebalancingOptions: &sdk.CastaiAutoscalerV1beta1RebalancingOptions{
 				MinNodes:              readOptionalNumber[int, int32](launchConfigurationData, "rebalancing_min_nodes"),
 				KeepDrainTimeoutNodes: optionalLaunchConfigBool(d, launchConfigurationData, "keep_drain_timeout_nodes"), //nolint:staticcheck // SA1019: deprecated but still sent for backward compatibility
@@ -514,8 +522,9 @@ func scheduleToState(schedule *sdk.ScheduledrebalancingV1RebalancingSchedule, d 
 	}
 
 	launchConfig := map[string]any{
-		"node_ttl_seconds":   schedule.LaunchConfiguration.NodeTtlSeconds,
-		"num_targeted_nodes": schedule.LaunchConfiguration.NumTargetedNodes,
+		"node_ttl_seconds":          schedule.LaunchConfiguration.NodeTtlSeconds,
+		"num_targeted_nodes":        schedule.LaunchConfiguration.NumTargetedNodes,
+		"targeted_nodes_percentage": schedule.LaunchConfiguration.TargetedNodesPercentage,
 	}
 
 	if schedule.LaunchConfiguration.RebalancingOptions != nil {

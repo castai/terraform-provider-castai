@@ -152,6 +152,7 @@ launch_configuration.0.rebalancing_min_nodes = 2
 launch_configuration.0.selector = 
 launch_configuration.0.split_nodes_in_batches_of = 4
 launch_configuration.0.target_node_selection_algorithm = TargetNodeSelectionAlgorithmNormalizedPrice
+launch_configuration.0.targeted_nodes_percentage = 0
 name = rebalancing schedule 1
 schedule.# = 1
 schedule.0.cron = 5 * * * * *

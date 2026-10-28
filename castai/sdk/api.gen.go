@@ -9313,7 +9313,10 @@ type ScheduledrebalancingV1LaunchConfiguration struct {
 	NodeTtlSeconds *int32 `json:"nodeTtlSeconds,omitempty"`
 
 	// NumTargetedNodes Maximum number of nodes that will be selected for rebalancing.
-	NumTargetedNodes             *int32                                              `json:"numTargetedNodes,omitempty"`
+	NumTargetedNodes *int32 `json:"numTargetedNodes,omitempty"`
+
+	// TargetedNodesPercentage Maximum percentage (1-100) of the nodes eligible for selection (matching the launch configuration selector) that will be selected for rebalancing. Mutually exclusive with num_targeted_nodes; when set, it takes precedence.
+	TargetedNodesPercentage      *int32                                              `json:"targetedNodesPercentage,omitempty"`
 	RebalancingOptions           *CastaiAutoscalerV1beta1RebalancingOptions          `json:"rebalancingOptions,omitempty"`
 	Selector                     *ScheduledrebalancingV1NodeSelector                 `json:"selector,omitempty"`
 	TargetNodeSelectionAlgorithm *ScheduledrebalancingV1TargetNodeSelectionAlgorithm `json:"targetNodeSelectionAlgorithm,omitempty"`
