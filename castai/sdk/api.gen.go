@@ -3865,6 +3865,9 @@ type CastaiServiceaccountsV1beta1CreateServiceAccountRequestServiceAccount struc
 
 	// Name Name is the name of the service account.
 	Name string `json:"name"`
+
+	// Product ProductType represents which product a category belongs to.
+	Product *CastaiRbacV1beta1ProductType `json:"product,omitempty"`
 }
 
 // CastaiServiceaccountsV1beta1CreateServiceAccountResponse CreateServiceAccountResponse is the response for creating a service account.
@@ -4027,6 +4030,9 @@ type CastaiServiceaccountsV1beta1ServiceAccount struct {
 
 	// OrganizationId OrganizationID is the organization that owns the service account.
 	OrganizationId *string `json:"organizationId,omitempty"`
+
+	// Product ProductType represents which product a category belongs to.
+	Product *CastaiRbacV1beta1ProductType `json:"product,omitempty"`
 }
 
 // CastaiServiceaccountsV1beta1ServiceAccountAuthor Author is the author of the service account.
@@ -4117,6 +4123,11 @@ type CastaiSsoV1beta1CreateSSOConnection struct {
 
 	// DefaultRoleId ID of default role for new users signing up with SSO.
 	DefaultRoleId *string `json:"defaultRoleId"`
+
+	// DefaultRoles Per-product default role IDs for new users signing up with SSO.
+	// A key with an empty value explicitly opts the product out of any default role.
+	// Mutually exclusive with default_role_id: setting both is an error.
+	DefaultRoles *map[string]string `json:"defaultRoles,omitempty"`
 
 	// EmailDomain EmailDomain is the email domain of the connection.
 	EmailDomain string `json:"emailDomain"`
@@ -4218,6 +4229,10 @@ type CastaiSsoV1beta1SSOConnection struct {
 
 	// DefaultRoleId ID of default role for new users signing up with SSO.
 	DefaultRoleId *string `json:"defaultRoleId,omitempty"`
+
+	// DefaultRoles Per-product default role IDs for new users signing up with SSO.
+	// A key with an empty value explicitly opts the product out of any default role.
+	DefaultRoles *map[string]string `json:"defaultRoles,omitempty"`
 
 	// EmailDomain EmailDomain is the email domain of the connection.
 	EmailDomain string `json:"emailDomain"`
@@ -4329,6 +4344,11 @@ type CastaiSsoV1beta1UpdateSSOConnection struct {
 
 	// DefaultRoleId ID of default role for new users signing up with SSO.
 	DefaultRoleId *string `json:"defaultRoleId"`
+
+	// DefaultRoles Per-product default role IDs for new users signing up with SSO.
+	// A key with an empty value explicitly opts the product out of any default role.
+	// Mutually exclusive with default_role_id: setting both is an error.
+	DefaultRoles *map[string]string `json:"defaultRoles,omitempty"`
 
 	// EmailDomain EmailDomain is the email domain of the connection.
 	EmailDomain *string `json:"emailDomain,omitempty"`
@@ -9330,6 +9350,12 @@ type ScheduledrebalancingV1LaunchConfiguration struct {
 	RebalancingOptions           *CastaiAutoscalerV1beta1RebalancingOptions          `json:"rebalancingOptions,omitempty"`
 	Selector                     *ScheduledrebalancingV1NodeSelector                 `json:"selector,omitempty"`
 	TargetNodeSelectionAlgorithm *ScheduledrebalancingV1TargetNodeSelectionAlgorithm `json:"targetNodeSelectionAlgorithm,omitempty"`
+
+	// TargetedNodesPercentage Maximum percentage (1-100) of eligible nodes that will be selected for
+	// rebalancing. Eligible nodes are those matching the launch configuration
+	// selector and free of problematic pods. Mutually exclusive with
+	// num_targeted_nodes; when set, it takes precedence.
+	TargetedNodesPercentage *int32 `json:"targetedNodesPercentage"`
 }
 
 // ScheduledrebalancingV1ListAvailableRebalancingTZResponse defines model for scheduledrebalancing.v1.ListAvailableRebalancingTZResponse.
