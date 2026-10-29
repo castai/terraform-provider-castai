@@ -475,6 +475,7 @@ func resourceAutoscaler() *schema.Resource {
 													Type:        schema.TypeString,
 													Optional:    true,
 													Default:     "1m",
+													StateFunc:   canonicalizeDurationString,
 													Description: "configure the interval duration between Evictor operations. This property can be used to lower or raise the frequency of the Evictor's find-and-drain operations.",
 												},
 												FieldEvictorNodeGracePeriodMinutes: {
@@ -487,6 +488,7 @@ func resourceAutoscaler() *schema.Resource {
 													Type:        schema.TypeString,
 													Optional:    true,
 													Default:     "5s",
+													StateFunc:   canonicalizeDurationString,
 													Description: "configure the pod eviction failure back off interval. If pod eviction fails then Evictor will attempt to evict it again after the amount of time specified here.",
 												},
 												FieldEvictorIgnorePodDisruptionBudgets: {
@@ -992,15 +994,21 @@ func normalizePolicyDurations(policiesJSON []byte) []byte {
 }
 
 func canonicalizeEvictorDuration(evictor map[string]interface{}, field string) {
-	v, ok := evictor[field].(string)
+	if v, ok := evictor[field].(string); ok {
+		evictor[field] = canonicalizeDurationString(v)
+	}
+}
+
+func canonicalizeDurationString(v interface{}) string {
+	s, ok := v.(string)
 	if !ok {
-		return
+		return ""
 	}
-	d, err := time.ParseDuration(v)
+	d, err := time.ParseDuration(s)
 	if err != nil {
-		return
+		return s
 	}
-	evictor[field] = d.String()
+	return d.String()
 }
 
 func getChangedPolicies(ctx context.Context, data types.ResourceProvider, meta interface{}, clusterId string) ([]byte, error) {
