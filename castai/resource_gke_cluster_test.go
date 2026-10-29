@@ -768,19 +768,22 @@ func TestGKEClusterResourceCredentialsDrift(t *testing.T) {
 }
 
 // TestAccGKE_ClusterImpersonation onboards a pre-existing GKE cluster to CAST AI
-// using service account impersonation instead of a service account key.
+// using service account impersonation instead of a service account key, then
+// switches the cluster back to service account key credentials.
 //
 // Required environment variables:
 //   - CASTAI_API_TOKEN, ACCEPTANCE_TEST_ORGANIZATION_ID (testAccPreCheck)
 //   - GOOGLE_PROJECT_ID - GCP project containing the shared acceptance cluster
 //   - GOOGLE_CLUSTER_NAME - name of the pre-existing GKE cluster
 //   - GOOGLE_CLUSTER_LOCATION - zone or region of the cluster, e.g. us-central1-c
+//   - CASTAI_GCP_CREDENTIALS - service account key JSON used for the static credentials step
 func TestAccGKE_ClusterImpersonation(t *testing.T) {
 	projectID := os.Getenv("GOOGLE_PROJECT_ID")
 	clusterName := os.Getenv("GOOGLE_CLUSTER_NAME")
 	location := os.Getenv("GOOGLE_CLUSTER_LOCATION")
-	if projectID == "" || clusterName == "" || location == "" {
-		t.Skip("GOOGLE_PROJECT_ID, GOOGLE_CLUSTER_NAME and GOOGLE_CLUSTER_LOCATION must be set for this acceptance test")
+	credentialsJSON := os.Getenv("CASTAI_GCP_CREDENTIALS")
+	if projectID == "" || clusterName == "" || location == "" || credentialsJSON == "" {
+		t.Skip("GOOGLE_PROJECT_ID, GOOGLE_CLUSTER_NAME, GOOGLE_CLUSTER_LOCATION and CASTAI_GCP_CREDENTIALS must be set for this acceptance test")
 	}
 
 	rName := fmt.Sprintf("%v-gke-imp-%v", ResourcePrefix, acctest.RandString(8))
@@ -822,49 +825,29 @@ func TestAccGKE_ClusterImpersonation(t *testing.T) {
 				Config:   testAccGKEImpersonationConfig(rName, clusterName, location, projectID),
 				PlanOnly: true,
 			},
+			{
+				Config: testAccGKECredentialsConfig(rName, clusterName, location, projectID, credentialsJSON),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet(resourceName, "id"),
+					resource.TestCheckResourceAttrSet(resourceName, "credentials_id"),
+					resource.TestCheckResourceAttr(resourceName, "target_service_account_email", ""),
+					resource.TestCheckResourceAttr(resourceName, "castai_service_account_email", ""),
+				),
+			},
+			{
+				Config:   testAccGKECredentialsConfig(rName, clusterName, location, projectID, credentialsJSON),
+				PlanOnly: true,
+			},
 		},
 	})
 }
 
 func testAccGKEImpersonationConfig(rName, clusterName, location, projectID string) string {
-	return fmt.Sprintf(`
-data "castai_impersonation_service_account" "gke" {
-  provider_type = "gke"
-}
-
-data "castai_gke_user_policies" "gke" {}
-
-resource "google_service_account" "target" {
-  account_id   = "%[1]s"
-  display_name = "Terraform acceptance tests GKE impersonation target for %[2]s"
-  project      = %[4]q
-}
-
-resource "google_project_iam_custom_role" "castai_role" {
-  role_id     = "castai.tfAccGkeImp.${substr(sha1("%[1]s"), 0, 8)}"
-  title       = "Terraform acceptance tests GKE impersonation role for %[2]s"
-  description = "Role to manage GKE cluster via CAST AI"
-  permissions = toset(data.castai_gke_user_policies.gke.policy)
-  project     = %[4]q
-  stage       = "GA"
-}
-
-resource "google_project_iam_member" "castai_role_binding" {
-  project = %[4]q
-  role    = google_project_iam_custom_role.castai_role.id
-  member  = "serviceAccount:${google_service_account.target.email}"
-}
-
-resource "google_service_account_iam_member" "token_creator_binding" {
-  service_account_id = google_service_account.target.name
-  role               = "roles/iam.serviceAccountTokenCreator"
-  member             = "serviceAccount:${data.castai_impersonation_service_account.gke.email}"
-}
-
+	return ConfigCompose(testAccGKEImpersonationPrereqConfig(rName, clusterName, projectID), fmt.Sprintf(`
 resource "castai_gke_cluster" "test" {
-  project_id                 = %[4]q
-  location                   = %[3]q
-  name                       = %[2]q
+  project_id                 = %[1]q
+  location                   = %[2]q
+  name                       = %[3]q
   delete_nodes_on_disconnect = false
 
   target_service_account_email  = google_service_account.target.email
@@ -875,5 +858,55 @@ resource "castai_gke_cluster" "test" {
     google_service_account_iam_member.token_creator_binding,
   ]
 }
-`, rName, clusterName, location, projectID)
+`, projectID, location, clusterName))
+}
+
+func testAccGKECredentialsConfig(rName, clusterName, location, projectID, credentialsJSON string) string {
+	return ConfigCompose(testAccGKEImpersonationPrereqConfig(rName, clusterName, projectID), fmt.Sprintf(`
+resource "castai_gke_cluster" "test" {
+  project_id                 = %[1]q
+  location                   = %[2]q
+  name                       = %[3]q
+  delete_nodes_on_disconnect = false
+
+  credentials_json = %q
+}
+`, projectID, location, clusterName, credentialsJSON))
+}
+
+func testAccGKEImpersonationPrereqConfig(rName, clusterName, projectID string) string {
+	return fmt.Sprintf(`
+data "castai_impersonation_service_account" "gke" {
+  provider_type = "gke"
+}
+
+data "castai_gke_user_policies" "gke" {}
+
+resource "google_service_account" "target" {
+  account_id   = "%[1]s"
+  display_name = "Terraform acceptance tests GKE impersonation target for %[2]s"
+  project      = %[3]q
+}
+
+resource "google_project_iam_custom_role" "castai_role" {
+  role_id     = "castai.tfAccGkeImp.${substr(sha1("%[1]s"), 0, 8)}"
+  title       = "Terraform acceptance tests GKE impersonation role for %[2]s"
+  description = "Role to manage GKE cluster via CAST AI"
+  permissions = toset(data.castai_gke_user_policies.gke.policy)
+  project     = %[3]q
+  stage       = "GA"
+}
+
+resource "google_project_iam_member" "castai_role_binding" {
+  project = %[3]q
+  role    = google_project_iam_custom_role.castai_role.id
+  member  = "serviceAccount:${google_service_account.target.email}"
+}
+
+resource "google_service_account_iam_member" "token_creator_binding" {
+  service_account_id = google_service_account.target.name
+  role               = "roles/iam.serviceAccountTokenCreator"
+  member             = "serviceAccount:${data.castai_impersonation_service_account.gke.email}"
+}
+`, rName, clusterName, projectID)
 }
