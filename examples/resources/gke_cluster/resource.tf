@@ -3,7 +3,7 @@ data "castai_impersonation_service_account" "this" {
 }
 
 resource "google_service_account" "target" {
-  account_id   = "castai-gke"
+  account_id   = var.service_account_id
   display_name = "CAST AI GKE cluster"
   project      = var.project_id
 }
