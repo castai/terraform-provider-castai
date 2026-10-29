@@ -14079,6 +14079,7 @@ type WorkloadOptimizationAPIGetWorkloadParams struct {
 	IncludeCosts   *bool      `form:"includeCosts,omitempty" json:"includeCosts,omitempty"`
 	FromTime       *time.Time `form:"fromTime,omitempty" json:"fromTime,omitempty"`
 	ToTime         *time.Time `form:"toTime,omitempty" json:"toTime,omitempty"`
+	ScopeValue     *string    `form:"scopeValue,omitempty" json:"scopeValue,omitempty"`
 }
 
 // WorkloadOptimizationAPIGetWorkloadGPUMetricsParams defines parameters for WorkloadOptimizationAPIGetWorkloadGPUMetrics.
