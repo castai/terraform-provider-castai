@@ -1,21 +1,15 @@
-# Configure Data sources and providers required for CAST AI connection.
-locals {
-  service_account_id = var.service_account_id != "" ? var.service_account_id : "castai-gke-tf-${substr(sha1(var.cluster_name), 0, 8)}"
-}
-
-# Configure GKE cluster connection.
-module "iam-impersonate" {
-  source             = "castai/iam-impersonate/gke"
-  version            = "1.0.0"
-  service_account_id = local.service_account_id
-  cluster_region     = var.cluster_region
-  cluster_name       = var.cluster_name
-  project_id         = var.project_id
+# GCP IAM resources required for CAST AI service account impersonation.
+module "castai-gke-iam" {
+  source                = "castai/gke-iam/castai"
+  version               = "~> 0.6"
+  project_id            = var.project_id
+  gke_cluster_name      = var.cluster_name
+  authentication_method = "impersonation"
 }
 
 module "castai-gke-cluster" {
   source  = "castai/gke-cluster/castai"
-  version = "~> 11.0"
+  version = "~> 11.1"
 
   api_url                       = var.castai_api_url
   castai_api_token              = var.castai_api_token
@@ -28,8 +22,9 @@ module "castai-gke-cluster" {
   gke_cluster_name     = var.cluster_name
   gke_cluster_location = module.gke.location
 
-  gke_credentials            = "{}"
-  delete_nodes_on_disconnect = var.delete_nodes_on_disconnect
+  target_service_account_email = module.castai-gke-iam.target_service_account_email
+  castai_service_account_email = module.castai-gke-iam.castai_service_account_email
+  delete_nodes_on_disconnect   = var.delete_nodes_on_disconnect
 
   default_node_configuration_name = "default"
 
@@ -161,5 +156,5 @@ module "castai-gke-cluster" {
 
   // depends_on helps terraform with creating proper dependencies graph in case of resource creation and in this case destroy
   // module "castai-gke-cluster" has to be destroyed before module "castai-gke-iam" and "module.gke"
-  depends_on = [module.gke]
+  depends_on = [module.castai-gke-iam, module.gke]
 }
