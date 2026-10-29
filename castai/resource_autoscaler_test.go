@@ -1900,3 +1900,26 @@ func TestAutoscalerResource_NormalizePolicyDurations_InvalidJSON(t *testing.T) {
 	input := []byte("invalid json")
 	r.Equal(input, normalizePolicyDurations(input))
 }
+
+func TestAutoscalerResource_CanonicalizeDurationString(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    interface{}
+		expected string
+	}{
+		{name: "minutes form", input: "1m", expected: "1m0s"},
+		{name: "seconds form", input: "60s", expected: "1m0s"},
+		{name: "already canonical", input: "5m10s", expected: "5m10s"},
+		{name: "seconds only", input: "5s", expected: "5s"},
+		{name: "empty string", input: "", expected: ""},
+		{name: "invalid duration", input: "fast", expected: "fast"},
+		{name: "non-string", input: 42, expected: ""},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			r := require.New(t)
+			r.Equal(tt.expected, canonicalizeDurationString(tt.input))
+		})
+	}
+}
