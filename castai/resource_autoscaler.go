@@ -12,8 +12,8 @@ import (
 	"strings"
 	"time"
 
-	jsonpatch "github.com/evanphx/json-patch"
 	"github.com/cenkalti/backoff/v4"
+	jsonpatch "github.com/evanphx/json-patch"
 	"github.com/google/uuid"
 	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -72,11 +72,11 @@ const (
 func resourceAutoscaler() *schema.Resource {
 	return &schema.Resource{
 		DeprecationMessage: "Use castai_autoscaler_policies and castai_evictor instead. This resource will be removed in the next major version.",
-		ReadContext:       resourceCastaiAutoscalerRead,
-		CreateContext:     resourceCastaiAutoscalerCreate,
-		UpdateContext:     resourceCastaiAutoscalerUpdate,
-		DeleteContext:     resourceCastaiAutoscalerDelete,
-		CustomizeDiff:     resourceCastaiAutoscalerDiff,
+		ReadContext:        resourceCastaiAutoscalerRead,
+		CreateContext:      resourceCastaiAutoscalerCreate,
+		UpdateContext:      resourceCastaiAutoscalerUpdate,
+		DeleteContext:      resourceCastaiAutoscalerDelete,
+		CustomizeDiff:      resourceCastaiAutoscalerDiff,
 		Importer: &schema.ResourceImporter{
 			StateContext: autoscalerStateImporter,
 		},
@@ -475,6 +475,7 @@ func resourceAutoscaler() *schema.Resource {
 													Type:        schema.TypeString,
 													Optional:    true,
 													Default:     "1m",
+													StateFunc:   canonicalizeDurationString,
 													Description: "configure the interval duration between Evictor operations. This property can be used to lower or raise the frequency of the Evictor's find-and-drain operations.",
 												},
 												FieldEvictorNodeGracePeriodMinutes: {
@@ -487,6 +488,7 @@ func resourceAutoscaler() *schema.Resource {
 													Type:        schema.TypeString,
 													Optional:    true,
 													Default:     "5s",
+													StateFunc:   canonicalizeDurationString,
 													Description: "configure the pod eviction failure back off interval. If pod eviction fails then Evictor will attempt to evict it again after the amount of time specified here.",
 												},
 												FieldEvictorIgnorePodDisruptionBudgets: {
@@ -801,7 +803,12 @@ func getCurrentPolicies(ctx context.Context, client sdk.ClientWithResponsesInter
 
 	log.Printf("[DEBUG] Read autoscaler policies for cluster %s:\n%v\n", clusterId, string(responseBytes))
 
-	return normalizeJSON(responseBytes)
+	normalized, err := normalizeJSON(responseBytes)
+	if err != nil {
+		return nil, err
+	}
+
+	return normalizePolicyDurations(normalized), nil
 }
 
 func updateAutoscalerPolicies(ctx context.Context, data *schema.ResourceData, meta interface{}) error {
@@ -963,6 +970,47 @@ func filterVolatileFields(policiesJSON []byte) []byte {
 	return filtered
 }
 
+// normalizePolicyDurations canonicalizes Go duration strings in evictor settings so that
+// equivalent values like "1m" and "60s" compare equal. The API may return a different
+// textual form than the configuration, which otherwise produces a perpetual plan diff.
+func normalizePolicyDurations(policiesJSON []byte) []byte {
+	var policies map[string]interface{}
+	if err := json.Unmarshal(policiesJSON, &policies); err != nil {
+		return policiesJSON
+	}
+
+	if nd, ok := policies["nodeDownscaler"].(map[string]interface{}); ok {
+		if evictor, ok := nd["evictor"].(map[string]interface{}); ok {
+			canonicalizeEvictorDuration(evictor, "cycleInterval")
+			canonicalizeEvictorDuration(evictor, "podEvictionFailureBackOffInterval")
+		}
+	}
+
+	normalized, err := json.Marshal(policies)
+	if err != nil {
+		return policiesJSON
+	}
+	return normalized
+}
+
+func canonicalizeEvictorDuration(evictor map[string]interface{}, field string) {
+	if v, ok := evictor[field].(string); ok {
+		evictor[field] = canonicalizeDurationString(v)
+	}
+}
+
+func canonicalizeDurationString(v interface{}) string {
+	s, ok := v.(string)
+	if !ok {
+		return ""
+	}
+	d, err := time.ParseDuration(s)
+	if err != nil {
+		return s
+	}
+	return d.String()
+}
+
 func getChangedPolicies(ctx context.Context, data types.ResourceProvider, meta interface{}, clusterId string) ([]byte, error) {
 	policyChangesJSON, isPoliciesJSONExist := data.GetOk(FieldAutoscalerPoliciesJSON)
 	_, isPoliciesSettingsExist := data.GetOk(FieldAutoscalerSettings)
@@ -1009,7 +1057,12 @@ func getChangedPolicies(ctx context.Context, data types.ResourceProvider, meta i
 		return nil, fmt.Errorf("failed to merge policies: %v", err)
 	}
 
-	return normalizeJSON(policies)
+	normalized, err := normalizeJSON(policies)
+	if err != nil {
+		return nil, err
+	}
+
+	return normalizePolicyDurations(normalized), nil
 }
 
 func validateAutoscalerPolicyJSON() schema.SchemaValidateDiagFunc {

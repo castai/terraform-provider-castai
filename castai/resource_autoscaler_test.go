@@ -1842,3 +1842,84 @@ func TestAutoscalerResource_FilterVolatileFields_StatusFields(t *testing.T) {
 		})
 	}
 }
+
+func TestAutoscalerResource_NormalizePolicyDurations(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    string
+		expected string
+	}{
+		{
+			name:     "canonicalizes minutes form",
+			input:    `{"nodeDownscaler":{"evictor":{"cycleInterval":"1m"}}}`,
+			expected: `{"nodeDownscaler":{"evictor":{"cycleInterval":"1m0s"}}}`,
+		},
+		{
+			name:     "canonicalizes seconds form to the same result",
+			input:    `{"nodeDownscaler":{"evictor":{"cycleInterval":"60s"}}}`,
+			expected: `{"nodeDownscaler":{"evictor":{"cycleInterval":"1m0s"}}}`,
+		},
+		{
+			name:     "keeps already canonical value",
+			input:    `{"nodeDownscaler":{"evictor":{"cycleInterval":"5m10s"}}}`,
+			expected: `{"nodeDownscaler":{"evictor":{"cycleInterval":"5m10s"}}}`,
+		},
+		{
+			name:     "canonicalizes pod eviction failure back off interval",
+			input:    `{"nodeDownscaler":{"evictor":{"podEvictionFailureBackOffInterval":"1m"}}}`,
+			expected: `{"nodeDownscaler":{"evictor":{"podEvictionFailureBackOffInterval":"1m0s"}}}`,
+		},
+		{
+			name:     "leaves invalid duration untouched",
+			input:    `{"nodeDownscaler":{"evictor":{"cycleInterval":"fast"}}}`,
+			expected: `{"nodeDownscaler":{"evictor":{"cycleInterval":"fast"}}}`,
+		},
+		{
+			name:     "leaves non-duration fields untouched",
+			input:    `{"enabled":true,"nodeDownscaler":{"enabled":true,"evictor":{"enabled":true,"dryRun":false,"nodeGracePeriodMinutes":5}}}`,
+			expected: `{"enabled":true,"nodeDownscaler":{"enabled":true,"evictor":{"enabled":true,"dryRun":false,"nodeGracePeriodMinutes":5}}}`,
+		},
+		{
+			name:     "leaves policies without evictor untouched",
+			input:    `{"enabled":true,"unschedulablePods":{"enabled":true}}`,
+			expected: `{"enabled":true,"unschedulablePods":{"enabled":true}}`,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			r := require.New(t)
+			r.JSONEq(tt.expected, string(normalizePolicyDurations([]byte(tt.input))))
+		})
+	}
+}
+
+func TestAutoscalerResource_NormalizePolicyDurations_InvalidJSON(t *testing.T) {
+	r := require.New(t)
+
+	input := []byte("invalid json")
+	r.Equal(input, normalizePolicyDurations(input))
+}
+
+func TestAutoscalerResource_CanonicalizeDurationString(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    interface{}
+		expected string
+	}{
+		{name: "minutes form", input: "1m", expected: "1m0s"},
+		{name: "seconds form", input: "60s", expected: "1m0s"},
+		{name: "already canonical", input: "5m10s", expected: "5m10s"},
+		{name: "seconds only", input: "5s", expected: "5s"},
+		{name: "empty string", input: "", expected: ""},
+		{name: "invalid duration", input: "fast", expected: "fast"},
+		{name: "non-string", input: 42, expected: ""},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			r := require.New(t)
+			r.Equal(tt.expected, canonicalizeDurationString(tt.input))
+		})
+	}
+}
