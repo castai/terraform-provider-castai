@@ -15,4 +15,4 @@ description: |-
 
 {{ .SchemaMarkdown | trimspace }}
 
-~> **NOTE** Clearing `target_service_account_email` and `castai_service_account_email` does not disable an already configured impersonation; the existing cluster credentials remain active on the CAST AI side.
+~> **NOTE** Clearing `target_service_account_email` and `castai_service_account_email` does not disable an already configured impersonation; the existing cluster credentials remain active on the CAST AI side. To switch back to service account key authentication, set `credentials_json` (removing the impersonation attributes) — the stored impersonation binding is then replaced on the CAST AI side.

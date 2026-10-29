@@ -619,11 +619,21 @@ func TestGKEClusterResourceUpdateCredentials(t *testing.T) {
 			apiClientSA:         targetSA,
 		},
 		{
-			name: "update legacy sends credentials json",
+			name: "update legacy sends credentials json only",
 			raw: map[string]interface{}{
 				FieldGKEClusterCredentials: credentialsJSON,
 			},
 			updateCredentialsID: "legacy-cid",
+			wantCredentials:     credentialsJSON,
+		},
+		{
+			name: "switching to static credentials omits sticky impersonation emails from prior state",
+			raw: map[string]interface{}{
+				FieldGKEClusterCredentials:                   credentialsJSON,
+				FieldGKECredentialsTargetServiceAccountEmail: targetSA,
+				FieldGKECredentialsCastaiServiceAccountEmail: castSA,
+			},
+			updateCredentialsID: "switched-cid",
 			wantCredentials:     credentialsJSON,
 		},
 	}
@@ -639,6 +649,10 @@ func TestGKEClusterResourceUpdateCredentials(t *testing.T) {
 				ExternalClusterAPIUpdateCluster(gomock.Any(), clusterID, gomock.Any(), gomock.Any()).
 				Do(func(_ context.Context, _ string, body sdk.ExternalClusterAPIUpdateClusterJSONRequestBody, _ ...sdk.RequestEditorFn) {
 					r.Equal(tt.wantCredentials, toString(body.Credentials))
+					if tt.wantCredentials != "" {
+						r.Nil(body.Gke)
+						return
+					}
 					r.NotNil(body.Gke)
 					r.Equal(tt.wantTargetSA, toString(body.Gke.TargetServiceAccountEmail))
 					r.Equal(tt.wantCastSA, toString(body.Gke.CastServiceAccountEmail))
@@ -691,6 +705,13 @@ func TestGKEClusterResourceCredentialsDrift(t *testing.T) {
 			apiBody:    `{"credentialsId":"remote-cid","gke":{"clusterName":"cluster","region":"europe-central2","location":"europe-central2-a","projectId":"project"}}`,
 			wantTarget: "",
 			wantCast:   "",
+		},
+		{
+			name:       "legacy impersonation without config emails mirrors API emails into state",
+			attributes: map[string]string{FieldClusterCredentialsId: "local-cid"},
+			apiBody:    `{"credentialsId":"local-cid","gke":{"targetServiceAccountEmail":"api-sa@project.iam.gserviceaccount.com","castServiceAccountEmail":"api-cast@cast-project.iam.gserviceaccount.com"}}`,
+			wantTarget: "api-sa@project.iam.gserviceaccount.com",
+			wantCast:   "api-cast@cast-project.iam.gserviceaccount.com",
 		},
 		{
 			name:       "impersonation emails mirrored from API override state",
