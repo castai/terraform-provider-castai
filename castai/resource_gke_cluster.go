@@ -85,6 +85,7 @@ func resourceGKECluster() *schema.Resource {
 			FieldGKECredentialsTargetServiceAccountEmail: {
 				Type:             schema.TypeString,
 				Optional:         true,
+				Computed:         true,
 				ConflictsWith:    []string{FieldGKEClusterCredentials},
 				RequiredWith:     []string{FieldGKECredentialsCastaiServiceAccountEmail},
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
@@ -93,6 +94,7 @@ func resourceGKECluster() *schema.Resource {
 			FieldGKECredentialsCastaiServiceAccountEmail: {
 				Type:             schema.TypeString,
 				Optional:         true,
+				Computed:         true,
 				ConflictsWith:    []string{FieldGKEClusterCredentials},
 				RequiredWith:     []string{FieldGKECredentialsTargetServiceAccountEmail},
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
