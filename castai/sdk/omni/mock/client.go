@@ -215,6 +215,46 @@ func (mr *MockClientInterfaceMockRecorder) ClustersAPIRegisterClusterWithBody(ct
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ClustersAPIRegisterClusterWithBody", reflect.TypeOf((*MockClientInterface)(nil).ClustersAPIRegisterClusterWithBody), varargs...)
 }
 
+// ClustersAPIRenderOmniAgentComponent mocks base method.
+func (m *MockClientInterface) ClustersAPIRenderOmniAgentComponent(ctx context.Context, id string, params *omni.ClustersAPIRenderOmniAgentComponentParams, body omni.ClustersAPIRenderOmniAgentComponentJSONRequestBody, reqEditors ...omni.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, id, params, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ClustersAPIRenderOmniAgentComponent", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ClustersAPIRenderOmniAgentComponent indicates an expected call of ClustersAPIRenderOmniAgentComponent.
+func (mr *MockClientInterfaceMockRecorder) ClustersAPIRenderOmniAgentComponent(ctx, id, params, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, id, params, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ClustersAPIRenderOmniAgentComponent", reflect.TypeOf((*MockClientInterface)(nil).ClustersAPIRenderOmniAgentComponent), varargs...)
+}
+
+// ClustersAPIRenderOmniAgentComponentWithBody mocks base method.
+func (m *MockClientInterface) ClustersAPIRenderOmniAgentComponentWithBody(ctx context.Context, id string, params *omni.ClustersAPIRenderOmniAgentComponentParams, contentType string, body io.Reader, reqEditors ...omni.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, id, params, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ClustersAPIRenderOmniAgentComponentWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ClustersAPIRenderOmniAgentComponentWithBody indicates an expected call of ClustersAPIRenderOmniAgentComponentWithBody.
+func (mr *MockClientInterfaceMockRecorder) ClustersAPIRenderOmniAgentComponentWithBody(ctx, id, params, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, id, params, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ClustersAPIRenderOmniAgentComponentWithBody", reflect.TypeOf((*MockClientInterface)(nil).ClustersAPIRenderOmniAgentComponentWithBody), varargs...)
+}
+
 // ClustersAPIReportStatus mocks base method.
 func (m *MockClientInterface) ClustersAPIReportStatus(ctx context.Context, organizationId, id string, body omni.ClustersAPIReportStatusJSONRequestBody, reqEditors ...omni.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
@@ -941,6 +981,76 @@ func (m *MockClientWithResponsesInterface) ClustersAPIRegisterClusterWithRespons
 func (mr *MockClientWithResponsesInterfaceMockRecorder) ClustersAPIRegisterClusterWithResponse(ctx, organizationId, id, body interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ClustersAPIRegisterClusterWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ClustersAPIRegisterClusterWithResponse), ctx, organizationId, id, body)
+}
+
+// ClustersAPIRenderOmniAgentComponent mocks base method.
+func (m *MockClientWithResponsesInterface) ClustersAPIRenderOmniAgentComponent(ctx context.Context, id string, params *omni.ClustersAPIRenderOmniAgentComponentParams, body omni.ClustersAPIRenderOmniAgentComponentJSONRequestBody, reqEditors ...omni.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, id, params, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ClustersAPIRenderOmniAgentComponent", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ClustersAPIRenderOmniAgentComponent indicates an expected call of ClustersAPIRenderOmniAgentComponent.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ClustersAPIRenderOmniAgentComponent(ctx, id, params, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, id, params, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ClustersAPIRenderOmniAgentComponent", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ClustersAPIRenderOmniAgentComponent), varargs...)
+}
+
+// ClustersAPIRenderOmniAgentComponentWithBody mocks base method.
+func (m *MockClientWithResponsesInterface) ClustersAPIRenderOmniAgentComponentWithBody(ctx context.Context, id string, params *omni.ClustersAPIRenderOmniAgentComponentParams, contentType string, body io.Reader, reqEditors ...omni.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, id, params, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ClustersAPIRenderOmniAgentComponentWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ClustersAPIRenderOmniAgentComponentWithBody indicates an expected call of ClustersAPIRenderOmniAgentComponentWithBody.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ClustersAPIRenderOmniAgentComponentWithBody(ctx, id, params, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, id, params, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ClustersAPIRenderOmniAgentComponentWithBody", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ClustersAPIRenderOmniAgentComponentWithBody), varargs...)
+}
+
+// ClustersAPIRenderOmniAgentComponentWithBodyWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) ClustersAPIRenderOmniAgentComponentWithBodyWithResponse(ctx context.Context, id string, params *omni.ClustersAPIRenderOmniAgentComponentParams, contentType string, body io.Reader) (*omni.ClustersAPIRenderOmniAgentComponentResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ClustersAPIRenderOmniAgentComponentWithBodyWithResponse", ctx, id, params, contentType, body)
+	ret0, _ := ret[0].(*omni.ClustersAPIRenderOmniAgentComponentResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ClustersAPIRenderOmniAgentComponentWithBodyWithResponse indicates an expected call of ClustersAPIRenderOmniAgentComponentWithBodyWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ClustersAPIRenderOmniAgentComponentWithBodyWithResponse(ctx, id, params, contentType, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ClustersAPIRenderOmniAgentComponentWithBodyWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ClustersAPIRenderOmniAgentComponentWithBodyWithResponse), ctx, id, params, contentType, body)
+}
+
+// ClustersAPIRenderOmniAgentComponentWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) ClustersAPIRenderOmniAgentComponentWithResponse(ctx context.Context, id string, params *omni.ClustersAPIRenderOmniAgentComponentParams, body omni.ClustersAPIRenderOmniAgentComponentJSONRequestBody) (*omni.ClustersAPIRenderOmniAgentComponentResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ClustersAPIRenderOmniAgentComponentWithResponse", ctx, id, params, body)
+	ret0, _ := ret[0].(*omni.ClustersAPIRenderOmniAgentComponentResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ClustersAPIRenderOmniAgentComponentWithResponse indicates an expected call of ClustersAPIRenderOmniAgentComponentWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ClustersAPIRenderOmniAgentComponentWithResponse(ctx, id, params, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ClustersAPIRenderOmniAgentComponentWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ClustersAPIRenderOmniAgentComponentWithResponse), ctx, id, params, body)
 }
 
 // ClustersAPIReportStatus mocks base method.
