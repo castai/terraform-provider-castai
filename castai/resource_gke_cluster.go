@@ -85,6 +85,7 @@ func resourceGKECluster() *schema.Resource {
 			FieldGKECredentialsTargetServiceAccountEmail: {
 				Type:             schema.TypeString,
 				Optional:         true,
+				Computed:         true,
 				ConflictsWith:    []string{FieldGKEClusterCredentials},
 				RequiredWith:     []string{FieldGKECredentialsCastaiServiceAccountEmail},
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
@@ -93,6 +94,7 @@ func resourceGKECluster() *schema.Resource {
 			FieldGKECredentialsCastaiServiceAccountEmail: {
 				Type:             schema.TypeString,
 				Optional:         true,
+				Computed:         true,
 				ConflictsWith:    []string{FieldGKEClusterCredentials},
 				RequiredWith:     []string{FieldGKECredentialsTargetServiceAccountEmail},
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
@@ -245,7 +247,10 @@ func updateGKEClusterSettings(ctx context.Context, data *schema.ResourceData, cl
 
 	req := sdk.ExternalClusterAPIUpdateClusterJSONRequestBody{}
 	if credentialsJSON, ok := data.GetOk(FieldGKEClusterCredentials); ok {
+		// API rejects credentials combined with impersonation emails; computed
+		// attributes may still hold sticky impersonation values from prior state.
 		req.Credentials = toPtr(credentialsJSON.(string))
+		return resourceCastaiClusterUpdate(ctx, client, data, &req)
 	}
 	req.Gke = &sdk.ExternalclusterV1UpdateGKEClusterParams{
 		TargetServiceAccountEmail: getOkString(data, FieldGKECredentialsTargetServiceAccountEmail),
