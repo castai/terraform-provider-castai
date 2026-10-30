@@ -532,7 +532,8 @@ Releasing the provider
 
 Releases are initiated by drafting a release on GitHub: https://github.com/castai/terraform-provider-castai/releases/new
 
-- For the `Tag`, select "Create new tag" to create a new `vX.Y.Z` tag on current `master`.
+- For the `Tag`, select "Create new tag" to create a new `vX.Y.Z` tag on current `master`. Refer to Semantic Versioning
+  for [guidelines](https://semver.org/#summary) on how to pick the next version number.
 - Use "Generate release notes" to generate list of changes. If necessary, extend this by calling out changes.
   **Breaking changes must be called out** in the release notes with clear instructions on how to adapt to them.
 - Leave "Release label" on "latest" so the new release becomes the latest.
