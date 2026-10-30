@@ -530,12 +530,14 @@ $ make test
 Releasing the provider
 ----------------------
 
-This repository contains a github action to automatically build and publish assets for release when
-tag is pushed with pattern `v*` (ie. `v0.1.0`).
+Releases are initiated by drafting a release on GitHub: https://github.com/castai/terraform-provider-castai/releases/new
 
-[GoReleaser](https://goreleaser.com/) is used to produce build artifacts matching
-the [layout required](https://www.terraform.io/docs/registry/providers/publishing.html#manually-preparing-a-release)
-to publish the provider in the Terraform Registry.
+- For the `Tag`, select "Create new tag" to create a new `vX.Y.Z` tag on current `master`.
+- Use "Generate release notes" to generate list of changes. If necessary, extend this by calling out changes.
+  **Breaking changes must be called out** in the release notes with clear instructions on how to adapt to them.
+- Leave "Release label" on "latest" so the new release becomes the latest.
+- Click "Publish release"
 
-Releases will appear as **drafts**. Once marked as published on the GitHub Releases page, they will become available via
-the Terraform Registry.
+Once the release is created, the `Release` GitHub action should pick it up and attach the assets to it once they're built.
+Terraform and OpenTofu registries should automatically pick up on the new release and make them available there.
+
