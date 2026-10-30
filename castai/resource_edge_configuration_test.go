@@ -215,6 +215,11 @@ func TestAccCloudAgnostic_ResourceEdgeConfigurationNebius(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "nebius.gpu_cluster", "gpu-cluster-a"),
 					resource.TestCheckResourceAttr(resourceName, "ssh_public_key", "c3NoLWVkMjU1MTkgQUFBQUMzTnphQzFsWkRJMU5URTVPUzB4InRlc3RAaW5pdGlhbCI="),
 					resource.TestCheckResourceAttr(resourceName, "cri.socket", "unix:///run/containerd/containerd.sock"),
+					resource.TestCheckResourceAttr(resourceName, "nebius.filesystems.#", "2"),
+					resource.TestCheckResourceAttr(resourceName, "nebius.filesystems.0.filesystem_id", "computefilesystem-aaa"),
+					resource.TestCheckResourceAttr(resourceName, "nebius.filesystems.0.mount_path", "/mnt/data"),
+					resource.TestCheckResourceAttr(resourceName, "nebius.filesystems.1.filesystem_id", "computefilesystem-bbb"),
+					resource.TestCheckResourceAttr(resourceName, "nebius.filesystems.1.mount_path", "/mnt/cache"),
 				),
 			},
 			{
@@ -242,6 +247,18 @@ func TestAccCloudAgnostic_ResourceEdgeConfigurationNebius(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "nebius.gpu_cluster", "gpu-cluster-updated"),
 					resource.TestCheckResourceAttr(resourceName, "ssh_public_key", "c3NoLWVkMjU1MTkgQUFBQUMzTnphQzFsWkRJMU5URTVPUzB4InRlc3RAaXBkYXRlZCI="),
 					resource.TestCheckResourceAttr(resourceName, "cri.socket", "unix:///run/containerd/containerd-updated.sock"),
+					resource.TestCheckResourceAttr(resourceName, "nebius.filesystems.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "nebius.filesystems.0.filesystem_id", "computefilesystem-updated"),
+					resource.TestCheckResourceAttr(resourceName, "nebius.filesystems.0.mount_path", "/mnt/updated"),
+				),
+			},
+			{
+				// Clearing the filesystems block must remove every attachment and
+				// leave the list empty in state (not the previously applied values).
+				Config: testAccEdgeConfigurationNebiusFilesystemsCleared(rName, clusterName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "name", rName+"-updated"),
+					resource.TestCheckResourceAttr(resourceName, "nebius.filesystems.#", "0"),
 				),
 			},
 		},
@@ -272,6 +289,9 @@ func TestEdgeConfigurationResource_toNebiusConfiguration_Conversions(t *testing.
 				Labels:          labelsMap,
 				ReservationIDs:  reservationList,
 				GpuCluster:      types.StringValue("gpu-cluster-a"),
+				Filesystems: []filesysAttachmentModel{
+					{FilesystemID: types.StringValue("computefilesystem-all"), MountPath: types.StringValue("/mnt/all")},
+				},
 			},
 			expected: &omni.NebiusConfiguration{
 				ImageId:         lo.ToPtr("nebius-image-123"),
@@ -279,6 +299,9 @@ func TestEdgeConfigurationResource_toNebiusConfiguration_Conversions(t *testing.
 				Labels:          &map[string]string{"env": "prod", "team": "platform"},
 				ReservationIds:  &[]string{"res-1", "res-2"},
 				GpuCluster:      lo.ToPtr("gpu-cluster-a"),
+				Filesystems: lo.ToPtr([]omni.FilesystemAttachment{
+					{FilesystemId: "computefilesystem-all", MountPath: "/mnt/all"},
+				}),
 			},
 		},
 		"all null/zero values": {
@@ -288,6 +311,7 @@ func TestEdgeConfigurationResource_toNebiusConfiguration_Conversions(t *testing.
 				Labels:          types.MapNull(types.StringType),
 				ReservationIDs:  types.ListNull(types.StringType),
 				GpuCluster:      types.StringNull(),
+				Filesystems:     nil,
 			},
 			// Labels stay nil so the field is omitted from the request instead of
 			// being sent as an empty map, which the API would echo back and break
@@ -297,6 +321,59 @@ func TestEdgeConfigurationResource_toNebiusConfiguration_Conversions(t *testing.
 				BootDiskSizeGib: lo.ToPtr(int32(0)),
 				ReservationIds:  lo.ToPtr([]string{}),
 				GpuCluster:      lo.ToPtr(""),
+				Filesystems:     lo.ToPtr([]omni.FilesystemAttachment{}),
+			},
+		},
+		"filesystems populated only": {
+			plan: &nebiusConfigurationModel{
+				Filesystems: []filesysAttachmentModel{
+					{FilesystemID: types.StringValue("computefilesystem-xyz"), MountPath: types.StringValue("/mnt/one")},
+				},
+			},
+			expected: &omni.NebiusConfiguration{
+				ImageId:         lo.ToPtr(""),
+				BootDiskSizeGib: lo.ToPtr(int32(0)),
+				ReservationIds:  lo.ToPtr([]string{}),
+				GpuCluster:      lo.ToPtr(""),
+				Filesystems: lo.ToPtr([]omni.FilesystemAttachment{
+					{FilesystemId: "computefilesystem-xyz", MountPath: "/mnt/one"},
+				}),
+			},
+		},
+		"filesystems cleared produce explicit empty slice": {
+			plan: &nebiusConfigurationModel{
+				Filesystems: []filesysAttachmentModel{},
+			},
+			expected: &omni.NebiusConfiguration{
+				ImageId:         lo.ToPtr(""),
+				BootDiskSizeGib: lo.ToPtr(int32(0)),
+				ReservationIds:  lo.ToPtr([]string{}),
+				GpuCluster:      lo.ToPtr(""),
+				Filesystems:     lo.ToPtr([]omni.FilesystemAttachment{}),
+			},
+		},
+		"filesystems appended alongside other fields": {
+			plan: &nebiusConfigurationModel{
+				ImageID:         types.StringValue("nebius-image-123"),
+				BootDiskSizeGiB: types.Int64Value(100),
+				Labels:          labelsMap,
+				ReservationIDs:  reservationList,
+				GpuCluster:      types.StringValue("gpu-cluster-a"),
+				Filesystems: []filesysAttachmentModel{
+					{FilesystemID: types.StringValue("computefilesystem-aaa"), MountPath: types.StringValue("/mnt/data")},
+					{FilesystemID: types.StringValue("computefilesystem-bbb"), MountPath: types.StringValue("/mnt/cache")},
+				},
+			},
+			expected: &omni.NebiusConfiguration{
+				ImageId:         lo.ToPtr("nebius-image-123"),
+				BootDiskSizeGib: lo.ToPtr(int32(100)),
+				Labels:          &map[string]string{"env": "prod", "team": "platform"},
+				ReservationIds:  &[]string{"res-1", "res-2"},
+				GpuCluster:      lo.ToPtr("gpu-cluster-a"),
+				Filesystems: lo.ToPtr([]omni.FilesystemAttachment{
+					{FilesystemId: "computefilesystem-aaa", MountPath: "/mnt/data"},
+					{FilesystemId: "computefilesystem-bbb", MountPath: "/mnt/cache"},
+				}),
 			},
 		},
 		"labels with wrong element type produces diagnostics": {
@@ -314,6 +391,7 @@ func TestEdgeConfigurationResource_toNebiusConfiguration_Conversions(t *testing.
 				BootDiskSizeGib: lo.ToPtr(int32(0)),
 				ReservationIds:  lo.ToPtr([]string{}),
 				GpuCluster:      lo.ToPtr(""),
+				Filesystems:     lo.ToPtr([]omni.FilesystemAttachment{}),
 			},
 			expError: "can't unmarshal tftypes.Number into *string, expected string",
 		},
@@ -367,6 +445,7 @@ func TestEdgeConfigurationResource_toNebiusConfigurationModel(t *testing.T) {
 		BootDiskSizeGiB: types.Int64Null(),
 		ReservationIDs:  types.ListNull(types.StringType),
 		GpuCluster:      types.StringNull(),
+		Filesystems:     nil,
 	}
 
 	tests := map[string]struct {
@@ -380,6 +459,9 @@ func TestEdgeConfigurationResource_toNebiusConfigurationModel(t *testing.T) {
 				Labels:          &map[string]string{"foo": "bar"},
 				ReservationIds:  &[]string{"r1", "r2", "r3"},
 				GpuCluster:      lo.ToPtr("gpu-cluster-z"),
+				Filesystems: lo.ToPtr([]omni.FilesystemAttachment{
+					{FilesystemId: "computefilesystem-all", MountPath: "/mnt/all"},
+				}),
 			},
 			expected: &nebiusConfigurationModel{
 				ImageID:         types.StringValue("nebius-image-xyz"),
@@ -387,6 +469,28 @@ func TestEdgeConfigurationResource_toNebiusConfigurationModel(t *testing.T) {
 				Labels:          expectedLabels,
 				ReservationIDs:  expectedReservations,
 				GpuCluster:      types.StringValue("gpu-cluster-z"),
+				Filesystems: []filesysAttachmentModel{
+					{FilesystemID: types.StringValue("computefilesystem-all"), MountPath: types.StringValue("/mnt/all")},
+				},
+			},
+		},
+		"filesystems populated produce attachment list": {
+			config: &omni.NebiusConfiguration{
+				Filesystems: lo.ToPtr([]omni.FilesystemAttachment{
+					{FilesystemId: "computefilesystem-aaa", MountPath: "/mnt/data"},
+					{FilesystemId: "computefilesystem-bbb", MountPath: "/mnt/cache"},
+				}),
+			},
+			expected: &nebiusConfigurationModel{
+				Labels:          types.MapNull(types.StringType),
+				ImageID:         types.StringNull(),
+				BootDiskSizeGiB: types.Int64Null(),
+				ReservationIDs:  types.ListNull(types.StringType),
+				GpuCluster:      types.StringNull(),
+				Filesystems: []filesysAttachmentModel{
+					{FilesystemID: types.StringValue("computefilesystem-aaa"), MountPath: types.StringValue("/mnt/data")},
+					{FilesystemID: types.StringValue("computefilesystem-bbb"), MountPath: types.StringValue("/mnt/cache")},
+				},
 			},
 		},
 		"empty string ImageId becomes null": {
@@ -801,6 +905,16 @@ resource "castai_edge_configuration" "test" {
     }
     reservation_ids = ["res-1", "res-2"]
     gpu_cluster     = "gpu-cluster-a"
+    filesystems = [
+      {
+        filesystem_id = "computefilesystem-aaa"
+        mount_path    = "/mnt/data"
+      },
+      {
+        filesystem_id = "computefilesystem-bbb"
+        mount_path    = "/mnt/cache"
+      }
+    ]
   }
 }
 `, organizationID, rName),
@@ -808,6 +922,45 @@ resource "castai_edge_configuration" "test" {
 }
 
 func testAccEdgeConfigurationNebiusUpdated(rName, clusterName string) string {
+	organizationID := testAccGetOrganizationID()
+
+	return ConfigCompose(
+		testAccEdgeLocationNebiusWIFConfig(rName, clusterName),
+		fmt.Sprintf(`
+resource "castai_edge_configuration" "test" {
+  organization_id  = %[1]q
+  cluster_id       = castai_omni_cluster.test.id
+  edge_location_id = castai_edge_location.test.id
+  name             = "%[2]s-updated"
+  user_data_base64 = "I2Nsb3VkLWNvbmZpZy11cGRhdGVkCg=="
+  ssh_public_key   = "c3NoLWVkMjU1MTkgQUFBQUMzTnphQzFsWkRJMU5URTVPUzB4InRlc3RAaXBkYXRlZCI="
+
+  cri = {
+    socket = "unix:///run/containerd/containerd-updated.sock"
+  }
+
+  nebius = {
+    image_id           = "projects/nebius/global/images/nebius-edge-v2"
+    boot_disk_size_gib = 200
+    labels = {
+      key1   = "updated-value1"
+      newkey = "newvalue"
+    }
+    reservation_ids = ["res-updated"]
+    gpu_cluster     = "gpu-cluster-updated"
+    filesystems = [
+      {
+        filesystem_id = "computefilesystem-updated"
+        mount_path    = "/mnt/updated"
+      }
+    ]
+  }
+}
+`, organizationID, rName),
+	)
+}
+
+func testAccEdgeConfigurationNebiusFilesystemsCleared(rName, clusterName string) string {
 	organizationID := testAccGetOrganizationID()
 
 	return ConfigCompose(
