@@ -283,6 +283,7 @@ rebalancing_config_min_nodes = 0
 should_taint = true
 Tainted = false
 clm_enabled = false
+clm_networking_mode = 
 edge_location_ids.# = 2
 edge_location_ids.0 = a1b2c3d4-e5f6-7890-abcd-ef1234567890
 edge_location_ids.1 = b2c3d4e5-f6a7-8901-bcde-f12345678901
@@ -912,6 +913,83 @@ func TestNodeTemplateResourceReadContext_StuckPodResizeReconciliation(t *testing
 			r.Len(blocks, 1)
 			block := blocks[0].(map[string]any)
 			r.Equal(*tc.expectEnabled, block[FieldNodeTemplateStuckPodResizeEnabled])
+		})
+	}
+}
+
+func TestNodeTemplateResourceCreate_ClmNetworkingMode(t *testing.T) {
+	clusterId := "b6bfc074-a267-400f-b8f1-db0850c369b1"
+	name := "custom-template"
+
+	testCases := []struct {
+		name           string
+		configMode     *string
+		expectedInBody *string // nil means the field must be omitted from the request
+	}{
+		{name: "tc mode", configMode: lo.ToPtr("tc"), expectedInBody: lo.ToPtr("tc")},
+		{name: "none mode", configMode: lo.ToPtr("none"), expectedInBody: lo.ToPtr("none")},
+		{name: "mode omitted", configMode: nil, expectedInBody: nil},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			r := require.New(t)
+			mockctrl := gomock.NewController(t)
+			mockClient := mock_sdk.NewMockClientInterface(mockctrl)
+
+			ctx := context.Background()
+			provider := &ProviderConfig{
+				api: &sdk.ClientWithResponses{
+					ClientInterface: mockClient,
+				},
+			}
+
+			var modeJSON string
+			if tc.configMode != nil {
+				modeJSON = fmt.Sprintf(`"clmNetworkingMode": %q,`, *tc.configMode)
+			}
+			templateResponse := fmt.Sprintf(`
+			{
+			  "name": "custom-template",
+			  "isEnabled": true,
+			  "clmEnabled": true,
+			  %s
+			  "constraints": {}
+			}`, modeJSON)
+
+			templateBody := io.NopCloser(bytes.NewReader([]byte(templateResponse)))
+			listBody := io.NopCloser(bytes.NewReader([]byte(fmt.Sprintf(`{"items": [{"template": %s}]}`, templateResponse))))
+
+			var capturedBody sdk.NodeTemplatesAPICreateNodeTemplateJSONRequestBody
+			mockClient.EXPECT().
+				NodeTemplatesAPICreateNodeTemplate(gomock.Any(), clusterId, gomock.Any()).
+				DoAndReturn(func(_ context.Context, _ string, body sdk.NodeTemplatesAPICreateNodeTemplateJSONRequestBody, _ ...sdk.RequestEditorFn) (*http.Response, error) {
+					capturedBody = body
+					return &http.Response{StatusCode: 200, Body: templateBody, Header: map[string][]string{"Content-Type": {"json"}}}, nil
+				})
+			mockClient.EXPECT().
+				NodeTemplatesAPIListNodeTemplates(gomock.Any(), clusterId, &sdk.NodeTemplatesAPIListNodeTemplatesParams{IncludeDefault: lo.ToPtr(true)}).
+				Return(&http.Response{StatusCode: 200, Body: listBody, Header: map[string][]string{"Content-Type": {"json"}}}, nil)
+
+			resource := resourceNodeTemplate()
+			configAttrs := map[string]cty.Value{
+				FieldClusterId:              cty.StringVal(clusterId),
+				FieldNodeTemplateName:       cty.StringVal(name),
+				FieldNodeTemplateClmEnabled: cty.BoolVal(true),
+			}
+			if tc.configMode != nil {
+				configAttrs[FieldNodeTemplateClmNetworkingMode] = cty.StringVal(*tc.configMode)
+			}
+			state := sdkterraform.NewInstanceStateShimmedFromValue(cty.ObjectVal(configAttrs), 0)
+			state.ID = name
+
+			data := resource.Data(state)
+			result := resource.CreateContext(ctx, data, provider)
+			r.Nil(result)
+			r.False(result.HasError())
+
+			r.Equal(tc.expectedInBody, capturedBody.ClmNetworkingMode)
+			r.Equal(lo.FromPtr(tc.expectedInBody), data.Get(FieldNodeTemplateClmNetworkingMode))
 		})
 	}
 }
@@ -1681,6 +1759,7 @@ func TestAccEKS_ResourceNodeTemplate_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "is_enabled", "true"),
 					resource.TestCheckResourceAttr(resourceName, "should_taint", "true"),
 					resource.TestCheckResourceAttr(resourceName, "clm_enabled", "true"),
+					resource.TestCheckResourceAttr(resourceName, "clm_networking_mode", "tc"),
 					resource.TestCheckResourceAttr(resourceName, "custom_instances_enabled", "false"),
 					resource.TestCheckResourceAttr(resourceName, "custom_instances_with_extended_memory_enabled", "false"),
 					resource.TestCheckResourceAttr(resourceName, "custom_labels.%", "2"),
@@ -2154,6 +2233,7 @@ func testNodeTemplateUpdated(rName, clusterName string) string {
 			configuration_id = castai_node_configuration.test.id
 			should_taint = true
 			clm_enabled = true
+			clm_networking_mode = "tc"
 			
 			custom_labels = {
 				%[1]s-label-key-1 = "%[1]s-label-value-1"
