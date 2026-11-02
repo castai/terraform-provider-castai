@@ -44,6 +44,7 @@ Read-Only:
 - `selector` (String)
 - `split_nodes_in_batches_of` (Number)
 - `target_node_selection_algorithm` (String)
+- `targeted_nodes_percentage` (Number)
 
 <a id="nestedobjatt--launch_configuration--aggressive_mode_config"></a>
 ### Nested Schema for `launch_configuration.aggressive_mode_config`
