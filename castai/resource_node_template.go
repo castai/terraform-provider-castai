@@ -913,9 +913,9 @@ func resourceNodeTemplate() *schema.Resource {
 				Optional: true,
 				Computed: true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice(
-					[]string{"default", "none", "tc", "cni", ""}, false,
+					[]string{"default", "none", "tc", "cni"}, false,
 				)),
-				Description: "CLM networking mode for nodes created from this template. Controls how TCP connections are handled during live migration. Valid values: default, none, tc, cni, or an empty string (treated the same as not setting the field). Applied only if `clm_enabled=true`. Removing this attribute does not reset the mode.",
+				Description: "CLM networking mode for nodes created from this template. Controls how TCP connections are handled during live migration. Valid values: default, none, tc, cni. Applied only if `clm_enabled=true`. Removing this attribute does not reset the mode; set it to `default` explicitly.",
 			},
 			FieldNodeTemplateEdgeLocationIDs: {
 				Type:     schema.TypeList,
@@ -1057,7 +1057,9 @@ func resourceNodeTemplateRead(ctx context.Context, d *schema.ResourceData, meta 
 		return diag.FromErr(fmt.Errorf("setting clm enabled: %w", err))
 	}
 
-	if err := d.Set(FieldNodeTemplateClmNetworkingMode, nodeTemplate.ClmNetworkingMode); err != nil {
+	// lo.FromPtr makes the nil contract explicit: a nil API value converges the
+	// state to "" instead of leaving a stale previously-applied mode behind.
+	if err := d.Set(FieldNodeTemplateClmNetworkingMode, lo.FromPtr(nodeTemplate.ClmNetworkingMode)); err != nil {
 		return diag.FromErr(fmt.Errorf("setting clm networking mode: %w", err))
 	}
 
