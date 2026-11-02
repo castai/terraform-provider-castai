@@ -915,7 +915,7 @@ func resourceNodeTemplate() *schema.Resource {
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice(
 					[]string{"default", "none", "tc", "cni", ""}, false,
 				)),
-				Description: "CLM networking mode for nodes created from this template. Controls how TCP connections are handled during live migration. Valid values: default, none, tc, cni, or an empty string (treated the same as not setting the field). Applied only if `clm_enabled=true`.",
+				Description: "CLM networking mode for nodes created from this template. Controls how TCP connections are handled during live migration. Valid values: default, none, tc, cni, or an empty string (treated the same as not setting the field). Applied only if `clm_enabled=true`. Removing this attribute does not reset the mode.",
 			},
 			FieldNodeTemplateEdgeLocationIDs: {
 				Type:     schema.TypeList,
@@ -1750,10 +1750,6 @@ func updateNodeTemplate(ctx context.Context, d *schema.ResourceData, meta any, s
 
 	if v, _ := d.GetOk(FieldNodeTemplateClmEnabled); v != nil {
 		req.ClmEnabled = lo.ToPtr(v.(bool))
-	}
-
-	if v, ok := d.GetOk(FieldNodeTemplateClmNetworkingMode); ok {
-		req.ClmNetworkingMode = lo.ToPtr(v.(string))
 	}
 
 	if v, ok := d.GetOk(FieldNodeTemplateClmNetworkingMode); ok {

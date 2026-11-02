@@ -1592,6 +1592,31 @@ func TestClmNetworkingModeEmptyStringAccepted(t *testing.T) {
 	r.False(diags.HasError(), "expected empty string to be accepted by the schema validator")
 }
 
+func TestClmNetworkingModeAllValidModesAccepted(t *testing.T) {
+	r := require.New(t)
+	field := resourceNodeTemplate().Schema[FieldNodeTemplateClmNetworkingMode]
+	for _, mode := range []string{"none", "tc", "cni"} {
+		diags := field.ValidateDiagFunc(mode, cty.Path{cty.GetAttrStep{Name: FieldNodeTemplateClmNetworkingMode}})
+		r.False(diags.HasError(), "expected %q to be accepted by the schema validator", mode)
+	}
+}
+
+func TestClmNetworkingModeInvalidValueRejected(t *testing.T) {
+	r := require.New(t)
+	field := resourceNodeTemplate().Schema[FieldNodeTemplateClmNetworkingMode]
+	diags := field.ValidateDiagFunc("bogus", cty.Path{cty.GetAttrStep{Name: FieldNodeTemplateClmNetworkingMode}})
+	r.True(diags.HasError(), "expected 'bogus' to be rejected by the schema validator")
+}
+
+func TestClmNetworkingModeCaseSensitive(t *testing.T) {
+	// The validator is case-sensitive: "CNI" must be rejected so users get an
+	// early plan-time error instead of a silent API-side default.
+	r := require.New(t)
+	field := resourceNodeTemplate().Schema[FieldNodeTemplateClmNetworkingMode]
+	diags := field.ValidateDiagFunc("CNI", cty.Path{cty.GetAttrStep{Name: FieldNodeTemplateClmNetworkingMode}})
+	r.True(diags.HasError(), "expected 'CNI' (uppercase) to be rejected by the schema validator")
+}
+
 func TestNodeTemplateResourceCreate_withClmNetworkingMode(t *testing.T) {
 	r := require.New(t)
 	mockctrl := gomock.NewController(t)
