@@ -186,6 +186,21 @@ func validateNodeTemplateIsDefault(name string, isDefault bool) error {
 	return nil
 }
 
+// clmNetworkingModeFromConfig returns the clm_networking_mode value exactly
+// as it is set in the user configuration, or nil when the attribute is absent
+// from the configuration. It deliberately avoids d.GetOk: that merges the
+// refreshed state with the configuration, so a previously applied mode would
+// be echoed back to the API on every update. Reading the raw configuration
+// instead means an absent attribute is sent as null, which the API resolves
+// to "keep the existing mode" on update and to "default" on create.
+func clmNetworkingModeFromConfig(d *schema.ResourceData) *string {
+	v, diags := d.GetRawConfigAt(cty.GetAttrPath(FieldNodeTemplateClmNetworkingMode))
+	if diags.HasError() || !v.IsKnown() || v.IsNull() || !v.Type().Equals(cty.String) {
+		return nil
+	}
+	return lo.ToPtr(v.AsString())
+}
+
 func resourceNodeTemplate() *schema.Resource {
 	supportedArchitectures := []string{ArchAMD64, ArchARM64}
 	supportedOs := []string{OsLinux, OsWindows}
@@ -1754,9 +1769,7 @@ func updateNodeTemplate(ctx context.Context, d *schema.ResourceData, meta any, s
 		req.ClmEnabled = lo.ToPtr(v.(bool))
 	}
 
-	if v, ok := d.GetOk(FieldNodeTemplateClmNetworkingMode); ok {
-		req.ClmNetworkingMode = lo.ToPtr(v.(string))
-	}
+	req.ClmNetworkingMode = clmNetworkingModeFromConfig(d)
 
 	if v, ok := d.Get(FieldNodeTemplateStuckPodResizeReconciliation).([]any); ok && len(v) > 0 {
 		req.StuckPodResizeReconciliation = toStuckPodResizeReconciliation(v[0])
@@ -1814,9 +1827,7 @@ func resourceNodeTemplateCreate(ctx context.Context, d *schema.ResourceData, met
 		ClmEnabled:      lo.ToPtr(d.Get(FieldNodeTemplateClmEnabled).(bool)),
 	}
 
-	if v, ok := d.GetOk(FieldNodeTemplateClmNetworkingMode); ok {
-		req.ClmNetworkingMode = lo.ToPtr(v.(string))
-	}
+	req.ClmNetworkingMode = clmNetworkingModeFromConfig(d)
 
 	if v, ok := d.Get(FieldNodeTemplateEdgeLocationConfig).([]any); ok && len(v) > 0 {
 		req.EdgeLocationConfigs = toEdgeLocationConfigs(v)
