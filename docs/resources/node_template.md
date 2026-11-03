@@ -89,6 +89,7 @@ resource "castai_node_template" "default_by_castai" {
 ### Optional
 
 - `clm_enabled` (Boolean) Marks whether Container Live Migration (CLM) should be enabled for nodes created from this template. Supported on EKS, GKE, and AKS clusters. CLM-enabled nodes participate in live workload migration during rebalancing, scale-down, and node lifecycle events.
+- `clm_networking_mode` (String) CLM networking mode for nodes created from this template. `default` - auto-detect; `none` - no connection preservation during migration; `tc` - new pod IP on the destination node with eBPF traffic-control translation of the old IP, allows cross-subnet/zone migration on any provider; `cni` - pod IP preservation via the CNI (Calico / AWS VPC CNI fork), requires the same subnet/zone.
 - `cluster_id` (String) CAST AI cluster id.
 - `configuration_id` (String) CAST AI node configuration id to be used for node template.
 - `constraints` (Block List, Max: 1) (see [below for nested schema](#nestedblock--constraints))
