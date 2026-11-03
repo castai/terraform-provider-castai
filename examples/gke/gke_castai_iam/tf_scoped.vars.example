@@ -3,3 +3,6 @@ project_id                  = "PLACEHOLDER"
 cluster_name                = "PLACEHOLDER"
 castai_api_url              = "PLACEHOLDER"
 service_accounts_unique_ids = ["PLACEHOLDER"]
+
+# authentication_method defaults to "impersonation"; set to "service_account_key"
+# to provision a JSON private key instead.

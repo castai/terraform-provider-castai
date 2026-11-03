@@ -2,7 +2,7 @@ terraform {
   required_providers {
     castai = {
       source  = "castai/castai"
-      version = ">= 8.1"
+      version = ">= 9.14.0"
     }
     kubernetes = {
       source = "hashicorp/kubernetes"

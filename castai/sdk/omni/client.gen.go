@@ -90,6 +90,11 @@ func WithRequestEditorFn(fn RequestEditorFn) ClientOption {
 
 // The interface specification for the client above.
 type ClientInterface interface {
+	// ClustersAPIRenderOmniAgentComponentWithBody request with any body
+	ClustersAPIRenderOmniAgentComponentWithBody(ctx context.Context, id string, params *ClustersAPIRenderOmniAgentComponentParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	ClustersAPIRenderOmniAgentComponent(ctx context.Context, id string, params *ClustersAPIRenderOmniAgentComponentParams, body ClustersAPIRenderOmniAgentComponentJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// ClustersAPIListClusters request
 	ClustersAPIListClusters(ctx context.Context, organizationId string, params *ClustersAPIListClustersParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -172,6 +177,30 @@ type ClientInterface interface {
 	ClustersAPIReportStatusWithBody(ctx context.Context, organizationId string, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	ClustersAPIReportStatus(ctx context.Context, organizationId string, id string, body ClustersAPIReportStatusJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+}
+
+func (c *Client) ClustersAPIRenderOmniAgentComponentWithBody(ctx context.Context, id string, params *ClustersAPIRenderOmniAgentComponentParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewClustersAPIRenderOmniAgentComponentRequestWithBody(c.Server, id, params, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) ClustersAPIRenderOmniAgentComponent(ctx context.Context, id string, params *ClustersAPIRenderOmniAgentComponentParams, body ClustersAPIRenderOmniAgentComponentJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewClustersAPIRenderOmniAgentComponentRequest(c.Server, id, params, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
 }
 
 func (c *Client) ClustersAPIListClusters(ctx context.Context, organizationId string, params *ClustersAPIListClustersParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
@@ -532,6 +561,75 @@ func (c *Client) ClustersAPIReportStatus(ctx context.Context, organizationId str
 		return nil, err
 	}
 	return c.Client.Do(req)
+}
+
+// NewClustersAPIRenderOmniAgentComponentRequest calls the generic ClustersAPIRenderOmniAgentComponent builder with application/json body
+func NewClustersAPIRenderOmniAgentComponentRequest(server string, id string, params *ClustersAPIRenderOmniAgentComponentParams, body ClustersAPIRenderOmniAgentComponentJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewClustersAPIRenderOmniAgentComponentRequestWithBody(server, id, params, "application/json", bodyReader)
+}
+
+// NewClustersAPIRenderOmniAgentComponentRequestWithBody generates requests for ClustersAPIRenderOmniAgentComponent with any type of body
+func NewClustersAPIRenderOmniAgentComponentRequestWithBody(server string, id string, params *ClustersAPIRenderOmniAgentComponentParams, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/castctl/v1beta/components/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if params.Version != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "version", runtime.ParamLocationQuery, *params.Version); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
 }
 
 // NewClustersAPIListClustersRequest generates requests for ClustersAPIListClusters
@@ -1951,6 +2049,11 @@ func WithBaseURL(baseURL string) ClientOption {
 // ClientWithResponsesInterface is the interface specification for the client with responses above.
 type ClientWithResponsesInterface interface {
 	ClientInterface
+	// ClustersAPIRenderOmniAgentComponent request  with any body
+	ClustersAPIRenderOmniAgentComponentWithBodyWithResponse(ctx context.Context, id string, params *ClustersAPIRenderOmniAgentComponentParams, contentType string, body io.Reader) (*ClustersAPIRenderOmniAgentComponentResponse, error)
+
+	ClustersAPIRenderOmniAgentComponentWithResponse(ctx context.Context, id string, params *ClustersAPIRenderOmniAgentComponentParams, body ClustersAPIRenderOmniAgentComponentJSONRequestBody) (*ClustersAPIRenderOmniAgentComponentResponse, error)
+
 	// ClustersAPIListClusters request
 	ClustersAPIListClustersWithResponse(ctx context.Context, organizationId string, params *ClustersAPIListClustersParams) (*ClustersAPIListClustersResponse, error)
 
@@ -2040,6 +2143,37 @@ type Response interface {
 	Status() string
 	StatusCode() int
 	GetBody() []byte
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type ClustersAPIRenderOmniAgentComponentResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *RenderOmniAgentComponentResponse
+	JSONDefault  *Status
+}
+
+// Status returns HTTPResponse.Status
+func (r ClustersAPIRenderOmniAgentComponentResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r ClustersAPIRenderOmniAgentComponentResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r ClustersAPIRenderOmniAgentComponentResponse) GetBody() []byte {
+	return r.Body
 }
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
@@ -2750,6 +2884,23 @@ func (r ClustersAPIReportStatusResponse) GetBody() []byte {
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
+// ClustersAPIRenderOmniAgentComponentWithBodyWithResponse request with arbitrary body returning *ClustersAPIRenderOmniAgentComponentResponse
+func (c *ClientWithResponses) ClustersAPIRenderOmniAgentComponentWithBodyWithResponse(ctx context.Context, id string, params *ClustersAPIRenderOmniAgentComponentParams, contentType string, body io.Reader) (*ClustersAPIRenderOmniAgentComponentResponse, error) {
+	rsp, err := c.ClustersAPIRenderOmniAgentComponentWithBody(ctx, id, params, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseClustersAPIRenderOmniAgentComponentResponse(rsp)
+}
+
+func (c *ClientWithResponses) ClustersAPIRenderOmniAgentComponentWithResponse(ctx context.Context, id string, params *ClustersAPIRenderOmniAgentComponentParams, body ClustersAPIRenderOmniAgentComponentJSONRequestBody) (*ClustersAPIRenderOmniAgentComponentResponse, error) {
+	rsp, err := c.ClustersAPIRenderOmniAgentComponent(ctx, id, params, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseClustersAPIRenderOmniAgentComponentResponse(rsp)
+}
+
 // ClustersAPIListClustersWithResponse request returning *ClustersAPIListClustersResponse
 func (c *ClientWithResponses) ClustersAPIListClustersWithResponse(ctx context.Context, organizationId string, params *ClustersAPIListClustersParams) (*ClustersAPIListClustersResponse, error) {
 	rsp, err := c.ClustersAPIListClusters(ctx, organizationId, params)
@@ -3011,6 +3162,39 @@ func (c *ClientWithResponses) ClustersAPIReportStatusWithResponse(ctx context.Co
 		return nil, err
 	}
 	return ParseClustersAPIReportStatusResponse(rsp)
+}
+
+// ParseClustersAPIRenderOmniAgentComponentResponse parses an HTTP response from a ClustersAPIRenderOmniAgentComponentWithResponse call
+func ParseClustersAPIRenderOmniAgentComponentResponse(rsp *http.Response) (*ClustersAPIRenderOmniAgentComponentResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &ClustersAPIRenderOmniAgentComponentResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest RenderOmniAgentComponentResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
+		var dest Status
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSONDefault = &dest
+
+	}
+
+	return response, nil
 }
 
 // ParseClustersAPIListClustersResponse parses an HTTP response from a ClustersAPIListClustersWithResponse call

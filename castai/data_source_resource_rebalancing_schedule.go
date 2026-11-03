@@ -25,6 +25,13 @@ func dataSourceRebalancingSchedule() *schema.Resource {
 			dataSourceRebalancingSchedule.Schema[key].Required = false
 			//  MaxItems is for configurable attributes, there's nothing to configure on computed-only field
 			dataSourceRebalancingSchedule.Schema[key].MaxItems = 0
+			// ConflictsWith references require MaxItems: 1 blocks, cleared above;
+			// nothing is user-configurable on a computed-only data source anyway.
+			if block, ok := value.Elem.(*schema.Resource); ok {
+				for _, attr := range block.Schema {
+					attr.ConflictsWith = nil
+				}
+			}
 		}
 	}
 	return dataSourceRebalancingSchedule

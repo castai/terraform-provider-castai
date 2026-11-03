@@ -3865,6 +3865,9 @@ type CastaiServiceaccountsV1beta1CreateServiceAccountRequestServiceAccount struc
 
 	// Name Name is the name of the service account.
 	Name string `json:"name"`
+
+	// Product ProductType represents which product a category belongs to.
+	Product *CastaiRbacV1beta1ProductType `json:"product,omitempty"`
 }
 
 // CastaiServiceaccountsV1beta1CreateServiceAccountResponse CreateServiceAccountResponse is the response for creating a service account.
@@ -4027,6 +4030,9 @@ type CastaiServiceaccountsV1beta1ServiceAccount struct {
 
 	// OrganizationId OrganizationID is the organization that owns the service account.
 	OrganizationId *string `json:"organizationId,omitempty"`
+
+	// Product ProductType represents which product a category belongs to.
+	Product *CastaiRbacV1beta1ProductType `json:"product,omitempty"`
 }
 
 // CastaiServiceaccountsV1beta1ServiceAccountAuthor Author is the author of the service account.
@@ -4117,6 +4123,11 @@ type CastaiSsoV1beta1CreateSSOConnection struct {
 
 	// DefaultRoleId ID of default role for new users signing up with SSO.
 	DefaultRoleId *string `json:"defaultRoleId"`
+
+	// DefaultRoles Per-product default role IDs for new users signing up with SSO.
+	// A key with an empty value explicitly opts the product out of any default role.
+	// Mutually exclusive with default_role_id: setting both is an error.
+	DefaultRoles *map[string]string `json:"defaultRoles,omitempty"`
 
 	// EmailDomain EmailDomain is the email domain of the connection.
 	EmailDomain string `json:"emailDomain"`
@@ -4218,6 +4229,10 @@ type CastaiSsoV1beta1SSOConnection struct {
 
 	// DefaultRoleId ID of default role for new users signing up with SSO.
 	DefaultRoleId *string `json:"defaultRoleId,omitempty"`
+
+	// DefaultRoles Per-product default role IDs for new users signing up with SSO.
+	// A key with an empty value explicitly opts the product out of any default role.
+	DefaultRoles *map[string]string `json:"defaultRoles,omitempty"`
 
 	// EmailDomain EmailDomain is the email domain of the connection.
 	EmailDomain string `json:"emailDomain"`
@@ -4329,6 +4344,11 @@ type CastaiSsoV1beta1UpdateSSOConnection struct {
 
 	// DefaultRoleId ID of default role for new users signing up with SSO.
 	DefaultRoleId *string `json:"defaultRoleId"`
+
+	// DefaultRoles Per-product default role IDs for new users signing up with SSO.
+	// A key with an empty value explicitly opts the product out of any default role.
+	// Mutually exclusive with default_role_id: setting both is an error.
+	DefaultRoles *map[string]string `json:"defaultRoles,omitempty"`
 
 	// EmailDomain EmailDomain is the email domain of the connection.
 	EmailDomain *string `json:"emailDomain,omitempty"`
@@ -6504,7 +6524,16 @@ type ExternalclusterV1GCPNodeConfigReservationAffinity struct {
 
 // ExternalclusterV1GKEClusterParams GKEClusterParams defines GKE-specific arguments.
 type ExternalclusterV1GKEClusterParams struct {
-	CastServiceAccount   *string `json:"castServiceAccount,omitempty"`
+	// CastServiceAccount CAST service account.
+	// Deprecated. Use cast_service_account_email instead.
+	CastServiceAccount *string `json:"castServiceAccount,omitempty"`
+
+	// CastServiceAccountEmail CAST AI-side service account email used as the impersonation source (per-org jumper SA). Same value as the UpdateCluster field.
+	// Omitted when the cluster is not onboarded with GKE impersonation, or when the binding predates tracking of this value.
+	CastServiceAccountEmail *string `json:"castServiceAccountEmail"`
+
+	// ClientServiceAccount Client service account.
+	// Deprecated. Use target_service_account_email instead.
 	ClientServiceAccount *string `json:"clientServiceAccount,omitempty"`
 
 	// ClusterName Name of the cluster.
@@ -6521,6 +6550,10 @@ type ExternalclusterV1GKEClusterParams struct {
 
 	// Region Region of the cluster.
 	Region *string `json:"region,omitempty"`
+
+	// TargetServiceAccountEmail Customer-side service account email impersonated by CAST AI. Same value as the UpdateCluster field.
+	// Omitted when the cluster is not onboarded with GKE impersonation.
+	TargetServiceAccountEmail *string `json:"targetServiceAccountEmail"`
 }
 
 // ExternalclusterV1GKECreateSAResponse defines model for externalcluster.v1.GKECreateSAResponse.
@@ -9317,6 +9350,12 @@ type ScheduledrebalancingV1LaunchConfiguration struct {
 	RebalancingOptions           *CastaiAutoscalerV1beta1RebalancingOptions          `json:"rebalancingOptions,omitempty"`
 	Selector                     *ScheduledrebalancingV1NodeSelector                 `json:"selector,omitempty"`
 	TargetNodeSelectionAlgorithm *ScheduledrebalancingV1TargetNodeSelectionAlgorithm `json:"targetNodeSelectionAlgorithm,omitempty"`
+
+	// TargetedNodesPercentage Maximum percentage (1-100) of eligible nodes that will be selected for
+	// rebalancing. Eligible nodes are those matching the launch configuration
+	// selector and free of problematic pods. Mutually exclusive with
+	// num_targeted_nodes; when set, it takes precedence.
+	TargetedNodesPercentage *int32 `json:"targetedNodesPercentage"`
 }
 
 // ScheduledrebalancingV1ListAvailableRebalancingTZResponse defines model for scheduledrebalancing.v1.ListAvailableRebalancingTZResponse.
@@ -14066,6 +14105,7 @@ type WorkloadOptimizationAPIGetWorkloadParams struct {
 	IncludeCosts   *bool      `form:"includeCosts,omitempty" json:"includeCosts,omitempty"`
 	FromTime       *time.Time `form:"fromTime,omitempty" json:"fromTime,omitempty"`
 	ToTime         *time.Time `form:"toTime,omitempty" json:"toTime,omitempty"`
+	ScopeValue     *string    `form:"scopeValue,omitempty" json:"scopeValue,omitempty"`
 }
 
 // WorkloadOptimizationAPIGetWorkloadGPUMetricsParams defines parameters for WorkloadOptimizationAPIGetWorkloadGPUMetrics.

@@ -112,6 +112,68 @@ func TestRebalancingSchedule_stateToSchedule_EvictGracefullyAndDrainOptions(t *t
 	r.Nil(unsetOpts.SplitNodesInBatchesOf)
 }
 
+func TestRebalancingSchedule_stateToSchedule_TargetedNodesPercentage(t *testing.T) {
+	r := require.New(t)
+	resource := resourceRebalancingSchedule()
+
+	state := terraform.NewInstanceStateShimmedFromValue(cty.ObjectVal(map[string]cty.Value{
+		"name": cty.StringVal("test-schedule-percentage"),
+		"schedule": cty.ListVal([]cty.Value{cty.ObjectVal(map[string]cty.Value{
+			"cron": cty.StringVal("5 4 * * *"),
+		})}),
+		"trigger_conditions": cty.ListVal([]cty.Value{cty.ObjectVal(map[string]cty.Value{
+			"savings_percentage": cty.NumberFloatVal(15),
+			"ignore_savings":     cty.BoolVal(false),
+		})}),
+		"launch_configuration": cty.ListVal([]cty.Value{cty.ObjectVal(map[string]cty.Value{
+			"targeted_nodes_percentage": cty.NumberIntVal(50),
+		})}),
+	}), 0)
+	state.RawConfig = cty.ObjectVal(map[string]cty.Value{
+		"launch_configuration": cty.ListVal([]cty.Value{cty.ObjectVal(map[string]cty.Value{
+			"targeted_nodes_percentage": cty.NumberIntVal(50),
+		})}),
+	})
+
+	schedule, err := stateToSchedule(resource.Data(state))
+	r.NoError(err)
+
+	r.NotNil(schedule.LaunchConfiguration.TargetedNodesPercentage)
+	r.Equal(int32(50), *schedule.LaunchConfiguration.TargetedNodesPercentage)
+	// The provider always sends the count (0 = unlimited when unset); the API
+	// rejects a count > 0 combined with a percentage.
+	if schedule.LaunchConfiguration.NumTargetedNodes != nil {
+		r.Equal(int32(0), *schedule.LaunchConfiguration.NumTargetedNodes)
+	}
+
+	// Omitted percentage must stay nil and not affect the fixed count.
+	countState := terraform.NewInstanceStateShimmedFromValue(cty.ObjectVal(map[string]cty.Value{
+		"name": cty.StringVal("test-schedule-count"),
+		"schedule": cty.ListVal([]cty.Value{cty.ObjectVal(map[string]cty.Value{
+			"cron": cty.StringVal("5 4 * * *"),
+		})}),
+		"trigger_conditions": cty.ListVal([]cty.Value{cty.ObjectVal(map[string]cty.Value{
+			"savings_percentage": cty.NumberFloatVal(15),
+			"ignore_savings":     cty.BoolVal(false),
+		})}),
+		"launch_configuration": cty.ListVal([]cty.Value{cty.ObjectVal(map[string]cty.Value{
+			"num_targeted_nodes": cty.NumberIntVal(5),
+		})}),
+	}), 0)
+	countState.RawConfig = cty.ObjectVal(map[string]cty.Value{
+		"launch_configuration": cty.ListVal([]cty.Value{cty.ObjectVal(map[string]cty.Value{
+			"num_targeted_nodes": cty.NumberIntVal(5),
+		})}),
+	})
+
+	countSchedule, err := stateToSchedule(resource.Data(countState))
+	r.NoError(err)
+
+	r.Nil(countSchedule.LaunchConfiguration.TargetedNodesPercentage)
+	r.NotNil(countSchedule.LaunchConfiguration.NumTargetedNodes)
+	r.Equal(int32(5), *countSchedule.LaunchConfiguration.NumTargetedNodes)
+}
+
 func TestRebalancingSchedule_validateDrainOptionsAlias(t *testing.T) {
 	r := require.New(t)
 

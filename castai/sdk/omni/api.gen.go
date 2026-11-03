@@ -17,6 +17,7 @@ const (
 // Defines values for ClusterProviderType.
 const (
 	ClusterProviderTypeAKS                     ClusterProviderType = "AKS"
+	ClusterProviderTypeANYWHERE                ClusterProviderType = "ANYWHERE"
 	ClusterProviderTypeEKS                     ClusterProviderType = "EKS"
 	ClusterProviderTypeGKE                     ClusterProviderType = "GKE"
 	ClusterProviderTypePROVIDERTYPEUNSPECIFIED ClusterProviderType = "PROVIDER_TYPE_UNSPECIFIED"
@@ -92,6 +93,15 @@ const (
 	ObjectStatusPhasePHASEUNSPECIFIED ObjectStatusPhase = "PHASE_UNSPECIFIED"
 	ObjectStatusPhaseREADY            ObjectStatusPhase = "READY"
 	ObjectStatusPhaseUNKNOWN          ObjectStatusPhase = "UNKNOWN"
+)
+
+// Defines values for OmniAgentContextProvider.
+const (
+	OmniAgentContextProviderAKS                     OmniAgentContextProvider = "AKS"
+	OmniAgentContextProviderANYWHERE                OmniAgentContextProvider = "ANYWHERE"
+	OmniAgentContextProviderEKS                     OmniAgentContextProvider = "EKS"
+	OmniAgentContextProviderGKE                     OmniAgentContextProvider = "GKE"
+	OmniAgentContextProviderPROVIDERTYPEUNSPECIFIED OmniAgentContextProvider = "PROVIDER_TYPE_UNSPECIFIED"
 )
 
 // AWSConfiguration AWS specific parameters present in edge configuration.
@@ -941,6 +951,48 @@ type OffboardEdgeLocationResponse struct {
 	Script *string `json:"script,omitempty"`
 }
 
+// OmniAgentContext Cluster context used to render the omni-agent helm values. Sent by castctl
+//
+//	when onboarding a cluster; the server renders the final values overrides from it.
+type OmniAgentContext struct {
+	// ApiServerUri The URI of the cluster API server.
+	//  API server to remote peers.
+	ApiServerUri string `json:"apiServerUri"`
+
+	// ClusterId The ID of the Cluster to be onboarded.
+	ClusterId string `json:"clusterId"`
+
+	// ClusterName Name of the Cluster.
+	ClusterName string `json:"clusterName"`
+
+	// DataPathProvider CNI/networking provider (e.g calico, cilium).
+	DataPathProvider *string `json:"dataPathProvider,omitempty"`
+
+	// LoadBalancerProvider The load balancer provider to use for omni-agent services.
+	LoadBalancerProvider *string `json:"loadBalancerProvider,omitempty"`
+
+	// NodeCidrs The node CIDRs of the cluster (e.g. node subnet CIDRs).
+	NodeCidrs *[]string `json:"nodeCidrs,omitempty"`
+
+	// OrganizationId The ID of the Organization.
+	OrganizationId string `json:"organizationId"`
+
+	// PodCidrs The pod CIDRs of the cluster.
+	PodCidrs []string `json:"podCidrs"`
+
+	// Provider The type of the cluster provider.
+	Provider OmniAgentContextProvider `json:"provider"`
+
+	// ServiceCidr The service CIDR of the cluster.
+	ServiceCidr string `json:"serviceCidr"`
+
+	// StorageProvider The storage provider (storage class) to use for omni-agent volumes.
+	StorageProvider *string `json:"storageProvider,omitempty"`
+}
+
+// OmniAgentContextProvider The type of the cluster provider.
+type OmniAgentContextProvider string
+
 // OnboardClusterResponse Message of the response to onboard cluster.
 type OnboardClusterResponse struct {
 	// Script The script to be executed to onboard the cluster.
@@ -975,6 +1027,33 @@ type RegisteredClusterStatus struct {
 
 	// PodCidr The comma-separated list of pod CIDRs of the cluster.
 	PodCidr string `json:"podCidr"`
+}
+
+// RenderOmniAgentComponentResponse Message of the response to render the omni-agent component manifest.
+type RenderOmniAgentComponentResponse struct {
+	// Chart The helm chart to install.
+	Chart *RenderOmniAgentComponentResponseChart `json:"chart,omitempty"`
+
+	// ValuesOverrides The rendered values overrides for the omni-agent helm chart. Merged by castctl
+	//  on top of the chart defaults; secrets (e.g. the API key) are added client-side.
+	ValuesOverrides *map[string]interface{} `json:"valuesOverrides,omitempty"`
+}
+
+// RenderOmniAgentComponentResponseChart The helm chart of the component.
+type RenderOmniAgentComponentResponseChart struct {
+	// ChartUri The direct URI of the helm chart, e.g. an OCI reference
+	//  (oci://registry/repository/chart@sha256:...). When set, the chart is
+	//  installed directly from this URI instead of from a repository.
+	ChartUri *string `json:"chartUri,omitempty"`
+
+	// Name The name of the helm chart in the repository.
+	Name *string `json:"name,omitempty"`
+
+	// RepoUri The URI of the helm chart repository. Set when the chart is installed from a repository.
+	RepoUri *string `json:"repoUri,omitempty"`
+
+	// Version The version of the helm chart.
+	Version *string `json:"version,omitempty"`
 }
 
 // ReportStatusRequest Message to submit object status.
@@ -1055,6 +1134,15 @@ type Zone struct {
 	Name *string `json:"name,omitempty"`
 }
 
+// ClustersAPIRenderOmniAgentComponentParams defines parameters for ClustersAPIRenderOmniAgentComponent.
+type ClustersAPIRenderOmniAgentComponentParams struct {
+	// Version The requested omni-agent chart version. "latest" (or empty) resolves to the
+	//  latest version known to the API; otherwise must be an explicit chart
+	//  version or a full OCI chart reference (oci://...) to install the chart
+	//  directly from a registry.
+	Version *string `form:"version,omitempty" json:"version,omitempty"`
+}
+
 // ClustersAPIListClustersParams defines parameters for ClustersAPIListClusters.
 type ClustersAPIListClustersParams struct {
 	// PageLimit Defines the number of items that should be returned
@@ -1114,6 +1202,9 @@ type ClustersAPIGetClusterParams struct {
 	// IncludeEdgeLocations Whether edge locations should be included in the response.
 	IncludeEdgeLocations *bool `form:"includeEdgeLocations,omitempty" json:"includeEdgeLocations,omitempty"`
 }
+
+// ClustersAPIRenderOmniAgentComponentJSONRequestBody defines body for ClustersAPIRenderOmniAgentComponent for application/json ContentType.
+type ClustersAPIRenderOmniAgentComponentJSONRequestBody = OmniAgentContext
 
 // EdgeLocationsAPICreateEdgeLocationJSONRequestBody defines body for EdgeLocationsAPICreateEdgeLocation for application/json ContentType.
 type EdgeLocationsAPICreateEdgeLocationJSONRequestBody = EdgeLocation
