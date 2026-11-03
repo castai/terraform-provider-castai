@@ -59,6 +59,7 @@ func TestAccEKS_ResourceNodeConfiguration(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "gke.#", "0"),
 					resource.TestCheckResourceAttr(resourceName, "eks.0.node_group_arn", "arn:aws:iam::000000000000:role/aws_node_group"),
 					resource.TestCheckResourceAttr(resourceName, "eks.0.threads_per_cpu", "1"),
+					resource.TestCheckResourceAttr(resourceName, "eks.0.nested_virtualisation", "enabled"),
 				),
 			},
 			{
@@ -150,6 +151,7 @@ resource "castai_node_configuration" "test" {
 	    arn = "arn:aws:test"
     }
 		threads_per_cpu = 1
+		nested_virtualisation = "enabled"
   }
 }
 

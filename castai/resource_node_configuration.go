@@ -50,12 +50,18 @@ const (
 	FieldNodeConfigurationAKSPodSubnetID               = "pod_subnet_id"
 	FieldNodeConfigurationAKSEncryptionAtHost          = "enable_encryption_at_host"
 	FieldNodeConfigurationAKSAcceleratedNetworking     = "accelerated_networking"
+	FieldNodeConfigurationEKSNestedVirtualisation      = "nested_virtualisation"
 )
 
 const (
 	eksImageFamilyAL2          = "al2"
 	eksImageFamilyAL2023       = "al2023"
 	eksImageFamilyBottlerocket = "bottlerocket"
+)
+
+const (
+	eksNestedVirtualisationEnabled  = "enabled"
+	eksNestedVirtualisationDisabled = "disabled"
 )
 
 const (
@@ -327,6 +333,12 @@ func resourceNodeConfiguration() *schema.Resource {
 							Optional:         true,
 							Description:      "Number of ENA queues per network interface.",
 							ValidateDiagFunc: validation.ToDiagFunc(validation.IntAtLeast(1)),
+						},
+						FieldNodeConfigurationEKSNestedVirtualisation: {
+							Type:             schema.TypeString,
+							Optional:         true,
+							Description:      "Controls EC2 nested virtualisation on provisioned nodes. Allowed values: `enabled`, `disabled`. When omitted, the field is not sent to the API and the API default (nested virtualisation off) applies.",
+							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{eksNestedVirtualisationEnabled, eksNestedVirtualisationDisabled}, false)),
 						},
 					},
 				},
@@ -1063,7 +1075,33 @@ func toEKSConfig(obj map[string]interface{}) *sdk.NodeconfigV1EKSConfig {
 		out.EnaQueueCountPerInterface = toPtr(int32(v))
 	}
 
+	if v, ok := obj[FieldNodeConfigurationEKSNestedVirtualisation].(string); ok && v != "" {
+		out.NestedVirtualisation = toEKSNodeConfigNestedVirtualisationMode(v)
+	}
+
 	return out
+}
+
+func toEKSNodeConfigNestedVirtualisationMode(v string) *sdk.NodeconfigV1EKSConfigNestedVirtualisationMode {
+	switch strings.ToLower(v) {
+	case eksNestedVirtualisationEnabled:
+		return lo.ToPtr(sdk.NodeconfigV1EKSConfigNestedVirtualisationModeNESTEDVIRTUALISATIONMODEENABLED)
+	case eksNestedVirtualisationDisabled:
+		return lo.ToPtr(sdk.NodeconfigV1EKSConfigNestedVirtualisationModeNESTEDVIRTUALISATIONMODEDISABLED)
+	default:
+		return nil
+	}
+}
+
+func fromEKSNodeConfigNestedVirtualisationMode(v sdk.NodeconfigV1EKSConfigNestedVirtualisationMode) string {
+	switch v {
+	case sdk.NodeconfigV1EKSConfigNestedVirtualisationModeNESTEDVIRTUALISATIONMODEENABLED:
+		return eksNestedVirtualisationEnabled
+	case sdk.NodeconfigV1EKSConfigNestedVirtualisationModeNESTEDVIRTUALISATIONMODEDISABLED:
+		return eksNestedVirtualisationDisabled
+	default:
+		return ""
+	}
 }
 
 func toEKSImageFamily(v string) *sdk.NodeconfigV1EKSConfigImageFamily {
@@ -1161,6 +1199,12 @@ func flattenEKSConfig(config *sdk.NodeconfigV1EKSConfig) []map[string]interface{
 
 	if v := config.EnaQueueCountPerInterface; v != nil {
 		m["ena_queue_count_per_interface"] = *config.EnaQueueCountPerInterface
+	}
+
+	if v := config.NestedVirtualisation; v != nil {
+		if s := fromEKSNodeConfigNestedVirtualisationMode(*v); s != "" {
+			m[FieldNodeConfigurationEKSNestedVirtualisation] = s
+		}
 	}
 
 	return []map[string]interface{}{m}
