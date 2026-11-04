@@ -176,6 +176,7 @@ Optional:
 - `ips_per_prefix` (Number) Number of IPs per prefix to be used for calculating max pods. For IPv4 it should be 16. More info: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-prefix-eni.html#ec2-prefix-basics
 - `key_pair_id` (String) AWS key pair ID to be used for CAST provisioned nodes. Has priority over ssh_public_key
 - `max_pods_per_node_formula` (String) Formula to calculate the maximum number of pods that can be run on a node. The following list of variables will be bound to a number before evaluating and can be used in the formula: NUM_MAX_NET_INTERFACES, NUM_IP_PER_INTERFACE, NUM_IP_PER_PREFIX, NUM_CPU, NUM_RAM_GB .
+- `nested_virtualisation` (String) Controls EC2 nested virtualisation on provisioned nodes. Allowed values: `enabled`, `disabled`. When omitted, the field is not sent to the API and the API default (nested virtualisation off) applies.
 - `node_group_arn` (String) Cluster's node group ARN used for CAST provisioned node pools. Required for hibernate/resume functionality
 - `target_group` (Block List) AWS target groups configuration for CAST provisioned nodes (see [below for nested schema](#nestedblock--eks--target_group))
 - `threads_per_cpu` (Number) Number of threads per core.
