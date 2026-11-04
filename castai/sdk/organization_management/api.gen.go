@@ -21,6 +21,14 @@ const (
 	BatchCreateEnterpriseGroupsRequestMemberKindSUBJECTKINDUSER           BatchCreateEnterpriseGroupsRequestMemberKind = "SUBJECT_KIND_USER"
 )
 
+// Defines values for BatchCreateEnterpriseServiceAccountsRequestServiceAccountRequestProduct.
+const (
+	BatchCreateEnterpriseServiceAccountsRequestServiceAccountRequestProductPRODUCTTYPECASTAI      BatchCreateEnterpriseServiceAccountsRequestServiceAccountRequestProduct = "PRODUCT_TYPE_CASTAI"
+	BatchCreateEnterpriseServiceAccountsRequestServiceAccountRequestProductPRODUCTTYPEKIMCHI      BatchCreateEnterpriseServiceAccountsRequestServiceAccountRequestProduct = "PRODUCT_TYPE_KIMCHI"
+	BatchCreateEnterpriseServiceAccountsRequestServiceAccountRequestProductPRODUCTTYPEPLATFORM    BatchCreateEnterpriseServiceAccountsRequestServiceAccountRequestProduct = "PRODUCT_TYPE_PLATFORM"
+	BatchCreateEnterpriseServiceAccountsRequestServiceAccountRequestProductPRODUCTTYPEUNSPECIFIED BatchCreateEnterpriseServiceAccountsRequestServiceAccountRequestProduct = "PRODUCT_TYPE_UNSPECIFIED"
+)
+
 // Defines values for BatchUpdateEnterpriseGroupsRequestMemberKind.
 const (
 	BatchUpdateEnterpriseGroupsRequestMemberKindSERVICEACCOUNT         BatchUpdateEnterpriseGroupsRequestMemberKind = "SERVICE_ACCOUNT"
@@ -317,7 +325,18 @@ type BatchCreateEnterpriseServiceAccountsRequestServiceAccountRequest struct {
 
 	// OrganizationId Organization ID — must be the enterprise itself or a direct child (deleted_at IS NULL).
 	OrganizationId string `json:"organizationId"`
+
+	// Product Which product the service account belongs to (castai or kimchi).
+	//  Resolved primarily from the caller's context, defaulting to castai.
+	//  All or nothing across the batch: omit it on every item or set the same value on every item.
+	Product *BatchCreateEnterpriseServiceAccountsRequestServiceAccountRequestProduct `json:"product,omitempty"`
 }
+
+// BatchCreateEnterpriseServiceAccountsRequestServiceAccountRequestProduct Which product the service account belongs to (castai or kimchi).
+//
+//	Resolved primarily from the caller's context, defaulting to castai.
+//	All or nothing across the batch: omit it on every item or set the same value on every item.
+type BatchCreateEnterpriseServiceAccountsRequestServiceAccountRequestProduct string
 
 // BatchCreateEnterpriseServiceAccountsResponse Response message for batch creating service accounts in an enterprise.
 type BatchCreateEnterpriseServiceAccountsResponse struct {

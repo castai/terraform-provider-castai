@@ -1191,15 +1191,17 @@ const (
 
 // Defines values for WorkloadoptimizationV1SystemOverrideResetOrigin.
 const (
-	WorkloadoptimizationV1SystemOverrideResetOriginSYSTEMOVERRIDERESETORIGINANNOTATIONSOFF WorkloadoptimizationV1SystemOverrideResetOrigin = "SYSTEM_OVERRIDE_RESET_ORIGIN_ANNOTATIONS_OFF"
-	WorkloadoptimizationV1SystemOverrideResetOriginSYSTEMOVERRIDERESETORIGINAPICALL        WorkloadoptimizationV1SystemOverrideResetOrigin = "SYSTEM_OVERRIDE_RESET_ORIGIN_API_CALL"
-	WorkloadoptimizationV1SystemOverrideResetOriginSYSTEMOVERRIDERESETORIGINEXPIRED        WorkloadoptimizationV1SystemOverrideResetOrigin = "SYSTEM_OVERRIDE_RESET_ORIGIN_EXPIRED"
-	WorkloadoptimizationV1SystemOverrideResetOriginSYSTEMOVERRIDERESETORIGINUNSPECIFIED    WorkloadoptimizationV1SystemOverrideResetOrigin = "SYSTEM_OVERRIDE_RESET_ORIGIN_UNSPECIFIED"
+	WorkloadoptimizationV1SystemOverrideResetOriginSYSTEMOVERRIDERESETORIGINANNOTATIONSOFF   WorkloadoptimizationV1SystemOverrideResetOrigin = "SYSTEM_OVERRIDE_RESET_ORIGIN_ANNOTATIONS_OFF"
+	WorkloadoptimizationV1SystemOverrideResetOriginSYSTEMOVERRIDERESETORIGINAPICALL          WorkloadoptimizationV1SystemOverrideResetOrigin = "SYSTEM_OVERRIDE_RESET_ORIGIN_API_CALL"
+	WorkloadoptimizationV1SystemOverrideResetOriginSYSTEMOVERRIDERESETORIGINDETECTORDISABLED WorkloadoptimizationV1SystemOverrideResetOrigin = "SYSTEM_OVERRIDE_RESET_ORIGIN_DETECTOR_DISABLED"
+	WorkloadoptimizationV1SystemOverrideResetOriginSYSTEMOVERRIDERESETORIGINEXPIRED          WorkloadoptimizationV1SystemOverrideResetOrigin = "SYSTEM_OVERRIDE_RESET_ORIGIN_EXPIRED"
+	WorkloadoptimizationV1SystemOverrideResetOriginSYSTEMOVERRIDERESETORIGINUNSPECIFIED      WorkloadoptimizationV1SystemOverrideResetOrigin = "SYSTEM_OVERRIDE_RESET_ORIGIN_UNSPECIFIED"
 )
 
 // Defines values for WorkloadoptimizationV1SystemOverrideTarget.
 const (
 	WorkloadoptimizationV1SystemOverrideTargetSYSTEMOVERRIDETARGETALL                  WorkloadoptimizationV1SystemOverrideTarget = "SYSTEM_OVERRIDE_TARGET_ALL"
+	WorkloadoptimizationV1SystemOverrideTargetSYSTEMOVERRIDETARGETMEMORYCAP            WorkloadoptimizationV1SystemOverrideTarget = "SYSTEM_OVERRIDE_TARGET_MEMORY_CAP"
 	WorkloadoptimizationV1SystemOverrideTargetSYSTEMOVERRIDETARGETUNSPECIFIED          WorkloadoptimizationV1SystemOverrideTarget = "SYSTEM_OVERRIDE_TARGET_UNSPECIFIED"
 	WorkloadoptimizationV1SystemOverrideTargetSYSTEMOVERRIDETARGETVERTICALOPTIMIZATION WorkloadoptimizationV1SystemOverrideTarget = "SYSTEM_OVERRIDE_TARGET_VERTICAL_OPTIMIZATION"
 )
@@ -10051,6 +10053,9 @@ type WorkloadoptimizationV1Event struct {
 type WorkloadoptimizationV1EventContainer struct {
 	Name      string                          `json:"name"`
 	Resources WorkloadoptimizationV1Resources `json:"resources"`
+
+	// ScopeValue Scope label value identifying the group the container belongs to; set only for scoped workloads.
+	ScopeValue *string `json:"scopeValue"`
 }
 
 // WorkloadoptimizationV1EventType EventType defines possible types for workload events.
@@ -12207,12 +12212,14 @@ type WorkloadoptimizationV1SystemOverrideResetEvent struct {
 	//  - SYSTEM_OVERRIDE_RESET_ORIGIN_API_CALL: Override reset via API call by user or system.
 	//  - SYSTEM_OVERRIDE_RESET_ORIGIN_EXPIRED: Override reset due to expiration after a configured time period.
 	//  - SYSTEM_OVERRIDE_RESET_ORIGIN_ANNOTATIONS_OFF: Override reset because workload is no longer managed by CAST AI annotations.
+	//  - SYSTEM_OVERRIDE_RESET_ORIGIN_DETECTOR_DISABLED: Override reset because the detector that produced it was disabled.
 	Origin WorkloadoptimizationV1SystemOverrideResetOrigin `json:"origin"`
 
 	// Target SystemOverrideTarget defines which workload optimization features are affected by the system override.
 	//
 	//  - SYSTEM_OVERRIDE_TARGET_ALL: Affects all system overrides properties.
 	//  - SYSTEM_OVERRIDE_TARGET_VERTICAL_OPTIMIZATION: Affects only vertical optimization (resource recommendations).
+	//  - SYSTEM_OVERRIDE_TARGET_MEMORY_CAP: Affects only the memory cap override (infinite memory growth detection).
 	Target WorkloadoptimizationV1SystemOverrideTarget `json:"target"`
 }
 
@@ -12221,12 +12228,14 @@ type WorkloadoptimizationV1SystemOverrideResetEvent struct {
 //   - SYSTEM_OVERRIDE_RESET_ORIGIN_API_CALL: Override reset via API call by user or system.
 //   - SYSTEM_OVERRIDE_RESET_ORIGIN_EXPIRED: Override reset due to expiration after a configured time period.
 //   - SYSTEM_OVERRIDE_RESET_ORIGIN_ANNOTATIONS_OFF: Override reset because workload is no longer managed by CAST AI annotations.
+//   - SYSTEM_OVERRIDE_RESET_ORIGIN_DETECTOR_DISABLED: Override reset because the detector that produced it was disabled.
 type WorkloadoptimizationV1SystemOverrideResetOrigin string
 
 // WorkloadoptimizationV1SystemOverrideTarget SystemOverrideTarget defines which workload optimization features are affected by the system override.
 //
 //   - SYSTEM_OVERRIDE_TARGET_ALL: Affects all system overrides properties.
 //   - SYSTEM_OVERRIDE_TARGET_VERTICAL_OPTIMIZATION: Affects only vertical optimization (resource recommendations).
+//   - SYSTEM_OVERRIDE_TARGET_MEMORY_CAP: Affects only the memory cap override (infinite memory growth detection).
 type WorkloadoptimizationV1SystemOverrideTarget string
 
 // WorkloadoptimizationV1SystemOverrideTriggeredEvent SystemOverrideTriggeredEvent is emitted when CAST AI activates a system override on a workload.
@@ -12241,6 +12250,7 @@ type WorkloadoptimizationV1SystemOverrideTriggeredEvent struct {
 	//
 	//  - SYSTEM_OVERRIDE_TARGET_ALL: Affects all system overrides properties.
 	//  - SYSTEM_OVERRIDE_TARGET_VERTICAL_OPTIMIZATION: Affects only vertical optimization (resource recommendations).
+	//  - SYSTEM_OVERRIDE_TARGET_MEMORY_CAP: Affects only the memory cap override (infinite memory growth detection).
 	Target WorkloadoptimizationV1SystemOverrideTarget `json:"target"`
 }
 
