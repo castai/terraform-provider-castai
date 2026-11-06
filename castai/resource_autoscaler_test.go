@@ -1234,6 +1234,9 @@ func TestAccEKS_ResourceAutoscaler_basic(t *testing.T) {
 				},
 				ImportState:       true,
 				ImportStateVerify: true,
+				// The state built from config keeps the duration as written (e.g. "1m"),
+				// while the importer stores the API's canonical form (e.g. "1m0s").
+				ImportStateVerifyIgnore: []string{"autoscaler_settings.0.node_downscaler.0.evictor.0.cycle_interval"},
 			},
 			// Step 4: Enable pod_pinner and evictor and verify state reflects changes
 			{
