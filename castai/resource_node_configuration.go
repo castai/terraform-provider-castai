@@ -583,8 +583,20 @@ For a node with 8 CPUs and 16 GB RAM, this calculates to 40 (5×8), 80 (5×16), 
 						"disk_type": {
 							Type:             schema.TypeString,
 							Optional:         true,
-							Description:      "Type of boot disk attached to the node. (See [disk types](https://cloud.google.com/compute/docs/disks#pdspecs)). One of: pd-standard, pd-balanced, pd-ssd, pd-extreme ",
-							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"pd-standard", "pd-balanced", "pd-ssd", "pd-extreme"}, false)),
+							Description:      "Type of boot disk attached to the node. (See [disk types](https://cloud.google.com/compute/docs/disks#pdspecs)). One of: pd-standard, pd-balanced, pd-ssd, pd-extreme, hyperdisk-balanced",
+							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"pd-standard", "pd-balanced", "pd-ssd", "pd-extreme", "hyperdisk-balanced"}, false)),
+						},
+						"provisioned_iops": {
+							Type:             schema.TypeInt,
+							Optional:         true,
+							ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(3000, 160000)),
+							Description:      "Provisioned IOPS for Hyperdisk-Balanced boot disks. Requires the boot disk to resolve to hyperdisk-balanced: an explicitly configured different disk_type is rejected, and provisioning fails if the runtime-resolved disk type differs. GCP valid range: 3000-160000",
+						},
+						"provisioned_throughput": {
+							Type:             schema.TypeInt,
+							Optional:         true,
+							ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(140, 2400)),
+							Description:      "Provisioned throughput in MiB/s for Hyperdisk-Balanced boot disks. Requires the boot disk to resolve to hyperdisk-balanced: an explicitly configured different disk_type is rejected, and provisioning fails if the runtime-resolved disk type differs. GCP valid range: 140-2400. When both provisioned values are set, GCP couples them: throughput must be between MAX(140, provisioned_iops/256) and MIN(2400, provisioned_iops/4) MiB/s",
 						},
 						"zones": {
 							Type:     schema.TypeList,
@@ -1686,6 +1698,12 @@ func toGKEConfig(obj map[string]interface{}) *sdk.NodeconfigV1GKEConfig {
 	if v, ok := obj["disk_type"].(string); ok && v != "" {
 		out.DiskType = toPtr(v)
 	}
+	if v, ok := obj["provisioned_iops"].(int); ok && v != 0 {
+		out.ProvisionedIops = toPtr(int64(v))
+	}
+	if v, ok := obj["provisioned_throughput"].(int); ok && v != 0 {
+		out.ProvisionedThroughput = toPtr(int64(v))
+	}
 	if v, ok := obj["zones"].([]interface{}); ok {
 		out.Zones = toPtr(toStringList(v))
 	}
@@ -1819,6 +1837,12 @@ func flattenGKEConfig(config *sdk.NodeconfigV1GKEConfig) []map[string]interface{
 	}
 	if v := config.DiskType; v != nil {
 		m["disk_type"] = *v
+	}
+	if v := config.ProvisionedIops; v != nil {
+		m["provisioned_iops"] = *v
+	}
+	if v := config.ProvisionedThroughput; v != nil {
+		m["provisioned_throughput"] = *v
 	}
 	if v := config.Zones; v != nil {
 		m["zones"] = *v

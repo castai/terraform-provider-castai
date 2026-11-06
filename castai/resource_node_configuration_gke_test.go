@@ -318,6 +318,83 @@ func TestGKEConfigSecondaryBootDisksMapping(t *testing.T) {
 	}
 }
 
+func TestGKEConfigProvisionedBootDiskMapping(t *testing.T) {
+	tests := []struct {
+		name            string
+		give            map[string]interface{}
+		wantIops        *int64
+		wantThroughput  *int64
+		wantInState     bool
+		wantIopsInState int64
+		wantTpInState   int64
+	}{
+		{
+			name:            "provisioned values round trip",
+			give:            map[string]interface{}{"provisioned_iops": 8000, "provisioned_throughput": 300},
+			wantIops:        toPtr(int64(8000)),
+			wantThroughput:  toPtr(int64(300)),
+			wantInState:     true,
+			wantIopsInState: 8000,
+			wantTpInState:   300,
+		},
+		{
+			name:           "omitted values stay nil and drift free",
+			give:           map[string]interface{}{},
+			wantIops:       nil,
+			wantThroughput: nil,
+			wantInState:    false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			cfg := toGKEConfig(tt.give)
+			require.Equal(t, tt.wantIops, cfg.ProvisionedIops)
+			require.Equal(t, tt.wantThroughput, cfg.ProvisionedThroughput)
+
+			flat := flattenGKEConfig(&sdk.NodeconfigV1GKEConfig{
+				ProvisionedIops:       cfg.ProvisionedIops,
+				ProvisionedThroughput: cfg.ProvisionedThroughput,
+			})
+			if tt.wantInState {
+				require.Equal(t, tt.wantIopsInState, flat[0]["provisioned_iops"])
+				require.Equal(t, tt.wantTpInState, flat[0]["provisioned_throughput"])
+			} else {
+				require.NotContains(t, flat[0], "provisioned_iops")
+				require.NotContains(t, flat[0], "provisioned_throughput")
+			}
+		})
+	}
+}
+
+func TestGKEConfigProvisionedBootDiskValidation(t *testing.T) {
+	gkeSchema := resourceNodeConfiguration().Schema[FieldNodeConfigurationGKE].
+		Elem.(*schema.Resource).Schema
+
+	tests := []struct {
+		name      string
+		field     string
+		give      interface{}
+		wantError bool
+	}{
+		{name: "iops lower bound accepted", field: "provisioned_iops", give: 3000, wantError: false},
+		{name: "iops upper bound accepted", field: "provisioned_iops", give: 160000, wantError: false},
+		{name: "iops below range rejected", field: "provisioned_iops", give: 2999, wantError: true},
+		{name: "iops above range rejected", field: "provisioned_iops", give: 160001, wantError: true},
+		{name: "throughput lower bound accepted", field: "provisioned_throughput", give: 140, wantError: false},
+		{name: "throughput upper bound accepted", field: "provisioned_throughput", give: 2400, wantError: false},
+		{name: "throughput below range rejected", field: "provisioned_throughput", give: 139, wantError: true},
+		{name: "throughput above range rejected", field: "provisioned_throughput", give: 2401, wantError: true},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			diags := gkeSchema[tt.field].ValidateDiagFunc(tt.give, cty.Path{})
+			require.Equal(t, tt.wantError, diags.HasError())
+		})
+	}
+}
+
 func TestGKEConfigSecondaryBootDisksEmpty(t *testing.T) {
 	cfg := toGKEConfig(map[string]interface{}{"secondary_boot_disks": []interface{}{}})
 	require.Nil(t, cfg.SecondaryBootDisks)

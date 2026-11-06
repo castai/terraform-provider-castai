@@ -203,7 +203,7 @@ Optional:
 
 Optional:
 
-- `disk_type` (String) Type of boot disk attached to the node. (See [disk types](https://cloud.google.com/compute/docs/disks#pdspecs)). One of: pd-standard, pd-balanced, pd-ssd, pd-extreme
+- `disk_type` (String) Type of boot disk attached to the node. (See [disk types](https://cloud.google.com/compute/docs/disks#pdspecs)). One of: pd-standard, pd-balanced, pd-ssd, pd-extreme, hyperdisk-balanced
 - `loadbalancers` (Block List) Loadboalancer configuration for CAST provisioned nodes (see [below for nested schema](#nestedblock--gke--loadbalancers))
 - `max_pods_per_node` (Number) Maximum number of pods that can be run on a node, which affects how many IP addresses you will need for each node. Defaults to 110
 - `max_pods_per_node_formula` (String) This is an advanced configuration field. In general, we recommend using max_pods_per_node instead.
@@ -216,6 +216,8 @@ If you want the smallest value between 5 times the CPUs, 5 times the RAM, or a c
 For a node with 8 CPUs and 16 GB RAM, this calculates to 40 (5×8), 80 (5×16), and 110, then picks the smallest value: 40 pods.
 - `network_tags` (List of String) Network tags to be added on a VM. (See [network tags](https://cloud.google.com/vpc/docs/add-remove-network-tags))
 - `on_host_maintenance` (String) Maintenance behavior of the instances. If not set, the default value for spot nodes is terminate, and for non-spot nodes, it is migrate.
+- `provisioned_iops` (Number) Provisioned IOPS for Hyperdisk-Balanced boot disks. Requires the boot disk to resolve to hyperdisk-balanced: an explicitly configured different disk_type is rejected, and provisioning fails if the runtime-resolved disk type differs. GCP valid range: 3000-160000
+- `provisioned_throughput` (Number) Provisioned throughput in MiB/s for Hyperdisk-Balanced boot disks. Requires the boot disk to resolve to hyperdisk-balanced: an explicitly configured different disk_type is rejected, and provisioning fails if the runtime-resolved disk type differs. GCP valid range: 140-2400. When both provisioned values are set, GCP couples them: throughput must be between MAX(140, provisioned_iops/256) and MIN(2400, provisioned_iops/4) MiB/s
 - `secondary_boot_disks` (Block List) Secondary boot disks to be attached to provisioned nodes. Can be used to preload container images or arbitrary data on new nodes. (see [below for nested schema](#nestedblock--gke--secondary_boot_disks))
 - `secondary_ip_range` (Block List, Max: 1) Secondary IP range configuration for pods in GKE nodes (see [below for nested schema](#nestedblock--gke--secondary_ip_range))
 - `use_ephemeral_storage_local_ssd` (Boolean) Use ephemeral storage local SSD. Defaults to false
