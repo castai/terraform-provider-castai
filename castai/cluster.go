@@ -25,15 +25,25 @@ const (
 )
 
 func resourceCastaiClusterDelete(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*ProviderConfig).api
+	return clusterDelete(ctx, data, meta.(*ProviderConfig).api, nil)
+}
+
+// clusterDelete disconnects and deletes the cluster. prefetched, when non-nil,
+// replaces the first status fetch inside the retry loop to avoid a redundant GET.
+func clusterDelete(ctx context.Context, data *schema.ResourceData, client sdk.ClientWithResponsesInterface, prefetched *sdk.ExternalClusterAPIGetClusterResponse) diag.Diagnostics {
 	clusterId := data.Id()
 
 	log.Printf("[INFO] Checking current status of the cluster.")
 
 	err := retry.RetryContext(ctx, data.Timeout(schema.TimeoutDelete), func() *retry.RetryError {
-		clusterResponse, err := client.ExternalClusterAPIGetClusterWithResponse(ctx, clusterId)
-		if checkErr := sdk.CheckOKResponse(clusterResponse, err); checkErr != nil {
-			return retry.NonRetryableError(checkErr)
+		clusterResponse := prefetched
+		prefetched = nil
+		if clusterResponse == nil {
+			resp, err := client.ExternalClusterAPIGetClusterWithResponse(ctx, clusterId)
+			if checkErr := sdk.CheckOKResponse(resp, err); checkErr != nil {
+				return retry.NonRetryableError(checkErr)
+			}
+			clusterResponse = resp
 		}
 
 		clusterStatus := *clusterResponse.JSON200.Status
