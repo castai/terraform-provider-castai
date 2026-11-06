@@ -8,11 +8,14 @@ import (
 	"testing"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
 	"github.com/samber/lo"
+
+	"github.com/castai/terraform-provider-castai/castai/sdk/omni"
 )
 
 func TestAccCloudAgnostic_ResourceEdgeLocationOCI(t *testing.T) {
@@ -38,6 +41,7 @@ func TestAccCloudAgnostic_ResourceEdgeLocationOCI(t *testing.T) {
 					resource.TestCheckResourceAttrSet(resourceName, "oci.compartment_id"),
 					resource.TestCheckResourceAttrSet(resourceName, "oci.subnet_id"),
 					resource.TestCheckResourceAttrSet(resourceName, "id"),
+					resource.TestCheckResourceAttr(resourceName, "oci.vcn_peered", "true"),
 					resource.TestCheckResourceAttr(resourceName, "credentials_revision", "1"),
 					resource.TestCheckResourceAttr(resourceName, "networking.tunneled_cidrs.#", "0"),
 				),
@@ -101,6 +105,7 @@ resource "castai_edge_location" "test" {
     %[4]s
     vcn_id            = "ocid1.vcn.oc1.phx.example"
     vcn_cidr          = "10.0.0.0/16"
+    vcn_peered        = true
     subnet_id         = "ocid1.subnet.oc1.phx.example"
     security_group_id = "ocid1.networksecuritygroup.oc1.phx.example"
   }
@@ -862,4 +867,69 @@ resource "castai_edge_location" "test" {
   }
 }
 `, rName, description, clusterName, organizationID, organizationID))
+}
+
+// TestEdgeLocationOCIVcnPeeredMapping covers the toOCI/toOCIModel mapping of the
+// vcn_peered attribute, including the null case: the REST API omits vcnPeered at
+// its zero value, so an omitted field must round-trip to a null attribute.
+func TestEdgeLocationOCIVcnPeeredMapping(t *testing.T) {
+	r := &edgeLocationResource{}
+
+	newModel := func(peered types.Bool) *ociModel {
+		return &ociModel{
+			TenancyID:          types.StringValue("tenancy"),
+			CompartmentID:      types.StringValue("compartment"),
+			UserIDWO:           types.StringValue("user"),
+			FingerprintWO:      types.StringValue("fingerprint"),
+			PrivateKeyBase64WO: types.StringValue("key"),
+			VcnID:              types.StringValue("vcn"),
+			SubnetID:           types.StringValue("subnet"),
+			VcnPeered:          peered,
+		}
+	}
+
+	t.Run("toOCI sends pointer when set true", func(t *testing.T) {
+		m := newModel(types.BoolValue(true))
+		out := r.toOCI(m, m)
+		if out == nil || out.Networking == nil || out.Networking.VcnPeered == nil || !*out.Networking.VcnPeered {
+			t.Fatalf("expected VcnPeered=true pointer, got %+v", out.Networking)
+		}
+	})
+
+	t.Run("toOCI sends pointer when set false", func(t *testing.T) {
+		m := newModel(types.BoolValue(false))
+		out := r.toOCI(m, m)
+		if out == nil || out.Networking == nil || out.Networking.VcnPeered == nil || *out.Networking.VcnPeered {
+			t.Fatalf("expected VcnPeered=false pointer, got %+v", out.Networking)
+		}
+	})
+
+	t.Run("toOCI omits field when unset", func(t *testing.T) {
+		m := newModel(types.BoolNull())
+		out := r.toOCI(m, m)
+		if out == nil || out.Networking == nil {
+			t.Fatal("expected networking to be set")
+		}
+		if out.Networking.VcnPeered != nil {
+			t.Fatalf("expected VcnPeered to be nil, got %v", *out.Networking.VcnPeered)
+		}
+	})
+
+	t.Run("toOCIModel reads back true", func(t *testing.T) {
+		out := r.toOCIModel(&omni.OCIParam{
+			Networking: &omni.OCIParamNetworking{VcnId: "vcn", SubnetId: "subnet", VcnPeered: lo.ToPtr(true)},
+		})
+		if out == nil || out.VcnPeered.IsNull() || !out.VcnPeered.ValueBool() {
+			t.Fatalf("expected vcn_peered=true, got %v", out.VcnPeered)
+		}
+	})
+
+	t.Run("toOCIModel maps omitted field to null", func(t *testing.T) {
+		out := r.toOCIModel(&omni.OCIParam{
+			Networking: &omni.OCIParamNetworking{VcnId: "vcn", SubnetId: "subnet"},
+		})
+		if out == nil || !out.VcnPeered.IsNull() {
+			t.Fatalf("expected vcn_peered to be null, got %v", out.VcnPeered)
+		}
+	})
 }
