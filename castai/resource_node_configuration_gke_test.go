@@ -47,7 +47,9 @@ func TestAccGKE_ResourceNodeConfiguration(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "kops.#", "0"),
 					resource.TestCheckResourceAttr(resourceName, "gke.0.max_pods_per_node", "31"),
 					resource.TestCheckResourceAttr(resourceName, "gke.0.max_pods_per_node_formula", ""),
-					resource.TestCheckResourceAttr(resourceName, "gke.0.disk_type", "pd-balanced"),
+					resource.TestCheckResourceAttr(resourceName, "gke.0.disk_type", "hyperdisk-balanced"),
+					resource.TestCheckResourceAttr(resourceName, "gke.0.provisioned_iops", "4000"),
+					resource.TestCheckResourceAttr(resourceName, "gke.0.provisioned_throughput", "200"),
 					resource.TestCheckResourceAttr(resourceName, "gke.0.network_tags.0", "ab"),
 					resource.TestCheckResourceAttr(resourceName, "gke.0.network_tags.1", "bc"),
 					resource.TestCheckResourceAttr(resourceName, "gke.0.zones.#", "0"),
@@ -69,7 +71,9 @@ func TestAccGKE_ResourceNodeConfiguration(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "kops.#", "0"),
 					resource.TestCheckResourceAttr(resourceName, "gke.0.max_pods_per_node", "110"),
 					resource.TestCheckResourceAttr(resourceName, "gke.0.max_pods_per_node_formula", ""),
-					resource.TestCheckResourceAttr(resourceName, "gke.0.disk_type", "pd-balanced"),
+					resource.TestCheckResourceAttr(resourceName, "gke.0.disk_type", ""),
+					resource.TestCheckResourceAttr(resourceName, "gke.0.provisioned_iops", "4000"),
+					resource.TestCheckResourceAttr(resourceName, "gke.0.provisioned_throughput", "200"),
 					resource.TestCheckResourceAttr(resourceName, "gke.0.network_tags.0", "ab"),
 					resource.TestCheckResourceAttr(resourceName, "gke.0.network_tags.1", "bc"),
 					resource.TestCheckResourceAttr(resourceName, "gke.0.zones.#", "0"),
@@ -130,7 +134,9 @@ func testAccGKENodeConfigurationConfig(rName, clusterName, projectID string) str
 	gkeParams := fmt.Sprintf(`
 		max_pods_per_node = 31
 		network_tags = ["ab", "bc"]
-		disk_type = "pd-balanced"
+		disk_type = "hyperdisk-balanced"
+		provisioned_iops = 4000
+		provisioned_throughput = 200
 		on_host_maintenance = "MIGRATE"
 		secondary_boot_disks {
 			disk_image = "projects/%[1]s/global/images/ep-e2e-2dary-images-cache"
@@ -141,9 +147,13 @@ func testAccGKENodeConfigurationConfig(rName, clusterName, projectID string) str
 }
 
 func testAccGKENodeConfigurationConfigWithoutMaxPods(rName, clusterName, projectID string) string {
+	// disk_type is intentionally left unset: the service resolves the boot disk type at
+	// provisioning time and the provisioned values are echoed back on read. This
+	// exercises the non-hyperdisk resolved-type path (values ignored, no drift).
 	const gkeParams = `
 		network_tags = ["ab", "bc"]
-		disk_type = "pd-balanced"
+		provisioned_iops = 4000
+		provisioned_throughput = 200
 		on_host_maintenance = "MIGRATE"
 	`
 	return testAccGKENodeConfigurationConfigWithGKEConfig(rName, clusterName, projectID, gkeParams)
@@ -253,6 +263,72 @@ locals {
 `, clusterName, projectID, acceptanceTestClusterSubnetworkName)
 }
 
+func TestGKEConfigProvisionedIopsThroughput(t *testing.T) {
+	cfg := toGKEConfig(map[string]interface{}{
+		"provisioned_iops":       4000,
+		"provisioned_throughput": 200,
+	})
+	require.NotNil(t, cfg.ProvisionedIops)
+	require.NotNil(t, cfg.ProvisionedThroughput)
+	require.Equal(t, int64(4000), *cfg.ProvisionedIops)
+	require.Equal(t, int64(200), *cfg.ProvisionedThroughput)
+
+	flat := flattenGKEConfig(cfg)
+	require.Equal(t, int64(4000), flat[0]["provisioned_iops"])
+	require.Equal(t, int64(200), flat[0]["provisioned_throughput"])
+}
+
+func TestGKEConfigProvisionedIopsThroughputEmpty(t *testing.T) {
+	cfg := toGKEConfig(map[string]interface{}{})
+	require.Nil(t, cfg.ProvisionedIops)
+	require.Nil(t, cfg.ProvisionedThroughput)
+
+	flat := flattenGKEConfig(&sdk.NodeconfigV1GKEConfig{})
+	require.NotContains(t, flat[0], "provisioned_iops")
+	require.NotContains(t, flat[0], "provisioned_throughput")
+}
+
+func TestValidateGKEProvisionedDiskType(t *testing.T) {
+	tests := []struct {
+		name      string
+		diskType  string
+		wantError bool
+	}{
+		{name: "hyperdisk-balanced accepted", diskType: gkeDiskTypeHyperdiskBalanced, wantError: false},
+		{name: "other disk type rejected", diskType: "pd-balanced", wantError: true},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := validateGKEProvisionedDiskType(tt.diskType)
+			require.Equal(t, tt.wantError, err != nil)
+		})
+	}
+}
+
+func TestValidateGKEProvisionedDiskCoupling(t *testing.T) {
+	tests := []struct {
+		name             string
+		iops, throughput int
+		wantError        bool
+	}{
+		{name: "valid mid range", iops: 4000, throughput: 200, wantError: false},
+		{name: "at coupling upper bound", iops: 4000, throughput: 1000, wantError: false},
+		{name: "above coupling upper bound rejected", iops: 4000, throughput: 1001, wantError: true},
+		{name: "at coupling lower bound", iops: 160000, throughput: 625, wantError: false},
+		{name: "below coupling lower bound rejected", iops: 160000, throughput: 624, wantError: true},
+		{name: "at GCP max throughput", iops: 160000, throughput: 2400, wantError: false},
+		{name: "above GCP max throughput rejected", iops: 160000, throughput: 2401, wantError: true},
+		{name: "iops at GCP min", iops: 3000, throughput: 750, wantError: false},
+		{name: "iops at GCP min above max rejected", iops: 3000, throughput: 751, wantError: true},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := validateGKEProvisionedDiskCoupling(tt.iops, tt.throughput)
+			require.Equal(t, tt.wantError, err != nil)
+		})
+	}
+}
+
 func TestGKEConfigSecondaryBootDisksMapping(t *testing.T) {
 	tests := []struct {
 		name     string
@@ -324,6 +400,28 @@ func TestGKEConfigSecondaryBootDisksEmpty(t *testing.T) {
 
 	flat := flattenGKEConfig(&sdk.NodeconfigV1GKEConfig{SecondaryBootDisks: &[]sdk.NodeconfigV1SecondaryBootDisk{}})
 	require.NotContains(t, flat[0], "secondary_boot_disks")
+}
+
+func TestGKEConfigDiskTypeAllowsHyperdiskBalanced(t *testing.T) {
+	diskTypeSchema := resourceNodeConfiguration().Schema[FieldNodeConfigurationGKE].
+		Elem.(*schema.Resource).Schema["disk_type"]
+
+	tests := []struct {
+		name      string
+		give      string
+		wantError bool
+	}{
+		{name: "hyperdisk-balanced accepted", give: "hyperdisk-balanced", wantError: false},
+		{name: "pd-balanced accepted", give: "pd-balanced", wantError: false},
+		{name: "unsupported type rejected", give: "hyperdisk-throughput", wantError: true},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			diags := diskTypeSchema.ValidateDiagFunc(tt.give, cty.Path{})
+			require.Equal(t, tt.wantError, diags.HasError())
+		})
+	}
 }
 
 func TestGKEConfigSecondaryBootDisksDiskImageValidation(t *testing.T) {
