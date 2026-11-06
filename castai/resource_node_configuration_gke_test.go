@@ -320,29 +320,36 @@ func TestGKEConfigSecondaryBootDisksMapping(t *testing.T) {
 
 func TestGKEConfigProvisionedBootDiskMapping(t *testing.T) {
 	tests := []struct {
-		name            string
-		give            map[string]interface{}
-		wantIops        *int64
-		wantThroughput  *int64
-		wantInState     bool
-		wantIopsInState int64
-		wantTpInState   int64
+		name                  string
+		give                  map[string]interface{}
+		wantIops              *int64
+		wantThroughput        *int64
+		wantIopsInState       *int64 // nil = key absent from flattened state
+		wantThroughputInState *int64 // nil = key absent from flattened state
 	}{
 		{
-			name:            "provisioned values round trip",
-			give:            map[string]interface{}{"provisioned_iops": 8000, "provisioned_throughput": 300},
-			wantIops:        toPtr(int64(8000)),
-			wantThroughput:  toPtr(int64(300)),
-			wantInState:     true,
-			wantIopsInState: 8000,
-			wantTpInState:   300,
+			name:                  "provisioned values round trip",
+			give:                  map[string]interface{}{"provisioned_iops": 8000, "provisioned_throughput": 300},
+			wantIops:              toPtr(int64(8000)),
+			wantThroughput:        toPtr(int64(300)),
+			wantIopsInState:       toPtr(int64(8000)),
+			wantThroughputInState: toPtr(int64(300)),
 		},
 		{
-			name:           "omitted values stay nil and drift free",
-			give:           map[string]interface{}{},
-			wantIops:       nil,
-			wantThroughput: nil,
-			wantInState:    false,
+			name:            "only iops set",
+			give:            map[string]interface{}{"provisioned_iops": 8000},
+			wantIops:        toPtr(int64(8000)),
+			wantIopsInState: toPtr(int64(8000)),
+		},
+		{
+			name:                  "only throughput set",
+			give:                  map[string]interface{}{"provisioned_throughput": 300},
+			wantThroughput:        toPtr(int64(300)),
+			wantThroughputInState: toPtr(int64(300)),
+		},
+		{
+			name: "omitted values stay nil",
+			give: map[string]interface{}{},
 		},
 	}
 
@@ -356,12 +363,15 @@ func TestGKEConfigProvisionedBootDiskMapping(t *testing.T) {
 				ProvisionedIops:       cfg.ProvisionedIops,
 				ProvisionedThroughput: cfg.ProvisionedThroughput,
 			})
-			if tt.wantInState {
-				require.Equal(t, tt.wantIopsInState, flat[0]["provisioned_iops"])
-				require.Equal(t, tt.wantTpInState, flat[0]["provisioned_throughput"])
-			} else {
+			if tt.wantIopsInState == nil {
 				require.NotContains(t, flat[0], "provisioned_iops")
+			} else {
+				require.Equal(t, *tt.wantIopsInState, flat[0]["provisioned_iops"])
+			}
+			if tt.wantThroughputInState == nil {
 				require.NotContains(t, flat[0], "provisioned_throughput")
+			} else {
+				require.Equal(t, *tt.wantThroughputInState, flat[0]["provisioned_throughput"])
 			}
 		})
 	}
@@ -391,6 +401,44 @@ func TestGKEConfigProvisionedBootDiskValidation(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			diags := gkeSchema[tt.field].ValidateDiagFunc(tt.give, cty.Path{})
 			require.Equal(t, tt.wantError, diags.HasError())
+		})
+	}
+}
+
+// TestGKEProvisionedBootDiskDiffValidation covers the plan-time CustomizeDiff validation,
+// which mirrors the API-side configuration checks so invalid combinations fail during
+// terraform plan instead of at apply or provisioning time.
+func TestGKEProvisionedBootDiskDiffValidation(t *testing.T) {
+	tests := []struct {
+		name       string
+		diskType   string
+		iops       int
+		throughput int
+		wantError  bool
+	}{
+		{name: "no provisioned values passes with any disk type", diskType: "pd-ssd", wantError: false},
+		{name: "valid pair with explicit hyperdisk passes", diskType: "hyperdisk-balanced", iops: 8000, throughput: 300, wantError: false},
+		{name: "valid pair without explicit disk type passes", iops: 8000, throughput: 300, wantError: false},
+		{name: "iops only passes", diskType: "hyperdisk-balanced", iops: 8000, wantError: false},
+		{name: "throughput only passes", diskType: "hyperdisk-balanced", throughput: 300, wantError: false},
+		{name: "coupling lower boundary passes", diskType: "hyperdisk-balanced", iops: 50000, throughput: 195, wantError: false},
+		{name: "coupling upper boundary passes", diskType: "hyperdisk-balanced", iops: 8000, throughput: 2000, wantError: false},
+		{name: "explicit pd-ssd with pair rejected", diskType: "pd-ssd", iops: 8000, throughput: 300, wantError: true},
+		{name: "explicit pd-balanced with iops only rejected", diskType: "pd-balanced", iops: 8000, wantError: true},
+		{name: "coupling above upper bound rejected", diskType: "hyperdisk-balanced", iops: 8000, throughput: 2001, wantError: true},
+		{name: "coupling below lower bound rejected", diskType: "hyperdisk-balanced", iops: 50000, throughput: 180, wantError: true},
+		{name: "out of range iops rejected", diskType: "hyperdisk-balanced", iops: 2999, wantError: true},
+		{name: "out of range throughput rejected", diskType: "hyperdisk-balanced", throughput: 2401, wantError: true},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := validateGKEProvisionedBootDiskValues(tt.diskType, tt.iops, tt.throughput)
+			if tt.wantError {
+				require.Error(t, err)
+			} else {
+				require.NoError(t, err)
+			}
 		})
 	}
 }
