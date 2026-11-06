@@ -22,7 +22,8 @@ resource "castai_service_account_key" "service_account_key" {
 }
 
 output "service_account_key" {
-  value = castai_service_account_key.service_account_key.token
+  value     = castai_service_account_key.service_account_key.token
+  sensitive = true
 }
 ```
 
@@ -46,7 +47,7 @@ output "service_account_key" {
 - `id` (String) The ID of this resource.
 - `last_used_at` (String) Last time the service account key was used.
 - `prefix` (String) Prefix of the service account key.
-- `token` (String) The token of the service account key used for authentication.
+- `token` (String, Sensitive) The token of the service account key used for authentication.
 
 <a id="nestedblock--timeouts"></a>
 ### Nested Schema for `timeouts`

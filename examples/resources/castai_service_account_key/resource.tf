@@ -7,5 +7,6 @@ resource "castai_service_account_key" "service_account_key" {
 }
 
 output "service_account_key" {
-  value = castai_service_account_key.service_account_key.token
+  value     = castai_service_account_key.service_account_key.token
+  sensitive = true
 }
