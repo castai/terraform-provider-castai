@@ -32,9 +32,17 @@ func TestAccCloudAgnostic_ResourceSSOConnection(t *testing.T) {
 	rName := fmt.Sprintf("%v-sso-connection-%v", ResourcePrefix, acctest.RandString(8))
 	resourceName := "castai_sso_connection.test"
 
+	// Non-secret identifiers of the "terraform-provider-acc-sso" Azure AD app;
+	// its client secret is the only sensitive value and is stored in onyx.
 	clientID := os.Getenv("SSO_CLIENT_ID")
+	if clientID == "" {
+		clientID = "324aec6c-bf7e-43a8-86e2-76ca5efaf891"
+	}
 	clientSecret := os.Getenv("SSO_CLIENT_SECRET")
 	domain := os.Getenv("SSO_DOMAIN")
+	if domain == "" {
+		domain = "cast.ai"
+	}
 	enterpriseToken := os.Getenv("CASTAI_ENTERPRISE_API_TOKEN")
 
 	var enterpriseClient *sdk.ClientWithResponses
@@ -53,14 +61,8 @@ func TestAccCloudAgnostic_ResourceSSOConnection(t *testing.T) {
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
-			if clientID == "" {
-				t.Skipf("missing required env var: SSO_CLIENT_ID")
-			}
 			if clientSecret == "" {
 				t.Skipf("missing required env var: SSO_CLIENT_SECRET")
-			}
-			if domain == "" {
-				t.Skipf("missing required env var: SSO_DOMAIN")
 			}
 			// The SSO API requires an enterprise organisation; CASTAI_API_TOKEN belongs to the standard acceptance test org.
 			if enterpriseToken == "" {
