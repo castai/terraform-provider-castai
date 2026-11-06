@@ -212,6 +212,7 @@ type ociModel struct {
 	PrivateKeyBase64WO types.String `tfsdk:"private_key_base64_wo"`
 	VcnID              types.String `tfsdk:"vcn_id"`
 	VcnCidr            types.String `tfsdk:"vcn_cidr"`
+	VcnPeered          types.Bool   `tfsdk:"vcn_peered"`
 	SubnetID           types.String `tfsdk:"subnet_id"`
 	SecurityGroupID    types.String `tfsdk:"security_group_id"`
 }
@@ -291,6 +292,7 @@ func (m ociModel) Equal(other *ociModel) bool {
 		m.CompartmentID.Equal(other.CompartmentID) &&
 		m.VcnID.Equal(other.VcnID) &&
 		m.VcnCidr.Equal(other.VcnCidr) &&
+		m.VcnPeered.Equal(other.VcnPeered) &&
 		m.SubnetID.Equal(other.SubnetID) &&
 		m.SecurityGroupID.Equal(other.SecurityGroupID)
 }
@@ -686,6 +688,10 @@ func (r *edgeLocationResource) Schema(_ context.Context, _ resource.SchemaReques
 					"vcn_cidr": schema.StringAttribute{
 						Optional:    true,
 						Description: "OCI VCN IPv4 CIDR block",
+					},
+					"vcn_peered": schema.BoolAttribute{
+						Optional:    true,
+						Description: "Whether existing VCN is peered with main cluster's network. Field is ignored if vcn_id is not provided or main cluster does not support internal load balancers. Omit the attribute instead of setting it to false to disable peering.",
 					},
 					"subnet_id": schema.StringAttribute{
 						Required:    true,
@@ -1680,6 +1686,7 @@ func (r *edgeLocationResource) toOCI(plan, config *ociModel) *omni.OCIParam {
 			VcnId:           plan.VcnID.ValueString(),
 			SubnetId:        plan.SubnetID.ValueString(),
 			VcnCidr:         plan.VcnCidr.ValueStringPointer(),
+			VcnPeered:       plan.VcnPeered.ValueBoolPointer(),
 			SecurityGroupId: plan.SecurityGroupID.ValueStringPointer(),
 		},
 		Credentials: &omni.OCIParamCredentials{
@@ -1702,6 +1709,7 @@ func (r *edgeLocationResource) toOCIModel(config *omni.OCIParam) *ociModel {
 		CompartmentID:      types.StringValue(lo.FromPtr(config.CompartmentId)),
 		VcnID:              types.StringNull(),
 		VcnCidr:            types.StringNull(),
+		VcnPeered:          types.BoolNull(),
 		SubnetID:           types.StringNull(),
 		SecurityGroupID:    types.StringNull(),
 		UserIDWO:           types.StringNull(),
@@ -1712,6 +1720,7 @@ func (r *edgeLocationResource) toOCIModel(config *omni.OCIParam) *ociModel {
 	if config.Networking != nil {
 		oci.VcnID = types.StringValue(config.Networking.VcnId)
 		oci.SubnetID = types.StringValue(config.Networking.SubnetId)
+		oci.VcnPeered = types.BoolPointerValue(config.Networking.VcnPeered)
 		if config.Networking.VcnCidr != nil && *config.Networking.VcnCidr != "" {
 			oci.VcnCidr = types.StringValue(*config.Networking.VcnCidr)
 		}

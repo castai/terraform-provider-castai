@@ -928,6 +928,9 @@ type OCIParamNetworking struct {
 
 	// VcnId OCI virtual cloud network id of edge location.
 	VcnId string `json:"vcnId"`
+
+	// VcnPeered Whether existing VCN is peered with main cluster's network. Field is ignored if vcn_id is not provided or main cluster does not support internal load balancers.
+	VcnPeered *bool `json:"vcnPeered,omitempty"`
 }
 
 // ObjectStatus ObjectStatus of the object.
