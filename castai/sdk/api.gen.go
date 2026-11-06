@@ -1176,6 +1176,12 @@ const (
 	WorkloadoptimizationV1ScalingPolicySelectSCALINGPOLICYSELECTUNSPECIFIED WorkloadoptimizationV1ScalingPolicySelect = "SCALING_POLICY_SELECT_UNSPECIFIED"
 )
 
+// Defines values for WorkloadoptimizationV1ScopePreset.
+const (
+	WorkloadoptimizationV1ScopePresetSCOPEPRESETINSTANCETYPE WorkloadoptimizationV1ScopePreset = "SCOPE_PRESET_INSTANCE_TYPE"
+	WorkloadoptimizationV1ScopePresetSCOPEPRESETUNSPECIFIED  WorkloadoptimizationV1ScopePreset = "SCOPE_PRESET_UNSPECIFIED"
+)
+
 // Defines values for WorkloadoptimizationV1ScopeType.
 const (
 	WorkloadoptimizationV1ScopeTypeSCOPETYPENODELABEL WorkloadoptimizationV1ScopeType = "SCOPE_TYPE_NODE_LABEL"
@@ -3837,6 +3843,9 @@ type CastaiServiceaccountsV1beta1CreateServiceAccountKeyRequestKey struct {
 
 	// Name Name is the name of the service account key.
 	Name string `json:"name"`
+
+	// Product ProductType represents which product a category belongs to.
+	Product *CastaiRbacV1beta1ProductType `json:"product,omitempty"`
 }
 
 // CastaiServiceaccountsV1beta1CreateServiceAccountKeyResponse CreateServiceAccountKeyResponse is the response for creating a service account key.
@@ -3855,6 +3864,9 @@ type CastaiServiceaccountsV1beta1CreateServiceAccountKeyResponse struct {
 
 	// Name Name is the name of the key.
 	Name *string `json:"name,omitempty"`
+
+	// Product ProductType represents which product a category belongs to.
+	Product *CastaiRbacV1beta1ProductType `json:"product,omitempty"`
 
 	// Token Token is the full secret key.
 	Token *string `json:"token,omitempty"`
@@ -4068,6 +4080,9 @@ type CastaiServiceaccountsV1beta1ServiceAccountKey struct {
 
 	// Prefix Prefix is the prefix of the key.
 	Prefix *string `json:"prefix,omitempty"`
+
+	// Product ProductType represents which product a category belongs to.
+	Product *CastaiRbacV1beta1ProductType `json:"product,omitempty"`
 }
 
 // CastaiServiceaccountsV1beta1UpdateServiceAccountKeyResponse UpdateServiceAccountKeyResponse is the response for updating a service account key.
@@ -7757,6 +7772,22 @@ type NodeconfigV1GKEConfig struct {
 	// OnHostMaintenance Maintenance behavior of the instances.
 	OnHostMaintenance *NodeconfigV1GKEConfigOnHostMaintenance `json:"onHostMaintenance,omitempty"`
 
+	// ProvisionedIops Provisioned IOPS for the node's boot disk. For Hyperdisk-Balanced boot disks only:
+	// the value is applied when the resolved boot disk type is hyperdisk-balanced and is
+	// ignored (never sent to GCP) otherwise. GCP valid range: 3000-160000. When both
+	// provisioned values are set, the coupling
+	// MAX(140, provisioned_iops/256) <= provisioned_throughput <= MIN(2400, provisioned_iops/4)
+	// is validated in the service.
+	ProvisionedIops *int64 `json:"provisionedIops"`
+
+	// ProvisionedThroughput Provisioned throughput in MiB/s for the node's boot disk. For Hyperdisk-Balanced boot
+	// disks only: the value is applied when the resolved boot disk type is hyperdisk-balanced
+	// and is ignored (never sent to GCP) otherwise. GCP valid range: 140-2400 MiB/s. When both
+	// provisioned values are set, the coupling
+	// MAX(140, provisioned_iops/256) <= provisioned_throughput <= MIN(2400, provisioned_iops/4)
+	// is validated in the service.
+	ProvisionedThroughput *int64 `json:"provisionedThroughput"`
+
 	// SecondaryBootDisks Secondary boot disks to be attached to provisioned nodes.
 	SecondaryBootDisks *[]NodeconfigV1SecondaryBootDisk `json:"secondaryBootDisks,omitempty"`
 	SecondaryIpRange   *NodeconfigV1SecondaryIPRange    `json:"secondaryIpRange,omitempty"`
@@ -11422,7 +11453,10 @@ type WorkloadoptimizationV1PatchVerticalSettings struct {
 	MemoryEvent       *WorkloadoptimizationV1MemoryEventSettings       `json:"memoryEvent,omitempty"`
 	PredictiveScaling *WorkloadoptimizationV1PredictiveScalingSettings `json:"predictiveScaling,omitempty"`
 	RolloutBehavior   *WorkloadoptimizationV1RolloutBehaviorSettings   `json:"rolloutBehavior,omitempty"`
-	Startup           *WorkloadoptimizationV1StartupSettings           `json:"startup,omitempty"`
+
+	// Scope ScopeSettings holds the scope configuration for recommendations.
+	Scope   *WorkloadoptimizationV1ScopeSettings   `json:"scope,omitempty"`
+	Startup *WorkloadoptimizationV1StartupSettings `json:"startup,omitempty"`
 }
 
 // WorkloadoptimizationV1PatchWorkloadScalingPolicy defines model for workloadoptimization.v1.PatchWorkloadScalingPolicy.
@@ -11601,7 +11635,10 @@ type WorkloadoptimizationV1RecommendationPolicies struct {
 	MemoryEvent       *WorkloadoptimizationV1MemoryEventSettings       `json:"memoryEvent,omitempty"`
 	PredictiveScaling *WorkloadoptimizationV1PredictiveScalingSettings `json:"predictiveScaling,omitempty"`
 	RolloutBehavior   *WorkloadoptimizationV1RolloutBehaviorSettings   `json:"rolloutBehavior,omitempty"`
-	Startup           *WorkloadoptimizationV1StartupSettings           `json:"startup,omitempty"`
+
+	// Scope ScopeSettings holds the scope configuration for recommendations.
+	Scope   *WorkloadoptimizationV1ScopeSettings   `json:"scope,omitempty"`
+	Startup *WorkloadoptimizationV1StartupSettings `json:"startup,omitempty"`
 }
 
 // WorkloadoptimizationV1RecommendationStatus defines model for workloadoptimization.v1.RecommendationStatus.
@@ -12133,6 +12170,15 @@ type WorkloadoptimizationV1Scope struct {
 
 	// Type ScopeType classifies the scoping mechanism. Mirrors the domain scope.Type enum.
 	Type *WorkloadoptimizationV1ScopeType `json:"type,omitempty"`
+}
+
+// WorkloadoptimizationV1ScopePreset ScopePreset is the closed set of supported scopes; each resolves server-side to a concrete scoping mechanism.
+type WorkloadoptimizationV1ScopePreset string
+
+// WorkloadoptimizationV1ScopeSettings ScopeSettings holds the scope configuration for recommendations.
+type WorkloadoptimizationV1ScopeSettings struct {
+	// Preset ScopePreset is the closed set of supported scopes; each resolves server-side to a concrete scoping mechanism.
+	Preset *WorkloadoptimizationV1ScopePreset `json:"preset,omitempty"`
 }
 
 // WorkloadoptimizationV1ScopeType ScopeType classifies the scoping mechanism. Mirrors the domain scope.Type enum.
