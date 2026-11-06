@@ -17,6 +17,16 @@ it as the default using `castai_node_configuration_default` resource.
 
 {{ tffile .ExampleFile }}
 
+### GKE Hyperdisk Balanced boot disks
+
+`gke.provisioned_iops` and `gke.provisioned_throughput` configure provisioned performance for Hyperdisk Balanced boot disks:
+
+- They require the boot disk to be `hyperdisk-balanced`. Setting a different `disk_type` alongside either value fails during `terraform plan`; if `disk_type` is unset, provisioning fails unless the machine family's runtime-resolved disk type is `hyperdisk-balanced`.
+- `hyperdisk-balanced` boots only on newer machine families (see [GCP disk types](https://cloud.google.com/compute/docs/disks#pdspecs)); provisioning fails for families that cannot boot from it.
+- When both values are set, GCP couples them: `MAX(140, provisioned_iops/256) <= provisioned_throughput <= MIN(2400, provisioned_iops/4)`.
+
+These settings apply to **newly provisioned nodes**: existing nodes are not reconfigured in place and pick up the new values as CAST AI replaces them through its normal consolidation and upgrade flows.
+
 {{ .SchemaMarkdown | trimspace }}
 
 

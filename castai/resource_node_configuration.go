@@ -583,8 +583,20 @@ For a node with 8 CPUs and 16 GB RAM, this calculates to 40 (5×8), 80 (5×16), 
 						"disk_type": {
 							Type:             schema.TypeString,
 							Optional:         true,
-							Description:      "Type of boot disk attached to the node. (See [disk types](https://cloud.google.com/compute/docs/disks#pdspecs)). One of: pd-standard, pd-balanced, pd-ssd, pd-extreme ",
-							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"pd-standard", "pd-balanced", "pd-ssd", "pd-extreme"}, false)),
+							Description:      "Type of boot disk attached to the node. (See [disk types](https://cloud.google.com/compute/docs/disks#pdspecs)). One of: pd-standard, pd-balanced, pd-ssd, pd-extreme, hyperdisk-balanced. hyperdisk-balanced boots only on newer machine families; provisioning fails for families that cannot boot from it, so set it deliberately",
+							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"pd-standard", "pd-balanced", "pd-ssd", "pd-extreme", "hyperdisk-balanced"}, false)),
+						},
+						"provisioned_iops": {
+							Type:             schema.TypeInt,
+							Optional:         true,
+							ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(3000, 160000)),
+							Description:      "Provisioned IOPS for Hyperdisk Balanced boot disks. Requires the boot disk to resolve to hyperdisk-balanced: a different explicit disk_type fails the plan, and when disk_type is unset, provisioning fails if the runtime-resolved type differs. GCP valid range: 3000-160000. Applied to newly provisioned nodes; existing nodes are not reconfigured in place",
+						},
+						"provisioned_throughput": {
+							Type:             schema.TypeInt,
+							Optional:         true,
+							ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(140, 2400)),
+							Description:      "Provisioned throughput in MiB/s for Hyperdisk Balanced boot disks. Same disk_type requirements as provisioned_iops. GCP valid range: 140-2400. When provisioned_iops is also set, GCP couples them: throughput must be between MAX(140, provisioned_iops/256) and MIN(2400, provisioned_iops/4) MiB/s. Applied to newly provisioned nodes; existing nodes are not reconfigured in place",
 						},
 						"zones": {
 							Type:     schema.TypeList,
@@ -695,8 +707,116 @@ For a node with 8 CPUs and 16 GB RAM, this calculates to 40 (5×8), 80 (5×16), 
 				},
 			},
 		},
-		CustomizeDiff: customizeGKEMaxPodsField,
+		CustomizeDiff: customizeNodeConfigurationDiff,
 	}
+}
+
+// Bounds of Hyperdisk Balanced provisioned performance accepted by GCP and enforced by
+// the CAST AI API. Kept in sync with the backend validation (KUBE-2296).
+const (
+	gkeDiskTypeHyperdiskBalanced = "hyperdisk-balanced"
+	gkeProvisionedIopsMin        = 3000
+	gkeProvisionedIopsMax        = 160000
+	gkeProvisionedThroughputMin  = 140  // MiB/s
+	gkeProvisionedThroughputMax  = 2400 // MiB/s
+)
+
+// customizeNodeConfigurationDiff runs all node-configuration diff customizations:
+// plan-time validation of the GKE provisioned boot disk fields first (so invalid
+// combinations fail during terraform plan instead of at apply or provisioning time),
+// then the existing max-pods defaulting and formula handling.
+func customizeNodeConfigurationDiff(ctx context.Context, d *schema.ResourceDiff, meta interface{}) error {
+	if gke := gkeBlockFromDiff(d); gke != nil {
+		if err := validateGKEProvisionedBootDiskValues(
+			gkeDiskType(gke),
+			gkeProvisionedInt(gke, "provisioned_iops"),
+			gkeProvisionedInt(gke, "provisioned_throughput"),
+		); err != nil {
+			return err
+		}
+	}
+	return customizeGKEMaxPodsField(ctx, d, meta)
+}
+
+// gkeBlockFromDiff returns the configured gke block from the resource diff, or nil when
+// it is absent (e.g. non-GKE node configurations).
+func gkeBlockFromDiff(d *schema.ResourceDiff) map[string]interface{} {
+	v, ok := d.GetOk(FieldNodeConfigurationGKE)
+	if !ok {
+		return nil
+	}
+	gkeList, ok := v.([]interface{})
+	if !ok || len(gkeList) == 0 {
+		return nil
+	}
+	gke, ok := gkeList[0].(map[string]interface{})
+	if !ok {
+		return nil
+	}
+	return gke
+}
+
+// gkeProvisionedInt reads an optional int field from the gke block; unset and zero both
+// map to 0, because TypeInt cannot distinguish them and 0 is outside every valid range.
+func gkeProvisionedInt(gke map[string]interface{}, field string) int {
+	if v, ok := gke[field].(int); ok {
+		return v
+	}
+	return 0
+}
+
+func gkeDiskType(gke map[string]interface{}) string {
+	if v, ok := gke["disk_type"].(string); ok {
+		return v
+	}
+	return ""
+}
+
+// validateGKEProvisionedBootDiskValues mirrors, at plan time, the configuration
+// validation the CAST AI API performs for GKE provisioned boot disk performance.
+// Surfacing the same rules during terraform plan turns apply-time API errors and
+// provisioning-time node-create failures into immediate feedback:
+//
+//   - provisioned values are only valid for hyperdisk-balanced boot disks; an
+//     explicitly configured different disk_type is rejected here (the API rejects the
+//     same combination, only later)
+//   - when both values are set, GCP's coupling constraint must hold:
+//     MAX(140, iops/256) <= throughput <= MIN(2400, iops/4)
+//
+// Zero means "not configured" for both provisioned values (0 is outside the valid
+// ranges, and the provider sends nil for unset values). A nil-vs-range check is kept
+// here despite the per-field ValidateDiagFunc so the pure function stays a faithful
+// mirror of the API contract even if the schema bounds drift.
+func validateGKEProvisionedBootDiskValues(diskType string, iops, throughput int) error {
+	if iops == 0 && throughput == 0 {
+		return nil
+	}
+
+	if diskType != "" && diskType != gkeDiskTypeHyperdiskBalanced {
+		return fmt.Errorf("gke.provisioned_iops and gke.provisioned_throughput are only supported with disk_type %q, got %q: unset the provisioned values or change the disk type",
+			gkeDiskTypeHyperdiskBalanced, diskType)
+	}
+
+	if iops != 0 && (iops < gkeProvisionedIopsMin || iops > gkeProvisionedIopsMax) {
+		return fmt.Errorf("gke.provisioned_iops must be between %d and %d, got %d",
+			gkeProvisionedIopsMin, gkeProvisionedIopsMax, iops)
+	}
+
+	if throughput != 0 && (throughput < gkeProvisionedThroughputMin || throughput > gkeProvisionedThroughputMax) {
+		return fmt.Errorf("gke.provisioned_throughput must be between %d and %d MiB/s, got %d",
+			gkeProvisionedThroughputMin, gkeProvisionedThroughputMax, throughput)
+	}
+
+	if iops != 0 && throughput != 0 {
+		minThroughput := max(gkeProvisionedThroughputMin, iops/256)
+		maxThroughput := min(gkeProvisionedThroughputMax, iops/4)
+		if throughput < minThroughput || throughput > maxThroughput {
+			return fmt.Errorf("gke.provisioned_throughput %d MiB/s does not satisfy the GCP coupling with gke.provisioned_iops %d: must be between %d and %d MiB/s (MAX(140, provisioned_iops/256) <= provisioned_throughput <= MIN(2400, provisioned_iops/4))",
+				throughput, iops, minThroughput, maxThroughput)
+		}
+	}
+
+	return nil
 }
 
 func customizeGKEMaxPodsField(_ context.Context, d *schema.ResourceDiff, _ interface{}) error {
@@ -1686,6 +1806,12 @@ func toGKEConfig(obj map[string]interface{}) *sdk.NodeconfigV1GKEConfig {
 	if v, ok := obj["disk_type"].(string); ok && v != "" {
 		out.DiskType = toPtr(v)
 	}
+	if v, ok := obj["provisioned_iops"].(int); ok && v != 0 {
+		out.ProvisionedIops = toPtr(int64(v))
+	}
+	if v, ok := obj["provisioned_throughput"].(int); ok && v != 0 {
+		out.ProvisionedThroughput = toPtr(int64(v))
+	}
 	if v, ok := obj["zones"].([]interface{}); ok {
 		out.Zones = toPtr(toStringList(v))
 	}
@@ -1819,6 +1945,12 @@ func flattenGKEConfig(config *sdk.NodeconfigV1GKEConfig) []map[string]interface{
 	}
 	if v := config.DiskType; v != nil {
 		m["disk_type"] = *v
+	}
+	if v := config.ProvisionedIops; v != nil {
+		m["provisioned_iops"] = *v
+	}
+	if v := config.ProvisionedThroughput; v != nil {
+		m["provisioned_throughput"] = *v
 	}
 	if v := config.Zones; v != nil {
 		m["zones"] = *v
