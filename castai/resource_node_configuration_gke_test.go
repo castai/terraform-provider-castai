@@ -48,6 +48,8 @@ func TestAccGKE_ResourceNodeConfiguration(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "gke.0.max_pods_per_node", "31"),
 					resource.TestCheckResourceAttr(resourceName, "gke.0.max_pods_per_node_formula", ""),
 					resource.TestCheckResourceAttr(resourceName, "gke.0.disk_type", "pd-balanced"),
+					resource.TestCheckResourceAttr(resourceName, "gke.0.provisioned_iops", "4000"),
+					resource.TestCheckResourceAttr(resourceName, "gke.0.provisioned_throughput", "200"),
 					resource.TestCheckResourceAttr(resourceName, "gke.0.network_tags.0", "ab"),
 					resource.TestCheckResourceAttr(resourceName, "gke.0.network_tags.1", "bc"),
 					resource.TestCheckResourceAttr(resourceName, "gke.0.zones.#", "0"),
@@ -131,6 +133,8 @@ func testAccGKENodeConfigurationConfig(rName, clusterName, projectID string) str
 		max_pods_per_node = 31
 		network_tags = ["ab", "bc"]
 		disk_type = "pd-balanced"
+		provisioned_iops = 4000
+		provisioned_throughput = 200
 		on_host_maintenance = "MIGRATE"
 		secondary_boot_disks {
 			disk_image = "projects/%[1]s/global/images/ep-e2e-2dary-images-cache"
@@ -251,6 +255,31 @@ locals {
 }
 
 `, clusterName, projectID, acceptanceTestClusterSubnetworkName)
+}
+
+func TestGKEConfigProvisionedIopsThroughput(t *testing.T) {
+	cfg := toGKEConfig(map[string]interface{}{
+		"provisioned_iops":       4000,
+		"provisioned_throughput": 200,
+	})
+	require.NotNil(t, cfg.ProvisionedIops)
+	require.NotNil(t, cfg.ProvisionedThroughput)
+	require.Equal(t, int64(4000), *cfg.ProvisionedIops)
+	require.Equal(t, int64(200), *cfg.ProvisionedThroughput)
+
+	flat := flattenGKEConfig(cfg)
+	require.Equal(t, int64(4000), flat[0]["provisioned_iops"])
+	require.Equal(t, int64(200), flat[0]["provisioned_throughput"])
+}
+
+func TestGKEConfigProvisionedIopsThroughputEmpty(t *testing.T) {
+	cfg := toGKEConfig(map[string]interface{}{})
+	require.Nil(t, cfg.ProvisionedIops)
+	require.Nil(t, cfg.ProvisionedThroughput)
+
+	flat := flattenGKEConfig(&sdk.NodeconfigV1GKEConfig{})
+	require.NotContains(t, flat[0], "provisioned_iops")
+	require.NotContains(t, flat[0], "provisioned_throughput")
 }
 
 func TestGKEConfigSecondaryBootDisksMapping(t *testing.T) {

@@ -296,9 +296,19 @@ const (
 	CastaiSsoV1beta1SSOConnectionStatusSTATUSUNKNOWN  CastaiSsoV1beta1SSOConnectionStatus = "STATUS_UNKNOWN"
 )
 
+// Defines values for CastaiSsoV1beta1SSOEmailDomainValidationCheckOutcome.
+const (
+	CastaiSsoV1beta1SSOEmailDomainValidationCheckOutcomeSSOEMAILDOMAINCHECKOUTCOMELOOKUPFAILED      CastaiSsoV1beta1SSOEmailDomainValidationCheckOutcome = "SSO_EMAIL_DOMAIN_CHECK_OUTCOME_LOOKUP_FAILED"
+	CastaiSsoV1beta1SSOEmailDomainValidationCheckOutcomeSSOEMAILDOMAINCHECKOUTCOMESECRETMISMATCH    CastaiSsoV1beta1SSOEmailDomainValidationCheckOutcome = "SSO_EMAIL_DOMAIN_CHECK_OUTCOME_SECRET_MISMATCH"
+	CastaiSsoV1beta1SSOEmailDomainValidationCheckOutcomeSSOEMAILDOMAINCHECKOUTCOMETXTRECORDNOTFOUND CastaiSsoV1beta1SSOEmailDomainValidationCheckOutcome = "SSO_EMAIL_DOMAIN_CHECK_OUTCOME_TXT_RECORD_NOT_FOUND"
+	CastaiSsoV1beta1SSOEmailDomainValidationCheckOutcomeSSOEMAILDOMAINCHECKOUTCOMEUNSPECIFIED       CastaiSsoV1beta1SSOEmailDomainValidationCheckOutcome = "SSO_EMAIL_DOMAIN_CHECK_OUTCOME_UNSPECIFIED"
+	CastaiSsoV1beta1SSOEmailDomainValidationCheckOutcomeSSOEMAILDOMAINCHECKOUTCOMEVERIFIED          CastaiSsoV1beta1SSOEmailDomainValidationCheckOutcome = "SSO_EMAIL_DOMAIN_CHECK_OUTCOME_VERIFIED"
+)
+
 // Defines values for CastaiSsoV1beta1SSOEmailDomainValidationStatus.
 const (
 	CastaiSsoV1beta1SSOEmailDomainValidationStatusSTATUSDENIED   CastaiSsoV1beta1SSOEmailDomainValidationStatus = "STATUS_DENIED"
+	CastaiSsoV1beta1SSOEmailDomainValidationStatusSTATUSERROR    CastaiSsoV1beta1SSOEmailDomainValidationStatus = "STATUS_ERROR"
 	CastaiSsoV1beta1SSOEmailDomainValidationStatusSTATUSEXPIRED  CastaiSsoV1beta1SSOEmailDomainValidationStatus = "STATUS_EXPIRED"
 	CastaiSsoV1beta1SSOEmailDomainValidationStatusSTATUSPENDING  CastaiSsoV1beta1SSOEmailDomainValidationStatus = "STATUS_PENDING"
 	CastaiSsoV1beta1SSOEmailDomainValidationStatusSTATUSUNKNOWN  CastaiSsoV1beta1SSOEmailDomainValidationStatus = "STATUS_UNKNOWN"
@@ -1174,6 +1184,12 @@ const (
 	WorkloadoptimizationV1ScalingPolicySelectMAXCHANGEPOLICYSELECT          WorkloadoptimizationV1ScalingPolicySelect = "MAX_CHANGE_POLICY_SELECT"
 	WorkloadoptimizationV1ScalingPolicySelectMINCHANGEPOLICYSELECT          WorkloadoptimizationV1ScalingPolicySelect = "MIN_CHANGE_POLICY_SELECT"
 	WorkloadoptimizationV1ScalingPolicySelectSCALINGPOLICYSELECTUNSPECIFIED WorkloadoptimizationV1ScalingPolicySelect = "SCALING_POLICY_SELECT_UNSPECIFIED"
+)
+
+// Defines values for WorkloadoptimizationV1ScopePreset.
+const (
+	WorkloadoptimizationV1ScopePresetSCOPEPRESETINSTANCETYPE WorkloadoptimizationV1ScopePreset = "SCOPE_PRESET_INSTANCE_TYPE"
+	WorkloadoptimizationV1ScopePresetSCOPEPRESETUNSPECIFIED  WorkloadoptimizationV1ScopePreset = "SCOPE_PRESET_UNSPECIFIED"
 )
 
 // Defines values for WorkloadoptimizationV1ScopeType.
@@ -3837,6 +3853,9 @@ type CastaiServiceaccountsV1beta1CreateServiceAccountKeyRequestKey struct {
 
 	// Name Name is the name of the service account key.
 	Name string `json:"name"`
+
+	// Product ProductType represents which product a category belongs to.
+	Product *CastaiRbacV1beta1ProductType `json:"product,omitempty"`
 }
 
 // CastaiServiceaccountsV1beta1CreateServiceAccountKeyResponse CreateServiceAccountKeyResponse is the response for creating a service account key.
@@ -3855,6 +3874,9 @@ type CastaiServiceaccountsV1beta1CreateServiceAccountKeyResponse struct {
 
 	// Name Name is the name of the key.
 	Name *string `json:"name,omitempty"`
+
+	// Product ProductType represents which product a category belongs to.
+	Product *CastaiRbacV1beta1ProductType `json:"product,omitempty"`
 
 	// Token Token is the full secret key.
 	Token *string `json:"token,omitempty"`
@@ -4068,6 +4090,9 @@ type CastaiServiceaccountsV1beta1ServiceAccountKey struct {
 
 	// Prefix Prefix is the prefix of the key.
 	Prefix *string `json:"prefix,omitempty"`
+
+	// Product ProductType represents which product a category belongs to.
+	Product *CastaiRbacV1beta1ProductType `json:"product,omitempty"`
 }
 
 // CastaiServiceaccountsV1beta1UpdateServiceAccountKeyResponse UpdateServiceAccountKeyResponse is the response for updating a service account key.
@@ -4297,6 +4322,15 @@ type CastaiSsoV1beta1SSOEmailDomainValidation struct {
 	// Domain Domain is the claimed email domain.
 	Domain *string `json:"domain,omitempty"`
 
+	// LastCheckOutcome CheckOutcome is the machine-readable outcome of the latest verification check of the claim.
+	//
+	//  - SSO_EMAIL_DOMAIN_CHECK_OUTCOME_UNSPECIFIED: CheckOutcomeUnspecified means no check result is recorded for the claim.
+	//  - SSO_EMAIL_DOMAIN_CHECK_OUTCOME_VERIFIED: CheckOutcomeVerified means the verification TXT record matched the claim secret.
+	//  - SSO_EMAIL_DOMAIN_CHECK_OUTCOME_TXT_RECORD_NOT_FOUND: CheckOutcomeTXTRecordNotFound means the verification TXT record was missing.
+	//  - SSO_EMAIL_DOMAIN_CHECK_OUTCOME_SECRET_MISMATCH: CheckOutcomeSecretMismatch means the verification TXT record carried a different secret.
+	//  - SSO_EMAIL_DOMAIN_CHECK_OUTCOME_LOOKUP_FAILED: CheckOutcomeLookupFailed means the DNS lookup itself failed.
+	LastCheckOutcome *CastaiSsoV1beta1SSOEmailDomainValidationCheckOutcome `json:"lastCheckOutcome,omitempty"`
+
 	// LastCheckedAt LastCheckedAt is the time the domain was last checked for the verification TXT record.
 	LastCheckedAt *time.Time `json:"lastCheckedAt,omitempty"`
 
@@ -4310,6 +4344,9 @@ type CastaiSsoV1beta1SSOEmailDomainValidation struct {
 	//  - STATUS_VERIFIED: StatusVerified means the claim was verified.
 	//  - STATUS_EXPIRED: StatusExpired means the pending claim expired before verification.
 	//  - STATUS_DENIED: StatusDenied means the claim was denied (domain taken by another connection).
+	//  - STATUS_ERROR: StatusError means the last verification check failed (no verification TXT
+	// record, a mismatching secret, or a lookup failure); the claim stays
+	// retryable until a check succeeds or the claim expires.
 	Status *CastaiSsoV1beta1SSOEmailDomainValidationStatus `json:"status,omitempty"`
 
 	// TxtRecord SSOEmailDomainTxtRecord represents the DNS TXT record to publish for email-domain verification.
@@ -4319,6 +4356,15 @@ type CastaiSsoV1beta1SSOEmailDomainValidation struct {
 	VerifiedAt *time.Time `json:"verifiedAt,omitempty"`
 }
 
+// CastaiSsoV1beta1SSOEmailDomainValidationCheckOutcome CheckOutcome is the machine-readable outcome of the latest verification check of the claim.
+//
+//   - SSO_EMAIL_DOMAIN_CHECK_OUTCOME_UNSPECIFIED: CheckOutcomeUnspecified means no check result is recorded for the claim.
+//   - SSO_EMAIL_DOMAIN_CHECK_OUTCOME_VERIFIED: CheckOutcomeVerified means the verification TXT record matched the claim secret.
+//   - SSO_EMAIL_DOMAIN_CHECK_OUTCOME_TXT_RECORD_NOT_FOUND: CheckOutcomeTXTRecordNotFound means the verification TXT record was missing.
+//   - SSO_EMAIL_DOMAIN_CHECK_OUTCOME_SECRET_MISMATCH: CheckOutcomeSecretMismatch means the verification TXT record carried a different secret.
+//   - SSO_EMAIL_DOMAIN_CHECK_OUTCOME_LOOKUP_FAILED: CheckOutcomeLookupFailed means the DNS lookup itself failed.
+type CastaiSsoV1beta1SSOEmailDomainValidationCheckOutcome string
+
 // CastaiSsoV1beta1SSOEmailDomainValidationStatus Status is the verification status of the email-domain claim.
 //
 //   - STATUS_UNKNOWN: StatusUnknown is the default status.
@@ -4326,6 +4372,10 @@ type CastaiSsoV1beta1SSOEmailDomainValidation struct {
 //   - STATUS_VERIFIED: StatusVerified means the claim was verified.
 //   - STATUS_EXPIRED: StatusExpired means the pending claim expired before verification.
 //   - STATUS_DENIED: StatusDenied means the claim was denied (domain taken by another connection).
+//   - STATUS_ERROR: StatusError means the last verification check failed (no verification TXT
+//
+// record, a mismatching secret, or a lookup failure); the claim stays
+// retryable until a check succeeds or the claim expires.
 type CastaiSsoV1beta1SSOEmailDomainValidationStatus string
 
 // CastaiSsoV1beta1SetSyncForSSOConnectionResponse defines model for castai.sso.v1beta1.SetSyncForSSOConnectionResponse.
@@ -7756,6 +7806,22 @@ type NodeconfigV1GKEConfig struct {
 
 	// OnHostMaintenance Maintenance behavior of the instances.
 	OnHostMaintenance *NodeconfigV1GKEConfigOnHostMaintenance `json:"onHostMaintenance,omitempty"`
+
+	// ProvisionedIops Provisioned IOPS for the node's boot disk. For Hyperdisk-Balanced boot disks only:
+	// the value is applied when the resolved boot disk type is hyperdisk-balanced and is
+	// ignored (never sent to GCP) otherwise. GCP valid range: 3000-160000. When both
+	// provisioned values are set, the coupling
+	// MAX(140, provisioned_iops/256) <= provisioned_throughput <= MIN(2400, provisioned_iops/4)
+	// is validated in the service.
+	ProvisionedIops *int64 `json:"provisionedIops"`
+
+	// ProvisionedThroughput Provisioned throughput in MiB/s for the node's boot disk. For Hyperdisk-Balanced boot
+	// disks only: the value is applied when the resolved boot disk type is hyperdisk-balanced
+	// and is ignored (never sent to GCP) otherwise. GCP valid range: 140-2400 MiB/s. When both
+	// provisioned values are set, the coupling
+	// MAX(140, provisioned_iops/256) <= provisioned_throughput <= MIN(2400, provisioned_iops/4)
+	// is validated in the service.
+	ProvisionedThroughput *int64 `json:"provisionedThroughput"`
 
 	// SecondaryBootDisks Secondary boot disks to be attached to provisioned nodes.
 	SecondaryBootDisks *[]NodeconfigV1SecondaryBootDisk `json:"secondaryBootDisks,omitempty"`
@@ -11422,7 +11488,10 @@ type WorkloadoptimizationV1PatchVerticalSettings struct {
 	MemoryEvent       *WorkloadoptimizationV1MemoryEventSettings       `json:"memoryEvent,omitempty"`
 	PredictiveScaling *WorkloadoptimizationV1PredictiveScalingSettings `json:"predictiveScaling,omitempty"`
 	RolloutBehavior   *WorkloadoptimizationV1RolloutBehaviorSettings   `json:"rolloutBehavior,omitempty"`
-	Startup           *WorkloadoptimizationV1StartupSettings           `json:"startup,omitempty"`
+
+	// Scope ScopeSettings holds the scope configuration for recommendations.
+	Scope   *WorkloadoptimizationV1ScopeSettings   `json:"scope,omitempty"`
+	Startup *WorkloadoptimizationV1StartupSettings `json:"startup,omitempty"`
 }
 
 // WorkloadoptimizationV1PatchWorkloadScalingPolicy defines model for workloadoptimization.v1.PatchWorkloadScalingPolicy.
@@ -11601,7 +11670,10 @@ type WorkloadoptimizationV1RecommendationPolicies struct {
 	MemoryEvent       *WorkloadoptimizationV1MemoryEventSettings       `json:"memoryEvent,omitempty"`
 	PredictiveScaling *WorkloadoptimizationV1PredictiveScalingSettings `json:"predictiveScaling,omitempty"`
 	RolloutBehavior   *WorkloadoptimizationV1RolloutBehaviorSettings   `json:"rolloutBehavior,omitempty"`
-	Startup           *WorkloadoptimizationV1StartupSettings           `json:"startup,omitempty"`
+
+	// Scope ScopeSettings holds the scope configuration for recommendations.
+	Scope   *WorkloadoptimizationV1ScopeSettings   `json:"scope,omitempty"`
+	Startup *WorkloadoptimizationV1StartupSettings `json:"startup,omitempty"`
 }
 
 // WorkloadoptimizationV1RecommendationStatus defines model for workloadoptimization.v1.RecommendationStatus.
@@ -12135,8 +12207,30 @@ type WorkloadoptimizationV1Scope struct {
 	Type *WorkloadoptimizationV1ScopeType `json:"type,omitempty"`
 }
 
+// WorkloadoptimizationV1ScopePreset ScopePreset is the closed set of supported scopes; each resolves server-side to a concrete scoping mechanism.
+type WorkloadoptimizationV1ScopePreset string
+
+// WorkloadoptimizationV1ScopeSettings ScopeSettings holds the scope configuration for recommendations.
+type WorkloadoptimizationV1ScopeSettings struct {
+	// Preset ScopePreset is the closed set of supported scopes; each resolves server-side to a concrete scoping mechanism.
+	Preset *WorkloadoptimizationV1ScopePreset `json:"preset,omitempty"`
+}
+
 // WorkloadoptimizationV1ScopeType ScopeType classifies the scoping mechanism. Mirrors the domain scope.Type enum.
 type WorkloadoptimizationV1ScopeType string
+
+// WorkloadoptimizationV1ScopedContainers ScopedContainers carries per-scope-group current resources and recommendations.
+type WorkloadoptimizationV1ScopedContainers struct {
+	// Containers Per-container state for the group, shape identical to Workload.containers[]:
+	// resources = average of the group's currently running pods' requests;
+	// recommendation = the group's current recommendation.
+	// A container absent from the group's recommendation is omitted entirely.
+	// A group with no currently-running pods is omitted entirely.
+	Containers []WorkloadoptimizationV1Container `json:"containers"`
+
+	// ScopeValue Scope value identifying the group.
+	ScopeValue string `json:"scopeValue"`
+}
 
 // WorkloadoptimizationV1SetScalingPoliciesOrderResponse defines model for workloadoptimization.v1.SetScalingPoliciesOrderResponse.
 type WorkloadoptimizationV1SetScalingPoliciesOrderResponse = map[string]interface{}
@@ -12489,7 +12583,10 @@ type WorkloadoptimizationV1Workload struct {
 	ScalingPolicyName string `json:"scalingPolicyName"`
 
 	// ScalingPolicyOrigin ScalingPolicyOrigin explains what was the source of the selected scaling policy.
-	ScalingPolicyOrigin        WorkloadoptimizationV1ScalingPolicyOrigin     `json:"scalingPolicyOrigin"`
+	ScalingPolicyOrigin WorkloadoptimizationV1ScalingPolicyOrigin `json:"scalingPolicyOrigin"`
+
+	// ScopedContainers Per-scope-group current resources/recommendations, mirroring containers. Absent when scoping is not configured.
+	ScopedContainers           *[]WorkloadoptimizationV1ScopedContainers     `json:"scopedContainers,omitempty"`
 	SuggestedScalingPolicyId   *string                                       `json:"suggestedScalingPolicyId"`
 	SuggestedScalingPolicyName *string                                       `json:"suggestedScalingPolicyName"`
 	SystemOverrides            WorkloadoptimizationV1WorkloadSystemOverrides `json:"systemOverrides"`

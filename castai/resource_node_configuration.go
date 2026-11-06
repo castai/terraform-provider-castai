@@ -586,6 +586,18 @@ For a node with 8 CPUs and 16 GB RAM, this calculates to 40 (5×8), 80 (5×16), 
 							Description:      "Type of boot disk attached to the node. (See [disk types](https://cloud.google.com/compute/docs/disks#pdspecs)). One of: pd-standard, pd-balanced, pd-ssd, pd-extreme ",
 							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"pd-standard", "pd-balanced", "pd-ssd", "pd-extreme"}, false)),
 						},
+						"provisioned_iops": {
+							Type:             schema.TypeInt,
+							Optional:         true,
+							Description:      "Provisioned IOPS for the node's boot disk. For Hyperdisk-Balanced boot disks only: the value is applied when the resolved boot disk type is hyperdisk-balanced and is ignored (never sent to GCP) otherwise. GCP valid range: 3000-160000. When both provisioned values are set, the coupling MAX(140, provisioned_iops/256) <= provisioned_throughput <= MIN(2400, provisioned_iops/4) is validated in the service.",
+							ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(3000, 160000)),
+						},
+						"provisioned_throughput": {
+							Type:             schema.TypeInt,
+							Optional:         true,
+							Description:      "Provisioned throughput in MiB/s for the node's boot disk. For Hyperdisk-Balanced boot disks only: the value is applied when the resolved boot disk type is hyperdisk-balanced and is ignored (never sent to GCP) otherwise. GCP valid range: 140-2400 MiB/s. When both provisioned values are set, the coupling MAX(140, provisioned_iops/256) <= provisioned_throughput <= MIN(2400, provisioned_iops/4) is validated in the service.",
+							ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(140, 2400)),
+						},
 						"zones": {
 							Type:     schema.TypeList,
 							Optional: true,
@@ -1686,6 +1698,12 @@ func toGKEConfig(obj map[string]interface{}) *sdk.NodeconfigV1GKEConfig {
 	if v, ok := obj["disk_type"].(string); ok && v != "" {
 		out.DiskType = toPtr(v)
 	}
+	if v, ok := obj["provisioned_iops"].(int); ok && v != 0 {
+		out.ProvisionedIops = toPtr(int64(v))
+	}
+	if v, ok := obj["provisioned_throughput"].(int); ok && v != 0 {
+		out.ProvisionedThroughput = toPtr(int64(v))
+	}
 	if v, ok := obj["zones"].([]interface{}); ok {
 		out.Zones = toPtr(toStringList(v))
 	}
@@ -1819,6 +1837,12 @@ func flattenGKEConfig(config *sdk.NodeconfigV1GKEConfig) []map[string]interface{
 	}
 	if v := config.DiskType; v != nil {
 		m["disk_type"] = *v
+	}
+	if v := config.ProvisionedIops; v != nil {
+		m["provisioned_iops"] = *v
+	}
+	if v := config.ProvisionedThroughput; v != nil {
+		m["provisioned_throughput"] = *v
 	}
 	if v := config.Zones; v != nil {
 		m["zones"] = *v
