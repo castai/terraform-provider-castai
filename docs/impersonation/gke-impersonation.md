@@ -150,7 +150,61 @@ After applying these changes, you can increase the module versions at your discr
 
 ### B) Didn't use iam-impersonate`, Used `gke-cluster`
 
-> TODO
+The following changes are required. Resources commented out can be deleted from the configuration, others need to be added or changed, see comments.
+
+Changes need to be applied together in a single `terraform apply`.
+
+```terraform
+# 1. `castai_gke_cluster_id` resource needs to be removed
+#
+# resource "castai_gke_cluster_id" "cluster_id" {
+#   client_service_account = google_service_account.client_service_account.email
+#   # ...
+# }
+
+# It needs to be dropped from the state without deleting it
+removed {
+  from = castai_gke_cluster_id.cluster_id
+  
+  lifecycle {
+    destroy = false
+  }
+}
+
+# 2. `castai_impersonation_service_account` resource data source needs to be defined
+data "castai_impersonation_service_account" "gke" {
+  provider_type = "gke"
+}
+
+# 3. References to `castai_gke_cluster_id` need to be replaced with `castai_impersonation_service_account` in every `google_service_account_iam_member` where it was referenced:
+resource "google_service_account_iam_member" "example_binding" {
+  # Replace this:
+  # member             = "serviceAccount:${castai_gke_cluster_id.cluster_id.cast_service_account}"
+  # With this:
+  # member             = "serviceAccount:${data.castai_impersonation_service_account.gke.email}"
+
+  # ...
+}
+
+# 4. `castai/gke-cluster` inputs need to be updated
+module "castai_gke_cluster" {
+  source  = "castai/gke-cluster/castai"
+  version = "~> 11.1"
+
+  # Remove gke_credentials:
+  # gke_credentials = "{}"
+
+  # Add the following instead:
+  target_service_account_email = google_service_account.client_service_account.email
+  castai_service_account_email = data.castai_impersonation_service_account.gke.email
+}
+```
+
+The expected changes in the resulting plan are:
+- Updating `module.castai_gke_cluster.castai_gke_cluster.castai_cluster` to remove `credentials_json` field
+- Forgetting `castai_gke_cluster_id.cluster_id`
+
+After applying these changes, you can increase the module versions at your discretion, but for the migration we suggest using these to make sure you see the same changes as above.
 
 ### C) Used `iam-impersonate`, didn't use `gke-cluster`
 
@@ -237,6 +291,7 @@ Changes need to be applied together in a single `terraform apply`.
 # 1. `castai_gke_cluster_id` resource needs to be removed
 #
 # resource "castai_gke_cluster_id" "cluster_id" {
+#   client_service_account = google_service_account.client_service_account.email
 #   # ...
 # }
 
