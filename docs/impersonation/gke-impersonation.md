@@ -41,7 +41,6 @@ The following section describes some prerequisites, and the ones after that desc
 
 ### Prerequisites
 
-- Terraform **>= 1.9** if you use the `castai/gke-cluster` module (version `~> 11.1` requires it, and `terraform init` enforces it). If you manage the `castai_gke_cluster` resource directly, no particular Terraform version is required for this migration.
 - Cast AI provider **>= 9.14.0**:
   ```hcl
   terraform {
@@ -67,11 +66,7 @@ module "castai_gke_iam" {
   # ...
   
   # Set these two arguments. Note, these are the defaults in 0.6.x. If you've
-  # already updated to that version and haven't changed them, you're good. If
-  # you've already set `authentication_method = "impersonation"`, you've
-  # finished this migration. If you've set `authentication_method_migration =
-  # "none"`, you've opted out of preparing impersonation; create the token
-  # creator binding yourself, as shown below.
+  # already updated to that version and haven't changed them, you're good.
   authentication_method           = "service_account_key"
   authentication_method_migration = "prepare"
 }
