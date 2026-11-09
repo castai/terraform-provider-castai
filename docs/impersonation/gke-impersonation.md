@@ -91,7 +91,7 @@ removed {
   }
 }
 
-# 2. Add `castai/gke-iam` instead
+# 2. `castai/gke-iam` needs to be added instead
 module "castai_gke_iam" {
   source  = "castai/gke-iam/castai"
   version = "~> 0.6.0"
@@ -120,7 +120,7 @@ moved {
   to   = module.castai_gke_iam.google_service_account.castai_service_account
 }
 
-# 3. Change `castai/gke-cluster` inputs
+# 3. `castai/gke-cluster` inputs need to be updated
 module "castai-gke-cluster" {
   source  = "castai/gke-cluster/castai"
   version = "~> 11.1"
@@ -176,7 +176,7 @@ removed {
   }
 }
 
-# 2. Add `castai/gke-iam` instead
+# 2. `castai/gke-iam` needs to be added instead
 module "castai_gke_iam" {
   source  = "castai/gke-iam/castai"
   version = "~> 0.6.0"
@@ -205,6 +205,7 @@ moved {
   to   = module.castai_gke_iam.google_service_account.castai_service_account
 }
 
+# 3. `castai_gke_cluster` needs to be updated
 resource "castai_gke_cluster" "castai_cluster" {
   # Remove credentials_json:
   # credentials_json = "{}"
@@ -222,10 +223,64 @@ resource "castai_gke_cluster" "castai_cluster" {
 }
 ```
 
-For the list expected changes in the resulting plan, please see scenario **A)**. The only difference should be that `castai_gke_cluster` resource is not under the `castai_gke_cluster` module.
+For the list of expected changes in the resulting plan, please see scenario **A)**. The only difference should be that `castai_gke_cluster` resource is not under the `castai_gke_cluster` module.
 
 After applying these changes, you can increase the module versions at your discretion, but for the migration we suggest using these to make sure you see the same changes as above.
 
 ### D) Didn't use `iam-impersonate`, didn't use `gke-cluster`
 
-> TODO
+The following changes are required. Resources commented out can be deleted from the configuration, others need to be added or changed, see comments.
+
+Changes need to be applied together in a single `terraform apply`.
+
+```terraform
+# 1. `castai_gke_cluster_id` resource needs to be removed
+#
+# resource "castai_gke_cluster_id" "cluster_id" {
+#   # ...
+# }
+
+# It needs to be dropped from the state without deleting it
+removed {
+  from = castai_gke_cluster_id.cluster_id
+  
+  lifecycle {
+    destroy = false
+  }
+}
+
+# 2. `castai_impersonation_service_account` resource data source needs to be defined
+data "castai_impersonation_service_account" "gke" {
+  provider_type = "gke"
+}
+
+# 3. References to `castai_gke_cluster_id` need to be replaced with `castai_impersonation_service_account` in every `google_service_account_iam_member` where it was referenced:
+resource "google_service_account_iam_member" "example_binding" {
+  # Replace this:
+  # member             = "serviceAccount:${castai_gke_cluster_id.cluster_id.cast_service_account}"
+  # With this:
+  # member             = "serviceAccount:${data.castai_impersonation_service_account.gke.email}"
+
+  # ...
+}
+
+# 4. `castai_gke_cluster` needs to be updated
+resource "castai_gke_cluster" "castai_cluster" {
+  # Remove credentials_json:
+  # credentials_json = "{}"
+  
+  # Add the following instead:
+  target_service_account_email = google_service_account.client_service_account.email
+  castai_service_account_email = data.castai_impersonation_service_account.gke.email
+
+  depends_on = [
+    # This dependency (if it was present) can be removed, it's no longer necessary:
+    
+    # castai_gke_cluster_id.cluster_id,
+  ]
+}
+```
+
+The expected changes in the resulting plan are:
+- Updating `castai_gke_cluster.castai_cluster` to remove `credentials_json` field
+- Forgetting `castai_gke_cluster_id.cluster_id`
