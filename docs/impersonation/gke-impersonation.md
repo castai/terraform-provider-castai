@@ -33,15 +33,15 @@ If you want to connect a new cluster to Cast AI, the recommended way is "New Imp
 ## Migrating from Service Account Keys to Impersonation
 
 If your cluster is connected using Service Account Keys (static credentials), you can migrate it to Impersonation. This involves the following three steps:
-1. Setting up GCP resources required for Impersonation to establish trust between your GCP Service Account and Cast's.
+1. Set up GCP resources required for Impersonation to establish trust between your GCP Service Account and Cast's.
 2. Switch your cluster to use the new authentication method.
-3. Clean up GCP resources that are no longer required. Cast AI will no longer use your Service Account Keys, those can be removed.
+3. Clean up GCP resources that are no longer required. Cast AI will no longer use your Service Account Keys, so they can be removed.
 
-The following section describes some prerequisites, and the ones after that describe these tests in detail.
+The following section describes some prerequisites, and the ones after that describe these steps in detail.
 
 ### Prerequisites
 
-- Terraform **>= 1.7**. The examples below use `removed` blocks, which require it.
+- Terraform **>= 1.9** if you use the `castai/gke-cluster` module (version `~> 11.1` requires it, and `terraform init` enforces it). If you manage the `castai_gke_cluster` resource directly, no particular Terraform version is required for this migration.
 - Cast AI provider **>= 9.14.0**:
   ```hcl
   terraform {
@@ -53,7 +53,7 @@ The following section describes some prerequisites, and the ones after that desc
     }
   }
   ```
-- If you're using the `castai/gke-cluster` module and have a lower version, update it to `~> 11.1`
+- If you're using the `castai/gke-cluster` module and have a lower version, update it to `~> 11.1`.
 
 ### 1. Setting up Impersonation GCP resources
 
@@ -68,17 +68,19 @@ module "castai_gke_iam" {
   
   # Set these two arguments. Note, these are the defaults in 0.6.x. If you've
   # already updated to that version and haven't changed them, you're good. If
-  # you've changed them, you've already started the migration, continue from
-  # where you've left off.
+  # you've already set `authentication_method = "impersonation"`, you've
+  # finished this migration. If you've set `authentication_method_migration =
+  # "none"`, you've opted out of preparing impersonation; create the token
+  # creator binding yourself, as shown below.
   authentication_method           = "service_account_key"
   authentication_method_migration = "prepare"
 }
 ```
 
 You should see the following changes:
-- Adding `google_service_account_iam_member.castai_token_creator`. This allows the Cast AI Service Account to Impersonate your Service Account.
+- Adding `google_service_account_iam_member.castai_token_creator`. This allows the Cast AI Service Account to impersonate your Service Account.
 
-If you **don't use** the `castai/gke-iam` module, you need to create an `google_service_account_iam_member` that allows the Cast AI Service Account to Impersonate your Service Account:
+If you **don't use** the `castai/gke-iam` module, you need to create a `google_service_account_iam_member` that allows the Cast AI Service Account to impersonate your Service Account:
 
 ```terraform
 data "castai_impersonation_service_account" "gke" {
@@ -136,20 +138,21 @@ resource "castai_gke_cluster" "castai_cluster" {
 
 ### 3. Clean up Service Account Keys
 
-At this point, your Service Account Keys are no longer in use by Cast AI, you can remove them.
+At this point, your Service Account Keys are no longer in use by Cast AI, so you can remove them.
 
 If you **use** the `castai/gke-iam` module, change the `authentication_method` argument and remove `authentication_method_migration`:
 
 ```terraform
 module "castai_gke_iam" {
   source  = "castai/gke-iam/castai"
-  version = ">= 0.6"
+  version = "~> 0.6.0"
 
   # ...
 
-  # Chang this to `impersonation`:
+  # Change this to `impersonation`:
   authentication_method = "impersonation"
-  # This can be removed. It's not strictly necessary, but it will be dropped in a future version of the module:
+  # Removing this is not strictly necessary, but the variable will be removed
+  # in a future version of the module, so we recommend deleting it:
   # authentication_method_migration = "prepare"
 }
 ```
@@ -179,7 +182,7 @@ The following section describes common prerequisites, and the ones after that sh
 
 ### Prerequisites
 
-- Terraform **>= 1.7**. The examples below use `removed` blocks, which require it.
+- Terraform **>= 1.9** if you use the `castai/gke-cluster` module (version `~> 11.1` requires it, and `terraform init` enforces it). Otherwise **>= 1.7**: the examples below use `removed` blocks, which require it.
 - Cast AI provider **>= 9.14.0**:
   ```hcl
   terraform {
@@ -191,8 +194,8 @@ The following section describes common prerequisites, and the ones after that sh
     }
   }
   ```
-- If you're using the `castai/gke-cluster` module and have a lower version, update it to `~> 11.1`
-- If you're using the `castai/iam-impersonate/gke` module and have a lower version, update it to `1.1.0`
+- If you're using the `castai/gke-cluster` module and have a lower version, update it to `~> 11.1`.
+- If you're using the `castai/iam-impersonate/gke` module and have a lower version, update it to `1.1.0`.
 - Keep the same `gke_cluster_name` through the migration: the service account name (`castai-gke-tf-<sha1 of gke_cluster_name>`) and the `castai_role` ID are derived from it. Changing it makes the `moved` blocks miss their targets.
 
 ### A) Used `iam-impersonate`, used `gke-cluster`
