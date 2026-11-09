@@ -32,9 +32,137 @@ If you want to connect a new cluster to Cast AI, the recommended way is "New Imp
 
 ## Migrating from Service Account Keys to Impersonation
 
-If your cluster is connected using Service Account Keys (static credentials), you can migrate it to Impersonation by following the process below.
+If your cluster is connected using Service Account Keys (static credentials), you can migrate it to Impersonation. This involves the following three steps:
+1. Setting up GCP resources required for Impersonation to establish trust between your GCP Service Account and Cast's.
+2. Switch your cluster to use the new authentication method.
+3. Clean up GCP resources that are no longer required. Cast AI will no longer use your Service Account Keys, those can be removed.
 
-> TODO: similar to "Migrating from Legacy to New Impersonation", describing different permutations of module vs. no-module
+The following section describes some prerequisites, and the ones after that describe these tests in detail.
+
+### Prerequisites
+
+- Terraform **>= 1.7**. The examples below use `removed` blocks, which require it.
+- Cast AI provider **>= 9.14.0**:
+  ```hcl
+  terraform {
+    required_providers {
+      castai = {
+        source  = "castai/castai"
+        version = ">= 9.14.0"
+      }
+    }
+  }
+  ```
+- If you're using the `castai/gke-cluster` module and have a lower version, update it to `~> 11.1`
+
+### 1. Setting up Impersonation GCP resources
+
+If you **use** the `castai/gke-iam` module, update to version `0.6` and set the following arguments:
+
+```terraform
+module "castai_gke_iam" {
+  source  = "castai/gke-iam/castai"
+  version = "~> 0.6.0"
+
+  # ...
+  
+  # Set these two arguments. Note, these are the defaults in 0.6.x. If you've
+  # already updated to that version and haven't changed them, you're good. If
+  # you've changed them, you've already started the migration, continue from
+  # where you've left off.
+  authentication_method           = "service_account_key"
+  authentication_method_migration = "prepare"
+}
+```
+
+You should see the following changes:
+- Adding `google_service_account_iam_member.castai_token_creator`. This allows the Cast AI Service Account to Impersonate your Service Account.
+
+If you **don't use** the `castai/gke-iam` module, you need to create an `google_service_account_iam_member` that allows the Cast AI Service Account to Impersonate your Service Account:
+
+```terraform
+data "castai_impersonation_service_account" "gke" {
+  provider_type = "gke"
+}
+
+resource "google_service_account_iam_member" "castai_token_creator" {
+  # ID of the Service Account that you're currently creating a `google_service_account_key` for and passing that to Cast AI via the `castai_gke_cluster` resource:
+  service_account_id = google_service_account.client_service_account.name
+  role               = "roles/iam.serviceAccountTokenCreator"
+  member             = "serviceAccount:${data.castai_impersonation_service_account.gke.email}"
+}
+```
+
+### 2. Switch the authentication method
+
+After verifying that the previous step was successfully applied and the `google_service_account_iam_member` resource was created, you can switch the authentication method from using the old Service Account Keys to Impersonation.
+
+If you **use** the `castai/gke-cluster` module, you need to change its inputs like the following:
+
+```terraform
+module "castai_gke_cluster" {
+  source  = "castai/gke-cluster/castai"
+  version = "~> 11.1"
+
+  # Remove gke_credentials:
+  # gke_credentials = "{}"
+
+  # Add the following if you use the `castai/gke-iam` module:
+  target_service_account_email = module.castai_gke_iam.target_service_account_email
+  castai_service_account_email = module.castai_gke_iam.castai_service_account_email
+  
+  # Add the following if you DON'T use the `castai/gke-iam` module:
+  target_service_account_email = google_service_account.client_service_account.email
+  castai_service_account_email = data.castai_impersonation_service_account.gke.email
+}
+```
+
+If you **don't use** the `castai/gke-cluster` module, you need to change the arguments of the `castai_gke_cluster` resource like the following:
+
+```terraform
+resource "castai_gke_cluster" "castai_cluster" {
+  # Remove credentials_json:
+  # credentials_json = "{}"
+
+  # Add the following if you use the `castai/gke-iam` module:
+  target_service_account_email = module.castai_gke_iam.target_service_account_email
+  castai_service_account_email = module.castai_gke_iam.castai_service_account_email
+
+  # Add the following if you DON'T use the `castai/gke-iam` module:
+  target_service_account_email = google_service_account.client_service_account.email
+  castai_service_account_email = data.castai_impersonation_service_account.gke.email
+}
+```
+
+### 3. Clean up Service Account Keys
+
+At this point, your Service Account Keys are no longer in use by Cast AI, you can remove them.
+
+If you **use** the `castai/gke-iam` module, change the `authentication_method` argument and remove `authentication_method_migration`:
+
+```terraform
+module "castai_gke_iam" {
+  source  = "castai/gke-iam/castai"
+  version = ">= 0.6"
+
+  # ...
+
+  # Chang this to `impersonation`:
+  authentication_method = "impersonation"
+  # This can be removed. It's not strictly necessary, but it will be dropped in a future version of the module:
+  # authentication_method_migration = "prepare"
+}
+```
+
+If you **don't use** the `castai/gke-iam` module, remove the `google_service_account_key` resource:
+
+```terraform
+# Remove this resource:
+# resource "google_service_account_key" "castai_key" {
+#   service_account_id = google_service_account.client_service_account.name
+#   # ...
+# }
+```
 
 ## Migrating from Legacy to New Impersonation
 
@@ -47,7 +175,7 @@ Depending on which Cast AI Terraform modules you relied on, the process is sligh
 | Used `gke-cluster`       | **A**. `iam-impersonate` module will be replaced with `gke-iam`.<br>The `gke-cluster` module receives different inputs.      | **B**. `castai_gke_cluster_id` resource will be removed.<br>The `gke-cluster` module receives different inputs.      |
 | Didn't use `gke-cluster` | **C**. `iam-impersonate` module will be replaced with `gke-iam`.<br>`castai_gke_cluster` resource receives different inputs. | **D**. `castai_gke_cluster_id` resource will be removed.<br>`castai_gke_cluster` resource receives different inputs. |
 
-The following section describes common pre-requisites, and the ones after that show configuration examples for each of these cases.
+The following section describes common prerequisites, and the ones after that show configuration examples for each of these cases.
 
 ### Prerequisites
 
@@ -121,7 +249,7 @@ moved {
 }
 
 # 3. `castai/gke-cluster` inputs need to be updated
-module "castai-gke-cluster" {
+module "castai_gke_cluster" {
   source  = "castai/gke-cluster/castai"
   version = "~> 11.1"
 
@@ -139,7 +267,7 @@ The expected changes in the resulting plan are:
 - Destroying `module.iam_impersonate.google_service_account_iam_member.impersonation_user_binding` (this was never really necessary)
 - Destroying `module.iam_impersonate.google_project_iam_binding.compute_manager_binding`
 - Adding `module.castai_gke_iam.google_project_iam_member.project` (this takes the place of `module.iam_impersonate.google_project_iam_binding.compute_manager_binding`)
-- Updating `module.castai-gke-cluster.castai_gke_cluster.castai_cluster` to remove `credentials_json` field
+- Updating `module.castai_gke_cluster.castai_gke_cluster.castai_cluster` to remove `credentials_json` field
 - Replacing (after moving) `module.castai_gke_iam.google_service_account_iam_member.castai_token_creator[0]` to remove an unnecessary `condition` (`title="AlwaysTrueCondition"`)
 - Forgetting `module.iam_impersonate.castai_gke_cluster_id.cluster_id`
 - Moving `module.iam_impersonate.google_project_iam_custom_role.castai_role`
