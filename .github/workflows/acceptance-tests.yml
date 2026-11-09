@@ -48,7 +48,6 @@ jobs:
           secrets: |-
             CASTAI_API_TOKEN:onyx-fyvd/terraform-provider-castai-token-dev
             ARM_CLIENT_SECRET:onyx-fyvd/terraform-provider-azure-client-secret
-            SSO_CLIENT_SECRET:onyx-fyvd/terraform-provider-sso-client-secret
 
       - name: Setup Go
         uses: actions/setup-go@v6
@@ -77,8 +76,6 @@ jobs:
           AZURE_TF_ACCEPTANCE_TEST_FEDERATION_ID: ${{ secrets.AZURE_TF_ACCEPTANCE_TEST_FEDERATION_ID }}
           AZURE_TF_ACCEPTANCE_TEST_ARM_TENANT_ID: ${{ secrets.AZURE_TF_ACCEPTANCE_TEST_ARM_TENANT_ID }}
           AZURE_TF_ACCEPTANCE_TEST_FEDERATION_CLIENT_ID: ${{ secrets.AZURE_TF_ACCEPTANCE_TEST_FEDERATION_CLIENT_ID }}
-          SSO_CLIENT_ID: ${{ secrets.SSO_CLIENT_ID }}
-          SSO_DOMAIN: ${{ secrets.SSO_DOMAIN }}
           ACCEPTANCE_TEST_ORGANIZATION_ID: ${{ vars.TF_ACCEPTANCE_TEST_ORGANIZATION_ID }}
         run: make testacc-aks
   eks:
@@ -108,7 +105,6 @@ jobs:
           export_to_environment: true
           secrets: |-
             CASTAI_API_TOKEN:onyx-fyvd/terraform-provider-castai-token-dev
-            SSO_CLIENT_SECRET:onyx-fyvd/terraform-provider-sso-client-secret
 
       - name: Configure AWS credentials
         # Role from IaC e2e-core/eks-tf-acc.tf; short-lived STS credentials
@@ -140,8 +136,6 @@ jobs:
 
       - name: Acceptance test
         env:
-          SSO_CLIENT_ID: ${{ secrets.SSO_CLIENT_ID }}
-          SSO_DOMAIN: ${{ secrets.SSO_DOMAIN }}
           ACCEPTANCE_TEST_ORGANIZATION_ID: ${{ vars.TF_ACCEPTANCE_TEST_ORGANIZATION_ID }}
         run: make testacc-eks
   gke:
@@ -172,7 +166,6 @@ jobs:
           secrets: |-
             CASTAI_API_TOKEN:onyx-fyvd/terraform-provider-castai-token-dev
             CASTAI_GCP_CREDENTIALS:onyx-fyvd/terraform-provider-castai-google-credentials
-            SSO_CLIENT_SECRET:onyx-fyvd/terraform-provider-sso-client-secret
 
       - name: Setup Go
         uses: actions/setup-go@v6
@@ -212,8 +205,6 @@ jobs:
       - name: Acceptance test
         env:
           GOOGLE_PROJECT_ID: ${{ secrets.GOOGLE_TF_ACCEPTANCE_PROJECT_ID }}
-          SSO_CLIENT_ID: ${{ secrets.SSO_CLIENT_ID }}
-          SSO_DOMAIN: ${{ secrets.SSO_DOMAIN }}
           ACCEPTANCE_TEST_ORGANIZATION_ID: ${{ vars.TF_ACCEPTANCE_TEST_ORGANIZATION_ID }}
         run: make testacc-gke
   cloud-agnostic:
@@ -267,8 +258,6 @@ jobs:
 
       - name: Acceptance test
         env:
-          SSO_CLIENT_ID: ${{ secrets.SSO_CLIENT_ID }}
-          SSO_DOMAIN: ${{ secrets.SSO_DOMAIN }}
           ACCEPTANCE_TEST_ORGANIZATION_ID: ${{ vars.TF_ACCEPTANCE_TEST_ORGANIZATION_ID }}
         run: make testacc-cloud-agnostic
 

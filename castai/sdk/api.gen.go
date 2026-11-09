@@ -1222,6 +1222,18 @@ const (
 	WorkloadoptimizationV1SystemOverrideTargetSYSTEMOVERRIDETARGETVERTICALOPTIMIZATION WorkloadoptimizationV1SystemOverrideTarget = "SYSTEM_OVERRIDE_TARGET_VERTICAL_OPTIMIZATION"
 )
 
+// Defines values for WorkloadoptimizationV1UnqualifiedResourceReason.
+const (
+	WorkloadoptimizationV1UnqualifiedResourceReasonUNQUALIFIEDRESOURCEREASONJVMMETRICSDEGRADED WorkloadoptimizationV1UnqualifiedResourceReason = "UNQUALIFIED_RESOURCE_REASON_JVM_METRICS_DEGRADED"
+	WorkloadoptimizationV1UnqualifiedResourceReasonUNQUALIFIEDRESOURCEREASONUNSPECIFIED        WorkloadoptimizationV1UnqualifiedResourceReason = "UNQUALIFIED_RESOURCE_REASON_UNSPECIFIED"
+)
+
+// Defines values for WorkloadoptimizationV1UnqualifiedResourceType.
+const (
+	WorkloadoptimizationV1UnqualifiedResourceTypeUNQUALIFIEDRESOURCETYPEMEMORY      WorkloadoptimizationV1UnqualifiedResourceType = "UNQUALIFIED_RESOURCE_TYPE_MEMORY"
+	WorkloadoptimizationV1UnqualifiedResourceTypeUNQUALIFIEDRESOURCETYPEUNSPECIFIED WorkloadoptimizationV1UnqualifiedResourceType = "UNQUALIFIED_RESOURCE_TYPE_UNSPECIFIED"
+)
+
 // Defines values for RbacServiceAPIListPermissionGroupsParamsProduct.
 const (
 	RbacServiceAPIListPermissionGroupsParamsProductPRODUCTTYPECASTAI      RbacServiceAPIListPermissionGroupsParamsProduct = "PRODUCT_TYPE_CASTAI"
@@ -9752,6 +9764,12 @@ type WorkloadoptimizationV1Container struct {
 
 	// Runtime Defines the application runtime.
 	Runtime *WorkloadoptimizationV1Runtime `json:"runtime,omitempty"`
+
+	// UnqualifiedResources Resources disqualified by a runtime condition on the stored recommendation (e.g.
+	// memory when JVM metrics are missing). Always exposed — anomaly windows included;
+	// the shipping state is inferable from the recommendation itself. Absent/empty when
+	// nothing is unqualified.
+	UnqualifiedResources *[]WorkloadoptimizationV1UnqualifiedResource `json:"unqualifiedResources,omitempty"`
 }
 
 // WorkloadoptimizationV1ContainerConfig ContainerConfig defines configuration settings for a specific container within a workload.
@@ -12362,6 +12380,34 @@ type WorkloadoptimizationV1TwoPhaseRecommendations struct {
 
 // WorkloadoptimizationV1UnboundMemoryGrowthEvent defines model for workloadoptimization.v1.UnboundMemoryGrowthEvent.
 type WorkloadoptimizationV1UnboundMemoryGrowthEvent = map[string]interface{}
+
+// WorkloadoptimizationV1UnqualifiedResource A per-container runtime condition that marks one resource of the recommendation
+// as unqualified for optimization, hint not a final decision.
+// Containers with nothing unqualified carry an absent/empty list.
+type WorkloadoptimizationV1UnqualifiedResource struct {
+	// Reason Why a resource of the recommendation is unqualified for optimization.
+	//
+	//  - UNQUALIFIED_RESOURCE_REASON_JVM_METRICS_DEGRADED: JVM metrics are degraded (missing or insufficient for sizing)
+	Reason *WorkloadoptimizationV1UnqualifiedResourceReason `json:"reason,omitempty"`
+
+	// Resource The resource kind a runtime condition marks as unqualified for optimization.
+	//
+	//  - UNQUALIFIED_RESOURCE_TYPE_MEMORY: The memory resource is unqualified for optimization.
+	Resource *WorkloadoptimizationV1UnqualifiedResourceType `json:"resource,omitempty"`
+
+	// Since Generation time.
+	Since *time.Time `json:"since,omitempty"`
+}
+
+// WorkloadoptimizationV1UnqualifiedResourceReason Why a resource of the recommendation is unqualified for optimization.
+//
+//   - UNQUALIFIED_RESOURCE_REASON_JVM_METRICS_DEGRADED: JVM metrics are degraded (missing or insufficient for sizing)
+type WorkloadoptimizationV1UnqualifiedResourceReason string
+
+// WorkloadoptimizationV1UnqualifiedResourceType The resource kind a runtime condition marks as unqualified for optimization.
+//
+//   - UNQUALIFIED_RESOURCE_TYPE_MEMORY: The memory resource is unqualified for optimization.
+type WorkloadoptimizationV1UnqualifiedResourceType string
 
 // WorkloadoptimizationV1UnschedulableRecommendationEvent defines model for workloadoptimization.v1.UnschedulableRecommendationEvent.
 type WorkloadoptimizationV1UnschedulableRecommendationEvent struct {
