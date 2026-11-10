@@ -316,6 +316,7 @@ Optional:
 
 - `security_group_id` (String) OCI network security group ID
 - `vcn_cidr` (String) OCI VCN IPv4 CIDR block
+- `vcn_peered` (Boolean) Whether existing VCN is peered with main cluster's network. Field is ignored if vcn_id is not provided or main cluster does not support internal load balancers. Omit the attribute instead of setting it to false to disable peering.
 
 
 <a id="nestedatt--zones"></a>

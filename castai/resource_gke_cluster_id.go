@@ -24,11 +24,12 @@ const (
 
 func resourceGKEClusterId() *schema.Resource {
 	return &schema.Resource{
-		CreateContext: resourceCastaiGKEClusterIdCreate,
-		ReadContext:   resourceCastaiGKEClusterIdRead,
-		UpdateContext: resourceCastaiGKEClusterIdUpdate,
-		DeleteContext: resourceCastaiGKEClusterIdDelete,
-		Description:   "GKE cluster resource allows connecting an existing GKE cluster to CAST AI.",
+		CreateContext:      resourceCastaiGKEClusterIdCreate,
+		ReadContext:        resourceCastaiGKEClusterIdRead,
+		UpdateContext:      resourceCastaiGKEClusterIdUpdate,
+		DeleteContext:      resourceCastaiGKEClusterIdDelete,
+		Description:        "GKE cluster resource ID allows registering an existing GKE cluster and configuring impersonation settings.",
+		DeprecationMessage: `Deprecated. Use castai_gke_cluster with target_service_account_email and castai_service_account_email (e.g. from the castai_impersonation_service_account data source with provider_type = "gke") instead. This resource will be removed in a future version.`,
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(5 * time.Minute),
@@ -188,5 +189,22 @@ func resourceCastaiGKEClusterIdUpdate(ctx context.Context, data *schema.Resource
 }
 
 func resourceCastaiGKEClusterIdDelete(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	return resourceCastaiClusterDelete(ctx, data, meta)
+	client := meta.(*ProviderConfig).api
+	resp, err := fetchClusterData(ctx, client, data.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	if resp == nil {
+		return nil
+	}
+	if toString(resp.JSON200.CredentialsId) != "" {
+		return diag.Diagnostics{
+			{
+				Severity: diag.Warning,
+				Summary:  fmt.Sprintf("Skipping delete of cluster \"%s\"", data.Id()),
+				Detail:   fmt.Sprintf("The cluster has credentials assigned (credentials_id=%s), which means it is managed by another resource such as castai_gke_cluster. The cluster was left registered in CAST AI; only the state entry was removed.", toString(resp.JSON200.CredentialsId)),
+			},
+		}
+	}
+	return clusterDelete(ctx, data, client, resp)
 }

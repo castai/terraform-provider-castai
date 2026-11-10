@@ -296,9 +296,19 @@ const (
 	CastaiSsoV1beta1SSOConnectionStatusSTATUSUNKNOWN  CastaiSsoV1beta1SSOConnectionStatus = "STATUS_UNKNOWN"
 )
 
+// Defines values for CastaiSsoV1beta1SSOEmailDomainValidationCheckOutcome.
+const (
+	CastaiSsoV1beta1SSOEmailDomainValidationCheckOutcomeSSOEMAILDOMAINCHECKOUTCOMELOOKUPFAILED      CastaiSsoV1beta1SSOEmailDomainValidationCheckOutcome = "SSO_EMAIL_DOMAIN_CHECK_OUTCOME_LOOKUP_FAILED"
+	CastaiSsoV1beta1SSOEmailDomainValidationCheckOutcomeSSOEMAILDOMAINCHECKOUTCOMESECRETMISMATCH    CastaiSsoV1beta1SSOEmailDomainValidationCheckOutcome = "SSO_EMAIL_DOMAIN_CHECK_OUTCOME_SECRET_MISMATCH"
+	CastaiSsoV1beta1SSOEmailDomainValidationCheckOutcomeSSOEMAILDOMAINCHECKOUTCOMETXTRECORDNOTFOUND CastaiSsoV1beta1SSOEmailDomainValidationCheckOutcome = "SSO_EMAIL_DOMAIN_CHECK_OUTCOME_TXT_RECORD_NOT_FOUND"
+	CastaiSsoV1beta1SSOEmailDomainValidationCheckOutcomeSSOEMAILDOMAINCHECKOUTCOMEUNSPECIFIED       CastaiSsoV1beta1SSOEmailDomainValidationCheckOutcome = "SSO_EMAIL_DOMAIN_CHECK_OUTCOME_UNSPECIFIED"
+	CastaiSsoV1beta1SSOEmailDomainValidationCheckOutcomeSSOEMAILDOMAINCHECKOUTCOMEVERIFIED          CastaiSsoV1beta1SSOEmailDomainValidationCheckOutcome = "SSO_EMAIL_DOMAIN_CHECK_OUTCOME_VERIFIED"
+)
+
 // Defines values for CastaiSsoV1beta1SSOEmailDomainValidationStatus.
 const (
 	CastaiSsoV1beta1SSOEmailDomainValidationStatusSTATUSDENIED   CastaiSsoV1beta1SSOEmailDomainValidationStatus = "STATUS_DENIED"
+	CastaiSsoV1beta1SSOEmailDomainValidationStatusSTATUSERROR    CastaiSsoV1beta1SSOEmailDomainValidationStatus = "STATUS_ERROR"
 	CastaiSsoV1beta1SSOEmailDomainValidationStatusSTATUSEXPIRED  CastaiSsoV1beta1SSOEmailDomainValidationStatus = "STATUS_EXPIRED"
 	CastaiSsoV1beta1SSOEmailDomainValidationStatusSTATUSPENDING  CastaiSsoV1beta1SSOEmailDomainValidationStatus = "STATUS_PENDING"
 	CastaiSsoV1beta1SSOEmailDomainValidationStatusSTATUSUNKNOWN  CastaiSsoV1beta1SSOEmailDomainValidationStatus = "STATUS_UNKNOWN"
@@ -1176,6 +1186,12 @@ const (
 	WorkloadoptimizationV1ScalingPolicySelectSCALINGPOLICYSELECTUNSPECIFIED WorkloadoptimizationV1ScalingPolicySelect = "SCALING_POLICY_SELECT_UNSPECIFIED"
 )
 
+// Defines values for WorkloadoptimizationV1ScopePreset.
+const (
+	WorkloadoptimizationV1ScopePresetSCOPEPRESETINSTANCETYPE WorkloadoptimizationV1ScopePreset = "SCOPE_PRESET_INSTANCE_TYPE"
+	WorkloadoptimizationV1ScopePresetSCOPEPRESETUNSPECIFIED  WorkloadoptimizationV1ScopePreset = "SCOPE_PRESET_UNSPECIFIED"
+)
+
 // Defines values for WorkloadoptimizationV1ScopeType.
 const (
 	WorkloadoptimizationV1ScopeTypeSCOPETYPENODELABEL WorkloadoptimizationV1ScopeType = "SCOPE_TYPE_NODE_LABEL"
@@ -1191,17 +1207,32 @@ const (
 
 // Defines values for WorkloadoptimizationV1SystemOverrideResetOrigin.
 const (
-	WorkloadoptimizationV1SystemOverrideResetOriginSYSTEMOVERRIDERESETORIGINANNOTATIONSOFF WorkloadoptimizationV1SystemOverrideResetOrigin = "SYSTEM_OVERRIDE_RESET_ORIGIN_ANNOTATIONS_OFF"
-	WorkloadoptimizationV1SystemOverrideResetOriginSYSTEMOVERRIDERESETORIGINAPICALL        WorkloadoptimizationV1SystemOverrideResetOrigin = "SYSTEM_OVERRIDE_RESET_ORIGIN_API_CALL"
-	WorkloadoptimizationV1SystemOverrideResetOriginSYSTEMOVERRIDERESETORIGINEXPIRED        WorkloadoptimizationV1SystemOverrideResetOrigin = "SYSTEM_OVERRIDE_RESET_ORIGIN_EXPIRED"
-	WorkloadoptimizationV1SystemOverrideResetOriginSYSTEMOVERRIDERESETORIGINUNSPECIFIED    WorkloadoptimizationV1SystemOverrideResetOrigin = "SYSTEM_OVERRIDE_RESET_ORIGIN_UNSPECIFIED"
+	WorkloadoptimizationV1SystemOverrideResetOriginSYSTEMOVERRIDERESETORIGINANNOTATIONSOFF   WorkloadoptimizationV1SystemOverrideResetOrigin = "SYSTEM_OVERRIDE_RESET_ORIGIN_ANNOTATIONS_OFF"
+	WorkloadoptimizationV1SystemOverrideResetOriginSYSTEMOVERRIDERESETORIGINAPICALL          WorkloadoptimizationV1SystemOverrideResetOrigin = "SYSTEM_OVERRIDE_RESET_ORIGIN_API_CALL"
+	WorkloadoptimizationV1SystemOverrideResetOriginSYSTEMOVERRIDERESETORIGINDETECTORDISABLED WorkloadoptimizationV1SystemOverrideResetOrigin = "SYSTEM_OVERRIDE_RESET_ORIGIN_DETECTOR_DISABLED"
+	WorkloadoptimizationV1SystemOverrideResetOriginSYSTEMOVERRIDERESETORIGINEXPIRED          WorkloadoptimizationV1SystemOverrideResetOrigin = "SYSTEM_OVERRIDE_RESET_ORIGIN_EXPIRED"
+	WorkloadoptimizationV1SystemOverrideResetOriginSYSTEMOVERRIDERESETORIGINUNSPECIFIED      WorkloadoptimizationV1SystemOverrideResetOrigin = "SYSTEM_OVERRIDE_RESET_ORIGIN_UNSPECIFIED"
 )
 
 // Defines values for WorkloadoptimizationV1SystemOverrideTarget.
 const (
 	WorkloadoptimizationV1SystemOverrideTargetSYSTEMOVERRIDETARGETALL                  WorkloadoptimizationV1SystemOverrideTarget = "SYSTEM_OVERRIDE_TARGET_ALL"
+	WorkloadoptimizationV1SystemOverrideTargetSYSTEMOVERRIDETARGETMEMORYCAP            WorkloadoptimizationV1SystemOverrideTarget = "SYSTEM_OVERRIDE_TARGET_MEMORY_CAP"
 	WorkloadoptimizationV1SystemOverrideTargetSYSTEMOVERRIDETARGETUNSPECIFIED          WorkloadoptimizationV1SystemOverrideTarget = "SYSTEM_OVERRIDE_TARGET_UNSPECIFIED"
 	WorkloadoptimizationV1SystemOverrideTargetSYSTEMOVERRIDETARGETVERTICALOPTIMIZATION WorkloadoptimizationV1SystemOverrideTarget = "SYSTEM_OVERRIDE_TARGET_VERTICAL_OPTIMIZATION"
+)
+
+// Defines values for WorkloadoptimizationV1UnqualifiedResourceReason.
+const (
+	WorkloadoptimizationV1UnqualifiedResourceReasonUNQUALIFIEDRESOURCEREASONJVMMETRICSDEGRADED WorkloadoptimizationV1UnqualifiedResourceReason = "UNQUALIFIED_RESOURCE_REASON_JVM_METRICS_DEGRADED"
+	WorkloadoptimizationV1UnqualifiedResourceReasonUNQUALIFIEDRESOURCEREASONSPARKDRIVER        WorkloadoptimizationV1UnqualifiedResourceReason = "UNQUALIFIED_RESOURCE_REASON_SPARK_DRIVER"
+	WorkloadoptimizationV1UnqualifiedResourceReasonUNQUALIFIEDRESOURCEREASONUNSPECIFIED        WorkloadoptimizationV1UnqualifiedResourceReason = "UNQUALIFIED_RESOURCE_REASON_UNSPECIFIED"
+)
+
+// Defines values for WorkloadoptimizationV1UnqualifiedResourceType.
+const (
+	WorkloadoptimizationV1UnqualifiedResourceTypeUNQUALIFIEDRESOURCETYPEMEMORY      WorkloadoptimizationV1UnqualifiedResourceType = "UNQUALIFIED_RESOURCE_TYPE_MEMORY"
+	WorkloadoptimizationV1UnqualifiedResourceTypeUNQUALIFIEDRESOURCETYPEUNSPECIFIED WorkloadoptimizationV1UnqualifiedResourceType = "UNQUALIFIED_RESOURCE_TYPE_UNSPECIFIED"
 )
 
 // Defines values for RbacServiceAPIListPermissionGroupsParamsProduct.
@@ -3835,6 +3866,9 @@ type CastaiServiceaccountsV1beta1CreateServiceAccountKeyRequestKey struct {
 
 	// Name Name is the name of the service account key.
 	Name string `json:"name"`
+
+	// Product ProductType represents which product a category belongs to.
+	Product *CastaiRbacV1beta1ProductType `json:"product,omitempty"`
 }
 
 // CastaiServiceaccountsV1beta1CreateServiceAccountKeyResponse CreateServiceAccountKeyResponse is the response for creating a service account key.
@@ -3854,6 +3888,9 @@ type CastaiServiceaccountsV1beta1CreateServiceAccountKeyResponse struct {
 	// Name Name is the name of the key.
 	Name *string `json:"name,omitempty"`
 
+	// Product ProductType represents which product a category belongs to.
+	Product *CastaiRbacV1beta1ProductType `json:"product,omitempty"`
+
 	// Token Token is the full secret key.
 	Token *string `json:"token,omitempty"`
 }
@@ -3865,6 +3902,9 @@ type CastaiServiceaccountsV1beta1CreateServiceAccountRequestServiceAccount struc
 
 	// Name Name is the name of the service account.
 	Name string `json:"name"`
+
+	// Product ProductType represents which product a category belongs to.
+	Product *CastaiRbacV1beta1ProductType `json:"product,omitempty"`
 }
 
 // CastaiServiceaccountsV1beta1CreateServiceAccountResponse CreateServiceAccountResponse is the response for creating a service account.
@@ -4027,6 +4067,9 @@ type CastaiServiceaccountsV1beta1ServiceAccount struct {
 
 	// OrganizationId OrganizationID is the organization that owns the service account.
 	OrganizationId *string `json:"organizationId,omitempty"`
+
+	// Product ProductType represents which product a category belongs to.
+	Product *CastaiRbacV1beta1ProductType `json:"product,omitempty"`
 }
 
 // CastaiServiceaccountsV1beta1ServiceAccountAuthor Author is the author of the service account.
@@ -4060,6 +4103,9 @@ type CastaiServiceaccountsV1beta1ServiceAccountKey struct {
 
 	// Prefix Prefix is the prefix of the key.
 	Prefix *string `json:"prefix,omitempty"`
+
+	// Product ProductType represents which product a category belongs to.
+	Product *CastaiRbacV1beta1ProductType `json:"product,omitempty"`
 }
 
 // CastaiServiceaccountsV1beta1UpdateServiceAccountKeyResponse UpdateServiceAccountKeyResponse is the response for updating a service account key.
@@ -4117,6 +4163,11 @@ type CastaiSsoV1beta1CreateSSOConnection struct {
 
 	// DefaultRoleId ID of default role for new users signing up with SSO.
 	DefaultRoleId *string `json:"defaultRoleId"`
+
+	// DefaultRoles Per-product default role IDs for new users signing up with SSO.
+	// A key with an empty value explicitly opts the product out of any default role.
+	// Mutually exclusive with default_role_id: setting both is an error.
+	DefaultRoles *map[string]string `json:"defaultRoles,omitempty"`
 
 	// EmailDomain EmailDomain is the email domain of the connection.
 	EmailDomain string `json:"emailDomain"`
@@ -4219,6 +4270,10 @@ type CastaiSsoV1beta1SSOConnection struct {
 	// DefaultRoleId ID of default role for new users signing up with SSO.
 	DefaultRoleId *string `json:"defaultRoleId,omitempty"`
 
+	// DefaultRoles Per-product default role IDs for new users signing up with SSO.
+	// A key with an empty value explicitly opts the product out of any default role.
+	DefaultRoles *map[string]string `json:"defaultRoles,omitempty"`
+
 	// EmailDomain EmailDomain is the email domain of the connection.
 	EmailDomain string `json:"emailDomain"`
 
@@ -4280,6 +4335,15 @@ type CastaiSsoV1beta1SSOEmailDomainValidation struct {
 	// Domain Domain is the claimed email domain.
 	Domain *string `json:"domain,omitempty"`
 
+	// LastCheckOutcome CheckOutcome is the machine-readable outcome of the latest verification check of the claim.
+	//
+	//  - SSO_EMAIL_DOMAIN_CHECK_OUTCOME_UNSPECIFIED: CheckOutcomeUnspecified means no check result is recorded for the claim.
+	//  - SSO_EMAIL_DOMAIN_CHECK_OUTCOME_VERIFIED: CheckOutcomeVerified means the verification TXT record matched the claim secret.
+	//  - SSO_EMAIL_DOMAIN_CHECK_OUTCOME_TXT_RECORD_NOT_FOUND: CheckOutcomeTXTRecordNotFound means the verification TXT record was missing.
+	//  - SSO_EMAIL_DOMAIN_CHECK_OUTCOME_SECRET_MISMATCH: CheckOutcomeSecretMismatch means the verification TXT record carried a different secret.
+	//  - SSO_EMAIL_DOMAIN_CHECK_OUTCOME_LOOKUP_FAILED: CheckOutcomeLookupFailed means the DNS lookup itself failed.
+	LastCheckOutcome *CastaiSsoV1beta1SSOEmailDomainValidationCheckOutcome `json:"lastCheckOutcome,omitempty"`
+
 	// LastCheckedAt LastCheckedAt is the time the domain was last checked for the verification TXT record.
 	LastCheckedAt *time.Time `json:"lastCheckedAt,omitempty"`
 
@@ -4293,6 +4357,9 @@ type CastaiSsoV1beta1SSOEmailDomainValidation struct {
 	//  - STATUS_VERIFIED: StatusVerified means the claim was verified.
 	//  - STATUS_EXPIRED: StatusExpired means the pending claim expired before verification.
 	//  - STATUS_DENIED: StatusDenied means the claim was denied (domain taken by another connection).
+	//  - STATUS_ERROR: StatusError means the last verification check failed (no verification TXT
+	// record, a mismatching secret, or a lookup failure); the claim stays
+	// retryable until a check succeeds or the claim expires.
 	Status *CastaiSsoV1beta1SSOEmailDomainValidationStatus `json:"status,omitempty"`
 
 	// TxtRecord SSOEmailDomainTxtRecord represents the DNS TXT record to publish for email-domain verification.
@@ -4302,6 +4369,15 @@ type CastaiSsoV1beta1SSOEmailDomainValidation struct {
 	VerifiedAt *time.Time `json:"verifiedAt,omitempty"`
 }
 
+// CastaiSsoV1beta1SSOEmailDomainValidationCheckOutcome CheckOutcome is the machine-readable outcome of the latest verification check of the claim.
+//
+//   - SSO_EMAIL_DOMAIN_CHECK_OUTCOME_UNSPECIFIED: CheckOutcomeUnspecified means no check result is recorded for the claim.
+//   - SSO_EMAIL_DOMAIN_CHECK_OUTCOME_VERIFIED: CheckOutcomeVerified means the verification TXT record matched the claim secret.
+//   - SSO_EMAIL_DOMAIN_CHECK_OUTCOME_TXT_RECORD_NOT_FOUND: CheckOutcomeTXTRecordNotFound means the verification TXT record was missing.
+//   - SSO_EMAIL_DOMAIN_CHECK_OUTCOME_SECRET_MISMATCH: CheckOutcomeSecretMismatch means the verification TXT record carried a different secret.
+//   - SSO_EMAIL_DOMAIN_CHECK_OUTCOME_LOOKUP_FAILED: CheckOutcomeLookupFailed means the DNS lookup itself failed.
+type CastaiSsoV1beta1SSOEmailDomainValidationCheckOutcome string
+
 // CastaiSsoV1beta1SSOEmailDomainValidationStatus Status is the verification status of the email-domain claim.
 //
 //   - STATUS_UNKNOWN: StatusUnknown is the default status.
@@ -4309,6 +4385,10 @@ type CastaiSsoV1beta1SSOEmailDomainValidation struct {
 //   - STATUS_VERIFIED: StatusVerified means the claim was verified.
 //   - STATUS_EXPIRED: StatusExpired means the pending claim expired before verification.
 //   - STATUS_DENIED: StatusDenied means the claim was denied (domain taken by another connection).
+//   - STATUS_ERROR: StatusError means the last verification check failed (no verification TXT
+//
+// record, a mismatching secret, or a lookup failure); the claim stays
+// retryable until a check succeeds or the claim expires.
 type CastaiSsoV1beta1SSOEmailDomainValidationStatus string
 
 // CastaiSsoV1beta1SetSyncForSSOConnectionResponse defines model for castai.sso.v1beta1.SetSyncForSSOConnectionResponse.
@@ -4329,6 +4409,11 @@ type CastaiSsoV1beta1UpdateSSOConnection struct {
 
 	// DefaultRoleId ID of default role for new users signing up with SSO.
 	DefaultRoleId *string `json:"defaultRoleId"`
+
+	// DefaultRoles Per-product default role IDs for new users signing up with SSO.
+	// A key with an empty value explicitly opts the product out of any default role.
+	// Mutually exclusive with default_role_id: setting both is an error.
+	DefaultRoles *map[string]string `json:"defaultRoles,omitempty"`
 
 	// EmailDomain EmailDomain is the email domain of the connection.
 	EmailDomain *string `json:"emailDomain,omitempty"`
@@ -7735,6 +7820,22 @@ type NodeconfigV1GKEConfig struct {
 	// OnHostMaintenance Maintenance behavior of the instances.
 	OnHostMaintenance *NodeconfigV1GKEConfigOnHostMaintenance `json:"onHostMaintenance,omitempty"`
 
+	// ProvisionedIops Provisioned IOPS for the node's boot disk. For Hyperdisk-Balanced boot disks only:
+	// the value is applied when the resolved boot disk type is hyperdisk-balanced and is
+	// ignored (never sent to GCP) otherwise. GCP valid range: 3000-160000. When both
+	// provisioned values are set, the coupling
+	// MAX(140, provisioned_iops/256) <= provisioned_throughput <= MIN(2400, provisioned_iops/4)
+	// is validated in the service.
+	ProvisionedIops *int64 `json:"provisionedIops"`
+
+	// ProvisionedThroughput Provisioned throughput in MiB/s for the node's boot disk. For Hyperdisk-Balanced boot
+	// disks only: the value is applied when the resolved boot disk type is hyperdisk-balanced
+	// and is ignored (never sent to GCP) otherwise. GCP valid range: 140-2400 MiB/s. When both
+	// provisioned values are set, the coupling
+	// MAX(140, provisioned_iops/256) <= provisioned_throughput <= MIN(2400, provisioned_iops/4)
+	// is validated in the service.
+	ProvisionedThroughput *int64 `json:"provisionedThroughput"`
+
 	// SecondaryBootDisks Secondary boot disks to be attached to provisioned nodes.
 	SecondaryBootDisks *[]NodeconfigV1SecondaryBootDisk `json:"secondaryBootDisks,omitempty"`
 	SecondaryIpRange   *NodeconfigV1SecondaryIPRange    `json:"secondaryIpRange,omitempty"`
@@ -9330,6 +9431,12 @@ type ScheduledrebalancingV1LaunchConfiguration struct {
 	RebalancingOptions           *CastaiAutoscalerV1beta1RebalancingOptions          `json:"rebalancingOptions,omitempty"`
 	Selector                     *ScheduledrebalancingV1NodeSelector                 `json:"selector,omitempty"`
 	TargetNodeSelectionAlgorithm *ScheduledrebalancingV1TargetNodeSelectionAlgorithm `json:"targetNodeSelectionAlgorithm,omitempty"`
+
+	// TargetedNodesPercentage Maximum percentage (1-100) of eligible nodes that will be selected for
+	// rebalancing. Eligible nodes are those matching the launch configuration
+	// selector and free of problematic pods. Mutually exclusive with
+	// num_targeted_nodes; when set, it takes precedence.
+	TargetedNodesPercentage *int32 `json:"targetedNodesPercentage"`
 }
 
 // ScheduledrebalancingV1ListAvailableRebalancingTZResponse defines model for scheduledrebalancing.v1.ListAvailableRebalancingTZResponse.
@@ -9658,6 +9765,12 @@ type WorkloadoptimizationV1Container struct {
 
 	// Runtime Defines the application runtime.
 	Runtime *WorkloadoptimizationV1Runtime `json:"runtime,omitempty"`
+
+	// UnqualifiedResources Resources disqualified by a runtime condition on the stored recommendation (e.g.
+	// memory when JVM metrics are missing). Always exposed — anomaly windows included;
+	// the shipping state is inferable from the recommendation itself. Absent/empty when
+	// nothing is unqualified.
+	UnqualifiedResources *[]WorkloadoptimizationV1UnqualifiedResource `json:"unqualifiedResources,omitempty"`
 }
 
 // WorkloadoptimizationV1ContainerConfig ContainerConfig defines configuration settings for a specific container within a workload.
@@ -10025,6 +10138,9 @@ type WorkloadoptimizationV1Event struct {
 type WorkloadoptimizationV1EventContainer struct {
 	Name      string                          `json:"name"`
 	Resources WorkloadoptimizationV1Resources `json:"resources"`
+
+	// ScopeValue Scope label value identifying the group the container belongs to; set only for scoped workloads.
+	ScopeValue *string `json:"scopeValue"`
 }
 
 // WorkloadoptimizationV1EventType EventType defines possible types for workload events.
@@ -11391,7 +11507,10 @@ type WorkloadoptimizationV1PatchVerticalSettings struct {
 	MemoryEvent       *WorkloadoptimizationV1MemoryEventSettings       `json:"memoryEvent,omitempty"`
 	PredictiveScaling *WorkloadoptimizationV1PredictiveScalingSettings `json:"predictiveScaling,omitempty"`
 	RolloutBehavior   *WorkloadoptimizationV1RolloutBehaviorSettings   `json:"rolloutBehavior,omitempty"`
-	Startup           *WorkloadoptimizationV1StartupSettings           `json:"startup,omitempty"`
+
+	// Scope ScopeSettings holds the scope configuration for recommendations.
+	Scope   *WorkloadoptimizationV1ScopeSettings   `json:"scope,omitempty"`
+	Startup *WorkloadoptimizationV1StartupSettings `json:"startup,omitempty"`
 }
 
 // WorkloadoptimizationV1PatchWorkloadScalingPolicy defines model for workloadoptimization.v1.PatchWorkloadScalingPolicy.
@@ -11570,7 +11689,10 @@ type WorkloadoptimizationV1RecommendationPolicies struct {
 	MemoryEvent       *WorkloadoptimizationV1MemoryEventSettings       `json:"memoryEvent,omitempty"`
 	PredictiveScaling *WorkloadoptimizationV1PredictiveScalingSettings `json:"predictiveScaling,omitempty"`
 	RolloutBehavior   *WorkloadoptimizationV1RolloutBehaviorSettings   `json:"rolloutBehavior,omitempty"`
-	Startup           *WorkloadoptimizationV1StartupSettings           `json:"startup,omitempty"`
+
+	// Scope ScopeSettings holds the scope configuration for recommendations.
+	Scope   *WorkloadoptimizationV1ScopeSettings   `json:"scope,omitempty"`
+	Startup *WorkloadoptimizationV1StartupSettings `json:"startup,omitempty"`
 }
 
 // WorkloadoptimizationV1RecommendationStatus defines model for workloadoptimization.v1.RecommendationStatus.
@@ -12104,8 +12226,30 @@ type WorkloadoptimizationV1Scope struct {
 	Type *WorkloadoptimizationV1ScopeType `json:"type,omitempty"`
 }
 
+// WorkloadoptimizationV1ScopePreset ScopePreset is the closed set of supported scopes; each resolves server-side to a concrete scoping mechanism.
+type WorkloadoptimizationV1ScopePreset string
+
+// WorkloadoptimizationV1ScopeSettings ScopeSettings holds the scope configuration for recommendations.
+type WorkloadoptimizationV1ScopeSettings struct {
+	// Preset ScopePreset is the closed set of supported scopes; each resolves server-side to a concrete scoping mechanism.
+	Preset *WorkloadoptimizationV1ScopePreset `json:"preset,omitempty"`
+}
+
 // WorkloadoptimizationV1ScopeType ScopeType classifies the scoping mechanism. Mirrors the domain scope.Type enum.
 type WorkloadoptimizationV1ScopeType string
+
+// WorkloadoptimizationV1ScopedContainers ScopedContainers carries per-scope-group current resources and recommendations.
+type WorkloadoptimizationV1ScopedContainers struct {
+	// Containers Per-container state for the group, shape identical to Workload.containers[]:
+	// resources = average of the group's currently running pods' requests;
+	// recommendation = the group's current recommendation.
+	// A container absent from the group's recommendation is omitted entirely.
+	// A group with no currently-running pods is omitted entirely.
+	Containers []WorkloadoptimizationV1Container `json:"containers"`
+
+	// ScopeValue Scope value identifying the group.
+	ScopeValue string `json:"scopeValue"`
+}
 
 // WorkloadoptimizationV1SetScalingPoliciesOrderResponse defines model for workloadoptimization.v1.SetScalingPoliciesOrderResponse.
 type WorkloadoptimizationV1SetScalingPoliciesOrderResponse = map[string]interface{}
@@ -12181,12 +12325,14 @@ type WorkloadoptimizationV1SystemOverrideResetEvent struct {
 	//  - SYSTEM_OVERRIDE_RESET_ORIGIN_API_CALL: Override reset via API call by user or system.
 	//  - SYSTEM_OVERRIDE_RESET_ORIGIN_EXPIRED: Override reset due to expiration after a configured time period.
 	//  - SYSTEM_OVERRIDE_RESET_ORIGIN_ANNOTATIONS_OFF: Override reset because workload is no longer managed by CAST AI annotations.
+	//  - SYSTEM_OVERRIDE_RESET_ORIGIN_DETECTOR_DISABLED: Override reset because the detector that produced it was disabled.
 	Origin WorkloadoptimizationV1SystemOverrideResetOrigin `json:"origin"`
 
 	// Target SystemOverrideTarget defines which workload optimization features are affected by the system override.
 	//
 	//  - SYSTEM_OVERRIDE_TARGET_ALL: Affects all system overrides properties.
 	//  - SYSTEM_OVERRIDE_TARGET_VERTICAL_OPTIMIZATION: Affects only vertical optimization (resource recommendations).
+	//  - SYSTEM_OVERRIDE_TARGET_MEMORY_CAP: Affects only the memory cap override (infinite memory growth detection).
 	Target WorkloadoptimizationV1SystemOverrideTarget `json:"target"`
 }
 
@@ -12195,12 +12341,14 @@ type WorkloadoptimizationV1SystemOverrideResetEvent struct {
 //   - SYSTEM_OVERRIDE_RESET_ORIGIN_API_CALL: Override reset via API call by user or system.
 //   - SYSTEM_OVERRIDE_RESET_ORIGIN_EXPIRED: Override reset due to expiration after a configured time period.
 //   - SYSTEM_OVERRIDE_RESET_ORIGIN_ANNOTATIONS_OFF: Override reset because workload is no longer managed by CAST AI annotations.
+//   - SYSTEM_OVERRIDE_RESET_ORIGIN_DETECTOR_DISABLED: Override reset because the detector that produced it was disabled.
 type WorkloadoptimizationV1SystemOverrideResetOrigin string
 
 // WorkloadoptimizationV1SystemOverrideTarget SystemOverrideTarget defines which workload optimization features are affected by the system override.
 //
 //   - SYSTEM_OVERRIDE_TARGET_ALL: Affects all system overrides properties.
 //   - SYSTEM_OVERRIDE_TARGET_VERTICAL_OPTIMIZATION: Affects only vertical optimization (resource recommendations).
+//   - SYSTEM_OVERRIDE_TARGET_MEMORY_CAP: Affects only the memory cap override (infinite memory growth detection).
 type WorkloadoptimizationV1SystemOverrideTarget string
 
 // WorkloadoptimizationV1SystemOverrideTriggeredEvent SystemOverrideTriggeredEvent is emitted when CAST AI activates a system override on a workload.
@@ -12215,6 +12363,7 @@ type WorkloadoptimizationV1SystemOverrideTriggeredEvent struct {
 	//
 	//  - SYSTEM_OVERRIDE_TARGET_ALL: Affects all system overrides properties.
 	//  - SYSTEM_OVERRIDE_TARGET_VERTICAL_OPTIMIZATION: Affects only vertical optimization (resource recommendations).
+	//  - SYSTEM_OVERRIDE_TARGET_MEMORY_CAP: Affects only the memory cap override (infinite memory growth detection).
 	Target WorkloadoptimizationV1SystemOverrideTarget `json:"target"`
 }
 
@@ -12232,6 +12381,36 @@ type WorkloadoptimizationV1TwoPhaseRecommendations struct {
 
 // WorkloadoptimizationV1UnboundMemoryGrowthEvent defines model for workloadoptimization.v1.UnboundMemoryGrowthEvent.
 type WorkloadoptimizationV1UnboundMemoryGrowthEvent = map[string]interface{}
+
+// WorkloadoptimizationV1UnqualifiedResource A per-container runtime condition that marks one resource of the recommendation
+// as unqualified for optimization, hint not a final decision.
+// Containers with nothing unqualified carry an absent/empty list.
+type WorkloadoptimizationV1UnqualifiedResource struct {
+	// Reason Why a resource of the recommendation is unqualified for optimization.
+	//
+	//  - UNQUALIFIED_RESOURCE_REASON_JVM_METRICS_DEGRADED: JVM metrics are degraded (missing or insufficient for sizing)
+	//  - UNQUALIFIED_RESOURCE_REASON_SPARK_DRIVER: Spark driver memory is not managed.
+	Reason *WorkloadoptimizationV1UnqualifiedResourceReason `json:"reason,omitempty"`
+
+	// Resource The resource kind a runtime condition marks as unqualified for optimization.
+	//
+	//  - UNQUALIFIED_RESOURCE_TYPE_MEMORY: The memory resource is unqualified for optimization.
+	Resource *WorkloadoptimizationV1UnqualifiedResourceType `json:"resource,omitempty"`
+
+	// Since Generation time.
+	Since *time.Time `json:"since,omitempty"`
+}
+
+// WorkloadoptimizationV1UnqualifiedResourceReason Why a resource of the recommendation is unqualified for optimization.
+//
+//   - UNQUALIFIED_RESOURCE_REASON_JVM_METRICS_DEGRADED: JVM metrics are degraded (missing or insufficient for sizing)
+//   - UNQUALIFIED_RESOURCE_REASON_SPARK_DRIVER: Spark driver memory is not managed.
+type WorkloadoptimizationV1UnqualifiedResourceReason string
+
+// WorkloadoptimizationV1UnqualifiedResourceType The resource kind a runtime condition marks as unqualified for optimization.
+//
+//   - UNQUALIFIED_RESOURCE_TYPE_MEMORY: The memory resource is unqualified for optimization.
+type WorkloadoptimizationV1UnqualifiedResourceType string
 
 // WorkloadoptimizationV1UnschedulableRecommendationEvent defines model for workloadoptimization.v1.UnschedulableRecommendationEvent.
 type WorkloadoptimizationV1UnschedulableRecommendationEvent struct {
@@ -12453,7 +12632,10 @@ type WorkloadoptimizationV1Workload struct {
 	ScalingPolicyName string `json:"scalingPolicyName"`
 
 	// ScalingPolicyOrigin ScalingPolicyOrigin explains what was the source of the selected scaling policy.
-	ScalingPolicyOrigin        WorkloadoptimizationV1ScalingPolicyOrigin     `json:"scalingPolicyOrigin"`
+	ScalingPolicyOrigin WorkloadoptimizationV1ScalingPolicyOrigin `json:"scalingPolicyOrigin"`
+
+	// ScopedContainers Per-scope-group current resources/recommendations, mirroring containers. Absent when scoping is not configured.
+	ScopedContainers           *[]WorkloadoptimizationV1ScopedContainers     `json:"scopedContainers,omitempty"`
 	SuggestedScalingPolicyId   *string                                       `json:"suggestedScalingPolicyId"`
 	SuggestedScalingPolicyName *string                                       `json:"suggestedScalingPolicyName"`
 	SystemOverrides            WorkloadoptimizationV1WorkloadSystemOverrides `json:"systemOverrides"`

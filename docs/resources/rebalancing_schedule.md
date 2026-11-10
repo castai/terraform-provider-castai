@@ -100,6 +100,7 @@ Optional:
 - `selector` (String) Node selector in JSON format.
 - `split_nodes_in_batches_of` (Number) If set, the rebalancing plan is executed in batches such that at most this many additional nodes (nodes created minus nodes drained) are alive at any moment during execution, and a node is only drained after its replacement node exists. When unset, the plan executes in a single batch.
 - `target_node_selection_algorithm` (String) Defines the algorithm used to select the target nodes for rebalancing.
+- `targeted_nodes_percentage` (Number) Maximum percentage (1-100) of eligible nodes that will be selected for rebalancing. Eligible nodes are those matching the launch configuration selector and free of problematic pods. Mutually exclusive with num_targeted_nodes.
 
 <a id="nestedblock--launch_configuration--aggressive_mode_config"></a>
 ### Nested Schema for `launch_configuration.aggressive_mode_config`

@@ -93,6 +93,7 @@ const (
 	FieldNodeTemplateSharedGpuName                            = "gpu_name"
 	FieldNodeTemplateSharingStrategy                          = "sharing_strategy"
 	FieldNodeTemplateClmEnabled                               = "clm_enabled"
+	FieldNodeTemplateClmNetworkingMode                        = "clm_networking_mode"
 	FieldNodeTemplateEdgeLocationIDs                          = "edge_location_ids"
 	FieldNodeTemplateEdgeLocationConfig                       = "edge_location_config"
 	FieldNodeTemplateEdgeLocationId                           = "edge_location_id"
@@ -183,6 +184,21 @@ func validateNodeTemplateIsDefault(name string, isDefault bool) error {
 		)
 	}
 	return nil
+}
+
+// clmNetworkingModeFromConfig returns the clm_networking_mode value exactly
+// as it is set in the user configuration, or nil when the attribute is absent
+// from the configuration. It deliberately avoids d.GetOk: that merges the
+// refreshed state with the configuration, so a previously applied mode would
+// be echoed back to the API on every update. Reading the raw configuration
+// instead means an absent attribute is sent as null, which the API resolves
+// to "keep the existing mode" on update and to "default" on create.
+func clmNetworkingModeFromConfig(d *schema.ResourceData) *string {
+	v, diags := d.GetRawConfigAt(cty.GetAttrPath(FieldNodeTemplateClmNetworkingMode))
+	if diags.HasError() || !v.IsKnown() || v.IsNull() || !v.Type().Equals(cty.String) {
+		return nil
+	}
+	return lo.ToPtr(v.AsString())
 }
 
 func resourceNodeTemplate() *schema.Resource {
@@ -907,6 +923,15 @@ func resourceNodeTemplate() *schema.Resource {
 					},
 				},
 			},
+			FieldNodeTemplateClmNetworkingMode: {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice(
+					[]string{"default", "none", "tc", "cni"}, false,
+				)),
+				Description: "CLM networking mode for nodes created from this template. Controls how TCP connections are handled during live migration. Valid values: default, none, tc, cni. Applied only if `clm_enabled=true`. Removing this attribute does not reset the mode; set it to `default` explicitly.",
+			},
 			FieldNodeTemplateEdgeLocationIDs: {
 				Type:     schema.TypeList,
 				Optional: true,
@@ -1045,6 +1070,12 @@ func resourceNodeTemplateRead(ctx context.Context, d *schema.ResourceData, meta 
 
 	if err := d.Set(FieldNodeTemplateClmEnabled, nodeTemplate.ClmEnabled); err != nil {
 		return diag.FromErr(fmt.Errorf("setting clm enabled: %w", err))
+	}
+
+	// lo.FromPtr makes the nil contract explicit: a nil API value converges the
+	// state to "" instead of leaving a stale previously-applied mode behind.
+	if err := d.Set(FieldNodeTemplateClmNetworkingMode, lo.FromPtr(nodeTemplate.ClmNetworkingMode)); err != nil {
+		return diag.FromErr(fmt.Errorf("setting clm networking mode: %w", err))
 	}
 
 	// Only populate the block when the API returns a non-null `enabled` value, so unset SPR doesn't drift
@@ -1653,6 +1684,7 @@ func updateNodeTemplate(ctx context.Context, d *schema.ResourceData, meta any, s
 		FieldNodeTemplateSharedClientsPerGpu,
 		FieldNodeTemplateClmEnabled,
 		FieldNodeTemplateStuckPodResizeReconciliation,
+		FieldNodeTemplateClmNetworkingMode,
 		FieldNodeTemplateEdgeLocationIDs,
 		FieldNodeTemplateEdgeLocationConfig,
 		FieldNodeTemplatePriceAdjustmentConfiguration,
@@ -1737,6 +1769,8 @@ func updateNodeTemplate(ctx context.Context, d *schema.ResourceData, meta any, s
 		req.ClmEnabled = lo.ToPtr(v.(bool))
 	}
 
+	req.ClmNetworkingMode = clmNetworkingModeFromConfig(d)
+
 	if v, ok := d.Get(FieldNodeTemplateStuckPodResizeReconciliation).([]any); ok && len(v) > 0 {
 		req.StuckPodResizeReconciliation = toStuckPodResizeReconciliation(v[0])
 	} else if d.HasChange(FieldNodeTemplateStuckPodResizeReconciliation) {
@@ -1792,6 +1826,8 @@ func resourceNodeTemplateCreate(ctx context.Context, d *schema.ResourceData, met
 		ShouldTaint:     lo.ToPtr(d.Get(FieldNodeTemplateShouldTaint).(bool)),
 		ClmEnabled:      lo.ToPtr(d.Get(FieldNodeTemplateClmEnabled).(bool)),
 	}
+
+	req.ClmNetworkingMode = clmNetworkingModeFromConfig(d)
 
 	if v, ok := d.Get(FieldNodeTemplateEdgeLocationConfig).([]any); ok && len(v) > 0 {
 		req.EdgeLocationConfigs = toEdgeLocationConfigs(v)

@@ -176,6 +176,7 @@ Optional:
 - `ips_per_prefix` (Number) Number of IPs per prefix to be used for calculating max pods. For IPv4 it should be 16. More info: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-prefix-eni.html#ec2-prefix-basics
 - `key_pair_id` (String) AWS key pair ID to be used for CAST provisioned nodes. Has priority over ssh_public_key
 - `max_pods_per_node_formula` (String) Formula to calculate the maximum number of pods that can be run on a node. The following list of variables will be bound to a number before evaluating and can be used in the formula: NUM_MAX_NET_INTERFACES, NUM_IP_PER_INTERFACE, NUM_IP_PER_PREFIX, NUM_CPU, NUM_RAM_GB .
+- `nested_virtualisation` (String) Controls EC2 nested virtualisation on provisioned nodes. Allowed values: `enabled`, `disabled`. When omitted, the field is not sent to the API and the API default (nested virtualisation off) applies.
 - `node_group_arn` (String) Cluster's node group ARN used for CAST provisioned node pools. Required for hibernate/resume functionality
 - `target_group` (Block List) AWS target groups configuration for CAST provisioned nodes (see [below for nested schema](#nestedblock--eks--target_group))
 - `threads_per_cpu` (Number) Number of threads per core.
@@ -202,7 +203,7 @@ Optional:
 
 Optional:
 
-- `disk_type` (String) Type of boot disk attached to the node. (See [disk types](https://cloud.google.com/compute/docs/disks#pdspecs)). One of: pd-standard, pd-balanced, pd-ssd, pd-extreme
+- `disk_type` (String) Type of boot disk attached to the node. (See [disk types](https://cloud.google.com/compute/docs/disks#pdspecs)). One of: pd-standard, pd-balanced, pd-ssd, pd-extreme, hyperdisk-balanced
 - `loadbalancers` (Block List) Loadboalancer configuration for CAST provisioned nodes (see [below for nested schema](#nestedblock--gke--loadbalancers))
 - `max_pods_per_node` (Number) Maximum number of pods that can be run on a node, which affects how many IP addresses you will need for each node. Defaults to 110
 - `max_pods_per_node_formula` (String) This is an advanced configuration field. In general, we recommend using max_pods_per_node instead.
@@ -215,6 +216,8 @@ If you want the smallest value between 5 times the CPUs, 5 times the RAM, or a c
 For a node with 8 CPUs and 16 GB RAM, this calculates to 40 (5×8), 80 (5×16), and 110, then picks the smallest value: 40 pods.
 - `network_tags` (List of String) Network tags to be added on a VM. (See [network tags](https://cloud.google.com/vpc/docs/add-remove-network-tags))
 - `on_host_maintenance` (String) Maintenance behavior of the instances. If not set, the default value for spot nodes is terminate, and for non-spot nodes, it is migrate.
+- `provisioned_iops` (Number) Provisioned IOPS for the node's boot disk. Only applies when the boot disk type is hyperdisk-balanced (set explicitly via disk_type or resolved by the service); configuring it together with an explicit different disk_type is rejected by the API. GCP valid range: 3000-160000. When both provisioned values are set, the coupling MAX(140, provisioned_iops/256) <= provisioned_throughput <= MIN(2400, provisioned_iops/4) is validated at plan time by the provider and in the service.
+- `provisioned_throughput` (Number) Provisioned throughput in MiB/s for the node's boot disk. Only applies when the boot disk type is hyperdisk-balanced (set explicitly via disk_type or resolved by the service); configuring it together with an explicit different disk_type is rejected by the API. GCP valid range: 140-2400 MiB/s. When both provisioned values are set, the coupling MAX(140, provisioned_iops/256) <= provisioned_throughput <= MIN(2400, provisioned_iops/4) is validated at plan time by the provider and in the service.
 - `secondary_boot_disks` (Block List) Secondary boot disks to be attached to provisioned nodes. Can be used to preload container images or arbitrary data on new nodes. (see [below for nested schema](#nestedblock--gke--secondary_boot_disks))
 - `secondary_ip_range` (Block List, Max: 1) Secondary IP range configuration for pods in GKE nodes (see [below for nested schema](#nestedblock--gke--secondary_ip_range))
 - `use_ephemeral_storage_local_ssd` (Boolean) Use ephemeral storage local SSD. Defaults to false
