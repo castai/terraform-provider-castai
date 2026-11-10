@@ -177,7 +177,7 @@ The following section describes common prerequisites, and the ones after that sh
 
 ### Prerequisites
 
-- Terraform **>= 1.9** if you use the `castai/gke-cluster` module (version `~> 11.1` requires it, and `terraform init` enforces it). Otherwise **>= 1.7**: the examples below use `removed` blocks, which require it.
+- Terraform **>= 1.9** if you use the `castai/gke-cluster` module (version `~> 11.1` requires it). Otherwise, **>= 1.7**: the examples below use `removed` blocks, which require it.
 - Cast AI provider **>= 9.14.0**:
   ```hcl
   terraform {
