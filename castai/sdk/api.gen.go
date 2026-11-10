@@ -1225,6 +1225,7 @@ const (
 // Defines values for WorkloadoptimizationV1UnqualifiedResourceReason.
 const (
 	WorkloadoptimizationV1UnqualifiedResourceReasonUNQUALIFIEDRESOURCEREASONJVMMETRICSDEGRADED WorkloadoptimizationV1UnqualifiedResourceReason = "UNQUALIFIED_RESOURCE_REASON_JVM_METRICS_DEGRADED"
+	WorkloadoptimizationV1UnqualifiedResourceReasonUNQUALIFIEDRESOURCEREASONSPARKDRIVER        WorkloadoptimizationV1UnqualifiedResourceReason = "UNQUALIFIED_RESOURCE_REASON_SPARK_DRIVER"
 	WorkloadoptimizationV1UnqualifiedResourceReasonUNQUALIFIEDRESOURCEREASONUNSPECIFIED        WorkloadoptimizationV1UnqualifiedResourceReason = "UNQUALIFIED_RESOURCE_REASON_UNSPECIFIED"
 )
 
@@ -12388,6 +12389,7 @@ type WorkloadoptimizationV1UnqualifiedResource struct {
 	// Reason Why a resource of the recommendation is unqualified for optimization.
 	//
 	//  - UNQUALIFIED_RESOURCE_REASON_JVM_METRICS_DEGRADED: JVM metrics are degraded (missing or insufficient for sizing)
+	//  - UNQUALIFIED_RESOURCE_REASON_SPARK_DRIVER: Spark driver memory is not managed.
 	Reason *WorkloadoptimizationV1UnqualifiedResourceReason `json:"reason,omitempty"`
 
 	// Resource The resource kind a runtime condition marks as unqualified for optimization.
@@ -12402,6 +12404,7 @@ type WorkloadoptimizationV1UnqualifiedResource struct {
 // WorkloadoptimizationV1UnqualifiedResourceReason Why a resource of the recommendation is unqualified for optimization.
 //
 //   - UNQUALIFIED_RESOURCE_REASON_JVM_METRICS_DEGRADED: JVM metrics are degraded (missing or insufficient for sizing)
+//   - UNQUALIFIED_RESOURCE_REASON_SPARK_DRIVER: Spark driver memory is not managed.
 type WorkloadoptimizationV1UnqualifiedResourceReason string
 
 // WorkloadoptimizationV1UnqualifiedResourceType The resource kind a runtime condition marks as unqualified for optimization.
