@@ -157,16 +157,17 @@ func TestPolicies(t *testing.T) {
 
 	t.Run("IAM policy with invalid pass role ARNs", func(t *testing.T) {
 		tests := map[string]string{
-			"not an ARN":        "node-role",
-			"wrong service":     "arn:aws:s3:::bucket",
-			"not a role":        "arn:aws:iam::123456789012:user/bob",
-			"bad account":       "arn:aws:iam::1234:role/node-role",
-			"empty name":        "arn:aws:iam::123456789012:role/",
-			"trailing slash":    "arn:aws:iam::123456789012:role/path/",
-			"wildcard":          "arn:aws:iam::123456789012:role/*",
-			"quote injection":   `arn:aws:iam::123456789012:role/a"b`,
-			"other partition":   "arn:aws-cn:iam::123456789012:role/node-role",
-			"unknown partition": "arn:foo:iam::123456789012:role/node-role",
+			"not an ARN":            "node-role",
+			"wrong service":         "arn:aws:s3:::bucket",
+			"not a role":            "arn:aws:iam::123456789012:user/bob",
+			"bad account":           "arn:aws:iam::1234:role/node-role",
+			"empty name":            "arn:aws:iam::123456789012:role/",
+			"trailing slash":        "arn:aws:iam::123456789012:role/path/",
+			"wildcard":              "arn:aws:iam::123456789012:role/*",
+			"quote injection":       `arn:aws:iam::123456789012:role/a"b`,
+			"unsupported partition": "arn:aws-cn:iam::123456789012:role/node-role",
+			"unknown partition":     "arn:foo:iam::123456789012:role/node-role",
+			"other account":         "arn:aws:iam::210987654321:role/node-role",
 		}
 
 		for name, arn := range tests {

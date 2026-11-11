@@ -3,6 +3,7 @@ package castai
 import (
 	"context"
 	"fmt"
+	"sort"
 	"strings"
 
 	"github.com/castai/terraform-provider-castai/castai/policies"
@@ -76,13 +77,13 @@ func dataSourceEKSSettings() *schema.Resource {
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
 			EKSSettingsFieldInstanceProfileRoleArns: {
-				Type:     schema.TypeList,
+				Type:     schema.TypeSet,
 				Optional: true,
 				Elem: &schema.Schema{
 					Type:             schema.TypeString,
 					ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 				},
-				Description: "IAM role ARNs that CAST AI is allowed to pass (iam:PassRole) to EC2 and EKS, e.g. the instance profile roles used by Node Configurations. " +
+				Description: "IAM role ARNs in the `account_id` account that CAST AI is allowed to pass (iam:PassRole) to EC2 and EKS, e.g. the instance profile roles used by Node Configurations. " +
 					"If not set, iam:PassRole is allowed for any role (`role/*`). " +
 					"Limiting this list can block node creation when a Node Configuration is later added or updated with an instance profile role that is not on the list; keeping the list in sync is your responsibility.",
 			},
@@ -107,9 +108,11 @@ func dataSourceCastaiEKSSettingsRead(ctx context.Context, data *schema.ResourceD
 
 	userPolicy, _ := policies.GetUserInlinePolicy(cluster, arn, vpc, partition, sharedVPCArn)
 	var passRoleARNs []string
-	for _, v := range data.Get(EKSSettingsFieldInstanceProfileRoleArns).([]interface{}) {
+	for _, v := range data.Get(EKSSettingsFieldInstanceProfileRoleArns).(*schema.Set).List() {
 		passRoleARNs = append(passRoleARNs, v.(string))
 	}
+	// Sets have no order, sort to keep the rendered policy stable.
+	sort.Strings(passRoleARNs)
 
 	iamPolicy, err := policies.GetIAMPolicy(accountID, partition, passRoleARNs)
 	if err != nil {

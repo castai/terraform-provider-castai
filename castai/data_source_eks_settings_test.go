@@ -42,9 +42,36 @@ func TestEKSSettingsInstanceProfileRoleArns(t *testing.T) {
 		require.NotContains(t, policy, "role/*")
 	})
 
+	t.Run("ignores duplicate ARNs", func(t *testing.T) {
+		data, err := read("eu-west-1", []interface{}{
+			"arn:aws:iam::123456789012:role/node-role",
+			"arn:aws:iam::123456789012:role/node-role",
+		})
+		require.NoError(t, err)
+		policy := data.Get(EKSSettingsFieldIamPolicyJson).(string)
+		require.Equal(t, 2, strings.Count(policy, `"Resource": "arn:aws:iam::123456789012:role/node-role"`))
+	})
+
+	t.Run("renders the same policy regardless of ARN order", func(t *testing.T) {
+		roleA := "arn:aws:iam::123456789012:role/a-role"
+		roleB := "arn:aws:iam::123456789012:role/b-role"
+
+		first, err := read("eu-west-1", []interface{}{roleA, roleB})
+		require.NoError(t, err)
+		second, err := read("eu-west-1", []interface{}{roleB, roleA})
+		require.NoError(t, err)
+
+		require.Equal(t, first.Get(EKSSettingsFieldIamPolicyJson), second.Get(EKSSettingsFieldIamPolicyJson))
+	})
+
 	t.Run("rejects invalid ARN", func(t *testing.T) {
 		_, err := read("eu-west-1", []interface{}{"not-an-arn"})
 		require.ErrorContains(t, err, "not a valid IAM role ARN")
+	})
+
+	t.Run("rejects ARN from another account", func(t *testing.T) {
+		_, err := read("eu-west-1", []interface{}{"arn:aws:iam::210987654321:role/node-role"})
+		require.ErrorContains(t, err, "does not belong to account")
 	})
 
 	t.Run("rejects ARN from another partition", func(t *testing.T) {

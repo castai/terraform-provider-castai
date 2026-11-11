@@ -6,11 +6,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"regexp"
+	"strings"
 	"text/template"
 )
 
 // iamRoleARNPattern matches an IAM role ARN: arn:<partition>:iam::<12 digit account>:role/<optional path/>name.
-var iamRoleARNPattern = regexp.MustCompile(`^arn:(aws|aws-cn|aws-us-gov):iam::[0-9]{12}:role/([A-Za-z0-9+=,.@_-]+/)*[A-Za-z0-9+=,.@_-]+$`)
+var iamRoleARNPattern = regexp.MustCompile(`^arn:(aws|aws-us-gov):iam::[0-9]{12}:role/([A-Za-z0-9+=,.@_-]+/)*[A-Za-z0-9+=,.@_-]+$`)
 
 var (
 	//go:embed iam-policy.json
@@ -19,14 +20,18 @@ var (
 	UserPolicy string
 )
 
-// ValidateRoleARNs checks that every entry is an IAM role ARN belonging to the given partition.
-func ValidateRoleARNs(partition string, roleARNs []string) error {
+// ValidateRoleARNs checks that every entry is an IAM role ARN belonging to the given partition and account.
+// A role from another account cannot be passed to EC2 or EKS, so it would only fail later at node creation.
+func ValidateRoleARNs(accountNumber, partition string, roleARNs []string) error {
 	for _, roleARN := range roleARNs {
 		if !iamRoleARNPattern.MatchString(roleARN) {
 			return fmt.Errorf("%q is not a valid IAM role ARN, expected format arn:<partition>:iam::<account-id>:role/<path/name>", roleARN)
 		}
-		if prefix := "arn:" + partition + ":"; roleARN[:len(prefix)] != prefix {
+		if !strings.HasPrefix(roleARN, "arn:"+partition+":") {
 			return fmt.Errorf("IAM role ARN %q does not belong to partition %q", roleARN, partition)
+		}
+		if !strings.HasPrefix(roleARN, "arn:"+partition+":iam::"+accountNumber+":") {
+			return fmt.Errorf("IAM role ARN %q does not belong to account %q", roleARN, accountNumber)
 		}
 	}
 	return nil
@@ -34,11 +39,11 @@ func ValidateRoleARNs(partition string, roleARNs []string) error {
 
 // passRoleResources renders the Resource value of the PassRole statements as JSON.
 // Without roleARNs it allows any role in the partition.
-func passRoleResources(partition string, roleARNs []string) (string, error) {
+func passRoleResources(accountNumber, partition string, roleARNs []string) (string, error) {
 	if len(roleARNs) == 0 {
 		return `"arn:` + partition + `:iam::*:role/*"`, nil
 	}
-	if err := ValidateRoleARNs(partition, roleARNs); err != nil {
+	if err := ValidateRoleARNs(accountNumber, partition, roleARNs); err != nil {
 		return "", err
 	}
 
@@ -56,7 +61,7 @@ func passRoleResources(partition string, roleARNs []string) (string, error) {
 // GetIAMPolicy renders the IAM policy. If passRoleARNs is empty, iam:PassRole is allowed for any role in the partition,
 // otherwise only for the given role ARNs.
 func GetIAMPolicy(accountNumber, partition string, passRoleARNs []string) (string, error) {
-	passRoleResources, err := passRoleResources(partition, passRoleARNs)
+	passRoleResources, err := passRoleResources(accountNumber, partition, passRoleARNs)
 	if err != nil {
 		return "", err
 	}
