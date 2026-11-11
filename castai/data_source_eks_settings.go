@@ -83,7 +83,7 @@ func dataSourceEKSSettings() *schema.Resource {
 					Type:             schema.TypeString,
 					ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 				},
-				Description: "IAM role ARNs in the `account_id` account that CAST AI is allowed to pass (iam:PassRole) to EC2 and EKS, e.g. the instance profile roles used by Node Configurations. " +
+				Description: "IAM role ARNs that CAST AI is allowed to pass (iam:PassRole) to EC2 and EKS, e.g. the instance profile roles used by Node Configurations. " +
 					"If not set, iam:PassRole is allowed for any role (`role/*`). " +
 					"Limiting this list can block node creation when a Node Configuration is later added or updated with an instance profile role that is not on the list; keeping the list in sync is your responsibility.",
 			},

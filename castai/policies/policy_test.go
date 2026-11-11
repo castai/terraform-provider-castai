@@ -155,36 +155,37 @@ func TestPolicies(t *testing.T) {
 		}
 	})
 
-	t.Run("IAM policy with invalid pass role ARNs", func(t *testing.T) {
+	t.Run("IAM policy passes role ARNs through without validating them", func(t *testing.T) {
 		tests := map[string]string{
-			"not an ARN":            "node-role",
-			"wrong service":         "arn:aws:s3:::bucket",
-			"not a role":            "arn:aws:iam::123456789012:user/bob",
-			"bad account":           "arn:aws:iam::1234:role/node-role",
-			"empty name":            "arn:aws:iam::123456789012:role/",
-			"trailing slash":        "arn:aws:iam::123456789012:role/path/",
-			"wildcard":              "arn:aws:iam::123456789012:role/*",
-			"quote injection":       `arn:aws:iam::123456789012:role/a"b`,
-			"unsupported partition": "arn:aws-cn:iam::123456789012:role/node-role",
-			"unknown partition":     "arn:foo:iam::123456789012:role/node-role",
-			"other account":         "arn:aws:iam::210987654321:role/node-role",
+			"wildcard":          "arn:aws:iam::123456789012:role/castai-eks-*",
+			"aws-cn partition":  "arn:aws-cn:iam::123456789012:role/node-role",
+			"unknown partition": "arn:foo:iam::123456789012:role/node-role",
+			"other account":     "arn:aws:iam::210987654321:role/node-role",
+			"quote":             `arn:aws:iam::123456789012:role/a"b`,
 		}
 
 		for name, arn := range tests {
 			t.Run(name, func(t *testing.T) {
-				if _, err := GetIAMPolicy("123456789012", "aws", []string{"arn:aws:iam::123456789012:role/ok", arn}); err == nil {
-					t.Fatalf("expected error for %q", arn)
+				got, err := GetIAMPolicy("123456789012", "aws", []string{arn})
+				if err != nil {
+					t.Fatalf("unexpected error: %v", err)
+				}
+
+				var policy struct {
+					Statement []struct {
+						Sid      string
+						Resource any
+					}
+				}
+				if err := json.Unmarshal([]byte(got), &policy); err != nil {
+					t.Fatalf("generated IAM policy is not valid JSON: %v", err)
+				}
+				for _, statement := range policy.Statement {
+					if (statement.Sid == "PassRoleEC2" || statement.Sid == "PassRoleEKS") && statement.Resource != arn {
+						t.Fatalf("%v: expected Resource %q, got %v", statement.Sid, arn, statement.Resource)
+					}
 				}
 			})
-		}
-	})
-
-	t.Run("IAM policy pass role ARNs must match partition", func(t *testing.T) {
-		if _, err := GetIAMPolicy("123456789012", "aws-us-gov", []string{"arn:aws-us-gov:iam::123456789012:role/node-role"}); err != nil {
-			t.Fatalf("unexpected error: %v", err)
-		}
-		if _, err := GetIAMPolicy("123456789012", "aws-us-gov", []string{"arn:aws:iam::123456789012:role/node-role"}); err == nil {
-			t.Fatalf("expected partition mismatch error")
 		}
 	})
 }

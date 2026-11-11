@@ -64,19 +64,16 @@ func TestEKSSettingsInstanceProfileRoleArns(t *testing.T) {
 		require.Equal(t, first.Get(EKSSettingsFieldIamPolicyJson), second.Get(EKSSettingsFieldIamPolicyJson))
 	})
 
-	t.Run("rejects invalid ARN", func(t *testing.T) {
-		_, err := read("eu-west-1", []interface{}{"not-an-arn"})
-		require.ErrorContains(t, err, "not a valid IAM role ARN")
-	})
-
-	t.Run("rejects ARN from another account", func(t *testing.T) {
-		_, err := read("eu-west-1", []interface{}{"arn:aws:iam::210987654321:role/node-role"})
-		require.ErrorContains(t, err, "does not belong to account")
-	})
-
-	t.Run("rejects ARN from another partition", func(t *testing.T) {
-		_, err := read("us-gov-west-1", []interface{}{"arn:aws:iam::123456789012:role/node-role"})
-		require.ErrorContains(t, err, "does not belong to partition")
+	t.Run("passes ARNs through without validating them", func(t *testing.T) {
+		for _, arn := range []string{
+			"arn:aws:iam::123456789012:role/castai-eks-*",
+			"arn:aws-cn:iam::123456789012:role/node-role",
+			"arn:aws:iam::210987654321:role/node-role",
+		} {
+			data, err := read("eu-west-1", []interface{}{arn})
+			require.NoError(t, err)
+			require.Equal(t, 2, strings.Count(data.Get(EKSSettingsFieldIamPolicyJson).(string), `"Resource": "`+arn+`"`))
+		}
 	})
 }
 
