@@ -56,16 +56,17 @@ The following section describes some prerequisites, and the ones after that desc
 
 ### 1. Setting up Impersonation GCP resources
 
-If you **use** the `castai/gke-iam` module, update to version `0.6` and set the following arguments:
+If you **use** the `castai/gke-iam` module, update to version `~> 0.7` and set the following arguments:
 
 ```terraform
 module "castai_gke_iam" {
   source  = "castai/gke-iam/castai"
-  version = "~> 0.6.0"
+  # Change version to `~> 0.7`
+  version = "~> 0.7"
 
   # ...
   
-  # Set these two arguments. Note, these are the defaults in 0.6.x. If you've
+  # Set these two arguments. Note, these are the defaults in 0.6+. If you've
   # already updated to that version and haven't changed them, you're good.
   authentication_method           = "service_account_key"
   authentication_method_migration = "prepare"
@@ -94,7 +95,7 @@ resource "google_service_account_iam_member" "castai_token_creator" {
 
 After verifying that the previous step was successfully applied and the `google_service_account_iam_member` resource was created, you can switch the authentication method from using the old Service Account Keys to Impersonation.
 
-If you **use** the `castai/gke-cluster` module, you need to change its inputs like the following:
+If you **use** the `castai/gke-cluster` module, you need to change the following arguments:
 
 ```terraform
 module "castai_gke_cluster" {
@@ -133,14 +134,14 @@ resource "castai_gke_cluster" "castai_cluster" {
 
 ### 3. Clean up Service Account Keys
 
-At this point, your Service Account Keys are no longer in use by Cast AI, so you can remove them.
+After applying the previous changes, your Service Account Keys are no longer in use by Cast AI, so you can remove them.
 
 If you **use** the `castai/gke-iam` module, change the `authentication_method` argument and remove `authentication_method_migration`:
 
 ```terraform
 module "castai_gke_iam" {
   source  = "castai/gke-iam/castai"
-  version = "~> 0.6.0"
+  version = "~> 0.7"
 
   # ...
 
@@ -151,6 +152,9 @@ module "castai_gke_iam" {
   # authentication_method_migration = "prepare"
 }
 ```
+
+You should see the following changes:
+- Destroying `module.castai_gke_iam.google_service_account_key.castai_key`.
 
 If you **don't use** the `castai/gke-iam` module, remove the `google_service_account_key` resource:
 
@@ -205,6 +209,7 @@ Changes need to be applied together in a single `terraform apply`.
 # module "iam_impersonate" {
 #   source  = "castai/iam-impersonate/gke"
 #   version = "1.1.0"
+#   service_account_id = local.service_account_id
 #   # ...
 # }
 
@@ -220,12 +225,18 @@ removed {
 # 2. `castai/gke-iam` needs to be added instead
 module "castai_gke_iam" {
   source  = "castai/gke-iam/castai"
-  version = "~> 0.6.0"
+  version = "~> 0.7"
 
   project_id       = var.project_id
   gke_cluster_name = var.cluster_name
 
   authentication_method = "impersonation"
+  
+  # `service_account_id` only needs to be specified if you've diverged from the gke_impersonate example
+  # (https://github.com/castai/terraform-provider-castai/tree/master/examples/gke/gke_impersonate)
+  # of using `service_account_id = "castai-gke-tf-${substr(sha1(var.cluster_name), 0, 8)}"`.
+  # If you ued that format, you can omit `service_account_id`.
+  service_account_id = local.service_account_id
 }
 
 # Some resources can be moved to avoid recreating them
@@ -271,6 +282,8 @@ The expected changes in the resulting plan are:
 - Moving `module.iam_impersonate.google_project_iam_custom_role.castai_role`
 - Moving `module.iam_impersonate.google_project_iam_member.service_account_user`
 - Moving `module.iam_impersonate.google_service_account.client_service_account`
+
+> Note: if you see the `google_service_account` being recreated, it's most probably because of using a different `service_account_id`, see comment in the code block above.
 
 After applying these changes, you can increase the module versions at your discretion, but for the migration we suggest using these to make sure you see the same changes as above.
 
@@ -344,6 +357,7 @@ Changes need to be applied together in a single `terraform apply`.
 # module "iam_impersonate" {
 #   source  = "castai/iam-impersonate/gke"
 #   version = "1.1.0"
+#   service_account_id = local.service_account_id
 #   # ...
 # }
 
@@ -359,12 +373,18 @@ removed {
 # 2. `castai/gke-iam` needs to be added instead
 module "castai_gke_iam" {
   source  = "castai/gke-iam/castai"
-  version = "~> 0.6.0"
+  version = "~> 0.7"
 
   project_id       = var.project_id
   gke_cluster_name = var.cluster_name
 
   authentication_method = "impersonation"
+
+  # `service_account_id` only needs to be specified if you've diverged from the gke_impersonate example
+  # (https://github.com/castai/terraform-provider-castai/tree/master/examples/gke/gke_impersonate)
+  # of using `service_account_id = "castai-gke-tf-${substr(sha1(var.cluster_name), 0, 8)}"`.
+  # If you ued that format, you can omit `service_account_id`.
+  service_account_id = local.service_account_id
 }
 
 # Some resources can be moved to avoid recreating them

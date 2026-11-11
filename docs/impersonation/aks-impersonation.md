@@ -1,6 +1,6 @@
 # Impersonation for AKS clusters
 
-Cast AI supports AKS Workload Identity Impersonation as an alternative to using App Registration password. This method enhances security by eliminating the need for password management while still allowing Cast AI to access your Azure resources.
+Cast AI supports AKS Workload Identity Impersonation as an alternative to using App Registration passwords. This method enhances security by eliminating the need for password management while still allowing Cast AI to access your Azure resources.
 
 For general information about this method, see https://docs.cast.ai/docs/sa-impersonation-aks.
 
@@ -10,7 +10,7 @@ This document describes how to configure AKS Impersonation using Terraform for n
 
 If you have a `azuread_application_password` resource in your Terraform state (called `castai` if you used the `castai/aks` module), you're using App Registration password (static credentials).
 
-If you have a `azurerm_federated_identity_credential` resource in your Terraform state (called `this` if you used the `castai/aks` module), you're using Workload Identity Impersonation.
+If you have an `azurerm_federated_identity_credential` resource in your Terraform state (called `this` if you used the `castai/aks` module), you're using Workload Identity Impersonation.
 
 ## Connecting with Impersonation
 
@@ -46,6 +46,7 @@ If you **use** the `castai/aks` module, update it to version `~> 12.1` (do _not_
 ```terraform
 module "castai_aks_cluster" {
   source  = "castai/aks/castai"
+  # Change version to `~> 12.1`
   version = "~> 12.1"
 
   # Set these two arguments. Note, these are the defaults in ~> 12.1. If you've
@@ -93,6 +94,7 @@ If you **use** the `castai/aks` module, update to version `~> 13.0` and change t
 ```terraform
 module "castai_aks_cluster" {
   source  = "castai/aks/castai"
+  # Change version to `~> 13.0`
   version = "~> 13.0"
 
   # Change `authentication_method` to `workload_identity`
