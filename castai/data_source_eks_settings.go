@@ -13,14 +13,15 @@ import (
 )
 
 const (
-	EKSSettingsFieldAccountId             = "account_id"
-	EKSSettingsFieldRegion                = "region"
-	EKSSettingsFieldVpc                   = "vpc"
-	EKSSettingsFieldCluster               = "cluster"
-	EKSSettingsFieldIamPolicyJson         = "iam_policy_json"
-	EKSSettingsFieldIamUserPolicyJson     = "iam_user_policy_json"
-	EKSSettingsFieldIamManagedPolicies    = "iam_managed_policies"
-	EKSSettingsFieldAWSSharedVPCAccountId = "shared_vpc_account_id"
+	EKSSettingsFieldAccountId               = "account_id"
+	EKSSettingsFieldRegion                  = "region"
+	EKSSettingsFieldVpc                     = "vpc"
+	EKSSettingsFieldCluster                 = "cluster"
+	EKSSettingsFieldIamPolicyJson           = "iam_policy_json"
+	EKSSettingsFieldIamUserPolicyJson       = "iam_user_policy_json"
+	EKSSettingsFieldIamManagedPolicies      = "iam_managed_policies"
+	EKSSettingsFieldAWSSharedVPCAccountId   = "shared_vpc_account_id"
+	EKSSettingsFieldInstanceProfileRoleArns = "instance_profile_role_arns"
 
 	GovCloudPrefix = "us-gov"
 )
@@ -74,6 +75,17 @@ func dataSourceEKSSettings() *schema.Resource {
 				Description:      "AWS account ID where the VPC and subnets are located, for shared VPC setups. If not applicable, defaults to the account_id.",
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
+			EKSSettingsFieldInstanceProfileRoleArns: {
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem: &schema.Schema{
+					Type:             schema.TypeString,
+					ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
+				},
+				Description: "IAM role ARNs that CAST AI is allowed to pass (iam:PassRole) to EC2 and EKS, e.g. the instance profile roles used by Node Configurations. " +
+					"If not set, iam:PassRole is allowed for any role (`role/*`). " +
+					"Limiting this list can block node creation when a Node Configuration is later added or updated with an instance profile role that is not on the list; keeping the list in sync is your responsibility.",
+			},
 		},
 	}
 }
@@ -94,7 +106,15 @@ func dataSourceCastaiEKSSettingsRead(ctx context.Context, data *schema.ResourceD
 	}
 
 	userPolicy, _ := policies.GetUserInlinePolicy(cluster, arn, vpc, partition, sharedVPCArn)
-	iamPolicy, _ := policies.GetIAMPolicy(accountID, partition)
+	var passRoleARNs []string
+	for _, v := range data.Get(EKSSettingsFieldInstanceProfileRoleArns).([]interface{}) {
+		passRoleARNs = append(passRoleARNs, v.(string))
+	}
+
+	iamPolicy, err := policies.GetIAMPolicy(accountID, partition, passRoleARNs)
+	if err != nil {
+		return diag.FromErr(fmt.Errorf("%s: %w", EKSSettingsFieldInstanceProfileRoleArns, err))
+	}
 	managedPolicies := policies.GetManagedPolicies(partition)
 
 	data.SetId(fmt.Sprintf("eks-%s-%s-%s-%s", accountID, vpc, region, cluster))
