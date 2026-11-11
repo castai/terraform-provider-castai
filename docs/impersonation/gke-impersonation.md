@@ -95,6 +95,8 @@ resource "google_service_account_iam_member" "castai_token_creator" {
 
 After verifying that the previous step was successfully applied and the `google_service_account_iam_member` resource was created, you can switch the authentication method from using the old Service Account Keys to Impersonation.
 
+While applying this change, Cast AI will briefly be unable to access your cloud resources, and thus **there can be a gap in all Cast AI services during this period**. Schedule this operation in a maintenance window to minimize the impact.
+
 If you **use** the `castai/gke-cluster` module, you need to change the following arguments:
 
 ```terraform
@@ -169,6 +171,8 @@ If you **don't use** the `castai/gke-iam` module, remove the `google_service_acc
 ## Migrating from Legacy to New Impersonation
 
 If your cluster is connected using Legacy Impersonation, you should migrate it to the New Impersonation. The essence of this is removing the `castai_gke_cluster_id` resource from Terraform state and passing the `target_service_account_email` and `castai_service_account_email` fields to the `castai_gke_cluster` resource instead. GCP resources should stay the same (as much as possible, see details below).
+
+While applying the changes outlined below, Cast AI will briefly be unable to access your cloud resources, and thus **there can be a gap in all Cast AI services during this period**. Schedule this operation in a maintenance window to minimize the impact.
 
 Depending on which Cast AI Terraform modules you relied on, the process is slightly different:
 

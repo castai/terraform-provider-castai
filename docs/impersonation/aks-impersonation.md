@@ -8,13 +8,13 @@ This document describes how to configure AKS Impersonation using Terraform for n
 
 ## What am I using now?
 
-If you have a `azuread_application_password` resource in your Terraform state (called `castai` if you used the `castai/aks` module), you're using App Registration password (static credentials).
+If your `castai_aks_cluster` resource has `client_secret` set, you're using App Registration password (static credentials). You should see an `azuread_application_password` resource in your Terraform state.
 
-If you have an `azurerm_federated_identity_credential` resource in your Terraform state (called `this` if you used the `castai/aks` module), you're using Workload Identity Impersonation.
+If your `castai_aks_cluster` resource has `federation_id` set, you're using Workload Identity Impersonation. You should see an `azurerm_federated_identity_credential` resource in your Terraform state.
 
 ## Connecting with Impersonation
 
-If you want to connect a new cluster to Cast AI, set `authentication_method = "workload_identity"` on the `castai/aks` module.
+If you want to connect a new cluster to Cast AI, set `authentication_method = "workload_identity"` on the `castai/aks` module. Module versions `13.0+` default to this `authentication_method`.
 
 ## Migrating from App Registration password to Workload Identity Impersonation
 
@@ -49,7 +49,7 @@ module "castai_aks_cluster" {
   # Change version to `~> 12.1`
   version = "~> 12.1"
 
-  # Set these two arguments. Note, these are the defaults in ~> 12.1. If you've
+  # Set these two arguments. Note that these are the defaults in ~> 12.1. If you've
   # already updated to that version and haven't changed them, you're good.
   authentication_method           = "client_secret"
   authentication_method_migration = "prepare"
@@ -57,7 +57,7 @@ module "castai_aks_cluster" {
 ```
 
 You should see the following changes:
-- Adding `module.castai_aks_cluster.azurerm_user_assigned_identity.this`. This is the Managed Identity that Cast will impersonate.
+- Adding `module.castai_aks_cluster.azurerm_user_assigned_identity.this`. This is the Managed Identity that Cast AI will impersonate.
 - Adding `module.castai_aks_cluster.azurerm_federated_identity_credential.this`. This configures the federation that allows Cast AI to impersonate the Managed Identity.
 
 If you **don't use** the `castai/aks` module, you need to create an `azurerm_user_assigned_identity` and `azurerm_federated_identity_credential` to define the Managed Identity and allow Cast AI to impersonate it:
@@ -72,7 +72,7 @@ data "castai_impersonation_service_account" "this" {
 resource "azurerm_user_assigned_identity" "this" {
   name                = "${var.aks_cluster_name}-castai-identity" # Suggested name
   resource_group_name = var.resource_group
-  location            = data.azurerm_kubernetes_cluster.castai[0].location
+  location            = data.azurerm_kubernetes_cluster.castai.location
 }
 
 # Create azurerm_federated_identity_credential
@@ -80,14 +80,16 @@ resource "azurerm_federated_identity_credential" "this" {
   name                      = substr("castai-${var.aks_cluster_name}-${var.resource_group}", 0, 64) # Suggested name
   audience                  = ["api://AzureADTokenExchange"]
   issuer                    = "https://accounts.google.com"
-  user_assigned_identity_id = azurerm_user_assigned_identity.this[0].id
-  subject                   = data.castai_impersonation_service_account.this[0].id
+  user_assigned_identity_id = azurerm_user_assigned_identity.this.id
+  subject                   = data.castai_impersonation_service_account.this.id
 }
 ```
 
 ### 2. Switch the authentication method
 
 After verifying that the previous step was successfully applied and the `azurerm_user_assigned_identity` and `azurerm_federated_identity_credential` resources were created, you can switch the authentication method from using the old App Registration password to Impersonation.
+
+While applying this change, Cast AI will briefly be unable to access your cloud resources, and thus **there can be a gap in all Cast AI services during this period**. Schedule this operation in a maintenance window to minimize the impact.
 
 If you **use** the `castai/aks` module, update to version `~> 13.0` and change the following arguments:
 
@@ -113,12 +115,12 @@ If you **don't use** the `castai/aks` module, you need to change `azurerm_role_a
 
 ```terraform
 resource "azurerm_role_assignment" "castai_resource_group" {
-  # `principal_id` must have pointed to an `azuread_service_principal` like this:
+  # `principal_id` previously pointed to an `azuread_service_principal` like this:
   # principal_id  = azuread_service_principal.castai.object_id
   # That needs to be updated to:
   principal_id = azurerm_user_assigned_identity.this.principal_id
   
-  # The following arguments can remain the same as before. These are examples on
+  # The following arguments can remain the same as before. These are examples of
   # what they probably looked like:
   role_definition_id = azurerm_role_definition.castai.role_definition_resource_id
   description        = "castai role assignment for resource group ${var.resource_group}"
@@ -126,7 +128,7 @@ resource "azurerm_role_assignment" "castai_resource_group" {
 }
 
 resource "azurerm_role_assignment" "castai_node_resource_group" {
-  # `principal_id` must have pointed to an `azuread_service_principal` like this:
+  # `principal_id` previously pointed to an `azuread_service_principal` like this:
   # principal_id = azuread_service_principal.castai.object_id
   # That needs to be updated to:
   principal_id       = azurerm_user_assigned_identity.this.principal_id
@@ -173,8 +175,8 @@ module "castai_aks_cluster" {
 
 You should see the following changes:
 - Destroying `module.castai_aks_cluster.azuread_application.castai`.
-- Destroying `module.castai_aks_cluster.azuread_application_password.castai`
-- Destroying `module.castai_aks_cluster.azuread_service_principal.castai`
+- Destroying `module.castai_aks_cluster.azuread_application_password.castai`.
+- Destroying `module.castai_aks_cluster.azuread_service_principal.castai`.
 
 If you **don't use** the `castai/aks` module, remove the following resources:
 
