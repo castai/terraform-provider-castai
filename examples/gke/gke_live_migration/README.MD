@@ -1,18 +1,21 @@
 # Running LIVE on GKE
 
-## Disclaimer
+This example creates a GKE cluster, onboards it to Cast AI, installs the `castai-live` Helm chart and creates a CLM-enabled node template.
 
-This is a temporary hack to enable early access to LIVE Migrations in Cast AI. We do not expect customers to run our installer in node configuration as we are doing in this example or having to make complicated setups.
-
-This example contains a full creation of a GKE cluster and onboarding on Cast AI with the needed node init script to enable live migration in NEW created nodes.
-
-## Network migration / TCP Migration
-
-Currently not supported in GKE yet, be aware of the type of workloads you try to migrate for customers, it will fail eventually if they use persistent TCP connections.
+Example configuration should be analysed in the following order:
+1. Create VPC - `vpc.tf`
+2. Create GKE cluster - `gke.tf`
+3. Connect the cluster to Cast AI, configure Autoscaler, Node Configurations and Node Templates - `castai.tf`
 
 # How to create your env
 1. Copy `terraform.tfvars.example` to `terraform.tfvars`
 2. Update `terraform.tfvars` file with your project name, cluster name, cluster region and Cast AI API token.
+
+| Variable | Description |
+| --- | --- |
+| `live_helm_version` | Optional. Version of the `castai-live` Helm chart. Latest when not set. |
+| `install_helm_live` | Optional. Set to `false` to skip the `castai-live` Helm chart (developers only). Default `true`. |
+
 3. Initialize tofu. Under example root folder run:
 ```bash
 tofu init
@@ -31,13 +34,17 @@ Please refer to this guide if you run into any issues https://docs.cast.ai/docs/
 # CLM Configuration
 
 CLM is enabled by having:
-1. A dedicated `live` node configuration in `castai.tf` using a COS or Ubuntu image with the appropriate init script (`init_cos.sh` or `init_ubuntu.sh`) to prepare nodes for live migration.
-2. A `live_tmpl` node template with `clm_enabled = true` and `should_taint = true` that uses the `live` node configuration. The taint ensures only workloads that tolerate the live-migration taint will be scheduled on CLM-enabled nodes.
-3. The `default_by_castai` template has `clm_enabled = true` for general cluster nodes.
+1. `install_live = true` (`install_live = var.install_helm_live`, default value is `true`) in the CAST AI module configuration (`module "castai-gke-cluster"`). It installs the `castai-live` Helm chart.
+2. A dedicated `live` node configuration in the CAST AI module configuration.
+3. `clm_enabled = true` in the `live_tmpl` node template (`node_templates` in the CAST AI module configuration) that uses the `live` node configuration.
+4. `clm_networking_mode = "tc"` in the `live_tmpl` node template. Refer to [Traffic Control (TC)](https://docs.cast.ai/docs/clm-reference-traffic-control).
+All are in the `castai.tf` file.
 
-# Notes
+Notes:
+- The instance families of the `live_tmpl` node template are limited to `c2d`. Refer to [CLM requirements and limitations](https://docs.cast.ai/docs/clm-requirements-and-limitations).
+- The `live_tmpl` node template has `should_taint = true`. Only pods that tolerate the `scheduling.cast.ai/node-template=live-tmpl:NoSchedule` taint are scheduled on its nodes.
 
-- Make sure to rebalance the cluster after it is fully onboarded, we replace the original image with a new image we know that contains a new version of containerd and is compatible with live.
+All other GKE/CAST AI resources mostly manage the GKE cluster and its connection to CAST AI, not specifically the CLM feature.
 
 # Closing
 

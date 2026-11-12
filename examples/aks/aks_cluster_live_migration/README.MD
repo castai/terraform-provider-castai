@@ -12,7 +12,8 @@ Example configuration should be analysed in the following order:
 CLM is enabled by having:
 1. `clm_enabled = true` in `module/castai/castai.tf` in the CAST AI node template.
 2. `install_live = true` (`install_live = var.install_helm_live`, default value is `true`) in the CAST AI module configuration (`module "castai-aks-cluster"`).
-Both are in the `module/castai/castai.tf` file.
+3. `clm_networking_mode = "tc"` in the same node template. Refer to [Traffic Control (TC)](https://docs.cast.ai/docs/clm-reference-traffic-control).
+All are in the `module/castai/castai.tf` file.
 
 All other AKS/CAST AI resources mostly manage the AKS cluster and its connection to CAST AI, not specifically the CLM feature.
 
