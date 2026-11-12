@@ -1,0 +1,52 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "PassRoleEC2",
+      "Action": "iam:PassRole",
+      "Effect": "Allow",
+      "Resource": "arn:aws:iam::*:role/*",
+      "Condition": {
+        "StringEquals": {
+          "iam:PassedToService": "ec2.amazonaws.com"
+        }
+      }
+    },
+    {
+      "Sid": "PassRoleEKS",
+      "Action": "iam:PassRole",
+      "Effect": "Allow",
+      "Resource": "arn:aws:iam::*:role/*",
+      "Condition": {
+        "StringEquals": {
+          "iam:PassedToService": "eks.amazonaws.com"
+        }
+      }
+    },
+    {
+      "Sid": "NonResourcePermissions",
+      "Effect": "Allow",
+      "Action": [
+        "iam:CreateServiceLinkedRole",
+        "ec2:CreateTags",
+        "ec2:DeleteKeyPair",
+        "ec2:DescribeCapacityReservations",
+        "ec2:ImportKeyPair"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "RunInstancesPermissions",
+      "Effect": "Allow",
+      "Action": "ec2:RunInstances",
+      "Resource": [
+        "arn:aws:ec2:*:123456789012:capacity-reservation/*",
+        "arn:aws:ec2:*:123456789012:key-pair/*",
+        "arn:aws:ec2:*:123456789012:network-interface/*",
+        "arn:aws:ec2:*:123456789012:security-group/*",
+        "arn:aws:ec2:*:123456789012:volume/*",
+        "arn:aws:ec2:*::image/*"
+      ]
+    }
+  ]
+}

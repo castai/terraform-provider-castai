@@ -9766,6 +9766,10 @@ type WorkloadoptimizationV1Container struct {
 	// Runtime Defines the application runtime.
 	Runtime *WorkloadoptimizationV1Runtime `json:"runtime,omitempty"`
 
+	// RuntimeInfo Detected runtime details of a container. jvm and gpu may be present
+	// simultaneously (e.g. Spark executors on GPUs).
+	RuntimeInfo *WorkloadoptimizationV1RuntimeInfo `json:"runtimeInfo,omitempty"`
+
 	// UnqualifiedResources Resources disqualified by a runtime condition on the stored recommendation (e.g.
 	// memory when JVM metrics are missing). Always exposed — anomaly windows included;
 	// the shipping state is inferable from the recommendation itself. Absent/empty when
@@ -10244,6 +10248,12 @@ type WorkloadoptimizationV1GPURecommendationContainer struct {
 type WorkloadoptimizationV1GPURecommendedRequestsChangedEvent struct {
 	Containers []WorkloadoptimizationV1GPURecommendationContainer `json:"containers"`
 	DebugData  *map[string]interface{}                            `json:"debugData,omitempty"`
+}
+
+// WorkloadoptimizationV1GPURuntimeInfo GPU runtime details detected for a container.
+type WorkloadoptimizationV1GPURuntimeInfo struct {
+	// Engine Detected GPU engine (e.g. "vllm"). Absent when the GPU workload is generic.
+	Engine *string `json:"engine"`
 }
 
 // WorkloadoptimizationV1GPUSettings defines model for workloadoptimization.v1.GPUSettings.
@@ -10950,6 +10960,10 @@ type WorkloadoptimizationV1JVMRuntimeConfigurationUpdate struct {
 	// OptionsEnvVar Name of environment variable with JVM parameters that will be injected to container (defaults to JAVA_OPTS if not set).
 	OptionsEnvVar *string `json:"optionsEnvVar"`
 }
+
+// WorkloadoptimizationV1JVMRuntimeInfo JVM runtime details detected for a container. A presence marker for now —
+// detected JVM details (e.g. env var overrides) may be added as fields later.
+type WorkloadoptimizationV1JVMRuntimeInfo = map[string]interface{}
 
 // WorkloadoptimizationV1JVMSettings defines model for workloadoptimization.v1.JVMSettings.
 type WorkloadoptimizationV1JVMSettings struct {
@@ -12114,6 +12128,17 @@ type WorkloadoptimizationV1RolloutBehaviorType string
 
 // WorkloadoptimizationV1Runtime Defines the application runtime.
 type WorkloadoptimizationV1Runtime string
+
+// WorkloadoptimizationV1RuntimeInfo Detected runtime details of a container. jvm and gpu may be present
+// simultaneously (e.g. Spark executors on GPUs).
+type WorkloadoptimizationV1RuntimeInfo struct {
+	// Gpu GPU runtime details detected for a container.
+	Gpu *WorkloadoptimizationV1GPURuntimeInfo `json:"gpu,omitempty"`
+
+	// Jvm JVM runtime details detected for a container. A presence marker for now —
+	// detected JVM details (e.g. env var overrides) may be added as fields later.
+	Jvm *WorkloadoptimizationV1JVMRuntimeInfo `json:"jvm,omitempty"`
+}
 
 // WorkloadoptimizationV1ScalingBehaviour defines model for workloadoptimization.v1.ScalingBehaviour.
 type WorkloadoptimizationV1ScalingBehaviour struct {
