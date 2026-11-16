@@ -217,7 +217,7 @@ func resourceCastaiClusterUpdate(
 }
 
 func createClusterToken(ctx context.Context, client sdk.ClientWithResponsesInterface, clusterID string) (string, error) {
-	resp, err := client.ExternalClusterAPICreateClusterTokenWithResponse(ctx, clusterID)
+	resp, err := client.ExternalClusterAPICreateClusterTokenWithResponse(ctx, clusterID, &sdk.ExternalClusterAPICreateClusterTokenParams{})
 	if checkErr := sdk.CheckOKResponse(resp, err); checkErr != nil {
 		return "", fmt.Errorf("creating cluster token: %w", checkErr)
 	}

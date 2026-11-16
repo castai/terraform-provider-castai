@@ -542,7 +542,7 @@ type ClientInterface interface {
 	ExternalClusterAPIUpdateClusterTags(ctx context.Context, clusterId string, body ExternalClusterAPIUpdateClusterTagsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// ExternalClusterAPICreateClusterToken request
-	ExternalClusterAPICreateClusterToken(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+	ExternalClusterAPICreateClusterToken(ctx context.Context, clusterId string, params *ExternalClusterAPICreateClusterTokenParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// NodeConfigurationAPIListMaxPodsPresets request
 	NodeConfigurationAPIListMaxPodsPresets(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -3044,8 +3044,8 @@ func (c *Client) ExternalClusterAPIUpdateClusterTags(ctx context.Context, cluste
 	return c.Client.Do(req)
 }
 
-func (c *Client) ExternalClusterAPICreateClusterToken(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewExternalClusterAPICreateClusterTokenRequest(c.Server, clusterId)
+func (c *Client) ExternalClusterAPICreateClusterToken(ctx context.Context, clusterId string, params *ExternalClusterAPICreateClusterTokenParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewExternalClusterAPICreateClusterTokenRequest(c.Server, clusterId, params)
 	if err != nil {
 		return nil, err
 	}
@@ -13377,7 +13377,7 @@ func NewExternalClusterAPIUpdateClusterTagsRequestWithBody(server string, cluste
 }
 
 // NewExternalClusterAPICreateClusterTokenRequest generates requests for ExternalClusterAPICreateClusterToken
-func NewExternalClusterAPICreateClusterTokenRequest(server string, clusterId string) (*http.Request, error) {
+func NewExternalClusterAPICreateClusterTokenRequest(server string, clusterId string, params *ExternalClusterAPICreateClusterTokenParams) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -13400,6 +13400,44 @@ func NewExternalClusterAPICreateClusterTokenRequest(server string, clusterId str
 	queryURL, err := serverURL.Parse(operationPath)
 	if err != nil {
 		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if params.TokenType != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "tokenType", runtime.ParamLocationQuery, *params.TokenType); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.Rotate != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "rotate", runtime.ParamLocationQuery, *params.Rotate); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
 	}
 
 	req, err := http.NewRequest("POST", queryURL.String(), nil)
@@ -22891,7 +22929,7 @@ type ClientWithResponsesInterface interface {
 	ExternalClusterAPIUpdateClusterTagsWithResponse(ctx context.Context, clusterId string, body ExternalClusterAPIUpdateClusterTagsJSONRequestBody) (*ExternalClusterAPIUpdateClusterTagsResponse, error)
 
 	// ExternalClusterAPICreateClusterToken request
-	ExternalClusterAPICreateClusterTokenWithResponse(ctx context.Context, clusterId string) (*ExternalClusterAPICreateClusterTokenResponse, error)
+	ExternalClusterAPICreateClusterTokenWithResponse(ctx context.Context, clusterId string, params *ExternalClusterAPICreateClusterTokenParams) (*ExternalClusterAPICreateClusterTokenResponse, error)
 
 	// NodeConfigurationAPIListMaxPodsPresets request
 	NodeConfigurationAPIListMaxPodsPresetsWithResponse(ctx context.Context) (*NodeConfigurationAPIListMaxPodsPresetsResponse, error)
@@ -32938,8 +32976,8 @@ func (c *ClientWithResponses) ExternalClusterAPIUpdateClusterTagsWithResponse(ct
 }
 
 // ExternalClusterAPICreateClusterTokenWithResponse request returning *ExternalClusterAPICreateClusterTokenResponse
-func (c *ClientWithResponses) ExternalClusterAPICreateClusterTokenWithResponse(ctx context.Context, clusterId string) (*ExternalClusterAPICreateClusterTokenResponse, error) {
-	rsp, err := c.ExternalClusterAPICreateClusterToken(ctx, clusterId)
+func (c *ClientWithResponses) ExternalClusterAPICreateClusterTokenWithResponse(ctx context.Context, clusterId string, params *ExternalClusterAPICreateClusterTokenParams) (*ExternalClusterAPICreateClusterTokenResponse, error) {
+	rsp, err := c.ExternalClusterAPICreateClusterToken(ctx, clusterId, params)
 	if err != nil {
 		return nil, err
 	}

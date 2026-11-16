@@ -496,6 +496,7 @@ const (
 
 // Defines values for ExternalclusterV1KarpenterControllerMode.
 const (
+	ExternalclusterV1KarpenterControllerModeCASTMANAGED                        ExternalclusterV1KarpenterControllerMode = "CAST_MANAGED"
 	ExternalclusterV1KarpenterControllerModeKARPENTERCONTROLLERMODEUNSPECIFIED ExternalclusterV1KarpenterControllerMode = "KARPENTER_CONTROLLER_MODE_UNSPECIFIED"
 	ExternalclusterV1KarpenterControllerModeMANAGEDOUTOFBAND                   ExternalclusterV1KarpenterControllerMode = "MANAGED_OUT_OF_BAND"
 	ExternalclusterV1KarpenterControllerModeSELFHOSTED                         ExternalclusterV1KarpenterControllerMode = "SELF_HOSTED"
@@ -527,6 +528,12 @@ const (
 	ExternalclusterV1OperationModeOPERATIONMODEDEFAULT     ExternalclusterV1OperationMode = "OPERATION_MODE_DEFAULT"
 	ExternalclusterV1OperationModeOPERATIONMODEDRYRUN      ExternalclusterV1OperationMode = "OPERATION_MODE_DRY_RUN"
 	ExternalclusterV1OperationModeOPERATIONMODEUNSPECIFIED ExternalclusterV1OperationMode = "OPERATION_MODE_UNSPECIFIED"
+)
+
+// Defines values for ExternalclusterV1TokenType.
+const (
+	ExternalclusterV1TokenTypeCONFIGSYNC ExternalclusterV1TokenType = "CONFIG_SYNC"
+	ExternalclusterV1TokenTypeDEFAULT    ExternalclusterV1TokenType = "DEFAULT"
 )
 
 // Defines values for K8sSelectorV1Operator.
@@ -1200,9 +1207,10 @@ const (
 
 // Defines values for WorkloadoptimizationV1SystemOverrideOrigin.
 const (
-	WorkloadoptimizationV1SystemOverrideOriginSYSTEMOVERRIDEORIGINCONTINUOUSOOMKILLED WorkloadoptimizationV1SystemOverrideOrigin = "SYSTEM_OVERRIDE_ORIGIN_CONTINUOUS_OOM_KILLED"
-	WorkloadoptimizationV1SystemOverrideOriginSYSTEMOVERRIDEORIGINUNBOUNDMEMORYGROWTH WorkloadoptimizationV1SystemOverrideOrigin = "SYSTEM_OVERRIDE_ORIGIN_UNBOUND_MEMORY_GROWTH"
-	WorkloadoptimizationV1SystemOverrideOriginSYSTEMOVERRIDEORIGINUNSPECIFIED         WorkloadoptimizationV1SystemOverrideOrigin = "SYSTEM_OVERRIDE_ORIGIN_UNSPECIFIED"
+	WorkloadoptimizationV1SystemOverrideOriginSYSTEMOVERRIDEORIGINCONTINUOUSOOMKILLED         WorkloadoptimizationV1SystemOverrideOrigin = "SYSTEM_OVERRIDE_ORIGIN_CONTINUOUS_OOM_KILLED"
+	WorkloadoptimizationV1SystemOverrideOriginSYSTEMOVERRIDEORIGINUNBOUNDMEMORYGROWTH         WorkloadoptimizationV1SystemOverrideOrigin = "SYSTEM_OVERRIDE_ORIGIN_UNBOUND_MEMORY_GROWTH"
+	WorkloadoptimizationV1SystemOverrideOriginSYSTEMOVERRIDEORIGINUNSCHEDULABLERECOMMENDATION WorkloadoptimizationV1SystemOverrideOrigin = "SYSTEM_OVERRIDE_ORIGIN_UNSCHEDULABLE_RECOMMENDATION"
+	WorkloadoptimizationV1SystemOverrideOriginSYSTEMOVERRIDEORIGINUNSPECIFIED                 WorkloadoptimizationV1SystemOverrideOrigin = "SYSTEM_OVERRIDE_ORIGIN_UNSPECIFIED"
 )
 
 // Defines values for WorkloadoptimizationV1SystemOverrideResetOrigin.
@@ -1372,6 +1380,12 @@ const (
 	ExternalClusterAPITriggerResumeClusterParamsModeOPERATIONMODEDEFAULT     ExternalClusterAPITriggerResumeClusterParamsMode = "OPERATION_MODE_DEFAULT"
 	ExternalClusterAPITriggerResumeClusterParamsModeOPERATIONMODEDRYRUN      ExternalClusterAPITriggerResumeClusterParamsMode = "OPERATION_MODE_DRY_RUN"
 	ExternalClusterAPITriggerResumeClusterParamsModeOPERATIONMODEUNSPECIFIED ExternalClusterAPITriggerResumeClusterParamsMode = "OPERATION_MODE_UNSPECIFIED"
+)
+
+// Defines values for ExternalClusterAPICreateClusterTokenParamsTokenType.
+const (
+	ExternalClusterAPICreateClusterTokenParamsTokenTypeCONFIGSYNC ExternalClusterAPICreateClusterTokenParamsTokenType = "CONFIG_SYNC"
+	ExternalClusterAPICreateClusterTokenParamsTokenTypeDEFAULT    ExternalClusterAPICreateClusterTokenParamsTokenType = "DEFAULT"
 )
 
 // Defines values for UsersAPILeaveOrganizationParamsProduct.
@@ -1934,19 +1948,26 @@ type CastaiAutoscalerV1beta1RebalancingOptions struct {
 	SplitNodesInBatchesOf *int32 `json:"splitNodesInBatchesOf"`
 }
 
-// CastaiEvictorV1AdvancedConfig AdvancedConfig the evictor advanced configuration.
+// CastaiEvictorV1AdvancedConfig AdvancedConfig the evictor advanced configuration. Rules are evaluated
+// first-match-wins: only the first rule matching a given pod or node applies,
+// so overlapping selectors are resolved by order and duplicated selectors are
+// rejected by the API.
 type CastaiEvictorV1AdvancedConfig struct {
 	EvictionConfig []CastaiEvictorV1EvictionConfig `json:"evictionConfig"`
 }
 
 // CastaiEvictorV1EvictionConfig EvictionConfig used to specify more granular settings per node/pod filters.
 type CastaiEvictorV1EvictionConfig struct {
-	NodeSelector *CastaiEvictorV1NodeSelector    `json:"nodeSelector,omitempty"`
-	PodSelector  *CastaiEvictorV1PodSelector     `json:"podSelector,omitempty"`
-	Settings     CastaiEvictorV1EvictionSettings `json:"settings"`
+	NodeSelector *CastaiEvictorV1NodeSelector `json:"nodeSelector,omitempty"`
+	PodSelector  *CastaiEvictorV1PodSelector  `json:"podSelector,omitempty"`
+
+	// Settings EvictionSettings defines eviction settings. Each setting is independent:
+	// a rule may enable any combination of them.
+	Settings CastaiEvictorV1EvictionSettings `json:"settings"`
 }
 
-// CastaiEvictorV1EvictionSettings defines model for castai.evictor.v1.EvictionSettings.
+// CastaiEvictorV1EvictionSettings EvictionSettings defines eviction settings. Each setting is independent:
+// a rule may enable any combination of them.
 type CastaiEvictorV1EvictionSettings struct {
 	Aggressive      *CastaiEvictorV1EvictionSettingsSettingEnabled `json:"aggressive,omitempty"`
 	Disposable      *CastaiEvictorV1EvictionSettingsSettingEnabled `json:"disposable,omitempty"`
@@ -6470,6 +6491,13 @@ type ExternalclusterV1CreateAssumeRolePrincipalResponse struct {
 // ExternalclusterV1CreateClusterTokenResponse defines model for externalcluster.v1.CreateClusterTokenResponse.
 type ExternalclusterV1CreateClusterTokenResponse struct {
 	Token *string `json:"token,omitempty"`
+
+	// TokenType TokenType selects which credential a cluster token request issues.
+	//
+	//  - DEFAULT: Issues the default cluster token, used by the agent and the cluster controller.
+	//  - CONFIG_SYNC: Issues the config-sync operator token, which is scoped to the endpoints the
+	// operator drives and tracks its first use.
+	TokenType *ExternalclusterV1TokenType `json:"tokenType,omitempty"`
 }
 
 // ExternalclusterV1DeleteAssumeRolePrincipalResponse defines model for externalcluster.v1.DeleteAssumeRolePrincipalResponse.
@@ -6786,6 +6814,7 @@ type ExternalclusterV1KarpenterAttribute struct {
 	//  - KARPENTER_CONTROLLER_MODE_UNSPECIFIED: Default value.
 	//  - SELF_HOSTED: Controller is self-hosted inside the cluster.
 	//  - MANAGED_OUT_OF_BAND: Controller is managed out-of-band by the provider. Only AKS NAP is detected; EKS Auto Mode is not yet.
+	//  - CAST_MANAGED: Controller runs in the cluster and is deployed and operated by CAST (castai-karpenter release).
 	ControllerMode *ExternalclusterV1KarpenterControllerMode `json:"controllerMode,omitempty"`
 
 	// KentEligibility KentEligibility defines Karpenter KENT eligibility status.
@@ -6800,6 +6829,7 @@ type ExternalclusterV1KarpenterAttribute struct {
 //   - KARPENTER_CONTROLLER_MODE_UNSPECIFIED: Default value.
 //   - SELF_HOSTED: Controller is self-hosted inside the cluster.
 //   - MANAGED_OUT_OF_BAND: Controller is managed out-of-band by the provider. Only AKS NAP is detected; EKS Auto Mode is not yet.
+//   - CAST_MANAGED: Controller runs in the cluster and is deployed and operated by CAST (castai-karpenter release).
 type ExternalclusterV1KarpenterControllerMode string
 
 // ExternalclusterV1KataConfig PodVirtualizationConfig describes virtualization isolation settings for a node.
@@ -7262,6 +7292,14 @@ type ExternalclusterV1Taint struct {
 	Key    string `json:"key"`
 	Value  string `json:"value"`
 }
+
+// ExternalclusterV1TokenType TokenType selects which credential a cluster token request issues.
+//
+//   - DEFAULT: Issues the default cluster token, used by the agent and the cluster controller.
+//   - CONFIG_SYNC: Issues the config-sync operator token, which is scoped to the endpoints the
+//
+// operator drives and tracks its first use.
+type ExternalclusterV1TokenType string
 
 // ExternalclusterV1TriggerHibernateClusterResponse TriggerHibernateClusterResponse is the result of HibernateClusterRequest.
 type ExternalclusterV1TriggerHibernateClusterResponse struct {
@@ -12341,6 +12379,7 @@ type WorkloadoptimizationV1SurgeEvent struct {
 //
 //   - SYSTEM_OVERRIDE_ORIGIN_CONTINUOUS_OOM_KILLED: Override triggered due to continuous OOM kills after multiple scaling attempts.
 //   - SYSTEM_OVERRIDE_ORIGIN_UNBOUND_MEMORY_GROWTH: Override triggered due to detected unbound memory growth.
+//   - SYSTEM_OVERRIDE_ORIGIN_UNSCHEDULABLE_RECOMMENDATION: Override triggered because lowering requests for unschedulable pods did not help.
 type WorkloadoptimizationV1SystemOverrideOrigin string
 
 // WorkloadoptimizationV1SystemOverrideResetEvent SystemOverrideResetEvent is emitted when a system override on a workload is deactivated.
@@ -12382,6 +12421,7 @@ type WorkloadoptimizationV1SystemOverrideTriggeredEvent struct {
 	//
 	//  - SYSTEM_OVERRIDE_ORIGIN_CONTINUOUS_OOM_KILLED: Override triggered due to continuous OOM kills after multiple scaling attempts.
 	//  - SYSTEM_OVERRIDE_ORIGIN_UNBOUND_MEMORY_GROWTH: Override triggered due to detected unbound memory growth.
+	//  - SYSTEM_OVERRIDE_ORIGIN_UNSCHEDULABLE_RECOMMENDATION: Override triggered because lowering requests for unschedulable pods did not help.
 	Origin WorkloadoptimizationV1SystemOverrideOrigin `json:"origin"`
 
 	// Target SystemOverrideTarget defines which workload optimization features are affected by the system override.
@@ -13615,6 +13655,23 @@ type ExternalClusterAPITriggerResumeClusterParamsMode string
 
 // ExternalClusterAPIUpdateClusterTagsJSONBody defines parameters for ExternalClusterAPIUpdateClusterTags.
 type ExternalClusterAPIUpdateClusterTagsJSONBody map[string]string
+
+// ExternalClusterAPICreateClusterTokenParams defines parameters for ExternalClusterAPICreateClusterToken.
+type ExternalClusterAPICreateClusterTokenParams struct {
+	// TokenType The type of token to issue.
+	//
+	//  - DEFAULT: Issues the default cluster token, used by the agent and the cluster controller.
+	//  - CONFIG_SYNC: Issues the config-sync operator token, which is scoped to the endpoints the
+	// operator drives and tracks its first use.
+	TokenType *ExternalClusterAPICreateClusterTokenParamsTokenType `form:"tokenType,omitempty" json:"tokenType,omitempty"`
+
+	// Rotate Rotates the cluster's existing token of the requested type instead of
+	// issuing an additional one.
+	Rotate *bool `form:"rotate,omitempty" json:"rotate,omitempty"`
+}
+
+// ExternalClusterAPICreateClusterTokenParamsTokenType defines parameters for ExternalClusterAPICreateClusterToken.
+type ExternalClusterAPICreateClusterTokenParamsTokenType string
 
 // RbacServiceAPIListGroupsParams defines parameters for RbacServiceAPIListGroups.
 type RbacServiceAPIListGroupsParams struct {

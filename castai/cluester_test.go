@@ -31,7 +31,7 @@ func TestCreateClusterToken(t *testing.T) {
 			setupMock: func(mockClient *mock_sdk.MockClientInterface) {
 				body := io.NopCloser(bytes.NewReader([]byte(fmt.Sprintf(`{"token": "%s"}`, expectedToken))))
 				mockClient.EXPECT().
-					ExternalClusterAPICreateClusterToken(gomock.Any(), clusterID).
+					ExternalClusterAPICreateClusterToken(gomock.Any(), clusterID, gomock.Any()).
 					Return(&http.Response{StatusCode: 200, Body: body, Header: map[string][]string{"Content-Type": {"json"}}}, nil)
 			},
 			expectError:   false,
@@ -42,7 +42,7 @@ func TestCreateClusterToken(t *testing.T) {
 			setupMock: func(mockClient *mock_sdk.MockClientInterface) {
 				body := io.NopCloser(bytes.NewReader([]byte(`{"message": "bad request"}`)))
 				mockClient.EXPECT().
-					ExternalClusterAPICreateClusterToken(gomock.Any(), clusterID).
+					ExternalClusterAPICreateClusterToken(gomock.Any(), clusterID, gomock.Any()).
 					Return(&http.Response{StatusCode: 400, Body: body, Header: map[string][]string{"Content-Type": {"json"}}}, nil)
 			},
 			expectError:   true,
@@ -53,7 +53,7 @@ func TestCreateClusterToken(t *testing.T) {
 			setupMock: func(mockClient *mock_sdk.MockClientInterface) {
 				body := io.NopCloser(bytes.NewReader([]byte(`{"message": "unauthorized"}`)))
 				mockClient.EXPECT().
-					ExternalClusterAPICreateClusterToken(gomock.Any(), clusterID).
+					ExternalClusterAPICreateClusterToken(gomock.Any(), clusterID, gomock.Any()).
 					Return(&http.Response{StatusCode: 401, Body: body, Header: map[string][]string{"Content-Type": {"json"}}}, nil)
 			},
 			expectError:   true,
@@ -64,7 +64,7 @@ func TestCreateClusterToken(t *testing.T) {
 			setupMock: func(mockClient *mock_sdk.MockClientInterface) {
 				body := io.NopCloser(bytes.NewReader([]byte(`{"message": "cluster not found"}`)))
 				mockClient.EXPECT().
-					ExternalClusterAPICreateClusterToken(gomock.Any(), clusterID).
+					ExternalClusterAPICreateClusterToken(gomock.Any(), clusterID, gomock.Any()).
 					Return(&http.Response{StatusCode: 404, Body: body, Header: map[string][]string{"Content-Type": {"json"}}}, nil)
 			},
 			expectError:   true,
@@ -75,7 +75,7 @@ func TestCreateClusterToken(t *testing.T) {
 			setupMock: func(mockClient *mock_sdk.MockClientInterface) {
 				body := io.NopCloser(bytes.NewReader([]byte(`{"message": "internal server error"}`)))
 				mockClient.EXPECT().
-					ExternalClusterAPICreateClusterToken(gomock.Any(), clusterID).
+					ExternalClusterAPICreateClusterToken(gomock.Any(), clusterID, gomock.Any()).
 					Return(&http.Response{StatusCode: 500, Body: body, Header: map[string][]string{"Content-Type": {"json"}}}, nil)
 			},
 			expectError:   true,
@@ -85,7 +85,7 @@ func TestCreateClusterToken(t *testing.T) {
 			name: "network error with nil response",
 			setupMock: func(mockClient *mock_sdk.MockClientInterface) {
 				mockClient.EXPECT().
-					ExternalClusterAPICreateClusterToken(gomock.Any(), clusterID).
+					ExternalClusterAPICreateClusterToken(gomock.Any(), clusterID, gomock.Any()).
 					Return(&http.Response{StatusCode: 0, Body: http.NoBody}, fmt.Errorf("network error"))
 			},
 			expectError:   true,
@@ -95,7 +95,7 @@ func TestCreateClusterToken(t *testing.T) {
 			name: "response body is empty with 200 status",
 			setupMock: func(mockClient *mock_sdk.MockClientInterface) {
 				mockClient.EXPECT().
-					ExternalClusterAPICreateClusterToken(gomock.Any(), clusterID).
+					ExternalClusterAPICreateClusterToken(gomock.Any(), clusterID, gomock.Any()).
 					Return(&http.Response{StatusCode: 200, Body: http.NoBody, Header: map[string][]string{"Content-Type": {"json"}}}, nil)
 			},
 			expectError:   true,
@@ -106,7 +106,7 @@ func TestCreateClusterToken(t *testing.T) {
 			setupMock: func(mockClient *mock_sdk.MockClientInterface) {
 				body := io.NopCloser(bytes.NewReader([]byte(`{"token": null}`)))
 				mockClient.EXPECT().
-					ExternalClusterAPICreateClusterToken(gomock.Any(), clusterID).
+					ExternalClusterAPICreateClusterToken(gomock.Any(), clusterID, gomock.Any()).
 					Return(&http.Response{StatusCode: 200, Body: body, Header: map[string][]string{"Content-Type": {"json"}}}, nil)
 			},
 			expectError:   true,
