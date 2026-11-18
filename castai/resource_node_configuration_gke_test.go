@@ -1,6 +1,7 @@
 package castai
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"testing"
@@ -9,6 +10,7 @@ import (
 	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/stretchr/testify/require"
 )
@@ -446,6 +448,34 @@ func TestGKEConfigSecondaryBootDisksDiskImageValidation(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			diags := diskImageSchema.ValidateDiagFunc(tt.give, cty.Path{})
 			require.Equal(t, tt.wantError, diags.HasError())
+		})
+	}
+}
+
+func TestCustomizeNodeConfigurationDiffGKEBlock(t *testing.T) {
+	tests := []struct {
+		name    string
+		giveGKE interface{}
+		wantMax string
+	}{
+		{name: "empty gke block defaults max pods", giveGKE: []interface{}{map[string]interface{}{}}, wantMax: "110"},
+		{name: "nil gke element defaults max pods", giveGKE: []interface{}{nil}, wantMax: "110"},
+		{name: "unset max pods with other fields defaults", giveGKE: []interface{}{map[string]interface{}{"disk_type": "pd-balanced"}}, wantMax: "110"},
+		{name: "explicit max pods preserved", giveGKE: []interface{}{map[string]interface{}{"max_pods_per_node": 31}}, wantMax: "31"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			r := require.New(t)
+			cfg := terraform.NewResourceConfigRaw(map[string]interface{}{
+				"cluster_id": "cluster-id",
+				"name":       "test",
+				"subnets":    []interface{}{"subnet-1"},
+				"gke":        tt.giveGKE,
+			})
+			diff, err := resourceNodeConfiguration().SimpleDiff(context.Background(), &terraform.InstanceState{}, cfg, nil)
+			r.NoError(err)
+			r.NotNil(diff)
+			r.Equal(tt.wantMax, diff.Attributes["gke.0.max_pods_per_node"].New)
 		})
 	}
 }
