@@ -496,6 +496,7 @@ const (
 
 // Defines values for ExternalclusterV1KarpenterControllerMode.
 const (
+	ExternalclusterV1KarpenterControllerModeCASTMANAGED                        ExternalclusterV1KarpenterControllerMode = "CAST_MANAGED"
 	ExternalclusterV1KarpenterControllerModeKARPENTERCONTROLLERMODEUNSPECIFIED ExternalclusterV1KarpenterControllerMode = "KARPENTER_CONTROLLER_MODE_UNSPECIFIED"
 	ExternalclusterV1KarpenterControllerModeMANAGEDOUTOFBAND                   ExternalclusterV1KarpenterControllerMode = "MANAGED_OUT_OF_BAND"
 	ExternalclusterV1KarpenterControllerModeSELFHOSTED                         ExternalclusterV1KarpenterControllerMode = "SELF_HOSTED"
@@ -1076,16 +1077,24 @@ const (
 
 // Defines values for WorkloadoptimizationV1RecommendationOrigin.
 const (
-	WorkloadoptimizationV1RecommendationOriginORIGINCONFIGCHANGED             WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_CONFIG_CHANGED"
-	WorkloadoptimizationV1RecommendationOriginORIGINHPAALMOSTMAXEDOUT         WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_HPA_ALMOST_MAXED_OUT"
-	WorkloadoptimizationV1RecommendationOriginORIGINHPAMAXEDOUT               WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_HPA_MAXED_OUT"
-	WorkloadoptimizationV1RecommendationOriginORIGINMEMORYEVENT               WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_MEMORY_EVENT"
-	WorkloadoptimizationV1RecommendationOriginORIGINREADONLYRESOURCECHANGED   WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_READONLY_RESOURCE_CHANGED"
-	WorkloadoptimizationV1RecommendationOriginORIGINSNAPSHOT                  WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_SNAPSHOT"
-	WorkloadoptimizationV1RecommendationOriginORIGINSTARTUPFAILUREEVENT       WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_STARTUP_FAILURE_EVENT"
-	WorkloadoptimizationV1RecommendationOriginORIGINSURGEEVENT                WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_SURGE_EVENT"
-	WorkloadoptimizationV1RecommendationOriginORIGINUNKNOWN                   WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_UNKNOWN"
-	WorkloadoptimizationV1RecommendationOriginORIGINVERTICALMANAGEMENTENABLED WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_VERTICAL_MANAGEMENT_ENABLED"
+	WorkloadoptimizationV1RecommendationOriginORIGINANOMALYDETECTED              WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_ANOMALY_DETECTED"
+	WorkloadoptimizationV1RecommendationOriginORIGINCONFIGCHANGED                WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_CONFIG_CHANGED"
+	WorkloadoptimizationV1RecommendationOriginORIGINHPAALMOSTMAXEDOUT            WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_HPA_ALMOST_MAXED_OUT"
+	WorkloadoptimizationV1RecommendationOriginORIGINHPAMAXEDOUT                  WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_HPA_MAXED_OUT"
+	WorkloadoptimizationV1RecommendationOriginORIGINMEMORYEVENT                  WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_MEMORY_EVENT"
+	WorkloadoptimizationV1RecommendationOriginORIGINNATIVEVPASTATECHANGED        WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_NATIVE_VPA_STATE_CHANGED"
+	WorkloadoptimizationV1RecommendationOriginORIGINPOLICYASSIGNMENTRULESCHANGED WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_POLICY_ASSIGNMENT_RULES_CHANGED"
+	WorkloadoptimizationV1RecommendationOriginORIGINPOLICYCHANGED                WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_POLICY_CHANGED"
+	WorkloadoptimizationV1RecommendationOriginORIGINPSICPUPRESSUREEVENT          WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_PSI_CPU_PRESSURE_EVENT"
+	WorkloadoptimizationV1RecommendationOriginORIGINPSICPUPRESSURERESOLVEDEVENT  WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_PSI_CPU_PRESSURE_RESOLVED_EVENT"
+	WorkloadoptimizationV1RecommendationOriginORIGINREADONLYRESOURCECHANGED      WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_READONLY_RESOURCE_CHANGED"
+	WorkloadoptimizationV1RecommendationOriginORIGINSINGLEWORKLOADCHANGED        WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_SINGLE_WORKLOAD_CHANGED"
+	WorkloadoptimizationV1RecommendationOriginORIGINSNAPSHOT                     WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_SNAPSHOT"
+	WorkloadoptimizationV1RecommendationOriginORIGINSTARTUPFAILUREEVENT          WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_STARTUP_FAILURE_EVENT"
+	WorkloadoptimizationV1RecommendationOriginORIGINSURGEEVENT                   WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_SURGE_EVENT"
+	WorkloadoptimizationV1RecommendationOriginORIGINUNKNOWN                      WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_UNKNOWN"
+	WorkloadoptimizationV1RecommendationOriginORIGINUNSCHEDULABLERECOMMENDATION  WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_UNSCHEDULABLE_RECOMMENDATION"
+	WorkloadoptimizationV1RecommendationOriginORIGINVERTICALMANAGEMENTENABLED    WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_VERTICAL_MANAGEMENT_ENABLED"
 )
 
 // Defines values for WorkloadoptimizationV1RecommendationStatusType.
@@ -1200,9 +1209,10 @@ const (
 
 // Defines values for WorkloadoptimizationV1SystemOverrideOrigin.
 const (
-	WorkloadoptimizationV1SystemOverrideOriginSYSTEMOVERRIDEORIGINCONTINUOUSOOMKILLED WorkloadoptimizationV1SystemOverrideOrigin = "SYSTEM_OVERRIDE_ORIGIN_CONTINUOUS_OOM_KILLED"
-	WorkloadoptimizationV1SystemOverrideOriginSYSTEMOVERRIDEORIGINUNBOUNDMEMORYGROWTH WorkloadoptimizationV1SystemOverrideOrigin = "SYSTEM_OVERRIDE_ORIGIN_UNBOUND_MEMORY_GROWTH"
-	WorkloadoptimizationV1SystemOverrideOriginSYSTEMOVERRIDEORIGINUNSPECIFIED         WorkloadoptimizationV1SystemOverrideOrigin = "SYSTEM_OVERRIDE_ORIGIN_UNSPECIFIED"
+	WorkloadoptimizationV1SystemOverrideOriginSYSTEMOVERRIDEORIGINCONTINUOUSOOMKILLED         WorkloadoptimizationV1SystemOverrideOrigin = "SYSTEM_OVERRIDE_ORIGIN_CONTINUOUS_OOM_KILLED"
+	WorkloadoptimizationV1SystemOverrideOriginSYSTEMOVERRIDEORIGINUNBOUNDMEMORYGROWTH         WorkloadoptimizationV1SystemOverrideOrigin = "SYSTEM_OVERRIDE_ORIGIN_UNBOUND_MEMORY_GROWTH"
+	WorkloadoptimizationV1SystemOverrideOriginSYSTEMOVERRIDEORIGINUNSCHEDULABLERECOMMENDATION WorkloadoptimizationV1SystemOverrideOrigin = "SYSTEM_OVERRIDE_ORIGIN_UNSCHEDULABLE_RECOMMENDATION"
+	WorkloadoptimizationV1SystemOverrideOriginSYSTEMOVERRIDEORIGINUNSPECIFIED                 WorkloadoptimizationV1SystemOverrideOrigin = "SYSTEM_OVERRIDE_ORIGIN_UNSPECIFIED"
 )
 
 // Defines values for WorkloadoptimizationV1SystemOverrideResetOrigin.
@@ -1241,6 +1251,12 @@ const (
 	RbacServiceAPIListPermissionGroupsParamsProductPRODUCTTYPEKIMCHI      RbacServiceAPIListPermissionGroupsParamsProduct = "PRODUCT_TYPE_KIMCHI"
 	RbacServiceAPIListPermissionGroupsParamsProductPRODUCTTYPEPLATFORM    RbacServiceAPIListPermissionGroupsParamsProduct = "PRODUCT_TYPE_PLATFORM"
 	RbacServiceAPIListPermissionGroupsParamsProductPRODUCTTYPEUNSPECIFIED RbacServiceAPIListPermissionGroupsParamsProduct = "PRODUCT_TYPE_UNSPECIFIED"
+)
+
+// Defines values for RbacServiceAPIListPermissionGroupsParamsScope.
+const (
+	RbacServiceAPIListPermissionGroupsParamsScopeCLUSTER      RbacServiceAPIListPermissionGroupsParamsScope = "CLUSTER"
+	RbacServiceAPIListPermissionGroupsParamsScopeORGANIZATION RbacServiceAPIListPermissionGroupsParamsScope = "ORGANIZATION"
 )
 
 // Defines values for CommitmentsAPIGetCommitmentUsageHistoryParamsAggregationInterval.
@@ -1798,7 +1814,9 @@ type CastaiAuthtokenV1beta1AuthToken struct {
 	CreatedBy *string `json:"createdBy"`
 
 	// ExpiresAt Time when the token will expire (unix timestamp in nanoseconds).
-	// A null value means that the key will never expire.
+	// When creating a token, it must be set to a time in the future, at most 366 days ahead.
+	// When reading a token, a null value means the token never expires. Such tokens are legacy:
+	// new tokens without an expiration are no longer accepted.
 	ExpiresAt *time.Time `json:"expiresAt,omitempty"`
 
 	// Id (read only) ID of the token.
@@ -1934,19 +1952,26 @@ type CastaiAutoscalerV1beta1RebalancingOptions struct {
 	SplitNodesInBatchesOf *int32 `json:"splitNodesInBatchesOf"`
 }
 
-// CastaiEvictorV1AdvancedConfig AdvancedConfig the evictor advanced configuration.
+// CastaiEvictorV1AdvancedConfig AdvancedConfig the evictor advanced configuration. Rules are evaluated
+// first-match-wins: only the first rule matching a given pod or node applies,
+// so overlapping selectors are resolved by order and duplicated selectors are
+// rejected by the API.
 type CastaiEvictorV1AdvancedConfig struct {
 	EvictionConfig []CastaiEvictorV1EvictionConfig `json:"evictionConfig"`
 }
 
 // CastaiEvictorV1EvictionConfig EvictionConfig used to specify more granular settings per node/pod filters.
 type CastaiEvictorV1EvictionConfig struct {
-	NodeSelector *CastaiEvictorV1NodeSelector    `json:"nodeSelector,omitempty"`
-	PodSelector  *CastaiEvictorV1PodSelector     `json:"podSelector,omitempty"`
-	Settings     CastaiEvictorV1EvictionSettings `json:"settings"`
+	NodeSelector *CastaiEvictorV1NodeSelector `json:"nodeSelector,omitempty"`
+	PodSelector  *CastaiEvictorV1PodSelector  `json:"podSelector,omitempty"`
+
+	// Settings EvictionSettings defines eviction settings. Each setting is independent:
+	// a rule may enable any combination of them.
+	Settings CastaiEvictorV1EvictionSettings `json:"settings"`
 }
 
-// CastaiEvictorV1EvictionSettings defines model for castai.evictor.v1.EvictionSettings.
+// CastaiEvictorV1EvictionSettings EvictionSettings defines eviction settings. Each setting is independent:
+// a rule may enable any combination of them.
 type CastaiEvictorV1EvictionSettings struct {
 	Aggressive      *CastaiEvictorV1EvictionSettingsSettingEnabled `json:"aggressive,omitempty"`
 	Disposable      *CastaiEvictorV1EvictionSettingsSettingEnabled `json:"disposable,omitempty"`
@@ -2333,7 +2358,12 @@ type CastaiInventoryV1beta1BlockStorageInfo struct {
 	// MaxBandwidthMbps Specifies the maximum bandwidth for block storage. Currently only supported for AWS EBS-optimized instances.
 	MaxBandwidthMbps *int32 `json:"maxBandwidthMbps"`
 
-	// MaxEbsAttachments Specifies maximum number of EBS volume attachments.
+	// MaxDataDisks Specifies the maximum number of data disks, excluding the OS disk.
+	// Populated for Azure only.
+	MaxDataDisks *int32 `json:"maxDataDisks"`
+
+	// MaxEbsAttachments Specifies the maximum number of EBS volume attachments, including the root volume.
+	// Populated for AWS only.
 	MaxEbsAttachments *int32 `json:"maxEbsAttachments"`
 
 	// MaxIops Specifies the maximum IOPS for block storage.
@@ -3666,6 +3696,13 @@ type CastaiRbacV1beta1PermissionGroup struct {
 
 	// ResourceDisplayName Human-readable display name for the resource.
 	ResourceDisplayName *string `json:"resourceDisplayName,omitempty"`
+
+	// Scope Scope represents the authentication tree for the system. Based on that we can build the
+	// authentication and authorization tree.
+	//
+	//  - ORGANIZATION: Organization scope represents the organization level authentication (Organization -> ResourceID)
+	//  - CLUSTER: Cluster scope represents the cluster level authentication (Organization -> Cluster -> ResourceID)
+	Scope CastaiRbacV1beta1ScopeType `json:"scope"`
 }
 
 // CastaiRbacV1beta1Permissions defines model for castai.rbac.v1beta1.Permissions.
@@ -4683,6 +4720,9 @@ type CastaiUsersV1beta1User struct {
 type CastaiUsersV1beta1UserOrganization struct {
 	// BlockEscalatedPrivilege Whether the organization blocks escalated privileges for Cast AI members.
 	BlockEscalatedPrivilege *bool `json:"blockEscalatedPrivilege,omitempty"`
+
+	// BlockUserApiKeyCreation Whether creating user API keys is blocked for the organization. Defaults to false (creation is allowed).
+	BlockUserApiKeyCreation *bool `json:"blockUserApiKeyCreation,omitempty"`
 
 	// ChildOrderId The order id of child org in enterprise by created_at - if the org is a child org.
 	ChildOrderId *int32 `json:"childOrderId"`
@@ -6786,6 +6826,7 @@ type ExternalclusterV1KarpenterAttribute struct {
 	//  - KARPENTER_CONTROLLER_MODE_UNSPECIFIED: Default value.
 	//  - SELF_HOSTED: Controller is self-hosted inside the cluster.
 	//  - MANAGED_OUT_OF_BAND: Controller is managed out-of-band by the provider. Only AKS NAP is detected; EKS Auto Mode is not yet.
+	//  - CAST_MANAGED: Controller runs in the cluster and is deployed and operated by CAST (castai-karpenter release).
 	ControllerMode *ExternalclusterV1KarpenterControllerMode `json:"controllerMode,omitempty"`
 
 	// KentEligibility KentEligibility defines Karpenter KENT eligibility status.
@@ -6800,6 +6841,7 @@ type ExternalclusterV1KarpenterAttribute struct {
 //   - KARPENTER_CONTROLLER_MODE_UNSPECIFIED: Default value.
 //   - SELF_HOSTED: Controller is self-hosted inside the cluster.
 //   - MANAGED_OUT_OF_BAND: Controller is managed out-of-band by the provider. Only AKS NAP is detected; EKS Auto Mode is not yet.
+//   - CAST_MANAGED: Controller runs in the cluster and is deployed and operated by CAST (castai-karpenter release).
 type ExternalclusterV1KarpenterControllerMode string
 
 // ExternalclusterV1KataConfig PodVirtualizationConfig describes virtualization isolation settings for a node.
@@ -10407,6 +10449,12 @@ type WorkloadoptimizationV1GetWorkloadResponse struct {
 	Workload WorkloadoptimizationV1Workload      `json:"workload"`
 }
 
+// WorkloadoptimizationV1GetWorkloadScopedRecommendationMetricsResponse Response of WorkloadOptimizationAPI.GetWorkloadScopedRecommendationMetrics.
+// Entries are ordered lexically by scope value, then container.
+type WorkloadoptimizationV1GetWorkloadScopedRecommendationMetricsResponse struct {
+	ScopedMetrics []WorkloadoptimizationV1WorkloadScopedRecommendationMetrics `json:"scopedMetrics"`
+}
+
 // WorkloadoptimizationV1GetWorkloadSpecResponse defines model for workloadoptimization.v1.GetWorkloadSpecResponse.
 type WorkloadoptimizationV1GetWorkloadSpecResponse struct {
 	ClusterId      string                 `json:"clusterId"`
@@ -12263,6 +12311,18 @@ type WorkloadoptimizationV1ScopeSettings struct {
 // WorkloadoptimizationV1ScopeType ScopeType classifies the scoping mechanism. Mirrors the domain scope.Type enum.
 type WorkloadoptimizationV1ScopeType string
 
+// WorkloadoptimizationV1ScopedContainerRecommendationMetrics Recommended-resources series of one container within one scope group.
+type WorkloadoptimizationV1ScopedContainerRecommendationMetrics struct {
+	// CpuCores Recommended CPU in cores.
+	CpuCores []WorkloadoptimizationV1TimeSeriesMetric `json:"cpuCores"`
+
+	// MemoryGib Recommended memory in GiB.
+	MemoryGib []WorkloadoptimizationV1TimeSeriesMetric `json:"memoryGib"`
+
+	// Name Container name.
+	Name string `json:"name"`
+}
+
 // WorkloadoptimizationV1ScopedContainers ScopedContainers carries per-scope-group current resources and recommendations.
 type WorkloadoptimizationV1ScopedContainers struct {
 	// Containers Per-container state for the group, shape identical to Workload.containers[]:
@@ -12341,6 +12401,7 @@ type WorkloadoptimizationV1SurgeEvent struct {
 //
 //   - SYSTEM_OVERRIDE_ORIGIN_CONTINUOUS_OOM_KILLED: Override triggered due to continuous OOM kills after multiple scaling attempts.
 //   - SYSTEM_OVERRIDE_ORIGIN_UNBOUND_MEMORY_GROWTH: Override triggered due to detected unbound memory growth.
+//   - SYSTEM_OVERRIDE_ORIGIN_UNSCHEDULABLE_RECOMMENDATION: Override triggered because lowering requests for unschedulable pods did not help.
 type WorkloadoptimizationV1SystemOverrideOrigin string
 
 // WorkloadoptimizationV1SystemOverrideResetEvent SystemOverrideResetEvent is emitted when a system override on a workload is deactivated.
@@ -12382,6 +12443,7 @@ type WorkloadoptimizationV1SystemOverrideTriggeredEvent struct {
 	//
 	//  - SYSTEM_OVERRIDE_ORIGIN_CONTINUOUS_OOM_KILLED: Override triggered due to continuous OOM kills after multiple scaling attempts.
 	//  - SYSTEM_OVERRIDE_ORIGIN_UNBOUND_MEMORY_GROWTH: Override triggered due to detected unbound memory growth.
+	//  - SYSTEM_OVERRIDE_ORIGIN_UNSCHEDULABLE_RECOMMENDATION: Override triggered because lowering requests for unschedulable pods did not help.
 	Origin WorkloadoptimizationV1SystemOverrideOrigin `json:"origin"`
 
 	// Target SystemOverrideTarget defines which workload optimization features are affected by the system override.
@@ -12827,6 +12889,13 @@ type WorkloadoptimizationV1WorkloadScalingPolicy struct {
 	UpdatedAt              time.Time                                    `json:"updatedAt"`
 }
 
+// WorkloadoptimizationV1WorkloadScopedRecommendationMetrics Recommended-resources series of all containers for one scope group.
+type WorkloadoptimizationV1WorkloadScopedRecommendationMetrics struct {
+	// Containers Per-container series, ordered by container name.
+	Containers []WorkloadoptimizationV1ScopedContainerRecommendationMetrics `json:"containers"`
+	ScopeValue string                                                       `json:"scopeValue"`
+}
+
 // WorkloadoptimizationV1WorkloadSystemOverrides defines model for workloadoptimization.v1.WorkloadSystemOverrides.
 type WorkloadoptimizationV1WorkloadSystemOverrides struct {
 	VerticalOptimization WorkloadoptimizationV1WorkloadSystemOverridesVerticalOptimization `json:"verticalOptimization"`
@@ -12869,10 +12938,19 @@ type RbacServiceAPIListPermissionGroupsParams struct {
 
 	// Product Filter by product type.
 	Product *RbacServiceAPIListPermissionGroupsParamsProduct `form:"product,omitempty" json:"product,omitempty"`
+
+	// Scope Filter by permission scope. Unset means no filtering by scope.
+	//
+	//  - ORGANIZATION: Organization scope represents the organization level authentication (Organization -> ResourceID)
+	//  - CLUSTER: Cluster scope represents the cluster level authentication (Organization -> Cluster -> ResourceID)
+	Scope *RbacServiceAPIListPermissionGroupsParamsScope `form:"scope,omitempty" json:"scope,omitempty"`
 }
 
 // RbacServiceAPIListPermissionGroupsParamsProduct defines parameters for RbacServiceAPIListPermissionGroups.
 type RbacServiceAPIListPermissionGroupsParamsProduct string
+
+// RbacServiceAPIListPermissionGroupsParamsScope defines parameters for RbacServiceAPIListPermissionGroups.
+type RbacServiceAPIListPermissionGroupsParamsScope string
 
 // CommitmentsAPIGetCommitmentUsageHistoryParams defines parameters for CommitmentsAPIGetCommitmentUsageHistory.
 type CommitmentsAPIGetCommitmentUsageHistoryParams struct {
@@ -14293,6 +14371,20 @@ type WorkloadOptimizationAPIGetWorkloadParams struct {
 type WorkloadOptimizationAPIGetWorkloadGPUMetricsParams struct {
 	From *time.Time `form:"from,omitempty" json:"from,omitempty"`
 	To   *time.Time `form:"to,omitempty" json:"to,omitempty"`
+}
+
+// WorkloadOptimizationAPIGetWorkloadScopedRecommendationMetricsParams defines parameters for WorkloadOptimizationAPIGetWorkloadScopedRecommendationMetrics.
+type WorkloadOptimizationAPIGetWorkloadScopedRecommendationMetricsParams struct {
+	// ScopeValues Scope group values to return series for. Between 1 and 10 unique,
+	// non-empty values. Values without recommendation data in the time window
+	// are omitted from the response.
+	ScopeValues []string `form:"scopeValues" json:"scopeValues"`
+
+	// FromTime Start of requested metric interval. Defaults to the last 7 days when omitted.
+	FromTime *time.Time `form:"fromTime,omitempty" json:"fromTime,omitempty"`
+
+	// ToTime End of requested metric interval. Defaults to now when omitted.
+	ToTime *time.Time `form:"toTime,omitempty" json:"toTime,omitempty"`
 }
 
 // InventoryAPIListZonesParams defines parameters for InventoryAPIListZones.
