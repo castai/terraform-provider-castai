@@ -630,6 +630,14 @@ const (
 	NodeconfigV1GKEConfigOnHostMaintenanceTerminate NodeconfigV1GKEConfigOnHostMaintenance = "terminate"
 )
 
+// Defines values for NodeconfigV1GKELocalSSDConfigMode.
+const (
+	NodeconfigV1GKELocalSSDConfigModeBLOCK           NodeconfigV1GKELocalSSDConfigMode = "BLOCK"
+	NodeconfigV1GKELocalSSDConfigModeEPHEMERAL       NodeconfigV1GKELocalSSDConfigMode = "EPHEMERAL"
+	NodeconfigV1GKELocalSSDConfigModeMIXED           NodeconfigV1GKELocalSSDConfigMode = "MIXED"
+	NodeconfigV1GKELocalSSDConfigModeMODEUNSPECIFIED NodeconfigV1GKELocalSSDConfigMode = "MODE_UNSPECIFIED"
+)
+
 // Defines values for NodeconfigV1SecondaryBootDiskMode.
 const (
 	NodeconfigV1SecondaryBootDiskModeCONTAINERIMAGECACHE NodeconfigV1SecondaryBootDiskMode = "CONTAINER_IMAGE_CACHE"
@@ -3431,6 +3439,9 @@ type CastaiOperationsV1beta1Operation struct {
 type CastaiOperationsV1beta1OperationError struct {
 	// Details Details is a concise human readable explanation for the error.
 	Details *string `json:"details,omitempty"`
+
+	// Message Message is the original error message that caused the operation to fail.
+	Message *string `json:"message,omitempty"`
 
 	// Reason Reason is an operation specific failure code. Refer to documentation about possible outcomes.
 	Reason *string `json:"reason,omitempty"`
@@ -7835,6 +7846,12 @@ type NodeconfigV1GKEConfig struct {
 	// LoadBalancers List of load balancers to be used for the cluster.
 	LoadBalancers *[]NodeconfigV1GKEConfigLoadBalancers `json:"loadBalancers,omitempty"`
 
+	// LocalSsd Recipe describing how local SSDs are exposed on nodes of a node configuration.
+	// The autoscaler reads it, derives the local SSD disk count and constructs the AddNode
+	// local_ssd payload from it; the AddNode payload remains the single source of local SSD
+	// configuration applied to a node.
+	LocalSsd *NodeconfigV1GKELocalSSDConfig `json:"localSsd,omitempty"`
+
 	// MaxPodsPerNode Maximum number of pods that can be run on a node, which affects how many IP addresses you will need for each node. Defaults to 110.
 	// For Standard GKE clusters, you can run a maximum of 256 Pods on a node with a /23 range, not 512 as you might expect.
 	// This is done to provides a buffer so that Pods don't become unschedulable due to a
@@ -7938,6 +7955,51 @@ type NodeconfigV1GKEConfigSecondaryBootDiskComputed struct {
 	// SizeGb Resolved disk size of the configured disk image in GiB, read from the GCP compute images API.
 	SizeGb *string `json:"sizeGb"`
 }
+
+// NodeconfigV1GKELocalSSDConfig Recipe describing how local SSDs are exposed on nodes of a node configuration.
+// The autoscaler reads it, derives the local SSD disk count and constructs the AddNode
+// local_ssd payload from it; the AddNode payload remains the single source of local SSD
+// configuration applied to a node.
+type NodeconfigV1GKELocalSSDConfig struct {
+	// EphemeralStoragePercent MIXED only: percentage (1-99) of the TOTAL local SSD capacity striped into kubelet ephemeral
+	// storage (GKE ephemeralCapacityGb). The rest of each disk stays as raw block devices.
+	EphemeralStoragePercent *int32 `json:"ephemeralStoragePercent"`
+
+	// LocalStoragePerCpuGib Additional local SSD capacity per vCPU (GiB). Autoscaler derives the disk count from it:
+	// disks = ceil((min-local-storage-size + ratio x vCPU) / per-disk size), snapped to the closest valid count for the
+	// instance type.
+	LocalStoragePerCpuGib *float64 `json:"localStoragePerCpuGib"`
+
+	// MinIops Minimum IOPS for the ephemeral storage, which might be on multiple disks with RAID0.
+	MinIops *int32 `json:"minIops"`
+
+	// MinLocalStorageGib Minimum local SSD capacity (GiB).
+	MinLocalStorageGib *string `json:"minLocalStorageGib"`
+
+	// Mode How local SSDs are exposed on the node.
+	//
+	//  - EPHEMERAL: Local SSDs become the node's kubelet ephemeral storage (emptyDir, writable layers, runtime state).
+	//  - MIXED: Each SSD is partitioned: the first partitions are striped into a RAID-0 kubelet ephemeral
+	// storage sized ephemeral_storage_percent of the total local SSD capacity; the remaining
+	// per-disk partitions stay as independent raw block devices.
+	// Requires GKE >= 1.37.0-gke.3570000
+	//  - BLOCK: Local SSDs are exposed as unformatted raw block devices; kubelet ephemeral storage stays on
+	// the boot disk.
+	Mode *NodeconfigV1GKELocalSSDConfigMode `json:"mode,omitempty"`
+}
+
+// NodeconfigV1GKELocalSSDConfigMode How local SSDs are exposed on the node.
+//
+//   - EPHEMERAL: Local SSDs become the node's kubelet ephemeral storage (emptyDir, writable layers, runtime state).
+//   - MIXED: Each SSD is partitioned: the first partitions are striped into a RAID-0 kubelet ephemeral
+//
+// storage sized ephemeral_storage_percent of the total local SSD capacity; the remaining
+// per-disk partitions stay as independent raw block devices.
+// Requires GKE >= 1.37.0-gke.3570000
+//   - BLOCK: Local SSDs are exposed as unformatted raw block devices; kubelet ephemeral storage stays on
+//
+// the boot disk.
+type NodeconfigV1GKELocalSSDConfigMode string
 
 // NodeconfigV1GetSuggestedConfigurationResponse defines model for nodeconfig.v1.GetSuggestedConfigurationResponse.
 type NodeconfigV1GetSuggestedConfigurationResponse struct {
