@@ -96,11 +96,7 @@ helm upgrade -i castai-workload-autoscaler castai-helm/castai-workload-autoscale
 #### castai-kvisor
 helm upgrade -i castai-kvisor castai-helm/castai-kvisor -n castai-agent \
 --set "envFrom[0].secretRef.name=$CAST_SECRET_APIKEY" \
---set "envFrom[1].configMapRef.name=$CAST_CONFIG_CLUSTERID" \ 
---set controller.extraArgs.kube-linter-enabled=true \
---set controller.extraArgs.image-scan-enabled=true \
---set controller.extraArgs.kube-bench-enabled=true \
---set controller.extraArgs.kube-bench-cloud-provider=aks
+--set "envFrom[1].configMapRef.name=$CAST_CONFIG_CLUSTERID"
 ```
 
 ## Steps Overview
