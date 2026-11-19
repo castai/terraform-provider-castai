@@ -123,5 +123,13 @@ module "castai_gke_cluster" {
 
   // depends_on helps terraform with creating proper dependencies graph in case of resource creation and in this case destroy
   // module "castai-gke-cluster" has to be destroyed before module "castai-gke-iam"
-  depends_on = [data.google_container_cluster.my_cluster, module.castai_gke_iam]
+  depends_on = [
+    data.google_container_cluster.my_cluster,
+    module.castai_gke_iam,
+    google_project_iam_member.castai_storage_autoscaler_volume,
+    google_project_iam_member.castai_storage_autoscaler_monitoring_viewer,
+    google_service_account_iam_member.castai_storage_autoscaler_workload_identity,
+    google_project_iam_member.castai_kvisor_storage_reader,
+    google_service_account_iam_member.castai_kvisor_workload_identity
+  ]
 }

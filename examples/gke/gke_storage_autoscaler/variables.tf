@@ -21,6 +21,7 @@ variable "castai_api_url" {
 
 variable "castai_api_token" {
   type        = string
+  sensitive   = true
   description = "CAST AI API token created in console.cast.ai API Access keys section."
 }
 
