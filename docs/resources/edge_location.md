@@ -287,6 +287,9 @@ Optional:
 Optional:
 
 - `cni` (Attributes) CNI (kube-router) configuration for the edge cluster. (see [below for nested schema](#nestedatt--networking--cni))
+- `external_cidr` (String) External CIDR used by Liqo on the edge cluster. Defaults to 10.70.0.0/16 when omitted. Immutable after creation.
+- `pod_cidr` (String) Pod network range of the edge cluster. Defaults to the k0s default (10.244.0.0/16) when omitted. Immutable after creation.
+- `service_cidr` (String) Service network range of the edge cluster. Defaults to the k0s default (10.96.0.0/12) when omitted. Immutable after creation.
 - `tunneled_cidrs` (List of String) List of destination CIDR blocks whose traffic should be routed through the main cluster instead of directly from the edge cluster.
 
 <a id="nestedatt--networking--cni"></a>
