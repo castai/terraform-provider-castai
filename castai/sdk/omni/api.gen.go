@@ -321,6 +321,18 @@ type EdgeClusterNetworking struct {
 	// Cni CNI configuration for the edge cluster.
 	Cni *EdgeClusterCNI `json:"cni,omitempty"`
 
+	// ExternalCidr External CIDR used by Liqo on the edge cluster. When omitted, 10.70.0.0/16
+	//  is used. Immutable after creation.
+	ExternalCidr *string `json:"externalCidr,omitempty"`
+
+	// PodCidr Pod network range of the edge cluster. When omitted, 10.244.0.0/16 is
+	//  used. Immutable after creation.
+	PodCidr *string `json:"podCidr,omitempty"`
+
+	// ServiceCidr Service network range of the edge cluster. When omitted, 10.96.0.0/12 is
+	//  used. Immutable after creation.
+	ServiceCidr *string `json:"serviceCidr,omitempty"`
+
 	// TunneledCidrs A list of destination CIDR blocks whose traffic should be routed through the main cluster instead of directly from the
 	//  edge cluster. When specified, the edge cluster will forward packets destined to these CIDRs over the peering tunnel
 	//  to the main cluster, which then routes them on to their final destination.
