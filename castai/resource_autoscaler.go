@@ -793,12 +793,14 @@ func getCurrentPolicies(ctx context.Context, client sdk.ClientWithResponsesInter
 	resp, err := client.PoliciesAPIGetClusterPolicies(ctx, clusterId)
 	if err != nil {
 		return nil, err
-	} else if resp.StatusCode == http.StatusNotFound {
+	}
+	defer func() { _ = resp.Body.Close() }()
+
+	if resp.StatusCode == http.StatusNotFound {
 		return nil, fmt.Errorf("%w: cluster %s policies do not exist at CAST AI", errAutoscalerPoliciesNotFound, clusterId)
 	}
 
 	responseBytes, err := io.ReadAll(resp.Body)
-	defer func() { _ = resp.Body.Close() }()
 	if err != nil {
 		return nil, fmt.Errorf("reading response body: %w", err)
 	}

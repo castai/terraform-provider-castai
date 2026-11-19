@@ -55,6 +55,32 @@ func TestAutoscalerResource_ReadNotFound(t *testing.T) {
 	r.Empty(data.Id())
 }
 
+func TestAutoscalerResource_ReadError(t *testing.T) {
+	r := require.New(t)
+	mockClient := mock_sdk.NewMockClientInterface(gomock.NewController(t))
+	clusterID := "cluster_id"
+
+	provider := &ProviderConfig{
+		api: &sdk.ClientWithResponses{ClientInterface: mockClient},
+	}
+
+	mockClient.EXPECT().
+		PoliciesAPIGetClusterPolicies(gomock.Any(), clusterID, gomock.Any()).
+		Return(nil, fmt.Errorf("network error"))
+
+	res := resourceAutoscaler()
+	state := terraform.NewInstanceStateShimmedFromValue(cty.ObjectVal(map[string]cty.Value{
+		FieldClusterId: cty.StringVal(clusterID),
+	}), 0)
+	state.ID = clusterID
+	data := res.Data(state)
+
+	diags := res.ReadContext(t.Context(), data, provider)
+
+	r.True(diags.HasError())
+	r.Equal(clusterID, data.Id())
+}
+
 func TestAutoscalerResource_DeleteNotFound(t *testing.T) {
 	r := require.New(t)
 	mockClient := mock_sdk.NewMockClientWithResponsesInterface(gomock.NewController(t))
