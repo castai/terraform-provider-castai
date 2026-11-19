@@ -267,12 +267,5 @@ func getOkString(data *schema.ResourceData, field string) *string {
 }
 
 func resourceCastaiGKEClusterDelete(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	// Disable service account used for impersonation.
-	client := meta.(*ProviderConfig).api
-	log.Printf("[INFO] Disabling service account.")
-	_, err := client.ExternalClusterAPIDisableGKESA(ctx, data.Id())
-	if err != nil {
-		log.Printf("[ERROR] Failed to disable service account: %v", err)
-	}
 	return resourceCastaiClusterDelete(ctx, data, meta)
 }
