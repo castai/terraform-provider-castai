@@ -622,6 +622,13 @@ const (
 	NodeconfigV1EKSConfigNestedVirtualisationModeNESTEDVIRTUALISATIONMODEUNSPECIFIED NodeconfigV1EKSConfigNestedVirtualisationMode = "NESTED_VIRTUALISATION_MODE_UNSPECIFIED"
 )
 
+// Defines values for NodeconfigV1GKEConfigImageFamily.
+const (
+	NodeconfigV1GKEConfigImageFamilyFAMILYCOSCONTAINERD    NodeconfigV1GKEConfigImageFamily = "FAMILY_COS_CONTAINERD"
+	NodeconfigV1GKEConfigImageFamilyFAMILYUBUNTUCONTAINERD NodeconfigV1GKEConfigImageFamily = "FAMILY_UBUNTU_CONTAINERD"
+	NodeconfigV1GKEConfigImageFamilyFAMILYUNSPECIFIED      NodeconfigV1GKEConfigImageFamily = "FAMILY_UNSPECIFIED"
+)
+
 // Defines values for NodeconfigV1GKEConfigOnHostMaintenance.
 const (
 	NodeconfigV1GKEConfigOnHostMaintenanceMIGRATE   NodeconfigV1GKEConfigOnHostMaintenance = "MIGRATE"
@@ -7843,6 +7850,9 @@ type NodeconfigV1GKEConfig struct {
 	// FallbackConfiguration Contains the configuration of fallback node pools.
 	FallbackConfiguration *NodeconfigV1FallbackConfiguration `json:"fallbackConfiguration,omitempty"`
 
+	// ImageFamily List of supported image families (OSes) for GKE nodes; the concrete image (and, for Ubuntu, the Ubuntu version) is resolved by the provider from the cluster and node pool Kubernetes version.
+	ImageFamily *NodeconfigV1GKEConfigImageFamily `json:"imageFamily,omitempty"`
+
 	// LoadBalancers List of load balancers to be used for the cluster.
 	LoadBalancers *[]NodeconfigV1GKEConfigLoadBalancers `json:"loadBalancers,omitempty"`
 
@@ -7918,6 +7928,9 @@ type NodeconfigV1GKEConfigComputed struct {
 	// as secondary_boot_disks. One entry per configured disk.
 	SecondaryBootDisks *[]NodeconfigV1GKEConfigSecondaryBootDiskComputed `json:"secondaryBootDisks,omitempty"`
 }
+
+// NodeconfigV1GKEConfigImageFamily List of supported image families (OSes) for GKE nodes; the concrete image (and, for Ubuntu, the Ubuntu version) is resolved by the provider from the cluster and node pool Kubernetes version.
+type NodeconfigV1GKEConfigImageFamily string
 
 // NodeconfigV1GKEConfigLoadBalancers defines model for nodeconfig.v1.GKEConfig.LoadBalancers.
 type NodeconfigV1GKEConfigLoadBalancers struct {
