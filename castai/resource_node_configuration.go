@@ -725,7 +725,13 @@ func customizeNodeConfigurationDiff(_ context.Context, d *schema.ResourceDiff, _
 	}
 	if v, ok := d.GetOk(FieldNodeConfigurationGKE); ok {
 		gkeList := v.([]interface{})
-		gke := gkeList[0].(map[string]interface{})
+		if len(gkeList) == 0 {
+			return nil
+		}
+		gke, _ := gkeList[0].(map[string]interface{})
+		if gke == nil {
+			gke = map[string]interface{}{}
+		}
 
 		static, formula := gke["max_pods_per_node"], gke["max_pods_per_node_formula"]
 		staticNotSet := static == nil || static.(int) == 0

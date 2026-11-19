@@ -1037,6 +1037,9 @@ type ClientInterface interface {
 	// WorkloadOptimizationAPIGetWorkloadRecommendationManifest request
 	WorkloadOptimizationAPIGetWorkloadRecommendationManifest(ctx context.Context, clusterId string, workloadId string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// WorkloadOptimizationAPIGetWorkloadScopedRecommendationMetrics request
+	WorkloadOptimizationAPIGetWorkloadScopedRecommendationMetrics(ctx context.Context, clusterId string, workloadId string, params *WorkloadOptimizationAPIGetWorkloadScopedRecommendationMetricsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// WorkloadOptimizationAPIGetWorkloadSpec request
 	WorkloadOptimizationAPIGetWorkloadSpec(ctx context.Context, clusterId string, workloadId string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -5204,6 +5207,18 @@ func (c *Client) WorkloadOptimizationAPIGetWorkloadRecommendationManifest(ctx co
 	return c.Client.Do(req)
 }
 
+func (c *Client) WorkloadOptimizationAPIGetWorkloadScopedRecommendationMetrics(ctx context.Context, clusterId string, workloadId string, params *WorkloadOptimizationAPIGetWorkloadScopedRecommendationMetricsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewWorkloadOptimizationAPIGetWorkloadScopedRecommendationMetricsRequest(c.Server, clusterId, workloadId, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
 func (c *Client) WorkloadOptimizationAPIGetWorkloadSpec(ctx context.Context, clusterId string, workloadId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewWorkloadOptimizationAPIGetWorkloadSpecRequest(c.Server, clusterId, workloadId)
 	if err != nil {
@@ -5436,6 +5451,22 @@ func NewRbacServiceAPIListPermissionGroupsRequest(server string, organizationId 
 		if params.Product != nil {
 
 			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "product", runtime.ParamLocationQuery, *params.Product); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.Scope != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "scope", runtime.ParamLocationQuery, *params.Scope); err != nil {
 				return nil, err
 			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
 				return nil, err
@@ -21640,6 +21671,97 @@ func NewWorkloadOptimizationAPIGetWorkloadRecommendationManifestRequest(server s
 	return req, nil
 }
 
+// NewWorkloadOptimizationAPIGetWorkloadScopedRecommendationMetricsRequest generates requests for WorkloadOptimizationAPIGetWorkloadScopedRecommendationMetrics
+func NewWorkloadOptimizationAPIGetWorkloadScopedRecommendationMetricsRequest(server string, clusterId string, workloadId string, params *WorkloadOptimizationAPIGetWorkloadScopedRecommendationMetricsParams) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "clusterId", runtime.ParamLocationPath, clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "workloadId", runtime.ParamLocationPath, workloadId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/workload-autoscaling/clusters/%s/workloads/%s/scoped-recommendation-metrics", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "scopeValues", runtime.ParamLocationQuery, params.ScopeValues); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+		if params.FromTime != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "fromTime", runtime.ParamLocationQuery, *params.FromTime); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.ToTime != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "toTime", runtime.ParamLocationQuery, *params.ToTime); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
 // NewWorkloadOptimizationAPIGetWorkloadSpecRequest generates requests for WorkloadOptimizationAPIGetWorkloadSpec
 func NewWorkloadOptimizationAPIGetWorkloadSpecRequest(server string, clusterId string, workloadId string) (*http.Request, error) {
 	var err error
@@ -23385,6 +23507,9 @@ type ClientWithResponsesInterface interface {
 
 	// WorkloadOptimizationAPIGetWorkloadRecommendationManifest request
 	WorkloadOptimizationAPIGetWorkloadRecommendationManifestWithResponse(ctx context.Context, clusterId string, workloadId string) (*WorkloadOptimizationAPIGetWorkloadRecommendationManifestResponse, error)
+
+	// WorkloadOptimizationAPIGetWorkloadScopedRecommendationMetrics request
+	WorkloadOptimizationAPIGetWorkloadScopedRecommendationMetricsWithResponse(ctx context.Context, clusterId string, workloadId string, params *WorkloadOptimizationAPIGetWorkloadScopedRecommendationMetricsParams) (*WorkloadOptimizationAPIGetWorkloadScopedRecommendationMetricsResponse, error)
 
 	// WorkloadOptimizationAPIGetWorkloadSpec request
 	WorkloadOptimizationAPIGetWorkloadSpecWithResponse(ctx context.Context, clusterId string, workloadId string) (*WorkloadOptimizationAPIGetWorkloadSpecResponse, error)
@@ -31202,6 +31327,36 @@ func (r WorkloadOptimizationAPIGetWorkloadRecommendationManifestResponse) GetBod
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
+type WorkloadOptimizationAPIGetWorkloadScopedRecommendationMetricsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *WorkloadoptimizationV1GetWorkloadScopedRecommendationMetricsResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r WorkloadOptimizationAPIGetWorkloadScopedRecommendationMetricsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r WorkloadOptimizationAPIGetWorkloadScopedRecommendationMetricsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r WorkloadOptimizationAPIGetWorkloadScopedRecommendationMetricsResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
 type WorkloadOptimizationAPIGetWorkloadSpecResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -34511,6 +34666,15 @@ func (c *ClientWithResponses) WorkloadOptimizationAPIGetWorkloadRecommendationMa
 		return nil, err
 	}
 	return ParseWorkloadOptimizationAPIGetWorkloadRecommendationManifestResponse(rsp)
+}
+
+// WorkloadOptimizationAPIGetWorkloadScopedRecommendationMetricsWithResponse request returning *WorkloadOptimizationAPIGetWorkloadScopedRecommendationMetricsResponse
+func (c *ClientWithResponses) WorkloadOptimizationAPIGetWorkloadScopedRecommendationMetricsWithResponse(ctx context.Context, clusterId string, workloadId string, params *WorkloadOptimizationAPIGetWorkloadScopedRecommendationMetricsParams) (*WorkloadOptimizationAPIGetWorkloadScopedRecommendationMetricsResponse, error) {
+	rsp, err := c.WorkloadOptimizationAPIGetWorkloadScopedRecommendationMetrics(ctx, clusterId, workloadId, params)
+	if err != nil {
+		return nil, err
+	}
+	return ParseWorkloadOptimizationAPIGetWorkloadScopedRecommendationMetricsResponse(rsp)
 }
 
 // WorkloadOptimizationAPIGetWorkloadSpecWithResponse request returning *WorkloadOptimizationAPIGetWorkloadSpecResponse
@@ -41330,6 +41494,32 @@ func ParseWorkloadOptimizationAPIGetWorkloadRecommendationManifestResponse(rsp *
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest WorkloadoptimizationV1GetWorkloadRecommendationManifestResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseWorkloadOptimizationAPIGetWorkloadScopedRecommendationMetricsResponse parses an HTTP response from a WorkloadOptimizationAPIGetWorkloadScopedRecommendationMetricsWithResponse call
+func ParseWorkloadOptimizationAPIGetWorkloadScopedRecommendationMetricsResponse(rsp *http.Response) (*WorkloadOptimizationAPIGetWorkloadScopedRecommendationMetricsResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &WorkloadOptimizationAPIGetWorkloadScopedRecommendationMetricsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest WorkloadoptimizationV1GetWorkloadScopedRecommendationMetricsResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
