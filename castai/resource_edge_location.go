@@ -149,15 +149,22 @@ func (m *gatewayServerModel) Equal(other *gatewayServerModel) bool {
 }
 
 type networkingModel struct {
-	TunneledCIDRs types.List `tfsdk:"tunneled_cidrs"`
-	CNI           *cniModel  `tfsdk:"cni"`
+	TunneledCIDRs types.List   `tfsdk:"tunneled_cidrs"`
+	PodCIDR       types.String `tfsdk:"pod_cidr"`
+	ServiceCIDR   types.String `tfsdk:"service_cidr"`
+	ExternalCIDR  types.String `tfsdk:"external_cidr"`
+	CNI           *cniModel    `tfsdk:"cni"`
 }
 
 func (m *networkingModel) Equal(other *networkingModel) bool {
 	if m == nil || other == nil {
 		return m == other
 	}
-	return m.TunneledCIDRs.Equal(other.TunneledCIDRs) && m.CNI.Equal(other.CNI)
+	return m.TunneledCIDRs.Equal(other.TunneledCIDRs) &&
+		m.PodCIDR.Equal(other.PodCIDR) &&
+		m.ServiceCIDR.Equal(other.ServiceCIDR) &&
+		m.ExternalCIDR.Equal(other.ExternalCIDR) &&
+		m.CNI.Equal(other.CNI)
 }
 
 // addonsEqual reports whether two addon slices are semantically equivalent.
@@ -430,6 +437,18 @@ func (r *edgeLocationResource) Schema(_ context.Context, _ resource.SchemaReques
 						Optional:    true,
 						ElementType: types.StringType,
 						Description: "List of destination CIDR blocks whose traffic should be routed through the main cluster instead of directly from the edge cluster.",
+					},
+					"pod_cidr": schema.StringAttribute{
+						Optional:    true,
+						Description: "Pod network range of the edge cluster. Defaults to the k0s default (10.244.0.0/16) when omitted. Immutable after creation.",
+					},
+					"service_cidr": schema.StringAttribute{
+						Optional:    true,
+						Description: "Service network range of the edge cluster. Defaults to the k0s default (10.96.0.0/12) when omitted. Immutable after creation.",
+					},
+					"external_cidr": schema.StringAttribute{
+						Optional:    true,
+						Description: "External CIDR used by Liqo on the edge cluster. Defaults to 10.70.0.0/16 when omitted. Immutable after creation.",
 					},
 					"cni": schema.SingleNestedAttribute{
 						Optional:    true,
@@ -929,6 +948,9 @@ func (r *edgeLocationResource) Read(ctx context.Context, req resource.ReadReques
 				resp.Diagnostics.Append(d...)
 				state.Networking.TunneledCIDRs = cidrs
 			}
+			state.Networking.PodCIDR = types.StringPointerValue(apiNet.PodCidr)
+			state.Networking.ServiceCIDR = types.StringPointerValue(apiNet.ServiceCidr)
+			state.Networking.ExternalCIDR = types.StringPointerValue(apiNet.ExternalCidr)
 			if state.Networking.CNI != nil && apiNet.Cni != nil {
 				overlay := types.StringPointerValue((*string)(apiNet.Cni.Overlay))
 				overlayEncap := types.StringPointerValue((*string)(apiNet.Cni.OverlayEncap))
@@ -1268,6 +1290,9 @@ func (r *edgeLocationResource) edgeClusterSpecUpdate(ctx context.Context, plan, 
 			if plan.Networking.CNI != nil {
 				spec.Networking.Cni = r.toCNI(plan.Networking.CNI)
 			}
+			spec.Networking.PodCidr = plan.Networking.PodCIDR.ValueStringPointer()
+			spec.Networking.ServiceCidr = plan.Networking.ServiceCIDR.ValueStringPointer()
+			spec.Networking.ExternalCidr = plan.Networking.ExternalCIDR.ValueStringPointer()
 		}
 	}
 	if liqoChanged {
@@ -1407,6 +1432,9 @@ func (r *edgeLocationResource) toEdgeClusterSpec(ctx context.Context, cp *contro
 		}
 		spec.Networking = &omni.EdgeClusterNetworking{
 			TunneledCidrs: &items,
+			PodCidr:       net.PodCIDR.ValueStringPointer(),
+			ServiceCidr:   net.ServiceCIDR.ValueStringPointer(),
+			ExternalCidr:  net.ExternalCIDR.ValueStringPointer(),
 		}
 		if net.CNI != nil {
 			spec.Networking.Cni = r.toCNI(net.CNI)
