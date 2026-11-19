@@ -81,6 +81,36 @@ func TestAutoscalerResource_DeleteNotFound(t *testing.T) {
 	r.False(diags.HasError())
 }
 
+func TestAutoscalerResource_GetChangedPoliciesNotFound(t *testing.T) {
+	r := require.New(t)
+	mockClient := mock_sdk.NewMockClientInterface(gomock.NewController(t))
+	clusterID := "cluster_id"
+	policyChanges := `{"enabled":true}`
+
+	provider := &ProviderConfig{
+		api: &sdk.ClientWithResponses{ClientInterface: mockClient},
+	}
+
+	mockClient.EXPECT().
+		PoliciesAPIGetClusterPolicies(gomock.Any(), clusterID, gomock.Any()).
+		Return(&http.Response{
+			StatusCode: http.StatusNotFound,
+			Body:       io.NopCloser(strings.NewReader(`{"message":"policies not found"}`)),
+		}, nil)
+
+	res := resourceAutoscaler()
+	state := terraform.NewInstanceStateShimmedFromValue(cty.ObjectVal(map[string]cty.Value{
+		FieldClusterId:              cty.StringVal(clusterID),
+		FieldAutoscalerPoliciesJSON: cty.StringVal(policyChanges),
+	}), 0)
+	data := res.Data(state)
+
+	policies, err := getChangedPolicies(t.Context(), data, provider, clusterID)
+
+	r.NoError(err)
+	r.JSONEq(policyChanges, string(policies))
+}
+
 func TestAutoscalerResource_PoliciesUpdateAction(t *testing.T) {
 	currentPolicies := `
 		{

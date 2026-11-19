@@ -1057,7 +1057,10 @@ func getChangedPolicies(ctx context.Context, data types.ResourceProvider, meta i
 	client := meta.(*ProviderConfig).api
 
 	currentPolicies, err := getCurrentPolicies(ctx, client, clusterId)
-	if err != nil {
+	if errors.Is(err, errAutoscalerPoliciesNotFound) {
+		log.Printf("[INFO] Autoscaler policies for cluster %s not found, creating them", clusterId)
+		currentPolicies = []byte("{}")
+	} else if err != nil {
 		log.Printf("[WARN] Getting current policies: %v", err)
 		return nil, fmt.Errorf("failed to get policies from API: %w", err)
 	}
