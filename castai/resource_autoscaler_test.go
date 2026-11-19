@@ -26,6 +26,35 @@ import (
 	"github.com/castai/terraform-provider-castai/castai/types"
 )
 
+func TestAutoscalerResource_ReadNotFound(t *testing.T) {
+	r := require.New(t)
+	mockClient := mock_sdk.NewMockClientInterface(gomock.NewController(t))
+	clusterID := "cluster_id"
+
+	provider := &ProviderConfig{
+		api: &sdk.ClientWithResponses{ClientInterface: mockClient},
+	}
+
+	mockClient.EXPECT().
+		PoliciesAPIGetClusterPolicies(gomock.Any(), clusterID, gomock.Any()).
+		Return(&http.Response{
+			StatusCode: http.StatusNotFound,
+			Body:       io.NopCloser(strings.NewReader(`{"message":"policies not found"}`)),
+		}, nil)
+
+	res := resourceAutoscaler()
+	state := terraform.NewInstanceStateShimmedFromValue(cty.ObjectVal(map[string]cty.Value{
+		FieldClusterId: cty.StringVal(clusterID),
+	}), 0)
+	state.ID = clusterID
+	data := res.Data(state)
+
+	diags := res.ReadContext(t.Context(), data, provider)
+
+	r.False(diags.HasError())
+	r.Empty(data.Id())
+}
+
 func TestAutoscalerResource_PoliciesUpdateAction(t *testing.T) {
 	currentPolicies := `
 		{

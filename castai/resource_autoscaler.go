@@ -785,6 +785,8 @@ func resourceCastaiAutoscalerUpdate(ctx context.Context, data *schema.ResourceDa
 	return nil
 }
 
+var errAutoscalerPoliciesNotFound = errors.New("autoscaler policies not found")
+
 func getCurrentPolicies(ctx context.Context, client sdk.ClientWithResponsesInterface, clusterId string) ([]byte, error) {
 	log.Printf("[INFO] Getting cluster autoscaler information.")
 
@@ -792,7 +794,7 @@ func getCurrentPolicies(ctx context.Context, client sdk.ClientWithResponsesInter
 	if err != nil {
 		return nil, err
 	} else if resp.StatusCode == http.StatusNotFound {
-		return nil, fmt.Errorf("cluster %s policies do not exist at CAST AI", clusterId)
+		return nil, fmt.Errorf("%w: cluster %s policies do not exist at CAST AI", errAutoscalerPoliciesNotFound, clusterId)
 	}
 
 	responseBytes, err := io.ReadAll(resp.Body)
@@ -908,6 +910,11 @@ func readAutoscalerPolicies(ctx context.Context, data *schema.ResourceData, meta
 
 	client := meta.(*ProviderConfig).api
 	currentPolicies, err := getCurrentPolicies(ctx, client, clusterId)
+	if errors.Is(err, errAutoscalerPoliciesNotFound) {
+		log.Printf("[INFO] Autoscaler policies for cluster %s not found, removing from state", clusterId)
+		data.SetId("")
+		return nil
+	}
 	if err != nil {
 		return err
 	}
