@@ -517,15 +517,10 @@ func resourceCastaiAutoscalerDelete(ctx context.Context, data *schema.ResourceDa
 		return nil
 	}
 
-	client := meta.(*ProviderConfig).api
-	resp, err := client.PoliciesAPIUpsertClusterPoliciesWithBodyWithResponse(ctx, clusterId, "application/json", bytes.NewReader([]byte(`{"enabled":false}`)))
-	if resp != nil && resp.StatusCode() == http.StatusNotFound {
-		log.Printf("[INFO] Autoscaler policies for cluster %s not found, skipping disable", clusterId)
-		return nil
-	}
-	if checkErr := sdk.CheckOKResponse(resp, err); checkErr != nil {
-		log.Printf("[ERROR] Failed to disable autoscaler policies: %v", checkErr)
-		return diag.FromErr(checkErr)
+	err := upsertPolicies(ctx, meta, clusterId, `{"enabled":false}`, true)
+	if err != nil {
+		log.Printf("[ERROR] Failed to disable autoscaler policies: %v", err)
+		return diag.FromErr(err)
 	}
 
 	return nil
@@ -843,7 +838,7 @@ func updateAutoscalerPolicies(ctx context.Context, data *schema.ResourceData, me
 			return nil
 		}
 
-		return upsertPolicies(ctx, meta, clusterId, changedPoliciesJSON)
+		return upsertPolicies(ctx, meta, clusterId, changedPoliciesJSON, false)
 	}
 
 	// Exponential backoff configuration: 100ms initial, 2.0 multiplier, 0.1 jitter,
@@ -883,10 +878,14 @@ func updateAutoscalerPolicies(ctx context.Context, data *schema.ResourceData, me
 	return nil
 }
 
-func upsertPolicies(ctx context.Context, meta interface{}, clusterId string, changedPoliciesJSON string) error {
+func upsertPolicies(ctx context.Context, meta interface{}, clusterId string, changedPoliciesJSON string, ignoreNotFound bool) error {
 	client := meta.(*ProviderConfig).api
 
 	resp, err := client.PoliciesAPIUpsertClusterPoliciesWithBodyWithResponse(ctx, clusterId, "application/json", bytes.NewReader([]byte(changedPoliciesJSON)))
+	if ignoreNotFound && resp != nil && resp.StatusCode() == http.StatusNotFound {
+		log.Printf("[INFO] Autoscaler policies for cluster %s not found, skipping upsert", clusterId)
+		return nil
+	}
 	if checkErr := sdk.CheckOKResponse(resp, err); checkErr != nil {
 		return checkErr
 	}
