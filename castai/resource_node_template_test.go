@@ -3135,11 +3135,6 @@ resource "castai_node_configuration" "test" {
   }
 }
 
-resource "castai_node_configuration_default" "default" {
-  cluster_id        = castai_eks_cluster.test.id
-  configuration_id  = castai_node_configuration.test.id
-}
-
 `, rName))
 }
 
