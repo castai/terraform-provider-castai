@@ -517,10 +517,15 @@ func resourceCastaiAutoscalerDelete(ctx context.Context, data *schema.ResourceDa
 		return nil
 	}
 
-	err := upsertPolicies(ctx, meta, clusterId, `{"enabled":false}`)
-	if err != nil {
-		log.Printf("[ERROR] Failed to disable autoscaler policies: %v", err)
-		return diag.FromErr(err)
+	client := meta.(*ProviderConfig).api
+	resp, err := client.PoliciesAPIUpsertClusterPoliciesWithBodyWithResponse(ctx, clusterId, "application/json", bytes.NewReader([]byte(`{"enabled":false}`)))
+	if resp != nil && resp.StatusCode() == http.StatusNotFound {
+		log.Printf("[INFO] Autoscaler policies for cluster %s not found, skipping disable", clusterId)
+		return nil
+	}
+	if checkErr := sdk.CheckOKResponse(resp, err); checkErr != nil {
+		log.Printf("[ERROR] Failed to disable autoscaler policies: %v", checkErr)
+		return diag.FromErr(checkErr)
 	}
 
 	return nil

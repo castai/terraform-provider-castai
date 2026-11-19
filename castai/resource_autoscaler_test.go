@@ -55,6 +55,32 @@ func TestAutoscalerResource_ReadNotFound(t *testing.T) {
 	r.Empty(data.Id())
 }
 
+func TestAutoscalerResource_DeleteNotFound(t *testing.T) {
+	r := require.New(t)
+	mockClient := mock_sdk.NewMockClientWithResponsesInterface(gomock.NewController(t))
+	clusterID := "cluster_id"
+
+	provider := &ProviderConfig{api: mockClient}
+
+	mockClient.EXPECT().
+		PoliciesAPIUpsertClusterPoliciesWithBodyWithResponse(gomock.Any(), clusterID, "application/json", gomock.Any()).
+		Return(&sdk.PoliciesAPIUpsertClusterPoliciesResponse{
+			HTTPResponse: &http.Response{StatusCode: http.StatusNotFound},
+			Body:         []byte(`{"message":"policies not found"}`),
+		}, nil)
+
+	res := resourceAutoscaler()
+	state := terraform.NewInstanceStateShimmedFromValue(cty.ObjectVal(map[string]cty.Value{
+		FieldClusterId: cty.StringVal(clusterID),
+	}), 0)
+	state.ID = clusterID
+	data := res.Data(state)
+
+	diags := res.DeleteContext(t.Context(), data, provider)
+
+	r.False(diags.HasError())
+}
+
 func TestAutoscalerResource_PoliciesUpdateAction(t *testing.T) {
 	currentPolicies := `
 		{
