@@ -1,0 +1,31 @@
+cluster_name     = "castai-pls-example"
+cluster_region   = "westeurope"
+subscription_id  = "<azure-subscription-id>"
+castai_api_token = "<cast-ai-api-token>"
+
+# Alias of the CAST AI Private Link Service. Use CAST AI docs to get the value for specific region.
+private_link_service_alias = "<pls-alias>.azure.privatelinkservice"
+
+# Defaults (below) target the US environment:
+# castai_api_url       = "https://api.cast.ai"
+# castai_grpc_url      = "grpc.cast.ai:443"
+# castai_api_grpc_url  = "api-grpc.cast.ai:443"
+# castai_files_url     = "files.cast.ai:443"
+# castai_kvisor_grpc_addr = "kvisor.prod-master.cast.ai:443"
+# castai_telemetry_url   = "telemetry.prod-master.cast.ai:443"
+
+# --- EU region ---------------------------------------------------------------
+# castai_api_url       = "https://api.eu.cast.ai"
+# castai_grpc_url      = "grpc.eu.cast.ai:443"
+# castai_api_grpc_url  = "api-grpc.eu.cast.ai:443"
+# castai_files_url     = "files.eu.cast.ai:443"
+# castai_kvisor_grpc_addr = "kvisor.prod-eu.cast.ai:443"
+# castai_telemetry_url   = "telemetry.prod-eu.cast.ai:443"
+
+# --- India region ------------------------------------------------------------
+# castai_api_url       = "https://api.india.cast.ai"
+# castai_grpc_url      = "grpc.india.cast.ai:443"
+# castai_api_grpc_url  = "api-grpc.india.cast.ai:443"
+# castai_files_url     = "files.india.cast.ai:443"
+# castai_kvisor_grpc_addr = "kvisor.india.cast.ai:443"
+# castai_telemetry_url   = "telemetry.india.cast.ai:443"
