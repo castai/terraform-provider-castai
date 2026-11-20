@@ -39,10 +39,10 @@ resource "google_project_iam_custom_role" "castai_storage_autoscaler_volume" {
   title       = "CAST AI Storage Autoscaler volume manager"
   description = "Allows Storage Autoscaler to read, resize, and modify zonal and regional persistent disks"
   permissions = [
-    "compute.disks.get",    # Read current disk state and provisioned performance.
-    "compute.disks.list",   # Discover zonal and regional disks.
-    "compute.disks.update", # Update provisioned IOPS and throughput.
-    "compute.disks.resize", # Expand zonal and regional disk size.
+    "compute.disks.get",          # Read current disk state and provisioned performance.
+    "compute.disks.list",         # Discover zonal and regional disks.
+    "compute.disks.update",       # Update provisioned IOPS and throughput.
+    "compute.zoneOperations.get", # Get operations on disks to track their progress.
   ]
 }
 
