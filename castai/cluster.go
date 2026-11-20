@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/samber/lo"
 
 	"github.com/castai/terraform-provider-castai/castai/sdk"
 )
@@ -217,7 +218,9 @@ func resourceCastaiClusterUpdate(
 }
 
 func createClusterToken(ctx context.Context, client sdk.ClientWithResponsesInterface, clusterID string) (string, error) {
-	resp, err := client.ExternalClusterAPICreateClusterTokenWithResponse(ctx, clusterID)
+	resp, err := client.ExternalClusterAPICreateClusterTokenWithResponse(ctx, clusterID, &sdk.ExternalClusterAPICreateClusterTokenParams{
+		TokenType: lo.ToPtr(sdk.ExternalClusterAPICreateClusterTokenParamsTokenTypeDEFAULT),
+	})
 	if checkErr := sdk.CheckOKResponse(resp, err); checkErr != nil {
 		return "", fmt.Errorf("creating cluster token: %w", checkErr)
 	}

@@ -30,11 +30,6 @@ resource "castai_node_configuration" "test" {
     aks_image_family = "ubuntu"
   }
 }
-
-resource "castai_node_configuration_default" "test" {
-  cluster_id       = castai_aks_cluster.test.id
-  configuration_id = castai_node_configuration.test.id
-}
 `, rName, resourceGroupName))
 }
 
@@ -114,11 +109,6 @@ resource "castai_node_configuration" "test" {
 		}
   }
 }
-
-resource "castai_node_configuration_default" "test" {
-  cluster_id       = castai_aks_cluster.test.id
-  configuration_id = castai_node_configuration.test.id
-}
 `, rName, resourceGroupName))
 }
 
@@ -150,11 +140,6 @@ resource "castai_node_configuration" "test" {
 			placement = "nvmeDisk"
 		}
   }
-}
-
-resource "castai_node_configuration_default" "test" {
-  cluster_id       = castai_aks_cluster.test.id
-  configuration_id = castai_node_configuration.test.id
 }
 `, rName, resourceGroupName))
 }
