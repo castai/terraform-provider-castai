@@ -39,6 +39,30 @@ terraform -chdir=examples/gke/node_configuration_local_ssd apply \
   -var 'subnets=[<subnetwork-self-link>]'
 ```
 
+### Onboarding the cluster from this example
+
+Set `onboard_cluster = true` and provide the GKE details plus a service account key:
+
+```shell
+terraform -chdir=examples/gke/node_configuration_local_ssd apply \
+  -var onboard_cluster=true \
+  -var gke_cluster_name=<cluster> \
+  -var gke_project_id=<project> \
+  -var gke_cluster_location=<zone-or-region> \
+  -var gke_credentials_json="$(cat credentials.json)" \
+  -var 'subnets=[<subnetwork-self-link>]'
+```
+
+Notes:
+
+- The node configuration API requires the cluster to have CAST AI credentials,
+  so the onboarding path needs `gke_credentials_json`.
+- Onboarding a cluster that is already registered with CAST AI will conflict -
+  use `onboard_cluster = false` with `castai_cluster_id` in that case.
+- The CAST AI agent (Helm install) is not part of this example; the
+  `castai/gke-cluster/castai` registry module does the full flow (but its
+  `node_configurations` map does not support `local_ssd` yet).
+
 ## Things to try
 
 - `local_ssd_mode = "EPHEMERAL"` / `"BLOCK"` / `"MIXED"` (MIXED requires

@@ -1,6 +1,37 @@
 variable "castai_cluster_id" {
   type        = string
-  description = "CAST AI cluster id (uuid) of the onboarded GKE cluster."
+  description = "CAST AI cluster id (uuid) of the onboarded GKE cluster. Required when onboard_cluster = false."
+}
+
+variable "onboard_cluster" {
+  type        = bool
+  default     = false
+  description = "When true, registers the GKE cluster (below) with CAST AI first and creates the node configuration on it. Set to false to reuse an already onboarded cluster via castai_cluster_id."
+}
+
+variable "gke_cluster_name" {
+  type        = string
+  default     = ""
+  description = "GKE cluster name (onboarding path only)."
+}
+
+variable "gke_project_id" {
+  type        = string
+  default     = ""
+  description = "GCP project id (onboarding path only)."
+}
+
+variable "gke_cluster_location" {
+  type        = string
+  default     = ""
+  description = "GKE cluster zone (zonal) or region (regional) (onboarding path only)."
+}
+
+variable "gke_credentials_json" {
+  type        = string
+  default     = ""
+  sensitive   = true
+  description = "GCP service account credentials.json for CAST AI to access the cluster (onboarding path only). The node configuration API requires the cluster to have CAST AI credentials, so onboarding without them will fail when creating the node configuration."
 }
 
 variable "subnets" {

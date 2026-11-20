@@ -21,9 +21,25 @@ terraform {
 #   api_token = var.castai_api_token
 # }
 
+# Onboarding path: registers the GKE cluster with CAST AI. The agent itself (Helm
+# install) is not covered by this example - for the full flow see the
+# castai/gke-cluster/castai registry module (its node_configurations map does not
+# support local_ssd yet).
+resource "castai_gke_cluster" "onboarded" {
+  count            = var.onboard_cluster ? 1 : 0
+  name             = var.gke_cluster_name
+  project_id       = var.gke_project_id
+  location         = var.gke_cluster_location
+  credentials_json = var.gke_credentials_json
+}
+
+locals {
+  cluster_id = var.onboard_cluster ? castai_gke_cluster.onboarded[0].id : var.castai_cluster_id
+}
+
 resource "castai_node_configuration" "local_ssd" {
   name       = "local-ssd-demo"
-  cluster_id = var.castai_cluster_id
+  cluster_id = local.cluster_id
   subnets    = var.subnets
 
   disk_cpu_ratio = 0
