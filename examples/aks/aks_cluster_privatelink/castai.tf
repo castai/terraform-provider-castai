@@ -3,7 +3,7 @@
 # See privatelink.tf where these names are redirected to the Private link service.
 # From there on, communication works as-if the workloads were reaching CAST AI normally.
 module "castai-aks-cluster" {
-  source  = "castai/aks/castai"
+  source = "castai/aks/castai"
 
   api_url          = var.castai_api_url
   grpc_url         = var.castai_grpc_url
