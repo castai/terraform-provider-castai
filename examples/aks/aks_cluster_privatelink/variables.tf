@@ -80,12 +80,6 @@ variable "castai_telemetry_url" {
   default     = "telemetry.prod-master.cast.ai:443"
 }
 
-variable "castai_extra_dns_hostnames" {
-  type        = list(string)
-  description = "Extra FQDNs to point at the private endpoint, on top of the ones derived from the URL variables - for a hostname CAST AI starts using that has no URL variable."
-  default     = []
-}
-
 variable "delete_nodes_on_disconnect" {
   type        = bool
   description = "Delete CAST AI provisioned nodes from Azure when the cluster is disconnected. Set to false for production clusters."
