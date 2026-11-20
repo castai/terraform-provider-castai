@@ -1,27 +1,28 @@
 # Example of AKS cluster connected to CAST AI over Azure Private Link
 
-Creates an AKS cluster with its resource group, VNet and subnets, connects the
-VNet to the CAST AI Private Link Service through a private endpoint, and onboards
-the cluster to CAST AI. From inside the cluster, every CAST AI call goes over the
-private endpoint - nothing else about the cluster is special.
+Creates an AKS cluster with its resource group, VNet and subnets, connects the VNet to the CAST AI Private Link Service through a private endpoint, 
+and onboards the cluster to CAST AI. From inside the cluster, every CAST AI call goes over the private endpoint - nothing else about the cluster is special. To make setup easier, the cluster itself is not fully private.
+
+The private link bits are isolated in [privatelink.tf](privatelink.tf) - check that on the minimal sample setup that can be matched to existing cluster.
+
+# Example setup
 
 ```
 consumer subscription (this example)                 CAST AI producer subscription
 ┌─────────────────────────────────────┐              ┌───────────────────────────────┐
 │ AKS (Azure CNI Overlay)             │              │ Private Link Service          │
-│   10.20.0.0/20 nodes                │              │   alias: <pls-alias>          │
-│        │                            │              │        │                      │
-│        ▼                            │◀─ Private ──▶│   NAT IPs                     │
-│ Private Endpoint  10.20.16.0/24     │   Link       │        ▼                      │
-│        │                            │              │ Internal LB :443 / :8080      │
-│        ▼                            │              │        ▼                      │
-│ Private DNS zone  cast.ai           │              │ nginx SNI router              │
-│   api / api-grpc / grpc / files /   │              │   ├─▶ api.cast.ai             │
-│   kvisor.prod-master → PE IP        │              │   └─▶ grpc.cast.ai …          │
+│   10.20.0.0/20 nodes                │              │        │                      │
+│        │                            │              │        ▼                      │
+│        ▼                            │◀─ Private ──▶│ CAST AI services              │
+│ Private Endpoint  10.20.16.0/24     │   Link       │                               │
+│        │                            │              │                               │
+│        ▼                            │              │                               │
+│ Private DNS zone  cast.ai           │              │                               │
+│   *.cast.ai → PE IP                 │              │                               │
 └─────────────────────────────────────┘              └───────────────────────────────┘
 ```
 
-Files, in the order to read them:
+Files, in the order to read them to fully understand the solution:
 
 1. `vnet.tf` - resource group, VNet, node subnet and private endpoint subnet
 2. `aks.tf` - AKS cluster (user-assigned identity, CNI Overlay, default egress)
@@ -39,18 +40,6 @@ to the private endpoint IP:
 | Pod in the cluster / any VM in the VNet | private endpoint IP in `10.20.16.0/24` | Private Link |
 | Your machine running Terraform | public IP | Public API |
 
-Both work at once - that is the point: Terraform onboards over the public API
-while the cluster itself talks privately. TLS is passed through the producer's
-SNI router untouched, so the certificates are the real CAST AI ones and nothing
-needs to trust a proxy CA.
-
-The example keeps the AKS default egress (`outbound_type = "loadBalancer"`) on
-purpose: AKS needs internet access to bootstrap, and CAST AI images come from
-`ghcr.io`, which the Private Link Service does not serve. A cluster without any
-internet egress needs a different shape - private API server, `outbound_type =
-"none"` and a private image registry. See `examples/aks/aks_cluster_with_proxy_privatelink`
-for the variant that combines a proxy with Private Link.
-
 ## Prerequisites
 
 - `terraform`/`tofu` >= 1.3.2 and the Azure CLI logged in to the consumer subscription.
@@ -61,45 +50,30 @@ for the variant that combines a proxy with Private Link.
   private DNS zone, **plus** role assignments (`Owner` or `User Access Administrator`).
 - A CAST AI API token for the environment the Private Link Service fronts.
 
-## Configure
+## Use the example
 
 ```bash
 cp terraform.tfvars.example terraform.tfvars
 ```
 
 Fill in `subscription_id`, `cluster_name`, `cluster_region`, `castai_api_token`
-and `private_link_service_alias` (read it in the producer workspace with
-`tofu output -raw private_link_service_alias`).
+and `private_link_service_alias`.
 
-The defaults target the US (`prod-master`) environment. The knobs that matter:
+| Variable | Effect                                                                                   |
+| --- |------------------------------------------------------------------------------------------|
+| `private_link_service_alias` | Which producer deployment to connect to                                                  |
+| `castai_api_url`, `castai_grpc_url`, `castai_api_grpc_url`, `castai_files_url`, `castai_kvisor_grpc_addr`, `castai_telemetry_url` | The CAST AI endpoints, exactly as in the docs per environment.                           |
+| `castai_private_dns_zone` | Zone the wildcard record lives in. Keep it at `cast.ai` unless some DNS magic is needed. |
 
-| Variable | Effect |
-| --- | --- |
-| `private_link_service_alias` | Which producer deployment to connect to |
-| `castai_api_url`, `castai_grpc_url`, `castai_api_grpc_url`, `castai_files_url`, `castai_kvisor_grpc_addr`, `castai_telemetry_url` | The CAST AI endpoints, exactly as in the docs per environment. Defaults are prod-master (US); `terraform.tfvars.example` has ready-to-copy blocks for EU, India and dev-master |
-| `castai_extra_dns_hostnames` | Extra FQDNs to point at the private endpoint, for a hostname with no URL variable |
-| `castai_private_dns_zone` | Zone the records are created in. Keep it at `cast.ai` - record names are derived by stripping this suffix from the URL hostnames, and a precondition fails the apply if any hostname does not live under the zone |
-
-The private DNS records are **derived from the URL variables**: the hostname is
-parsed out of each URL and the zone suffix is stripped, so `api.eu.cast.ai`
-becomes record `api.eu` and `kvisor.prod-eu.cast.ai` becomes `kvisor.prod-eu` -
-no separate hostname list to keep in sync.
-
-`terraform.tfvars.example` contains ready-to-copy URL blocks for the US, EU,
-India and dev-master environments - switching is uncommenting one block.
-
-## Deploy
+Then plan and deploy:
 
 ```bash
 terraform init
 terraform apply
 ```
 
-AKS dominates the apply time. Note `private_endpoint_ip` (in `10.20.16.0/24`) in:
 
-```bash
-terraform output
-```
+Successful apply should have a cluster connected to CAST AI and display some data about the created resources.
 
 ## Verify
 
@@ -123,7 +97,7 @@ The script starts a throwaway `ghcr.io/nicolaka/netshoot` pod in namespace
 | --- | --- | --- |
 | 1 | `api.cast.ai`, `grpc.cast.ai` resolution | the private endpoint IP |
 | 2 | `https://api.cast.ai/` | `remote_ip` = the private endpoint IP |
-| 3 | TLS to the endpoint with SNI `api.cast.ai` | the real upstream `api.cast.ai` certificate |
+| 3 | TLS handshake to `api.cast.ai` | the real `api.cast.ai` certificate |
 | 4 | Public DNS from the host (`dig`) | a different, public address |
 
 It prints one `PASS`/`FAIL`/`SKIP` line per check and exits non-zero on any
@@ -131,24 +105,33 @@ It prints one `PASS`/`FAIL`/`SKIP` line per check and exits non-zero on any
 endpoint IP (otherwise read from `terraform output`), `KEEP_POD=1` leaves the pod
 for poking, `--namespace` changes the namespace.
 
-The agents can also be checked directly:
+Sample output:
+```
+==> starting ghcr.io/nicolaka/netshoot:v0.16 pod in namespace castai-pls-verify (context test-context)
+==> expecting private endpoint IP: 10.20.16.4
+==> checking hostnames: api.eu.cast.ai grpc.eu.cast.ai api-grpc.eu.cast.ai files.eu.cast.ai kvisor.prod-eu.cast.ai telemetry.prod-eu.cast.ai 
+PASS  api.eu.cast.ai resolves to 10.20.16.4 (private endpoint)
+PASS  grpc.eu.cast.ai resolves to 10.20.16.4 (private endpoint)
+PASS  api-grpc.eu.cast.ai resolves to 10.20.16.4 (private endpoint)
+PASS  files.eu.cast.ai resolves to 10.20.16.4 (private endpoint)
+PASS  kvisor.prod-eu.cast.ai resolves to 10.20.16.4 (private endpoint)
+PASS  telemetry.prod-eu.cast.ai resolves to 10.20.16.4 (private endpoint)
+PASS  https://api.eu.cast.ai/ used the private endpoint (remote_ip=10.20.16.4)
+PASS  TLS through the endpoint serves the real api.eu.cast.ai certificate
+PASS  public DNS still returns 141.101.90.96, so the private answer is an override
 
-```bash
-kubectl -n castai-agent get pods
-kubectl -n castai-agent exec deploy/castai-agent -- getent hosts api.cast.ai
-# 10.20.16.x   api.cast.ai
+9 passed, 0 failed, 0 skipped
 ```
 
 ## Troubleshooting
 
-| Symptom | Cause / fix |
-| --- | --- |
-| Connection state `Pending` | The subscription is not on the producer's auto-approval list; nothing on the consumer side fixes it |
-| `getent hosts api.cast.ai` returns nothing in the cluster | The hostname is not covered by the derived records - the zone is authoritative inside the VNet, unlisted names do not fall back to public DNS. Add it via `castai_dns_hostnames`. Azure Private DNS has no wildcard records |
-| `getent hosts` returns the public IP in the cluster | The zone is not linked to the VNet the nodes use, or the zone name does not cover the hostname |
-| TLS handshake resets / no certificate | The hostname is outside the producer's SNI allow-list, or the request has no SNI |
-| `terraform apply` fails on subnet permissions | The caller lacks `Microsoft.Authorization/roleAssignments/write`; the cluster identity needs `Network Contributor` on the node subnet before AKS is created |
-| `azurerm_role_assignment` fails with `PrincipalNotFound` | Entra replication lag right after the identity is created; re-run `terraform apply` |
+| Symptom                                                  | Cause / fix                                                                                                                                                                              |
+|----------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Connection state `Pending`                               | The subscription is not on the producer's auto-approval list; contact CAST AI                                                                                                            |
+| `getent hosts <host>>` returns nothing in the cluster    | The zone is not linked to the VNet the cluster uses, or the hostname lives outside the zone - the wildcard only covers names under it, and unlisted names do not fall back to public DNS |
+| `getent hosts` returns the public IP in the cluster      | The zone is not linked to the VNet the nodes use, or the zone name does not cover the hostname                                                                                           |
+| TLS handshake resets / no certificate                    | The TLS handshake carries no server name (SNI). This is mandatory.                                                                                                                       |
+| `azurerm_role_assignment` fails with `PrincipalNotFound` | Entra replication lag right after the identity is created; re-run `terraform apply`                                                                                                      |
 
 ## Cleanup
 
@@ -158,14 +141,3 @@ terraform destroy
 
 Destroying the private endpoint removes the connection from the producer's
 `privateEndpointConnections` list by itself; the producer's allow-list is untouched.
-
-## Notes
-
-- **Not for production:** Free AKS tier, an examples-only address plan, and no
-  network policies.
-- **Zone scope:** linking `cast.ai` makes the zone authoritative for every
-  `*.cast.ai` name inside the VNet. Per-hostname zones (e.g. `api.cast.ai` with an
-  apex A record) narrow that to one name each, at the cost of one zone link per
-  hostname.
-- The producer side (capacity limits, idle timers, allow-list management) is
-  described in the CAST AI `cast-iac` repository, `privatelink/azure`.
