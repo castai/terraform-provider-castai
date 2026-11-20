@@ -542,7 +542,7 @@ type ClientInterface interface {
 	ExternalClusterAPIUpdateClusterTags(ctx context.Context, clusterId string, body ExternalClusterAPIUpdateClusterTagsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// ExternalClusterAPICreateClusterToken request
-	ExternalClusterAPICreateClusterToken(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+	ExternalClusterAPICreateClusterToken(ctx context.Context, clusterId string, params *ExternalClusterAPICreateClusterTokenParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// NodeConfigurationAPIListMaxPodsPresets request
 	NodeConfigurationAPIListMaxPodsPresets(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -608,7 +608,7 @@ type ClientInterface interface {
 	RbacServiceAPIGetGroup(ctx context.Context, organizationId string, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// UsersAPILeaveOrganization request
-	UsersAPILeaveOrganization(ctx context.Context, organizationId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+	UsersAPILeaveOrganization(ctx context.Context, organizationId string, params *UsersAPILeaveOrganizationParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// InventoryAPIGetReservations request
 	InventoryAPIGetReservations(ctx context.Context, organizationId string, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -707,7 +707,7 @@ type ClientInterface interface {
 	UsersAPIAddUserToOrganization(ctx context.Context, organizationId string, body UsersAPIAddUserToOrganizationJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// UsersAPIRemoveUserFromOrganization request
-	UsersAPIRemoveUserFromOrganization(ctx context.Context, organizationId string, userId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+	UsersAPIRemoveUserFromOrganization(ctx context.Context, organizationId string, userId string, params *UsersAPIRemoveUserFromOrganizationParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// UsersAPIListUserGroups request
 	UsersAPIListUserGroups(ctx context.Context, organizationId string, userId string, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -977,6 +977,11 @@ type ClientInterface interface {
 	// WorkloadOptimizationAPIGetWorkloadScalingPolicy request
 	WorkloadOptimizationAPIGetWorkloadScalingPolicy(ctx context.Context, clusterId string, policyId string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// WorkloadOptimizationAPIPatchWorkloadScalingPolicyWithBody request with any body
+	WorkloadOptimizationAPIPatchWorkloadScalingPolicyWithBody(ctx context.Context, clusterId string, policyId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	WorkloadOptimizationAPIPatchWorkloadScalingPolicy(ctx context.Context, clusterId string, policyId string, body WorkloadOptimizationAPIPatchWorkloadScalingPolicyJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// WorkloadOptimizationAPIUpdateWorkloadScalingPolicyWithBody request with any body
 	WorkloadOptimizationAPIUpdateWorkloadScalingPolicyWithBody(ctx context.Context, clusterId string, policyId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -1031,6 +1036,9 @@ type ClientInterface interface {
 
 	// WorkloadOptimizationAPIGetWorkloadRecommendationManifest request
 	WorkloadOptimizationAPIGetWorkloadRecommendationManifest(ctx context.Context, clusterId string, workloadId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// WorkloadOptimizationAPIGetWorkloadScopedRecommendationMetrics request
+	WorkloadOptimizationAPIGetWorkloadScopedRecommendationMetrics(ctx context.Context, clusterId string, workloadId string, params *WorkloadOptimizationAPIGetWorkloadScopedRecommendationMetricsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// WorkloadOptimizationAPIGetWorkloadSpec request
 	WorkloadOptimizationAPIGetWorkloadSpec(ctx context.Context, clusterId string, workloadId string, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -3039,8 +3047,8 @@ func (c *Client) ExternalClusterAPIUpdateClusterTags(ctx context.Context, cluste
 	return c.Client.Do(req)
 }
 
-func (c *Client) ExternalClusterAPICreateClusterToken(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewExternalClusterAPICreateClusterTokenRequest(c.Server, clusterId)
+func (c *Client) ExternalClusterAPICreateClusterToken(ctx context.Context, clusterId string, params *ExternalClusterAPICreateClusterTokenParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewExternalClusterAPICreateClusterTokenRequest(c.Server, clusterId, params)
 	if err != nil {
 		return nil, err
 	}
@@ -3327,8 +3335,8 @@ func (c *Client) RbacServiceAPIGetGroup(ctx context.Context, organizationId stri
 	return c.Client.Do(req)
 }
 
-func (c *Client) UsersAPILeaveOrganization(ctx context.Context, organizationId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewUsersAPILeaveOrganizationRequest(c.Server, organizationId)
+func (c *Client) UsersAPILeaveOrganization(ctx context.Context, organizationId string, params *UsersAPILeaveOrganizationParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUsersAPILeaveOrganizationRequest(c.Server, organizationId, params)
 	if err != nil {
 		return nil, err
 	}
@@ -3759,8 +3767,8 @@ func (c *Client) UsersAPIAddUserToOrganization(ctx context.Context, organization
 	return c.Client.Do(req)
 }
 
-func (c *Client) UsersAPIRemoveUserFromOrganization(ctx context.Context, organizationId string, userId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewUsersAPIRemoveUserFromOrganizationRequest(c.Server, organizationId, userId)
+func (c *Client) UsersAPIRemoveUserFromOrganization(ctx context.Context, organizationId string, userId string, params *UsersAPIRemoveUserFromOrganizationParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUsersAPIRemoveUserFromOrganizationRequest(c.Server, organizationId, userId, params)
 	if err != nil {
 		return nil, err
 	}
@@ -4947,6 +4955,30 @@ func (c *Client) WorkloadOptimizationAPIGetWorkloadScalingPolicy(ctx context.Con
 	return c.Client.Do(req)
 }
 
+func (c *Client) WorkloadOptimizationAPIPatchWorkloadScalingPolicyWithBody(ctx context.Context, clusterId string, policyId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewWorkloadOptimizationAPIPatchWorkloadScalingPolicyRequestWithBody(c.Server, clusterId, policyId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) WorkloadOptimizationAPIPatchWorkloadScalingPolicy(ctx context.Context, clusterId string, policyId string, body WorkloadOptimizationAPIPatchWorkloadScalingPolicyJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewWorkloadOptimizationAPIPatchWorkloadScalingPolicyRequest(c.Server, clusterId, policyId, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
 func (c *Client) WorkloadOptimizationAPIUpdateWorkloadScalingPolicyWithBody(ctx context.Context, clusterId string, policyId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewWorkloadOptimizationAPIUpdateWorkloadScalingPolicyRequestWithBody(c.Server, clusterId, policyId, contentType, body)
 	if err != nil {
@@ -5165,6 +5197,18 @@ func (c *Client) WorkloadOptimizationAPIGetWorkloadNativeVpaSpec(ctx context.Con
 
 func (c *Client) WorkloadOptimizationAPIGetWorkloadRecommendationManifest(ctx context.Context, clusterId string, workloadId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewWorkloadOptimizationAPIGetWorkloadRecommendationManifestRequest(c.Server, clusterId, workloadId)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) WorkloadOptimizationAPIGetWorkloadScopedRecommendationMetrics(ctx context.Context, clusterId string, workloadId string, params *WorkloadOptimizationAPIGetWorkloadScopedRecommendationMetricsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewWorkloadOptimizationAPIGetWorkloadScopedRecommendationMetricsRequest(c.Server, clusterId, workloadId, params)
 	if err != nil {
 		return nil, err
 	}
@@ -5407,6 +5451,22 @@ func NewRbacServiceAPIListPermissionGroupsRequest(server string, organizationId 
 		if params.Product != nil {
 
 			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "product", runtime.ParamLocationQuery, *params.Product); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.Scope != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "scope", runtime.ParamLocationQuery, *params.Scope); err != nil {
 				return nil, err
 			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
 				return nil, err
@@ -13348,7 +13408,7 @@ func NewExternalClusterAPIUpdateClusterTagsRequestWithBody(server string, cluste
 }
 
 // NewExternalClusterAPICreateClusterTokenRequest generates requests for ExternalClusterAPICreateClusterToken
-func NewExternalClusterAPICreateClusterTokenRequest(server string, clusterId string) (*http.Request, error) {
+func NewExternalClusterAPICreateClusterTokenRequest(server string, clusterId string, params *ExternalClusterAPICreateClusterTokenParams) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -13371,6 +13431,44 @@ func NewExternalClusterAPICreateClusterTokenRequest(server string, clusterId str
 	queryURL, err := serverURL.Parse(operationPath)
 	if err != nil {
 		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if params.TokenType != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "tokenType", runtime.ParamLocationQuery, *params.TokenType); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.Rotate != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "rotate", runtime.ParamLocationQuery, *params.Rotate); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
 	}
 
 	req, err := http.NewRequest("POST", queryURL.String(), nil)
@@ -14087,7 +14185,7 @@ func NewRbacServiceAPIGetGroupRequest(server string, organizationId string, id s
 }
 
 // NewUsersAPILeaveOrganizationRequest generates requests for UsersAPILeaveOrganization
-func NewUsersAPILeaveOrganizationRequest(server string, organizationId string) (*http.Request, error) {
+func NewUsersAPILeaveOrganizationRequest(server string, organizationId string, params *UsersAPILeaveOrganizationParams) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -14110,6 +14208,28 @@ func NewUsersAPILeaveOrganizationRequest(server string, organizationId string) (
 	queryURL, err := serverURL.Parse(operationPath)
 	if err != nil {
 		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if params.Product != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "product", runtime.ParamLocationQuery, *params.Product); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
 	}
 
 	req, err := http.NewRequest("DELETE", queryURL.String(), nil)
@@ -15488,6 +15608,22 @@ func NewUsersAPIRemoveOrganizationUsersRequest(server string, organizationId str
 			}
 		}
 
+		if params.Product != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "product", runtime.ParamLocationQuery, *params.Product); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
 		queryURL.RawQuery = queryValues.Encode()
 	}
 
@@ -15560,6 +15696,22 @@ func NewUsersAPIListOrganizationUsersRequest(server string, organizationId strin
 
 		}
 
+		if params.Product != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "product", runtime.ParamLocationQuery, *params.Product); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
 		queryURL.RawQuery = queryValues.Encode()
 	}
 
@@ -15619,7 +15771,7 @@ func NewUsersAPIAddUserToOrganizationRequestWithBody(server string, organization
 }
 
 // NewUsersAPIRemoveUserFromOrganizationRequest generates requests for UsersAPIRemoveUserFromOrganization
-func NewUsersAPIRemoveUserFromOrganizationRequest(server string, organizationId string, userId string) (*http.Request, error) {
+func NewUsersAPIRemoveUserFromOrganizationRequest(server string, organizationId string, userId string, params *UsersAPIRemoveUserFromOrganizationParams) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -15649,6 +15801,28 @@ func NewUsersAPIRemoveUserFromOrganizationRequest(server string, organizationId 
 	queryURL, err := serverURL.Parse(operationPath)
 	if err != nil {
 		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if params.Product != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "product", runtime.ParamLocationQuery, *params.Product); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
 	}
 
 	req, err := http.NewRequest("DELETE", queryURL.String(), nil)
@@ -20058,6 +20232,60 @@ func NewWorkloadOptimizationAPIGetWorkloadScalingPolicyRequest(server string, cl
 	return req, nil
 }
 
+// NewWorkloadOptimizationAPIPatchWorkloadScalingPolicyRequest calls the generic WorkloadOptimizationAPIPatchWorkloadScalingPolicy builder with application/json body
+func NewWorkloadOptimizationAPIPatchWorkloadScalingPolicyRequest(server string, clusterId string, policyId string, body WorkloadOptimizationAPIPatchWorkloadScalingPolicyJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewWorkloadOptimizationAPIPatchWorkloadScalingPolicyRequestWithBody(server, clusterId, policyId, "application/json", bodyReader)
+}
+
+// NewWorkloadOptimizationAPIPatchWorkloadScalingPolicyRequestWithBody generates requests for WorkloadOptimizationAPIPatchWorkloadScalingPolicy with any type of body
+func NewWorkloadOptimizationAPIPatchWorkloadScalingPolicyRequestWithBody(server string, clusterId string, policyId string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "clusterId", runtime.ParamLocationPath, clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "policyId", runtime.ParamLocationPath, policyId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/workload-autoscaling/clusters/%s/policies/%s", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("PATCH", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
 // NewWorkloadOptimizationAPIUpdateWorkloadScalingPolicyRequest calls the generic WorkloadOptimizationAPIUpdateWorkloadScalingPolicy builder with application/json body
 func NewWorkloadOptimizationAPIUpdateWorkloadScalingPolicyRequest(server string, clusterId string, policyId string, body WorkloadOptimizationAPIUpdateWorkloadScalingPolicyJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
@@ -21293,6 +21521,22 @@ func NewWorkloadOptimizationAPIGetWorkloadRequest(server string, clusterId strin
 
 		}
 
+		if params.ScopeValue != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "scopeValue", runtime.ParamLocationQuery, *params.ScopeValue); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
 		queryURL.RawQuery = queryValues.Encode()
 	}
 
@@ -21455,6 +21699,97 @@ func NewWorkloadOptimizationAPIGetWorkloadRecommendationManifestRequest(server s
 	queryURL, err := serverURL.Parse(operationPath)
 	if err != nil {
 		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewWorkloadOptimizationAPIGetWorkloadScopedRecommendationMetricsRequest generates requests for WorkloadOptimizationAPIGetWorkloadScopedRecommendationMetrics
+func NewWorkloadOptimizationAPIGetWorkloadScopedRecommendationMetricsRequest(server string, clusterId string, workloadId string, params *WorkloadOptimizationAPIGetWorkloadScopedRecommendationMetricsParams) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "clusterId", runtime.ParamLocationPath, clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "workloadId", runtime.ParamLocationPath, workloadId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/workload-autoscaling/clusters/%s/workloads/%s/scoped-recommendation-metrics", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "scopeValues", runtime.ParamLocationQuery, params.ScopeValues); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+		if params.FromTime != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "fromTime", runtime.ParamLocationQuery, *params.FromTime); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.ToTime != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "toTime", runtime.ParamLocationQuery, *params.ToTime); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
 	}
 
 	req, err := http.NewRequest("GET", queryURL.String(), nil)
@@ -22716,7 +23051,7 @@ type ClientWithResponsesInterface interface {
 	ExternalClusterAPIUpdateClusterTagsWithResponse(ctx context.Context, clusterId string, body ExternalClusterAPIUpdateClusterTagsJSONRequestBody) (*ExternalClusterAPIUpdateClusterTagsResponse, error)
 
 	// ExternalClusterAPICreateClusterToken request
-	ExternalClusterAPICreateClusterTokenWithResponse(ctx context.Context, clusterId string) (*ExternalClusterAPICreateClusterTokenResponse, error)
+	ExternalClusterAPICreateClusterTokenWithResponse(ctx context.Context, clusterId string, params *ExternalClusterAPICreateClusterTokenParams) (*ExternalClusterAPICreateClusterTokenResponse, error)
 
 	// NodeConfigurationAPIListMaxPodsPresets request
 	NodeConfigurationAPIListMaxPodsPresetsWithResponse(ctx context.Context) (*NodeConfigurationAPIListMaxPodsPresetsResponse, error)
@@ -22782,7 +23117,7 @@ type ClientWithResponsesInterface interface {
 	RbacServiceAPIGetGroupWithResponse(ctx context.Context, organizationId string, id string) (*RbacServiceAPIGetGroupResponse, error)
 
 	// UsersAPILeaveOrganization request
-	UsersAPILeaveOrganizationWithResponse(ctx context.Context, organizationId string) (*UsersAPILeaveOrganizationResponse, error)
+	UsersAPILeaveOrganizationWithResponse(ctx context.Context, organizationId string, params *UsersAPILeaveOrganizationParams) (*UsersAPILeaveOrganizationResponse, error)
 
 	// InventoryAPIGetReservations request
 	InventoryAPIGetReservationsWithResponse(ctx context.Context, organizationId string) (*InventoryAPIGetReservationsResponse, error)
@@ -22881,7 +23216,7 @@ type ClientWithResponsesInterface interface {
 	UsersAPIAddUserToOrganizationWithResponse(ctx context.Context, organizationId string, body UsersAPIAddUserToOrganizationJSONRequestBody) (*UsersAPIAddUserToOrganizationResponse, error)
 
 	// UsersAPIRemoveUserFromOrganization request
-	UsersAPIRemoveUserFromOrganizationWithResponse(ctx context.Context, organizationId string, userId string) (*UsersAPIRemoveUserFromOrganizationResponse, error)
+	UsersAPIRemoveUserFromOrganizationWithResponse(ctx context.Context, organizationId string, userId string, params *UsersAPIRemoveUserFromOrganizationParams) (*UsersAPIRemoveUserFromOrganizationResponse, error)
 
 	// UsersAPIListUserGroups request
 	UsersAPIListUserGroupsWithResponse(ctx context.Context, organizationId string, userId string) (*UsersAPIListUserGroupsResponse, error)
@@ -23151,6 +23486,11 @@ type ClientWithResponsesInterface interface {
 	// WorkloadOptimizationAPIGetWorkloadScalingPolicy request
 	WorkloadOptimizationAPIGetWorkloadScalingPolicyWithResponse(ctx context.Context, clusterId string, policyId string) (*WorkloadOptimizationAPIGetWorkloadScalingPolicyResponse, error)
 
+	// WorkloadOptimizationAPIPatchWorkloadScalingPolicy request  with any body
+	WorkloadOptimizationAPIPatchWorkloadScalingPolicyWithBodyWithResponse(ctx context.Context, clusterId string, policyId string, contentType string, body io.Reader) (*WorkloadOptimizationAPIPatchWorkloadScalingPolicyResponse, error)
+
+	WorkloadOptimizationAPIPatchWorkloadScalingPolicyWithResponse(ctx context.Context, clusterId string, policyId string, body WorkloadOptimizationAPIPatchWorkloadScalingPolicyJSONRequestBody) (*WorkloadOptimizationAPIPatchWorkloadScalingPolicyResponse, error)
+
 	// WorkloadOptimizationAPIUpdateWorkloadScalingPolicy request  with any body
 	WorkloadOptimizationAPIUpdateWorkloadScalingPolicyWithBodyWithResponse(ctx context.Context, clusterId string, policyId string, contentType string, body io.Reader) (*WorkloadOptimizationAPIUpdateWorkloadScalingPolicyResponse, error)
 
@@ -23205,6 +23545,9 @@ type ClientWithResponsesInterface interface {
 
 	// WorkloadOptimizationAPIGetWorkloadRecommendationManifest request
 	WorkloadOptimizationAPIGetWorkloadRecommendationManifestWithResponse(ctx context.Context, clusterId string, workloadId string) (*WorkloadOptimizationAPIGetWorkloadRecommendationManifestResponse, error)
+
+	// WorkloadOptimizationAPIGetWorkloadScopedRecommendationMetrics request
+	WorkloadOptimizationAPIGetWorkloadScopedRecommendationMetricsWithResponse(ctx context.Context, clusterId string, workloadId string, params *WorkloadOptimizationAPIGetWorkloadScopedRecommendationMetricsParams) (*WorkloadOptimizationAPIGetWorkloadScopedRecommendationMetricsResponse, error)
 
 	// WorkloadOptimizationAPIGetWorkloadSpec request
 	WorkloadOptimizationAPIGetWorkloadSpecWithResponse(ctx context.Context, clusterId string, workloadId string) (*WorkloadOptimizationAPIGetWorkloadSpecResponse, error)
@@ -30482,6 +30825,36 @@ func (r WorkloadOptimizationAPIGetWorkloadScalingPolicyResponse) GetBody() []byt
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
+type WorkloadOptimizationAPIPatchWorkloadScalingPolicyResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *WorkloadoptimizationV1WorkloadScalingPolicy
+}
+
+// Status returns HTTPResponse.Status
+func (r WorkloadOptimizationAPIPatchWorkloadScalingPolicyResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r WorkloadOptimizationAPIPatchWorkloadScalingPolicyResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r WorkloadOptimizationAPIPatchWorkloadScalingPolicyResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
 type WorkloadOptimizationAPIUpdateWorkloadScalingPolicyResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -30987,6 +31360,36 @@ func (r WorkloadOptimizationAPIGetWorkloadRecommendationManifestResponse) Status
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
 func (r WorkloadOptimizationAPIGetWorkloadRecommendationManifestResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type WorkloadOptimizationAPIGetWorkloadScopedRecommendationMetricsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *WorkloadoptimizationV1GetWorkloadScopedRecommendationMetricsResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r WorkloadOptimizationAPIGetWorkloadScopedRecommendationMetricsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r WorkloadOptimizationAPIGetWorkloadScopedRecommendationMetricsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r WorkloadOptimizationAPIGetWorkloadScopedRecommendationMetricsResponse) GetBody() []byte {
 	return r.Body
 }
 
@@ -32728,8 +33131,8 @@ func (c *ClientWithResponses) ExternalClusterAPIUpdateClusterTagsWithResponse(ct
 }
 
 // ExternalClusterAPICreateClusterTokenWithResponse request returning *ExternalClusterAPICreateClusterTokenResponse
-func (c *ClientWithResponses) ExternalClusterAPICreateClusterTokenWithResponse(ctx context.Context, clusterId string) (*ExternalClusterAPICreateClusterTokenResponse, error) {
-	rsp, err := c.ExternalClusterAPICreateClusterToken(ctx, clusterId)
+func (c *ClientWithResponses) ExternalClusterAPICreateClusterTokenWithResponse(ctx context.Context, clusterId string, params *ExternalClusterAPICreateClusterTokenParams) (*ExternalClusterAPICreateClusterTokenResponse, error) {
+	rsp, err := c.ExternalClusterAPICreateClusterToken(ctx, clusterId, params)
 	if err != nil {
 		return nil, err
 	}
@@ -32938,8 +33341,8 @@ func (c *ClientWithResponses) RbacServiceAPIGetGroupWithResponse(ctx context.Con
 }
 
 // UsersAPILeaveOrganizationWithResponse request returning *UsersAPILeaveOrganizationResponse
-func (c *ClientWithResponses) UsersAPILeaveOrganizationWithResponse(ctx context.Context, organizationId string) (*UsersAPILeaveOrganizationResponse, error) {
-	rsp, err := c.UsersAPILeaveOrganization(ctx, organizationId)
+func (c *ClientWithResponses) UsersAPILeaveOrganizationWithResponse(ctx context.Context, organizationId string, params *UsersAPILeaveOrganizationParams) (*UsersAPILeaveOrganizationResponse, error) {
+	rsp, err := c.UsersAPILeaveOrganization(ctx, organizationId, params)
 	if err != nil {
 		return nil, err
 	}
@@ -33253,8 +33656,8 @@ func (c *ClientWithResponses) UsersAPIAddUserToOrganizationWithResponse(ctx cont
 }
 
 // UsersAPIRemoveUserFromOrganizationWithResponse request returning *UsersAPIRemoveUserFromOrganizationResponse
-func (c *ClientWithResponses) UsersAPIRemoveUserFromOrganizationWithResponse(ctx context.Context, organizationId string, userId string) (*UsersAPIRemoveUserFromOrganizationResponse, error) {
-	rsp, err := c.UsersAPIRemoveUserFromOrganization(ctx, organizationId, userId)
+func (c *ClientWithResponses) UsersAPIRemoveUserFromOrganizationWithResponse(ctx context.Context, organizationId string, userId string, params *UsersAPIRemoveUserFromOrganizationParams) (*UsersAPIRemoveUserFromOrganizationResponse, error) {
+	rsp, err := c.UsersAPIRemoveUserFromOrganization(ctx, organizationId, userId, params)
 	if err != nil {
 		return nil, err
 	}
@@ -34117,6 +34520,23 @@ func (c *ClientWithResponses) WorkloadOptimizationAPIGetWorkloadScalingPolicyWit
 	return ParseWorkloadOptimizationAPIGetWorkloadScalingPolicyResponse(rsp)
 }
 
+// WorkloadOptimizationAPIPatchWorkloadScalingPolicyWithBodyWithResponse request with arbitrary body returning *WorkloadOptimizationAPIPatchWorkloadScalingPolicyResponse
+func (c *ClientWithResponses) WorkloadOptimizationAPIPatchWorkloadScalingPolicyWithBodyWithResponse(ctx context.Context, clusterId string, policyId string, contentType string, body io.Reader) (*WorkloadOptimizationAPIPatchWorkloadScalingPolicyResponse, error) {
+	rsp, err := c.WorkloadOptimizationAPIPatchWorkloadScalingPolicyWithBody(ctx, clusterId, policyId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseWorkloadOptimizationAPIPatchWorkloadScalingPolicyResponse(rsp)
+}
+
+func (c *ClientWithResponses) WorkloadOptimizationAPIPatchWorkloadScalingPolicyWithResponse(ctx context.Context, clusterId string, policyId string, body WorkloadOptimizationAPIPatchWorkloadScalingPolicyJSONRequestBody) (*WorkloadOptimizationAPIPatchWorkloadScalingPolicyResponse, error) {
+	rsp, err := c.WorkloadOptimizationAPIPatchWorkloadScalingPolicy(ctx, clusterId, policyId, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseWorkloadOptimizationAPIPatchWorkloadScalingPolicyResponse(rsp)
+}
+
 // WorkloadOptimizationAPIUpdateWorkloadScalingPolicyWithBodyWithResponse request with arbitrary body returning *WorkloadOptimizationAPIUpdateWorkloadScalingPolicyResponse
 func (c *ClientWithResponses) WorkloadOptimizationAPIUpdateWorkloadScalingPolicyWithBodyWithResponse(ctx context.Context, clusterId string, policyId string, contentType string, body io.Reader) (*WorkloadOptimizationAPIUpdateWorkloadScalingPolicyResponse, error) {
 	rsp, err := c.WorkloadOptimizationAPIUpdateWorkloadScalingPolicyWithBody(ctx, clusterId, policyId, contentType, body)
@@ -34284,6 +34704,15 @@ func (c *ClientWithResponses) WorkloadOptimizationAPIGetWorkloadRecommendationMa
 		return nil, err
 	}
 	return ParseWorkloadOptimizationAPIGetWorkloadRecommendationManifestResponse(rsp)
+}
+
+// WorkloadOptimizationAPIGetWorkloadScopedRecommendationMetricsWithResponse request returning *WorkloadOptimizationAPIGetWorkloadScopedRecommendationMetricsResponse
+func (c *ClientWithResponses) WorkloadOptimizationAPIGetWorkloadScopedRecommendationMetricsWithResponse(ctx context.Context, clusterId string, workloadId string, params *WorkloadOptimizationAPIGetWorkloadScopedRecommendationMetricsParams) (*WorkloadOptimizationAPIGetWorkloadScopedRecommendationMetricsResponse, error) {
+	rsp, err := c.WorkloadOptimizationAPIGetWorkloadScopedRecommendationMetrics(ctx, clusterId, workloadId, params)
+	if err != nil {
+		return nil, err
+	}
+	return ParseWorkloadOptimizationAPIGetWorkloadScopedRecommendationMetricsResponse(rsp)
 }
 
 // WorkloadOptimizationAPIGetWorkloadSpecWithResponse request returning *WorkloadOptimizationAPIGetWorkloadSpecResponse
@@ -40645,6 +41074,32 @@ func ParseWorkloadOptimizationAPIGetWorkloadScalingPolicyResponse(rsp *http.Resp
 	return response, nil
 }
 
+// ParseWorkloadOptimizationAPIPatchWorkloadScalingPolicyResponse parses an HTTP response from a WorkloadOptimizationAPIPatchWorkloadScalingPolicyWithResponse call
+func ParseWorkloadOptimizationAPIPatchWorkloadScalingPolicyResponse(rsp *http.Response) (*WorkloadOptimizationAPIPatchWorkloadScalingPolicyResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &WorkloadOptimizationAPIPatchWorkloadScalingPolicyResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest WorkloadoptimizationV1WorkloadScalingPolicy
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
 // ParseWorkloadOptimizationAPIUpdateWorkloadScalingPolicyResponse parses an HTTP response from a WorkloadOptimizationAPIUpdateWorkloadScalingPolicyWithResponse call
 func ParseWorkloadOptimizationAPIUpdateWorkloadScalingPolicyResponse(rsp *http.Response) (*WorkloadOptimizationAPIUpdateWorkloadScalingPolicyResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
@@ -41077,6 +41532,32 @@ func ParseWorkloadOptimizationAPIGetWorkloadRecommendationManifestResponse(rsp *
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest WorkloadoptimizationV1GetWorkloadRecommendationManifestResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseWorkloadOptimizationAPIGetWorkloadScopedRecommendationMetricsResponse parses an HTTP response from a WorkloadOptimizationAPIGetWorkloadScopedRecommendationMetricsWithResponse call
+func ParseWorkloadOptimizationAPIGetWorkloadScopedRecommendationMetricsResponse(rsp *http.Response) (*WorkloadOptimizationAPIGetWorkloadScopedRecommendationMetricsResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &WorkloadOptimizationAPIGetWorkloadScopedRecommendationMetricsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest WorkloadoptimizationV1GetWorkloadScopedRecommendationMetricsResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
