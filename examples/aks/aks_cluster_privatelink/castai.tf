@@ -18,7 +18,7 @@ module "castai-aks-cluster" {
   umbrella_enabled              = true
 
   aks_cluster_name    = azurerm_kubernetes_cluster.this.name
-  aks_cluster_region  = var.cluster_region
+  aks_cluster_region  = azurerm_kubernetes_cluster.this.location
   node_resource_group = azurerm_kubernetes_cluster.this.node_resource_group
   resource_group      = azurerm_kubernetes_cluster.this.resource_group_name
 
