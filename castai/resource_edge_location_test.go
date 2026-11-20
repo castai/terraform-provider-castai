@@ -8,6 +8,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -930,6 +931,86 @@ func TestEdgeLocationOCIVcnPeeredMapping(t *testing.T) {
 		})
 		if out == nil || !out.VcnPeered.IsNull() {
 			t.Fatalf("expected vcn_peered to be null, got %v", out.VcnPeered)
+		}
+	})
+}
+
+func TestEdgeClusterSpecUpdateNetworkingCIDRs(t *testing.T) {
+	r := &edgeLocationResource{}
+	ctx := context.Background()
+
+	networking := func(tunneled attr.Value) *networkingModel {
+		return &networkingModel{
+			TunneledCIDRs: types.ListValueMust(types.StringType, []attr.Value{tunneled}),
+			PodCIDR:       types.StringValue("10.200.0.0/24"),
+			ServiceCIDR:   types.StringValue("10.99.0.0/16"),
+			ExternalCIDR:  types.StringValue("10.72.0.0/16"),
+		}
+	}
+
+	t.Run("ranges are echoed back when the networking block changes", func(t *testing.T) {
+		// Without an update mask the API replaces the whole edge location, so the
+		// unchanged ranges have to travel with the request.
+		plan := edgeLocationModel{Networking: networking(types.StringValue("10.10.0.0/16"))}
+		state := edgeLocationModel{Networking: networking(types.StringValue("192.168.0.0/24"))}
+
+		spec, diags := r.edgeClusterSpecUpdate(ctx, plan, state)
+		if diags.HasError() {
+			t.Fatalf("unexpected diagnostics: %v", diags)
+		}
+		if spec.Networking == nil {
+			t.Fatal("expected networking to be set")
+		}
+		if got := lo.FromPtr(spec.Networking.PodCidr); got != "10.200.0.0/24" {
+			t.Fatalf("unexpected pod CIDR: %q", got)
+		}
+		if got := lo.FromPtr(spec.Networking.ServiceCidr); got != "10.99.0.0/16" {
+			t.Fatalf("unexpected service CIDR: %q", got)
+		}
+		if got := lo.FromPtr(spec.Networking.ExternalCidr); got != "10.72.0.0/16" {
+			t.Fatalf("unexpected external CIDR: %q", got)
+		}
+	})
+}
+
+func TestToEdgeClusterSpecNetworkingCIDRs(t *testing.T) {
+	r := &edgeLocationResource{}
+	ctx := context.Background()
+
+	t.Run("ranges are sent to the API", func(t *testing.T) {
+		spec, diags := r.toEdgeClusterSpec(ctx, nil, &networkingModel{
+			TunneledCIDRs: types.ListNull(types.StringType),
+			PodCIDR:       types.StringValue("10.200.0.0/24"),
+			ServiceCIDR:   types.StringValue("10.99.0.0/16"),
+			ExternalCIDR:  types.StringValue("10.72.0.0/16"),
+		}, nil, nil)
+		if diags.HasError() {
+			t.Fatalf("unexpected diagnostics: %v", diags)
+		}
+		if spec.Networking == nil {
+			t.Fatal("expected networking to be set")
+		}
+		if got := lo.FromPtr(spec.Networking.PodCidr); got != "10.200.0.0/24" {
+			t.Fatalf("unexpected pod CIDR: %q", got)
+		}
+		if got := lo.FromPtr(spec.Networking.ServiceCidr); got != "10.99.0.0/16" {
+			t.Fatalf("unexpected service CIDR: %q", got)
+		}
+		if got := lo.FromPtr(spec.Networking.ExternalCidr); got != "10.72.0.0/16" {
+			t.Fatalf("unexpected external CIDR: %q", got)
+		}
+	})
+
+	t.Run("omitted ranges are not sent", func(t *testing.T) {
+		spec, diags := r.toEdgeClusterSpec(ctx, nil, &networkingModel{TunneledCIDRs: types.ListNull(types.StringType)}, nil, nil)
+		if diags.HasError() {
+			t.Fatalf("unexpected diagnostics: %v", diags)
+		}
+		if spec.Networking == nil {
+			t.Fatal("expected networking to be set")
+		}
+		if spec.Networking.PodCidr != nil || spec.Networking.ServiceCidr != nil || spec.Networking.ExternalCidr != nil {
+			t.Fatalf("expected omitted ranges, got %+v", spec.Networking)
 		}
 	})
 }
