@@ -21,9 +21,8 @@ locals {
   dns_service_ip = "10.21.0.10"
   pod_cidr       = "192.168.0.0/16"
 
-  # CAST AI hostnames, parsed from the endpoint URL variables - the single
-  # source of truth for both the module inputs and the private DNS records.
-  # Each URL is "https://host" or "host:443"; only the host part matters here.
+  # CAST AI hostnames. Validated against the zone resource that they live under its private DNS zone.
+  # Each URL is expected to be "https://host" or "host:443", only <host> matters here.
   castai_urls = [
     var.castai_api_url,
     var.castai_grpc_url,
@@ -33,14 +32,6 @@ locals {
     var.castai_telemetry_url,
   ]
   castai_hostnames = [for url in local.castai_urls : regex("^(?:[a-zA-Z][a-zA-Z0-9+.-]*://)?([^:/]+)", url)[0]]
-
-  # Record names relative to the private DNS zone: "api.cast.ai" -> "api",
-  # "kvisor.prod-eu.cast.ai" -> "kvisor.prod-eu". The zone resource carries a
-  # precondition that every hostname actually lives under the zone.
-  castai_dns_records = distinct(concat(
-    [for host in local.castai_hostnames : trimsuffix(host, ".${var.castai_private_dns_zone}")],
-    var.castai_extra_dns_hostnames,
-  ))
 
   tags = merge(
     {
