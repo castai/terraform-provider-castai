@@ -89,6 +89,9 @@ data "castai_workload_scaling_policy" "all" {
 	- Deployment's rollout strategy allows for downtime.
 	- Recommendation apply type is "immediate".
 	- Cluster has workload-autoscaler component version v0.35.3 or higher. (see [below for nested schema](#nestedatt--rollout_behavior))
+- `scope` (List of Object) Defines the scope used to group recommendations per scope value. When unset, recommendations are not scoped.
+	Workloads with HPA-driven replica scaling or JVM optimization enabled fall back to unscoped recommendations.
+	Minimum required workload-autoscaler version: v1.11.0. (see [below for nested schema](#nestedatt--scope))
 - `startup` (List of Object) (see [below for nested schema](#nestedatt--startup))
 
 <a id="nestedatt--anomaly_detection"></a>
@@ -380,6 +383,14 @@ Read-Only:
 - `delay_seconds` (Number)
 - `prefer_one_by_one` (Boolean)
 - `type` (String)
+
+
+<a id="nestedatt--scope"></a>
+### Nested Schema for `scope`
+
+Read-Only:
+
+- `preset` (String)
 
 
 <a id="nestedatt--startup"></a>

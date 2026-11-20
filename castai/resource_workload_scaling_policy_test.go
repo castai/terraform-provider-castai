@@ -189,30 +189,30 @@ func clusterComponentsConfig(clusterName, projectID, name string) string {
 		cleanup_on_fail  = true
 		wait             = true
 		replace          = true
-	
+
 		set {
 			name  = "provider"
 			value = "gke"
 		}
-	
+
 		set_sensitive {
 			name  = "apiKey"
 			value = castai_gke_cluster.test.cluster_token
 		}
-	
+
 		set {
 			name  = "apiURL"
 			value = %[1]q
 		}
-	
+
 		set {
 			name  = "createNamespace"
 			value = "false"
 		}
-	
+
 		depends_on = [castai_gke_cluster.test]
 	}
-	
+
 	resource "helm_release" "castai_cluster_controller" {
 		depends_on       = [helm_release.castai_agent]
 		name             = "castai-cluster-controller"
@@ -228,23 +228,23 @@ func clusterComponentsConfig(clusterName, projectID, name string) string {
 			name  = "castai.apiKey"
 			value = castai_gke_cluster.test.cluster_token
 		}
-	
+
 		set {
 			name  = "castai.apiURL"
 			value = %[1]q
 		}
-	
+
 		set {
 			name  = "castai.clusterID"
 			value = castai_gke_cluster.test.id
 		}
-	
+
 		set {
 			name  = "autoscaling.enabled"
 			value = "false"
 		}
 	}
-	
+
 	resource "helm_release" "castai_workload_autoscaler" {
 		depends_on       = [helm_release.castai_agent, helm_release.castai_cluster_controller]
 		name             = "castai-workload-autoscaler"
@@ -260,12 +260,12 @@ func clusterComponentsConfig(clusterName, projectID, name string) string {
 			name  = "castai.apiKey"
 			value = castai_gke_cluster.test.cluster_token
 		}
-	
+
 		set {
 			name  = "castai.apiURL"
 			value = %[1]q
 		}
-	
+
 		set {
 			name  = "castai.clusterID"
 			value = castai_gke_cluster.test.id
@@ -1117,6 +1117,78 @@ func Test_toPredictiveScaling(t *testing.T) {
 	}
 }
 
+func Test_toScope(t *testing.T) {
+	testCases := map[string]struct {
+		args map[string]any
+		exp  *sdk.WorkloadoptimizationV1ScopeSettings
+	}{
+		"should return scope settings for instance type preset": {
+			args: map[string]any{
+				FieldScopePreset: string(sdk.WorkloadoptimizationV1ScopePresetSCOPEPRESETINSTANCETYPE),
+			},
+			exp: &sdk.WorkloadoptimizationV1ScopeSettings{
+				Preset: lo.ToPtr(sdk.WorkloadoptimizationV1ScopePresetSCOPEPRESETINSTANCETYPE),
+			},
+		},
+		"should return nil on empty map": {
+			args: map[string]any{},
+			exp:  nil,
+		},
+		"should return nil when preset is missing": {
+			args: map[string]any{
+				"unknown": "value",
+			},
+			exp: nil,
+		},
+		"should return nil when preset is empty": {
+			args: map[string]any{
+				FieldScopePreset: "",
+			},
+			exp: nil,
+		},
+	}
+	for name, tc := range testCases {
+		t.Run(name, func(t *testing.T) {
+			r := require.New(t)
+			got := toScope(tc.args)
+			r.Equal(tc.exp, got)
+		})
+	}
+}
+
+func Test_toScopeMap(t *testing.T) {
+	testCases := map[string]struct {
+		args *sdk.WorkloadoptimizationV1ScopeSettings
+		exp  []map[string]any
+	}{
+		"should return scope map for instance type preset": {
+			args: &sdk.WorkloadoptimizationV1ScopeSettings{
+				Preset: lo.ToPtr(sdk.WorkloadoptimizationV1ScopePresetSCOPEPRESETINSTANCETYPE),
+			},
+			exp: []map[string]any{
+				{
+					FieldScopePreset: string(sdk.WorkloadoptimizationV1ScopePresetSCOPEPRESETINSTANCETYPE),
+				},
+			},
+		},
+		"should return nil for nil input": {
+			args: nil,
+			exp:  nil,
+		},
+		"should return nil for empty settings": {
+			args: &sdk.WorkloadoptimizationV1ScopeSettings{},
+			exp:  nil,
+		},
+	}
+	for name, tc := range testCases {
+		t.Run(name, func(t *testing.T) {
+			r := require.New(t)
+			got := toScopeMap(tc.args)
+			r.Equal(tc.exp, got)
+		})
+	}
+}
+
 func Test_toRolloutBehavior(t *testing.T) {
 	tests := map[string]struct {
 		args map[string]any
@@ -1875,6 +1947,45 @@ func Test_resourceWorkloadScalingPolicyCreate(t *testing.T) {
 					WorkloadOptimizationAPICreateWorkloadScalingPolicy(gomock.Any(), clusterId, gomock.Any()).
 					DoAndReturn(func(_ context.Context, cID string, req sdk.WorkloadOptimizationAPICreateWorkloadScalingPolicyJSONRequestBody, _ ...sdk.RequestEditorFn) (*http.Response, error) {
 						r.Equal(clusterId, cID)
+						return toResponse(r, policy, http.StatusOK)
+					})
+				mockClient.EXPECT().
+					WorkloadOptimizationAPIGetWorkloadScalingPolicy(gomock.Any(), clusterId, policyId).
+					DoAndReturn(func(_ context.Context, cID string, pID string, _ ...sdk.RequestEditorFn) (*http.Response, error) {
+						r.Equal(clusterId, cID)
+						r.Equal(policyId, pID)
+						return toResponse(r, policy, http.StatusOK)
+					})
+			},
+		},
+		"should create scaling policy with scope in recommendation policies": {
+			schemaVersion: 0,
+			state: map[string]cty.Value{
+				"cluster_id": cty.StringVal(clusterId),
+				"name":       cty.StringVal(name),
+				"apply_type": cty.StringVal("IMMEDIATE"),
+				"scope": cty.ListVal([]cty.Value{
+					cty.ObjectVal(map[string]cty.Value{
+						"preset": cty.StringVal(string(sdk.WorkloadoptimizationV1ScopePresetSCOPEPRESETINSTANCETYPE)),
+					}),
+				}),
+			},
+			setup: func(r *require.Assertions, mockClient *mock_sdk.MockClientInterface) {
+				applyType := sdk.WorkloadoptimizationV1ApplyType("IMMEDIATE")
+				policy := &sdk.WorkloadoptimizationV1WorkloadScalingPolicy{
+					OrganizationId: organizationId,
+					ClusterId:      clusterId,
+					Id:             policyId,
+					Name:           name,
+					ApplyType:      applyType,
+				}
+
+				mockClient.EXPECT().
+					WorkloadOptimizationAPICreateWorkloadScalingPolicy(gomock.Any(), clusterId, gomock.Any()).
+					DoAndReturn(func(_ context.Context, cID string, req sdk.WorkloadOptimizationAPICreateWorkloadScalingPolicyJSONRequestBody, _ ...sdk.RequestEditorFn) (*http.Response, error) {
+						r.Equal(clusterId, cID)
+						r.NotNil(req.RecommendationPolicies.Scope)
+						r.Equal(sdk.WorkloadoptimizationV1ScopePresetSCOPEPRESETINSTANCETYPE, lo.FromPtr(req.RecommendationPolicies.Scope.Preset))
 						return toResponse(r, policy, http.StatusOK)
 					})
 				mockClient.EXPECT().
