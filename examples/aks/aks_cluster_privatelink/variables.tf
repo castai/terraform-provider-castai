@@ -12,7 +12,7 @@ variable "cluster_name" {
 
 variable "cluster_region" {
   type        = string
-  description = "Region of the cluster and of the private endpoint. Keep it in the producer's region for the shortest path, or in the region the producer advertises in its alias."
+  description = "Region of the cluster and of the private endpoint."
 }
 
 variable "aks_kubernetes_version" {
@@ -33,10 +33,7 @@ variable "aks_node_count" {
   default     = 2
 }
 
-# CAST AI variables. Every endpoint URL is an explicit input - mirroring the
-# per-environment endpoint lists in the CAST AI docs - and the private DNS
-# records are derived from their hostnames, so switching environments is a
-# tfvars change only. Defaults target the US (prod-master) environment.
+# CAST AI variables.
 
 variable "castai_api_token" {
   type        = string
@@ -46,37 +43,37 @@ variable "castai_api_token" {
 
 variable "castai_api_url" {
   type        = string
-  description = "CAST AI REST API URL. EU: https://api.eu.cast.ai, dev: https://api.dev-master.cast.ai."
+  description = "CAST AI REST API URL."
   default     = "https://api.cast.ai"
 }
 
 variable "castai_grpc_url" {
   type        = string
-  description = "CAST AI gRPC URL used by the pod pinner. EU: grpc.eu.cast.ai:443."
+  description = "CAST AI gRPC URL used by the pod pinner."
   default     = "grpc.cast.ai:443"
 }
 
 variable "castai_api_grpc_url" {
   type        = string
-  description = "CAST AI gRPC API URL used by Kvisor, APA and newer components. India: api-grpc.india.cast.ai:443."
+  description = "CAST AI gRPC API URL used by Kvisor and other components."
   default     = "api-grpc.cast.ai:443"
 }
 
 variable "castai_files_url" {
   type        = string
-  description = "Static file proxies for CAST AI node binaries and node logs. EU: files.eu.cast.ai:443."
+  description = "Static file proxies for CAST AI node binaries."
   default     = "files.cast.ai:443"
 }
 
 variable "castai_kvisor_grpc_addr" {
   type        = string
-  description = "CAST AI Kvisor gRPC address. EU: kvisor.prod-eu.cast.ai:443, dev: kvisor.dev-master.cast.ai:443."
+  description = "CAST AI Kvisor gRPC address."
   default     = "kvisor.prod-master.cast.ai:443"
 }
 
 variable "castai_telemetry_url" {
   type        = string
-  description = "CAST AI telemetry endpoint used by the Kvisor reliability-metrics exporter. EU: telemetry.prod-eu.cast.ai:443."
+  description = "CAST AI telemetry endpoint used by the Kvisor reliability-metrics exporter."
   default     = "telemetry.prod-master.cast.ai:443"
 }
 
@@ -97,13 +94,7 @@ variable "tags" {
 variable "private_link_service_alias" {
   type        = string
   description = <<-EOT
-    Alias of the CAST AI Private Link Service (producer side). Take it from the
-    producer workspace:
-
-      tofu output -raw private_link_service_alias
-
-    For the dev-master deployment the consumer test harness uses:
-    cast-privatelink-dev-master-pls.7e8d457a-8657-4d43-8ec5-0019df225003.westeurope.azure.privatelinkservice
+    Alias of the CAST AI Private Link Service (producer side). Take it from CAST AI documentation.
   EOT
 
   validation {
@@ -116,13 +107,7 @@ variable "castai_private_dns_zone" {
   type        = string
   description = <<-EOT
     Name of the private DNS zone that steers CAST AI hostnames to the private
-    endpoint. Keep it at "cast.ai": every record name is derived from the URL
-    variables by stripping this zone suffix, and a narrower zone (e.g.
-    "eu.cast.ai") does not hold all of them - kvisor.prod-eu.cast.ai lives
-    directly under cast.ai, not under eu.cast.ai.
-
-    Inside the VNet this zone becomes authoritative, so listed hostnames resolve
-    privately and unlisted ones do not resolve at all (no public fallback).
+    endpoint. In most deployments, keep it at "cast.ai": the safest approach to cover all hostnames automatically.
   EOT
   default     = "cast.ai"
 }
