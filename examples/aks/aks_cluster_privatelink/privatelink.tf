@@ -3,7 +3,7 @@
 # Two resources enable CAST AI private traffic:
 #
 # 1. A private endpoint that connects the VNet to the CAST AI Private Link Service via alias.
-# 2. A private DNS zone that redirects CAST AI hostnames to the private endpoint NIC. This can be done per-host or for the whole zone.
+# 2. A private DNS zone with a wildcard record that points every CAST AI hostname at the private endpoint NIC.
 # Approval of the private link connection happens automatically, as long as CAST AI is notified to include the given subscription in the allow list.
 
 
@@ -16,7 +16,6 @@ resource "azurerm_private_endpoint" "castai" {
 
   private_service_connection {
     name = "${local.name}-castai-pls"
-
 
     # The alias of the producer Private Link Service, see CAST AI docs for the possible values per region.
     # A PLS in one region can be used to access CAST AI deployment in another region as well.
@@ -33,7 +32,7 @@ resource "azurerm_private_endpoint" "castai" {
 
 # ------------------------------------------------------------------------------
 # DNS: the consumer's responsibility in Azure Private Link to route traffic correctly.
-# This is just one example way to set this up - it can be a whole zone or list of hostnames.
+# This is just one example way to set this up - a wildcard record for the whole zone, or one record per hostname.
 # The important bit is that those hostnames end up going through the Private Link.
 # ------------------------------------------------------------------------------
 
@@ -59,21 +58,16 @@ resource "azurerm_private_dns_zone_virtual_network_link" "castai" {
   tags                 = local.tags
 }
 
-# One record per CAST AI hostname the cluster talks to. Each name is relative to the zone above.
-# For example "api" -> api.cast.ai, "kvisor.prod-master" -> "kvisor.prod-master.cast.ai"
+# A single wildcard record points every hostname under the zone at the private endpoint:
+# This is a simpler setup but separate DNS records per endpoint host can be used as well.
+# See https://docs.cast.ai/docs/communication-requirements for the list.
+# Two properties to keep in mind:
 #
-# Caveat that comes with a parent zone like cast.ai: inside this VNet the zone is authoritative,
-# so a hostname within the zone without record here, will not NOT fall back to the public DNS.
-# This is useful for validation - "is this traffic private?" - but it might be undesired.
-# authoritative, so a CAST AI hostname without a record here does NOT fall back
-# to public DNS. That is what makes "is this traffic private?" unambiguous, but
-# it also means every hostname CAST AI starts using has to be added here.
+#   - "cast.ai" itself is NOT covered by "*.cast.ai"; add a dedicated record if that name is needed.
+#   - Non-service names under the zone (e.g. www.cast.ai) resolve to the endpoint too.
 #
-# Azure Private DNS has no wildcard records, so there is no "*.cast.ai" shortcut.
 resource "azurerm_private_dns_a_record" "castai" {
-  for_each = toset(local.castai_dns_records)
-
-  name                = each.value
+  name                = "*"
   private_dns_zone_id = azurerm_private_dns_zone.castai.id
   ttl                 = 60
 
