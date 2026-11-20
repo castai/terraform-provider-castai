@@ -25,7 +25,7 @@ variable "castai_api_url" {
   default     = "https://api.cast.ai"
 }
 
-# Variables required for connecting EKS cluster to CAST AI
+# Variables required for connecting GKE cluster to CAST AI
 variable "castai_api_token" {
   type        = string
   description = "CAST AI API token created in console.cast.ai API Access keys section."
@@ -53,4 +53,16 @@ variable "gke_img_type" {
   type        = string
   description = "defines the type of image cluster nodes should use."
   default     = "COS_CONTAINERD"
+}
+
+variable "install_helm_live" {
+  type        = bool
+  description = "Optional parameter, if set to true - the 'castai-live' Helm chart will be installed on the cluster. Helm chart must be installed to enable live migration functionality, the option exists only for developers."
+  default     = true
+}
+
+variable "live_helm_version" {
+  type        = string
+  description = "Version of the 'castai-live' Helm chart. Defaults to the latest version."
+  default     = null
 }
