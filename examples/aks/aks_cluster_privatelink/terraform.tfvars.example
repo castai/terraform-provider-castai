@@ -1,0 +1,45 @@
+cluster_name     = "castai-pls-example"
+cluster_region   = "westeurope"
+subscription_id  = "<azure-subscription-id>"
+castai_api_token = "<cast-ai-api-token>"
+
+# Alias of the CAST AI Private Link Service. Read it from the producer workspace
+# in the cast-iac repository:
+#   cd privatelink/azure && tofu output -raw private_link_service_alias
+private_link_service_alias = "<pls-alias>.azure.privatelinkservice"
+
+# Every endpoint URL below is an input; the private DNS records are derived
+# from their hostnames, so switching environments is a copy of one block.
+# Defaults (below) target the US (prod-master) environment:
+
+# castai_api_url       = "https://api.cast.ai"
+# castai_grpc_url      = "grpc.cast.ai:443"
+# castai_api_grpc_url  = "api-grpc.cast.ai:443"
+# castai_files_url     = "files.cast.ai:443"
+# castai_kvisor_grpc_addr = "kvisor.prod-master.cast.ai:443"
+# castai_telemetry_url   = "telemetry.prod-master.cast.ai:443"
+
+# --- EU region ---------------------------------------------------------------
+# castai_api_url       = "https://api.eu.cast.ai"
+# castai_grpc_url      = "grpc.eu.cast.ai:443"
+# castai_api_grpc_url  = "api-grpc.eu.cast.ai:443"
+# castai_files_url     = "files.eu.cast.ai:443"
+# castai_kvisor_grpc_addr = "kvisor.prod-eu.cast.ai:443"
+# castai_telemetry_url   = "telemetry.prod-eu.cast.ai:443"
+
+# --- dev-master producer (auto-approves Engineering-dev / e2e-tests) --------
+# private_link_service_alias = "cast-privatelink-dev-master-pls.7e8d457a-8657-4d43-8ec5-0019df225003.westeurope.azure.privatelinkservice"
+# castai_api_url       = "https://api.dev-master.cast.ai"
+# castai_grpc_url      = "grpc.dev-master.cast.ai:443"
+# castai_api_grpc_url  = "api-grpc.dev-master.cast.ai:443"
+# castai_files_url     = "files.dev-master.cast.ai:443"
+# castai_kvisor_grpc_addr = "kvisor.dev-master.cast.ai:443"
+# castai_telemetry_url   = "telemetry.dev-master.cast.ai:443"
+
+# --- India region ------------------------------------------------------------
+# castai_api_url       = "https://api.india.cast.ai"
+# castai_grpc_url      = "grpc.india.cast.ai:443"
+# castai_api_grpc_url  = "api-grpc.india.cast.ai:443"
+# castai_files_url     = "files.india.cast.ai:443"
+# castai_kvisor_grpc_addr = "kvisor.india.cast.ai:443"
+# castai_telemetry_url   = "telemetry.india.cast.ai:443"
