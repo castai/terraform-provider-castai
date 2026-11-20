@@ -94,5 +94,8 @@ resource "castai_workload_scaling_policy" "services" {
       optimization = true
     }
   }
+  scope {
+    preset = "SCOPE_PRESET_INSTANCE_TYPE"
+  }
   excluded_containers = ["container-1", "container-2"]
 }

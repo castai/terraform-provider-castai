@@ -67,6 +67,8 @@ const (
 	FieldRolloutBehaviorDelaySeconds                      = "delay_seconds"
 	FieldJVM                                              = "jvm"
 	FieldPredictiveScaling                                = "predictive_scaling"
+	FieldScope                                            = "scope"
+	FieldScopePreset                                      = "preset"
 	FieldMemoryEvent                                      = "memory_event"
 	FieldApplyType                                        = "apply_type"
 	FieldConfidenceThreshold                              = "threshold"
@@ -469,6 +471,25 @@ It can be either:
 					},
 				},
 			},
+			FieldScope: {
+				Type:     schema.TypeList,
+				Optional: true,
+				MaxItems: 1,
+				Description: `Defines the scope used to group recommendations per scope value. When unset, recommendations are not scoped.
+	Workloads with HPA-driven replica scaling or JVM optimization enabled fall back to unscoped recommendations.
+	Minimum required workload-autoscaler version: v1.11.0.`,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						FieldScopePreset: {
+							Type:     schema.TypeString,
+							Required: true,
+							Description: `Defines the scope preset used to group recommendations.
+	- SCOPE_PRESET_INSTANCE_TYPE - recommendations are calculated per node instance type.`,
+							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{string(sdk.WorkloadoptimizationV1ScopePresetSCOPEPRESETINSTANCETYPE)}, false)),
+						},
+					},
+				},
+			},
 		},
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(createTimeout),
@@ -836,6 +857,8 @@ func resourceWorkloadScalingPolicyCreate(ctx context.Context, d *schema.Resource
 
 	req.RecommendationPolicies.HpaConverters = toHpaConverters(d.Get(FieldHpaConverters).([]any))
 
+	req.RecommendationPolicies.Scope = toScope(toSection(d, FieldScope))
+
 	ar, err := toAssignmentRules(toSection(d, FieldAssignmentRules))
 	if err != nil {
 		return diag.FromErr(err)
@@ -994,6 +1017,9 @@ func flattenWorkloadScalingPolicy(d *schema.ResourceData, sp *sdk.Workloadoptimi
 	if err := d.Set(FieldAnomalyDetection, toAnomalyDetectionMap(sp.RecommendationPolicies.AnomalyDetection)); err != nil {
 		return fmt.Errorf("setting anomaly detection: %w", err)
 	}
+	if err := d.Set(FieldScope, toScopeMap(sp.RecommendationPolicies.Scope)); err != nil {
+		return fmt.Errorf("setting scope: %w", err)
+	}
 	if err := d.Set(FieldAssignmentRules, toAssignmentRulesMap(getResourceFrom(d, FieldAssignmentRules), sp.AssignmentRules)); err != nil {
 		return fmt.Errorf("setting assignment rules: %w", err)
 	}
@@ -1035,6 +1061,7 @@ func updateScalingPolicy(ctx context.Context, d *schema.ResourceData, meta any) 
 		FieldAnomalyDetection,
 		FieldExcludedContainers,
 		FieldHpaConverters,
+		FieldScope,
 	) {
 		tflog.Info(ctx, "scaling policy up to date")
 		return nil, nil
@@ -1074,6 +1101,7 @@ func updateScalingPolicy(ctx context.Context, d *schema.ResourceData, meta any) 
 			AnomalyDetection:   toAnomalyDetection(toSection(d, FieldAnomalyDetection)),
 			ExcludedContainers: toExcludedContainers(d),
 			HpaConverters:      toHpaConverters(d.Get(FieldHpaConverters).([]any)),
+			Scope:              toScope(toSection(d, FieldScope)),
 		},
 	}
 
@@ -2021,6 +2049,35 @@ func toPredictiveScaling(m map[string]any) *sdk.WorkloadoptimizationV1Predictive
 
 	return &sdk.WorkloadoptimizationV1PredictiveScalingSettings{
 		Cpu: cpuResource,
+	}
+}
+
+func toScopeMap(s *sdk.WorkloadoptimizationV1ScopeSettings) []map[string]any {
+	if s == nil || s.Preset == nil {
+		return nil
+	}
+
+	return []map[string]any{
+		{
+			FieldScopePreset: string(*s.Preset),
+		},
+	}
+}
+
+func toScope(m map[string]any) *sdk.WorkloadoptimizationV1ScopeSettings {
+	if len(m) == 0 {
+		return nil
+	}
+
+	preset, ok := m[FieldScopePreset].(string)
+	if !ok || preset == "" {
+		return nil
+	}
+
+	presetValue := sdk.WorkloadoptimizationV1ScopePreset(preset)
+
+	return &sdk.WorkloadoptimizationV1ScopeSettings{
+		Preset: &presetValue,
 	}
 }
 

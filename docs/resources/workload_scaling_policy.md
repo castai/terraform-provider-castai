@@ -111,6 +111,9 @@ resource "castai_workload_scaling_policy" "services" {
       optimization = true
     }
   }
+  scope {
+    preset = "SCOPE_PRESET_INSTANCE_TYPE"
+  }
   excluded_containers = ["container-1", "container-2"]
 }
 ```
@@ -149,6 +152,9 @@ resource "castai_workload_scaling_policy" "services" {
 	- Deployment's rollout strategy allows for downtime.
 	- Recommendation apply type is "immediate".
 	- Cluster has workload-autoscaler component version v0.35.3 or higher. (see [below for nested schema](#nestedblock--rollout_behavior))
+- `scope` (Block List, Max: 1) Defines the scope used to group recommendations per scope value. When unset, recommendations are not scoped.
+	Workloads with HPA-driven replica scaling or JVM optimization enabled fall back to unscoped recommendations.
+	Minimum required workload-autoscaler version: v1.11.0. (see [below for nested schema](#nestedblock--scope))
 - `startup` (Block List, Max: 1) (see [below for nested schema](#nestedblock--startup))
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
@@ -514,6 +520,15 @@ Optional:
 - `type` (String) Defines the rollout type to be used when applying recommendations.
 	- NO_DISRUPTION - pods are restarted without causing service disruption.
 	- UNSPECIFIED - rollout type is not specified.
+
+
+<a id="nestedblock--scope"></a>
+### Nested Schema for `scope`
+
+Required:
+
+- `preset` (String) Defines the scope preset used to group recommendations.
+	- SCOPE_PRESET_INSTANCE_TYPE - recommendations are calculated per node instance type.
 
 
 <a id="nestedblock--startup"></a>
