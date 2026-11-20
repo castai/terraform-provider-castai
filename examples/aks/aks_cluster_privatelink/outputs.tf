@@ -29,8 +29,8 @@ output "castai_private_dns_zone" {
 }
 
 output "castai_private_dns_fqdns" {
-  description = "CAST AI hostnames that resolve to the private endpoint inside the VNet."
-  value       = [for record in azurerm_private_dns_a_record.castai : "${record.name}.${azurerm_private_dns_zone.castai.name}"]
+  description = "CAST AI hostnames that the wildcard record resolves to the private endpoint inside the VNet."
+  value       = local.castai_hostnames
 }
 
 output "kubeconfig_command" {
