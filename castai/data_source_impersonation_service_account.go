@@ -11,18 +11,25 @@ import (
 )
 
 const (
-	FieldImpersonationServiceAccountId = "id"
+	FieldImpersonationServiceAccountId            = "id"
+	FieldImpersonationServiceAccountCloudProvider = "cloud_provider"
 )
 
 func dataSourceImpersonationServiceAccount() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: dataSourceImpersonationServiceAccountRead,
-		Description: "Retrieve impersonation service account ID for AKS clusters",
+		Description: "Retrieve the CAST AI per-organization impersonation service account used for cloud identity (e.g. for GKE impersonation onboarding).",
 		Schema: map[string]*schema.Schema{
 			FieldImpersonationServiceAccountId: {
 				Type:        schema.TypeString,
 				Computed:    true,
 				Description: "ID of the impersonation service account",
+			},
+			FieldImpersonationServiceAccountCloudProvider: {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Default:     "aks",
+				Description: "Cloud provider to retrieve the impersonation service account for (e.g. aks, gcp).",
 			},
 		},
 	}
@@ -31,7 +38,7 @@ func dataSourceImpersonationServiceAccount() *schema.Resource {
 func dataSourceImpersonationServiceAccountRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*ProviderConfig).api
 
-	provider := "aks"
+	provider := data.Get(FieldImpersonationServiceAccountCloudProvider).(string)
 	resp, err := client.ExternalClusterAPIImpersonationServiceAccountWithResponse(ctx,
 		sdk.ExternalclusterV1ImpersonationServiceAccountRequest{
 			Provider: &provider,

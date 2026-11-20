@@ -31,6 +31,10 @@ resource "castai_gke_cluster" "onboarded" {
   project_id       = var.gke_project_id
   location         = var.gke_cluster_location
   credentials_json = var.gke_credentials_json
+
+  # Keyless alternative to credentials_json: GKE impersonation (both required together).
+  cast_service_account_email   = var.cast_service_account_email
+  target_service_account_email = var.target_service_account_email
 }
 
 locals {

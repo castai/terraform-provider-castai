@@ -32,8 +32,10 @@ resource "castai_gke_cluster" "this" {
 
 ### Optional
 
-- `credentials_json` (String, Sensitive) GCP credentials.json from ServiceAccount with credentials for CAST AI
+- `cast_service_account_email` (String) CAST AI-side service account email used as the impersonation source (the per-org jumper service account, see the castai_impersonation_service_account data source). Must be set together with target_service_account_email and instead of credentials_json.
+- `credentials_json` (String, Sensitive) GCP credentials.json from ServiceAccount with credentials for CAST AI. Either this or the GKE impersonation pair (cast_service_account_email + target_service_account_email) must be set.
 - `delete_nodes_on_disconnect` (Boolean) Should CAST AI remove nodes managed by CAST.AI on disconnect
+- `target_service_account_email` (String) Customer-side GCP service account email for CAST AI to impersonate. Must be set together with cast_service_account_email and instead of credentials_json.
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
 ### Read-Only

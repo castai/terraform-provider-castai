@@ -19,6 +19,9 @@ const (
 	FieldGKEClusterProjectId   = "project_id"
 	FieldGKEClusterLocation    = "location"
 	FieldGKEClusterCredentials = "credentials_json"
+
+	FieldGKEClusterCastServiceAccountEmail   = "cast_service_account_email"
+	FieldGKEClusterTargetServiceAccountEmail = "target_service_account_email"
 )
 
 func resourceGKECluster() *schema.Resource {
@@ -73,7 +76,17 @@ func resourceGKECluster() *schema.Resource {
 				Sensitive:        true,
 				Optional:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
-				Description:      "GCP credentials.json from ServiceAccount with credentials for CAST AI",
+				Description:      "GCP credentials.json from ServiceAccount with credentials for CAST AI. Either this or the GKE impersonation pair (cast_service_account_email + target_service_account_email) must be set.",
+			},
+			FieldGKEClusterCastServiceAccountEmail: {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "CAST AI-side service account email used as the impersonation source (the per-org jumper service account, see the castai_impersonation_service_account data source). Must be set together with target_service_account_email and instead of credentials_json.",
+			},
+			FieldGKEClusterTargetServiceAccountEmail: {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Customer-side GCP service account email for CAST AI to impersonate. Must be set together with cast_service_account_email and instead of credentials_json.",
 			},
 			FieldDeleteNodesOnDisconnect: {
 				Type:        schema.TypeBool,
@@ -198,6 +211,8 @@ func updateGKEClusterSettings(ctx context.Context, data *schema.ResourceData, cl
 	if !data.HasChanges(
 		FieldGKEClusterCredentials,
 		FieldClusterCredentialsId,
+		FieldGKEClusterCastServiceAccountEmail,
+		FieldGKEClusterTargetServiceAccountEmail,
 	) {
 		log.Printf("[INFO] Nothing to update in cluster setttings.")
 		return nil
@@ -210,6 +225,21 @@ func updateGKEClusterSettings(ctx context.Context, data *schema.ResourceData, cl
 	credentialsJSON, ok := data.GetOk(FieldGKEClusterCredentials)
 	if ok {
 		req.Credentials = toPtr(credentialsJSON.(string))
+	}
+
+	castSA, castSASet := data.GetOk(FieldGKEClusterCastServiceAccountEmail)
+	targetSA, targetSASet := data.GetOk(FieldGKEClusterTargetServiceAccountEmail)
+	if castSASet != targetSASet {
+		return fmt.Errorf("%q and %q must be set together to enable the GKE impersonation flow", FieldGKEClusterCastServiceAccountEmail, FieldGKEClusterTargetServiceAccountEmail)
+	}
+	if castSASet && credentialsJSON != "" {
+		return fmt.Errorf("use either %q or the GKE impersonation pair (%q + %q), not both", FieldGKEClusterCredentials, FieldGKEClusterCastServiceAccountEmail, FieldGKEClusterTargetServiceAccountEmail)
+	}
+	if castSASet {
+		req.Gke = &sdk.ExternalclusterV1UpdateGKEClusterParams{
+			CastServiceAccountEmail:   toPtr(castSA.(string)),
+			TargetServiceAccountEmail: toPtr(targetSA.(string)),
+		}
 	}
 
 	return resourceCastaiClusterUpdate(ctx, client, data, &req)

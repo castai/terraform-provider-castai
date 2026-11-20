@@ -31,7 +31,19 @@ variable "gke_credentials_json" {
   type        = string
   default     = ""
   sensitive   = true
-  description = "GCP service account credentials.json for CAST AI to access the cluster (onboarding path only). The node configuration API requires the cluster to have CAST AI credentials, so onboarding without them will fail when creating the node configuration."
+  description = "GCP service account credentials.json for CAST AI to access the cluster. Either this or the impersonation pair (cast_service_account_email + target_service_account_email) is required on the onboarding path."
+}
+
+variable "cast_service_account_email" {
+  type        = string
+  default     = ""
+  description = "CAST AI per-org impersonation (jumper) service account email - get it from the castai_impersonation_service_account data source with provider = \"gcp\". Set together with target_service_account_email instead of gke_credentials_json."
+}
+
+variable "target_service_account_email" {
+  type        = string
+  default     = ""
+  description = "Customer-side GCP service account for CAST AI to impersonate. Must have the CAST AI GKE roles (see the castai/gke-iam module) and must allow token creation by the jumper service account. Set together with cast_service_account_email."
 }
 
 variable "subnets" {

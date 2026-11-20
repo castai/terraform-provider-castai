@@ -41,7 +41,9 @@ terraform -chdir=examples/gke/node_configuration_local_ssd apply \
 
 ### Onboarding the cluster from this example
 
-Set `onboard_cluster = true` and provide the GKE details plus a service account key:
+Set `onboard_cluster = true` and provide the GKE details plus credentials. Two options:
+
+**a) Service account key** (`gke_credentials_json`):
 
 ```shell
 terraform -chdir=examples/gke/node_configuration_local_ssd apply \
@@ -53,10 +55,42 @@ terraform -chdir=examples/gke/node_configuration_local_ssd apply \
   -var 'subnets=[<subnetwork-self-link>]'
 ```
 
+**b) Service account impersonation (no exported key)** - set
+`cast_service_account_email` + `target_service_account_email` instead of
+`gke_credentials_json`:
+
+```hcl
+data "castai_impersonation_service_account" "gcp" {
+  cloud_provider = "gcp"   # returns the per-org CAST AI jumper service account
+}
+
+# Customer-side SA (roles: see castai/gke-iam module) that CAST AI impersonates:
+resource "google_service_account" "castai" {
+  account_id = "castai-impersonated"
+}
+
+resource "google_service_account_iam_binding" "jumper_token_creator" {
+  service_account_id = google_service_account.castai.name
+  role               = "roles/iam.serviceAccountTokenCreator"
+  members            = ["serviceAccount:${data.castai_impersonation_service_account.gcp.id}"]
+}
+```
+
+```shell
+terraform -chdir=examples/gke/node_configuration_local_ssd apply \
+  -var onboard_cluster=true \
+  -var gke_cluster_name=<cluster> \
+  -var gke_project_id=<project> \
+  -var gke_cluster_location=<zone-or-region> \
+  -var cast_service_account_email=data.castai_impersonation_service_account.gcp.id \
+  -var target_service_account_email=google_service_account.castai.email \
+  -var 'subnets=[<subnetwork-self-link>]'
+```
+
 Notes:
 
-- The node configuration API requires the cluster to have CAST AI credentials,
-  so the onboarding path needs `gke_credentials_json`.
+- The node configuration API requires the cluster to have working CAST AI
+  credentials, so the onboarding path needs either the key or the impersonation pair.
 - Onboarding a cluster that is already registered with CAST AI will conflict -
   use `onboard_cluster = false` with `castai_cluster_id` in that case.
 - The CAST AI agent (Helm install) is not part of this example; the
