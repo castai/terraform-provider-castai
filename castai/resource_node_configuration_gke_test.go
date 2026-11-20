@@ -396,3 +396,119 @@ func TestGKEConfigSecondaryBootDisksDiskImageValidation(t *testing.T) {
 		})
 	}
 }
+
+func TestGKEConfigLocalSSDMapping(t *testing.T) {
+	tests := []struct {
+		name     string
+		give     map[string]interface{}
+		wantSend *sdk.NodeconfigV1GKELocalSSDConfig
+		want     map[string]interface{}
+	}{
+		{
+			name: "EPHEMERAL with capacity and minIops round trips",
+			give: map[string]interface{}{"mode": "EPHEMERAL", "min_local_storage_gib": 375, "min_iops": 1000},
+			wantSend: &sdk.NodeconfigV1GKELocalSSDConfig{
+				Mode:               toPtr(sdk.NodeconfigV1GKELocalSSDConfigModeEPHEMERAL),
+				MinLocalStorageGib: toPtr("375"),
+				MinIops:            toPtr(int32(1000)),
+			},
+			want: map[string]interface{}{"mode": "EPHEMERAL", "min_local_storage_gib": 375, "min_iops": 1000},
+		},
+		{
+			name: "MIXED with all fields round trips",
+			give: map[string]interface{}{"mode": "MIXED", "min_local_storage_gib": 375, "local_storage_per_cpu_gib": 3.5, "ephemeral_storage_percent": 30, "min_iops": 1000},
+			wantSend: &sdk.NodeconfigV1GKELocalSSDConfig{
+				Mode:                    toPtr(sdk.NodeconfigV1GKELocalSSDConfigModeMIXED),
+				MinLocalStorageGib:      toPtr("375"),
+				LocalStoragePerCpuGib:   toPtr(3.5),
+				EphemeralStoragePercent: toPtr(int32(30)),
+				MinIops:                 toPtr(int32(1000)),
+			},
+			want: map[string]interface{}{"mode": "MIXED", "min_local_storage_gib": 375, "local_storage_per_cpu_gib": 3.5, "ephemeral_storage_percent": 30, "min_iops": 1000},
+		},
+		{
+			name: "BLOCK with minIops is accepted",
+			give: map[string]interface{}{"mode": "BLOCK", "min_local_storage_gib": 1500, "min_iops": 1000},
+			wantSend: &sdk.NodeconfigV1GKELocalSSDConfig{
+				Mode:               toPtr(sdk.NodeconfigV1GKELocalSSDConfigModeBLOCK),
+				MinLocalStorageGib: toPtr("1500"),
+				MinIops:            toPtr(int32(1000)),
+			},
+			want: map[string]interface{}{"mode": "BLOCK", "min_local_storage_gib": 1500, "min_iops": 1000},
+		},
+		{
+			name:     "mode only without capacity fields is accepted",
+			give:     map[string]interface{}{"mode": "EPHEMERAL"},
+			wantSend: &sdk.NodeconfigV1GKELocalSSDConfig{Mode: toPtr(sdk.NodeconfigV1GKELocalSSDConfigModeEPHEMERAL)},
+			want:     map[string]interface{}{"mode": "EPHEMERAL"},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			cfg := toGKEConfig(map[string]interface{}{"local_ssd": []interface{}{tt.give}})
+			require.Equal(t, tt.wantSend, cfg.LocalSsd)
+
+			flat := flattenGKEConfig(&sdk.NodeconfigV1GKEConfig{LocalSsd: cfg.LocalSsd})
+			require.Equal(t, []map[string]interface{}{tt.want}, flat[0]["local_ssd"])
+		})
+	}
+}
+
+func TestGKEConfigLocalSSDEmpty(t *testing.T) {
+	cfg := toGKEConfig(map[string]interface{}{"local_ssd": []interface{}{}})
+	require.Nil(t, cfg.LocalSsd)
+
+	flat := flattenGKEConfig(&sdk.NodeconfigV1GKEConfig{LocalSsd: &sdk.NodeconfigV1GKELocalSSDConfig{Mode: toPtr(sdk.NodeconfigV1GKELocalSSDConfigModeEPHEMERAL)}})
+	require.Contains(t, flat[0], "local_ssd")
+
+	flat = flattenGKEConfig(&sdk.NodeconfigV1GKEConfig{})
+	require.NotContains(t, flat[0], "local_ssd")
+}
+
+func TestGKEConfigLocalSSDModeValidation(t *testing.T) {
+	modeSchema := resourceNodeConfiguration().Schema[FieldNodeConfigurationGKE].
+		Elem.(*schema.Resource).Schema["local_ssd"].
+		Elem.(*schema.Resource).Schema["mode"]
+
+	for _, tt := range []struct {
+		name      string
+		give      string
+		wantError bool
+	}{
+		{name: "EPHEMERAL accepted", give: "EPHEMERAL", wantError: false},
+		{name: "MIXED accepted", give: "MIXED", wantError: false},
+		{name: "BLOCK accepted", give: "BLOCK", wantError: false},
+		{name: "MODE_UNSPECIFIED rejected", give: "MODE_UNSPECIFIED", wantError: true},
+		{name: "unknown rejected", give: "SOMETHING", wantError: true},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			diags := modeSchema.ValidateDiagFunc(tt.give, cty.Path{})
+			require.Equal(t, tt.wantError, diags.HasError())
+		})
+	}
+}
+
+func TestGKEConfigLocalSSDCrossFieldValidation(t *testing.T) {
+	for _, tt := range []struct {
+		name      string
+		mode      string
+		percent   int
+		wantError bool
+	}{
+		{name: "MIXED without percent rejected", mode: "MIXED", percent: 0, wantError: true},
+		{name: "MIXED with percent accepted", mode: "MIXED", percent: 30, wantError: false},
+		{name: "EPHEMERAL with percent rejected", mode: "EPHEMERAL", percent: 30, wantError: true},
+		{name: "BLOCK with percent rejected", mode: "BLOCK", percent: 30, wantError: true},
+		{name: "EPHEMERAL without percent accepted", mode: "EPHEMERAL", percent: 0, wantError: false},
+		{name: "BLOCK without percent accepted", mode: "BLOCK", percent: 0, wantError: false},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			err := validateGKELocalSSDCrossFields(tt.mode, tt.percent)
+			require.Equal(t, tt.wantError, err != nil)
+			if tt.wantError {
+				require.ErrorContains(t, err, "ephemeral_storage_percent")
+			}
+		})
+	}
+}

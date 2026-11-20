@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 
@@ -614,6 +615,43 @@ For a node with 8 CPUs and 16 GB RAM, this calculates to 40 (5×8), 80 (5×16), 
 								},
 							},
 						},
+						"local_ssd": {
+							Type:        schema.TypeList,
+							Optional:    true,
+							MaxItems:    1,
+							Description: "Local SSD configuration for provisioned GKE nodes: how local SSDs are exposed on the nodes.",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"mode": {
+										Type:             schema.TypeString,
+										Required:         true,
+										Description:      "How local SSDs are exposed on the node. EPHEMERAL - local SSDs become the node's kubelet ephemeral storage. MIXED - each SSD is partitioned into RAID-0 kubelet ephemeral storage (ephemeral_storage_percent of the total capacity) plus raw block devices; requires GKE >= 1.37.0-gke.3570000. BLOCK - unformatted raw block devices; kubelet ephemeral storage stays on the boot disk.",
+										ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"EPHEMERAL", "MIXED", "BLOCK"}, false)),
+									},
+									"min_local_storage_gib": {
+										Type:        schema.TypeInt,
+										Optional:    true,
+										Description: "Minimum local SSD capacity (GiB). Optional: omit the capacity fields to apply the mode without capacity-derived sizing.",
+									},
+									"local_storage_per_cpu_gib": {
+										Type:        schema.TypeFloat,
+										Optional:    true,
+										Description: "Additional local SSD capacity per vCPU (GiB). The autoscaler derives the disk count from the capacity fields.",
+									},
+									"ephemeral_storage_percent": {
+										Type:             schema.TypeInt,
+										Optional:         true,
+										Description:      "MIXED only: percentage (1-99) of the total local SSD capacity striped into kubelet ephemeral storage; the rest of each disk stays as raw block devices.",
+										ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(1, 99)),
+									},
+									"min_iops": {
+										Type:        schema.TypeInt,
+										Optional:    true,
+										Description: "Minimum IOPS for the local SSD storage, which might be on multiple disks with RAID0.",
+									},
+								},
+							},
+						},
 						"secondary_ip_range": {
 							Type:        schema.TypeList,
 							Optional:    true,
@@ -683,8 +721,44 @@ For a node with 8 CPUs and 16 GB RAM, this calculates to 40 (5×8), 80 (5×16), 
 				},
 			},
 		},
-		CustomizeDiff: customizeGKEMaxPodsField,
+		CustomizeDiff: customizeNodeConfigurationDiff,
 	}
+}
+
+func customizeNodeConfigurationDiff(ctx context.Context, d *schema.ResourceDiff, meta interface{}) error {
+	if err := customizeGKEMaxPodsField(ctx, d, meta); err != nil {
+		return err
+	}
+	return customizeGKELocalSSDField(ctx, d, meta)
+}
+
+// validateGKELocalSSDCrossFields mirrors the API's cross-field rules for gke.local_ssd:
+// ephemeral_storage_percent is required for MIXED and invalid for the other modes.
+func validateGKELocalSSDCrossFields(mode string, ephemeralStoragePercent int) error {
+	percentSet := ephemeralStoragePercent != 0
+	if mode == "MIXED" && !percentSet {
+		return fmt.Errorf("gke.local_ssd.ephemeral_storage_percent is required when mode is MIXED")
+	}
+	if mode != "MIXED" && percentSet {
+		return fmt.Errorf("gke.local_ssd.ephemeral_storage_percent is only valid when mode is MIXED")
+	}
+	return nil
+}
+
+func customizeGKELocalSSDField(_ context.Context, d *schema.ResourceDiff, _ interface{}) error {
+	v, ok := d.GetOk(FieldNodeConfigurationGKE)
+	if !ok || len(v.([]interface{})) == 0 {
+		return nil
+	}
+	gke := v.([]interface{})[0].(map[string]interface{})
+	raw, ok := gke["local_ssd"].([]interface{})
+	if !ok || len(raw) == 0 || raw[0] == nil {
+		return nil
+	}
+	localSSD := raw[0].(map[string]interface{})
+	mode, _ := localSSD["mode"].(string)
+	percent, _ := localSSD["ephemeral_storage_percent"].(int)
+	return validateGKELocalSSDCrossFields(mode, percent)
 }
 
 func customizeGKEMaxPodsField(_ context.Context, d *schema.ResourceDiff, _ interface{}) error {
@@ -1661,6 +1735,10 @@ func toGKEConfig(obj map[string]interface{}) *sdk.NodeconfigV1GKEConfig {
 		out.SecondaryBootDisks = toGkeSecondaryBootDisks(v)
 	}
 
+	if v, ok := obj["local_ssd"].([]interface{}); ok && len(v) > 0 && v[0] != nil {
+		out.LocalSsd = toGkeLocalSSDConfig(v[0].(map[string]interface{}))
+	}
+
 	if v, ok := obj["on_host_maintenance"].(string); ok && v != "" {
 		out.OnHostMaintenance = toPtr(sdk.NodeconfigV1GKEConfigOnHostMaintenance(v))
 	}
@@ -1691,6 +1769,26 @@ func toGkeSecondaryBootDisks(obj []interface{}) *[]sdk.NodeconfigV1SecondaryBoot
 		out = append(out, entry)
 	}
 	return &out
+}
+
+func toGkeLocalSSDConfig(obj map[string]interface{}) *sdk.NodeconfigV1GKELocalSSDConfig {
+	out := &sdk.NodeconfigV1GKELocalSSDConfig{}
+	if v, ok := obj["mode"].(string); ok && v != "" {
+		out.Mode = toPtr(sdk.NodeconfigV1GKELocalSSDConfigMode(v))
+	}
+	if v, ok := obj["min_local_storage_gib"].(int); ok {
+		out.MinLocalStorageGib = toPtr(strconv.FormatInt(int64(v), 10))
+	}
+	if v, ok := obj["local_storage_per_cpu_gib"].(float64); ok {
+		out.LocalStoragePerCpuGib = toPtr(v)
+	}
+	if v, ok := obj["ephemeral_storage_percent"].(int); ok {
+		out.EphemeralStoragePercent = toPtr(int32(v))
+	}
+	if v, ok := obj["min_iops"].(int); ok {
+		out.MinIops = toPtr(int32(v))
+	}
+	return out
 }
 
 func toGkeLoadBalancers(obj []interface{}) *[]sdk.NodeconfigV1GKEConfigLoadBalancers {
@@ -1794,6 +1892,10 @@ func flattenGKEConfig(config *sdk.NodeconfigV1GKEConfig) []map[string]interface{
 		m["secondary_boot_disks"] = fromGkeSecondaryBootDisks(*v)
 	}
 
+	if v := config.LocalSsd; v != nil {
+		m["local_ssd"] = []map[string]interface{}{fromGkeLocalSSDConfig(*v)}
+	}
+
 	if v := config.OnHostMaintenance; v != nil {
 		m["on_host_maintenance"] = *v
 	}
@@ -1851,6 +1953,30 @@ func fromGkeSecondaryBootDisks(objs []sdk.NodeconfigV1SecondaryBootDisk) []map[s
 		results = append(results, result)
 	}
 	return results
+}
+
+func fromGkeLocalSSDConfig(obj sdk.NodeconfigV1GKELocalSSDConfig) map[string]interface{} {
+	result := map[string]interface{}{}
+	mode := sdk.NodeconfigV1GKELocalSSDConfigModeMODEUNSPECIFIED
+	if obj.Mode != nil && *obj.Mode != "" {
+		mode = *obj.Mode
+	}
+	result["mode"] = string(mode)
+	if obj.MinLocalStorageGib != nil {
+		if v, err := strconv.ParseInt(*obj.MinLocalStorageGib, 10, 64); err == nil {
+			result["min_local_storage_gib"] = int(v)
+		}
+	}
+	if obj.LocalStoragePerCpuGib != nil {
+		result["local_storage_per_cpu_gib"] = *obj.LocalStoragePerCpuGib
+	}
+	if obj.EphemeralStoragePercent != nil {
+		result["ephemeral_storage_percent"] = int(*obj.EphemeralStoragePercent)
+	}
+	if obj.MinIops != nil {
+		result["min_iops"] = int(*obj.MinIops)
+	}
+	return result
 }
 
 func nodeConfigStateImporter(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {

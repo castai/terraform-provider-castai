@@ -204,6 +204,7 @@ Optional:
 
 - `disk_type` (String) Type of boot disk attached to the node. (See [disk types](https://cloud.google.com/compute/docs/disks#pdspecs)). One of: pd-standard, pd-balanced, pd-ssd, pd-extreme
 - `loadbalancers` (Block List) Loadboalancer configuration for CAST provisioned nodes (see [below for nested schema](#nestedblock--gke--loadbalancers))
+- `local_ssd` (Block List, Max: 1) Local SSD configuration for provisioned GKE nodes: how local SSDs are exposed on the nodes. (see [below for nested schema](#nestedblock--gke--local_ssd))
 - `max_pods_per_node` (Number) Maximum number of pods that can be run on a node, which affects how many IP addresses you will need for each node. Defaults to 110
 - `max_pods_per_node_formula` (String) This is an advanced configuration field. In general, we recommend using max_pods_per_node instead.
 This field accepts a formula to calculate the maximum number of pods that can run on a node. This will affect the pod CIDR range that the node reserves. The following variables are available for use in the formula and will be bound to numeric values before evaluation:
@@ -244,6 +245,21 @@ Required:
 - `name` (String) Name of the instance group
 - `zone` (String) Zone of the instance group
 
+
+
+<a id="nestedblock--gke--local_ssd"></a>
+### Nested Schema for `gke.local_ssd`
+
+Required:
+
+- `mode` (String) How local SSDs are exposed on the node. EPHEMERAL - local SSDs become the node's kubelet ephemeral storage. MIXED - each SSD is partitioned into RAID-0 kubelet ephemeral storage (ephemeral_storage_percent of the total capacity) plus raw block devices; requires GKE >= 1.37.0-gke.3570000. BLOCK - unformatted raw block devices; kubelet ephemeral storage stays on the boot disk.
+
+Optional:
+
+- `ephemeral_storage_percent` (Number) MIXED only: percentage (1-99) of the total local SSD capacity striped into kubelet ephemeral storage; the rest of each disk stays as raw block devices.
+- `local_storage_per_cpu_gib` (Number) Additional local SSD capacity per vCPU (GiB). The autoscaler derives the disk count from the capacity fields.
+- `min_iops` (Number) Minimum IOPS for the local SSD storage, which might be on multiple disks with RAID0.
+- `min_local_storage_gib` (Number) Minimum local SSD capacity (GiB). Optional: omit the capacity fields to apply the mode without capacity-derived sizing.
 
 
 <a id="nestedblock--gke--secondary_boot_disks"></a>
