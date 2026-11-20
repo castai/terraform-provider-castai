@@ -530,6 +530,12 @@ const (
 	ExternalclusterV1OperationModeOPERATIONMODEUNSPECIFIED ExternalclusterV1OperationMode = "OPERATION_MODE_UNSPECIFIED"
 )
 
+// Defines values for ExternalclusterV1TokenType.
+const (
+	ExternalclusterV1TokenTypeCONFIGSYNC ExternalclusterV1TokenType = "CONFIG_SYNC"
+	ExternalclusterV1TokenTypeDEFAULT    ExternalclusterV1TokenType = "DEFAULT"
+)
+
 // Defines values for K8sSelectorV1Operator.
 const (
 	K8sSelectorV1OperatorDoesNotExist  K8sSelectorV1Operator = "DoesNotExist"
@@ -1403,6 +1409,12 @@ const (
 	ExternalClusterAPITriggerResumeClusterParamsModeOPERATIONMODEDEFAULT     ExternalClusterAPITriggerResumeClusterParamsMode = "OPERATION_MODE_DEFAULT"
 	ExternalClusterAPITriggerResumeClusterParamsModeOPERATIONMODEDRYRUN      ExternalClusterAPITriggerResumeClusterParamsMode = "OPERATION_MODE_DRY_RUN"
 	ExternalClusterAPITriggerResumeClusterParamsModeOPERATIONMODEUNSPECIFIED ExternalClusterAPITriggerResumeClusterParamsMode = "OPERATION_MODE_UNSPECIFIED"
+)
+
+// Defines values for ExternalClusterAPICreateClusterTokenParamsTokenType.
+const (
+	ExternalClusterAPICreateClusterTokenParamsTokenTypeCONFIGSYNC ExternalClusterAPICreateClusterTokenParamsTokenType = "CONFIG_SYNC"
+	ExternalClusterAPICreateClusterTokenParamsTokenTypeDEFAULT    ExternalClusterAPICreateClusterTokenParamsTokenType = "DEFAULT"
 )
 
 // Defines values for UsersAPILeaveOrganizationParamsProduct.
@@ -6528,6 +6540,13 @@ type ExternalclusterV1CreateAssumeRolePrincipalResponse struct {
 // ExternalclusterV1CreateClusterTokenResponse defines model for externalcluster.v1.CreateClusterTokenResponse.
 type ExternalclusterV1CreateClusterTokenResponse struct {
 	Token *string `json:"token,omitempty"`
+
+	// TokenType TokenType selects which credential a cluster token request issues.
+	//
+	//  - DEFAULT: Issues the default cluster token, used by the agent and the cluster controller.
+	//  - CONFIG_SYNC: Issues the config-sync operator token, which is scoped to the endpoints the
+	// operator drives and tracks its first use.
+	TokenType *ExternalclusterV1TokenType `json:"tokenType,omitempty"`
 }
 
 // ExternalclusterV1DeleteAssumeRolePrincipalResponse defines model for externalcluster.v1.DeleteAssumeRolePrincipalResponse.
@@ -7322,6 +7341,14 @@ type ExternalclusterV1Taint struct {
 	Key    string `json:"key"`
 	Value  string `json:"value"`
 }
+
+// ExternalclusterV1TokenType TokenType selects which credential a cluster token request issues.
+//
+//   - DEFAULT: Issues the default cluster token, used by the agent and the cluster controller.
+//   - CONFIG_SYNC: Issues the config-sync operator token, which is scoped to the endpoints the
+//
+// operator drives and tracks its first use.
+type ExternalclusterV1TokenType string
 
 // ExternalclusterV1TriggerHibernateClusterResponse TriggerHibernateClusterResponse is the result of HibernateClusterRequest.
 type ExternalclusterV1TriggerHibernateClusterResponse struct {
@@ -13768,6 +13795,23 @@ type ExternalClusterAPITriggerResumeClusterParamsMode string
 
 // ExternalClusterAPIUpdateClusterTagsJSONBody defines parameters for ExternalClusterAPIUpdateClusterTags.
 type ExternalClusterAPIUpdateClusterTagsJSONBody map[string]string
+
+// ExternalClusterAPICreateClusterTokenParams defines parameters for ExternalClusterAPICreateClusterToken.
+type ExternalClusterAPICreateClusterTokenParams struct {
+	// TokenType The type of token to issue.
+	//
+	//  - DEFAULT: Issues the default cluster token, used by the agent and the cluster controller.
+	//  - CONFIG_SYNC: Issues the config-sync operator token, which is scoped to the endpoints the
+	// operator drives and tracks its first use.
+	TokenType *ExternalClusterAPICreateClusterTokenParamsTokenType `form:"tokenType,omitempty" json:"tokenType,omitempty"`
+
+	// Rotate Rotates the cluster's existing token of the requested type instead of
+	// issuing an additional one.
+	Rotate *bool `form:"rotate,omitempty" json:"rotate,omitempty"`
+}
+
+// ExternalClusterAPICreateClusterTokenParamsTokenType defines parameters for ExternalClusterAPICreateClusterToken.
+type ExternalClusterAPICreateClusterTokenParamsTokenType string
 
 // RbacServiceAPIListGroupsParams defines parameters for RbacServiceAPIListGroups.
 type RbacServiceAPIListGroupsParams struct {
