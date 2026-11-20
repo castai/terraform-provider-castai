@@ -442,6 +442,13 @@ func TestGKEConfigLocalSSDMapping(t *testing.T) {
 			wantSend: &sdk.NodeconfigV1GKELocalSSDConfig{Mode: toPtr(sdk.NodeconfigV1GKELocalSSDConfigModeEPHEMERAL)},
 			want:     map[string]interface{}{"mode": "EPHEMERAL"},
 		},
+		{
+			// Terraform reports 0 for unset optional ints - they must be omitted from the request.
+			name:     "zero values are treated as unset",
+			give:     map[string]interface{}{"mode": "BLOCK", "min_local_storage_gib": 0, "local_storage_per_cpu_gib": 0.0, "ephemeral_storage_percent": 0, "min_iops": 0},
+			wantSend: &sdk.NodeconfigV1GKELocalSSDConfig{Mode: toPtr(sdk.NodeconfigV1GKELocalSSDConfigModeBLOCK)},
+			want:     map[string]interface{}{"mode": "BLOCK"},
+		},
 	}
 
 	for _, tt := range tests {

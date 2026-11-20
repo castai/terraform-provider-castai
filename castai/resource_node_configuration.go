@@ -1776,16 +1776,19 @@ func toGkeLocalSSDConfig(obj map[string]interface{}) *sdk.NodeconfigV1GKELocalSS
 	if v, ok := obj["mode"].(string); ok && v != "" {
 		out.Mode = toPtr(sdk.NodeconfigV1GKELocalSSDConfigMode(v))
 	}
-	if v, ok := obj["min_local_storage_gib"].(int); ok {
+	// Optional ints: Terraform reports 0 for unset values, and 0 is not a valid value
+	// for these fields on the API side (min_local_storage_gib >= 1, percent 1-99,
+	// min_iops >= 1), so 0 means "not set" and must be omitted from the request.
+	if v, ok := obj["min_local_storage_gib"].(int); ok && v != 0 {
 		out.MinLocalStorageGib = toPtr(strconv.FormatInt(int64(v), 10))
 	}
-	if v, ok := obj["local_storage_per_cpu_gib"].(float64); ok {
+	if v, ok := obj["local_storage_per_cpu_gib"].(float64); ok && v != 0 {
 		out.LocalStoragePerCpuGib = toPtr(v)
 	}
-	if v, ok := obj["ephemeral_storage_percent"].(int); ok {
+	if v, ok := obj["ephemeral_storage_percent"].(int); ok && v != 0 {
 		out.EphemeralStoragePercent = toPtr(int32(v))
 	}
-	if v, ok := obj["min_iops"].(int); ok {
+	if v, ok := obj["min_iops"].(int); ok && v != 0 {
 		out.MinIops = toPtr(int32(v))
 	}
 	return out
