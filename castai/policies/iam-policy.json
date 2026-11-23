@@ -5,7 +5,7 @@
       "Sid": "PassRoleEC2",
       "Action": "iam:PassRole",
       "Effect": "Allow",
-      "Resource": "arn:{{ .Partition }}:iam::*:role/*",
+      "Resource": {{ .PassRoleResources }},
       "Condition": {
         "StringEquals": {
           "iam:PassedToService": "ec2.amazonaws.com"
@@ -16,7 +16,7 @@
       "Sid": "PassRoleEKS",
       "Action": "iam:PassRole",
       "Effect": "Allow",
-      "Resource": "arn:{{ .Partition }}:iam::*:role/*",
+      "Resource": {{ .PassRoleResources }},
       "Condition": {
         "StringEquals": {
           "iam:PassedToService": "eks.amazonaws.com"

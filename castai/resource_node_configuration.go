@@ -250,13 +250,13 @@ func resourceNodeConfiguration() *schema.Resource {
 							Type:             schema.TypeInt,
 							Optional:         true,
 							Description:      "AWS EBS volume IOPS to be used for CAST provisioned nodes",
-							ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(100, 100000)),
+							ValidateDiagFunc: validation.ToDiagFunc(validation.IntAtLeast(1)),
 						},
 						"volume_throughput": {
 							Type:             schema.TypeInt,
 							Optional:         true,
 							Description:      "AWS EBS volume throughput in MiB/s to be used for CAST provisioned nodes",
-							ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(125, 1000)),
+							ValidateDiagFunc: validation.ToDiagFunc(validation.IntAtLeast(1)),
 						},
 						"imds_v1": {
 							Type:        schema.TypeBool,
@@ -575,7 +575,7 @@ For a node with 8 CPUs and 16 GB RAM, this calculates to 40 (5×8), 80 (5×16), 
 						"max_pods_per_node": {
 							Type:             schema.TypeInt,
 							Optional:         true,
-							ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(10, 256)),
+							ValidateDiagFunc: validation.ToDiagFunc(validation.IntAtLeast(8)),
 							Description:      "Maximum number of pods that can be run on a node, which affects how many IP addresses you will need for each node. Defaults to 110",
 							ConflictsWith:    []string{FieldNodeConfigurationGKE + ".0.max_pods_per_node_formula"},
 						},
@@ -725,7 +725,13 @@ func customizeNodeConfigurationDiff(_ context.Context, d *schema.ResourceDiff, _
 	}
 	if v, ok := d.GetOk(FieldNodeConfigurationGKE); ok {
 		gkeList := v.([]interface{})
-		gke := gkeList[0].(map[string]interface{})
+		if len(gkeList) == 0 {
+			return nil
+		}
+		gke, _ := gkeList[0].(map[string]interface{})
+		if gke == nil {
+			gke = map[string]interface{}{}
+		}
 
 		static, formula := gke["max_pods_per_node"], gke["max_pods_per_node_formula"]
 		staticNotSet := static == nil || static.(int) == 0

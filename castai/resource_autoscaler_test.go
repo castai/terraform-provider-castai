@@ -26,6 +26,117 @@ import (
 	"github.com/castai/terraform-provider-castai/castai/types"
 )
 
+func TestAutoscalerResource_ReadNotFound(t *testing.T) {
+	r := require.New(t)
+	mockClient := mock_sdk.NewMockClientInterface(gomock.NewController(t))
+	clusterID := "cluster_id"
+
+	provider := &ProviderConfig{
+		api: &sdk.ClientWithResponses{ClientInterface: mockClient},
+	}
+
+	mockClient.EXPECT().
+		PoliciesAPIGetClusterPolicies(gomock.Any(), clusterID, gomock.Any()).
+		Return(&http.Response{
+			StatusCode: http.StatusNotFound,
+			Body:       io.NopCloser(strings.NewReader(`{"message":"policies not found"}`)),
+		}, nil)
+
+	res := resourceAutoscaler()
+	state := terraform.NewInstanceStateShimmedFromValue(cty.ObjectVal(map[string]cty.Value{
+		FieldClusterId: cty.StringVal(clusterID),
+	}), 0)
+	state.ID = clusterID
+	data := res.Data(state)
+
+	diags := res.ReadContext(t.Context(), data, provider)
+
+	r.False(diags.HasError())
+	r.Empty(data.Id())
+}
+
+func TestAutoscalerResource_ReadError(t *testing.T) {
+	r := require.New(t)
+	mockClient := mock_sdk.NewMockClientInterface(gomock.NewController(t))
+	clusterID := "cluster_id"
+
+	provider := &ProviderConfig{
+		api: &sdk.ClientWithResponses{ClientInterface: mockClient},
+	}
+
+	mockClient.EXPECT().
+		PoliciesAPIGetClusterPolicies(gomock.Any(), clusterID, gomock.Any()).
+		Return(nil, fmt.Errorf("network error"))
+
+	res := resourceAutoscaler()
+	state := terraform.NewInstanceStateShimmedFromValue(cty.ObjectVal(map[string]cty.Value{
+		FieldClusterId: cty.StringVal(clusterID),
+	}), 0)
+	state.ID = clusterID
+	data := res.Data(state)
+
+	diags := res.ReadContext(t.Context(), data, provider)
+
+	r.True(diags.HasError())
+	r.Equal(clusterID, data.Id())
+}
+
+func TestAutoscalerResource_DeleteNotFound(t *testing.T) {
+	r := require.New(t)
+	mockClient := mock_sdk.NewMockClientWithResponsesInterface(gomock.NewController(t))
+	clusterID := "cluster_id"
+
+	provider := &ProviderConfig{api: mockClient}
+
+	mockClient.EXPECT().
+		PoliciesAPIUpsertClusterPoliciesWithBodyWithResponse(gomock.Any(), clusterID, "application/json", gomock.Any()).
+		Return(&sdk.PoliciesAPIUpsertClusterPoliciesResponse{
+			HTTPResponse: &http.Response{StatusCode: http.StatusNotFound},
+			Body:         []byte(`{"message":"policies not found"}`),
+		}, nil)
+
+	res := resourceAutoscaler()
+	state := terraform.NewInstanceStateShimmedFromValue(cty.ObjectVal(map[string]cty.Value{
+		FieldClusterId: cty.StringVal(clusterID),
+	}), 0)
+	state.ID = clusterID
+	data := res.Data(state)
+
+	diags := res.DeleteContext(t.Context(), data, provider)
+
+	r.False(diags.HasError())
+}
+
+func TestAutoscalerResource_GetChangedPoliciesNotFound(t *testing.T) {
+	r := require.New(t)
+	mockClient := mock_sdk.NewMockClientInterface(gomock.NewController(t))
+	clusterID := "cluster_id"
+	policyChanges := `{"enabled":true}`
+
+	provider := &ProviderConfig{
+		api: &sdk.ClientWithResponses{ClientInterface: mockClient},
+	}
+
+	mockClient.EXPECT().
+		PoliciesAPIGetClusterPolicies(gomock.Any(), clusterID, gomock.Any()).
+		Return(&http.Response{
+			StatusCode: http.StatusNotFound,
+			Body:       io.NopCloser(strings.NewReader(`{"message":"policies not found"}`)),
+		}, nil)
+
+	res := resourceAutoscaler()
+	state := terraform.NewInstanceStateShimmedFromValue(cty.ObjectVal(map[string]cty.Value{
+		FieldClusterId:              cty.StringVal(clusterID),
+		FieldAutoscalerPoliciesJSON: cty.StringVal(policyChanges),
+	}), 0)
+	data := res.Data(state)
+
+	policies, err := getChangedPolicies(t.Context(), data, provider, clusterID)
+
+	r.NoError(err)
+	r.JSONEq(policyChanges, string(policies))
+}
+
 func TestAutoscalerResource_PoliciesUpdateAction(t *testing.T) {
 	currentPolicies := `
 		{

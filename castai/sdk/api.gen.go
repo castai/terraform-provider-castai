@@ -496,6 +496,7 @@ const (
 
 // Defines values for ExternalclusterV1KarpenterControllerMode.
 const (
+	ExternalclusterV1KarpenterControllerModeCASTMANAGED                        ExternalclusterV1KarpenterControllerMode = "CAST_MANAGED"
 	ExternalclusterV1KarpenterControllerModeKARPENTERCONTROLLERMODEUNSPECIFIED ExternalclusterV1KarpenterControllerMode = "KARPENTER_CONTROLLER_MODE_UNSPECIFIED"
 	ExternalclusterV1KarpenterControllerModeMANAGEDOUTOFBAND                   ExternalclusterV1KarpenterControllerMode = "MANAGED_OUT_OF_BAND"
 	ExternalclusterV1KarpenterControllerModeSELFHOSTED                         ExternalclusterV1KarpenterControllerMode = "SELF_HOSTED"
@@ -621,12 +622,27 @@ const (
 	NodeconfigV1EKSConfigNestedVirtualisationModeNESTEDVIRTUALISATIONMODEUNSPECIFIED NodeconfigV1EKSConfigNestedVirtualisationMode = "NESTED_VIRTUALISATION_MODE_UNSPECIFIED"
 )
 
+// Defines values for NodeconfigV1GKEConfigImageFamily.
+const (
+	NodeconfigV1GKEConfigImageFamilyFAMILYCOSCONTAINERD    NodeconfigV1GKEConfigImageFamily = "FAMILY_COS_CONTAINERD"
+	NodeconfigV1GKEConfigImageFamilyFAMILYUBUNTUCONTAINERD NodeconfigV1GKEConfigImageFamily = "FAMILY_UBUNTU_CONTAINERD"
+	NodeconfigV1GKEConfigImageFamilyFAMILYUNSPECIFIED      NodeconfigV1GKEConfigImageFamily = "FAMILY_UNSPECIFIED"
+)
+
 // Defines values for NodeconfigV1GKEConfigOnHostMaintenance.
 const (
 	NodeconfigV1GKEConfigOnHostMaintenanceMIGRATE   NodeconfigV1GKEConfigOnHostMaintenance = "MIGRATE"
 	NodeconfigV1GKEConfigOnHostMaintenanceMigrate   NodeconfigV1GKEConfigOnHostMaintenance = "migrate"
 	NodeconfigV1GKEConfigOnHostMaintenanceTERMINATE NodeconfigV1GKEConfigOnHostMaintenance = "TERMINATE"
 	NodeconfigV1GKEConfigOnHostMaintenanceTerminate NodeconfigV1GKEConfigOnHostMaintenance = "terminate"
+)
+
+// Defines values for NodeconfigV1GKELocalSSDConfigMode.
+const (
+	NodeconfigV1GKELocalSSDConfigModeBLOCK           NodeconfigV1GKELocalSSDConfigMode = "BLOCK"
+	NodeconfigV1GKELocalSSDConfigModeEPHEMERAL       NodeconfigV1GKELocalSSDConfigMode = "EPHEMERAL"
+	NodeconfigV1GKELocalSSDConfigModeMIXED           NodeconfigV1GKELocalSSDConfigMode = "MIXED"
+	NodeconfigV1GKELocalSSDConfigModeMODEUNSPECIFIED NodeconfigV1GKELocalSSDConfigMode = "MODE_UNSPECIFIED"
 )
 
 // Defines values for NodeconfigV1SecondaryBootDiskMode.
@@ -1076,16 +1092,24 @@ const (
 
 // Defines values for WorkloadoptimizationV1RecommendationOrigin.
 const (
-	WorkloadoptimizationV1RecommendationOriginORIGINCONFIGCHANGED             WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_CONFIG_CHANGED"
-	WorkloadoptimizationV1RecommendationOriginORIGINHPAALMOSTMAXEDOUT         WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_HPA_ALMOST_MAXED_OUT"
-	WorkloadoptimizationV1RecommendationOriginORIGINHPAMAXEDOUT               WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_HPA_MAXED_OUT"
-	WorkloadoptimizationV1RecommendationOriginORIGINMEMORYEVENT               WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_MEMORY_EVENT"
-	WorkloadoptimizationV1RecommendationOriginORIGINREADONLYRESOURCECHANGED   WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_READONLY_RESOURCE_CHANGED"
-	WorkloadoptimizationV1RecommendationOriginORIGINSNAPSHOT                  WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_SNAPSHOT"
-	WorkloadoptimizationV1RecommendationOriginORIGINSTARTUPFAILUREEVENT       WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_STARTUP_FAILURE_EVENT"
-	WorkloadoptimizationV1RecommendationOriginORIGINSURGEEVENT                WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_SURGE_EVENT"
-	WorkloadoptimizationV1RecommendationOriginORIGINUNKNOWN                   WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_UNKNOWN"
-	WorkloadoptimizationV1RecommendationOriginORIGINVERTICALMANAGEMENTENABLED WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_VERTICAL_MANAGEMENT_ENABLED"
+	WorkloadoptimizationV1RecommendationOriginORIGINANOMALYDETECTED              WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_ANOMALY_DETECTED"
+	WorkloadoptimizationV1RecommendationOriginORIGINCONFIGCHANGED                WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_CONFIG_CHANGED"
+	WorkloadoptimizationV1RecommendationOriginORIGINHPAALMOSTMAXEDOUT            WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_HPA_ALMOST_MAXED_OUT"
+	WorkloadoptimizationV1RecommendationOriginORIGINHPAMAXEDOUT                  WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_HPA_MAXED_OUT"
+	WorkloadoptimizationV1RecommendationOriginORIGINMEMORYEVENT                  WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_MEMORY_EVENT"
+	WorkloadoptimizationV1RecommendationOriginORIGINNATIVEVPASTATECHANGED        WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_NATIVE_VPA_STATE_CHANGED"
+	WorkloadoptimizationV1RecommendationOriginORIGINPOLICYASSIGNMENTRULESCHANGED WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_POLICY_ASSIGNMENT_RULES_CHANGED"
+	WorkloadoptimizationV1RecommendationOriginORIGINPOLICYCHANGED                WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_POLICY_CHANGED"
+	WorkloadoptimizationV1RecommendationOriginORIGINPSICPUPRESSUREEVENT          WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_PSI_CPU_PRESSURE_EVENT"
+	WorkloadoptimizationV1RecommendationOriginORIGINPSICPUPRESSURERESOLVEDEVENT  WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_PSI_CPU_PRESSURE_RESOLVED_EVENT"
+	WorkloadoptimizationV1RecommendationOriginORIGINREADONLYRESOURCECHANGED      WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_READONLY_RESOURCE_CHANGED"
+	WorkloadoptimizationV1RecommendationOriginORIGINSINGLEWORKLOADCHANGED        WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_SINGLE_WORKLOAD_CHANGED"
+	WorkloadoptimizationV1RecommendationOriginORIGINSNAPSHOT                     WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_SNAPSHOT"
+	WorkloadoptimizationV1RecommendationOriginORIGINSTARTUPFAILUREEVENT          WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_STARTUP_FAILURE_EVENT"
+	WorkloadoptimizationV1RecommendationOriginORIGINSURGEEVENT                   WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_SURGE_EVENT"
+	WorkloadoptimizationV1RecommendationOriginORIGINUNKNOWN                      WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_UNKNOWN"
+	WorkloadoptimizationV1RecommendationOriginORIGINUNSCHEDULABLERECOMMENDATION  WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_UNSCHEDULABLE_RECOMMENDATION"
+	WorkloadoptimizationV1RecommendationOriginORIGINVERTICALMANAGEMENTENABLED    WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_VERTICAL_MANAGEMENT_ENABLED"
 )
 
 // Defines values for WorkloadoptimizationV1RecommendationStatusType.
@@ -1200,9 +1224,10 @@ const (
 
 // Defines values for WorkloadoptimizationV1SystemOverrideOrigin.
 const (
-	WorkloadoptimizationV1SystemOverrideOriginSYSTEMOVERRIDEORIGINCONTINUOUSOOMKILLED WorkloadoptimizationV1SystemOverrideOrigin = "SYSTEM_OVERRIDE_ORIGIN_CONTINUOUS_OOM_KILLED"
-	WorkloadoptimizationV1SystemOverrideOriginSYSTEMOVERRIDEORIGINUNBOUNDMEMORYGROWTH WorkloadoptimizationV1SystemOverrideOrigin = "SYSTEM_OVERRIDE_ORIGIN_UNBOUND_MEMORY_GROWTH"
-	WorkloadoptimizationV1SystemOverrideOriginSYSTEMOVERRIDEORIGINUNSPECIFIED         WorkloadoptimizationV1SystemOverrideOrigin = "SYSTEM_OVERRIDE_ORIGIN_UNSPECIFIED"
+	WorkloadoptimizationV1SystemOverrideOriginSYSTEMOVERRIDEORIGINCONTINUOUSOOMKILLED         WorkloadoptimizationV1SystemOverrideOrigin = "SYSTEM_OVERRIDE_ORIGIN_CONTINUOUS_OOM_KILLED"
+	WorkloadoptimizationV1SystemOverrideOriginSYSTEMOVERRIDEORIGINUNBOUNDMEMORYGROWTH         WorkloadoptimizationV1SystemOverrideOrigin = "SYSTEM_OVERRIDE_ORIGIN_UNBOUND_MEMORY_GROWTH"
+	WorkloadoptimizationV1SystemOverrideOriginSYSTEMOVERRIDEORIGINUNSCHEDULABLERECOMMENDATION WorkloadoptimizationV1SystemOverrideOrigin = "SYSTEM_OVERRIDE_ORIGIN_UNSCHEDULABLE_RECOMMENDATION"
+	WorkloadoptimizationV1SystemOverrideOriginSYSTEMOVERRIDEORIGINUNSPECIFIED                 WorkloadoptimizationV1SystemOverrideOrigin = "SYSTEM_OVERRIDE_ORIGIN_UNSPECIFIED"
 )
 
 // Defines values for WorkloadoptimizationV1SystemOverrideResetOrigin.
@@ -1241,6 +1266,12 @@ const (
 	RbacServiceAPIListPermissionGroupsParamsProductPRODUCTTYPEKIMCHI      RbacServiceAPIListPermissionGroupsParamsProduct = "PRODUCT_TYPE_KIMCHI"
 	RbacServiceAPIListPermissionGroupsParamsProductPRODUCTTYPEPLATFORM    RbacServiceAPIListPermissionGroupsParamsProduct = "PRODUCT_TYPE_PLATFORM"
 	RbacServiceAPIListPermissionGroupsParamsProductPRODUCTTYPEUNSPECIFIED RbacServiceAPIListPermissionGroupsParamsProduct = "PRODUCT_TYPE_UNSPECIFIED"
+)
+
+// Defines values for RbacServiceAPIListPermissionGroupsParamsScope.
+const (
+	RbacServiceAPIListPermissionGroupsParamsScopeCLUSTER      RbacServiceAPIListPermissionGroupsParamsScope = "CLUSTER"
+	RbacServiceAPIListPermissionGroupsParamsScopeORGANIZATION RbacServiceAPIListPermissionGroupsParamsScope = "ORGANIZATION"
 )
 
 // Defines values for CommitmentsAPIGetCommitmentUsageHistoryParamsAggregationInterval.
@@ -1798,7 +1829,9 @@ type CastaiAuthtokenV1beta1AuthToken struct {
 	CreatedBy *string `json:"createdBy"`
 
 	// ExpiresAt Time when the token will expire (unix timestamp in nanoseconds).
-	// A null value means that the key will never expire.
+	// When creating a token, it must be set to a time in the future, at most 366 days ahead.
+	// When reading a token, a null value means the token never expires. Such tokens are legacy:
+	// new tokens without an expiration are no longer accepted.
 	ExpiresAt *time.Time `json:"expiresAt,omitempty"`
 
 	// Id (read only) ID of the token.
@@ -1934,19 +1967,26 @@ type CastaiAutoscalerV1beta1RebalancingOptions struct {
 	SplitNodesInBatchesOf *int32 `json:"splitNodesInBatchesOf"`
 }
 
-// CastaiEvictorV1AdvancedConfig AdvancedConfig the evictor advanced configuration.
+// CastaiEvictorV1AdvancedConfig AdvancedConfig the evictor advanced configuration. Rules are evaluated
+// first-match-wins: only the first rule matching a given pod or node applies,
+// so overlapping selectors are resolved by order and duplicated selectors are
+// rejected by the API.
 type CastaiEvictorV1AdvancedConfig struct {
 	EvictionConfig []CastaiEvictorV1EvictionConfig `json:"evictionConfig"`
 }
 
 // CastaiEvictorV1EvictionConfig EvictionConfig used to specify more granular settings per node/pod filters.
 type CastaiEvictorV1EvictionConfig struct {
-	NodeSelector *CastaiEvictorV1NodeSelector    `json:"nodeSelector,omitempty"`
-	PodSelector  *CastaiEvictorV1PodSelector     `json:"podSelector,omitempty"`
-	Settings     CastaiEvictorV1EvictionSettings `json:"settings"`
+	NodeSelector *CastaiEvictorV1NodeSelector `json:"nodeSelector,omitempty"`
+	PodSelector  *CastaiEvictorV1PodSelector  `json:"podSelector,omitempty"`
+
+	// Settings EvictionSettings defines eviction settings. Each setting is independent:
+	// a rule may enable any combination of them.
+	Settings CastaiEvictorV1EvictionSettings `json:"settings"`
 }
 
-// CastaiEvictorV1EvictionSettings defines model for castai.evictor.v1.EvictionSettings.
+// CastaiEvictorV1EvictionSettings EvictionSettings defines eviction settings. Each setting is independent:
+// a rule may enable any combination of them.
 type CastaiEvictorV1EvictionSettings struct {
 	Aggressive      *CastaiEvictorV1EvictionSettingsSettingEnabled `json:"aggressive,omitempty"`
 	Disposable      *CastaiEvictorV1EvictionSettingsSettingEnabled `json:"disposable,omitempty"`
@@ -2333,7 +2373,12 @@ type CastaiInventoryV1beta1BlockStorageInfo struct {
 	// MaxBandwidthMbps Specifies the maximum bandwidth for block storage. Currently only supported for AWS EBS-optimized instances.
 	MaxBandwidthMbps *int32 `json:"maxBandwidthMbps"`
 
-	// MaxEbsAttachments Specifies maximum number of EBS volume attachments.
+	// MaxDataDisks Specifies the maximum number of data disks, excluding the OS disk.
+	// Populated for Azure only.
+	MaxDataDisks *int32 `json:"maxDataDisks"`
+
+	// MaxEbsAttachments Specifies the maximum number of EBS volume attachments, including the root volume.
+	// Populated for AWS only.
 	MaxEbsAttachments *int32 `json:"maxEbsAttachments"`
 
 	// MaxIops Specifies the maximum IOPS for block storage.
@@ -3402,6 +3447,9 @@ type CastaiOperationsV1beta1OperationError struct {
 	// Details Details is a concise human readable explanation for the error.
 	Details *string `json:"details,omitempty"`
 
+	// Message Message is the original error message that caused the operation to fail.
+	Message *string `json:"message,omitempty"`
+
 	// Reason Reason is an operation specific failure code. Refer to documentation about possible outcomes.
 	Reason *string `json:"reason,omitempty"`
 }
@@ -3666,6 +3714,13 @@ type CastaiRbacV1beta1PermissionGroup struct {
 
 	// ResourceDisplayName Human-readable display name for the resource.
 	ResourceDisplayName *string `json:"resourceDisplayName,omitempty"`
+
+	// Scope Scope represents the authentication tree for the system. Based on that we can build the
+	// authentication and authorization tree.
+	//
+	//  - ORGANIZATION: Organization scope represents the organization level authentication (Organization -> ResourceID)
+	//  - CLUSTER: Cluster scope represents the cluster level authentication (Organization -> Cluster -> ResourceID)
+	Scope CastaiRbacV1beta1ScopeType `json:"scope"`
 }
 
 // CastaiRbacV1beta1Permissions defines model for castai.rbac.v1beta1.Permissions.
@@ -4683,6 +4738,9 @@ type CastaiUsersV1beta1User struct {
 type CastaiUsersV1beta1UserOrganization struct {
 	// BlockEscalatedPrivilege Whether the organization blocks escalated privileges for Cast AI members.
 	BlockEscalatedPrivilege *bool `json:"blockEscalatedPrivilege,omitempty"`
+
+	// BlockUserApiKeyCreation Whether creating user API keys is blocked for the organization. Defaults to false (creation is allowed).
+	BlockUserApiKeyCreation *bool `json:"blockUserApiKeyCreation,omitempty"`
 
 	// ChildOrderId The order id of child org in enterprise by created_at - if the org is a child org.
 	ChildOrderId *int32 `json:"childOrderId"`
@@ -6786,6 +6844,7 @@ type ExternalclusterV1KarpenterAttribute struct {
 	//  - KARPENTER_CONTROLLER_MODE_UNSPECIFIED: Default value.
 	//  - SELF_HOSTED: Controller is self-hosted inside the cluster.
 	//  - MANAGED_OUT_OF_BAND: Controller is managed out-of-band by the provider. Only AKS NAP is detected; EKS Auto Mode is not yet.
+	//  - CAST_MANAGED: Controller runs in the cluster and is deployed and operated by CAST (castai-karpenter release).
 	ControllerMode *ExternalclusterV1KarpenterControllerMode `json:"controllerMode,omitempty"`
 
 	// KentEligibility KentEligibility defines Karpenter KENT eligibility status.
@@ -6800,6 +6859,7 @@ type ExternalclusterV1KarpenterAttribute struct {
 //   - KARPENTER_CONTROLLER_MODE_UNSPECIFIED: Default value.
 //   - SELF_HOSTED: Controller is self-hosted inside the cluster.
 //   - MANAGED_OUT_OF_BAND: Controller is managed out-of-band by the provider. Only AKS NAP is detected; EKS Auto Mode is not yet.
+//   - CAST_MANAGED: Controller runs in the cluster and is deployed and operated by CAST (castai-karpenter release).
 type ExternalclusterV1KarpenterControllerMode string
 
 // ExternalclusterV1KataConfig PodVirtualizationConfig describes virtualization isolation settings for a node.
@@ -7790,8 +7850,17 @@ type NodeconfigV1GKEConfig struct {
 	// FallbackConfiguration Contains the configuration of fallback node pools.
 	FallbackConfiguration *NodeconfigV1FallbackConfiguration `json:"fallbackConfiguration,omitempty"`
 
+	// ImageFamily List of supported image families (OSes) for GKE nodes; the concrete image (and, for Ubuntu, the Ubuntu version) is resolved by the provider from the cluster and node pool Kubernetes version.
+	ImageFamily *NodeconfigV1GKEConfigImageFamily `json:"imageFamily,omitempty"`
+
 	// LoadBalancers List of load balancers to be used for the cluster.
 	LoadBalancers *[]NodeconfigV1GKEConfigLoadBalancers `json:"loadBalancers,omitempty"`
+
+	// LocalSsd Recipe describing how local SSDs are exposed on nodes of a node configuration.
+	// The autoscaler reads it, derives the local SSD disk count and constructs the AddNode
+	// local_ssd payload from it; the AddNode payload remains the single source of local SSD
+	// configuration applied to a node.
+	LocalSsd *NodeconfigV1GKELocalSSDConfig `json:"localSsd,omitempty"`
 
 	// MaxPodsPerNode Maximum number of pods that can be run on a node, which affects how many IP addresses you will need for each node. Defaults to 110.
 	// For Standard GKE clusters, you can run a maximum of 256 Pods on a node with a /23 range, not 512 as you might expect.
@@ -7860,6 +7929,9 @@ type NodeconfigV1GKEConfigComputed struct {
 	SecondaryBootDisks *[]NodeconfigV1GKEConfigSecondaryBootDiskComputed `json:"secondaryBootDisks,omitempty"`
 }
 
+// NodeconfigV1GKEConfigImageFamily List of supported image families (OSes) for GKE nodes; the concrete image (and, for Ubuntu, the Ubuntu version) is resolved by the provider from the cluster and node pool Kubernetes version.
+type NodeconfigV1GKEConfigImageFamily string
+
 // NodeconfigV1GKEConfigLoadBalancers defines model for nodeconfig.v1.GKEConfig.LoadBalancers.
 type NodeconfigV1GKEConfigLoadBalancers struct {
 	TargetBackendPools      *[]NodeconfigV1GKEConfigLoadBalancersTargetBackendPools      `json:"targetBackendPools,omitempty"`
@@ -7896,6 +7968,51 @@ type NodeconfigV1GKEConfigSecondaryBootDiskComputed struct {
 	// SizeGb Resolved disk size of the configured disk image in GiB, read from the GCP compute images API.
 	SizeGb *string `json:"sizeGb"`
 }
+
+// NodeconfigV1GKELocalSSDConfig Recipe describing how local SSDs are exposed on nodes of a node configuration.
+// The autoscaler reads it, derives the local SSD disk count and constructs the AddNode
+// local_ssd payload from it; the AddNode payload remains the single source of local SSD
+// configuration applied to a node.
+type NodeconfigV1GKELocalSSDConfig struct {
+	// EphemeralStoragePercent MIXED only: percentage (1-99) of the TOTAL local SSD capacity striped into kubelet ephemeral
+	// storage (GKE ephemeralCapacityGb). The rest of each disk stays as raw block devices.
+	EphemeralStoragePercent *int32 `json:"ephemeralStoragePercent"`
+
+	// LocalStoragePerCpuGib Additional local SSD capacity per vCPU (GiB). Autoscaler derives the disk count from it:
+	// disks = ceil((min-local-storage-size + ratio x vCPU) / per-disk size), snapped to the closest valid count for the
+	// instance type.
+	LocalStoragePerCpuGib *float64 `json:"localStoragePerCpuGib"`
+
+	// MinIops Minimum IOPS for the ephemeral storage, which might be on multiple disks with RAID0.
+	MinIops *int32 `json:"minIops"`
+
+	// MinLocalStorageGib Minimum local SSD capacity (GiB).
+	MinLocalStorageGib *string `json:"minLocalStorageGib"`
+
+	// Mode How local SSDs are exposed on the node.
+	//
+	//  - EPHEMERAL: Local SSDs become the node's kubelet ephemeral storage (emptyDir, writable layers, runtime state).
+	//  - MIXED: Each SSD is partitioned: the first partitions are striped into a RAID-0 kubelet ephemeral
+	// storage sized ephemeral_storage_percent of the total local SSD capacity; the remaining
+	// per-disk partitions stay as independent raw block devices.
+	// Requires GKE >= 1.37.0-gke.3570000
+	//  - BLOCK: Local SSDs are exposed as unformatted raw block devices; kubelet ephemeral storage stays on
+	// the boot disk.
+	Mode *NodeconfigV1GKELocalSSDConfigMode `json:"mode,omitempty"`
+}
+
+// NodeconfigV1GKELocalSSDConfigMode How local SSDs are exposed on the node.
+//
+//   - EPHEMERAL: Local SSDs become the node's kubelet ephemeral storage (emptyDir, writable layers, runtime state).
+//   - MIXED: Each SSD is partitioned: the first partitions are striped into a RAID-0 kubelet ephemeral
+//
+// storage sized ephemeral_storage_percent of the total local SSD capacity; the remaining
+// per-disk partitions stay as independent raw block devices.
+// Requires GKE >= 1.37.0-gke.3570000
+//   - BLOCK: Local SSDs are exposed as unformatted raw block devices; kubelet ephemeral storage stays on
+//
+// the boot disk.
+type NodeconfigV1GKELocalSSDConfigMode string
 
 // NodeconfigV1GetSuggestedConfigurationResponse defines model for nodeconfig.v1.GetSuggestedConfigurationResponse.
 type NodeconfigV1GetSuggestedConfigurationResponse struct {
@@ -9766,6 +9883,10 @@ type WorkloadoptimizationV1Container struct {
 	// Runtime Defines the application runtime.
 	Runtime *WorkloadoptimizationV1Runtime `json:"runtime,omitempty"`
 
+	// RuntimeInfo Detected runtime details of a container. jvm and gpu may be present
+	// simultaneously (e.g. Spark executors on GPUs).
+	RuntimeInfo *WorkloadoptimizationV1RuntimeInfo `json:"runtimeInfo,omitempty"`
+
 	// UnqualifiedResources Resources disqualified by a runtime condition on the stored recommendation (e.g.
 	// memory when JVM metrics are missing). Always exposed — anomaly windows included;
 	// the shipping state is inferable from the recommendation itself. Absent/empty when
@@ -10246,6 +10367,12 @@ type WorkloadoptimizationV1GPURecommendedRequestsChangedEvent struct {
 	DebugData  *map[string]interface{}                            `json:"debugData,omitempty"`
 }
 
+// WorkloadoptimizationV1GPURuntimeInfo GPU runtime details detected for a container.
+type WorkloadoptimizationV1GPURuntimeInfo struct {
+	// Engine Detected GPU engine (e.g. "vllm"). Absent when the GPU workload is generic.
+	Engine *string `json:"engine"`
+}
+
 // WorkloadoptimizationV1GPUSettings defines model for workloadoptimization.v1.GPUSettings.
 type WorkloadoptimizationV1GPUSettings struct {
 	// ManagementOption Defines possible options for workload management.
@@ -10395,6 +10522,12 @@ type WorkloadoptimizationV1GetWorkloadResponse struct {
 	// Pods Stores information about the pods synchronisation status.
 	Pods     []WorkloadoptimizationV1PodMetadata `json:"pods"`
 	Workload WorkloadoptimizationV1Workload      `json:"workload"`
+}
+
+// WorkloadoptimizationV1GetWorkloadScopedRecommendationMetricsResponse Response of WorkloadOptimizationAPI.GetWorkloadScopedRecommendationMetrics.
+// Entries are ordered lexically by scope value, then container.
+type WorkloadoptimizationV1GetWorkloadScopedRecommendationMetricsResponse struct {
+	ScopedMetrics []WorkloadoptimizationV1WorkloadScopedRecommendationMetrics `json:"scopedMetrics"`
 }
 
 // WorkloadoptimizationV1GetWorkloadSpecResponse defines model for workloadoptimization.v1.GetWorkloadSpecResponse.
@@ -10950,6 +11083,10 @@ type WorkloadoptimizationV1JVMRuntimeConfigurationUpdate struct {
 	// OptionsEnvVar Name of environment variable with JVM parameters that will be injected to container (defaults to JAVA_OPTS if not set).
 	OptionsEnvVar *string `json:"optionsEnvVar"`
 }
+
+// WorkloadoptimizationV1JVMRuntimeInfo JVM runtime details detected for a container. A presence marker for now —
+// detected JVM details (e.g. env var overrides) may be added as fields later.
+type WorkloadoptimizationV1JVMRuntimeInfo = map[string]interface{}
 
 // WorkloadoptimizationV1JVMSettings defines model for workloadoptimization.v1.JVMSettings.
 type WorkloadoptimizationV1JVMSettings struct {
@@ -12115,6 +12252,17 @@ type WorkloadoptimizationV1RolloutBehaviorType string
 // WorkloadoptimizationV1Runtime Defines the application runtime.
 type WorkloadoptimizationV1Runtime string
 
+// WorkloadoptimizationV1RuntimeInfo Detected runtime details of a container. jvm and gpu may be present
+// simultaneously (e.g. Spark executors on GPUs).
+type WorkloadoptimizationV1RuntimeInfo struct {
+	// Gpu GPU runtime details detected for a container.
+	Gpu *WorkloadoptimizationV1GPURuntimeInfo `json:"gpu,omitempty"`
+
+	// Jvm JVM runtime details detected for a container. A presence marker for now —
+	// detected JVM details (e.g. env var overrides) may be added as fields later.
+	Jvm *WorkloadoptimizationV1JVMRuntimeInfo `json:"jvm,omitempty"`
+}
+
 // WorkloadoptimizationV1ScalingBehaviour defines model for workloadoptimization.v1.ScalingBehaviour.
 type WorkloadoptimizationV1ScalingBehaviour struct {
 	// StabilizationWindowSeconds Defines the minimum time to make a scaling decision after decision has been made.
@@ -12238,6 +12386,18 @@ type WorkloadoptimizationV1ScopeSettings struct {
 // WorkloadoptimizationV1ScopeType ScopeType classifies the scoping mechanism. Mirrors the domain scope.Type enum.
 type WorkloadoptimizationV1ScopeType string
 
+// WorkloadoptimizationV1ScopedContainerRecommendationMetrics Recommended-resources series of one container within one scope group.
+type WorkloadoptimizationV1ScopedContainerRecommendationMetrics struct {
+	// CpuCores Recommended CPU in cores.
+	CpuCores []WorkloadoptimizationV1TimeSeriesMetric `json:"cpuCores"`
+
+	// MemoryGib Recommended memory in GiB.
+	MemoryGib []WorkloadoptimizationV1TimeSeriesMetric `json:"memoryGib"`
+
+	// Name Container name.
+	Name string `json:"name"`
+}
+
 // WorkloadoptimizationV1ScopedContainers ScopedContainers carries per-scope-group current resources and recommendations.
 type WorkloadoptimizationV1ScopedContainers struct {
 	// Containers Per-container state for the group, shape identical to Workload.containers[]:
@@ -12316,6 +12476,7 @@ type WorkloadoptimizationV1SurgeEvent struct {
 //
 //   - SYSTEM_OVERRIDE_ORIGIN_CONTINUOUS_OOM_KILLED: Override triggered due to continuous OOM kills after multiple scaling attempts.
 //   - SYSTEM_OVERRIDE_ORIGIN_UNBOUND_MEMORY_GROWTH: Override triggered due to detected unbound memory growth.
+//   - SYSTEM_OVERRIDE_ORIGIN_UNSCHEDULABLE_RECOMMENDATION: Override triggered because lowering requests for unschedulable pods did not help.
 type WorkloadoptimizationV1SystemOverrideOrigin string
 
 // WorkloadoptimizationV1SystemOverrideResetEvent SystemOverrideResetEvent is emitted when a system override on a workload is deactivated.
@@ -12357,6 +12518,7 @@ type WorkloadoptimizationV1SystemOverrideTriggeredEvent struct {
 	//
 	//  - SYSTEM_OVERRIDE_ORIGIN_CONTINUOUS_OOM_KILLED: Override triggered due to continuous OOM kills after multiple scaling attempts.
 	//  - SYSTEM_OVERRIDE_ORIGIN_UNBOUND_MEMORY_GROWTH: Override triggered due to detected unbound memory growth.
+	//  - SYSTEM_OVERRIDE_ORIGIN_UNSCHEDULABLE_RECOMMENDATION: Override triggered because lowering requests for unschedulable pods did not help.
 	Origin WorkloadoptimizationV1SystemOverrideOrigin `json:"origin"`
 
 	// Target SystemOverrideTarget defines which workload optimization features are affected by the system override.
@@ -12802,6 +12964,13 @@ type WorkloadoptimizationV1WorkloadScalingPolicy struct {
 	UpdatedAt              time.Time                                    `json:"updatedAt"`
 }
 
+// WorkloadoptimizationV1WorkloadScopedRecommendationMetrics Recommended-resources series of all containers for one scope group.
+type WorkloadoptimizationV1WorkloadScopedRecommendationMetrics struct {
+	// Containers Per-container series, ordered by container name.
+	Containers []WorkloadoptimizationV1ScopedContainerRecommendationMetrics `json:"containers"`
+	ScopeValue string                                                       `json:"scopeValue"`
+}
+
 // WorkloadoptimizationV1WorkloadSystemOverrides defines model for workloadoptimization.v1.WorkloadSystemOverrides.
 type WorkloadoptimizationV1WorkloadSystemOverrides struct {
 	VerticalOptimization WorkloadoptimizationV1WorkloadSystemOverridesVerticalOptimization `json:"verticalOptimization"`
@@ -12844,10 +13013,19 @@ type RbacServiceAPIListPermissionGroupsParams struct {
 
 	// Product Filter by product type.
 	Product *RbacServiceAPIListPermissionGroupsParamsProduct `form:"product,omitempty" json:"product,omitempty"`
+
+	// Scope Filter by permission scope. Unset means no filtering by scope.
+	//
+	//  - ORGANIZATION: Organization scope represents the organization level authentication (Organization -> ResourceID)
+	//  - CLUSTER: Cluster scope represents the cluster level authentication (Organization -> Cluster -> ResourceID)
+	Scope *RbacServiceAPIListPermissionGroupsParamsScope `form:"scope,omitempty" json:"scope,omitempty"`
 }
 
 // RbacServiceAPIListPermissionGroupsParamsProduct defines parameters for RbacServiceAPIListPermissionGroups.
 type RbacServiceAPIListPermissionGroupsParamsProduct string
+
+// RbacServiceAPIListPermissionGroupsParamsScope defines parameters for RbacServiceAPIListPermissionGroups.
+type RbacServiceAPIListPermissionGroupsParamsScope string
 
 // CommitmentsAPIGetCommitmentUsageHistoryParams defines parameters for CommitmentsAPIGetCommitmentUsageHistory.
 type CommitmentsAPIGetCommitmentUsageHistoryParams struct {
@@ -14268,6 +14446,20 @@ type WorkloadOptimizationAPIGetWorkloadParams struct {
 type WorkloadOptimizationAPIGetWorkloadGPUMetricsParams struct {
 	From *time.Time `form:"from,omitempty" json:"from,omitempty"`
 	To   *time.Time `form:"to,omitempty" json:"to,omitempty"`
+}
+
+// WorkloadOptimizationAPIGetWorkloadScopedRecommendationMetricsParams defines parameters for WorkloadOptimizationAPIGetWorkloadScopedRecommendationMetrics.
+type WorkloadOptimizationAPIGetWorkloadScopedRecommendationMetricsParams struct {
+	// ScopeValues Scope group values to return series for. Between 1 and 10 unique,
+	// non-empty values. Values without recommendation data in the time window
+	// are omitted from the response.
+	ScopeValues []string `form:"scopeValues" json:"scopeValues"`
+
+	// FromTime Start of requested metric interval. Defaults to the last 7 days when omitted.
+	FromTime *time.Time `form:"fromTime,omitempty" json:"fromTime,omitempty"`
+
+	// ToTime End of requested metric interval. Defaults to now when omitted.
+	ToTime *time.Time `form:"toTime,omitempty" json:"toTime,omitempty"`
 }
 
 // InventoryAPIListZonesParams defines parameters for InventoryAPIListZones.
