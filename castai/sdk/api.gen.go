@@ -1287,6 +1287,12 @@ const (
 	RbacServiceAPIListPermissionGroupsParamsScopeORGANIZATION RbacServiceAPIListPermissionGroupsParamsScope = "ORGANIZATION"
 )
 
+// Defines values for RbacServiceAPIListPermissionGroupsParamsTargetScopesScopeKind.
+const (
+	RbacServiceAPIListPermissionGroupsParamsTargetScopesScopeKindCLUSTER      RbacServiceAPIListPermissionGroupsParamsTargetScopesScopeKind = "CLUSTER"
+	RbacServiceAPIListPermissionGroupsParamsTargetScopesScopeKindORGANIZATION RbacServiceAPIListPermissionGroupsParamsTargetScopesScopeKind = "ORGANIZATION"
+)
+
 // Defines values for CommitmentsAPIGetCommitmentUsageHistoryParamsAggregationInterval.
 const (
 	CommitmentsAPIGetCommitmentUsageHistoryParamsAggregationIntervalAGGREGATIONINTERVALUNSPECIFIED CommitmentsAPIGetCommitmentUsageHistoryParamsAggregationInterval = "AGGREGATION_INTERVAL_UNSPECIFIED"
@@ -13070,6 +13076,15 @@ type RbacServiceAPIListPermissionGroupsParams struct {
 	//  - ORGANIZATION: Organization scope represents the organization level authentication (Organization -> ResourceID)
 	//  - CLUSTER: Cluster scope represents the cluster level authentication (Organization -> Cluster -> ResourceID)
 	Scope *RbacServiceAPIListPermissionGroupsParamsScope `form:"scope,omitempty" json:"scope,omitempty"`
+
+	// TargetScopesScopeKind Kind of every target scope.
+	//
+	//  - ORGANIZATION: Organization scope represents the organization level authentication (Organization -> ResourceID)
+	//  - CLUSTER: Cluster scope represents the cluster level authentication (Organization -> Cluster -> ResourceID)
+	TargetScopesScopeKind *RbacServiceAPIListPermissionGroupsParamsTargetScopesScopeKind `form:"targetScopes.scopeKind,omitempty" json:"targetScopes.scopeKind,omitempty"`
+
+	// TargetScopesResourceIds IDs of the target organizations or clusters. They must all belong to scope_kind.
+	TargetScopesResourceIds *[]string `form:"targetScopes.resourceIds,omitempty" json:"targetScopes.resourceIds,omitempty"`
 }
 
 // RbacServiceAPIListPermissionGroupsParamsProduct defines parameters for RbacServiceAPIListPermissionGroups.
@@ -13077,6 +13092,9 @@ type RbacServiceAPIListPermissionGroupsParamsProduct string
 
 // RbacServiceAPIListPermissionGroupsParamsScope defines parameters for RbacServiceAPIListPermissionGroups.
 type RbacServiceAPIListPermissionGroupsParamsScope string
+
+// RbacServiceAPIListPermissionGroupsParamsTargetScopesScopeKind defines parameters for RbacServiceAPIListPermissionGroups.
+type RbacServiceAPIListPermissionGroupsParamsTargetScopesScopeKind string
 
 // CommitmentsAPIGetCommitmentUsageHistoryParams defines parameters for CommitmentsAPIGetCommitmentUsageHistory.
 type CommitmentsAPIGetCommitmentUsageHistoryParams struct {
@@ -13830,7 +13848,10 @@ type ExternalClusterAPICreateClusterTokenParams struct {
 	TokenType *ExternalClusterAPICreateClusterTokenParamsTokenType `form:"tokenType,omitempty" json:"tokenType,omitempty"`
 
 	// Rotate Rotates the cluster's existing token of the requested type instead of
-	// issuing an additional one.
+	// issuing an additional one. Applies to CONFIG_SYNC only: a DEFAULT token
+	// is short-lived (pending component install, 4h) and can be minted an
+	// unlimited number of times concurrently, so there is no single live token
+	// to gate and rotation is meaningless for it.
 	Rotate *bool `form:"rotate,omitempty" json:"rotate,omitempty"`
 }
 
