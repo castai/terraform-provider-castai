@@ -498,7 +498,7 @@ func TestGKEClusterResourceCreate(t *testing.T) {
 				Header:     map[string][]string{"Content-Type": {"json"}},
 			}, nil)
 		mockClient.EXPECT().
-			ExternalClusterAPICreateClusterToken(gomock.Any(), clusterID, gomock.Any()).
+			ExternalClusterAPICreateClusterToken(gomock.Any(), clusterID, gomock.Eq(&sdk.ExternalClusterAPICreateClusterTokenParams{})).
 			Return(&http.Response{
 				StatusCode: 200,
 				Body:       io.NopCloser(bytes.NewReader([]byte(`{"token":"token-123"}`))),
