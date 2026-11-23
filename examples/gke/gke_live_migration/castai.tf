@@ -2,10 +2,6 @@
 
 # Configure Data sources and providers required for CAST AI connection.
 
-locals {
-  init_script = var.gke_img_type == "COS_CONTAINERD" ? "init_cos.sh" : "init_ubuntu.sh"
-}
-
 data "google_client_config" "default" {}
 
 provider "castai" {
@@ -32,7 +28,7 @@ module "castai-gke-iam" {
 
 module "castai-gke-cluster" {
   source  = "castai/gke-cluster/castai"
-  version = "~> 11.0"
+  version = "~> 11.2"
 
   api_url                       = var.castai_api_url
   castai_api_token              = var.castai_api_token
@@ -53,17 +49,11 @@ module "castai-gke-cluster" {
     default = {
       disk_cpu_ratio = 25
       subnets        = [module.vpc.subnets_ids[0]]
-      # https://cloud.google.com/container-optimized-os/docs/release-notes/m121
-      image       = "projects/cos-cloud/global/images/cos-121-18867-90-59"
-      init_script = base64encode(file(local.init_script))
     }
 
     live = {
       disk_cpu_ratio = 25
       subnets        = [module.vpc.subnets_ids[0]]
-      # https://cloud.google.com/container-optimized-os/docs/release-notes/m121
-      image       = "projects/cos-cloud/global/images/cos-121-18867-90-59"
-      init_script = base64encode(file(local.init_script))
     }
   }
 
@@ -85,17 +75,24 @@ module "castai-gke-cluster" {
       }
     }
 
+    # CLM-enabled node template.
     live_tmpl = {
+      name               = "live-tmpl"
       configuration_name = "live"
       is_enabled         = true
       should_taint       = true
       clm_enabled        = true
 
+      # https://docs.cast.ai/docs/clm-reference-traffic-control
+      clm_networking_mode = "tc"
+
       constraints = {
         on_demand = true
         spot      = true
+
+        # https://docs.cast.ai/docs/clm-requirements-and-limitations
         instance_families = {
-          enabled = ["n2", "n2d", "c2", "c2d"]
+          include = ["c2d"]
         }
       }
     }
@@ -135,6 +132,9 @@ module "castai-gke-cluster" {
       }
     }
   }
+  install_live = var.install_helm_live
+  live_version = var.live_helm_version
+
   // depends_on helps terraform with creating proper dependencies graph in case of resource creation and in this case destroy
   // module "castai-gke-cluster" has to be destroyed before module "castai-gke-iam" and "module.gke"
   depends_on = [module.gke, module.castai-gke-iam]
