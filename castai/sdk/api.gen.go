@@ -138,6 +138,13 @@ const (
 	CastaiInventoryV1beta1GCPFlexCUDCUDPlanTWELVEMONTH    CastaiInventoryV1beta1GCPFlexCUDCUDPlan = "TWELVE_MONTH"
 )
 
+// Defines values for CastaiInventoryV1beta1GCPReservationDeploymentType.
+const (
+	CastaiInventoryV1beta1GCPReservationDeploymentTypeGCPRESERVATIONDEPLOYMENTTYPEDENSE       CastaiInventoryV1beta1GCPReservationDeploymentType = "GCP_RESERVATION_DEPLOYMENT_TYPE_DENSE"
+	CastaiInventoryV1beta1GCPReservationDeploymentTypeGCPRESERVATIONDEPLOYMENTTYPEFLEXIBLE    CastaiInventoryV1beta1GCPReservationDeploymentType = "GCP_RESERVATION_DEPLOYMENT_TYPE_FLEXIBLE"
+	CastaiInventoryV1beta1GCPReservationDeploymentTypeGCPRESERVATIONDEPLOYMENTTYPEUNSPECIFIED CastaiInventoryV1beta1GCPReservationDeploymentType = "GCP_RESERVATION_DEPLOYMENT_TYPE_UNSPECIFIED"
+)
+
 // Defines values for CastaiInventoryV1beta1GCPReservationLocalSsdInterface.
 const (
 	CastaiInventoryV1beta1GCPReservationLocalSsdInterfaceGCPRESERVATIONLOCALSSDINTERFACENVME        CastaiInventoryV1beta1GCPReservationLocalSsdInterface = "GCP_RESERVATION_LOCAL_SSD_INTERFACE_NVME"
@@ -528,6 +535,12 @@ const (
 	ExternalclusterV1OperationModeOPERATIONMODEDEFAULT     ExternalclusterV1OperationMode = "OPERATION_MODE_DEFAULT"
 	ExternalclusterV1OperationModeOPERATIONMODEDRYRUN      ExternalclusterV1OperationMode = "OPERATION_MODE_DRY_RUN"
 	ExternalclusterV1OperationModeOPERATIONMODEUNSPECIFIED ExternalclusterV1OperationMode = "OPERATION_MODE_UNSPECIFIED"
+)
+
+// Defines values for ExternalclusterV1TokenType.
+const (
+	ExternalclusterV1TokenTypeCONFIGSYNC ExternalclusterV1TokenType = "CONFIG_SYNC"
+	ExternalclusterV1TokenTypeDEFAULT    ExternalclusterV1TokenType = "DEFAULT"
 )
 
 // Defines values for K8sSelectorV1Operator.
@@ -1274,6 +1287,12 @@ const (
 	RbacServiceAPIListPermissionGroupsParamsScopeORGANIZATION RbacServiceAPIListPermissionGroupsParamsScope = "ORGANIZATION"
 )
 
+// Defines values for RbacServiceAPIListPermissionGroupsParamsTargetScopesScopeKind.
+const (
+	RbacServiceAPIListPermissionGroupsParamsTargetScopesScopeKindCLUSTER      RbacServiceAPIListPermissionGroupsParamsTargetScopesScopeKind = "CLUSTER"
+	RbacServiceAPIListPermissionGroupsParamsTargetScopesScopeKindORGANIZATION RbacServiceAPIListPermissionGroupsParamsTargetScopesScopeKind = "ORGANIZATION"
+)
+
 // Defines values for CommitmentsAPIGetCommitmentUsageHistoryParamsAggregationInterval.
 const (
 	CommitmentsAPIGetCommitmentUsageHistoryParamsAggregationIntervalAGGREGATIONINTERVALUNSPECIFIED CommitmentsAPIGetCommitmentUsageHistoryParamsAggregationInterval = "AGGREGATION_INTERVAL_UNSPECIFIED"
@@ -1403,6 +1422,12 @@ const (
 	ExternalClusterAPITriggerResumeClusterParamsModeOPERATIONMODEDEFAULT     ExternalClusterAPITriggerResumeClusterParamsMode = "OPERATION_MODE_DEFAULT"
 	ExternalClusterAPITriggerResumeClusterParamsModeOPERATIONMODEDRYRUN      ExternalClusterAPITriggerResumeClusterParamsMode = "OPERATION_MODE_DRY_RUN"
 	ExternalClusterAPITriggerResumeClusterParamsModeOPERATIONMODEUNSPECIFIED ExternalClusterAPITriggerResumeClusterParamsMode = "OPERATION_MODE_UNSPECIFIED"
+)
+
+// Defines values for ExternalClusterAPICreateClusterTokenParamsTokenType.
+const (
+	ExternalClusterAPICreateClusterTokenParamsTokenTypeCONFIGSYNC ExternalClusterAPICreateClusterTokenParamsTokenType = "CONFIG_SYNC"
+	ExternalClusterAPICreateClusterTokenParamsTokenTypeDEFAULT    ExternalClusterAPICreateClusterTokenParamsTokenType = "DEFAULT"
 )
 
 // Defines values for UsersAPILeaveOrganizationParamsProduct.
@@ -2573,6 +2598,13 @@ type CastaiInventoryV1beta1GCPCapacityReservationContext struct {
 	Accelerators         *[]CastaiInventoryV1beta1GCPReservationAccelerator `json:"accelerators,omitempty"`
 	AssuredInstanceCount *string                                            `json:"assuredInstanceCount,omitempty"`
 
+	// DeploymentType Deployment type reported by GCP.
+	//
+	//  - GCP_RESERVATION_DEPLOYMENT_TYPE_UNSPECIFIED: The reservation does not report a deployment type.
+	//  - GCP_RESERVATION_DEPLOYMENT_TYPE_FLEXIBLE: Highly flexible, logical deployment of reserved capacity.
+	//  - GCP_RESERVATION_DEPLOYMENT_TYPE_DENSE: Densely deployed reserved capacity.
+	DeploymentType *CastaiInventoryV1beta1GCPReservationDeploymentType `json:"deploymentType,omitempty"`
+
 	// EffectiveCount Effective instance count is the adjusted original commitment count based only on the portion remaining after out-of-cluster usage.
 	EffectiveCount *string `json:"effectiveCount,omitempty"`
 
@@ -2660,6 +2692,13 @@ type CastaiInventoryV1beta1GCPReservationAccelerator struct {
 	// "https://www.googleapis.com/compute/v1/projects/<p>/zones/<z>/acceleratorTypes/nvidia-tesla-t4".
 	AcceleratorType *string `json:"acceleratorType,omitempty"`
 }
+
+// CastaiInventoryV1beta1GCPReservationDeploymentType Deployment type reported by GCP.
+//
+//   - GCP_RESERVATION_DEPLOYMENT_TYPE_UNSPECIFIED: The reservation does not report a deployment type.
+//   - GCP_RESERVATION_DEPLOYMENT_TYPE_FLEXIBLE: Highly flexible, logical deployment of reserved capacity.
+//   - GCP_RESERVATION_DEPLOYMENT_TYPE_DENSE: Densely deployed reserved capacity.
+type CastaiInventoryV1beta1GCPReservationDeploymentType string
 
 // CastaiInventoryV1beta1GCPReservationLocalSsd GCPReservationLocalSsd describes a local SSD disk that a reserved VM must
 // match exactly to consume a GCP capacity reservation.
@@ -6528,6 +6567,13 @@ type ExternalclusterV1CreateAssumeRolePrincipalResponse struct {
 // ExternalclusterV1CreateClusterTokenResponse defines model for externalcluster.v1.CreateClusterTokenResponse.
 type ExternalclusterV1CreateClusterTokenResponse struct {
 	Token *string `json:"token,omitempty"`
+
+	// TokenType TokenType selects which credential a cluster token request issues.
+	//
+	//  - DEFAULT: Issues the default cluster token, used by the agent and the cluster controller.
+	//  - CONFIG_SYNC: Issues the config-sync operator token, which is scoped to the endpoints the
+	// operator drives and tracks its first use.
+	TokenType *ExternalclusterV1TokenType `json:"tokenType,omitempty"`
 }
 
 // ExternalclusterV1DeleteAssumeRolePrincipalResponse defines model for externalcluster.v1.DeleteAssumeRolePrincipalResponse.
@@ -6630,6 +6676,9 @@ type ExternalclusterV1GCPCreateSAResponse struct {
 
 // ExternalclusterV1GCPNodeConfig GCPNodeConfig holds GCP-specific configuration for node provisioning.
 type ExternalclusterV1GCPNodeConfig struct {
+	// ProvisioningModel The provisioning model for the GCE instance. Only set when the node
+	// consumes a reservation whose capacity is reservation-bound.
+	ProvisioningModel   *string                                            `json:"provisioningModel"`
 	ReservationAffinity *ExternalclusterV1GCPNodeConfigReservationAffinity `json:"reservationAffinity,omitempty"`
 }
 
@@ -7322,6 +7371,14 @@ type ExternalclusterV1Taint struct {
 	Key    string `json:"key"`
 	Value  string `json:"value"`
 }
+
+// ExternalclusterV1TokenType TokenType selects which credential a cluster token request issues.
+//
+//   - DEFAULT: Issues the default cluster token, used by the agent and the cluster controller.
+//   - CONFIG_SYNC: Issues the config-sync operator token, which is scoped to the endpoints the
+//
+// operator drives and tracks its first use.
+type ExternalclusterV1TokenType string
 
 // ExternalclusterV1TriggerHibernateClusterResponse TriggerHibernateClusterResponse is the result of HibernateClusterRequest.
 type ExternalclusterV1TriggerHibernateClusterResponse struct {
@@ -13019,6 +13076,15 @@ type RbacServiceAPIListPermissionGroupsParams struct {
 	//  - ORGANIZATION: Organization scope represents the organization level authentication (Organization -> ResourceID)
 	//  - CLUSTER: Cluster scope represents the cluster level authentication (Organization -> Cluster -> ResourceID)
 	Scope *RbacServiceAPIListPermissionGroupsParamsScope `form:"scope,omitempty" json:"scope,omitempty"`
+
+	// TargetScopesScopeKind Kind of every target scope.
+	//
+	//  - ORGANIZATION: Organization scope represents the organization level authentication (Organization -> ResourceID)
+	//  - CLUSTER: Cluster scope represents the cluster level authentication (Organization -> Cluster -> ResourceID)
+	TargetScopesScopeKind *RbacServiceAPIListPermissionGroupsParamsTargetScopesScopeKind `form:"targetScopes.scopeKind,omitempty" json:"targetScopes.scopeKind,omitempty"`
+
+	// TargetScopesResourceIds IDs of the target organizations or clusters. They must all belong to scope_kind.
+	TargetScopesResourceIds *[]string `form:"targetScopes.resourceIds,omitempty" json:"targetScopes.resourceIds,omitempty"`
 }
 
 // RbacServiceAPIListPermissionGroupsParamsProduct defines parameters for RbacServiceAPIListPermissionGroups.
@@ -13026,6 +13092,9 @@ type RbacServiceAPIListPermissionGroupsParamsProduct string
 
 // RbacServiceAPIListPermissionGroupsParamsScope defines parameters for RbacServiceAPIListPermissionGroups.
 type RbacServiceAPIListPermissionGroupsParamsScope string
+
+// RbacServiceAPIListPermissionGroupsParamsTargetScopesScopeKind defines parameters for RbacServiceAPIListPermissionGroups.
+type RbacServiceAPIListPermissionGroupsParamsTargetScopesScopeKind string
 
 // CommitmentsAPIGetCommitmentUsageHistoryParams defines parameters for CommitmentsAPIGetCommitmentUsageHistory.
 type CommitmentsAPIGetCommitmentUsageHistoryParams struct {
@@ -13768,6 +13837,23 @@ type ExternalClusterAPITriggerResumeClusterParamsMode string
 
 // ExternalClusterAPIUpdateClusterTagsJSONBody defines parameters for ExternalClusterAPIUpdateClusterTags.
 type ExternalClusterAPIUpdateClusterTagsJSONBody map[string]string
+
+// ExternalClusterAPICreateClusterTokenParams defines parameters for ExternalClusterAPICreateClusterToken.
+type ExternalClusterAPICreateClusterTokenParams struct {
+	// TokenType The type of token to issue.
+	//
+	//  - DEFAULT: Issues the default cluster token, used by the agent and the cluster controller.
+	//  - CONFIG_SYNC: Issues the config-sync operator token, which is scoped to the endpoints the
+	// operator drives and tracks its first use.
+	TokenType *ExternalClusterAPICreateClusterTokenParamsTokenType `form:"tokenType,omitempty" json:"tokenType,omitempty"`
+
+	// Rotate Rotates the cluster's existing token of the requested type instead of
+	// issuing an additional one.
+	Rotate *bool `form:"rotate,omitempty" json:"rotate,omitempty"`
+}
+
+// ExternalClusterAPICreateClusterTokenParamsTokenType defines parameters for ExternalClusterAPICreateClusterToken.
+type ExternalClusterAPICreateClusterTokenParamsTokenType string
 
 // RbacServiceAPIListGroupsParams defines parameters for RbacServiceAPIListGroups.
 type RbacServiceAPIListGroupsParams struct {
