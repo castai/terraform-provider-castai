@@ -225,7 +225,7 @@ func TestEKSClusterImporter(t *testing.T) {
 
 		body := io.NopCloser(bytes.NewReader([]byte(`{"token": "imported-cluster-token"}`)))
 		mockClient.EXPECT().
-			ExternalClusterAPICreateClusterToken(gomock.Any(), clusterID).
+			ExternalClusterAPICreateClusterToken(gomock.Any(), clusterID, gomock.Eq(&sdk.ExternalClusterAPICreateClusterTokenParams{})).
 			Return(&http.Response{StatusCode: 200, Body: body, Header: map[string][]string{"Content-Type": {"json"}}}, nil)
 
 		credentialsId := "imported-credentials-id"
@@ -262,7 +262,7 @@ func TestEKSClusterImporter(t *testing.T) {
 
 		body := io.NopCloser(bytes.NewReader([]byte(`{"message":"Cluster not found"}`)))
 		mockClient.EXPECT().
-			ExternalClusterAPICreateClusterToken(gomock.Any(), clusterID).
+			ExternalClusterAPICreateClusterToken(gomock.Any(), clusterID, gomock.Eq(&sdk.ExternalClusterAPICreateClusterTokenParams{})).
 			Return(&http.Response{StatusCode: 404, Body: body, Header: map[string][]string{"Content-Type": {"json"}}}, nil)
 
 		resource := resourceEKSCluster()
