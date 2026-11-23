@@ -138,6 +138,13 @@ const (
 	CastaiInventoryV1beta1GCPFlexCUDCUDPlanTWELVEMONTH    CastaiInventoryV1beta1GCPFlexCUDCUDPlan = "TWELVE_MONTH"
 )
 
+// Defines values for CastaiInventoryV1beta1GCPReservationDeploymentType.
+const (
+	CastaiInventoryV1beta1GCPReservationDeploymentTypeGCPRESERVATIONDEPLOYMENTTYPEDENSE       CastaiInventoryV1beta1GCPReservationDeploymentType = "GCP_RESERVATION_DEPLOYMENT_TYPE_DENSE"
+	CastaiInventoryV1beta1GCPReservationDeploymentTypeGCPRESERVATIONDEPLOYMENTTYPEFLEXIBLE    CastaiInventoryV1beta1GCPReservationDeploymentType = "GCP_RESERVATION_DEPLOYMENT_TYPE_FLEXIBLE"
+	CastaiInventoryV1beta1GCPReservationDeploymentTypeGCPRESERVATIONDEPLOYMENTTYPEUNSPECIFIED CastaiInventoryV1beta1GCPReservationDeploymentType = "GCP_RESERVATION_DEPLOYMENT_TYPE_UNSPECIFIED"
+)
+
 // Defines values for CastaiInventoryV1beta1GCPReservationLocalSsdInterface.
 const (
 	CastaiInventoryV1beta1GCPReservationLocalSsdInterfaceGCPRESERVATIONLOCALSSDINTERFACENVME        CastaiInventoryV1beta1GCPReservationLocalSsdInterface = "GCP_RESERVATION_LOCAL_SSD_INTERFACE_NVME"
@@ -2585,6 +2592,13 @@ type CastaiInventoryV1beta1GCPCapacityReservationContext struct {
 	Accelerators         *[]CastaiInventoryV1beta1GCPReservationAccelerator `json:"accelerators,omitempty"`
 	AssuredInstanceCount *string                                            `json:"assuredInstanceCount,omitempty"`
 
+	// DeploymentType Deployment type reported by GCP.
+	//
+	//  - GCP_RESERVATION_DEPLOYMENT_TYPE_UNSPECIFIED: The reservation does not report a deployment type.
+	//  - GCP_RESERVATION_DEPLOYMENT_TYPE_FLEXIBLE: Highly flexible, logical deployment of reserved capacity.
+	//  - GCP_RESERVATION_DEPLOYMENT_TYPE_DENSE: Densely deployed reserved capacity.
+	DeploymentType *CastaiInventoryV1beta1GCPReservationDeploymentType `json:"deploymentType,omitempty"`
+
 	// EffectiveCount Effective instance count is the adjusted original commitment count based only on the portion remaining after out-of-cluster usage.
 	EffectiveCount *string `json:"effectiveCount,omitempty"`
 
@@ -2672,6 +2686,13 @@ type CastaiInventoryV1beta1GCPReservationAccelerator struct {
 	// "https://www.googleapis.com/compute/v1/projects/<p>/zones/<z>/acceleratorTypes/nvidia-tesla-t4".
 	AcceleratorType *string `json:"acceleratorType,omitempty"`
 }
+
+// CastaiInventoryV1beta1GCPReservationDeploymentType Deployment type reported by GCP.
+//
+//   - GCP_RESERVATION_DEPLOYMENT_TYPE_UNSPECIFIED: The reservation does not report a deployment type.
+//   - GCP_RESERVATION_DEPLOYMENT_TYPE_FLEXIBLE: Highly flexible, logical deployment of reserved capacity.
+//   - GCP_RESERVATION_DEPLOYMENT_TYPE_DENSE: Densely deployed reserved capacity.
+type CastaiInventoryV1beta1GCPReservationDeploymentType string
 
 // CastaiInventoryV1beta1GCPReservationLocalSsd GCPReservationLocalSsd describes a local SSD disk that a reserved VM must
 // match exactly to consume a GCP capacity reservation.
@@ -6649,6 +6670,9 @@ type ExternalclusterV1GCPCreateSAResponse struct {
 
 // ExternalclusterV1GCPNodeConfig GCPNodeConfig holds GCP-specific configuration for node provisioning.
 type ExternalclusterV1GCPNodeConfig struct {
+	// ProvisioningModel The provisioning model for the GCE instance. Only set when the node
+	// consumes a reservation whose capacity is reservation-bound.
+	ProvisioningModel   *string                                            `json:"provisioningModel"`
 	ReservationAffinity *ExternalclusterV1GCPNodeConfigReservationAffinity `json:"reservationAffinity,omitempty"`
 }
 
