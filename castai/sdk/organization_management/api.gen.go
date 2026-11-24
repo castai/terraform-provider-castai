@@ -21,6 +21,13 @@ const (
 	BatchCreateEnterpriseGroupsRequestMemberKindSUBJECTKINDUSER           BatchCreateEnterpriseGroupsRequestMemberKind = "SUBJECT_KIND_USER"
 )
 
+// Defines values for BatchCreateEnterpriseServiceAccountsRequestServiceAccountRequestAccessModel.
+const (
+	BatchCreateEnterpriseServiceAccountsRequestServiceAccountRequestAccessModelACCESSMODELFINEGRAINED BatchCreateEnterpriseServiceAccountsRequestServiceAccountRequestAccessModel = "ACCESS_MODEL_FINE_GRAINED"
+	BatchCreateEnterpriseServiceAccountsRequestServiceAccountRequestAccessModelACCESSMODELROLEBASED   BatchCreateEnterpriseServiceAccountsRequestServiceAccountRequestAccessModel = "ACCESS_MODEL_ROLE_BASED"
+	BatchCreateEnterpriseServiceAccountsRequestServiceAccountRequestAccessModelACCESSMODELUNSPECIFIED BatchCreateEnterpriseServiceAccountsRequestServiceAccountRequestAccessModel = "ACCESS_MODEL_UNSPECIFIED"
+)
+
 // Defines values for BatchCreateEnterpriseServiceAccountsRequestServiceAccountRequestProduct.
 const (
 	BatchCreateEnterpriseServiceAccountsRequestServiceAccountRequestProductPRODUCTTYPECASTAI      BatchCreateEnterpriseServiceAccountsRequestServiceAccountRequestProduct = "PRODUCT_TYPE_CASTAI"
@@ -48,6 +55,14 @@ const (
 	DefinitionMemberKindSUBJECTKINDSERVICEACCOUNT DefinitionMemberKind = "SUBJECT_KIND_SERVICE_ACCOUNT"
 	DefinitionMemberKindSUBJECTKINDUNSPECIFIED    DefinitionMemberKind = "SUBJECT_KIND_UNSPECIFIED"
 	DefinitionMemberKindSUBJECTKINDUSER           DefinitionMemberKind = "SUBJECT_KIND_USER"
+)
+
+// Defines values for FineGrainedAccessScopeKind.
+const (
+	FineGrainedAccessScopeKindSCOPEKINDCLUSTER      FineGrainedAccessScopeKind = "SCOPE_KIND_CLUSTER"
+	FineGrainedAccessScopeKindSCOPEKINDENTERPRISE   FineGrainedAccessScopeKind = "SCOPE_KIND_ENTERPRISE"
+	FineGrainedAccessScopeKindSCOPEKINDORGANIZATION FineGrainedAccessScopeKind = "SCOPE_KIND_ORGANIZATION"
+	FineGrainedAccessScopeKindSCOPEKINDUNSPECIFIED  FineGrainedAccessScopeKind = "SCOPE_KIND_UNSPECIFIED"
 )
 
 // Defines values for GetEnterpriseGroupResponseSsoProvider.
@@ -79,6 +94,21 @@ const (
 	ListChildrenOrganizationsResponseChildOrganizationTypeORGANIZATIONTYPEDEFAULT     ListChildrenOrganizationsResponseChildOrganizationType = "ORGANIZATION_TYPE_DEFAULT"
 	ListChildrenOrganizationsResponseChildOrganizationTypeORGANIZATIONTYPEENTERPRISE  ListChildrenOrganizationsResponseChildOrganizationType = "ORGANIZATION_TYPE_ENTERPRISE"
 	ListChildrenOrganizationsResponseChildOrganizationTypeORGANIZATIONTYPEUNSPECIFIED ListChildrenOrganizationsResponseChildOrganizationType = "ORGANIZATION_TYPE_UNSPECIFIED"
+)
+
+// Defines values for ListEnterpriseServiceAccountsResponseServiceAccountAccessModel.
+const (
+	ListEnterpriseServiceAccountsResponseServiceAccountAccessModelACCESSMODELFINEGRAINED ListEnterpriseServiceAccountsResponseServiceAccountAccessModel = "ACCESS_MODEL_FINE_GRAINED"
+	ListEnterpriseServiceAccountsResponseServiceAccountAccessModelACCESSMODELROLEBASED   ListEnterpriseServiceAccountsResponseServiceAccountAccessModel = "ACCESS_MODEL_ROLE_BASED"
+	ListEnterpriseServiceAccountsResponseServiceAccountAccessModelACCESSMODELUNSPECIFIED ListEnterpriseServiceAccountsResponseServiceAccountAccessModel = "ACCESS_MODEL_UNSPECIFIED"
+)
+
+// Defines values for ListEnterpriseServiceAccountsResponseServiceAccountProduct.
+const (
+	ListEnterpriseServiceAccountsResponseServiceAccountProductPRODUCTTYPECASTAI      ListEnterpriseServiceAccountsResponseServiceAccountProduct = "PRODUCT_TYPE_CASTAI"
+	ListEnterpriseServiceAccountsResponseServiceAccountProductPRODUCTTYPEKIMCHI      ListEnterpriseServiceAccountsResponseServiceAccountProduct = "PRODUCT_TYPE_KIMCHI"
+	ListEnterpriseServiceAccountsResponseServiceAccountProductPRODUCTTYPEPLATFORM    ListEnterpriseServiceAccountsResponseServiceAccountProduct = "PRODUCT_TYPE_PLATFORM"
+	ListEnterpriseServiceAccountsResponseServiceAccountProductPRODUCTTYPEUNSPECIFIED ListEnterpriseServiceAccountsResponseServiceAccountProduct = "PRODUCT_TYPE_UNSPECIFIED"
 )
 
 // Defines values for RoleBindingRoleBindingStatusState.
@@ -140,6 +170,22 @@ const (
 	EnterpriseAPIListEnterpriseServiceAccountsParamsSortOrderAsc  EnterpriseAPIListEnterpriseServiceAccountsParamsSortOrder = "asc"
 	EnterpriseAPIListEnterpriseServiceAccountsParamsSortOrderDESC EnterpriseAPIListEnterpriseServiceAccountsParamsSortOrder = "DESC"
 	EnterpriseAPIListEnterpriseServiceAccountsParamsSortOrderDesc EnterpriseAPIListEnterpriseServiceAccountsParamsSortOrder = "desc"
+)
+
+// Defines values for EnterpriseAPIListEnterpriseServiceAccountsParamsActions.
+const (
+	EnterpriseAPIListEnterpriseServiceAccountsParamsActionsCREATE EnterpriseAPIListEnterpriseServiceAccountsParamsActions = "CREATE"
+	EnterpriseAPIListEnterpriseServiceAccountsParamsActionsDELETE EnterpriseAPIListEnterpriseServiceAccountsParamsActions = "DELETE"
+	EnterpriseAPIListEnterpriseServiceAccountsParamsActionsREAD   EnterpriseAPIListEnterpriseServiceAccountsParamsActions = "READ"
+	EnterpriseAPIListEnterpriseServiceAccountsParamsActionsWRITE  EnterpriseAPIListEnterpriseServiceAccountsParamsActions = "WRITE"
+)
+
+// Defines values for EnterpriseAPIListEnterpriseServiceAccountsParamsScopeKind.
+const (
+	EnterpriseAPIListEnterpriseServiceAccountsParamsScopeKindSCOPEKINDCLUSTER      EnterpriseAPIListEnterpriseServiceAccountsParamsScopeKind = "SCOPE_KIND_CLUSTER"
+	EnterpriseAPIListEnterpriseServiceAccountsParamsScopeKindSCOPEKINDENTERPRISE   EnterpriseAPIListEnterpriseServiceAccountsParamsScopeKind = "SCOPE_KIND_ENTERPRISE"
+	EnterpriseAPIListEnterpriseServiceAccountsParamsScopeKindSCOPEKINDORGANIZATION EnterpriseAPIListEnterpriseServiceAccountsParamsScopeKind = "SCOPE_KIND_ORGANIZATION"
+	EnterpriseAPIListEnterpriseServiceAccountsParamsScopeKindSCOPEKINDUNSPECIFIED  EnterpriseAPIListEnterpriseServiceAccountsParamsScopeKind = "SCOPE_KIND_UNSPECIFIED"
 )
 
 // AddUserToChildOrganizationRequest Request message for adding a user to a child organization
@@ -317,8 +363,15 @@ type BatchCreateEnterpriseServiceAccountsRequest struct {
 
 // BatchCreateEnterpriseServiceAccountsRequestServiceAccountRequest ServiceAccountRequest is a single service account to create.
 type BatchCreateEnterpriseServiceAccountsRequestServiceAccountRequest struct {
+	// AccessModel AccessModel selects role-based or fine-grained access. Unspecified means role-based.
+	AccessModel *BatchCreateEnterpriseServiceAccountsRequestServiceAccountRequestAccessModel `json:"accessModel,omitempty"`
+
 	// Description Description of the service account.
 	Description *string `json:"description,omitempty"`
+
+	// FineGrainedAccess FineGrainedAccess is required for fine-grained access and rejected for role-based access.
+	//  A fine-grained service account cannot have the platform product.
+	FineGrainedAccess *FineGrainedAccess `json:"fineGrainedAccess,omitempty"`
 
 	// Name Name of the service account.
 	Name string `json:"name"`
@@ -331,6 +384,9 @@ type BatchCreateEnterpriseServiceAccountsRequestServiceAccountRequest struct {
 	//  All or nothing across the batch: omit it on every item or set the same value on every item.
 	Product *BatchCreateEnterpriseServiceAccountsRequestServiceAccountRequestProduct `json:"product,omitempty"`
 }
+
+// BatchCreateEnterpriseServiceAccountsRequestServiceAccountRequestAccessModel AccessModel selects role-based or fine-grained access. Unspecified means role-based.
+type BatchCreateEnterpriseServiceAccountsRequestServiceAccountRequestAccessModel string
 
 // BatchCreateEnterpriseServiceAccountsRequestServiceAccountRequestProduct Which product the service account belongs to (castai or kimchi).
 //
@@ -547,6 +603,9 @@ type BatchUpdateEnterpriseServiceAccountsRequestUpdateServiceAccountRequest stru
 	// Description If absent, the existing description is preserved. If present and empty, the description is cleared.
 	Description *string `json:"description,omitempty"`
 
+	// FineGrainedAccess If omitted, access is unchanged. If present, scopes and permission groups are replaced together.
+	FineGrainedAccess *FineGrainedAccess `json:"fineGrainedAccess,omitempty"`
+
 	// Name If absent, the existing name is preserved.
 	Name *string `json:"name,omitempty"`
 
@@ -649,6 +708,31 @@ type DefinitionRoleBinding struct {
 	// Scopes List of scopes to which this role binding applies.
 	Scopes *[]RoleBindingScope `json:"scopes,omitempty"`
 }
+
+// FineGrainedAccess FineGrainedAccess defines the targets and permission groups of a fine-grained service account.
+//
+//	All scopes must have the same kind and must not contain duplicate targets.
+//	An enterprise scope covers the entire enterprise and must be the only scope.
+//	Organization scopes for an enterprise parent name selected child organizations.
+type FineGrainedAccess struct {
+	// PermissionGroups PermissionGroups are the names of the permission groups given to the service account.
+	PermissionGroups []string `json:"permissionGroups"`
+
+	// Scopes Scopes are the targets to which all permission groups apply.
+	Scopes []FineGrainedAccessScope `json:"scopes"`
+}
+
+// FineGrainedAccessScope Scope identifies one target to which access applies.
+type FineGrainedAccessScope struct {
+	// Id ID is the UUID of the target.
+	Id string `json:"id"`
+
+	// Kind Kind is the type of the target.
+	Kind FineGrainedAccessScopeKind `json:"kind"`
+}
+
+// FineGrainedAccessScopeKind Kind is the type of the target.
+type FineGrainedAccessScopeKind string
 
 // GetEnterpriseGroupResponse Response message containing the requested enterprise group
 type GetEnterpriseGroupResponse struct {
@@ -912,6 +996,9 @@ type ListEnterpriseServiceAccountsResponse struct {
 
 // ListEnterpriseServiceAccountsResponseServiceAccount ServiceAccount represents a service account item in the enterprise.
 type ListEnterpriseServiceAccountsResponseServiceAccount struct {
+	// AccessModel AccessModel identifies how the service account gets its permissions.
+	AccessModel *ListEnterpriseServiceAccountsResponseServiceAccountAccessModel `json:"accessModel,omitempty"`
+
 	// Author Author is the author of the service account.
 	Author *ServiceAccountAuthor `json:"author,omitempty"`
 
@@ -923,6 +1010,9 @@ type ListEnterpriseServiceAccountsResponseServiceAccount struct {
 
 	// Email Email is the email of the service account.
 	Email *string `json:"email,omitempty"`
+
+	// FineGrainedAccess FineGrainedAccess is present only for fine-grained service accounts.
+	FineGrainedAccess *FineGrainedAccess `json:"fineGrainedAccess,omitempty"`
 
 	// Id ID is the unique identifier of the service account.
 	Id *string `json:"id,omitempty"`
@@ -938,7 +1028,16 @@ type ListEnterpriseServiceAccountsResponseServiceAccount struct {
 
 	// OrganizationId OrganizationID is the organization this service account belongs to.
 	OrganizationId *string `json:"organizationId,omitempty"`
+
+	// Product Which product the service account belongs to: castai or kimchi; platform means visible in all products.
+	Product *ListEnterpriseServiceAccountsResponseServiceAccountProduct `json:"product,omitempty"`
 }
+
+// ListEnterpriseServiceAccountsResponseServiceAccountAccessModel AccessModel identifies how the service account gets its permissions.
+type ListEnterpriseServiceAccountsResponseServiceAccountAccessModel string
+
+// ListEnterpriseServiceAccountsResponseServiceAccountProduct Which product the service account belongs to: castai or kimchi; platform means visible in all products.
+type ListEnterpriseServiceAccountsResponseServiceAccountProduct string
 
 // ListGroupsResponse Response message containing the list of groups in the enterprise organization
 type ListGroupsResponse struct {
@@ -1524,8 +1623,8 @@ type EnterpriseAPIListEnterpriseServiceAccountsParams struct {
 	//  Empty value indicates to start from beginning of the dataset.
 	PageCursor *string `form:"page.cursor,omitempty" json:"page.cursor,omitempty"`
 
-	// OrganizationId Filter by organization ID. Multiple values can be passed as query
-	//  parameters (e.g., &organization_id=x&organization_id=y).
+	// OrganizationId Filter by the organization that owns the service account, not by its access scope.
+	//  Multiple values can be passed as query parameters (e.g., &organization_id=x&organization_id=y).
 	OrganizationId *[]string `form:"organizationId,omitempty" json:"organizationId,omitempty"`
 
 	// SortField The field name to order by. Nested fields can be specified by using a dot (e.g. user.name).
@@ -1536,10 +1635,41 @@ type EnterpriseAPIListEnterpriseServiceAccountsParams struct {
 
 	// Name Filter by name. Performs case-insensitive partial matching.
 	Name *string `form:"name,omitempty" json:"name,omitempty"`
+
+	// ManagedBy Filter by the exact managed_by value for either access model. An empty string matches legacy values.
+	ManagedBy *[]string `form:"managedBy,omitempty" json:"managedBy,omitempty"`
+
+	// PermissionGroups Filter fine-grained service accounts by permission group. Every given group must be present.
+	//  Role-based service accounts do not match this filter.
+	PermissionGroups *[]string `form:"permissionGroups,omitempty" json:"permissionGroups,omitempty"`
+
+	// Actions Filter either access model by action. A role-based service account matches through its assigned roles;
+	//  a fine-grained service account matches through its permission groups. At least one action must match.
+	Actions *[]EnterpriseAPIListEnterpriseServiceAccountsParamsActions `form:"actions,omitempty" json:"actions,omitempty"`
+
+	// ScopeKind Filter either access model by the exact stored scope kind.
+	ScopeKind *[]EnterpriseAPIListEnterpriseServiceAccountsParamsScopeKind `form:"scopeKind,omitempty" json:"scopeKind,omitempty"`
+
+	// ScopeOrganizationId Filter either access model by an exact stored organization scope.
+	//  This does not return an entire-enterprise service account only because it covers a child organization.
+	ScopeOrganizationId *[]string `form:"scopeOrganizationId,omitempty" json:"scopeOrganizationId,omitempty"`
+
+	// ScopeClusterId Filter either access model by an exact stored cluster scope.
+	//  This does not return an organization-scoped service account only because it covers the cluster.
+	ScopeClusterId *[]string `form:"scopeClusterId,omitempty" json:"scopeClusterId,omitempty"`
+
+	// RoleId Filter role-based service accounts by an assigned role ID. Fine-grained service accounts do not match.
+	RoleId *[]string `form:"roleId,omitempty" json:"roleId,omitempty"`
 }
 
 // EnterpriseAPIListEnterpriseServiceAccountsParamsSortOrder defines parameters for EnterpriseAPIListEnterpriseServiceAccounts.
 type EnterpriseAPIListEnterpriseServiceAccountsParamsSortOrder string
+
+// EnterpriseAPIListEnterpriseServiceAccountsParamsActions defines parameters for EnterpriseAPIListEnterpriseServiceAccounts.
+type EnterpriseAPIListEnterpriseServiceAccountsParamsActions string
+
+// EnterpriseAPIListEnterpriseServiceAccountsParamsScopeKind defines parameters for EnterpriseAPIListEnterpriseServiceAccounts.
+type EnterpriseAPIListEnterpriseServiceAccountsParamsScopeKind string
 
 // EnterpriseAPIBatchCreateEnterpriseGroupsJSONRequestBody defines body for EnterpriseAPIBatchCreateEnterpriseGroups for application/json ContentType.
 type EnterpriseAPIBatchCreateEnterpriseGroupsJSONRequestBody = BatchCreateEnterpriseGroupsRequest
