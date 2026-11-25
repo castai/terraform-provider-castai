@@ -88,9 +88,6 @@ func Provider(version string) *schema.Provider {
 			"castai_enterprise_group":           resourceEnterpriseGroup(),
 			"castai_enterprise_role_binding":    resourceEnterpriseRoleBinding(),
 			"castai_enterprise_service_account": resourceEnterpriseServiceAccount(),
-			"castai_cache_group":                resourceCacheGroup(),
-			"castai_cache_configuration":        resourceCacheConfiguration(),
-			"castai_cache_rule":                 resourceCacheRule(),
 
 			"castai_workload_scaling_policy":             resourceWorkloadScalingPolicy(),
 			"castai_workload_scaling_policy_order":       resourceWorkloadScalingPolicyOrder(),
@@ -111,7 +108,6 @@ func Provider(version string) *schema.Provider {
 			"castai_workload_scaling_policy":       dataSourceWorkloadScalingPolicy(),
 			"castai_workload_scaling_policies":     dataSourceWorkloadScalingPolicies(),
 			"castai_workload_scaling_policy_order": dataSourceWorkloadScalingPolicyOrder(),
-			"castai_cache_group":                   dataSourceCacheGroup(),
 			"castai_impersonation_service_account": dataSourceImpersonationServiceAccount(),
 			"castai_roles":                         dataSourceRoles(),
 			"castai_role":                          dataSourceRole(),

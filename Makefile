@@ -1,7 +1,7 @@
 SHELL := /bin/bash
 
 export API_HOST ?= api.cast.ai
-export API_TAGS ?= ExternalClusterAPI,PoliciesAPI,NodeConfigurationAPI,NodeTemplatesAPI,AuthTokenAPI,ScheduledRebalancingAPI,InventoryAPI,UsersAPI,OperationsAPI,EvictorAPI,SSOAPI,CommitmentsAPI,WorkloadOptimizationAPI,ServiceAccountsAPI,RbacServiceAPI,RuntimeSecurityAPI,AllocationGroupAPI,DboAPI
+export API_TAGS ?= ExternalClusterAPI,PoliciesAPI,NodeConfigurationAPI,NodeTemplatesAPI,AuthTokenAPI,ScheduledRebalancingAPI,InventoryAPI,UsersAPI,OperationsAPI,EvictorAPI,SSOAPI,CommitmentsAPI,WorkloadOptimizationAPI,ServiceAccountsAPI,RbacServiceAPI,RuntimeSecurityAPI,AllocationGroupAPI
 export SWAGGER_LOCATION ?= https://$(API_HOST)/v1/spec/openapi.json
 
 #  To add a new SDK, add a line here in the format: package_name:ApiTagName:spec_location
