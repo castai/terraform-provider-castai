@@ -62,6 +62,41 @@ func TestToRegisteredClusterStatusWithoutStatus(t *testing.T) {
 	require.Nil(t, toRegisteredClusterStatus(nil))
 }
 
+func TestValidateOmniClusterStatus(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name           string
+		status         *omniClusterStatusModel
+		expectedErrors int
+	}{
+		{name: "no status", expectedErrors: 0},
+		{name: "legacy agent", status: &omniClusterStatusModel{OmniAgentVersion: types.StringValue("1.19.16")}, expectedErrors: 0},
+		{name: "connect without agent version", status: &omniClusterStatusModel{
+			ProvisioningMode: types.StringValue("OMNI_CONNECT"),
+			OmniAgentVersion: types.StringNull(),
+		}, expectedErrors: 0},
+		{name: "agent without version", status: &omniClusterStatusModel{
+			ProvisioningMode: types.StringValue("OMNI_AGENT"),
+			OmniAgentVersion: types.StringNull(),
+		}, expectedErrors: 1},
+		{name: "legacy empty version", status: &omniClusterStatusModel{
+			OmniAgentVersion: types.StringValue(""),
+		}, expectedErrors: 1},
+		{name: "connect with agent version", status: &omniClusterStatusModel{
+			ProvisioningMode: types.StringValue("OMNI_CONNECT"),
+			OmniAgentVersion: types.StringValue("1.19.16"),
+		}, expectedErrors: 1},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			diags := validateOmniClusterStatus(tt.status)
+			require.Len(t, diags.Errors(), tt.expectedErrors)
+		})
+	}
+}
+
 func stringPointer(value string) *string {
 	return &value
 }

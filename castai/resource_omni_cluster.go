@@ -6,10 +6,13 @@ import (
 	"github.com/samber/lo"
 	"net/http"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	"github.com/castai/terraform-provider-castai/castai/sdk/omni"
@@ -78,6 +81,12 @@ func (r *omniClusterResource) Schema(_ context.Context, _ resource.SchemaRequest
 					"provisioning_mode": schema.StringAttribute{
 						Optional:    true,
 						Description: "Provisioning component used by the cluster: OMNI_AGENT or OMNI_CONNECT. Omit to preserve legacy OMNI_AGENT behavior.",
+						Validators: []validator.String{
+							stringvalidator.OneOf(
+								string(omni.RegisteredClusterStatusProvisioningModeOMNIAGENT),
+								string(omni.RegisteredClusterStatusProvisioningModeOMNICONNECT),
+							),
+						},
 					},
 					"omni_agent_version": schema.StringAttribute{
 						Optional:    true,
@@ -124,10 +133,34 @@ func toRegisteredClusterStatus(status *omniClusterStatusModel) *omni.RegisteredC
 	}
 }
 
+func validateOmniClusterStatus(status *omniClusterStatusModel) diag.Diagnostics {
+	var diags diag.Diagnostics
+	if status == nil {
+		return diags
+	}
+
+	if status.ProvisioningMode.ValueString() == string(omni.RegisteredClusterStatusProvisioningModeOMNICONNECT) {
+		if !status.OmniAgentVersion.IsNull() {
+			diags.AddError("Invalid omni_agent_version", "omni_agent_version must be omitted when provisioning_mode is OMNI_CONNECT")
+		}
+		return diags
+	}
+
+	if status.OmniAgentVersion.IsNull() || status.OmniAgentVersion.ValueString() == "" {
+		diags.AddError("Missing omni_agent_version", "omni_agent_version is required when provisioning_mode is OMNI_AGENT or unspecified")
+	}
+	return diags
+}
+
 func (r *omniClusterResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var plan omniClusterModel
 
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	resp.Diagnostics.Append(validateOmniClusterStatus(plan.Status)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
@@ -203,6 +236,11 @@ func (r *omniClusterResource) Update(ctx context.Context, req resource.UpdateReq
 	client := r.client.omniAPI
 	organizationID := plan.OrganizationID.ValueString()
 	clusterID := plan.ClusterID.ValueString()
+
+	resp.Diagnostics.Append(validateOmniClusterStatus(plan.Status)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
 
 	body := omni.RegisteredCluster{Status: toRegisteredClusterStatus(plan.Status)}
 

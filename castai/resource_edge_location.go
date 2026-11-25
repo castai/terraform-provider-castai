@@ -400,7 +400,7 @@ func (r *edgeLocationResource) Schema(_ context.Context, _ resource.SchemaReques
 			},
 			"control_plane": schema.SingleNestedAttribute{
 				Optional:    true,
-				Description: "Control plane configuration. Only valid when control_plane_mode is SHARED.",
+				Description: "Control plane configuration. Only valid when control_plane_mode is SHARED; must be unset for DEDICATED and NATIVE.",
 				Attributes: map[string]schema.Attribute{
 					"ha": schema.BoolAttribute{
 						Optional:    true,
@@ -807,12 +807,11 @@ func (r *edgeLocationResource) Create(ctx context.Context, req resource.CreateRe
 		createReq.Description = lo.ToPtr(plan.Description.ValueString())
 	}
 
-	if plan.ControlPlaneMode.ValueString() != string(omni.EdgeLocationControlPlaneModeNATIVE) {
-		createReq.EdgeClusterSpec, diags = r.toEdgeClusterSpec(ctx, plan.ControlPlane, plan.Networking, plan.Addons, plan.Liqo)
-		resp.Diagnostics.Append(diags...)
-		if resp.Diagnostics.HasError() {
-			return
-		}
+	createReq.EdgeClusterSpec, diags = r.toEdgeClusterSpecForMode(ctx, plan.ControlPlaneMode.ValueString(), plan.ControlPlane, plan.Networking, plan.Addons, plan.Liqo)
+	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(r.nativeEdgeClusterWarning(plan)...)
+	if resp.Diagnostics.HasError() {
+		return
 	}
 
 	// Map cloud provider specific configurations.
@@ -1076,6 +1075,10 @@ func (r *edgeLocationResource) Update(ctx context.Context, req resource.UpdateRe
 	if len(plan.Zones) > 0 {
 		updateReq.Zones = toPtr(r.toZones(plan.Zones))
 	}
+	resp.Diagnostics.Append(r.nativeEdgeClusterWarning(plan)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
 
 	// Check if credentials have changed by comparing credentials revision
 	credentialsChanged := !plan.CredentialsRevision.Equal(state.CredentialsRevision)
@@ -1086,10 +1089,12 @@ func (r *edgeLocationResource) Update(ctx context.Context, req resource.UpdateRe
 		mc    ModelWithCredentials
 	)
 
-	updateReq.EdgeClusterSpec, diags = r.edgeClusterSpecUpdate(ctx, plan, state)
-	resp.Diagnostics.Append(diags...)
-	if resp.Diagnostics.HasError() {
-		return
+	if plan.ControlPlaneMode.ValueString() != string(omni.EdgeLocationControlPlaneModeNATIVE) {
+		updateReq.EdgeClusterSpec, diags = r.edgeClusterSpecUpdate(ctx, plan, state)
+		resp.Diagnostics.Append(diags...)
+		if resp.Diagnostics.HasError() {
+			return
+		}
 	}
 
 	// Include cloud provider config if it or credentials has changed.
@@ -1408,6 +1413,39 @@ func stringMapValue(ctx context.Context, m *map[string]string, diags *diag.Diagn
 	v, d := types.MapValueFrom(ctx, types.StringType, *m)
 	diags.Append(d...)
 	return v
+}
+
+func (r *edgeLocationResource) nativeEdgeClusterWarning(plan edgeLocationModel) diag.Diagnostics {
+	var diags diag.Diagnostics
+	if plan.ControlPlaneMode.ValueString() != string(omni.EdgeLocationControlPlaneModeNATIVE) {
+		return diags
+	}
+
+	var fields []string
+	if plan.ControlPlane != nil {
+		fields = append(fields, "control_plane")
+	}
+	if plan.Networking != nil {
+		fields = append(fields, "networking")
+	}
+	if len(plan.Addons) > 0 {
+		fields = append(fields, "addons")
+	}
+	if plan.Liqo != nil {
+		fields = append(fields, "liqo")
+	}
+	if len(fields) > 0 {
+		diags.AddWarning("EdgeCluster settings are ignored for NATIVE", strings.Join(fields, ", ")+" have no effect when control_plane_mode is NATIVE and are not sent to the API")
+	}
+	return diags
+}
+
+func (r *edgeLocationResource) toEdgeClusterSpecForMode(ctx context.Context, mode string, cp *controlPlaneModel, net *networkingModel, addons []addonModel, liqo *liqoModel) (*omni.EdgeClusterSpec, diag.Diagnostics) {
+	var diags diag.Diagnostics
+	if mode == string(omni.EdgeLocationControlPlaneModeNATIVE) {
+		return nil, diags
+	}
+	return r.toEdgeClusterSpec(ctx, cp, net, addons, liqo)
 }
 
 func (r *edgeLocationResource) toEdgeClusterSpec(ctx context.Context, cp *controlPlaneModel, net *networkingModel, addons []addonModel, liqo *liqoModel) (*omni.EdgeClusterSpec, diag.Diagnostics) {
