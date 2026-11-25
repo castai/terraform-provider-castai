@@ -288,6 +288,21 @@ const (
 	CastaiRbacV1beta1ScopeTypeORGANIZATION CastaiRbacV1beta1ScopeType = "ORGANIZATION"
 )
 
+// Defines values for CastaiServiceaccountsV1beta1AccessModel.
+const (
+	CastaiServiceaccountsV1beta1AccessModelACCESSMODELFINEGRAINED CastaiServiceaccountsV1beta1AccessModel = "ACCESS_MODEL_FINE_GRAINED"
+	CastaiServiceaccountsV1beta1AccessModelACCESSMODELROLEBASED   CastaiServiceaccountsV1beta1AccessModel = "ACCESS_MODEL_ROLE_BASED"
+	CastaiServiceaccountsV1beta1AccessModelACCESSMODELUNSPECIFIED CastaiServiceaccountsV1beta1AccessModel = "ACCESS_MODEL_UNSPECIFIED"
+)
+
+// Defines values for CastaiServiceaccountsV1beta1ScopeKind.
+const (
+	CastaiServiceaccountsV1beta1ScopeKindSCOPEKINDCLUSTER      CastaiServiceaccountsV1beta1ScopeKind = "SCOPE_KIND_CLUSTER"
+	CastaiServiceaccountsV1beta1ScopeKindSCOPEKINDENTERPRISE   CastaiServiceaccountsV1beta1ScopeKind = "SCOPE_KIND_ENTERPRISE"
+	CastaiServiceaccountsV1beta1ScopeKindSCOPEKINDORGANIZATION CastaiServiceaccountsV1beta1ScopeKind = "SCOPE_KIND_ORGANIZATION"
+	CastaiServiceaccountsV1beta1ScopeKindSCOPEKINDUNSPECIFIED  CastaiServiceaccountsV1beta1ScopeKind = "SCOPE_KIND_UNSPECIFIED"
+)
+
 // Defines values for CastaiSsoV1beta1OIDCType.
 const (
 	CastaiSsoV1beta1OIDCTypeTYPEBACKCHANNEL  CastaiSsoV1beta1OIDCType = "TYPE_BACK_CHANNEL"
@@ -1456,6 +1471,22 @@ const (
 	RbacServiceAPIListRolesParamsTypeALL        RbacServiceAPIListRolesParamsType = "ALL"
 	RbacServiceAPIListRolesParamsTypeDEFAULT    RbacServiceAPIListRolesParamsType = "DEFAULT"
 	RbacServiceAPIListRolesParamsTypeENTERPRISE RbacServiceAPIListRolesParamsType = "ENTERPRISE"
+)
+
+// Defines values for ServiceAccountsAPIListServiceAccountsParamsActions.
+const (
+	ServiceAccountsAPIListServiceAccountsParamsActionsCREATE ServiceAccountsAPIListServiceAccountsParamsActions = "CREATE"
+	ServiceAccountsAPIListServiceAccountsParamsActionsDELETE ServiceAccountsAPIListServiceAccountsParamsActions = "DELETE"
+	ServiceAccountsAPIListServiceAccountsParamsActionsREAD   ServiceAccountsAPIListServiceAccountsParamsActions = "READ"
+	ServiceAccountsAPIListServiceAccountsParamsActionsWRITE  ServiceAccountsAPIListServiceAccountsParamsActions = "WRITE"
+)
+
+// Defines values for ServiceAccountsAPIListServiceAccountsParamsScopeKind.
+const (
+	ServiceAccountsAPIListServiceAccountsParamsScopeKindSCOPEKINDCLUSTER      ServiceAccountsAPIListServiceAccountsParamsScopeKind = "SCOPE_KIND_CLUSTER"
+	ServiceAccountsAPIListServiceAccountsParamsScopeKindSCOPEKINDENTERPRISE   ServiceAccountsAPIListServiceAccountsParamsScopeKind = "SCOPE_KIND_ENTERPRISE"
+	ServiceAccountsAPIListServiceAccountsParamsScopeKindSCOPEKINDORGANIZATION ServiceAccountsAPIListServiceAccountsParamsScopeKind = "SCOPE_KIND_ORGANIZATION"
+	ServiceAccountsAPIListServiceAccountsParamsScopeKindSCOPEKINDUNSPECIFIED  ServiceAccountsAPIListServiceAccountsParamsScopeKind = "SCOPE_KIND_UNSPECIFIED"
 )
 
 // Defines values for UsersAPIRemoveOrganizationUsersParamsProduct.
@@ -3949,13 +3980,20 @@ type CastaiRbacV1beta1UserSubject struct {
 	Name *string `json:"name,omitempty"`
 }
 
+// CastaiServiceaccountsV1beta1AccessModel AccessModel identifies how a service account gets its permissions.
+//
+//   - ACCESS_MODEL_UNSPECIFIED: Default value. In create requests, this keeps the existing role-based behavior.
+//   - ACCESS_MODEL_ROLE_BASED: The service account gets permissions through role bindings.
+//   - ACCESS_MODEL_FINE_GRAINED: The service account gets permissions directly from FineGrainedAccess.
+type CastaiServiceaccountsV1beta1AccessModel string
+
 // CastaiServiceaccountsV1beta1CreateServiceAccountKeyRequestKey Key is the key to create.
 type CastaiServiceaccountsV1beta1CreateServiceAccountKeyRequestKey struct {
 	// Active Active is the active state of the key. If not provided, the default is true.
 	Active *bool `json:"active,omitempty"`
 
 	// ExpiresAt ExpiresAt is the expiration time of the key.
-	// A null value means that the key will never expire.
+	// Required: it must be set to a time in the future, at most 366 days ahead.
 	ExpiresAt *time.Time `json:"expiresAt,omitempty"`
 
 	// Name Name is the name of the service account key.
@@ -3974,6 +4012,7 @@ type CastaiServiceaccountsV1beta1CreateServiceAccountKeyResponse struct {
 	CreatedAt *time.Time `json:"createdAt,omitempty"`
 
 	// ExpiresAt ExpiresAt is the expiration time of the key.
+	// A null value means the key never expires. Such keys are legacy: new keys without an expiration are no longer accepted.
 	ExpiresAt *time.Time `json:"expiresAt,omitempty"`
 
 	// Id ID is the unique identifier of the key.
@@ -3991,8 +4030,19 @@ type CastaiServiceaccountsV1beta1CreateServiceAccountKeyResponse struct {
 
 // CastaiServiceaccountsV1beta1CreateServiceAccountRequestServiceAccount ServiceAccounts is the service account to be created.
 type CastaiServiceaccountsV1beta1CreateServiceAccountRequestServiceAccount struct {
+	// AccessModel AccessModel identifies how a service account gets its permissions.
+	//
+	//  - ACCESS_MODEL_UNSPECIFIED: Default value. In create requests, this keeps the existing role-based behavior.
+	//  - ACCESS_MODEL_ROLE_BASED: The service account gets permissions through role bindings.
+	//  - ACCESS_MODEL_FINE_GRAINED: The service account gets permissions directly from FineGrainedAccess.
+	AccessModel *CastaiServiceaccountsV1beta1AccessModel `json:"accessModel,omitempty"`
+
 	// Description Description is the description of the role binding.
 	Description *string `json:"description,omitempty"`
+
+	// FineGrainedAccess FineGrainedAccess defines the targets and permission groups of a fine-grained service account.
+	// All scopes must have the same kind and must not contain duplicate targets.
+	FineGrainedAccess *CastaiServiceaccountsV1beta1FineGrainedAccess `json:"fineGrainedAccess,omitempty"`
 
 	// Name Name is the name of the service account.
 	Name string `json:"name"`
@@ -4003,13 +4053,24 @@ type CastaiServiceaccountsV1beta1CreateServiceAccountRequestServiceAccount struc
 
 // CastaiServiceaccountsV1beta1CreateServiceAccountResponse CreateServiceAccountResponse is the response for creating a service account.
 type CastaiServiceaccountsV1beta1CreateServiceAccountResponse struct {
+	// AccessModel AccessModel identifies how a service account gets its permissions.
+	//
+	//  - ACCESS_MODEL_UNSPECIFIED: Default value. In create requests, this keeps the existing role-based behavior.
+	//  - ACCESS_MODEL_ROLE_BASED: The service account gets permissions through role bindings.
+	//  - ACCESS_MODEL_FINE_GRAINED: The service account gets permissions directly from FineGrainedAccess.
+	AccessModel *CastaiServiceaccountsV1beta1AccessModel `json:"accessModel,omitempty"`
+
 	// Author Author is the author of the service account.
 	Author      *CastaiServiceaccountsV1beta1CreateServiceAccountResponseAuthor `json:"author,omitempty"`
 	CreatedAt   *time.Time                                                      `json:"createdAt,omitempty"`
 	Description *string                                                         `json:"description,omitempty"`
 	Email       *string                                                         `json:"email,omitempty"`
-	Id          *string                                                         `json:"id,omitempty"`
-	Name        *string                                                         `json:"name,omitempty"`
+
+	// FineGrainedAccess FineGrainedAccess defines the targets and permission groups of a fine-grained service account.
+	// All scopes must have the same kind and must not contain duplicate targets.
+	FineGrainedAccess *CastaiServiceaccountsV1beta1FineGrainedAccess `json:"fineGrainedAccess,omitempty"`
+	Id                *string                                        `json:"id,omitempty"`
+	Name              *string                                        `json:"name,omitempty"`
 }
 
 // CastaiServiceaccountsV1beta1CreateServiceAccountResponseAuthor Author is the author of the service account.
@@ -4026,6 +4087,30 @@ type CastaiServiceaccountsV1beta1DeleteServiceAccountResponse = map[string]inter
 
 // CastaiServiceaccountsV1beta1DeleteServiceAccountsResponse DeleteServiceAccountsResponse is the response for batch deleting service accounts.
 type CastaiServiceaccountsV1beta1DeleteServiceAccountsResponse = map[string]interface{}
+
+// CastaiServiceaccountsV1beta1FineGrainedAccess FineGrainedAccess defines the targets and permission groups of a fine-grained service account.
+// All scopes must have the same kind and must not contain duplicate targets.
+type CastaiServiceaccountsV1beta1FineGrainedAccess struct {
+	// PermissionGroups PermissionGroups are the names of the permission groups given to the service account.
+	PermissionGroups []string `json:"permissionGroups"`
+
+	// Scopes Scopes are the targets to which all permission groups apply.
+	Scopes []CastaiServiceaccountsV1beta1FineGrainedAccessScope `json:"scopes"`
+}
+
+// CastaiServiceaccountsV1beta1FineGrainedAccessScope Scope identifies one target to which access applies.
+type CastaiServiceaccountsV1beta1FineGrainedAccessScope struct {
+	// Id ID is the UUID of the target.
+	Id string `json:"id"`
+
+	// Kind ScopeKind identifies the type of target to which access applies.
+	//
+	//  - SCOPE_KIND_UNSPECIFIED: Default value. It is not valid in a scope or scope filter.
+	//  - SCOPE_KIND_ENTERPRISE: The entire enterprise, including its child organizations.
+	//  - SCOPE_KIND_ORGANIZATION: A standalone organization or a selected child organization.
+	//  - SCOPE_KIND_CLUSTER: A single cluster.
+	Kind CastaiServiceaccountsV1beta1ScopeKind `json:"kind"`
+}
 
 // CastaiServiceaccountsV1beta1GetServiceAccountKeyResponse GetServiceAccountKeyResponse is the response for getting a service account key.
 type CastaiServiceaccountsV1beta1GetServiceAccountKeyResponse struct {
@@ -4063,6 +4148,7 @@ type CastaiServiceaccountsV1beta1ListOrganizationServiceAccountKeysResponseKey s
 	CreatedBy *CastaiServiceaccountsV1beta1ServiceAccountAuthor `json:"createdBy,omitempty"`
 
 	// ExpiresAt ExpiresAt is the expiration time of the key.
+	// A null value means the key never expires. Such keys are legacy: new keys without an expiration are no longer accepted.
 	ExpiresAt *time.Time `json:"expiresAt,omitempty"`
 
 	// Id ID is the unique identifier of the key.
@@ -4129,8 +4215,23 @@ type CastaiServiceaccountsV1beta1ListServiceAccountsResponse struct {
 	TotalCount *string `json:"totalCount,omitempty"`
 }
 
+// CastaiServiceaccountsV1beta1ScopeKind ScopeKind identifies the type of target to which access applies.
+//
+//   - SCOPE_KIND_UNSPECIFIED: Default value. It is not valid in a scope or scope filter.
+//   - SCOPE_KIND_ENTERPRISE: The entire enterprise, including its child organizations.
+//   - SCOPE_KIND_ORGANIZATION: A standalone organization or a selected child organization.
+//   - SCOPE_KIND_CLUSTER: A single cluster.
+type CastaiServiceaccountsV1beta1ScopeKind string
+
 // CastaiServiceaccountsV1beta1ServiceAccount ServiceAccounts is the readable version of the service accounts.
 type CastaiServiceaccountsV1beta1ServiceAccount struct {
+	// AccessModel AccessModel identifies how a service account gets its permissions.
+	//
+	//  - ACCESS_MODEL_UNSPECIFIED: Default value. In create requests, this keeps the existing role-based behavior.
+	//  - ACCESS_MODEL_ROLE_BASED: The service account gets permissions through role bindings.
+	//  - ACCESS_MODEL_FINE_GRAINED: The service account gets permissions directly from FineGrainedAccess.
+	AccessModel *CastaiServiceaccountsV1beta1AccessModel `json:"accessModel,omitempty"`
+
 	// Author Author is the author of the service account.
 	Author *CastaiServiceaccountsV1beta1ServiceAccountAuthor `json:"author,omitempty"`
 
@@ -4142,6 +4243,10 @@ type CastaiServiceaccountsV1beta1ServiceAccount struct {
 
 	// Email Email is the email of the service account.
 	Email *string `json:"email,omitempty"`
+
+	// FineGrainedAccess FineGrainedAccess defines the targets and permission groups of a fine-grained service account.
+	// All scopes must have the same kind and must not contain duplicate targets.
+	FineGrainedAccess *CastaiServiceaccountsV1beta1FineGrainedAccess `json:"fineGrainedAccess,omitempty"`
 
 	// Id ID is the unique identifier of the service account.
 	Id *string `json:"id,omitempty"`
@@ -4184,6 +4289,7 @@ type CastaiServiceaccountsV1beta1ServiceAccountKey struct {
 	Active *bool `json:"active,omitempty"`
 
 	// ExpiresAt ExpiresAt is the expiration time of the key.
+	// A null value means the key never expires. Such keys are legacy: new keys without an expiration are no longer accepted.
 	ExpiresAt *time.Time `json:"expiresAt,omitempty"`
 
 	// Id ID is the unique identifier of the key.
@@ -4208,6 +4314,7 @@ type CastaiServiceaccountsV1beta1UpdateServiceAccountKeyResponse struct {
 	Active *bool `json:"active,omitempty"`
 
 	// ExpiresAt ExpiresAt is the expiration time of the key.
+	// A null value means the key never expires. Such keys are legacy: new keys without an expiration are no longer accepted.
 	ExpiresAt *time.Time `json:"expiresAt,omitempty"`
 
 	// Id ID is the unique identifier of the key.
@@ -4226,7 +4333,11 @@ type CastaiServiceaccountsV1beta1UpdateServiceAccountKeyResponse struct {
 // CastaiServiceaccountsV1beta1UpdateServiceAccountRequestServiceAccount ServiceAccount is the service account to be updated.
 type CastaiServiceaccountsV1beta1UpdateServiceAccountRequestServiceAccount struct {
 	Description *string `json:"description,omitempty"`
-	Name        string  `json:"name"`
+
+	// FineGrainedAccess FineGrainedAccess defines the targets and permission groups of a fine-grained service account.
+	// All scopes must have the same kind and must not contain duplicate targets.
+	FineGrainedAccess *CastaiServiceaccountsV1beta1FineGrainedAccess `json:"fineGrainedAccess,omitempty"`
+	Name              string                                         `json:"name"`
 }
 
 // CastaiServiceaccountsV1beta1UpdateServiceAccountResponse UpdateServiceAccountResponse is the response for updating a service account.
@@ -13963,7 +14074,39 @@ type ServiceAccountsAPIListServiceAccountsParams struct {
 
 	// ServiceAccountName Service account name filter.
 	ServiceAccountName *string `form:"serviceAccountName,omitempty" json:"serviceAccountName,omitempty"`
+
+	// ManagedBy Filter by the exact managed_by value for either access model. An empty string matches legacy values.
+	ManagedBy *[]string `form:"managedBy,omitempty" json:"managedBy,omitempty"`
+
+	// PermissionGroups Filter fine-grained service accounts by permission group. Every given group must be present.
+	// Role-based service accounts do not match this filter.
+	PermissionGroups *[]string `form:"permissionGroups,omitempty" json:"permissionGroups,omitempty"`
+
+	// Actions Filter either access model by action. A role-based service account matches through its assigned roles;
+	// a fine-grained service account matches through its permission groups. At least one action must match.
+	Actions *[]ServiceAccountsAPIListServiceAccountsParamsActions `form:"actions,omitempty" json:"actions,omitempty"`
+
+	// ScopeKind Filter either access model by the exact stored scope kind.
+	//
+	//  - SCOPE_KIND_UNSPECIFIED: Default value. It is not valid in a scope or scope filter.
+	//  - SCOPE_KIND_ENTERPRISE: The entire enterprise, including its child organizations.
+	//  - SCOPE_KIND_ORGANIZATION: A standalone organization or a selected child organization.
+	//  - SCOPE_KIND_CLUSTER: A single cluster.
+	ScopeKind *[]ServiceAccountsAPIListServiceAccountsParamsScopeKind `form:"scopeKind,omitempty" json:"scopeKind,omitempty"`
+
+	// ScopeClusterId Filter either access model by an exact stored cluster scope.
+	// This does not return an organization-scoped service account only because it covers the cluster.
+	ScopeClusterId *[]string `form:"scopeClusterId,omitempty" json:"scopeClusterId,omitempty"`
+
+	// RoleId Filter role-based service accounts by an assigned role ID. Fine-grained service accounts do not match.
+	RoleId *[]string `form:"roleId,omitempty" json:"roleId,omitempty"`
 }
+
+// ServiceAccountsAPIListServiceAccountsParamsActions defines parameters for ServiceAccountsAPIListServiceAccounts.
+type ServiceAccountsAPIListServiceAccountsParamsActions string
+
+// ServiceAccountsAPIListServiceAccountsParamsScopeKind defines parameters for ServiceAccountsAPIListServiceAccounts.
+type ServiceAccountsAPIListServiceAccountsParamsScopeKind string
 
 // ServiceAccountsAPIListOrganizationServiceAccountKeysParams defines parameters for ServiceAccountsAPIListOrganizationServiceAccountKeys.
 type ServiceAccountsAPIListOrganizationServiceAccountKeysParams struct {
