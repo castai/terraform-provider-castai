@@ -33,5 +33,9 @@ Omni cluster resource allows registering a cluster with CAST AI Omni provider.
 
 Required:
 
-- `omni_agent_version` (String) Version of the omni agent running on the cluster.
 - `pod_cidr` (String) Pod CIDR of the cluster.
+
+Optional:
+
+- `omni_agent_version` (String) Version of the omni agent running on the cluster. Required for OMNI_AGENT and omitted for OMNI_CONNECT.
+- `provisioning_mode` (String) Provisioning component used by the cluster: OMNI_AGENT or OMNI_CONNECT. Omit to preserve legacy OMNI_AGENT behavior.

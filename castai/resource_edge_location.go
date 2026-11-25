@@ -390,12 +390,12 @@ func (r *edgeLocationResource) Schema(_ context.Context, _ resource.SchemaReques
 				Optional:    true,
 				Computed:    true,
 				Default:     stringdefault.StaticString(string(omni.EdgeLocationControlPlaneModeDEDICATED)),
-				Description: "The mode of control plane inside edge location. Valid values: DEDICATED, SHARED.",
+				Description: "The mode of control plane inside edge location. Valid values: DEDICATED, SHARED, NATIVE.",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
 				},
 				Validators: []validator.String{
-					stringvalidator.OneOf(string(omni.EdgeLocationControlPlaneModeDEDICATED), string(omni.EdgeLocationControlPlaneModeSHARED)),
+					stringvalidator.OneOf(string(omni.EdgeLocationControlPlaneModeDEDICATED), string(omni.EdgeLocationControlPlaneModeSHARED), string(omni.EdgeLocationControlPlaneModeNATIVE)),
 				},
 			},
 			"control_plane": schema.SingleNestedAttribute{
@@ -807,10 +807,12 @@ func (r *edgeLocationResource) Create(ctx context.Context, req resource.CreateRe
 		createReq.Description = lo.ToPtr(plan.Description.ValueString())
 	}
 
-	createReq.EdgeClusterSpec, diags = r.toEdgeClusterSpec(ctx, plan.ControlPlane, plan.Networking, plan.Addons, plan.Liqo)
-	resp.Diagnostics.Append(diags...)
-	if resp.Diagnostics.HasError() {
-		return
+	if plan.ControlPlaneMode.ValueString() != string(omni.EdgeLocationControlPlaneModeNATIVE) {
+		createReq.EdgeClusterSpec, diags = r.toEdgeClusterSpec(ctx, plan.ControlPlane, plan.Networking, plan.Addons, plan.Liqo)
+		resp.Diagnostics.Append(diags...)
+		if resp.Diagnostics.HasError() {
+			return
+		}
 	}
 
 	// Map cloud provider specific configurations.

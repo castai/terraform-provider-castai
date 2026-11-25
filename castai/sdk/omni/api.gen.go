@@ -62,6 +62,7 @@ const (
 const (
 	EdgeLocationControlPlaneModeCONTROLPLANEMODEUNSPECIFIED EdgeLocationControlPlaneMode = "CONTROL_PLANE_MODE_UNSPECIFIED"
 	EdgeLocationControlPlaneModeDEDICATED                   EdgeLocationControlPlaneMode = "DEDICATED"
+	EdgeLocationControlPlaneModeNATIVE                      EdgeLocationControlPlaneMode = "NATIVE"
 	EdgeLocationControlPlaneModeSHARED                      EdgeLocationControlPlaneMode = "SHARED"
 )
 
@@ -102,6 +103,13 @@ const (
 	OmniAgentContextProviderEKS                     OmniAgentContextProvider = "EKS"
 	OmniAgentContextProviderGKE                     OmniAgentContextProvider = "GKE"
 	OmniAgentContextProviderPROVIDERTYPEUNSPECIFIED OmniAgentContextProvider = "PROVIDER_TYPE_UNSPECIFIED"
+)
+
+// Defines values for RegisteredClusterStatusProvisioningMode.
+const (
+	RegisteredClusterStatusProvisioningModeOMNIAGENT                   RegisteredClusterStatusProvisioningMode = "OMNI_AGENT"
+	RegisteredClusterStatusProvisioningModeOMNICONNECT                 RegisteredClusterStatusProvisioningMode = "OMNI_CONNECT"
+	RegisteredClusterStatusProvisioningModePROVISIONINGMODEUNSPECIFIED RegisteredClusterStatusProvisioningMode = "PROVISIONING_MODE_UNSPECIFIED"
 )
 
 // AWSConfiguration AWS specific parameters present in edge configuration.
@@ -1038,11 +1046,17 @@ type RegisteredCluster struct {
 // RegisteredClusterStatus Current status information of the cluster.
 type RegisteredClusterStatus struct {
 	// OmniAgentVersion The version of omni agent running on the cluster.
-	OmniAgentVersion string `json:"omniAgentVersion"`
+	OmniAgentVersion *string `json:"omniAgentVersion,omitempty"`
 
 	// PodCidr The comma-separated list of pod CIDRs of the cluster.
 	PodCidr string `json:"podCidr"`
+
+	// ProvisioningMode The component used to provision nodes and edge locations.
+	ProvisioningMode *RegisteredClusterStatusProvisioningMode `json:"provisioningMode,omitempty"`
 }
+
+// RegisteredClusterStatusProvisioningMode The component used to provision nodes and edge locations.
+type RegisteredClusterStatusProvisioningMode string
 
 // RenderOmniAgentComponentResponse Message of the response to render the omni-agent component manifest.
 type RenderOmniAgentComponentResponse struct {

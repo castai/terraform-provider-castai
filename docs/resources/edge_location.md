@@ -162,7 +162,7 @@ resource "castai_edge_location" "aws_example_no_addons" {
 - `addons` (Attributes List) Optional addons to install on the edge cluster. Defaults to installing nvidia-gpu-operator. Set to an empty list to install no optional addons. (see [below for nested schema](#nestedatt--addons))
 - `aws` (Attributes) AWS configuration for the edge location (see [below for nested schema](#nestedatt--aws))
 - `control_plane` (Attributes) Control plane configuration. Only valid when control_plane_mode is SHARED. (see [below for nested schema](#nestedatt--control_plane))
-- `control_plane_mode` (String) The mode of control plane inside edge location. Valid values: DEDICATED, SHARED.
+- `control_plane_mode` (String) The mode of control plane inside edge location. Valid values: DEDICATED, SHARED, NATIVE.
 - `custom` (Attributes) Custom cloud provider configuration for the edge location (see [below for nested schema](#nestedatt--custom))
 - `description` (String) Description of the edge location
 - `gcp` (Attributes) GCP configuration for the edge location (see [below for nested schema](#nestedatt--gcp))
