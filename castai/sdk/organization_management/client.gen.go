@@ -1794,6 +1794,118 @@ func NewEnterpriseAPIListEnterpriseServiceAccountsRequest(server string, enterpr
 
 		}
 
+		if params.ManagedBy != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "managedBy", runtime.ParamLocationQuery, *params.ManagedBy); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.PermissionGroups != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "permissionGroups", runtime.ParamLocationQuery, *params.PermissionGroups); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.Actions != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "actions", runtime.ParamLocationQuery, *params.Actions); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.ScopeKind != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "scopeKind", runtime.ParamLocationQuery, *params.ScopeKind); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.ScopeOrganizationId != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "scopeOrganizationId", runtime.ParamLocationQuery, *params.ScopeOrganizationId); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.ScopeClusterId != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "scopeClusterId", runtime.ParamLocationQuery, *params.ScopeClusterId); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.RoleId != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "roleId", runtime.ParamLocationQuery, *params.RoleId); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
 		queryURL.RawQuery = queryValues.Encode()
 	}
 
