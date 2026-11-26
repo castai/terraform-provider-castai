@@ -80,17 +80,17 @@ func (r *omniClusterResource) Schema(_ context.Context, _ resource.SchemaRequest
 				Attributes: map[string]schema.Attribute{
 					"provisioning_mode": schema.StringAttribute{
 						Optional:    true,
-						Description: "Provisioning component used by the cluster: OMNI_AGENT or OMNI_CONNECT. Omit to preserve legacy OMNI_AGENT behavior.",
+						Description: "Cluster registration mode: VIRTUALNODE or NATIVE. Omit to preserve VIRTUALNODE behavior.",
 						Validators: []validator.String{
 							stringvalidator.OneOf(
-								string(omni.RegisteredClusterStatusProvisioningModeOMNIAGENT),
-								string(omni.RegisteredClusterStatusProvisioningModeOMNICONNECT),
+								string(omni.RegisteredClusterStatusProvisioningMode("VIRTUALNODE")),
+								string(omni.RegisteredClusterStatusProvisioningMode("NATIVE")),
 							),
 						},
 					},
 					"omni_agent_version": schema.StringAttribute{
 						Optional:    true,
-						Description: "Version of the omni agent running on the cluster. Required for OMNI_AGENT and omitted for OMNI_CONNECT.",
+						Description: "Version of the omni agent running on the cluster. Required for VIRTUALNODE and omitted for NATIVE.",
 					},
 					"pod_cidr": schema.StringAttribute{
 						Required:    true,
@@ -139,15 +139,15 @@ func validateOmniClusterStatus(status *omniClusterStatusModel) diag.Diagnostics 
 		return diags
 	}
 
-	if status.ProvisioningMode.ValueString() == string(omni.RegisteredClusterStatusProvisioningModeOMNICONNECT) {
+	if status.ProvisioningMode.ValueString() == "NATIVE" {
 		if !status.OmniAgentVersion.IsNull() {
-			diags.AddError("Invalid omni_agent_version", "omni_agent_version must be omitted when provisioning_mode is OMNI_CONNECT")
+			diags.AddError("Invalid omni_agent_version", "omni_agent_version must be omitted when provisioning_mode is NATIVE")
 		}
 		return diags
 	}
 
 	if status.OmniAgentVersion.IsNull() || status.OmniAgentVersion.ValueString() == "" {
-		diags.AddError("Missing omni_agent_version", "omni_agent_version is required when provisioning_mode is OMNI_AGENT or unspecified")
+		diags.AddError("Missing omni_agent_version", "omni_agent_version is required when provisioning_mode is VIRTUALNODE or unspecified")
 	}
 	return diags
 }
