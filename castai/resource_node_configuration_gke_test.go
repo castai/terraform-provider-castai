@@ -187,11 +187,6 @@ resource "castai_node_configuration" "test" {
 		%s
   }
 }
-
-resource "castai_node_configuration_default" "test" {
-  cluster_id       = castai_gke_cluster.test.id
-  configuration_id = castai_node_configuration.test.id
-}
 `, rName, gkeParams))
 }
 

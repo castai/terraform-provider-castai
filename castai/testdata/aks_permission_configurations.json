@@ -1,0 +1,995 @@
+[
+  {
+    "id": "official-module-replica",
+    "name": "Official module replica",
+    "description": "Single custom role with the full advertised action list, assigned to the cluster, node and VNet resource groups, exactly as the castai/aks Terraform module and docs.cast.ai advertise it.",
+    "rationale": "Baseline configuration; by definition covers every advertised action at every advertised scope.",
+    "expected_valid": true,
+    "required_scope_coverage": [
+      "cluster_resource_group",
+      "node_resource_group",
+      "vnet_resource_group"
+    ],
+    "role_definitions": [
+      {
+        "ref": "custom-castai-role",
+        "kind": "custom",
+        "name": "CastAKSRole-<cluster_name>",
+        "actions": [
+          "Microsoft.Compute/*/read",
+          "Microsoft.Compute/virtualMachines/*",
+          "Microsoft.Compute/virtualMachineScaleSets/*",
+          "Microsoft.Compute/disks/write",
+          "Microsoft.Compute/disks/delete",
+          "Microsoft.Compute/disks/beginGetAccess/action",
+          "Microsoft.Compute/galleries/write",
+          "Microsoft.Compute/galleries/delete",
+          "Microsoft.Compute/galleries/images/write",
+          "Microsoft.Compute/galleries/images/delete",
+          "Microsoft.Compute/galleries/images/versions/write",
+          "Microsoft.Compute/galleries/images/versions/delete",
+          "Microsoft.Compute/snapshots/write",
+          "Microsoft.Compute/snapshots/delete",
+          "Microsoft.Network/*/read",
+          "Microsoft.Network/networkInterfaces/write",
+          "Microsoft.Network/networkInterfaces/delete",
+          "Microsoft.Network/networkInterfaces/join/action",
+          "Microsoft.Network/networkSecurityGroups/join/action",
+          "Microsoft.Network/virtualNetworks/subnets/join/action",
+          "Microsoft.Network/applicationGateways/backendhealth/action",
+          "Microsoft.Network/applicationGateways/backendAddressPools/join/action",
+          "Microsoft.Network/applicationSecurityGroups/joinIpConfiguration/action",
+          "Microsoft.Network/loadBalancers/backendAddressPools/write",
+          "Microsoft.Network/loadBalancers/backendAddressPools/join/action",
+          "Microsoft.ContainerService/*/read",
+          "Microsoft.ContainerService/managedClusters/start/action",
+          "Microsoft.ContainerService/managedClusters/stop/action",
+          "Microsoft.ContainerService/managedClusters/runCommand/action",
+          "Microsoft.ContainerService/managedClusters/agentPools/*",
+          "Microsoft.Resources/*/read",
+          "Microsoft.Resources/tags/write",
+          "Microsoft.Authorization/locks/read",
+          "Microsoft.Authorization/roleAssignments/read",
+          "Microsoft.Authorization/roleDefinitions/read",
+          "Microsoft.ManagedIdentity/userAssignedIdentities/assign/action"
+        ],
+        "not_actions": [],
+        "assignable_scopes": [
+          "cluster_resource_group",
+          "node_resource_group",
+          "vnet_resource_group"
+        ]
+      }
+    ],
+    "role_assignments": [
+      {
+        "role_definition": "custom-castai-role",
+        "scope": "cluster_resource_group"
+      },
+      {
+        "role_definition": "custom-castai-role",
+        "scope": "node_resource_group"
+      },
+      {
+        "role_definition": "custom-castai-role",
+        "scope": "vnet_resource_group"
+      }
+    ]
+  },
+  {
+    "id": "official-role-at-subscription-scope",
+    "name": "Official role at subscription scope",
+    "description": "The same single custom role with the full advertised action list, but assigned once at the subscription scope instead of per resource group.",
+    "rationale": "A subscription-scoped assignment covers every resource group underneath, so each advertised action remains allowed at every resource-group scope that the official configuration covers.",
+    "expected_valid": true,
+    "required_scope_coverage": [
+      "cluster_resource_group",
+      "node_resource_group",
+      "vnet_resource_group"
+    ],
+    "role_definitions": [
+      {
+        "ref": "custom-castai-role",
+        "kind": "custom",
+        "name": "CastAKSRole-<cluster_name>",
+        "actions": [
+          "Microsoft.Compute/*/read",
+          "Microsoft.Compute/virtualMachines/*",
+          "Microsoft.Compute/virtualMachineScaleSets/*",
+          "Microsoft.Compute/disks/write",
+          "Microsoft.Compute/disks/delete",
+          "Microsoft.Compute/disks/beginGetAccess/action",
+          "Microsoft.Compute/galleries/write",
+          "Microsoft.Compute/galleries/delete",
+          "Microsoft.Compute/galleries/images/write",
+          "Microsoft.Compute/galleries/images/delete",
+          "Microsoft.Compute/galleries/images/versions/write",
+          "Microsoft.Compute/galleries/images/versions/delete",
+          "Microsoft.Compute/snapshots/write",
+          "Microsoft.Compute/snapshots/delete",
+          "Microsoft.Network/*/read",
+          "Microsoft.Network/networkInterfaces/write",
+          "Microsoft.Network/networkInterfaces/delete",
+          "Microsoft.Network/networkInterfaces/join/action",
+          "Microsoft.Network/networkSecurityGroups/join/action",
+          "Microsoft.Network/virtualNetworks/subnets/join/action",
+          "Microsoft.Network/applicationGateways/backendhealth/action",
+          "Microsoft.Network/applicationGateways/backendAddressPools/join/action",
+          "Microsoft.Network/applicationSecurityGroups/joinIpConfiguration/action",
+          "Microsoft.Network/loadBalancers/backendAddressPools/write",
+          "Microsoft.Network/loadBalancers/backendAddressPools/join/action",
+          "Microsoft.ContainerService/*/read",
+          "Microsoft.ContainerService/managedClusters/start/action",
+          "Microsoft.ContainerService/managedClusters/stop/action",
+          "Microsoft.ContainerService/managedClusters/runCommand/action",
+          "Microsoft.ContainerService/managedClusters/agentPools/*",
+          "Microsoft.Resources/*/read",
+          "Microsoft.Resources/tags/write",
+          "Microsoft.Authorization/locks/read",
+          "Microsoft.Authorization/roleAssignments/read",
+          "Microsoft.Authorization/roleDefinitions/read",
+          "Microsoft.ManagedIdentity/userAssignedIdentities/assign/action"
+        ],
+        "not_actions": [],
+        "assignable_scopes": [
+          "subscription"
+        ]
+      }
+    ],
+    "role_assignments": [
+      {
+        "role_definition": "custom-castai-role",
+        "scope": "subscription"
+      }
+    ]
+  },
+  {
+    "id": "per-service-split-custom-roles",
+    "name": "Split into per-service custom roles",
+    "description": "The advertised actions partitioned into three custom roles (Compute, Network, control plane), each assigned to all three resource groups.",
+    "rationale": "Azure RBAC unions the actions of every role assigned at a scope; the union of the three partitions equals the advertised action list at each scope.",
+    "expected_valid": true,
+    "required_scope_coverage": [
+      "cluster_resource_group",
+      "node_resource_group",
+      "vnet_resource_group"
+    ],
+    "role_definitions": [
+      {
+        "ref": "custom-compute-role",
+        "kind": "custom",
+        "name": "CastAI-AKS-Compute-<cluster_name>",
+        "actions": [
+          "Microsoft.Compute/*/read",
+          "Microsoft.Compute/virtualMachines/*",
+          "Microsoft.Compute/virtualMachineScaleSets/*",
+          "Microsoft.Compute/disks/write",
+          "Microsoft.Compute/disks/delete",
+          "Microsoft.Compute/disks/beginGetAccess/action",
+          "Microsoft.Compute/galleries/write",
+          "Microsoft.Compute/galleries/delete",
+          "Microsoft.Compute/galleries/images/write",
+          "Microsoft.Compute/galleries/images/delete",
+          "Microsoft.Compute/galleries/images/versions/write",
+          "Microsoft.Compute/galleries/images/versions/delete",
+          "Microsoft.Compute/snapshots/write",
+          "Microsoft.Compute/snapshots/delete"
+        ],
+        "not_actions": [],
+        "assignable_scopes": [
+          "cluster_resource_group",
+          "node_resource_group",
+          "vnet_resource_group"
+        ]
+      },
+      {
+        "ref": "custom-network-role",
+        "kind": "custom",
+        "name": "CastAI-AKS-Network-<cluster_name>",
+        "actions": [
+          "Microsoft.Network/*/read",
+          "Microsoft.Network/networkInterfaces/write",
+          "Microsoft.Network/networkInterfaces/delete",
+          "Microsoft.Network/networkInterfaces/join/action",
+          "Microsoft.Network/networkSecurityGroups/join/action",
+          "Microsoft.Network/virtualNetworks/subnets/join/action",
+          "Microsoft.Network/applicationGateways/backendhealth/action",
+          "Microsoft.Network/applicationGateways/backendAddressPools/join/action",
+          "Microsoft.Network/applicationSecurityGroups/joinIpConfiguration/action",
+          "Microsoft.Network/loadBalancers/backendAddressPools/write",
+          "Microsoft.Network/loadBalancers/backendAddressPools/join/action"
+        ],
+        "not_actions": [],
+        "assignable_scopes": [
+          "cluster_resource_group",
+          "node_resource_group",
+          "vnet_resource_group"
+        ]
+      },
+      {
+        "ref": "custom-control-plane-role",
+        "kind": "custom",
+        "name": "CastAI-AKS-ControlPlane-<cluster_name>",
+        "actions": [
+          "Microsoft.ContainerService/*/read",
+          "Microsoft.ContainerService/managedClusters/start/action",
+          "Microsoft.ContainerService/managedClusters/stop/action",
+          "Microsoft.ContainerService/managedClusters/runCommand/action",
+          "Microsoft.ContainerService/managedClusters/agentPools/*",
+          "Microsoft.Resources/*/read",
+          "Microsoft.Resources/tags/write",
+          "Microsoft.Authorization/locks/read",
+          "Microsoft.Authorization/roleAssignments/read",
+          "Microsoft.Authorization/roleDefinitions/read",
+          "Microsoft.ManagedIdentity/userAssignedIdentities/assign/action"
+        ],
+        "not_actions": [],
+        "assignable_scopes": [
+          "cluster_resource_group",
+          "node_resource_group",
+          "vnet_resource_group"
+        ]
+      }
+    ],
+    "role_assignments": [
+      {
+        "role_definition": "custom-compute-role",
+        "scope": "cluster_resource_group"
+      },
+      {
+        "role_definition": "custom-compute-role",
+        "scope": "node_resource_group"
+      },
+      {
+        "role_definition": "custom-compute-role",
+        "scope": "vnet_resource_group"
+      },
+      {
+        "role_definition": "custom-network-role",
+        "scope": "cluster_resource_group"
+      },
+      {
+        "role_definition": "custom-network-role",
+        "scope": "node_resource_group"
+      },
+      {
+        "role_definition": "custom-network-role",
+        "scope": "vnet_resource_group"
+      },
+      {
+        "role_definition": "custom-control-plane-role",
+        "scope": "cluster_resource_group"
+      },
+      {
+        "role_definition": "custom-control-plane-role",
+        "scope": "node_resource_group"
+      },
+      {
+        "role_definition": "custom-control-plane-role",
+        "scope": "vnet_resource_group"
+      }
+    ]
+  },
+  {
+    "id": "builtin-reader-plus-custom-writer",
+    "name": "Built-in Reader plus custom writer",
+    "description": "Built-in Reader at subscription scope for every read, plus one custom role holding all non-read advertised actions assigned to the three resource groups.",
+    "rationale": "Reader grants */read, which covers every advertised read pattern; the writer role carries every advertised write/join/action pattern verbatim.",
+    "expected_valid": true,
+    "required_scope_coverage": [
+      "cluster_resource_group",
+      "node_resource_group",
+      "vnet_resource_group"
+    ],
+    "role_definitions": [
+      {
+        "ref": "builtin-reader",
+        "kind": "builtin",
+        "name": "Reader",
+        "role_definition_id": "acdd72a7-3385-48ef-bd42-f606fba81ae7",
+        "actions": [
+          "*/read"
+        ],
+        "not_actions": []
+      },
+      {
+        "ref": "custom-writer-role",
+        "kind": "custom",
+        "name": "CastAI-AKS-Writer-<cluster_name>",
+        "actions": [
+          "Microsoft.Compute/virtualMachines/*",
+          "Microsoft.Compute/virtualMachineScaleSets/*",
+          "Microsoft.Compute/disks/write",
+          "Microsoft.Compute/disks/delete",
+          "Microsoft.Compute/disks/beginGetAccess/action",
+          "Microsoft.Compute/galleries/write",
+          "Microsoft.Compute/galleries/delete",
+          "Microsoft.Compute/galleries/images/write",
+          "Microsoft.Compute/galleries/images/delete",
+          "Microsoft.Compute/galleries/images/versions/write",
+          "Microsoft.Compute/galleries/images/versions/delete",
+          "Microsoft.Compute/snapshots/write",
+          "Microsoft.Compute/snapshots/delete",
+          "Microsoft.Network/networkInterfaces/write",
+          "Microsoft.Network/networkInterfaces/delete",
+          "Microsoft.Network/networkInterfaces/join/action",
+          "Microsoft.Network/networkSecurityGroups/join/action",
+          "Microsoft.Network/virtualNetworks/subnets/join/action",
+          "Microsoft.Network/applicationGateways/backendhealth/action",
+          "Microsoft.Network/applicationGateways/backendAddressPools/join/action",
+          "Microsoft.Network/applicationSecurityGroups/joinIpConfiguration/action",
+          "Microsoft.Network/loadBalancers/backendAddressPools/write",
+          "Microsoft.Network/loadBalancers/backendAddressPools/join/action",
+          "Microsoft.ContainerService/managedClusters/start/action",
+          "Microsoft.ContainerService/managedClusters/stop/action",
+          "Microsoft.ContainerService/managedClusters/runCommand/action",
+          "Microsoft.ContainerService/managedClusters/agentPools/*",
+          "Microsoft.Resources/tags/write",
+          "Microsoft.ManagedIdentity/userAssignedIdentities/assign/action"
+        ],
+        "not_actions": [],
+        "assignable_scopes": [
+          "cluster_resource_group",
+          "node_resource_group",
+          "vnet_resource_group"
+        ]
+      }
+    ],
+    "role_assignments": [
+      {
+        "role_definition": "builtin-reader",
+        "scope": "subscription"
+      },
+      {
+        "role_definition": "custom-writer-role",
+        "scope": "cluster_resource_group"
+      },
+      {
+        "role_definition": "custom-writer-role",
+        "scope": "node_resource_group"
+      },
+      {
+        "role_definition": "custom-writer-role",
+        "scope": "vnet_resource_group"
+      }
+    ]
+  },
+  {
+    "id": "builtin-contributor-at-resource-groups",
+    "name": "Built-in Contributor at resource groups",
+    "description": "Built-in Contributor role assigned to the cluster, node and VNet resource groups.",
+    "rationale": "Contributor grants * minus authorization writes, blueprint assignment writes, gallery sharing, Purview consents, deployment-stack deny-setting management and subscription lifecycle actions. None of the advertised actions are excluded, so all of them remain allowed at each assigned scope.",
+    "expected_valid": true,
+    "required_scope_coverage": [
+      "cluster_resource_group",
+      "node_resource_group",
+      "vnet_resource_group"
+    ],
+    "role_definitions": [
+      {
+        "ref": "builtin-contributor",
+        "kind": "builtin",
+        "name": "Contributor",
+        "role_definition_id": "b24988ac-6180-42a0-ab88-20f7382dd24c",
+        "actions": [
+          "*"
+        ],
+        "not_actions": [
+          "Microsoft.Authorization/*/Delete",
+          "Microsoft.Authorization/*/Write",
+          "Microsoft.Authorization/elevateAccess/Action",
+          "Microsoft.Blueprint/blueprintAssignments/write",
+          "Microsoft.Blueprint/blueprintAssignments/delete",
+          "Microsoft.Compute/galleries/share/action",
+          "Microsoft.Purview/consents/write",
+          "Microsoft.Purview/consents/delete",
+          "Microsoft.Resources/deploymentStacks/manageDenySetting/action",
+          "Microsoft.Subscription/cancel/action",
+          "Microsoft.Subscription/enable/action"
+        ]
+      }
+    ],
+    "role_assignments": [
+      {
+        "role_definition": "builtin-contributor",
+        "scope": "cluster_resource_group"
+      },
+      {
+        "role_definition": "builtin-contributor",
+        "scope": "node_resource_group"
+      },
+      {
+        "role_definition": "builtin-contributor",
+        "scope": "vnet_resource_group"
+      }
+    ]
+  },
+  {
+    "id": "builtin-contributor-at-subscription-scope",
+    "name": "Built-in Contributor at subscription scope",
+    "description": "Built-in Contributor role assigned once at the subscription scope.",
+    "rationale": "Contributor's exclusions do not intersect the advertised action list, and the subscription scope covers every resource group the official configuration covers.",
+    "expected_valid": true,
+    "required_scope_coverage": [
+      "cluster_resource_group",
+      "node_resource_group",
+      "vnet_resource_group"
+    ],
+    "role_definitions": [
+      {
+        "ref": "builtin-contributor",
+        "kind": "builtin",
+        "name": "Contributor",
+        "role_definition_id": "b24988ac-6180-42a0-ab88-20f7382dd24c",
+        "actions": [
+          "*"
+        ],
+        "not_actions": [
+          "Microsoft.Authorization/*/Delete",
+          "Microsoft.Authorization/*/Write",
+          "Microsoft.Authorization/elevateAccess/Action",
+          "Microsoft.Blueprint/blueprintAssignments/write",
+          "Microsoft.Blueprint/blueprintAssignments/delete",
+          "Microsoft.Compute/galleries/share/action",
+          "Microsoft.Purview/consents/write",
+          "Microsoft.Purview/consents/delete",
+          "Microsoft.Resources/deploymentStacks/manageDenySetting/action",
+          "Microsoft.Subscription/cancel/action",
+          "Microsoft.Subscription/enable/action"
+        ]
+      }
+    ],
+    "role_assignments": [
+      {
+        "role_definition": "builtin-contributor",
+        "scope": "subscription"
+      }
+    ]
+  },
+  {
+    "id": "broadened-wildcard-custom-role",
+    "name": "Broadened wildcard custom role",
+    "description": "One custom role that trades the advertised fine-grained patterns for four service-wide wildcards, plus the exact authorization reads and managed-identity assignment, assigned to the three resource groups.",
+    "rationale": "Every advertised pattern is matched by one of the broader wildcards (for example Microsoft.Compute/* matches Microsoft.Compute/*/read and every compute write), so coverage is a strict superset.",
+    "expected_valid": true,
+    "required_scope_coverage": [
+      "cluster_resource_group",
+      "node_resource_group",
+      "vnet_resource_group"
+    ],
+    "role_definitions": [
+      {
+        "ref": "custom-broad-role",
+        "kind": "custom",
+        "name": "CastAI-AKS-Broad-<cluster_name>",
+        "actions": [
+          "Microsoft.Compute/*",
+          "Microsoft.Network/*",
+          "Microsoft.ContainerService/*",
+          "Microsoft.Resources/*",
+          "Microsoft.Authorization/locks/read",
+          "Microsoft.Authorization/roleAssignments/read",
+          "Microsoft.Authorization/roleDefinitions/read",
+          "Microsoft.ManagedIdentity/userAssignedIdentities/assign/action"
+        ],
+        "not_actions": [],
+        "assignable_scopes": [
+          "cluster_resource_group",
+          "node_resource_group",
+          "vnet_resource_group"
+        ]
+      }
+    ],
+    "role_assignments": [
+      {
+        "role_definition": "custom-broad-role",
+        "scope": "cluster_resource_group"
+      },
+      {
+        "role_definition": "custom-broad-role",
+        "scope": "node_resource_group"
+      },
+      {
+        "role_definition": "custom-broad-role",
+        "scope": "vnet_resource_group"
+      }
+    ]
+  },
+  {
+    "id": "wildcard-custom-role-with-notactions",
+    "name": "Wildcard custom role with NotActions",
+    "description": "Same broadened wildcard custom role, but NotActions subtract a few dangerous actions that the advertised configuration never grants (host group writes, DNS zone writes, cluster admin credential listing).",
+    "rationale": "NotActions only remove actions outside the advertised list, so every advertised action stays allowed while the role shows that NotActions do not invalidate a configuration.",
+    "expected_valid": true,
+    "required_scope_coverage": [
+      "cluster_resource_group",
+      "node_resource_group",
+      "vnet_resource_group"
+    ],
+    "role_definitions": [
+      {
+        "ref": "custom-broad-role-minus",
+        "kind": "custom",
+        "name": "CastAI-AKS-Broad-<cluster_name>",
+        "actions": [
+          "Microsoft.Compute/*",
+          "Microsoft.Network/*",
+          "Microsoft.ContainerService/*",
+          "Microsoft.Resources/*",
+          "Microsoft.Authorization/locks/read",
+          "Microsoft.Authorization/roleAssignments/read",
+          "Microsoft.Authorization/roleDefinitions/read",
+          "Microsoft.ManagedIdentity/userAssignedIdentities/assign/action"
+        ],
+        "not_actions": [
+          "Microsoft.Compute/hostGroups/write",
+          "Microsoft.Compute/hostGroups/delete",
+          "Microsoft.Network/dnsZones/write",
+          "Microsoft.ContainerService/managedClusters/listClusterAdminCredential/action"
+        ],
+        "assignable_scopes": [
+          "cluster_resource_group",
+          "node_resource_group",
+          "vnet_resource_group"
+        ]
+      }
+    ],
+    "role_assignments": [
+      {
+        "role_definition": "custom-broad-role-minus",
+        "scope": "cluster_resource_group"
+      },
+      {
+        "role_definition": "custom-broad-role-minus",
+        "scope": "node_resource_group"
+      },
+      {
+        "role_definition": "custom-broad-role-minus",
+        "scope": "vnet_resource_group"
+      }
+    ]
+  },
+  {
+    "id": "custom-reader-at-subscription-custom-writer-at-resource-groups",
+    "name": "Custom reader at subscription, custom writer at resource groups",
+    "description": "A small custom reader role carrying only the advertised read patterns, assigned at subscription scope, and a custom writer role with all non-read advertised actions at the three resource groups.",
+    "rationale": "Reads are inherited from the subscription level while writes are granted per resource group; the union at each resource group equals the advertised list.",
+    "expected_valid": true,
+    "required_scope_coverage": [
+      "cluster_resource_group",
+      "node_resource_group",
+      "vnet_resource_group"
+    ],
+    "role_definitions": [
+      {
+        "ref": "custom-reader-role",
+        "kind": "custom",
+        "name": "CastAI-AKS-Reader-<cluster_name>",
+        "actions": [
+          "Microsoft.Compute/*/read",
+          "Microsoft.Network/*/read",
+          "Microsoft.ContainerService/*/read",
+          "Microsoft.Resources/*/read",
+          "Microsoft.Authorization/locks/read",
+          "Microsoft.Authorization/roleAssignments/read",
+          "Microsoft.Authorization/roleDefinitions/read"
+        ],
+        "not_actions": [],
+        "assignable_scopes": [
+          "subscription"
+        ]
+      },
+      {
+        "ref": "custom-writer-role",
+        "kind": "custom",
+        "name": "CastAI-AKS-Writer-<cluster_name>",
+        "actions": [
+          "Microsoft.Compute/virtualMachines/*",
+          "Microsoft.Compute/virtualMachineScaleSets/*",
+          "Microsoft.Compute/disks/write",
+          "Microsoft.Compute/disks/delete",
+          "Microsoft.Compute/disks/beginGetAccess/action",
+          "Microsoft.Compute/galleries/write",
+          "Microsoft.Compute/galleries/delete",
+          "Microsoft.Compute/galleries/images/write",
+          "Microsoft.Compute/galleries/images/delete",
+          "Microsoft.Compute/galleries/images/versions/write",
+          "Microsoft.Compute/galleries/images/versions/delete",
+          "Microsoft.Compute/snapshots/write",
+          "Microsoft.Compute/snapshots/delete",
+          "Microsoft.Network/networkInterfaces/write",
+          "Microsoft.Network/networkInterfaces/delete",
+          "Microsoft.Network/networkInterfaces/join/action",
+          "Microsoft.Network/networkSecurityGroups/join/action",
+          "Microsoft.Network/virtualNetworks/subnets/join/action",
+          "Microsoft.Network/applicationGateways/backendhealth/action",
+          "Microsoft.Network/applicationGateways/backendAddressPools/join/action",
+          "Microsoft.Network/applicationSecurityGroups/joinIpConfiguration/action",
+          "Microsoft.Network/loadBalancers/backendAddressPools/write",
+          "Microsoft.Network/loadBalancers/backendAddressPools/join/action",
+          "Microsoft.ContainerService/managedClusters/start/action",
+          "Microsoft.ContainerService/managedClusters/stop/action",
+          "Microsoft.ContainerService/managedClusters/runCommand/action",
+          "Microsoft.ContainerService/managedClusters/agentPools/*",
+          "Microsoft.Resources/tags/write",
+          "Microsoft.ManagedIdentity/userAssignedIdentities/assign/action"
+        ],
+        "not_actions": [],
+        "assignable_scopes": [
+          "cluster_resource_group",
+          "node_resource_group",
+          "vnet_resource_group"
+        ]
+      }
+    ],
+    "role_assignments": [
+      {
+        "role_definition": "custom-reader-role",
+        "scope": "subscription"
+      },
+      {
+        "role_definition": "custom-writer-role",
+        "scope": "cluster_resource_group"
+      },
+      {
+        "role_definition": "custom-writer-role",
+        "scope": "node_resource_group"
+      },
+      {
+        "role_definition": "custom-writer-role",
+        "scope": "vnet_resource_group"
+      }
+    ]
+  },
+  {
+    "id": "builtin-roles-mix-with-gapfiller",
+    "name": "Built-in roles mix with gap-filler custom role",
+    "description": "Reader at subscription scope; Network Contributor, Azure Kubernetes Service Contributor Role and Virtual Machine Contributor at the three resource groups; plus a small custom gap-filler role for the advertised actions the built-ins do not cover (disk SAS access, gallery and snapshot writes, tag writes, managed identity assignment).",
+    "rationale": "Each built-in covers the advertised patterns of its service, Reader covers every read, and the gap-filler closes the remaining advertised actions; unions at each scope cover the full list.",
+    "expected_valid": true,
+    "required_scope_coverage": [
+      "cluster_resource_group",
+      "node_resource_group",
+      "vnet_resource_group"
+    ],
+    "role_definitions": [
+      {
+        "ref": "builtin-reader",
+        "kind": "builtin",
+        "name": "Reader",
+        "role_definition_id": "acdd72a7-3385-48ef-bd42-f606fba81ae7",
+        "actions": [
+          "*/read"
+        ],
+        "not_actions": []
+      },
+      {
+        "ref": "builtin-network-contributor",
+        "kind": "builtin",
+        "name": "Network Contributor",
+        "role_definition_id": "4d97b98b-1d4f-4787-a291-c67834d212e7",
+        "actions": [
+          "Microsoft.Authorization/*/read",
+          "Microsoft.Insights/alertRules/*",
+          "Microsoft.Network/*",
+          "Microsoft.ResourceHealth/availabilityStatuses/read",
+          "Microsoft.Resources/deployments/*",
+          "Microsoft.Resources/subscriptions/resourceGroups/read",
+          "Microsoft.Support/*"
+        ],
+        "not_actions": []
+      },
+      {
+        "ref": "builtin-aks-contributor",
+        "kind": "builtin",
+        "name": "Azure Kubernetes Service Contributor Role",
+        "role_definition_id": "ed7f3fbd-7b88-4dd4-9017-9adb7ce333f8",
+        "actions": [
+          "Microsoft.Authorization/*/read",
+          "Microsoft.ContainerService/locations/*",
+          "Microsoft.ContainerService/managedClusters/*",
+          "Microsoft.ContainerService/managedclustersnapshots/*",
+          "Microsoft.ContainerService/snapshots/*",
+          "Microsoft.Insights/alertRules/*",
+          "Microsoft.Resources/deployments/*",
+          "Microsoft.Resources/subscriptions/resourceGroups/read",
+          "Microsoft.ContainerService/deploymentSafeguards/*"
+        ],
+        "not_actions": []
+      },
+      {
+        "ref": "builtin-vm-contributor",
+        "kind": "builtin",
+        "name": "Virtual Machine Contributor",
+        "role_definition_id": "9980e02c-c2be-4d73-94e8-173b1dc7cf3c",
+        "actions": [
+          "Microsoft.Authorization/*/read",
+          "Microsoft.Compute/availabilitySets/*",
+          "Microsoft.Compute/locations/*",
+          "Microsoft.Compute/virtualMachines/*",
+          "Microsoft.Compute/virtualMachineScaleSets/*",
+          "Microsoft.Compute/cloudServices/*",
+          "Microsoft.Compute/disks/write",
+          "Microsoft.Compute/disks/read",
+          "Microsoft.Compute/disks/delete",
+          "Microsoft.Compute/hostgroups/write",
+          "Microsoft.Compute/hostgroups/hosts/write",
+          "Microsoft.DevTestLab/schedules/*",
+          "Microsoft.Insights/alertRules/*",
+          "Microsoft.Network/applicationGateways/backendAddressPools/join/action",
+          "Microsoft.Network/loadBalancers/backendAddressPools/join/action",
+          "Microsoft.Network/loadBalancers/inboundNatPools/join/action",
+          "Microsoft.Network/loadBalancers/inboundNatRules/join/action",
+          "Microsoft.Network/loadBalancers/probes/join/action",
+          "Microsoft.Network/loadBalancers/read",
+          "Microsoft.Network/locations/*",
+          "Microsoft.Network/networkInterfaces/*",
+          "Microsoft.Network/networkSecurityGroups/join/action",
+          "Microsoft.Network/networkSecurityGroups/read",
+          "Microsoft.Network/publicIPAddresses/join/action",
+          "Microsoft.Network/publicIPAddresses/read",
+          "Microsoft.Network/virtualNetworks/read",
+          "Microsoft.Network/virtualNetworks/subnets/join/action",
+          "Microsoft.RecoveryServices/locations/*",
+          "Microsoft.RecoveryServices/Vaults/backupFabrics/backupProtectionIntent/write",
+          "Microsoft.RecoveryServices/Vaults/backupFabrics/protectionContainers/protectedItems/*/read",
+          "Microsoft.RecoveryServices/Vaults/backupFabrics/protectionContainers/protectedItems/read",
+          "Microsoft.RecoveryServices/Vaults/backupFabrics/protectionContainers/protectedItems/write",
+          "Microsoft.RecoveryServices/Vaults/backupPolicies/read",
+          "Microsoft.RecoveryServices/Vaults/backupPolicies/write",
+          "Microsoft.RecoveryServices/Vaults/read",
+          "Microsoft.RecoveryServices/Vaults/usages/read",
+          "Microsoft.RecoveryServices/Vaults/write",
+          "Microsoft.ResourceHealth/availabilityStatuses/read",
+          "Microsoft.Resources/deployments/*",
+          "Microsoft.Resources/subscriptions/resourceGroups/read",
+          "Microsoft.SerialConsole/serialPorts/connect/action",
+          "Microsoft.SqlVirtualMachine/*",
+          "Microsoft.Storage/storageAccounts/listKeys/action",
+          "Microsoft.Storage/storageAccounts/read",
+          "Microsoft.Support/*"
+        ],
+        "not_actions": []
+      },
+      {
+        "ref": "custom-gapfiller-role",
+        "kind": "custom",
+        "name": "CastAI-AKS-GapFiller-<cluster_name>",
+        "actions": [
+          "Microsoft.Compute/disks/beginGetAccess/action",
+          "Microsoft.Compute/galleries/write",
+          "Microsoft.Compute/galleries/delete",
+          "Microsoft.Compute/galleries/images/write",
+          "Microsoft.Compute/galleries/images/delete",
+          "Microsoft.Compute/galleries/images/versions/write",
+          "Microsoft.Compute/galleries/images/versions/delete",
+          "Microsoft.Compute/snapshots/write",
+          "Microsoft.Compute/snapshots/delete",
+          "Microsoft.Resources/tags/write",
+          "Microsoft.ManagedIdentity/userAssignedIdentities/assign/action"
+        ],
+        "not_actions": [],
+        "assignable_scopes": [
+          "cluster_resource_group",
+          "node_resource_group",
+          "vnet_resource_group"
+        ]
+      }
+    ],
+    "role_assignments": [
+      {
+        "role_definition": "builtin-reader",
+        "scope": "subscription"
+      },
+      {
+        "role_definition": "builtin-network-contributor",
+        "scope": "cluster_resource_group"
+      },
+      {
+        "role_definition": "builtin-network-contributor",
+        "scope": "node_resource_group"
+      },
+      {
+        "role_definition": "builtin-network-contributor",
+        "scope": "vnet_resource_group"
+      },
+      {
+        "role_definition": "builtin-aks-contributor",
+        "scope": "cluster_resource_group"
+      },
+      {
+        "role_definition": "builtin-aks-contributor",
+        "scope": "node_resource_group"
+      },
+      {
+        "role_definition": "builtin-aks-contributor",
+        "scope": "vnet_resource_group"
+      },
+      {
+        "role_definition": "builtin-vm-contributor",
+        "scope": "cluster_resource_group"
+      },
+      {
+        "role_definition": "builtin-vm-contributor",
+        "scope": "node_resource_group"
+      },
+      {
+        "role_definition": "builtin-vm-contributor",
+        "scope": "vnet_resource_group"
+      },
+      {
+        "role_definition": "custom-gapfiller-role",
+        "scope": "cluster_resource_group"
+      },
+      {
+        "role_definition": "custom-gapfiller-role",
+        "scope": "node_resource_group"
+      },
+      {
+        "role_definition": "custom-gapfiller-role",
+        "scope": "vnet_resource_group"
+      }
+    ]
+  },
+  {
+    "id": "overlapping-redundant-assignments",
+    "name": "Overlapping redundant assignments",
+    "description": "The official custom role assigned to the three resource groups, plus a broad wildcard custom role assigned at subscription scope on top, intentionally overlapping.",
+    "rationale": "Duplicate and overlapping grants are permitted in Azure RBAC; effectiveness is the union, and the subscription-level role alone already covers the full advertised list at every scope.",
+    "expected_valid": true,
+    "required_scope_coverage": [
+      "cluster_resource_group",
+      "node_resource_group",
+      "vnet_resource_group"
+    ],
+    "role_definitions": [
+      {
+        "ref": "custom-castai-role",
+        "kind": "custom",
+        "name": "CastAKSRole-<cluster_name>",
+        "actions": [
+          "Microsoft.Compute/*/read",
+          "Microsoft.Compute/virtualMachines/*",
+          "Microsoft.Compute/virtualMachineScaleSets/*",
+          "Microsoft.Compute/disks/write",
+          "Microsoft.Compute/disks/delete",
+          "Microsoft.Compute/disks/beginGetAccess/action",
+          "Microsoft.Compute/galleries/write",
+          "Microsoft.Compute/galleries/delete",
+          "Microsoft.Compute/galleries/images/write",
+          "Microsoft.Compute/galleries/images/delete",
+          "Microsoft.Compute/galleries/images/versions/write",
+          "Microsoft.Compute/galleries/images/versions/delete",
+          "Microsoft.Compute/snapshots/write",
+          "Microsoft.Compute/snapshots/delete",
+          "Microsoft.Network/*/read",
+          "Microsoft.Network/networkInterfaces/write",
+          "Microsoft.Network/networkInterfaces/delete",
+          "Microsoft.Network/networkInterfaces/join/action",
+          "Microsoft.Network/networkSecurityGroups/join/action",
+          "Microsoft.Network/virtualNetworks/subnets/join/action",
+          "Microsoft.Network/applicationGateways/backendhealth/action",
+          "Microsoft.Network/applicationGateways/backendAddressPools/join/action",
+          "Microsoft.Network/applicationSecurityGroups/joinIpConfiguration/action",
+          "Microsoft.Network/loadBalancers/backendAddressPools/write",
+          "Microsoft.Network/loadBalancers/backendAddressPools/join/action",
+          "Microsoft.ContainerService/*/read",
+          "Microsoft.ContainerService/managedClusters/start/action",
+          "Microsoft.ContainerService/managedClusters/stop/action",
+          "Microsoft.ContainerService/managedClusters/runCommand/action",
+          "Microsoft.ContainerService/managedClusters/agentPools/*",
+          "Microsoft.Resources/*/read",
+          "Microsoft.Resources/tags/write",
+          "Microsoft.Authorization/locks/read",
+          "Microsoft.Authorization/roleAssignments/read",
+          "Microsoft.Authorization/roleDefinitions/read",
+          "Microsoft.ManagedIdentity/userAssignedIdentities/assign/action"
+        ],
+        "not_actions": [],
+        "assignable_scopes": [
+          "cluster_resource_group",
+          "node_resource_group",
+          "vnet_resource_group"
+        ]
+      },
+      {
+        "ref": "custom-broad-role",
+        "kind": "custom",
+        "name": "CastAI-AKS-Broad-<cluster_name>",
+        "actions": [
+          "Microsoft.Compute/*",
+          "Microsoft.Network/*",
+          "Microsoft.ContainerService/*",
+          "Microsoft.Resources/*",
+          "Microsoft.Authorization/locks/read",
+          "Microsoft.Authorization/roleAssignments/read",
+          "Microsoft.Authorization/roleDefinitions/read",
+          "Microsoft.ManagedIdentity/userAssignedIdentities/assign/action"
+        ],
+        "not_actions": [],
+        "assignable_scopes": [
+          "subscription"
+        ]
+      }
+    ],
+    "role_assignments": [
+      {
+        "role_definition": "custom-castai-role",
+        "scope": "cluster_resource_group"
+      },
+      {
+        "role_definition": "custom-castai-role",
+        "scope": "node_resource_group"
+      },
+      {
+        "role_definition": "custom-castai-role",
+        "scope": "vnet_resource_group"
+      },
+      {
+        "role_definition": "custom-broad-role",
+        "scope": "subscription"
+      }
+    ]
+  },
+  {
+    "id": "allow-all-custom-role-with-denylist",
+    "name": "Allow-all custom role with deny list",
+    "description": "A custom role granting * at the three resource groups, restricted through not_actions alone: role-assignment and policy writes, role-assignment elevation, blueprint assignments, gallery sharing, host group writes, DNS zone and private endpoint writes, cluster admin credential listing, Purview consents, deployment-stack deny-setting management and subscription lifecycle actions are denied; everything else, including every advertised Cast AI action, is allowed.",
+    "rationale": "Inverts the direction of the advertised allow-list: instead of enumerating the 36 required actions it grants everything and subtracts an explicit deny list. Every subtracted pattern targets actions outside the advertised set, so no required action is denied and the configuration remains a strict superset of the baseline.",
+    "expected_valid": true,
+    "required_scope_coverage": [
+      "cluster_resource_group",
+      "node_resource_group",
+      "vnet_resource_group"
+    ],
+    "role_definitions": [
+      {
+        "ref": "custom-allow-all-role",
+        "kind": "custom",
+        "name": "CastAI-AKS-AllowAll-<cluster_name>",
+        "actions": [
+          "*"
+        ],
+        "not_actions": [
+          "Microsoft.Authorization/*/write",
+          "Microsoft.Authorization/*/delete",
+          "Microsoft.Authorization/elevateAccess/Action",
+          "Microsoft.Blueprint/blueprintAssignments/write",
+          "Microsoft.Blueprint/blueprintAssignments/delete",
+          "Microsoft.Compute/galleries/share/action",
+          "Microsoft.Compute/hostGroups/write",
+          "Microsoft.Compute/hostGroups/delete",
+          "Microsoft.Network/dnsZones/write",
+          "Microsoft.Network/dnsZones/delete",
+          "Microsoft.Network/privateEndpoints/write",
+          "Microsoft.Network/privateEndpoints/delete",
+          "Microsoft.ContainerService/managedClusters/listClusterAdminCredential/action",
+          "Microsoft.Purview/consents/write",
+          "Microsoft.Purview/consents/delete",
+          "Microsoft.Resources/deploymentStacks/manageDenySetting/action",
+          "Microsoft.Subscription/cancel/action",
+          "Microsoft.Subscription/enable/action"
+        ],
+        "assignable_scopes": [
+          "cluster_resource_group",
+          "node_resource_group",
+          "vnet_resource_group"
+        ]
+      }
+    ],
+    "role_assignments": [
+      {
+        "role_definition": "custom-allow-all-role",
+        "scope": "cluster_resource_group"
+      },
+      {
+        "role_definition": "custom-allow-all-role",
+        "scope": "node_resource_group"
+      },
+      {
+        "role_definition": "custom-allow-all-role",
+        "scope": "vnet_resource_group"
+      }
+    ]
+  }
+]
