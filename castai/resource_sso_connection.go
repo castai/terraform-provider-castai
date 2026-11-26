@@ -5,6 +5,8 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"slices"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -13,6 +15,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 
 	"github.com/castai/terraform-provider-castai/castai/sdk"
+	"github.com/castai/terraform-provider-castai/castai/sdk/organization_management"
 )
 
 const (
@@ -21,6 +24,16 @@ const (
 	FieldSSOConnectionAdditionalEmailDomains = "additional_email_domains"
 	FieldSSOConnectionSynchronizeUserGroups  = "synchronize_user_groups"
 	FieldSSOConnectionSyncAuthToken          = "sync_auth_token"
+	FieldSSOConnectionOrganizationID         = "organization_id"
+	FieldSSOConnectionBlockInvitations       = "block_invitations"
+	FieldSSOConnectionEmailDomainValidation  = "email_domain_validation"
+
+	FieldSSOConnectionEmailDomainValidationDomain           = "domain"
+	FieldSSOConnectionEmailDomainValidationStatus           = "status"
+	FieldSSOConnectionEmailDomainValidationVerified         = "verified"
+	FieldSSOConnectionEmailDomainValidationLastCheckOutcome = "last_check_outcome"
+	FieldSSOConnectionEmailDomainValidationTxtRecordName    = "txt_record_name"
+	FieldSSOConnectionEmailDomainValidationTxtRecordValue   = "txt_record_value"
 
 	FieldSSOConnectionAAD            = "aad"
 	FieldSSOConnectionADDomain       = "ad_domain"
@@ -58,6 +71,60 @@ func resourceSSOConnection() *schema.Resource {
 				Required:         true,
 				Description:      "Connection name",
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
+			},
+			FieldSSOConnectionOrganizationID: {
+				Type:             schema.TypeString,
+				Required:         true,
+				ForceNew:         true,
+				Description:      "CAST AI organization ID that owns this SSO connection. The organization settings endpoint is used to manage block_invitations.",
+				ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
+			},
+			FieldSSOConnectionBlockInvitations: {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Computed:    true,
+				Description: "When true, invitations sent by castai_organization_members are refused by the API. Managed only when explicitly set in configuration: a set value is enforced, an unset value mirrors the organization setting without producing a diff.",
+			},
+			FieldSSOConnectionEmailDomainValidation: {
+				Type:        schema.TypeList,
+				Computed:    true,
+				Description: "Verification state of the connection's claimed email domains. The verification record is returned by the API exactly once when it is issued: pending claims without a record get one issued automatically (via the regenerate-tokens endpoint) and it is persisted in state; already issued records are never rotated by the provider. For each pending domain, publish txt_record_name/txt_record_value as a DNS TXT record; CAST AI re-checks DNS automatically until the claim is verified.",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						FieldSSOConnectionEmailDomainValidationDomain: {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The claimed email domain.",
+						},
+						FieldSSOConnectionEmailDomainValidationStatus: {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "Verification status of the claim: STATUS_PENDING, STATUS_VERIFIED, STATUS_EXPIRED, STATUS_DENIED, STATUS_ERROR or STATUS_UNKNOWN.",
+						},
+						FieldSSOConnectionEmailDomainValidationVerified: {
+							Type:        schema.TypeBool,
+							Computed:    true,
+							Description: "True when the domain claim is verified.",
+						},
+						FieldSSOConnectionEmailDomainValidationLastCheckOutcome: {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "Outcome of the latest verification check: SSO_EMAIL_DOMAIN_CHECK_OUTCOME_VERIFIED, SSO_EMAIL_DOMAIN_CHECK_OUTCOME_TXT_RECORD_NOT_FOUND, SSO_EMAIL_DOMAIN_CHECK_OUTCOME_SECRET_MISMATCH, SSO_EMAIL_DOMAIN_CHECK_OUTCOME_LOOKUP_FAILED or SSO_EMAIL_DOMAIN_CHECK_OUTCOME_UNSPECIFIED.",
+						},
+						FieldSSOConnectionEmailDomainValidationTxtRecordName: {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Sensitive:   true,
+							Description: "Name of the DNS TXT record to publish for email-domain verification.",
+						},
+						FieldSSOConnectionEmailDomainValidationTxtRecordValue: {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Sensitive:   true,
+							Description: "Value of the DNS TXT record to publish for email-domain verification. Carries the verification secret.",
+						},
+					},
+				},
 			},
 			FieldSSOConnectionEmailDomain: {
 				Type:             schema.TypeString,
@@ -264,7 +331,26 @@ func resourceCastaiSSOConnectionCreate(ctx context.Context, data *schema.Resourc
 		}
 	}
 
-	return append(syncDiags, resourceCastaiSSOConnectionRead(ctx, data, meta)...)
+	// block_invitations is an org-wide setting managed through the organization-management
+	// API. Only touch it when the user explicitly wrote the attribute in configuration:
+	// d.Get cannot distinguish an unset Optional+Computed attribute from an explicit value.
+	var settingsDiags diag.Diagnostics
+	if blockInvitationsInConfig(data) {
+		if err := updateSSOBlockInvitations(ctx, meta, data, data.Get(FieldSSOConnectionBlockInvitations).(bool)); err != nil {
+			// A failure here must not taint the freshly created connection: report a warning
+			// instead. The next plan shows the drift between the org setting and the config
+			// and Update retries the settings call.
+			settingsDiags = append(settingsDiags, diag.Diagnostic{
+				Severity: diag.Warning,
+				Summary:  "failed updating organization settings",
+				Detail:   fmt.Sprintf("block_invitations may not be applied: %v", err),
+			})
+		}
+	}
+
+	returnDiags := append(settingsDiags, resourceCastaiSSOConnectionRead(ctx, data, meta)...)
+
+	return append(syncDiags, returnDiags...)
 }
 
 func resourceCastaiSSOConnectionRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -305,7 +391,45 @@ func resourceCastaiSSOConnectionRead(ctx context.Context, data *schema.ResourceD
 		return diag.Errorf("setting sync_auth_token: %v", err)
 	}
 
-	return nil
+	if err := data.Set(FieldSSOConnectionOrganizationID, data.Get(FieldSSOConnectionOrganizationID)); err != nil {
+		return diag.Errorf("setting organization_id: %v", err)
+	}
+
+	// Surface the DNS verification state of the claimed email domains, and nudge the user
+	// while any claim is still pending verification.
+	validationDiags := setEmailDomainValidation(ctx, meta, data, connection.Connection.EmailDomains)
+	if validationDiags.HasError() {
+		return validationDiags
+	}
+
+	// block_invitations mirrors the org-wide settings endpoint. Without organization_id
+	// (legacy state, unit tests) there is nothing to query — keep the prior value.
+	orgID := data.Get(FieldSSOConnectionOrganizationID).(string)
+	if orgID == "" {
+		return validationDiags
+	}
+
+	orgClient := meta.(*ProviderConfig).organizationManagementClient
+	settingsResp, err := orgClient.SettingsAPIGetSettingsWithResponse(ctx, orgID)
+	if err := sdk.CheckOKResponse(settingsResp, err); err != nil {
+		// A read failure must not break the refresh of an otherwise healthy connection;
+		// surface a warning and keep the last known value instead.
+		return append(validationDiags, diag.Diagnostic{
+			Severity: diag.Warning,
+			Summary:  "failed retrieving organization settings",
+			Detail:   fmt.Sprintf("keeping the last known block_invitations value in state: %v", err),
+		})
+	}
+
+	var blocked bool
+	if settingsResp.JSON200 != nil && settingsResp.JSON200.BlockInvitations != nil {
+		blocked = *settingsResp.JSON200.BlockInvitations
+	}
+	if err := data.Set(FieldSSOConnectionBlockInvitations, blocked); err != nil {
+		return append(validationDiags, diag.Errorf("setting block_invitations: %v", err)...)
+	}
+
+	return validationDiags
 }
 
 func resourceCastaiSSOConnectionUpdate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -317,6 +441,7 @@ func resourceCastaiSSOConnectionUpdate(ctx context.Context, data *schema.Resourc
 		FieldSSOConnectionOkta,
 		FieldSSOConnectionOIDC,
 		FieldSSOConnectionSynchronizeUserGroups,
+		FieldSSOConnectionBlockInvitations,
 	) {
 		return nil
 	}
@@ -384,10 +509,31 @@ func resourceCastaiSSOConnectionUpdate(ctx context.Context, data *schema.Resourc
 		}
 	}
 
-	return append(syncDiags, resourceCastaiSSOConnectionRead(ctx, data, meta)...)
+	// block_invitations is managed through the organization-management settings API, kept
+	// outside the SSO update above so changing only the flag never calls the SSO update API
+	// and changing only SSO fields never calls the settings API.
+	var settingsDiags diag.Diagnostics
+	if blockInvitationsInConfig(data) && data.HasChange(FieldSSOConnectionBlockInvitations) {
+		if err := updateSSOBlockInvitations(ctx, meta, data, data.Get(FieldSSOConnectionBlockInvitations).(bool)); err != nil {
+			return append(syncDiags, diag.FromErr(err)...)
+		}
+	}
+
+	returnDiags := append(settingsDiags, resourceCastaiSSOConnectionRead(ctx, data, meta)...)
+
+	return append(syncDiags, returnDiags...)
 }
 
 func resourceCastaiSSOConnectionDelete(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	// With the SSO connection gone, invitations must flow again: reset the org-wide
+	// block_invitations setting before the connection itself is deleted. Failing here
+	// keeps the resource in state so the apply can be retried.
+	if orgID := data.Get(FieldSSOConnectionOrganizationID).(string); orgID != "" {
+		if err := updateSSOBlockInvitations(ctx, meta, data, false); err != nil {
+			return diag.FromErr(err)
+		}
+	}
+
 	client := meta.(*ProviderConfig).api
 
 	resp, err := client.SSOAPIDeleteSSOConnectionWithResponse(ctx, data.Id())
@@ -491,6 +637,234 @@ func toOIDCConnector(obj map[string]any) *sdk.CastaiSsoV1beta1OIDC {
 	}
 
 	return out
+}
+
+// updateSSOBlockInvitations patches the org-wide settings endpoint with only the
+// blockInvitations key so no other organization setting is touched.
+func updateSSOBlockInvitations(ctx context.Context, meta interface{}, data *schema.ResourceData, block bool) error {
+	orgID := data.Get(FieldSSOConnectionOrganizationID).(string)
+	if orgID == "" {
+		return fmt.Errorf("organization_id is required to manage block_invitations")
+	}
+
+	orgClient := meta.(*ProviderConfig).organizationManagementClient
+	resp, err := orgClient.SettingsAPIUpdateSettingsWithResponse(ctx, orgID, organization_management.SettingsAPIUpdateSettingsJSONRequestBody{
+		BlockInvitations: toPtr(block),
+	})
+	if err := sdk.CheckOKResponse(resp, err); err != nil {
+		return fmt.Errorf("updating organization settings (block_invitations=%t): %w", block, err)
+	}
+
+	return nil
+}
+
+// setEmailDomainValidation stores the verification state of the claimed email domains in
+// state and emits one warning per domain that is not verified yet.
+//
+// The verification secret is never stored in plaintext server-side and the connection GET
+// never returns it: the record to publish is returned exactly once, when it is issued via
+// the regenerate-tokens endpoint (the same flow the console uses). Therefore:
+//
+//   - records already stored in state are preserved (write-back, like sync_auth_token);
+//   - pending claims without any record (first refresh after create, new domains, lost
+//     state) get one issued via the regenerate endpoint — for a claim with no record yet
+//     this is the first issuance, so nothing the user already published is rotated;
+//   - if issuance fails, the claim stays without a record and the warning says so.
+//
+// Pending-domain warnings include the full record (name and value) so the user can act on
+// the message alone; the value is only obtainable until verified and is shown by the
+// console as well.
+func setEmailDomainValidation(ctx context.Context, meta interface{}, data *schema.ResourceData, domains *[]sdk.CastaiSsoV1beta1SSOEmailDomainValidation) diag.Diagnostics {
+	parsed := parseEmailDomainValidation(domains)
+
+	// Preserve one-time records already stored in state.
+	previous := previousEmailDomainRecords(data)
+	for _, entry := range parsed {
+		name := entry[FieldSSOConnectionEmailDomainValidationTxtRecordName].(string)
+		if name != "" {
+			continue
+		}
+		domain := entry[FieldSSOConnectionEmailDomainValidationDomain].(string)
+		if rec, ok := previous[domain]; ok {
+			entry[FieldSSOConnectionEmailDomainValidationTxtRecordName] = rec[FieldSSOConnectionEmailDomainValidationTxtRecordName]
+			entry[FieldSSOConnectionEmailDomainValidationTxtRecordValue] = rec[FieldSSOConnectionEmailDomainValidationTxtRecordValue]
+		}
+	}
+
+	// Issue records for pending claims that still have none.
+	var needRecord []string
+	for _, entry := range parsed {
+		if entry[FieldSSOConnectionEmailDomainValidationVerified].(bool) {
+			continue
+		}
+		if entry[FieldSSOConnectionEmailDomainValidationTxtRecordName].(string) == "" {
+			needRecord = append(needRecord, entry[FieldSSOConnectionEmailDomainValidationDomain].(string))
+		}
+	}
+
+	var diags diag.Diagnostics
+	if len(needRecord) > 0 {
+		issued, err := issueEmailDomainRecords(ctx, meta, data, needRecord)
+		if err != nil {
+			diags = append(diags, diag.Diagnostic{
+				Severity: diag.Warning,
+				Summary:  "failed issuing SSO email-domain verification records",
+				Detail:   fmt.Sprintf("domains %v: %v", needRecord, err),
+			})
+		} else {
+			mergeIssuedRecords(parsed, issued)
+		}
+	}
+
+	if err := data.Set(FieldSSOConnectionEmailDomainValidation, parsed); err != nil {
+		return diag.Errorf("setting email_domain_validation: %v", err)
+	}
+
+	for _, entry := range parsed {
+		if entry[FieldSSOConnectionEmailDomainValidationVerified].(bool) {
+			continue
+		}
+		domain := entry[FieldSSOConnectionEmailDomainValidationDomain].(string)
+		status := entry[FieldSSOConnectionEmailDomainValidationStatus].(string)
+		outcome := entry[FieldSSOConnectionEmailDomainValidationLastCheckOutcome].(string)
+		name := entry[FieldSSOConnectionEmailDomainValidationTxtRecordName].(string)
+		if name == "" {
+			diags = append(diags, diag.Diagnostic{
+				Severity: diag.Warning,
+				Summary:  "SSO email domain is not verified yet",
+				Detail: fmt.Sprintf("Email domain %q has verification status %s (last check outcome: %s). The DNS verification record could not be issued automatically: the record is returned exactly once when issued, and no record is available for this claim. Publish the record shown in the CAST AI console, or remove and recreate the connection to issue a fresh record; CAST AI re-checks DNS automatically once it is published.",
+					domain, status, outcome),
+			})
+			continue
+		}
+		diags = append(diags, diag.Diagnostic{
+			Severity: diag.Warning,
+			Summary:  "SSO email domain is not verified yet",
+			Detail: fmt.Sprintf("Publish the DNS TXT record %q with the value %q. CAST AI re-checks DNS automatically until the claim is verified. (Email domain %q, status: %s, last check outcome: %s.)",
+				name,
+				entry[FieldSSOConnectionEmailDomainValidationTxtRecordValue],
+				domain, status, outcome),
+		})
+	}
+
+	return diags
+}
+
+// previousEmailDomainRecords indexes the email_domain_validation records currently stored in
+// state by domain, so one-time verification records survive refreshes.
+func previousEmailDomainRecords(data *schema.ResourceData) map[string]map[string]any {
+	previous := map[string]map[string]any{}
+	for _, v := range data.Get(FieldSSOConnectionEmailDomainValidation).([]any) {
+		entry, ok := v.(map[string]any)
+		if !ok {
+			continue
+		}
+		domain, _ := entry[FieldSSOConnectionEmailDomainValidationDomain].(string)
+		name, _ := entry[FieldSSOConnectionEmailDomainValidationTxtRecordName].(string)
+		if domain == "" || name == "" {
+			continue
+		}
+		previous[domain] = entry
+	}
+	return previous
+}
+
+// issueEmailDomainRecords calls the regenerate-tokens endpoint for the given pending domains
+// and returns the updated validation entries containing the records to publish. The record
+// is returned exactly once per issuance.
+func issueEmailDomainRecords(ctx context.Context, meta interface{}, data *schema.ResourceData, domains []string) ([]organization_management.SSOEmailDomainValidation, error) {
+	orgID := data.Get(FieldSSOConnectionOrganizationID).(string)
+	if orgID == "" {
+		return nil, fmt.Errorf("organization_id is required to issue email-domain verification records")
+	}
+
+	orgClient := meta.(*ProviderConfig).organizationManagementClient
+	resp, err := orgClient.SSOEmailDomainAPIRegenerateSSOEmailDomainsTokensWithResponse(ctx, orgID, organization_management.SSOEmailDomainAPIRegenerateSSOEmailDomainsTokensJSONRequestBody{
+		OrganizationId: orgID,
+		Domains:        domains,
+	})
+	if err := sdk.CheckOKResponse(resp, err); err != nil {
+		return nil, fmt.Errorf("issuing verification records: %w", err)
+	}
+	if resp.JSON200 == nil || resp.JSON200.EmailDomains == nil {
+		return nil, fmt.Errorf("issuing verification records: empty response")
+	}
+
+	return *resp.JSON200.EmailDomains, nil
+}
+
+// mergeIssuedRecords copies the newly issued verification records into the parsed entries.
+func mergeIssuedRecords(parsed []map[string]any, issued []organization_management.SSOEmailDomainValidation) {
+	for _, issuedDomain := range issued {
+		if issuedDomain.TxtRecord == nil {
+			continue
+		}
+		for _, entry := range parsed {
+			if entry[FieldSSOConnectionEmailDomainValidationDomain] != derefString(issuedDomain.Domain) {
+				continue
+			}
+			entry[FieldSSOConnectionEmailDomainValidationTxtRecordName] = derefString(issuedDomain.TxtRecord.Name)
+			entry[FieldSSOConnectionEmailDomainValidationTxtRecordValue] = derefString(issuedDomain.TxtRecord.Value)
+			entry[FieldSSOConnectionEmailDomainValidationStatus] = derefString(issuedDomain.Status)
+			entry[FieldSSOConnectionEmailDomainValidationVerified] = issuedDomain.Status != nil && *issuedDomain.Status == organization_management.SSOEmailDomainValidationStatusSSOEMAILDOMAINSTATUSVERIFIED
+			entry[FieldSSOConnectionEmailDomainValidationLastCheckOutcome] = derefString(issuedDomain.LastCheckOutcome)
+		}
+	}
+}
+
+// parseEmailDomainValidation flattens the API validation entries into schema-compatible maps,
+// sorted by domain so the computed list has a stable order across refreshes.
+func parseEmailDomainValidation(domains *[]sdk.CastaiSsoV1beta1SSOEmailDomainValidation) []map[string]any {
+	parsed := []map[string]any{}
+	if domains == nil {
+		return parsed
+	}
+
+	for _, d := range *domains {
+		entry := map[string]any{
+			FieldSSOConnectionEmailDomainValidationDomain:           derefString(d.Domain),
+			FieldSSOConnectionEmailDomainValidationStatus:           derefString(d.Status),
+			FieldSSOConnectionEmailDomainValidationVerified:         d.Status != nil && *d.Status == sdk.CastaiSsoV1beta1SSOEmailDomainValidationStatusSTATUSVERIFIED,
+			FieldSSOConnectionEmailDomainValidationLastCheckOutcome: derefString(d.LastCheckOutcome),
+			FieldSSOConnectionEmailDomainValidationTxtRecordName:    "",
+			FieldSSOConnectionEmailDomainValidationTxtRecordValue:   "",
+		}
+		if d.TxtRecord != nil {
+			entry[FieldSSOConnectionEmailDomainValidationTxtRecordName] = derefString(d.TxtRecord.Name)
+			entry[FieldSSOConnectionEmailDomainValidationTxtRecordValue] = derefString(d.TxtRecord.Value)
+		}
+		parsed = append(parsed, entry)
+	}
+
+	slices.SortFunc(parsed, func(a, b map[string]any) int {
+		return strings.Compare(
+			a[FieldSSOConnectionEmailDomainValidationDomain].(string),
+			b[FieldSSOConnectionEmailDomainValidationDomain].(string),
+		)
+	})
+
+	return parsed
+}
+
+// stringValue dereferences an optional string-ish value into a plain string.
+func derefString[T ~string](v *T) string {
+	if v == nil {
+		return ""
+	}
+	return string(*v)
+}
+
+// blockInvitationsInConfig reports whether block_invitations is explicitly written in the
+// configuration. d.Get cannot distinguish an unset Optional+Computed attribute from an
+// explicit value, so the raw config is inspected instead. A missing raw config (unit tests
+// built without one, import paths) counts as unset.
+func blockInvitationsInConfig(data *schema.ResourceData) bool {
+	raw := data.GetRawConfig()
+	if raw.IsNull() || !raw.Type().IsObjectType() || !raw.Type().HasAttribute(FieldSSOConnectionBlockInvitations) {
+		return false
+	}
+	v := raw.GetAttr(FieldSSOConnectionBlockInvitations)
+	return !v.IsNull() && v.IsKnown()
 }
 
 // setSSOConnectionSync calls the SetSync API and, on a false→true transition, stores the

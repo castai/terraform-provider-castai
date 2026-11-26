@@ -1,5 +1,6 @@
 resource "castai_sso_connection" "sso" {
   name                     = "azure_sso"
+  organization_id          = var.castai_organization_id
   email_domain             = azuread_application.castai_sso.publisher_domain
   additional_email_domains = ["example.com", "example.net"]
   aad {

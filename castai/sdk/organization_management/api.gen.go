@@ -125,6 +125,25 @@ const (
 	RoleBindingScopeScopeORGANIZATION RoleBindingScopeScope = "ORGANIZATION"
 )
 
+// Defines values for SSOEmailDomainValidationLastCheckOutcome.
+const (
+	SSOEmailDomainValidationLastCheckOutcomeSSOEMAILDOMAINCHECKOUTCOMELOOKUPFAILED      SSOEmailDomainValidationLastCheckOutcome = "SSO_EMAIL_DOMAIN_CHECK_OUTCOME_LOOKUP_FAILED"
+	SSOEmailDomainValidationLastCheckOutcomeSSOEMAILDOMAINCHECKOUTCOMESECRETMISMATCH    SSOEmailDomainValidationLastCheckOutcome = "SSO_EMAIL_DOMAIN_CHECK_OUTCOME_SECRET_MISMATCH"
+	SSOEmailDomainValidationLastCheckOutcomeSSOEMAILDOMAINCHECKOUTCOMETXTRECORDNOTFOUND SSOEmailDomainValidationLastCheckOutcome = "SSO_EMAIL_DOMAIN_CHECK_OUTCOME_TXT_RECORD_NOT_FOUND"
+	SSOEmailDomainValidationLastCheckOutcomeSSOEMAILDOMAINCHECKOUTCOMEUNSPECIFIED       SSOEmailDomainValidationLastCheckOutcome = "SSO_EMAIL_DOMAIN_CHECK_OUTCOME_UNSPECIFIED"
+	SSOEmailDomainValidationLastCheckOutcomeSSOEMAILDOMAINCHECKOUTCOMEVERIFIED          SSOEmailDomainValidationLastCheckOutcome = "SSO_EMAIL_DOMAIN_CHECK_OUTCOME_VERIFIED"
+)
+
+// Defines values for SSOEmailDomainValidationStatus.
+const (
+	SSOEmailDomainValidationStatusSSOEMAILDOMAINSTATUSDENIED      SSOEmailDomainValidationStatus = "SSO_EMAIL_DOMAIN_STATUS_DENIED"
+	SSOEmailDomainValidationStatusSSOEMAILDOMAINSTATUSERROR       SSOEmailDomainValidationStatus = "SSO_EMAIL_DOMAIN_STATUS_ERROR"
+	SSOEmailDomainValidationStatusSSOEMAILDOMAINSTATUSEXPIRED     SSOEmailDomainValidationStatus = "SSO_EMAIL_DOMAIN_STATUS_EXPIRED"
+	SSOEmailDomainValidationStatusSSOEMAILDOMAINSTATUSPENDING     SSOEmailDomainValidationStatus = "SSO_EMAIL_DOMAIN_STATUS_PENDING"
+	SSOEmailDomainValidationStatusSSOEMAILDOMAINSTATUSUNSPECIFIED SSOEmailDomainValidationStatus = "SSO_EMAIL_DOMAIN_STATUS_UNSPECIFIED"
+	SSOEmailDomainValidationStatusSSOEMAILDOMAINSTATUSVERIFIED    SSOEmailDomainValidationStatus = "SSO_EMAIL_DOMAIN_STATUS_VERIFIED"
+)
+
 // Defines values for EnterpriseAPIListGroupsParamsSortOrder.
 const (
 	EnterpriseAPIListGroupsParamsSortOrderASC  EnterpriseAPIListGroupsParamsSortOrder = "ASC"
@@ -645,6 +664,15 @@ type ClusterScope struct {
 	Id string `json:"id"`
 }
 
+// CopilotSettings CopilotSettings defines the settings related to the copilot feature
+type CopilotSettings struct {
+	// Enabled Whether copilot features are enabled for the organization
+	Enabled *bool `json:"enabled,omitempty"`
+
+	// OrganizationInitialized Whether the organization has explicitly initialized copilot settings
+	OrganizationInitialized *bool `json:"organizationInitialized,omitempty"`
+}
+
 // CreateChildOrganizationRequestChildOrganization Represents child organization details
 type CreateChildOrganizationRequestChildOrganization struct {
 	// Name Name of the organization
@@ -780,6 +808,43 @@ type GetEnterpriseGroupResponseGroupDefinition struct {
 type GetEnterpriseMemberResponse struct {
 	// Item Users in the enterprise or child organization
 	Item *ListMembersResponseItem `json:"item,omitempty"`
+}
+
+// GetSettingsResponse Response message for getting organization settings
+type GetSettingsResponse struct {
+	// BlockEscalatedPrivilege Whether to block users with escalated privileges from accessing the organization
+	BlockEscalatedPrivilege *bool `json:"blockEscalatedPrivilege,omitempty"`
+
+	// BlockInvitations Whether to block invitations to be sent to users
+	BlockInvitations *bool `json:"blockInvitations,omitempty"`
+
+	// BlockUserApiKeyCreation Whether creating user API keys is blocked for the organization.
+	//  Defaults to false (creation is allowed).
+	BlockUserApiKeyCreation *bool `json:"blockUserApiKeyCreation,omitempty"`
+
+	// BypassIpWhitelist Whether IP whitelist rules are bypassed for Cast AI staff
+	BypassIpWhitelist *bool `json:"bypassIpWhitelist,omitempty"`
+
+	// CopilotSettings Copilot-related settings
+	CopilotSettings *CopilotSettings `json:"copilotSettings,omitempty"`
+
+	// CreateTime When the settings were created
+	CreateTime *time.Time `json:"createTime,omitempty"`
+
+	// EnterpriseCommitments Whether enterprise commitments sharing is enabled
+	EnterpriseCommitments *bool `json:"enterpriseCommitments,omitempty"`
+
+	// EnterpriseMultipleSso Whether the organization supports multiple SSO connections
+	EnterpriseMultipleSso *bool `json:"enterpriseMultipleSso,omitempty"`
+
+	// ProductAwareRbac Whether the organization is migrated to product-aware RBAC roles
+	ProductAwareRbac *bool `json:"productAwareRbac,omitempty"`
+
+	// ReadOnly Whether organization is in read only mode
+	ReadOnly *bool `json:"readOnly,omitempty"`
+
+	// UpdateTime When the settings were last updated
+	UpdateTime *time.Time `json:"updateTime,omitempty"`
 }
 
 // GoogleProtobufAny Contains an arbitrary serialized message along with a @type that describes the type of the serialized message.
@@ -1237,6 +1302,12 @@ type ListRoleBindingsResponse struct {
 	TotalCount *int32 `json:"totalCount,omitempty"`
 }
 
+// ListSSOEmailDomainsResponse Defines the container for the email-domain claims list response.
+type ListSSOEmailDomainsResponse struct {
+	// SsoEmailDomains SsoEmailDomains are the organization's email-domain claims with their validation status.
+	SsoEmailDomains *[]SSOEmailDomainValidation `json:"ssoEmailDomains,omitempty"`
+}
+
 // OrganizationScope OrganizationScope represents the organization scope.
 type OrganizationScope struct {
 	// Id ID is the unique identifier of the organization.
@@ -1281,6 +1352,22 @@ type OverrideUserRoleBindingsRequestUserAccess struct {
 
 // OverrideUserRoleBindingsResponse Response message for overriding users role bindings for enterprise and child organizations
 type OverrideUserRoleBindingsResponse = map[string]interface{}
+
+// RegenerateSSOEmailDomainsTokensRequest Defines the container for the SSO connection email-domain verification token regeneration request.
+type RegenerateSSOEmailDomainsTokensRequest struct {
+	// Domains Email domains to regenerate the verification tokens for.
+	Domains []string `json:"domains"`
+
+	// OrganizationId Organization ID.
+	OrganizationId string `json:"organizationId"`
+}
+
+// RegenerateSSOEmailDomainsTokensResponse Defines the container for the verification secrets regeneration response.
+type RegenerateSSOEmailDomainsTokensResponse struct {
+	// EmailDomains EmailDomain is the updated validation state of the claim, including the TXT record to
+	//  publish. The TXT record is returned exactly once and its secret is never stored in plaintext.
+	EmailDomains *[]SSOEmailDomainValidation `json:"emailDomains,omitempty"`
+}
 
 // ResourceScope ResourceScope represents the resource scope.
 //
@@ -1426,6 +1513,51 @@ type SCIMSchemaAttribute struct {
 	Uniqueness *string `json:"uniqueness,omitempty"`
 }
 
+// SSOEmailDomainTxtRecord SSOEmailDomainTxtRecord represents the DNS TXT record to publish for email-domain verification.
+type SSOEmailDomainTxtRecord struct {
+	// Name Name is the DNS TXT record name.
+	Name *string `json:"name,omitempty"`
+
+	// Value Value is the DNS TXT record value carrying the verification secret.
+	Value *string `json:"value,omitempty"`
+}
+
+// SSOEmailDomainValidation SSOEmailDomainValidation represents the verification state of a claimed SSO connection email domain.
+type SSOEmailDomainValidation struct {
+	// Domain Domain is the claimed email domain.
+	Domain *string `json:"domain,omitempty"`
+
+	// LastCheckOutcome LastCheckOutcome is the result of the most recent DNS verification check. It is reset to
+	//  SSO_EMAIL_DOMAIN_CHECK_OUTCOME_UNSPECIFIED whenever a new secret is minted, and is
+	//  SSO_EMAIL_DOMAIN_CHECK_OUTCOME_LOOKUP_FAILED when the resolver errored.
+	LastCheckOutcome *SSOEmailDomainValidationLastCheckOutcome `json:"lastCheckOutcome,omitempty"`
+
+	// LastCheckedTime LastCheckedAt is the time the domain was last checked for the verification TXT record.
+	LastCheckedTime *time.Time `json:"lastCheckedTime,omitempty"`
+
+	// NextRetryTime NextRetryAt is the earliest time the next verification check may run.
+	NextRetryTime *time.Time `json:"nextRetryTime,omitempty"`
+
+	// Status Status is the verification status of the email-domain claim.
+	Status *SSOEmailDomainValidationStatus `json:"status,omitempty"`
+
+	// TxtRecord TxtRecord is the TXT record to publish for verification. It is only set in the response of the
+	//  operation that (re)generated the secret; it is never set on read operations.
+	TxtRecord *SSOEmailDomainTxtRecord `json:"txtRecord,omitempty"`
+
+	// VerifiedTime VerifiedAt is the time the domain was verified.
+	VerifiedTime *time.Time `json:"verifiedTime,omitempty"`
+}
+
+// SSOEmailDomainValidationLastCheckOutcome LastCheckOutcome is the result of the most recent DNS verification check. It is reset to
+//
+//	SSO_EMAIL_DOMAIN_CHECK_OUTCOME_UNSPECIFIED whenever a new secret is minted, and is
+//	SSO_EMAIL_DOMAIN_CHECK_OUTCOME_LOOKUP_FAILED when the resolver errored.
+type SSOEmailDomainValidationLastCheckOutcome string
+
+// SSOEmailDomainValidationStatus Status is the verification status of the email-domain claim.
+type SSOEmailDomainValidationStatus string
+
 // Scope Scope represents the scope of the role binding.
 type Scope struct {
 	// Cluster ClusterScope represents the cluster scope.
@@ -1481,6 +1613,45 @@ type Subject struct {
 
 	// User UserSubject represents the user subject.
 	User *UserSubject `json:"user,omitempty"`
+}
+
+// UpdateSettingsRequestSettings The settings to update
+type UpdateSettingsRequestSettings struct {
+	// BlockEscalatedPrivilege Whether to block users with escalated privileges from accessing the organization
+	BlockEscalatedPrivilege *bool `json:"blockEscalatedPrivilege,omitempty"`
+
+	// BlockInvitations Whether to block invitations to be sent to users
+	BlockInvitations *bool `json:"blockInvitations,omitempty"`
+
+	// CopilotSettings Copilot-related settings
+	CopilotSettings *CopilotSettings `json:"copilotSettings,omitempty"`
+
+	// EnterpriseCommitments Whether enterprise commitments sharing is enabled
+	EnterpriseCommitments *bool `json:"enterpriseCommitments,omitempty"`
+
+	// EnterpriseMultipleSso Whether the organization supports multiple SSO connections
+	EnterpriseMultipleSso *bool `json:"enterpriseMultipleSso,omitempty"`
+}
+
+// UpdateSettingsResponse Response message for updating organization settings
+type UpdateSettingsResponse struct {
+	// BlockEscalatedPrivilege Whether to block users with escalated privileges from accessing the organization
+	BlockEscalatedPrivilege *bool `json:"blockEscalatedPrivilege,omitempty"`
+
+	// BlockInvitations Whether to block invitations to be sent to users
+	BlockInvitations *bool `json:"blockInvitations,omitempty"`
+
+	// CopilotSettings Copilot-related settings
+	CopilotSettings *CopilotSettings `json:"copilotSettings,omitempty"`
+
+	// CreateTime When the settings were created
+	CreateTime *time.Time `json:"createTime,omitempty"`
+
+	// EnterpriseMultipleSso Whether the organization supports multiple SSO connections
+	EnterpriseMultipleSso *bool `json:"enterpriseMultipleSso,omitempty"`
+
+	// UpdateTime When the settings were last updated
+	UpdateTime *time.Time `json:"updateTime,omitempty"`
 }
 
 // UserSubject UserSubject represents the user subject.
@@ -1671,6 +1842,16 @@ type EnterpriseAPIListEnterpriseServiceAccountsParamsActions string
 // EnterpriseAPIListEnterpriseServiceAccountsParamsScopeKind defines parameters for EnterpriseAPIListEnterpriseServiceAccounts.
 type EnterpriseAPIListEnterpriseServiceAccountsParamsScopeKind string
 
+// SSOEmailDomainAPIListSSOEmailDomainsParams defines parameters for SSOEmailDomainAPIListSSOEmailDomains.
+type SSOEmailDomainAPIListSSOEmailDomainsParams struct {
+	// PageLimit Defines the number of items that should be returned
+	PageLimit *string `form:"page.limit,omitempty" json:"page.limit,omitempty"`
+
+	// PageCursor Cursor that defines token indicating where to start the next page.
+	//  Empty value indicates to start from beginning of the dataset.
+	PageCursor *string `form:"page.cursor,omitempty" json:"page.cursor,omitempty"`
+}
+
 // EnterpriseAPIBatchCreateEnterpriseGroupsJSONRequestBody defines body for EnterpriseAPIBatchCreateEnterpriseGroups for application/json ContentType.
 type EnterpriseAPIBatchCreateEnterpriseGroupsJSONRequestBody = BatchCreateEnterpriseGroupsRequest
 
@@ -1709,6 +1890,12 @@ type EnterpriseAPIAddUserToChildOrganizationJSONRequestBody = AddUserToChildOrga
 
 // EnterpriseAPIOverrideUserRoleBindingsJSONRequestBody defines body for EnterpriseAPIOverrideUserRoleBindings for application/json ContentType.
 type EnterpriseAPIOverrideUserRoleBindingsJSONRequestBody = OverrideUserRoleBindingsRequest
+
+// SettingsAPIUpdateSettingsJSONRequestBody defines body for SettingsAPIUpdateSettings for application/json ContentType.
+type SettingsAPIUpdateSettingsJSONRequestBody = UpdateSettingsRequestSettings
+
+// SSOEmailDomainAPIRegenerateSSOEmailDomainsTokensJSONRequestBody defines body for SSOEmailDomainAPIRegenerateSSOEmailDomainsTokens for application/json ContentType.
+type SSOEmailDomainAPIRegenerateSSOEmailDomainsTokensJSONRequestBody = RegenerateSSOEmailDomainsTokensRequest
 
 // Getter for additional properties for GoogleProtobufAny. Returns the specified
 // element and whether it was found
