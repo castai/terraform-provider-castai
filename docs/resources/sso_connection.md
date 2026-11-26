@@ -60,7 +60,7 @@ output "email_domain_verification_records" {
 
 - `aad` (Block List, Max: 1) Azure AD connector (see [below for nested schema](#nestedblock--aad))
 - `additional_email_domains` (List of String) Additional email domains that will be allowed to sign in via the connection
-- `block_invitations` (Boolean) When true, invitations sent by castai_organization_members are refused by the API. Managed only when explicitly set in configuration: a set value is enforced, an unset value mirrors the organization setting without producing a diff.
+- `block_invitations` (Boolean) When true, invitations sent by castai_organization_members are refused by the API. Managed only when explicitly set in configuration: a set value is enforced, an unset value mirrors the organization setting without producing a diff, and deleting the connection only resets the setting to false when the attribute is set.
 - `oidc` (Block List, Max: 1) OIDC connector (e.g. Keycloak) (see [below for nested schema](#nestedblock--oidc))
 - `okta` (Block List, Max: 1) Okta connector (see [below for nested schema](#nestedblock--okta))
 - `synchronize_user_groups` (Boolean) When enabled, user groups from the identity provider will be synchronized with CAST AI. A sync auth token is generated on activation and stored in sync_auth_token.

@@ -1436,6 +1436,23 @@ func okOrgSettingsUpdateResponse(blockInvitations *bool) *organization_managemen
 	}
 }
 
+// okOrgEmailDomainIssueResponse builds a successful regenerate-tokens response carrying a
+// TXT record for each given domain.
+func okOrgEmailDomainIssueResponse(domains ...string) *organization_management.SSOEmailDomainAPIRegenerateSSOEmailDomainsTokensResponse {
+	issued := make([]organization_management.SSOEmailDomainValidation, 0, len(domains))
+	for _, domain := range domains {
+		issued = append(issued, organization_management.SSOEmailDomainValidation{
+			Domain:    toPtr(domain),
+			Status:    toPtr(organization_management.SSOEmailDomainValidationStatusSSOEMAILDOMAINSTATUSPENDING),
+			TxtRecord: &organization_management.SSOEmailDomainTxtRecord{Name: toPtr("_castai-verification." + domain), Value: toPtr("issued-secret-" + domain)},
+		})
+	}
+	return &organization_management.SSOEmailDomainAPIRegenerateSSOEmailDomainsTokensResponse{
+		HTTPResponse: &http.Response{StatusCode: http.StatusOK},
+		JSON200:      &organization_management.RegenerateSSOEmailDomainsTokensResponse{EmailDomains: &issued},
+	}
+}
+
 // okSSOGetConnectionResponse returns a 200 response for SSOAPIGetSSOConnection with a
 // minimal connection payload.
 func okSSOGetConnectionResponse(connectionID string) *http.Response {
@@ -1629,7 +1646,7 @@ func TestSSOConnection_ReadContext_EmailDomainValidation(t *testing.T) {
 }
 
 func TestSSOConnection_ReadContext_EmailDomainRecordIssuance(t *testing.T) {
-	t.Run("read issues a verification record for a pending claim without one", func(t *testing.T) {
+	t.Run("read does not issue records and warns when a pending claim has none", func(t *testing.T) {
 		t.Parallel()
 		r := require.New(t)
 		provider, mockClient, mockOrgClient := newSSOTestProvider(t)
@@ -1642,28 +1659,9 @@ func TestSSOConnection_ReadContext_EmailDomainRecordIssuance(t *testing.T) {
 			Return(&http.Response{
 				StatusCode: 200,
 				Header:     map[string][]string{"Content-Type": {"json"}},
-				Body:       io.NopCloser(bytes.NewReader([]byte(fmt.Sprintf(`{"connection":{"id":%q,"name":"test_sso","emailDomain":"pending.com","emailDomains":[{"domain":"pending.com","status":"STATUS_PENDING"}]}}`, connectionID))))}, nil)
-		mockOrgClient.EXPECT().
-			SSOEmailDomainAPIRegenerateSSOEmailDomainsTokensWithResponse(gomock.Any(), orgID, gomock.Any()).
-			DoAndReturn(func(_ context.Context, _ string, body organization_management.SSOEmailDomainAPIRegenerateSSOEmailDomainsTokensJSONRequestBody) (*organization_management.SSOEmailDomainAPIRegenerateSSOEmailDomainsTokensResponse, error) {
-				r.Equal(orgID, body.OrganizationId)
-				r.Equal([]string{"pending.com"}, body.Domains)
-				return &organization_management.SSOEmailDomainAPIRegenerateSSOEmailDomainsTokensResponse{
-					HTTPResponse: &http.Response{StatusCode: http.StatusOK},
-					JSON200: &organization_management.RegenerateSSOEmailDomainsTokensResponse{
-						EmailDomains: &[]organization_management.SSOEmailDomainValidation{{
-							Domain: toPtr("pending.com"),
-							Status: toPtr(organization_management.SSOEmailDomainValidationStatusSSOEMAILDOMAINSTATUSPENDING),
-							TxtRecord: &organization_management.SSOEmailDomainTxtRecord{
-								Name:  toPtr("_castai-verification.pending.com"),
-								Value: toPtr("issued-secret"),
-							},
-						}},
-					},
-				}, nil
-			})
+				Body:       io.NopCloser(bytes.NewReader([]byte(fmt.Sprintf(`{"connection":{"id":%q,"name":"test_sso","emailDomain":"pending.com","emailDomains":[{"domain":"pending.com","status":"STATUS_PENDING"}]}}`, connectionID)))),
+			}, nil)
 
-		// Read also mirrors block_invitations because organization_id is set.
 		mockOrgClient.EXPECT().
 			SettingsAPIGetSettingsWithResponse(gomock.Any(), orgID).
 			Return(okOrgSettingsGetResponse(nil), nil)
@@ -1676,22 +1674,24 @@ func TestSSOConnection_ReadContext_EmailDomainRecordIssuance(t *testing.T) {
 			}), 0),
 		)
 
+		// No SSOEmailDomainAPIRegenerateSSOEmailDomainsTokensWithResponse expectation:
+		// Read is side-effect free — issuance only happens in Create/Update, so a plan
+		// refresh can never rotate a verification secret.
+
 		result := resource.ReadContext(context.Background(), data, provider)
 		r.False(result.HasError())
 
 		validation := data.Get(FieldSSOConnectionEmailDomainValidation).([]interface{})
 		r.Len(validation, 1)
 		entry := validation[0].(map[string]interface{})
-		r.Equal("_castai-verification.pending.com", entry[FieldSSOConnectionEmailDomainValidationTxtRecordName])
-		r.Equal("issued-secret", entry[FieldSSOConnectionEmailDomainValidationTxtRecordValue])
+		r.Empty(entry[FieldSSOConnectionEmailDomainValidationTxtRecordName])
+		r.Empty(entry[FieldSSOConnectionEmailDomainValidationTxtRecordValue])
 
-		// The nudge names the issued record but never the secret.
 		found := false
 		for _, d := range result {
 			if d.Summary == "SSO email domain is not verified yet" {
 				found = true
-				r.Contains(d.Detail, "_castai-verification.pending.com")
-				r.Contains(d.Detail, "issued-secret")
+				r.Contains(d.Detail, "could not be issued automatically")
 			}
 		}
 		r.True(found)
@@ -1709,7 +1709,9 @@ func TestSSOConnection_ReadContext_EmailDomainRecordIssuance(t *testing.T) {
 			Return(&http.Response{
 				StatusCode: 200,
 				Header:     map[string][]string{"Content-Type": {"json"}},
-				Body:       io.NopCloser(bytes.NewReader([]byte(fmt.Sprintf(`{"connection":{"id":%q,"name":"test_sso","emailDomain":"pending.com","emailDomains":[{"domain":"pending.com","status":"STATUS_PENDING"}]}}`, connectionID))))}, nil)
+				Body:       io.NopCloser(bytes.NewReader([]byte(fmt.Sprintf(`{"connection":{"id":%q,"name":"test_sso","emailDomain":"pending.com","emailDomains":[{"domain":"pending.com","status":"STATUS_PENDING"}]}}`, connectionID)))),
+			}, nil)
+
 		// No regenerate expectation: the record already lives in state and must not be rotated.
 		// Read also mirrors block_invitations because organization_id is set.
 		mockOrgClient.EXPECT().
@@ -1749,8 +1751,154 @@ func TestSSOConnection_ReadContext_EmailDomainRecordIssuance(t *testing.T) {
 		}
 		r.True(found)
 	})
+}
 
-	t.Run("read warns when issuance fails", func(t *testing.T) {
+func TestSSOConnection_CreateContext_EmailDomainRecords(t *testing.T) {
+	t.Run("create issues verification records for the claimed domains", func(t *testing.T) {
+		t.Parallel()
+		r := require.New(t)
+		provider, mockClient, mockOrgClient := newSSOTestProvider(t)
+		connectionID := uuid.NewString()
+		orgID := uuid.NewString()
+
+		mockClient.EXPECT().
+			SSOAPICreateSSOConnection(gomock.Any(), gomock.Any()).
+			Return(&http.Response{
+				StatusCode: 200,
+				Header:     map[string][]string{"Content-Type": {"json"}},
+				Body:       io.NopCloser(bytes.NewReader([]byte(fmt.Sprintf(`{"id":%q,"status":"STATUS_ACTIVE"}`, connectionID)))),
+			}, nil)
+
+		mockOrgClient.EXPECT().
+			SSOEmailDomainAPIRegenerateSSOEmailDomainsTokensWithResponse(gomock.Any(), orgID, gomock.Any()).
+			DoAndReturn(func(_ context.Context, _ string, body organization_management.SSOEmailDomainAPIRegenerateSSOEmailDomainsTokensJSONRequestBody) (*organization_management.SSOEmailDomainAPIRegenerateSSOEmailDomainsTokensResponse, error) {
+				r.Equal(orgID, body.OrganizationId)
+				r.ElementsMatch([]string{"pending.com", "other.com"}, body.Domains)
+				// Statuses deliberately use the org-management enum — they must not leak into state.
+				return &organization_management.SSOEmailDomainAPIRegenerateSSOEmailDomainsTokensResponse{
+					HTTPResponse: &http.Response{StatusCode: http.StatusOK},
+					JSON200: &organization_management.RegenerateSSOEmailDomainsTokensResponse{
+						EmailDomains: &[]organization_management.SSOEmailDomainValidation{
+							{
+								Domain:    toPtr("pending.com"),
+								Status:    toPtr(organization_management.SSOEmailDomainValidationStatusSSOEMAILDOMAINSTATUSPENDING),
+								TxtRecord: &organization_management.SSOEmailDomainTxtRecord{Name: toPtr("_castai-verification.pending.com"), Value: toPtr("issued-secret-1")},
+							},
+							{
+								Domain:    toPtr("other.com"),
+								Status:    toPtr(organization_management.SSOEmailDomainValidationStatusSSOEMAILDOMAINSTATUSPENDING),
+								TxtRecord: &organization_management.SSOEmailDomainTxtRecord{Name: toPtr("_castai-verification.other.com"), Value: toPtr("issued-secret-2")},
+							},
+						},
+					},
+				}, nil
+			})
+
+		mockClient.EXPECT().
+			SSOAPIGetSSOConnection(gomock.Any(), connectionID).
+			Return(&http.Response{
+				StatusCode: 200,
+				Header:     map[string][]string{"Content-Type": {"json"}},
+				Body:       io.NopCloser(bytes.NewReader([]byte(fmt.Sprintf(`{"connection":{"id":%q,"name":"test_sso","emailDomain":"pending.com","emailDomains":[{"domain":"other.com","status":"STATUS_PENDING"},{"domain":"pending.com","status":"STATUS_PENDING"}]}}`, connectionID)))),
+			}, nil)
+
+		mockOrgClient.EXPECT().
+			SettingsAPIGetSettingsWithResponse(gomock.Any(), orgID).
+			Return(okOrgSettingsGetResponse(nil), nil)
+
+		resource := resourceSSOConnection()
+		val := cty.ObjectVal(map[string]cty.Value{
+			FieldSSOConnectionName:                   cty.StringVal("test_sso"),
+			FieldSSOConnectionEmailDomain:            cty.StringVal("pending.com"),
+			FieldSSOConnectionAdditionalEmailDomains: cty.ListVal([]cty.Value{cty.StringVal("other.com")}),
+			FieldSSOConnectionOrganizationID:         cty.StringVal(orgID),
+		})
+		state := sdkterraform.NewInstanceStateShimmedFromValue(val, 0)
+		state.RawConfig = val
+		data := resource.Data(state)
+
+		result := resource.CreateContext(context.Background(), data, provider)
+		r.False(result.HasError())
+
+		validation := data.Get(FieldSSOConnectionEmailDomainValidation).([]interface{})
+		r.Len(validation, 2)
+		byDomain := map[string]map[string]interface{}{}
+		for _, v := range validation {
+			e := v.(map[string]interface{})
+			byDomain[e[FieldSSOConnectionEmailDomainValidationDomain].(string)] = e
+		}
+		r.Equal("issued-secret-1", byDomain["pending.com"][FieldSSOConnectionEmailDomainValidationTxtRecordValue])
+		r.Equal("issued-secret-2", byDomain["other.com"][FieldSSOConnectionEmailDomainValidationTxtRecordValue])
+		// Statuses come from the connection GET (SSO enum), not from the issuance response.
+		r.Equal("STATUS_PENDING", byDomain["pending.com"][FieldSSOConnectionEmailDomainValidationStatus])
+		r.Equal("STATUS_PENDING", byDomain["other.com"][FieldSSOConnectionEmailDomainValidationStatus])
+	})
+}
+
+func TestSSOConnection_UpdateContext_EmailDomainRecords(t *testing.T) {
+	t.Run("update issues verification records for claimed domains without one", func(t *testing.T) {
+		t.Parallel()
+		r := require.New(t)
+		provider, mockClient, mockOrgClient := newSSOTestProvider(t)
+		connectionID := uuid.NewString()
+		orgID := uuid.NewString()
+
+		mockClient.EXPECT().
+			SSOAPIUpdateSSOConnection(gomock.Any(), connectionID, gomock.Any()).
+			Return(&http.Response{
+				StatusCode: 200,
+				Header:     map[string][]string{"Content-Type": {"json"}},
+				Body:       io.NopCloser(bytes.NewReader([]byte(`{"name":"test_sso","status":"STATUS_ACTIVE"}`))),
+			}, nil)
+
+		mockOrgClient.EXPECT().
+			SSOEmailDomainAPIRegenerateSSOEmailDomainsTokensWithResponse(gomock.Any(), orgID, gomock.Any()).
+			DoAndReturn(func(_ context.Context, _ string, body organization_management.SSOEmailDomainAPIRegenerateSSOEmailDomainsTokensJSONRequestBody) (*organization_management.SSOEmailDomainAPIRegenerateSSOEmailDomainsTokensResponse, error) {
+				r.Equal([]string{"new.com"}, body.Domains)
+				return &organization_management.SSOEmailDomainAPIRegenerateSSOEmailDomainsTokensResponse{
+					HTTPResponse: &http.Response{StatusCode: http.StatusOK},
+					JSON200: &organization_management.RegenerateSSOEmailDomainsTokensResponse{
+						EmailDomains: &[]organization_management.SSOEmailDomainValidation{{
+							Domain:    toPtr("new.com"),
+							Status:    toPtr(organization_management.SSOEmailDomainValidationStatusSSOEMAILDOMAINSTATUSPENDING),
+							TxtRecord: &organization_management.SSOEmailDomainTxtRecord{Name: toPtr("_castai-verification.new.com"), Value: toPtr("issued-secret")},
+						}},
+					},
+				}, nil
+			})
+
+		mockClient.EXPECT().
+			SSOAPIGetSSOConnection(gomock.Any(), connectionID).
+			Return(&http.Response{
+				StatusCode: 200,
+				Header:     map[string][]string{"Content-Type": {"json"}},
+				Body:       io.NopCloser(bytes.NewReader([]byte(fmt.Sprintf(`{"connection":{"id":%q,"name":"test_sso","emailDomain":"new.com","emailDomains":[{"domain":"new.com","status":"STATUS_PENDING"}]}}`, connectionID)))),
+			}, nil)
+
+		mockOrgClient.EXPECT().
+			SettingsAPIGetSettingsWithResponse(gomock.Any(), orgID).
+			Return(okOrgSettingsGetResponse(nil), nil)
+
+		resource := resourceSSOConnection()
+		data := schema.TestResourceDataRaw(t, resource.Schema, map[string]interface{}{
+			FieldSSOConnectionEmailDomain:    "new.com",
+			FieldSSOConnectionOrganizationID: orgID,
+		})
+		data.SetId(connectionID)
+
+		result := resource.UpdateContext(context.Background(), data, provider)
+		r.False(result.HasError())
+
+		validation := data.Get(FieldSSOConnectionEmailDomainValidation).([]interface{})
+		r.Len(validation, 1)
+		entry := validation[0].(map[string]interface{})
+		r.Equal("issued-secret", entry[FieldSSOConnectionEmailDomainValidationTxtRecordValue])
+		r.Equal("STATUS_PENDING", entry[FieldSSOConnectionEmailDomainValidationStatus])
+	})
+}
+
+func TestSSOConnection_ReadContext_BlockInvitations(t *testing.T) {
+	t.Run("read keeps prior block_invitations when the settings response omits the field", func(t *testing.T) {
 		t.Parallel()
 		r := require.New(t)
 		provider, mockClient, mockOrgClient := newSSOTestProvider(t)
@@ -1759,39 +1907,30 @@ func TestSSOConnection_ReadContext_EmailDomainRecordIssuance(t *testing.T) {
 
 		mockClient.EXPECT().
 			SSOAPIGetSSOConnection(gomock.Any(), connectionID).
-			Return(&http.Response{
-				StatusCode: 200,
-				Header:     map[string][]string{"Content-Type": {"json"}},
-				Body:       io.NopCloser(bytes.NewReader([]byte(fmt.Sprintf(`{"connection":{"id":%q,"name":"test_sso","emailDomain":"pending.com","emailDomains":[{"domain":"pending.com","status":"STATUS_PENDING"}]}}`, connectionID))))}, nil)
-		mockOrgClient.EXPECT().
-			SSOEmailDomainAPIRegenerateSSOEmailDomainsTokensWithResponse(gomock.Any(), orgID, gomock.Any()).
-			Return(&organization_management.SSOEmailDomainAPIRegenerateSSOEmailDomainsTokensResponse{
-				HTTPResponse: &http.Response{StatusCode: http.StatusInternalServerError},
-				Body:         []byte(`{"message":"boom"}`),
-			}, nil)
+			Return(okSSOGetConnectionResponse(connectionID), nil)
 
-		// Read also mirrors block_invitations because organization_id is set.
+		// 200 with an empty payload: BlockInvitations is nil and must not clobber state.
 		mockOrgClient.EXPECT().
 			SettingsAPIGetSettingsWithResponse(gomock.Any(), orgID).
-			Return(okOrgSettingsGetResponse(nil), nil)
+			Return(&organization_management.SettingsAPIGetSettingsResponse{
+				HTTPResponse: &http.Response{StatusCode: http.StatusOK},
+				JSON200:      &organization_management.GetSettingsResponse{},
+			}, nil)
 
 		resource := resourceSSOConnection()
 		data := resource.Data(
 			sdkterraform.NewInstanceStateShimmedFromValue(cty.ObjectVal(map[string]cty.Value{
-				"id":                             cty.StringVal(connectionID),
-				FieldSSOConnectionOrganizationID: cty.StringVal(orgID),
+				"id":                               cty.StringVal(connectionID),
+				FieldSSOConnectionOrganizationID:   cty.StringVal(orgID),
+				FieldSSOConnectionBlockInvitations: cty.True,
 			}), 0),
 		)
 
 		result := resource.ReadContext(context.Background(), data, provider)
 		r.False(result.HasError())
-		r.Len(result, 2)
-		r.Equal("failed issuing SSO email-domain verification records", result[0].Summary)
-		r.Contains(result[1].Detail, "could not be issued automatically")
+		r.True(data.Get(FieldSSOConnectionBlockInvitations).(bool))
 	})
-}
 
-func TestSSOConnection_ReadContext_BlockInvitations(t *testing.T) {
 	t.Run("read mirrors block_invitations from organization settings", func(t *testing.T) {
 		t.Parallel()
 		r := require.New(t)
@@ -1898,6 +2037,9 @@ func TestSSOConnection_CreateContext_BlockInvitations(t *testing.T) {
 				Header:     map[string][]string{"Content-Type": {"json"}},
 				Body:       io.NopCloser(bytes.NewReader([]byte(fmt.Sprintf(`{"id":%q,"status":"STATUS_ACTIVE"}`, connectionID)))),
 			}, nil)
+		mockOrgClient.EXPECT().
+			SSOEmailDomainAPIRegenerateSSOEmailDomainsTokensWithResponse(gomock.Any(), orgID, gomock.Any()).
+			Return(okOrgEmailDomainIssueResponse("test_email"), nil)
 
 		mockOrgClient.EXPECT().
 			SettingsAPIUpdateSettingsWithResponse(gomock.Any(), orgID, gomock.Any()).
@@ -1950,6 +2092,9 @@ func TestSSOConnection_CreateContext_BlockInvitations(t *testing.T) {
 				Header:     map[string][]string{"Content-Type": {"json"}},
 				Body:       io.NopCloser(bytes.NewReader([]byte(fmt.Sprintf(`{"id":%q,"status":"STATUS_ACTIVE"}`, connectionID)))),
 			}, nil)
+		mockOrgClient.EXPECT().
+			SSOEmailDomainAPIRegenerateSSOEmailDomainsTokensWithResponse(gomock.Any(), orgID, gomock.Any()).
+			Return(okOrgEmailDomainIssueResponse("test_email"), nil)
 
 		mockClient.EXPECT().
 			SSOAPIGetSSOConnection(gomock.Any(), connectionID).
@@ -1990,6 +2135,9 @@ func TestSSOConnection_CreateContext_BlockInvitations(t *testing.T) {
 				Header:     map[string][]string{"Content-Type": {"json"}},
 				Body:       io.NopCloser(bytes.NewReader([]byte(fmt.Sprintf(`{"id":%q,"status":"STATUS_ACTIVE"}`, connectionID)))),
 			}, nil)
+		mockOrgClient.EXPECT().
+			SSOEmailDomainAPIRegenerateSSOEmailDomainsTokensWithResponse(gomock.Any(), orgID, gomock.Any()).
+			Return(okOrgEmailDomainIssueResponse("test_email"), nil)
 
 		mockOrgClient.EXPECT().
 			SettingsAPIUpdateSettingsWithResponse(gomock.Any(), orgID, gomock.Any()).
@@ -2027,6 +2175,12 @@ func TestSSOConnection_CreateContext_BlockInvitations(t *testing.T) {
 }
 
 func TestSSOConnection_UpdateContext_BlockInvitations(t *testing.T) {
+	// Note: schema.TestResourceDataRaw produces a real diff (so HasChange works) but never
+	// populates RawConfig, so blockInvitationsInConfig is false here and the settings PATCH
+	// branch cannot be exercised in this unit-test form. The subtest therefore pins the
+	// negative contract: a flag-only change must never reach the SSO update API. The
+	// positive path (managed flag → settings PATCH) is covered by Create tests and the
+	// acceptance test.
 	t.Run("changing only block_invitations does not call the sso connection update API", func(t *testing.T) {
 		t.Parallel()
 		r := require.New(t)
@@ -2201,12 +2355,50 @@ func TestSSOConnection_DeleteContext_WithOrganization(t *testing.T) {
 		}, nil)
 
 	resource := resourceSSOConnection()
-	data := resource.Data(
-		sdkterraform.NewInstanceStateShimmedFromValue(cty.ObjectVal(map[string]cty.Value{
-			"id":                             cty.StringVal(connectionID),
-			FieldSSOConnectionOrganizationID: cty.StringVal(orgID),
-		}), 0),
-	)
+	val := cty.ObjectVal(map[string]cty.Value{
+		"id":                               cty.StringVal(connectionID),
+		FieldSSOConnectionOrganizationID:   cty.StringVal(orgID),
+		FieldSSOConnectionBlockInvitations: cty.True,
+	})
+	state := sdkterraform.NewInstanceStateShimmedFromValue(val, 0)
+	state.RawConfig = val
+	data := resource.Data(state)
+
+	result := resource.DeleteContext(context.Background(), data, provider)
+	r.False(result.HasError())
+}
+
+// Deleting a connection that does not manage block_invitations (attribute absent from the
+// configuration) must not touch the org-wide setting: it may have been set by the console
+// or by another SSO connection in the same organization.
+func TestSSOConnection_DeleteContext_UnmanagedBlockInvitations(t *testing.T) {
+	r := require.New(t)
+	provider, mockClient, mockOrgClient := newSSOTestProvider(t)
+	connectionID := uuid.NewString()
+	orgID := uuid.NewString()
+
+	mockClient.EXPECT().
+		SSOAPIDeleteSSOConnection(gomock.Any(), connectionID).
+		Return(&http.Response{
+			StatusCode: 200,
+			Header:     map[string][]string{"Content-Type": {"json"}},
+			Body:       io.NopCloser(bytes.NewReader([]byte(`{}`))),
+		}, nil)
+
+	resource := resourceSSOConnection()
+	val := cty.ObjectVal(map[string]cty.Value{
+		"id":                             cty.StringVal(connectionID),
+		FieldSSOConnectionName:           cty.StringVal("test_sso"),
+		FieldSSOConnectionEmailDomain:    cty.StringVal("test_email"),
+		FieldSSOConnectionOrganizationID: cty.StringVal(orgID),
+		// No block_invitations attribute: the flag is not managed by this resource.
+	})
+	state := sdkterraform.NewInstanceStateShimmedFromValue(val, 0)
+	state.RawConfig = val
+	data := resource.Data(state)
+
+	// No SettingsAPIUpdateSettingsWithResponse expectation: an unexpected call would fail the mock.
+	_ = mockOrgClient
 
 	result := resource.DeleteContext(context.Background(), data, provider)
 	r.False(result.HasError())
