@@ -138,6 +138,13 @@ const (
 	CastaiInventoryV1beta1GCPFlexCUDCUDPlanTWELVEMONTH    CastaiInventoryV1beta1GCPFlexCUDCUDPlan = "TWELVE_MONTH"
 )
 
+// Defines values for CastaiInventoryV1beta1GCPReservationDeploymentType.
+const (
+	CastaiInventoryV1beta1GCPReservationDeploymentTypeGCPRESERVATIONDEPLOYMENTTYPEDENSE       CastaiInventoryV1beta1GCPReservationDeploymentType = "GCP_RESERVATION_DEPLOYMENT_TYPE_DENSE"
+	CastaiInventoryV1beta1GCPReservationDeploymentTypeGCPRESERVATIONDEPLOYMENTTYPEFLEXIBLE    CastaiInventoryV1beta1GCPReservationDeploymentType = "GCP_RESERVATION_DEPLOYMENT_TYPE_FLEXIBLE"
+	CastaiInventoryV1beta1GCPReservationDeploymentTypeGCPRESERVATIONDEPLOYMENTTYPEUNSPECIFIED CastaiInventoryV1beta1GCPReservationDeploymentType = "GCP_RESERVATION_DEPLOYMENT_TYPE_UNSPECIFIED"
+)
+
 // Defines values for CastaiInventoryV1beta1GCPReservationLocalSsdInterface.
 const (
 	CastaiInventoryV1beta1GCPReservationLocalSsdInterfaceGCPRESERVATIONLOCALSSDINTERFACENVME        CastaiInventoryV1beta1GCPReservationLocalSsdInterface = "GCP_RESERVATION_LOCAL_SSD_INTERFACE_NVME"
@@ -279,6 +286,21 @@ const (
 const (
 	CastaiRbacV1beta1ScopeTypeCLUSTER      CastaiRbacV1beta1ScopeType = "CLUSTER"
 	CastaiRbacV1beta1ScopeTypeORGANIZATION CastaiRbacV1beta1ScopeType = "ORGANIZATION"
+)
+
+// Defines values for CastaiServiceaccountsV1beta1AccessModel.
+const (
+	CastaiServiceaccountsV1beta1AccessModelACCESSMODELFINEGRAINED CastaiServiceaccountsV1beta1AccessModel = "ACCESS_MODEL_FINE_GRAINED"
+	CastaiServiceaccountsV1beta1AccessModelACCESSMODELROLEBASED   CastaiServiceaccountsV1beta1AccessModel = "ACCESS_MODEL_ROLE_BASED"
+	CastaiServiceaccountsV1beta1AccessModelACCESSMODELUNSPECIFIED CastaiServiceaccountsV1beta1AccessModel = "ACCESS_MODEL_UNSPECIFIED"
+)
+
+// Defines values for CastaiServiceaccountsV1beta1ScopeKind.
+const (
+	CastaiServiceaccountsV1beta1ScopeKindSCOPEKINDCLUSTER      CastaiServiceaccountsV1beta1ScopeKind = "SCOPE_KIND_CLUSTER"
+	CastaiServiceaccountsV1beta1ScopeKindSCOPEKINDENTERPRISE   CastaiServiceaccountsV1beta1ScopeKind = "SCOPE_KIND_ENTERPRISE"
+	CastaiServiceaccountsV1beta1ScopeKindSCOPEKINDORGANIZATION CastaiServiceaccountsV1beta1ScopeKind = "SCOPE_KIND_ORGANIZATION"
+	CastaiServiceaccountsV1beta1ScopeKindSCOPEKINDUNSPECIFIED  CastaiServiceaccountsV1beta1ScopeKind = "SCOPE_KIND_UNSPECIFIED"
 )
 
 // Defines values for CastaiSsoV1beta1OIDCType.
@@ -496,6 +518,7 @@ const (
 
 // Defines values for ExternalclusterV1KarpenterControllerMode.
 const (
+	ExternalclusterV1KarpenterControllerModeCASTMANAGED                        ExternalclusterV1KarpenterControllerMode = "CAST_MANAGED"
 	ExternalclusterV1KarpenterControllerModeKARPENTERCONTROLLERMODEUNSPECIFIED ExternalclusterV1KarpenterControllerMode = "KARPENTER_CONTROLLER_MODE_UNSPECIFIED"
 	ExternalclusterV1KarpenterControllerModeMANAGEDOUTOFBAND                   ExternalclusterV1KarpenterControllerMode = "MANAGED_OUT_OF_BAND"
 	ExternalclusterV1KarpenterControllerModeSELFHOSTED                         ExternalclusterV1KarpenterControllerMode = "SELF_HOSTED"
@@ -527,6 +550,12 @@ const (
 	ExternalclusterV1OperationModeOPERATIONMODEDEFAULT     ExternalclusterV1OperationMode = "OPERATION_MODE_DEFAULT"
 	ExternalclusterV1OperationModeOPERATIONMODEDRYRUN      ExternalclusterV1OperationMode = "OPERATION_MODE_DRY_RUN"
 	ExternalclusterV1OperationModeOPERATIONMODEUNSPECIFIED ExternalclusterV1OperationMode = "OPERATION_MODE_UNSPECIFIED"
+)
+
+// Defines values for ExternalclusterV1TokenType.
+const (
+	ExternalclusterV1TokenTypeCONFIGSYNC ExternalclusterV1TokenType = "CONFIG_SYNC"
+	ExternalclusterV1TokenTypeDEFAULT    ExternalclusterV1TokenType = "DEFAULT"
 )
 
 // Defines values for K8sSelectorV1Operator.
@@ -621,12 +650,27 @@ const (
 	NodeconfigV1EKSConfigNestedVirtualisationModeNESTEDVIRTUALISATIONMODEUNSPECIFIED NodeconfigV1EKSConfigNestedVirtualisationMode = "NESTED_VIRTUALISATION_MODE_UNSPECIFIED"
 )
 
+// Defines values for NodeconfigV1GKEConfigImageFamily.
+const (
+	NodeconfigV1GKEConfigImageFamilyFAMILYCOSCONTAINERD    NodeconfigV1GKEConfigImageFamily = "FAMILY_COS_CONTAINERD"
+	NodeconfigV1GKEConfigImageFamilyFAMILYUBUNTUCONTAINERD NodeconfigV1GKEConfigImageFamily = "FAMILY_UBUNTU_CONTAINERD"
+	NodeconfigV1GKEConfigImageFamilyFAMILYUNSPECIFIED      NodeconfigV1GKEConfigImageFamily = "FAMILY_UNSPECIFIED"
+)
+
 // Defines values for NodeconfigV1GKEConfigOnHostMaintenance.
 const (
 	NodeconfigV1GKEConfigOnHostMaintenanceMIGRATE   NodeconfigV1GKEConfigOnHostMaintenance = "MIGRATE"
 	NodeconfigV1GKEConfigOnHostMaintenanceMigrate   NodeconfigV1GKEConfigOnHostMaintenance = "migrate"
 	NodeconfigV1GKEConfigOnHostMaintenanceTERMINATE NodeconfigV1GKEConfigOnHostMaintenance = "TERMINATE"
 	NodeconfigV1GKEConfigOnHostMaintenanceTerminate NodeconfigV1GKEConfigOnHostMaintenance = "terminate"
+)
+
+// Defines values for NodeconfigV1GKELocalSSDConfigMode.
+const (
+	NodeconfigV1GKELocalSSDConfigModeBLOCK           NodeconfigV1GKELocalSSDConfigMode = "BLOCK"
+	NodeconfigV1GKELocalSSDConfigModeEPHEMERAL       NodeconfigV1GKELocalSSDConfigMode = "EPHEMERAL"
+	NodeconfigV1GKELocalSSDConfigModeMIXED           NodeconfigV1GKELocalSSDConfigMode = "MIXED"
+	NodeconfigV1GKELocalSSDConfigModeMODEUNSPECIFIED NodeconfigV1GKELocalSSDConfigMode = "MODE_UNSPECIFIED"
 )
 
 // Defines values for NodeconfigV1SecondaryBootDiskMode.
@@ -1076,16 +1120,24 @@ const (
 
 // Defines values for WorkloadoptimizationV1RecommendationOrigin.
 const (
-	WorkloadoptimizationV1RecommendationOriginORIGINCONFIGCHANGED             WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_CONFIG_CHANGED"
-	WorkloadoptimizationV1RecommendationOriginORIGINHPAALMOSTMAXEDOUT         WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_HPA_ALMOST_MAXED_OUT"
-	WorkloadoptimizationV1RecommendationOriginORIGINHPAMAXEDOUT               WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_HPA_MAXED_OUT"
-	WorkloadoptimizationV1RecommendationOriginORIGINMEMORYEVENT               WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_MEMORY_EVENT"
-	WorkloadoptimizationV1RecommendationOriginORIGINREADONLYRESOURCECHANGED   WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_READONLY_RESOURCE_CHANGED"
-	WorkloadoptimizationV1RecommendationOriginORIGINSNAPSHOT                  WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_SNAPSHOT"
-	WorkloadoptimizationV1RecommendationOriginORIGINSTARTUPFAILUREEVENT       WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_STARTUP_FAILURE_EVENT"
-	WorkloadoptimizationV1RecommendationOriginORIGINSURGEEVENT                WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_SURGE_EVENT"
-	WorkloadoptimizationV1RecommendationOriginORIGINUNKNOWN                   WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_UNKNOWN"
-	WorkloadoptimizationV1RecommendationOriginORIGINVERTICALMANAGEMENTENABLED WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_VERTICAL_MANAGEMENT_ENABLED"
+	WorkloadoptimizationV1RecommendationOriginORIGINANOMALYDETECTED              WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_ANOMALY_DETECTED"
+	WorkloadoptimizationV1RecommendationOriginORIGINCONFIGCHANGED                WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_CONFIG_CHANGED"
+	WorkloadoptimizationV1RecommendationOriginORIGINHPAALMOSTMAXEDOUT            WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_HPA_ALMOST_MAXED_OUT"
+	WorkloadoptimizationV1RecommendationOriginORIGINHPAMAXEDOUT                  WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_HPA_MAXED_OUT"
+	WorkloadoptimizationV1RecommendationOriginORIGINMEMORYEVENT                  WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_MEMORY_EVENT"
+	WorkloadoptimizationV1RecommendationOriginORIGINNATIVEVPASTATECHANGED        WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_NATIVE_VPA_STATE_CHANGED"
+	WorkloadoptimizationV1RecommendationOriginORIGINPOLICYASSIGNMENTRULESCHANGED WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_POLICY_ASSIGNMENT_RULES_CHANGED"
+	WorkloadoptimizationV1RecommendationOriginORIGINPOLICYCHANGED                WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_POLICY_CHANGED"
+	WorkloadoptimizationV1RecommendationOriginORIGINPSICPUPRESSUREEVENT          WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_PSI_CPU_PRESSURE_EVENT"
+	WorkloadoptimizationV1RecommendationOriginORIGINPSICPUPRESSURERESOLVEDEVENT  WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_PSI_CPU_PRESSURE_RESOLVED_EVENT"
+	WorkloadoptimizationV1RecommendationOriginORIGINREADONLYRESOURCECHANGED      WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_READONLY_RESOURCE_CHANGED"
+	WorkloadoptimizationV1RecommendationOriginORIGINSINGLEWORKLOADCHANGED        WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_SINGLE_WORKLOAD_CHANGED"
+	WorkloadoptimizationV1RecommendationOriginORIGINSNAPSHOT                     WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_SNAPSHOT"
+	WorkloadoptimizationV1RecommendationOriginORIGINSTARTUPFAILUREEVENT          WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_STARTUP_FAILURE_EVENT"
+	WorkloadoptimizationV1RecommendationOriginORIGINSURGEEVENT                   WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_SURGE_EVENT"
+	WorkloadoptimizationV1RecommendationOriginORIGINUNKNOWN                      WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_UNKNOWN"
+	WorkloadoptimizationV1RecommendationOriginORIGINUNSCHEDULABLERECOMMENDATION  WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_UNSCHEDULABLE_RECOMMENDATION"
+	WorkloadoptimizationV1RecommendationOriginORIGINVERTICALMANAGEMENTENABLED    WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_VERTICAL_MANAGEMENT_ENABLED"
 )
 
 // Defines values for WorkloadoptimizationV1RecommendationStatusType.
@@ -1200,9 +1252,10 @@ const (
 
 // Defines values for WorkloadoptimizationV1SystemOverrideOrigin.
 const (
-	WorkloadoptimizationV1SystemOverrideOriginSYSTEMOVERRIDEORIGINCONTINUOUSOOMKILLED WorkloadoptimizationV1SystemOverrideOrigin = "SYSTEM_OVERRIDE_ORIGIN_CONTINUOUS_OOM_KILLED"
-	WorkloadoptimizationV1SystemOverrideOriginSYSTEMOVERRIDEORIGINUNBOUNDMEMORYGROWTH WorkloadoptimizationV1SystemOverrideOrigin = "SYSTEM_OVERRIDE_ORIGIN_UNBOUND_MEMORY_GROWTH"
-	WorkloadoptimizationV1SystemOverrideOriginSYSTEMOVERRIDEORIGINUNSPECIFIED         WorkloadoptimizationV1SystemOverrideOrigin = "SYSTEM_OVERRIDE_ORIGIN_UNSPECIFIED"
+	WorkloadoptimizationV1SystemOverrideOriginSYSTEMOVERRIDEORIGINCONTINUOUSOOMKILLED         WorkloadoptimizationV1SystemOverrideOrigin = "SYSTEM_OVERRIDE_ORIGIN_CONTINUOUS_OOM_KILLED"
+	WorkloadoptimizationV1SystemOverrideOriginSYSTEMOVERRIDEORIGINUNBOUNDMEMORYGROWTH         WorkloadoptimizationV1SystemOverrideOrigin = "SYSTEM_OVERRIDE_ORIGIN_UNBOUND_MEMORY_GROWTH"
+	WorkloadoptimizationV1SystemOverrideOriginSYSTEMOVERRIDEORIGINUNSCHEDULABLERECOMMENDATION WorkloadoptimizationV1SystemOverrideOrigin = "SYSTEM_OVERRIDE_ORIGIN_UNSCHEDULABLE_RECOMMENDATION"
+	WorkloadoptimizationV1SystemOverrideOriginSYSTEMOVERRIDEORIGINUNSPECIFIED                 WorkloadoptimizationV1SystemOverrideOrigin = "SYSTEM_OVERRIDE_ORIGIN_UNSPECIFIED"
 )
 
 // Defines values for WorkloadoptimizationV1SystemOverrideResetOrigin.
@@ -1241,6 +1294,18 @@ const (
 	RbacServiceAPIListPermissionGroupsParamsProductPRODUCTTYPEKIMCHI      RbacServiceAPIListPermissionGroupsParamsProduct = "PRODUCT_TYPE_KIMCHI"
 	RbacServiceAPIListPermissionGroupsParamsProductPRODUCTTYPEPLATFORM    RbacServiceAPIListPermissionGroupsParamsProduct = "PRODUCT_TYPE_PLATFORM"
 	RbacServiceAPIListPermissionGroupsParamsProductPRODUCTTYPEUNSPECIFIED RbacServiceAPIListPermissionGroupsParamsProduct = "PRODUCT_TYPE_UNSPECIFIED"
+)
+
+// Defines values for RbacServiceAPIListPermissionGroupsParamsScope.
+const (
+	RbacServiceAPIListPermissionGroupsParamsScopeCLUSTER      RbacServiceAPIListPermissionGroupsParamsScope = "CLUSTER"
+	RbacServiceAPIListPermissionGroupsParamsScopeORGANIZATION RbacServiceAPIListPermissionGroupsParamsScope = "ORGANIZATION"
+)
+
+// Defines values for RbacServiceAPIListPermissionGroupsParamsTargetScopesScopeKind.
+const (
+	RbacServiceAPIListPermissionGroupsParamsTargetScopesScopeKindCLUSTER      RbacServiceAPIListPermissionGroupsParamsTargetScopesScopeKind = "CLUSTER"
+	RbacServiceAPIListPermissionGroupsParamsTargetScopesScopeKindORGANIZATION RbacServiceAPIListPermissionGroupsParamsTargetScopesScopeKind = "ORGANIZATION"
 )
 
 // Defines values for CommitmentsAPIGetCommitmentUsageHistoryParamsAggregationInterval.
@@ -1374,6 +1439,12 @@ const (
 	ExternalClusterAPITriggerResumeClusterParamsModeOPERATIONMODEUNSPECIFIED ExternalClusterAPITriggerResumeClusterParamsMode = "OPERATION_MODE_UNSPECIFIED"
 )
 
+// Defines values for ExternalClusterAPICreateClusterTokenParamsTokenType.
+const (
+	ExternalClusterAPICreateClusterTokenParamsTokenTypeCONFIGSYNC ExternalClusterAPICreateClusterTokenParamsTokenType = "CONFIG_SYNC"
+	ExternalClusterAPICreateClusterTokenParamsTokenTypeDEFAULT    ExternalClusterAPICreateClusterTokenParamsTokenType = "DEFAULT"
+)
+
 // Defines values for UsersAPILeaveOrganizationParamsProduct.
 const (
 	UsersAPILeaveOrganizationParamsProductPRODUCTTYPECASTAI      UsersAPILeaveOrganizationParamsProduct = "PRODUCT_TYPE_CASTAI"
@@ -1400,6 +1471,22 @@ const (
 	RbacServiceAPIListRolesParamsTypeALL        RbacServiceAPIListRolesParamsType = "ALL"
 	RbacServiceAPIListRolesParamsTypeDEFAULT    RbacServiceAPIListRolesParamsType = "DEFAULT"
 	RbacServiceAPIListRolesParamsTypeENTERPRISE RbacServiceAPIListRolesParamsType = "ENTERPRISE"
+)
+
+// Defines values for ServiceAccountsAPIListServiceAccountsParamsActions.
+const (
+	ServiceAccountsAPIListServiceAccountsParamsActionsCREATE ServiceAccountsAPIListServiceAccountsParamsActions = "CREATE"
+	ServiceAccountsAPIListServiceAccountsParamsActionsDELETE ServiceAccountsAPIListServiceAccountsParamsActions = "DELETE"
+	ServiceAccountsAPIListServiceAccountsParamsActionsREAD   ServiceAccountsAPIListServiceAccountsParamsActions = "READ"
+	ServiceAccountsAPIListServiceAccountsParamsActionsWRITE  ServiceAccountsAPIListServiceAccountsParamsActions = "WRITE"
+)
+
+// Defines values for ServiceAccountsAPIListServiceAccountsParamsScopeKind.
+const (
+	ServiceAccountsAPIListServiceAccountsParamsScopeKindSCOPEKINDCLUSTER      ServiceAccountsAPIListServiceAccountsParamsScopeKind = "SCOPE_KIND_CLUSTER"
+	ServiceAccountsAPIListServiceAccountsParamsScopeKindSCOPEKINDENTERPRISE   ServiceAccountsAPIListServiceAccountsParamsScopeKind = "SCOPE_KIND_ENTERPRISE"
+	ServiceAccountsAPIListServiceAccountsParamsScopeKindSCOPEKINDORGANIZATION ServiceAccountsAPIListServiceAccountsParamsScopeKind = "SCOPE_KIND_ORGANIZATION"
+	ServiceAccountsAPIListServiceAccountsParamsScopeKindSCOPEKINDUNSPECIFIED  ServiceAccountsAPIListServiceAccountsParamsScopeKind = "SCOPE_KIND_UNSPECIFIED"
 )
 
 // Defines values for UsersAPIRemoveOrganizationUsersParamsProduct.
@@ -1798,7 +1885,9 @@ type CastaiAuthtokenV1beta1AuthToken struct {
 	CreatedBy *string `json:"createdBy"`
 
 	// ExpiresAt Time when the token will expire (unix timestamp in nanoseconds).
-	// A null value means that the key will never expire.
+	// When creating a token, it must be set to a time in the future, at most 366 days ahead.
+	// When reading a token, a null value means the token never expires. Such tokens are legacy:
+	// new tokens without an expiration are no longer accepted.
 	ExpiresAt *time.Time `json:"expiresAt,omitempty"`
 
 	// Id (read only) ID of the token.
@@ -1934,19 +2023,26 @@ type CastaiAutoscalerV1beta1RebalancingOptions struct {
 	SplitNodesInBatchesOf *int32 `json:"splitNodesInBatchesOf"`
 }
 
-// CastaiEvictorV1AdvancedConfig AdvancedConfig the evictor advanced configuration.
+// CastaiEvictorV1AdvancedConfig AdvancedConfig the evictor advanced configuration. Rules are evaluated
+// first-match-wins: only the first rule matching a given pod or node applies,
+// so overlapping selectors are resolved by order and duplicated selectors are
+// rejected by the API.
 type CastaiEvictorV1AdvancedConfig struct {
 	EvictionConfig []CastaiEvictorV1EvictionConfig `json:"evictionConfig"`
 }
 
 // CastaiEvictorV1EvictionConfig EvictionConfig used to specify more granular settings per node/pod filters.
 type CastaiEvictorV1EvictionConfig struct {
-	NodeSelector *CastaiEvictorV1NodeSelector    `json:"nodeSelector,omitempty"`
-	PodSelector  *CastaiEvictorV1PodSelector     `json:"podSelector,omitempty"`
-	Settings     CastaiEvictorV1EvictionSettings `json:"settings"`
+	NodeSelector *CastaiEvictorV1NodeSelector `json:"nodeSelector,omitempty"`
+	PodSelector  *CastaiEvictorV1PodSelector  `json:"podSelector,omitempty"`
+
+	// Settings EvictionSettings defines eviction settings. Each setting is independent:
+	// a rule may enable any combination of them.
+	Settings CastaiEvictorV1EvictionSettings `json:"settings"`
 }
 
-// CastaiEvictorV1EvictionSettings defines model for castai.evictor.v1.EvictionSettings.
+// CastaiEvictorV1EvictionSettings EvictionSettings defines eviction settings. Each setting is independent:
+// a rule may enable any combination of them.
 type CastaiEvictorV1EvictionSettings struct {
 	Aggressive      *CastaiEvictorV1EvictionSettingsSettingEnabled `json:"aggressive,omitempty"`
 	Disposable      *CastaiEvictorV1EvictionSettingsSettingEnabled `json:"disposable,omitempty"`
@@ -2333,7 +2429,12 @@ type CastaiInventoryV1beta1BlockStorageInfo struct {
 	// MaxBandwidthMbps Specifies the maximum bandwidth for block storage. Currently only supported for AWS EBS-optimized instances.
 	MaxBandwidthMbps *int32 `json:"maxBandwidthMbps"`
 
-	// MaxEbsAttachments Specifies maximum number of EBS volume attachments.
+	// MaxDataDisks Specifies the maximum number of data disks, excluding the OS disk.
+	// Populated for Azure only.
+	MaxDataDisks *int32 `json:"maxDataDisks"`
+
+	// MaxEbsAttachments Specifies the maximum number of EBS volume attachments, including the root volume.
+	// Populated for AWS only.
 	MaxEbsAttachments *int32 `json:"maxEbsAttachments"`
 
 	// MaxIops Specifies the maximum IOPS for block storage.
@@ -2528,6 +2629,13 @@ type CastaiInventoryV1beta1GCPCapacityReservationContext struct {
 	Accelerators         *[]CastaiInventoryV1beta1GCPReservationAccelerator `json:"accelerators,omitempty"`
 	AssuredInstanceCount *string                                            `json:"assuredInstanceCount,omitempty"`
 
+	// DeploymentType Deployment type reported by GCP.
+	//
+	//  - GCP_RESERVATION_DEPLOYMENT_TYPE_UNSPECIFIED: The reservation does not report a deployment type.
+	//  - GCP_RESERVATION_DEPLOYMENT_TYPE_FLEXIBLE: Highly flexible, logical deployment of reserved capacity.
+	//  - GCP_RESERVATION_DEPLOYMENT_TYPE_DENSE: Densely deployed reserved capacity.
+	DeploymentType *CastaiInventoryV1beta1GCPReservationDeploymentType `json:"deploymentType,omitempty"`
+
 	// EffectiveCount Effective instance count is the adjusted original commitment count based only on the portion remaining after out-of-cluster usage.
 	EffectiveCount *string `json:"effectiveCount,omitempty"`
 
@@ -2615,6 +2723,13 @@ type CastaiInventoryV1beta1GCPReservationAccelerator struct {
 	// "https://www.googleapis.com/compute/v1/projects/<p>/zones/<z>/acceleratorTypes/nvidia-tesla-t4".
 	AcceleratorType *string `json:"acceleratorType,omitempty"`
 }
+
+// CastaiInventoryV1beta1GCPReservationDeploymentType Deployment type reported by GCP.
+//
+//   - GCP_RESERVATION_DEPLOYMENT_TYPE_UNSPECIFIED: The reservation does not report a deployment type.
+//   - GCP_RESERVATION_DEPLOYMENT_TYPE_FLEXIBLE: Highly flexible, logical deployment of reserved capacity.
+//   - GCP_RESERVATION_DEPLOYMENT_TYPE_DENSE: Densely deployed reserved capacity.
+type CastaiInventoryV1beta1GCPReservationDeploymentType string
 
 // CastaiInventoryV1beta1GCPReservationLocalSsd GCPReservationLocalSsd describes a local SSD disk that a reserved VM must
 // match exactly to consume a GCP capacity reservation.
@@ -3402,6 +3517,9 @@ type CastaiOperationsV1beta1OperationError struct {
 	// Details Details is a concise human readable explanation for the error.
 	Details *string `json:"details,omitempty"`
 
+	// Message Message is the original error message that caused the operation to fail.
+	Message *string `json:"message,omitempty"`
+
 	// Reason Reason is an operation specific failure code. Refer to documentation about possible outcomes.
 	Reason *string `json:"reason,omitempty"`
 }
@@ -3666,6 +3784,13 @@ type CastaiRbacV1beta1PermissionGroup struct {
 
 	// ResourceDisplayName Human-readable display name for the resource.
 	ResourceDisplayName *string `json:"resourceDisplayName,omitempty"`
+
+	// Scope Scope represents the authentication tree for the system. Based on that we can build the
+	// authentication and authorization tree.
+	//
+	//  - ORGANIZATION: Organization scope represents the organization level authentication (Organization -> ResourceID)
+	//  - CLUSTER: Cluster scope represents the cluster level authentication (Organization -> Cluster -> ResourceID)
+	Scope CastaiRbacV1beta1ScopeType `json:"scope"`
 }
 
 // CastaiRbacV1beta1Permissions defines model for castai.rbac.v1beta1.Permissions.
@@ -3855,13 +3980,20 @@ type CastaiRbacV1beta1UserSubject struct {
 	Name *string `json:"name,omitempty"`
 }
 
+// CastaiServiceaccountsV1beta1AccessModel AccessModel identifies how a service account gets its permissions.
+//
+//   - ACCESS_MODEL_UNSPECIFIED: Default value. In create requests, this keeps the existing role-based behavior.
+//   - ACCESS_MODEL_ROLE_BASED: The service account gets permissions through role bindings.
+//   - ACCESS_MODEL_FINE_GRAINED: The service account gets permissions directly from FineGrainedAccess.
+type CastaiServiceaccountsV1beta1AccessModel string
+
 // CastaiServiceaccountsV1beta1CreateServiceAccountKeyRequestKey Key is the key to create.
 type CastaiServiceaccountsV1beta1CreateServiceAccountKeyRequestKey struct {
 	// Active Active is the active state of the key. If not provided, the default is true.
 	Active *bool `json:"active,omitempty"`
 
 	// ExpiresAt ExpiresAt is the expiration time of the key.
-	// A null value means that the key will never expire.
+	// Required: it must be set to a time in the future, at most 366 days ahead.
 	ExpiresAt *time.Time `json:"expiresAt,omitempty"`
 
 	// Name Name is the name of the service account key.
@@ -3880,6 +4012,7 @@ type CastaiServiceaccountsV1beta1CreateServiceAccountKeyResponse struct {
 	CreatedAt *time.Time `json:"createdAt,omitempty"`
 
 	// ExpiresAt ExpiresAt is the expiration time of the key.
+	// A null value means the key never expires. Such keys are legacy: new keys without an expiration are no longer accepted.
 	ExpiresAt *time.Time `json:"expiresAt,omitempty"`
 
 	// Id ID is the unique identifier of the key.
@@ -3897,8 +4030,19 @@ type CastaiServiceaccountsV1beta1CreateServiceAccountKeyResponse struct {
 
 // CastaiServiceaccountsV1beta1CreateServiceAccountRequestServiceAccount ServiceAccounts is the service account to be created.
 type CastaiServiceaccountsV1beta1CreateServiceAccountRequestServiceAccount struct {
+	// AccessModel AccessModel identifies how a service account gets its permissions.
+	//
+	//  - ACCESS_MODEL_UNSPECIFIED: Default value. In create requests, this keeps the existing role-based behavior.
+	//  - ACCESS_MODEL_ROLE_BASED: The service account gets permissions through role bindings.
+	//  - ACCESS_MODEL_FINE_GRAINED: The service account gets permissions directly from FineGrainedAccess.
+	AccessModel *CastaiServiceaccountsV1beta1AccessModel `json:"accessModel,omitempty"`
+
 	// Description Description is the description of the role binding.
 	Description *string `json:"description,omitempty"`
+
+	// FineGrainedAccess FineGrainedAccess defines the targets and permission groups of a fine-grained service account.
+	// All scopes must have the same kind and must not contain duplicate targets.
+	FineGrainedAccess *CastaiServiceaccountsV1beta1FineGrainedAccess `json:"fineGrainedAccess,omitempty"`
 
 	// Name Name is the name of the service account.
 	Name string `json:"name"`
@@ -3909,13 +4053,24 @@ type CastaiServiceaccountsV1beta1CreateServiceAccountRequestServiceAccount struc
 
 // CastaiServiceaccountsV1beta1CreateServiceAccountResponse CreateServiceAccountResponse is the response for creating a service account.
 type CastaiServiceaccountsV1beta1CreateServiceAccountResponse struct {
+	// AccessModel AccessModel identifies how a service account gets its permissions.
+	//
+	//  - ACCESS_MODEL_UNSPECIFIED: Default value. In create requests, this keeps the existing role-based behavior.
+	//  - ACCESS_MODEL_ROLE_BASED: The service account gets permissions through role bindings.
+	//  - ACCESS_MODEL_FINE_GRAINED: The service account gets permissions directly from FineGrainedAccess.
+	AccessModel *CastaiServiceaccountsV1beta1AccessModel `json:"accessModel,omitempty"`
+
 	// Author Author is the author of the service account.
 	Author      *CastaiServiceaccountsV1beta1CreateServiceAccountResponseAuthor `json:"author,omitempty"`
 	CreatedAt   *time.Time                                                      `json:"createdAt,omitempty"`
 	Description *string                                                         `json:"description,omitempty"`
 	Email       *string                                                         `json:"email,omitempty"`
-	Id          *string                                                         `json:"id,omitempty"`
-	Name        *string                                                         `json:"name,omitempty"`
+
+	// FineGrainedAccess FineGrainedAccess defines the targets and permission groups of a fine-grained service account.
+	// All scopes must have the same kind and must not contain duplicate targets.
+	FineGrainedAccess *CastaiServiceaccountsV1beta1FineGrainedAccess `json:"fineGrainedAccess,omitempty"`
+	Id                *string                                        `json:"id,omitempty"`
+	Name              *string                                        `json:"name,omitempty"`
 }
 
 // CastaiServiceaccountsV1beta1CreateServiceAccountResponseAuthor Author is the author of the service account.
@@ -3932,6 +4087,30 @@ type CastaiServiceaccountsV1beta1DeleteServiceAccountResponse = map[string]inter
 
 // CastaiServiceaccountsV1beta1DeleteServiceAccountsResponse DeleteServiceAccountsResponse is the response for batch deleting service accounts.
 type CastaiServiceaccountsV1beta1DeleteServiceAccountsResponse = map[string]interface{}
+
+// CastaiServiceaccountsV1beta1FineGrainedAccess FineGrainedAccess defines the targets and permission groups of a fine-grained service account.
+// All scopes must have the same kind and must not contain duplicate targets.
+type CastaiServiceaccountsV1beta1FineGrainedAccess struct {
+	// PermissionGroups PermissionGroups are the names of the permission groups given to the service account.
+	PermissionGroups []string `json:"permissionGroups"`
+
+	// Scopes Scopes are the targets to which all permission groups apply.
+	Scopes []CastaiServiceaccountsV1beta1FineGrainedAccessScope `json:"scopes"`
+}
+
+// CastaiServiceaccountsV1beta1FineGrainedAccessScope Scope identifies one target to which access applies.
+type CastaiServiceaccountsV1beta1FineGrainedAccessScope struct {
+	// Id ID is the UUID of the target.
+	Id string `json:"id"`
+
+	// Kind ScopeKind identifies the type of target to which access applies.
+	//
+	//  - SCOPE_KIND_UNSPECIFIED: Default value. It is not valid in a scope or scope filter.
+	//  - SCOPE_KIND_ENTERPRISE: The entire enterprise, including its child organizations.
+	//  - SCOPE_KIND_ORGANIZATION: A standalone organization or a selected child organization.
+	//  - SCOPE_KIND_CLUSTER: A single cluster.
+	Kind CastaiServiceaccountsV1beta1ScopeKind `json:"kind"`
+}
 
 // CastaiServiceaccountsV1beta1GetServiceAccountKeyResponse GetServiceAccountKeyResponse is the response for getting a service account key.
 type CastaiServiceaccountsV1beta1GetServiceAccountKeyResponse struct {
@@ -3969,6 +4148,7 @@ type CastaiServiceaccountsV1beta1ListOrganizationServiceAccountKeysResponseKey s
 	CreatedBy *CastaiServiceaccountsV1beta1ServiceAccountAuthor `json:"createdBy,omitempty"`
 
 	// ExpiresAt ExpiresAt is the expiration time of the key.
+	// A null value means the key never expires. Such keys are legacy: new keys without an expiration are no longer accepted.
 	ExpiresAt *time.Time `json:"expiresAt,omitempty"`
 
 	// Id ID is the unique identifier of the key.
@@ -4035,8 +4215,23 @@ type CastaiServiceaccountsV1beta1ListServiceAccountsResponse struct {
 	TotalCount *string `json:"totalCount,omitempty"`
 }
 
+// CastaiServiceaccountsV1beta1ScopeKind ScopeKind identifies the type of target to which access applies.
+//
+//   - SCOPE_KIND_UNSPECIFIED: Default value. It is not valid in a scope or scope filter.
+//   - SCOPE_KIND_ENTERPRISE: The entire enterprise, including its child organizations.
+//   - SCOPE_KIND_ORGANIZATION: A standalone organization or a selected child organization.
+//   - SCOPE_KIND_CLUSTER: A single cluster.
+type CastaiServiceaccountsV1beta1ScopeKind string
+
 // CastaiServiceaccountsV1beta1ServiceAccount ServiceAccounts is the readable version of the service accounts.
 type CastaiServiceaccountsV1beta1ServiceAccount struct {
+	// AccessModel AccessModel identifies how a service account gets its permissions.
+	//
+	//  - ACCESS_MODEL_UNSPECIFIED: Default value. In create requests, this keeps the existing role-based behavior.
+	//  - ACCESS_MODEL_ROLE_BASED: The service account gets permissions through role bindings.
+	//  - ACCESS_MODEL_FINE_GRAINED: The service account gets permissions directly from FineGrainedAccess.
+	AccessModel *CastaiServiceaccountsV1beta1AccessModel `json:"accessModel,omitempty"`
+
 	// Author Author is the author of the service account.
 	Author *CastaiServiceaccountsV1beta1ServiceAccountAuthor `json:"author,omitempty"`
 
@@ -4048,6 +4243,10 @@ type CastaiServiceaccountsV1beta1ServiceAccount struct {
 
 	// Email Email is the email of the service account.
 	Email *string `json:"email,omitempty"`
+
+	// FineGrainedAccess FineGrainedAccess defines the targets and permission groups of a fine-grained service account.
+	// All scopes must have the same kind and must not contain duplicate targets.
+	FineGrainedAccess *CastaiServiceaccountsV1beta1FineGrainedAccess `json:"fineGrainedAccess,omitempty"`
 
 	// Id ID is the unique identifier of the service account.
 	Id *string `json:"id,omitempty"`
@@ -4090,6 +4289,7 @@ type CastaiServiceaccountsV1beta1ServiceAccountKey struct {
 	Active *bool `json:"active,omitempty"`
 
 	// ExpiresAt ExpiresAt is the expiration time of the key.
+	// A null value means the key never expires. Such keys are legacy: new keys without an expiration are no longer accepted.
 	ExpiresAt *time.Time `json:"expiresAt,omitempty"`
 
 	// Id ID is the unique identifier of the key.
@@ -4114,6 +4314,7 @@ type CastaiServiceaccountsV1beta1UpdateServiceAccountKeyResponse struct {
 	Active *bool `json:"active,omitempty"`
 
 	// ExpiresAt ExpiresAt is the expiration time of the key.
+	// A null value means the key never expires. Such keys are legacy: new keys without an expiration are no longer accepted.
 	ExpiresAt *time.Time `json:"expiresAt,omitempty"`
 
 	// Id ID is the unique identifier of the key.
@@ -4132,7 +4333,11 @@ type CastaiServiceaccountsV1beta1UpdateServiceAccountKeyResponse struct {
 // CastaiServiceaccountsV1beta1UpdateServiceAccountRequestServiceAccount ServiceAccount is the service account to be updated.
 type CastaiServiceaccountsV1beta1UpdateServiceAccountRequestServiceAccount struct {
 	Description *string `json:"description,omitempty"`
-	Name        string  `json:"name"`
+
+	// FineGrainedAccess FineGrainedAccess defines the targets and permission groups of a fine-grained service account.
+	// All scopes must have the same kind and must not contain duplicate targets.
+	FineGrainedAccess *CastaiServiceaccountsV1beta1FineGrainedAccess `json:"fineGrainedAccess,omitempty"`
+	Name              string                                         `json:"name"`
 }
 
 // CastaiServiceaccountsV1beta1UpdateServiceAccountResponse UpdateServiceAccountResponse is the response for updating a service account.
@@ -4683,6 +4888,9 @@ type CastaiUsersV1beta1User struct {
 type CastaiUsersV1beta1UserOrganization struct {
 	// BlockEscalatedPrivilege Whether the organization blocks escalated privileges for Cast AI members.
 	BlockEscalatedPrivilege *bool `json:"blockEscalatedPrivilege,omitempty"`
+
+	// BlockUserApiKeyCreation Whether creating user API keys is blocked for the organization. Defaults to false (creation is allowed).
+	BlockUserApiKeyCreation *bool `json:"blockUserApiKeyCreation,omitempty"`
 
 	// ChildOrderId The order id of child org in enterprise by created_at - if the org is a child org.
 	ChildOrderId *int32 `json:"childOrderId"`
@@ -6470,6 +6678,13 @@ type ExternalclusterV1CreateAssumeRolePrincipalResponse struct {
 // ExternalclusterV1CreateClusterTokenResponse defines model for externalcluster.v1.CreateClusterTokenResponse.
 type ExternalclusterV1CreateClusterTokenResponse struct {
 	Token *string `json:"token,omitempty"`
+
+	// TokenType TokenType selects which credential a cluster token request issues.
+	//
+	//  - DEFAULT: Issues the default cluster token, used by the agent and the cluster controller.
+	//  - CONFIG_SYNC: Issues the config-sync operator token, which is scoped to the endpoints the
+	// operator drives and tracks its first use.
+	TokenType *ExternalclusterV1TokenType `json:"tokenType,omitempty"`
 }
 
 // ExternalclusterV1DeleteAssumeRolePrincipalResponse defines model for externalcluster.v1.DeleteAssumeRolePrincipalResponse.
@@ -6572,6 +6787,9 @@ type ExternalclusterV1GCPCreateSAResponse struct {
 
 // ExternalclusterV1GCPNodeConfig GCPNodeConfig holds GCP-specific configuration for node provisioning.
 type ExternalclusterV1GCPNodeConfig struct {
+	// ProvisioningModel The provisioning model for the GCE instance. Only set when the node
+	// consumes a reservation whose capacity is reservation-bound.
+	ProvisioningModel   *string                                            `json:"provisioningModel"`
 	ReservationAffinity *ExternalclusterV1GCPNodeConfigReservationAffinity `json:"reservationAffinity,omitempty"`
 }
 
@@ -6786,6 +7004,7 @@ type ExternalclusterV1KarpenterAttribute struct {
 	//  - KARPENTER_CONTROLLER_MODE_UNSPECIFIED: Default value.
 	//  - SELF_HOSTED: Controller is self-hosted inside the cluster.
 	//  - MANAGED_OUT_OF_BAND: Controller is managed out-of-band by the provider. Only AKS NAP is detected; EKS Auto Mode is not yet.
+	//  - CAST_MANAGED: Controller runs in the cluster and is deployed and operated by CAST (castai-karpenter release).
 	ControllerMode *ExternalclusterV1KarpenterControllerMode `json:"controllerMode,omitempty"`
 
 	// KentEligibility KentEligibility defines Karpenter KENT eligibility status.
@@ -6800,6 +7019,7 @@ type ExternalclusterV1KarpenterAttribute struct {
 //   - KARPENTER_CONTROLLER_MODE_UNSPECIFIED: Default value.
 //   - SELF_HOSTED: Controller is self-hosted inside the cluster.
 //   - MANAGED_OUT_OF_BAND: Controller is managed out-of-band by the provider. Only AKS NAP is detected; EKS Auto Mode is not yet.
+//   - CAST_MANAGED: Controller runs in the cluster and is deployed and operated by CAST (castai-karpenter release).
 type ExternalclusterV1KarpenterControllerMode string
 
 // ExternalclusterV1KataConfig PodVirtualizationConfig describes virtualization isolation settings for a node.
@@ -7262,6 +7482,14 @@ type ExternalclusterV1Taint struct {
 	Key    string `json:"key"`
 	Value  string `json:"value"`
 }
+
+// ExternalclusterV1TokenType TokenType selects which credential a cluster token request issues.
+//
+//   - DEFAULT: Issues the default cluster token, used by the agent and the cluster controller.
+//   - CONFIG_SYNC: Issues the config-sync operator token, which is scoped to the endpoints the
+//
+// operator drives and tracks its first use.
+type ExternalclusterV1TokenType string
 
 // ExternalclusterV1TriggerHibernateClusterResponse TriggerHibernateClusterResponse is the result of HibernateClusterRequest.
 type ExternalclusterV1TriggerHibernateClusterResponse struct {
@@ -7790,8 +8018,17 @@ type NodeconfigV1GKEConfig struct {
 	// FallbackConfiguration Contains the configuration of fallback node pools.
 	FallbackConfiguration *NodeconfigV1FallbackConfiguration `json:"fallbackConfiguration,omitempty"`
 
+	// ImageFamily List of supported image families (OSes) for GKE nodes; the concrete image (and, for Ubuntu, the Ubuntu version) is resolved by the provider from the cluster and node pool Kubernetes version.
+	ImageFamily *NodeconfigV1GKEConfigImageFamily `json:"imageFamily,omitempty"`
+
 	// LoadBalancers List of load balancers to be used for the cluster.
 	LoadBalancers *[]NodeconfigV1GKEConfigLoadBalancers `json:"loadBalancers,omitempty"`
+
+	// LocalSsd Recipe describing how local SSDs are exposed on nodes of a node configuration.
+	// The autoscaler reads it, derives the local SSD disk count and constructs the AddNode
+	// local_ssd payload from it; the AddNode payload remains the single source of local SSD
+	// configuration applied to a node.
+	LocalSsd *NodeconfigV1GKELocalSSDConfig `json:"localSsd,omitempty"`
 
 	// MaxPodsPerNode Maximum number of pods that can be run on a node, which affects how many IP addresses you will need for each node. Defaults to 110.
 	// For Standard GKE clusters, you can run a maximum of 256 Pods on a node with a /23 range, not 512 as you might expect.
@@ -7860,6 +8097,9 @@ type NodeconfigV1GKEConfigComputed struct {
 	SecondaryBootDisks *[]NodeconfigV1GKEConfigSecondaryBootDiskComputed `json:"secondaryBootDisks,omitempty"`
 }
 
+// NodeconfigV1GKEConfigImageFamily List of supported image families (OSes) for GKE nodes; the concrete image (and, for Ubuntu, the Ubuntu version) is resolved by the provider from the cluster and node pool Kubernetes version.
+type NodeconfigV1GKEConfigImageFamily string
+
 // NodeconfigV1GKEConfigLoadBalancers defines model for nodeconfig.v1.GKEConfig.LoadBalancers.
 type NodeconfigV1GKEConfigLoadBalancers struct {
 	TargetBackendPools      *[]NodeconfigV1GKEConfigLoadBalancersTargetBackendPools      `json:"targetBackendPools,omitempty"`
@@ -7896,6 +8136,51 @@ type NodeconfigV1GKEConfigSecondaryBootDiskComputed struct {
 	// SizeGb Resolved disk size of the configured disk image in GiB, read from the GCP compute images API.
 	SizeGb *string `json:"sizeGb"`
 }
+
+// NodeconfigV1GKELocalSSDConfig Recipe describing how local SSDs are exposed on nodes of a node configuration.
+// The autoscaler reads it, derives the local SSD disk count and constructs the AddNode
+// local_ssd payload from it; the AddNode payload remains the single source of local SSD
+// configuration applied to a node.
+type NodeconfigV1GKELocalSSDConfig struct {
+	// EphemeralStoragePercent MIXED only: percentage (1-99) of the TOTAL local SSD capacity striped into kubelet ephemeral
+	// storage (GKE ephemeralCapacityGb). The rest of each disk stays as raw block devices.
+	EphemeralStoragePercent *int32 `json:"ephemeralStoragePercent"`
+
+	// LocalStoragePerCpuGib Additional local SSD capacity per vCPU (GiB). Autoscaler derives the disk count from it:
+	// disks = ceil((min-local-storage-size + ratio x vCPU) / per-disk size), snapped to the closest valid count for the
+	// instance type.
+	LocalStoragePerCpuGib *float64 `json:"localStoragePerCpuGib"`
+
+	// MinIops Minimum IOPS for the ephemeral storage, which might be on multiple disks with RAID0.
+	MinIops *int32 `json:"minIops"`
+
+	// MinLocalStorageGib Minimum local SSD capacity (GiB).
+	MinLocalStorageGib *string `json:"minLocalStorageGib"`
+
+	// Mode How local SSDs are exposed on the node.
+	//
+	//  - EPHEMERAL: Local SSDs become the node's kubelet ephemeral storage (emptyDir, writable layers, runtime state).
+	//  - MIXED: Each SSD is partitioned: the first partitions are striped into a RAID-0 kubelet ephemeral
+	// storage sized ephemeral_storage_percent of the total local SSD capacity; the remaining
+	// per-disk partitions stay as independent raw block devices.
+	// Requires GKE >= 1.37.0-gke.3570000
+	//  - BLOCK: Local SSDs are exposed as unformatted raw block devices; kubelet ephemeral storage stays on
+	// the boot disk.
+	Mode *NodeconfigV1GKELocalSSDConfigMode `json:"mode,omitempty"`
+}
+
+// NodeconfigV1GKELocalSSDConfigMode How local SSDs are exposed on the node.
+//
+//   - EPHEMERAL: Local SSDs become the node's kubelet ephemeral storage (emptyDir, writable layers, runtime state).
+//   - MIXED: Each SSD is partitioned: the first partitions are striped into a RAID-0 kubelet ephemeral
+//
+// storage sized ephemeral_storage_percent of the total local SSD capacity; the remaining
+// per-disk partitions stay as independent raw block devices.
+// Requires GKE >= 1.37.0-gke.3570000
+//   - BLOCK: Local SSDs are exposed as unformatted raw block devices; kubelet ephemeral storage stays on
+//
+// the boot disk.
+type NodeconfigV1GKELocalSSDConfigMode string
 
 // NodeconfigV1GetSuggestedConfigurationResponse defines model for nodeconfig.v1.GetSuggestedConfigurationResponse.
 type NodeconfigV1GetSuggestedConfigurationResponse struct {
@@ -10407,6 +10692,12 @@ type WorkloadoptimizationV1GetWorkloadResponse struct {
 	Workload WorkloadoptimizationV1Workload      `json:"workload"`
 }
 
+// WorkloadoptimizationV1GetWorkloadScopedRecommendationMetricsResponse Response of WorkloadOptimizationAPI.GetWorkloadScopedRecommendationMetrics.
+// Entries are ordered lexically by scope value, then container.
+type WorkloadoptimizationV1GetWorkloadScopedRecommendationMetricsResponse struct {
+	ScopedMetrics []WorkloadoptimizationV1WorkloadScopedRecommendationMetrics `json:"scopedMetrics"`
+}
+
 // WorkloadoptimizationV1GetWorkloadSpecResponse defines model for workloadoptimization.v1.GetWorkloadSpecResponse.
 type WorkloadoptimizationV1GetWorkloadSpecResponse struct {
 	ClusterId      string                 `json:"clusterId"`
@@ -12263,6 +12554,18 @@ type WorkloadoptimizationV1ScopeSettings struct {
 // WorkloadoptimizationV1ScopeType ScopeType classifies the scoping mechanism. Mirrors the domain scope.Type enum.
 type WorkloadoptimizationV1ScopeType string
 
+// WorkloadoptimizationV1ScopedContainerRecommendationMetrics Recommended-resources series of one container within one scope group.
+type WorkloadoptimizationV1ScopedContainerRecommendationMetrics struct {
+	// CpuCores Recommended CPU in cores.
+	CpuCores []WorkloadoptimizationV1TimeSeriesMetric `json:"cpuCores"`
+
+	// MemoryGib Recommended memory in GiB.
+	MemoryGib []WorkloadoptimizationV1TimeSeriesMetric `json:"memoryGib"`
+
+	// Name Container name.
+	Name string `json:"name"`
+}
+
 // WorkloadoptimizationV1ScopedContainers ScopedContainers carries per-scope-group current resources and recommendations.
 type WorkloadoptimizationV1ScopedContainers struct {
 	// Containers Per-container state for the group, shape identical to Workload.containers[]:
@@ -12341,6 +12644,7 @@ type WorkloadoptimizationV1SurgeEvent struct {
 //
 //   - SYSTEM_OVERRIDE_ORIGIN_CONTINUOUS_OOM_KILLED: Override triggered due to continuous OOM kills after multiple scaling attempts.
 //   - SYSTEM_OVERRIDE_ORIGIN_UNBOUND_MEMORY_GROWTH: Override triggered due to detected unbound memory growth.
+//   - SYSTEM_OVERRIDE_ORIGIN_UNSCHEDULABLE_RECOMMENDATION: Override triggered because lowering requests for unschedulable pods did not help.
 type WorkloadoptimizationV1SystemOverrideOrigin string
 
 // WorkloadoptimizationV1SystemOverrideResetEvent SystemOverrideResetEvent is emitted when a system override on a workload is deactivated.
@@ -12382,6 +12686,7 @@ type WorkloadoptimizationV1SystemOverrideTriggeredEvent struct {
 	//
 	//  - SYSTEM_OVERRIDE_ORIGIN_CONTINUOUS_OOM_KILLED: Override triggered due to continuous OOM kills after multiple scaling attempts.
 	//  - SYSTEM_OVERRIDE_ORIGIN_UNBOUND_MEMORY_GROWTH: Override triggered due to detected unbound memory growth.
+	//  - SYSTEM_OVERRIDE_ORIGIN_UNSCHEDULABLE_RECOMMENDATION: Override triggered because lowering requests for unschedulable pods did not help.
 	Origin WorkloadoptimizationV1SystemOverrideOrigin `json:"origin"`
 
 	// Target SystemOverrideTarget defines which workload optimization features are affected by the system override.
@@ -12827,6 +13132,13 @@ type WorkloadoptimizationV1WorkloadScalingPolicy struct {
 	UpdatedAt              time.Time                                    `json:"updatedAt"`
 }
 
+// WorkloadoptimizationV1WorkloadScopedRecommendationMetrics Recommended-resources series of all containers for one scope group.
+type WorkloadoptimizationV1WorkloadScopedRecommendationMetrics struct {
+	// Containers Per-container series, ordered by container name.
+	Containers []WorkloadoptimizationV1ScopedContainerRecommendationMetrics `json:"containers"`
+	ScopeValue string                                                       `json:"scopeValue"`
+}
+
 // WorkloadoptimizationV1WorkloadSystemOverrides defines model for workloadoptimization.v1.WorkloadSystemOverrides.
 type WorkloadoptimizationV1WorkloadSystemOverrides struct {
 	VerticalOptimization WorkloadoptimizationV1WorkloadSystemOverridesVerticalOptimization `json:"verticalOptimization"`
@@ -12869,10 +13181,31 @@ type RbacServiceAPIListPermissionGroupsParams struct {
 
 	// Product Filter by product type.
 	Product *RbacServiceAPIListPermissionGroupsParamsProduct `form:"product,omitempty" json:"product,omitempty"`
+
+	// Scope Filter by permission scope. Unset means no filtering by scope.
+	//
+	//  - ORGANIZATION: Organization scope represents the organization level authentication (Organization -> ResourceID)
+	//  - CLUSTER: Cluster scope represents the cluster level authentication (Organization -> Cluster -> ResourceID)
+	Scope *RbacServiceAPIListPermissionGroupsParamsScope `form:"scope,omitempty" json:"scope,omitempty"`
+
+	// TargetScopesScopeKind Kind of every target scope.
+	//
+	//  - ORGANIZATION: Organization scope represents the organization level authentication (Organization -> ResourceID)
+	//  - CLUSTER: Cluster scope represents the cluster level authentication (Organization -> Cluster -> ResourceID)
+	TargetScopesScopeKind *RbacServiceAPIListPermissionGroupsParamsTargetScopesScopeKind `form:"targetScopes.scopeKind,omitempty" json:"targetScopes.scopeKind,omitempty"`
+
+	// TargetScopesResourceIds IDs of the target organizations or clusters. They must all belong to scope_kind.
+	TargetScopesResourceIds *[]string `form:"targetScopes.resourceIds,omitempty" json:"targetScopes.resourceIds,omitempty"`
 }
 
 // RbacServiceAPIListPermissionGroupsParamsProduct defines parameters for RbacServiceAPIListPermissionGroups.
 type RbacServiceAPIListPermissionGroupsParamsProduct string
+
+// RbacServiceAPIListPermissionGroupsParamsScope defines parameters for RbacServiceAPIListPermissionGroups.
+type RbacServiceAPIListPermissionGroupsParamsScope string
+
+// RbacServiceAPIListPermissionGroupsParamsTargetScopesScopeKind defines parameters for RbacServiceAPIListPermissionGroups.
+type RbacServiceAPIListPermissionGroupsParamsTargetScopesScopeKind string
 
 // CommitmentsAPIGetCommitmentUsageHistoryParams defines parameters for CommitmentsAPIGetCommitmentUsageHistory.
 type CommitmentsAPIGetCommitmentUsageHistoryParams struct {
@@ -13616,6 +13949,26 @@ type ExternalClusterAPITriggerResumeClusterParamsMode string
 // ExternalClusterAPIUpdateClusterTagsJSONBody defines parameters for ExternalClusterAPIUpdateClusterTags.
 type ExternalClusterAPIUpdateClusterTagsJSONBody map[string]string
 
+// ExternalClusterAPICreateClusterTokenParams defines parameters for ExternalClusterAPICreateClusterToken.
+type ExternalClusterAPICreateClusterTokenParams struct {
+	// TokenType The type of token to issue.
+	//
+	//  - DEFAULT: Issues the default cluster token, used by the agent and the cluster controller.
+	//  - CONFIG_SYNC: Issues the config-sync operator token, which is scoped to the endpoints the
+	// operator drives and tracks its first use.
+	TokenType *ExternalClusterAPICreateClusterTokenParamsTokenType `form:"tokenType,omitempty" json:"tokenType,omitempty"`
+
+	// Rotate Rotates the cluster's existing token of the requested type instead of
+	// issuing an additional one. Applies to CONFIG_SYNC only: a DEFAULT token
+	// is short-lived (pending component install, 4h) and can be minted an
+	// unlimited number of times concurrently, so there is no single live token
+	// to gate and rotation is meaningless for it.
+	Rotate *bool `form:"rotate,omitempty" json:"rotate,omitempty"`
+}
+
+// ExternalClusterAPICreateClusterTokenParamsTokenType defines parameters for ExternalClusterAPICreateClusterToken.
+type ExternalClusterAPICreateClusterTokenParamsTokenType string
+
 // RbacServiceAPIListGroupsParams defines parameters for RbacServiceAPIListGroups.
 type RbacServiceAPIListGroupsParams struct {
 	PageLimit *string `form:"page.limit,omitempty" json:"page.limit,omitempty"`
@@ -13721,7 +14074,39 @@ type ServiceAccountsAPIListServiceAccountsParams struct {
 
 	// ServiceAccountName Service account name filter.
 	ServiceAccountName *string `form:"serviceAccountName,omitempty" json:"serviceAccountName,omitempty"`
+
+	// ManagedBy Filter by the exact managed_by value for either access model. An empty string matches legacy values.
+	ManagedBy *[]string `form:"managedBy,omitempty" json:"managedBy,omitempty"`
+
+	// PermissionGroups Filter fine-grained service accounts by permission group. Every given group must be present.
+	// Role-based service accounts do not match this filter.
+	PermissionGroups *[]string `form:"permissionGroups,omitempty" json:"permissionGroups,omitempty"`
+
+	// Actions Filter either access model by action. A role-based service account matches through its assigned roles;
+	// a fine-grained service account matches through its permission groups. At least one action must match.
+	Actions *[]ServiceAccountsAPIListServiceAccountsParamsActions `form:"actions,omitempty" json:"actions,omitempty"`
+
+	// ScopeKind Filter either access model by the exact stored scope kind.
+	//
+	//  - SCOPE_KIND_UNSPECIFIED: Default value. It is not valid in a scope or scope filter.
+	//  - SCOPE_KIND_ENTERPRISE: The entire enterprise, including its child organizations.
+	//  - SCOPE_KIND_ORGANIZATION: A standalone organization or a selected child organization.
+	//  - SCOPE_KIND_CLUSTER: A single cluster.
+	ScopeKind *[]ServiceAccountsAPIListServiceAccountsParamsScopeKind `form:"scopeKind,omitempty" json:"scopeKind,omitempty"`
+
+	// ScopeClusterId Filter either access model by an exact stored cluster scope.
+	// This does not return an organization-scoped service account only because it covers the cluster.
+	ScopeClusterId *[]string `form:"scopeClusterId,omitempty" json:"scopeClusterId,omitempty"`
+
+	// RoleId Filter role-based service accounts by an assigned role ID. Fine-grained service accounts do not match.
+	RoleId *[]string `form:"roleId,omitempty" json:"roleId,omitempty"`
 }
+
+// ServiceAccountsAPIListServiceAccountsParamsActions defines parameters for ServiceAccountsAPIListServiceAccounts.
+type ServiceAccountsAPIListServiceAccountsParamsActions string
+
+// ServiceAccountsAPIListServiceAccountsParamsScopeKind defines parameters for ServiceAccountsAPIListServiceAccounts.
+type ServiceAccountsAPIListServiceAccountsParamsScopeKind string
 
 // ServiceAccountsAPIListOrganizationServiceAccountKeysParams defines parameters for ServiceAccountsAPIListOrganizationServiceAccountKeys.
 type ServiceAccountsAPIListOrganizationServiceAccountKeysParams struct {
@@ -14293,6 +14678,20 @@ type WorkloadOptimizationAPIGetWorkloadParams struct {
 type WorkloadOptimizationAPIGetWorkloadGPUMetricsParams struct {
 	From *time.Time `form:"from,omitempty" json:"from,omitempty"`
 	To   *time.Time `form:"to,omitempty" json:"to,omitempty"`
+}
+
+// WorkloadOptimizationAPIGetWorkloadScopedRecommendationMetricsParams defines parameters for WorkloadOptimizationAPIGetWorkloadScopedRecommendationMetrics.
+type WorkloadOptimizationAPIGetWorkloadScopedRecommendationMetricsParams struct {
+	// ScopeValues Scope group values to return series for. Between 1 and 10 unique,
+	// non-empty values. Values without recommendation data in the time window
+	// are omitted from the response.
+	ScopeValues []string `form:"scopeValues" json:"scopeValues"`
+
+	// FromTime Start of requested metric interval. Defaults to the last 7 days when omitted.
+	FromTime *time.Time `form:"fromTime,omitempty" json:"fromTime,omitempty"`
+
+	// ToTime End of requested metric interval. Defaults to now when omitted.
+	ToTime *time.Time `form:"toTime,omitempty" json:"toTime,omitempty"`
 }
 
 // InventoryAPIListZonesParams defines parameters for InventoryAPIListZones.

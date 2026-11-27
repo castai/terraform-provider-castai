@@ -44,16 +44,6 @@ module "castai-eks-cluster" {
   # Kvisor configuration examples, enable certain features:
   kvisor_values = [
     yamlencode({
-      controller = {
-        extraArgs = {
-          # UI: Vulnerability management configuration = API: IMAGE_SCANNING
-          "image-scan-enabled" = true
-          # UI: Compliance configuration = API: CONFIGURATION_SCANNING
-          "kube-bench-enabled"  = true
-          "kube-linter-enabled" = true
-        }
-      }
-
       # UI: Runtime Security = API: RUNTIME_SECURITY
       agent = {
         # In order to enable Runtime security set agent.enabled to true.

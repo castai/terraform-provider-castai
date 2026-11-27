@@ -62,6 +62,7 @@ const (
 const (
 	EdgeLocationControlPlaneModeCONTROLPLANEMODEUNSPECIFIED EdgeLocationControlPlaneMode = "CONTROL_PLANE_MODE_UNSPECIFIED"
 	EdgeLocationControlPlaneModeDEDICATED                   EdgeLocationControlPlaneMode = "DEDICATED"
+	EdgeLocationControlPlaneModeNATIVE                      EdgeLocationControlPlaneMode = "NATIVE"
 	EdgeLocationControlPlaneModeSHARED                      EdgeLocationControlPlaneMode = "SHARED"
 )
 
@@ -102,6 +103,13 @@ const (
 	OmniAgentContextProviderEKS                     OmniAgentContextProvider = "EKS"
 	OmniAgentContextProviderGKE                     OmniAgentContextProvider = "GKE"
 	OmniAgentContextProviderPROVIDERTYPEUNSPECIFIED OmniAgentContextProvider = "PROVIDER_TYPE_UNSPECIFIED"
+)
+
+// Defines values for RegisteredClusterStatusProvisioningMode.
+const (
+	RegisteredClusterStatusProvisioningModeOMNIAGENT                   RegisteredClusterStatusProvisioningMode = "OMNI_AGENT"
+	RegisteredClusterStatusProvisioningModeOMNICONNECT                 RegisteredClusterStatusProvisioningMode = "OMNI_CONNECT"
+	RegisteredClusterStatusProvisioningModePROVISIONINGMODEUNSPECIFIED RegisteredClusterStatusProvisioningMode = "PROVISIONING_MODE_UNSPECIFIED"
 )
 
 // AWSConfiguration AWS specific parameters present in edge configuration.
@@ -320,6 +328,18 @@ type EdgeClusterLiqoSpec struct {
 type EdgeClusterNetworking struct {
 	// Cni CNI configuration for the edge cluster.
 	Cni *EdgeClusterCNI `json:"cni,omitempty"`
+
+	// ExternalCidr External CIDR used by Liqo on the edge cluster. When omitted, 10.70.0.0/16
+	//  is used. Immutable after creation.
+	ExternalCidr *string `json:"externalCidr,omitempty"`
+
+	// PodCidr Pod network range of the edge cluster. When omitted, 10.244.0.0/16 is
+	//  used. Immutable after creation.
+	PodCidr *string `json:"podCidr,omitempty"`
+
+	// ServiceCidr Service network range of the edge cluster. When omitted, 10.96.0.0/12 is
+	//  used. Immutable after creation.
+	ServiceCidr *string `json:"serviceCidr,omitempty"`
 
 	// TunneledCidrs A list of destination CIDR blocks whose traffic should be routed through the main cluster instead of directly from the
 	//  edge cluster. When specified, the edge cluster will forward packets destined to these CIDRs over the peering tunnel
@@ -1026,11 +1046,17 @@ type RegisteredCluster struct {
 // RegisteredClusterStatus Current status information of the cluster.
 type RegisteredClusterStatus struct {
 	// OmniAgentVersion The version of omni agent running on the cluster.
-	OmniAgentVersion string `json:"omniAgentVersion"`
+	OmniAgentVersion *string `json:"omniAgentVersion,omitempty"`
 
 	// PodCidr The comma-separated list of pod CIDRs of the cluster.
 	PodCidr string `json:"podCidr"`
+
+	// ProvisioningMode The component used to provision nodes and edge locations.
+	ProvisioningMode *RegisteredClusterStatusProvisioningMode `json:"provisioningMode,omitempty"`
 }
+
+// RegisteredClusterStatusProvisioningMode The component used to provision nodes and edge locations.
+type RegisteredClusterStatusProvisioningMode string
 
 // RenderOmniAgentComponentResponse Message of the response to render the omni-agent component manifest.
 type RenderOmniAgentComponentResponse struct {

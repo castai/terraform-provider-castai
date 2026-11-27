@@ -149,15 +149,22 @@ func (m *gatewayServerModel) Equal(other *gatewayServerModel) bool {
 }
 
 type networkingModel struct {
-	TunneledCIDRs types.List `tfsdk:"tunneled_cidrs"`
-	CNI           *cniModel  `tfsdk:"cni"`
+	TunneledCIDRs types.List   `tfsdk:"tunneled_cidrs"`
+	PodCIDR       types.String `tfsdk:"pod_cidr"`
+	ServiceCIDR   types.String `tfsdk:"service_cidr"`
+	ExternalCIDR  types.String `tfsdk:"external_cidr"`
+	CNI           *cniModel    `tfsdk:"cni"`
 }
 
 func (m *networkingModel) Equal(other *networkingModel) bool {
 	if m == nil || other == nil {
 		return m == other
 	}
-	return m.TunneledCIDRs.Equal(other.TunneledCIDRs) && m.CNI.Equal(other.CNI)
+	return m.TunneledCIDRs.Equal(other.TunneledCIDRs) &&
+		m.PodCIDR.Equal(other.PodCIDR) &&
+		m.ServiceCIDR.Equal(other.ServiceCIDR) &&
+		m.ExternalCIDR.Equal(other.ExternalCIDR) &&
+		m.CNI.Equal(other.CNI)
 }
 
 // addonsEqual reports whether two addon slices are semantically equivalent.
@@ -383,17 +390,17 @@ func (r *edgeLocationResource) Schema(_ context.Context, _ resource.SchemaReques
 				Optional:    true,
 				Computed:    true,
 				Default:     stringdefault.StaticString(string(omni.EdgeLocationControlPlaneModeDEDICATED)),
-				Description: "The mode of control plane inside edge location. Valid values: DEDICATED, SHARED.",
+				Description: "The mode of control plane inside edge location. Valid values: DEDICATED, SHARED, NATIVE.",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
 				},
 				Validators: []validator.String{
-					stringvalidator.OneOf(string(omni.EdgeLocationControlPlaneModeDEDICATED), string(omni.EdgeLocationControlPlaneModeSHARED)),
+					stringvalidator.OneOf(string(omni.EdgeLocationControlPlaneModeDEDICATED), string(omni.EdgeLocationControlPlaneModeSHARED), string(omni.EdgeLocationControlPlaneModeNATIVE)),
 				},
 			},
 			"control_plane": schema.SingleNestedAttribute{
 				Optional:    true,
-				Description: "Control plane configuration. Only valid when control_plane_mode is SHARED.",
+				Description: "Control plane configuration. Only valid when control_plane_mode is SHARED; must be unset for DEDICATED and NATIVE.",
 				Attributes: map[string]schema.Attribute{
 					"ha": schema.BoolAttribute{
 						Optional:    true,
@@ -430,6 +437,18 @@ func (r *edgeLocationResource) Schema(_ context.Context, _ resource.SchemaReques
 						Optional:    true,
 						ElementType: types.StringType,
 						Description: "List of destination CIDR blocks whose traffic should be routed through the main cluster instead of directly from the edge cluster.",
+					},
+					"pod_cidr": schema.StringAttribute{
+						Optional:    true,
+						Description: "Pod network range of the edge cluster. Defaults to the k0s default (10.244.0.0/16) when omitted. Immutable after creation.",
+					},
+					"service_cidr": schema.StringAttribute{
+						Optional:    true,
+						Description: "Service network range of the edge cluster. Defaults to the k0s default (10.96.0.0/12) when omitted. Immutable after creation.",
+					},
+					"external_cidr": schema.StringAttribute{
+						Optional:    true,
+						Description: "External CIDR used by Liqo on the edge cluster. Defaults to 10.70.0.0/16 when omitted. Immutable after creation.",
 					},
 					"cni": schema.SingleNestedAttribute{
 						Optional:    true,
@@ -788,8 +807,9 @@ func (r *edgeLocationResource) Create(ctx context.Context, req resource.CreateRe
 		createReq.Description = lo.ToPtr(plan.Description.ValueString())
 	}
 
-	createReq.EdgeClusterSpec, diags = r.toEdgeClusterSpec(ctx, plan.ControlPlane, plan.Networking, plan.Addons, plan.Liqo)
+	createReq.EdgeClusterSpec, diags = r.toEdgeClusterSpecForMode(ctx, plan.ControlPlaneMode.ValueString(), plan.ControlPlane, plan.Networking, plan.Addons, plan.Liqo)
 	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(r.nativeEdgeClusterWarning(plan)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
@@ -929,6 +949,9 @@ func (r *edgeLocationResource) Read(ctx context.Context, req resource.ReadReques
 				resp.Diagnostics.Append(d...)
 				state.Networking.TunneledCIDRs = cidrs
 			}
+			state.Networking.PodCIDR = types.StringPointerValue(apiNet.PodCidr)
+			state.Networking.ServiceCIDR = types.StringPointerValue(apiNet.ServiceCidr)
+			state.Networking.ExternalCIDR = types.StringPointerValue(apiNet.ExternalCidr)
 			if state.Networking.CNI != nil && apiNet.Cni != nil {
 				overlay := types.StringPointerValue((*string)(apiNet.Cni.Overlay))
 				overlayEncap := types.StringPointerValue((*string)(apiNet.Cni.OverlayEncap))
@@ -1052,6 +1075,10 @@ func (r *edgeLocationResource) Update(ctx context.Context, req resource.UpdateRe
 	if len(plan.Zones) > 0 {
 		updateReq.Zones = toPtr(r.toZones(plan.Zones))
 	}
+	resp.Diagnostics.Append(r.nativeEdgeClusterWarning(plan)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
 
 	// Check if credentials have changed by comparing credentials revision
 	credentialsChanged := !plan.CredentialsRevision.Equal(state.CredentialsRevision)
@@ -1062,10 +1089,12 @@ func (r *edgeLocationResource) Update(ctx context.Context, req resource.UpdateRe
 		mc    ModelWithCredentials
 	)
 
-	updateReq.EdgeClusterSpec, diags = r.edgeClusterSpecUpdate(ctx, plan, state)
-	resp.Diagnostics.Append(diags...)
-	if resp.Diagnostics.HasError() {
-		return
+	if plan.ControlPlaneMode.ValueString() != string(omni.EdgeLocationControlPlaneModeNATIVE) {
+		updateReq.EdgeClusterSpec, diags = r.edgeClusterSpecUpdate(ctx, plan, state)
+		resp.Diagnostics.Append(diags...)
+		if resp.Diagnostics.HasError() {
+			return
+		}
 	}
 
 	// Include cloud provider config if it or credentials has changed.
@@ -1268,6 +1297,9 @@ func (r *edgeLocationResource) edgeClusterSpecUpdate(ctx context.Context, plan, 
 			if plan.Networking.CNI != nil {
 				spec.Networking.Cni = r.toCNI(plan.Networking.CNI)
 			}
+			spec.Networking.PodCidr = plan.Networking.PodCIDR.ValueStringPointer()
+			spec.Networking.ServiceCidr = plan.Networking.ServiceCIDR.ValueStringPointer()
+			spec.Networking.ExternalCidr = plan.Networking.ExternalCIDR.ValueStringPointer()
 		}
 	}
 	if liqoChanged {
@@ -1383,6 +1415,39 @@ func stringMapValue(ctx context.Context, m *map[string]string, diags *diag.Diagn
 	return v
 }
 
+func (r *edgeLocationResource) nativeEdgeClusterWarning(plan edgeLocationModel) diag.Diagnostics {
+	var diags diag.Diagnostics
+	if plan.ControlPlaneMode.ValueString() != string(omni.EdgeLocationControlPlaneModeNATIVE) {
+		return diags
+	}
+
+	var fields []string
+	if plan.ControlPlane != nil {
+		fields = append(fields, "control_plane")
+	}
+	if plan.Networking != nil {
+		fields = append(fields, "networking")
+	}
+	if len(plan.Addons) > 0 {
+		fields = append(fields, "addons")
+	}
+	if plan.Liqo != nil {
+		fields = append(fields, "liqo")
+	}
+	if len(fields) > 0 {
+		diags.AddWarning("EdgeCluster settings are ignored for NATIVE", strings.Join(fields, ", ")+" have no effect when control_plane_mode is NATIVE and are not sent to the API")
+	}
+	return diags
+}
+
+func (r *edgeLocationResource) toEdgeClusterSpecForMode(ctx context.Context, mode string, cp *controlPlaneModel, net *networkingModel, addons []addonModel, liqo *liqoModel) (*omni.EdgeClusterSpec, diag.Diagnostics) {
+	var diags diag.Diagnostics
+	if mode == string(omni.EdgeLocationControlPlaneModeNATIVE) {
+		return nil, diags
+	}
+	return r.toEdgeClusterSpec(ctx, cp, net, addons, liqo)
+}
+
 func (r *edgeLocationResource) toEdgeClusterSpec(ctx context.Context, cp *controlPlaneModel, net *networkingModel, addons []addonModel, liqo *liqoModel) (*omni.EdgeClusterSpec, diag.Diagnostics) {
 	var diags diag.Diagnostics
 	if cp == nil && net == nil && addons == nil && liqo == nil {
@@ -1407,6 +1472,9 @@ func (r *edgeLocationResource) toEdgeClusterSpec(ctx context.Context, cp *contro
 		}
 		spec.Networking = &omni.EdgeClusterNetworking{
 			TunneledCidrs: &items,
+			PodCidr:       net.PodCIDR.ValueStringPointer(),
+			ServiceCidr:   net.ServiceCIDR.ValueStringPointer(),
+			ExternalCidr:  net.ExternalCIDR.ValueStringPointer(),
 		}
 		if net.CNI != nil {
 			spec.Networking.Cni = r.toCNI(net.CNI)

@@ -1,0 +1,7 @@
+cluster_name     = ""
+cluster_region   = ""
+castai_api_token = ""
+
+# Optional. Leave commented out to use the standard AWS credential chain (AWS_PROFILE,
+# AWS_ACCESS_KEY_ID/AWS_SECRET_ACCESS_KEY, SSO, default profile). Setting it overrides AWS_PROFILE.
+# profile = "my-aws-profile"

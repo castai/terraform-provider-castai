@@ -517,7 +517,7 @@ func resourceCastaiAutoscalerDelete(ctx context.Context, data *schema.ResourceDa
 		return nil
 	}
 
-	err := upsertPolicies(ctx, meta, clusterId, `{"enabled":false}`)
+	err := upsertPolicies(ctx, meta, clusterId, `{"enabled":false}`, true)
 	if err != nil {
 		log.Printf("[ERROR] Failed to disable autoscaler policies: %v", err)
 		return diag.FromErr(err)
@@ -785,18 +785,22 @@ func resourceCastaiAutoscalerUpdate(ctx context.Context, data *schema.ResourceDa
 	return nil
 }
 
+var errAutoscalerPoliciesNotFound = errors.New("autoscaler policies not found")
+
 func getCurrentPolicies(ctx context.Context, client sdk.ClientWithResponsesInterface, clusterId string) ([]byte, error) {
 	log.Printf("[INFO] Getting cluster autoscaler information.")
 
 	resp, err := client.PoliciesAPIGetClusterPolicies(ctx, clusterId)
 	if err != nil {
 		return nil, err
-	} else if resp.StatusCode == http.StatusNotFound {
-		return nil, fmt.Errorf("cluster %s policies do not exist at CAST AI", clusterId)
+	}
+	defer func() { _ = resp.Body.Close() }()
+
+	if resp.StatusCode == http.StatusNotFound {
+		return nil, fmt.Errorf("%w: cluster %s policies do not exist at CAST AI", errAutoscalerPoliciesNotFound, clusterId)
 	}
 
 	responseBytes, err := io.ReadAll(resp.Body)
-	defer func() { _ = resp.Body.Close() }()
 	if err != nil {
 		return nil, fmt.Errorf("reading response body: %w", err)
 	}
@@ -836,7 +840,7 @@ func updateAutoscalerPolicies(ctx context.Context, data *schema.ResourceData, me
 			return nil
 		}
 
-		return upsertPolicies(ctx, meta, clusterId, changedPoliciesJSON)
+		return upsertPolicies(ctx, meta, clusterId, changedPoliciesJSON, false)
 	}
 
 	// Exponential backoff configuration: 100ms initial, 2.0 multiplier, 0.1 jitter,
@@ -876,10 +880,14 @@ func updateAutoscalerPolicies(ctx context.Context, data *schema.ResourceData, me
 	return nil
 }
 
-func upsertPolicies(ctx context.Context, meta interface{}, clusterId string, changedPoliciesJSON string) error {
+func upsertPolicies(ctx context.Context, meta interface{}, clusterId string, changedPoliciesJSON string, ignoreNotFound bool) error {
 	client := meta.(*ProviderConfig).api
 
 	resp, err := client.PoliciesAPIUpsertClusterPoliciesWithBodyWithResponse(ctx, clusterId, "application/json", bytes.NewReader([]byte(changedPoliciesJSON)))
+	if ignoreNotFound && resp != nil && resp.StatusCode() == http.StatusNotFound {
+		log.Printf("[INFO] Autoscaler policies for cluster %s not found, skipping upsert", clusterId)
+		return nil
+	}
 	if checkErr := sdk.CheckOKResponse(resp, err); checkErr != nil {
 		return checkErr
 	}
@@ -908,6 +916,11 @@ func readAutoscalerPolicies(ctx context.Context, data *schema.ResourceData, meta
 
 	client := meta.(*ProviderConfig).api
 	currentPolicies, err := getCurrentPolicies(ctx, client, clusterId)
+	if errors.Is(err, errAutoscalerPoliciesNotFound) {
+		log.Printf("[INFO] Autoscaler policies for cluster %s not found, removing from state", clusterId)
+		data.SetId("")
+		return nil
+	}
 	if err != nil {
 		return err
 	}
@@ -1046,7 +1059,10 @@ func getChangedPolicies(ctx context.Context, data types.ResourceProvider, meta i
 	client := meta.(*ProviderConfig).api
 
 	currentPolicies, err := getCurrentPolicies(ctx, client, clusterId)
-	if err != nil {
+	if errors.Is(err, errAutoscalerPoliciesNotFound) {
+		log.Printf("[INFO] Autoscaler policies for cluster %s not found, creating them", clusterId)
+		currentPolicies = []byte("{}")
+	} else if err != nil {
 		log.Printf("[WARN] Getting current policies: %v", err)
 		return nil, fmt.Errorf("failed to get policies from API: %w", err)
 	}
