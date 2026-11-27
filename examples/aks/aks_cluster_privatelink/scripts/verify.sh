@@ -1,6 +1,9 @@
 #!/usr/bin/env sh
 # Prove that CAST AI traffic from this cluster takes the Private Link path.
-#
+# !!!!
+# THIS SCRIPT IS FOR TESTING PURPOSES ONLY.
+# It is not required for using private link at all.
+# !!!!
 # Usage:
 #   ./scripts/verify.sh [--context NAME] [--namespace NAME]
 #

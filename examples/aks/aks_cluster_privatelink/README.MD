@@ -90,6 +90,9 @@ az aks get-credentials --resource-group "$(terraform output -raw resource_group_
 ./scripts/verify.sh --context "$(terraform output -raw aks_cluster_name)"
 ```
 
+** This step is OPTIONAL. ** It exists purely to verify connectivity and for testing purposes. On a real cluster,
+it is not required to use or have the script in order to use PrivateLink.
+
 The script starts a throwaway `ghcr.io/nicolaka/netshoot` pod in namespace
 `castai-pls-verify` (deleted afterwards) and checks, from inside the cluster:
 
