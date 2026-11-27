@@ -53,6 +53,6 @@ resource "castai_role_bindings" "platform_viewer" {
 ### Read-Only
 
 - `description` (String) Group description.
-- `id` (String) Group UUID, e.g. to reference a subject in castai_role_bindings.
+- `id` (String) The ID of this resource.
 - `managed_by` (String) How the group is managed: console, terraform, idp-sync or sso-default; empty for legacy groups.
 - `sso_provider` (String) SSO connection that owns the group, when the group is provisioned by SSO/SCIM.

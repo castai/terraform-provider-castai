@@ -23,41 +23,34 @@ func dataSourceOrganizationGroup() *schema.Resource {
 		Description: "Looks up a single group in a Cast AI organization by its exact, case-sensitive name. " +
 			"Useful for resolving SCIM-synced group UUIDs for castai_role_bindings without hardcoding them. " +
 			"The data source errors if no group with the given name exists.",
-		Schema: map[string]*schema.Schema{
-			FieldOrgGroupOrganizationID: {
-				Type:             schema.TypeString,
-				Required:         true,
-				ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
-				Description:      "Cast AI organization ID.",
-			},
-			FieldOrgGroupName: {
-				Type:             schema.TypeString,
-				Required:         true,
-				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
-				Description:      "Exact, case-sensitive name of the group to look up.",
-			},
-			"id": {
-				Type:        schema.TypeString,
-				Computed:    true,
-				Description: "Group UUID, e.g. to reference a subject in castai_role_bindings.",
-			},
-			"description": {
-				Type:        schema.TypeString,
-				Computed:    true,
-				Description: "Group description.",
-			},
-			"managed_by": {
-				Type:        schema.TypeString,
-				Computed:    true,
-				Description: "How the group is managed: console, terraform, idp-sync or sso-default; empty for legacy groups.",
-			},
-			"sso_provider": {
-				Type:        schema.TypeString,
-				Computed:    true,
-				Description: "SSO connection that owns the group, when the group is provisioned by SSO/SCIM.",
-			},
+		Schema: organizationGroupDataSourceSchema(),
+	}
+}
+
+// organizationGroupDataSourceSchema builds the schema of the singular group
+// data source: the lookup inputs plus the computed fields shared with the
+// castai_organization_groups list element (organizationGroupSchemaResource).
+func organizationGroupDataSourceSchema() map[string]*schema.Schema {
+	fields := map[string]*schema.Schema{
+		FieldOrgGroupOrganizationID: {
+			Type:             schema.TypeString,
+			Required:         true,
+			ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
+			Description:      "Cast AI organization ID.",
+		},
+		FieldOrgGroupName: {
+			Type:             schema.TypeString,
+			Required:         true,
+			ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
+			Description:      "Exact, case-sensitive name of the group to look up.",
 		},
 	}
+	// The top-level "id" attribute is not declared here: it is managed
+	// implicitly by the SDK from d.SetId, like in the castai_role data source.
+	for name, field := range organizationGroupComputedFields() {
+		fields[name] = field
+	}
+	return fields
 }
 
 func dataSourceOrganizationGroupRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
@@ -65,6 +58,10 @@ func dataSourceOrganizationGroupRead(ctx context.Context, d *schema.ResourceData
 	organizationID := d.Get(FieldOrgGroupOrganizationID).(string)
 	name := d.Get(FieldOrgGroupName).(string)
 
+	// The groups list API has no name filter, so this walks every page and
+	// matches in memory. The full scan is intentional: group names are
+	// expected to be unique per organization, and stopping at the first match
+	// would hide duplicate names from the error below.
 	groups, err := listGroups(ctx, client, organizationID, nil)
 	if err != nil {
 		return diag.FromErr(err)

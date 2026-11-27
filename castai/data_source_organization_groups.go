@@ -58,37 +58,47 @@ func dataSourceOrganizationGroups() *schema.Resource {
 	}
 }
 
-// organizationGroupSchemaResource holds the fields describing a single group,
-// shared by the castai_organization_group and castai_organization_groups data
-// sources.
+// organizationGroupSchemaResource holds the fields describing a single group
+// list element in the castai_organization_groups data source. The computed
+// fields are shared with the singular castai_organization_group data source.
 func organizationGroupSchemaResource() *schema.Resource {
-	return &schema.Resource{
-		Schema: map[string]*schema.Schema{
-			"id": {
-				Type:        schema.TypeString,
-				Computed:    true,
-				Description: "Group UUID, e.g. to reference a subject in castai_role_bindings.",
-			},
-			"name": {
-				Type:        schema.TypeString,
-				Computed:    true,
-				Description: "Group name.",
-			},
-			"description": {
-				Type:        schema.TypeString,
-				Computed:    true,
-				Description: "Group description.",
-			},
-			"managed_by": {
-				Type:        schema.TypeString,
-				Computed:    true,
-				Description: "How the group is managed: console, terraform, idp-sync or sso-default; empty for legacy groups.",
-			},
-			"sso_provider": {
-				Type:        schema.TypeString,
-				Computed:    true,
-				Description: "SSO connection that owns the group, when the group is provisioned by SSO/SCIM.",
-			},
+	fields := map[string]*schema.Schema{
+		"id": {
+			Type:        schema.TypeString,
+			Computed:    true,
+			Description: "Group UUID, e.g. to reference a subject in castai_role_bindings.",
+		},
+		"name": {
+			Type:        schema.TypeString,
+			Computed:    true,
+			Description: "Group name.",
+		},
+	}
+	for name, field := range organizationGroupComputedFields() {
+		fields[name] = field
+	}
+	return &schema.Resource{Schema: fields}
+}
+
+// organizationGroupComputedFields returns the group fields shared between the
+// castai_organization_group data source output and the castai_organization_groups
+// list element.
+func organizationGroupComputedFields() map[string]*schema.Schema {
+	return map[string]*schema.Schema{
+		"description": {
+			Type:        schema.TypeString,
+			Computed:    true,
+			Description: "Group description.",
+		},
+		"managed_by": {
+			Type:        schema.TypeString,
+			Computed:    true,
+			Description: "How the group is managed: console, terraform, idp-sync or sso-default; empty for legacy groups.",
+		},
+		"sso_provider": {
+			Type:        schema.TypeString,
+			Computed:    true,
+			Description: "SSO connection that owns the group, when the group is provisioned by SSO/SCIM.",
 		},
 	}
 }
@@ -131,9 +141,13 @@ func organizationGroupsManagedByFilter(d *schema.ResourceData) []string {
 
 // listGroups fetches all groups of an organization, following the pagination
 // cursor until every page is retrieved. A nil managedBy returns all groups.
+// Termination is driven purely by the empty next cursor; a repeated cursor
+// (server misbehaving) is cut off by the seen-cursors guard, and the page cap
+// bounds the loop regardless.
 func listGroups(ctx context.Context, client sdk.ClientWithResponsesInterface, organizationID string, managedBy []string) ([]sdk.CastaiRbacV1beta1Group, error) {
 	groups := make([]sdk.CastaiRbacV1beta1Group, 0)
 	seenGroupIDs := make(map[string]bool)
+	seenCursors := make(map[string]bool)
 	var cursor *string
 	pages := 0
 	for {
@@ -151,18 +165,18 @@ func listGroups(ctx context.Context, client sdk.ClientWithResponsesInterface, or
 		if e := sdk.CheckOKResponse(resp, err); e != nil {
 			return nil, fmt.Errorf("listing groups: %w", e)
 		}
-		if resp.JSON200 == nil {
+		if resp == nil || resp.JSON200 == nil {
 			return nil, fmt.Errorf("unexpected empty response from listing groups")
 		}
 
-		added := 0
+		// Deduplicate by id: overlapping pages at cursor boundaries must not
+		// yield the same group twice.
 		for _, group := range lo.FromPtr(resp.JSON200.Groups) {
 			groupID := lo.FromPtr(group.Id)
 			if seenGroupIDs[groupID] {
 				continue
 			}
 			seenGroupIDs[groupID] = true
-			added++
 			groups = append(groups, group)
 		}
 
@@ -170,9 +184,10 @@ func listGroups(ctx context.Context, client sdk.ClientWithResponsesInterface, or
 		if resp.JSON200.NextPage != nil && resp.JSON200.NextPage.Cursor != nil {
 			next = *resp.JSON200.NextPage.Cursor
 		}
-		if next == "" || added == 0 {
+		if next == "" || seenCursors[next] {
 			break
 		}
+		seenCursors[next] = true
 		cursor = &next
 	}
 
