@@ -178,6 +178,22 @@ type ClientInterface interface {
 	EnterpriseAPIOverrideUserRoleBindingsWithBody(ctx context.Context, enterpriseId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	EnterpriseAPIOverrideUserRoleBindings(ctx context.Context, enterpriseId string, body EnterpriseAPIOverrideUserRoleBindingsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// SettingsAPIGetSettings request
+	SettingsAPIGetSettings(ctx context.Context, organizationId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// SettingsAPIUpdateSettingsWithBody request with any body
+	SettingsAPIUpdateSettingsWithBody(ctx context.Context, organizationId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	SettingsAPIUpdateSettings(ctx context.Context, organizationId string, body SettingsAPIUpdateSettingsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// SSOEmailDomainAPIListSSOEmailDomains request
+	SSOEmailDomainAPIListSSOEmailDomains(ctx context.Context, organizationId string, params *SSOEmailDomainAPIListSSOEmailDomainsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// SSOEmailDomainAPIRegenerateSSOEmailDomainsTokensWithBody request with any body
+	SSOEmailDomainAPIRegenerateSSOEmailDomainsTokensWithBody(ctx context.Context, organizationId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	SSOEmailDomainAPIRegenerateSSOEmailDomainsTokens(ctx context.Context, organizationId string, body SSOEmailDomainAPIRegenerateSSOEmailDomainsTokensJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 }
 
 func (c *Client) EnterpriseAPIListGroups(ctx context.Context, enterpriseId string, params *EnterpriseAPIListGroupsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
@@ -578,6 +594,78 @@ func (c *Client) EnterpriseAPIOverrideUserRoleBindingsWithBody(ctx context.Conte
 
 func (c *Client) EnterpriseAPIOverrideUserRoleBindings(ctx context.Context, enterpriseId string, body EnterpriseAPIOverrideUserRoleBindingsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewEnterpriseAPIOverrideUserRoleBindingsRequest(c.Server, enterpriseId, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) SettingsAPIGetSettings(ctx context.Context, organizationId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewSettingsAPIGetSettingsRequest(c.Server, organizationId)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) SettingsAPIUpdateSettingsWithBody(ctx context.Context, organizationId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewSettingsAPIUpdateSettingsRequestWithBody(c.Server, organizationId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) SettingsAPIUpdateSettings(ctx context.Context, organizationId string, body SettingsAPIUpdateSettingsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewSettingsAPIUpdateSettingsRequest(c.Server, organizationId, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) SSOEmailDomainAPIListSSOEmailDomains(ctx context.Context, organizationId string, params *SSOEmailDomainAPIListSSOEmailDomainsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewSSOEmailDomainAPIListSSOEmailDomainsRequest(c.Server, organizationId, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) SSOEmailDomainAPIRegenerateSSOEmailDomainsTokensWithBody(ctx context.Context, organizationId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewSSOEmailDomainAPIRegenerateSSOEmailDomainsTokensRequestWithBody(c.Server, organizationId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) SSOEmailDomainAPIRegenerateSSOEmailDomainsTokens(ctx context.Context, organizationId string, body SSOEmailDomainAPIRegenerateSSOEmailDomainsTokensJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewSSOEmailDomainAPIRegenerateSSOEmailDomainsTokensRequest(c.Server, organizationId, body)
 	if err != nil {
 		return nil, err
 	}
@@ -2152,6 +2240,206 @@ func NewEnterpriseAPIOverrideUserRoleBindingsRequestWithBody(server string, ente
 	return req, nil
 }
 
+// NewSettingsAPIGetSettingsRequest generates requests for SettingsAPIGetSettings
+func NewSettingsAPIGetSettingsRequest(server string, organizationId string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "organizationId", runtime.ParamLocationPath, organizationId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/organization-management/v1/organizations/%s/settings", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewSettingsAPIUpdateSettingsRequest calls the generic SettingsAPIUpdateSettings builder with application/json body
+func NewSettingsAPIUpdateSettingsRequest(server string, organizationId string, body SettingsAPIUpdateSettingsJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewSettingsAPIUpdateSettingsRequestWithBody(server, organizationId, "application/json", bodyReader)
+}
+
+// NewSettingsAPIUpdateSettingsRequestWithBody generates requests for SettingsAPIUpdateSettings with any type of body
+func NewSettingsAPIUpdateSettingsRequestWithBody(server string, organizationId string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "organizationId", runtime.ParamLocationPath, organizationId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/organization-management/v1/organizations/%s/settings", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("PATCH", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewSSOEmailDomainAPIListSSOEmailDomainsRequest generates requests for SSOEmailDomainAPIListSSOEmailDomains
+func NewSSOEmailDomainAPIListSSOEmailDomainsRequest(server string, organizationId string, params *SSOEmailDomainAPIListSSOEmailDomainsParams) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "organizationId", runtime.ParamLocationPath, organizationId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/organization-management/v1beta/organizations/%s/sso-email-domains", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if params.PageLimit != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "page.limit", runtime.ParamLocationQuery, *params.PageLimit); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.PageCursor != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "page.cursor", runtime.ParamLocationQuery, *params.PageCursor); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewSSOEmailDomainAPIRegenerateSSOEmailDomainsTokensRequest calls the generic SSOEmailDomainAPIRegenerateSSOEmailDomainsTokens builder with application/json body
+func NewSSOEmailDomainAPIRegenerateSSOEmailDomainsTokensRequest(server string, organizationId string, body SSOEmailDomainAPIRegenerateSSOEmailDomainsTokensJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewSSOEmailDomainAPIRegenerateSSOEmailDomainsTokensRequestWithBody(server, organizationId, "application/json", bodyReader)
+}
+
+// NewSSOEmailDomainAPIRegenerateSSOEmailDomainsTokensRequestWithBody generates requests for SSOEmailDomainAPIRegenerateSSOEmailDomainsTokens with any type of body
+func NewSSOEmailDomainAPIRegenerateSSOEmailDomainsTokensRequestWithBody(server string, organizationId string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "organizationId", runtime.ParamLocationPath, organizationId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/organization-management/v1beta/organizations/%s/sso-email-domains:regenerateTokens", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
 func (c *Client) applyEditors(ctx context.Context, req *http.Request, additionalEditors []RequestEditorFn) error {
 	for _, r := range c.RequestEditors {
 		if err := r(ctx, req); err != nil {
@@ -2284,6 +2572,22 @@ type ClientWithResponsesInterface interface {
 	EnterpriseAPIOverrideUserRoleBindingsWithBodyWithResponse(ctx context.Context, enterpriseId string, contentType string, body io.Reader) (*EnterpriseAPIOverrideUserRoleBindingsResponse, error)
 
 	EnterpriseAPIOverrideUserRoleBindingsWithResponse(ctx context.Context, enterpriseId string, body EnterpriseAPIOverrideUserRoleBindingsJSONRequestBody) (*EnterpriseAPIOverrideUserRoleBindingsResponse, error)
+
+	// SettingsAPIGetSettings request
+	SettingsAPIGetSettingsWithResponse(ctx context.Context, organizationId string) (*SettingsAPIGetSettingsResponse, error)
+
+	// SettingsAPIUpdateSettings request  with any body
+	SettingsAPIUpdateSettingsWithBodyWithResponse(ctx context.Context, organizationId string, contentType string, body io.Reader) (*SettingsAPIUpdateSettingsResponse, error)
+
+	SettingsAPIUpdateSettingsWithResponse(ctx context.Context, organizationId string, body SettingsAPIUpdateSettingsJSONRequestBody) (*SettingsAPIUpdateSettingsResponse, error)
+
+	// SSOEmailDomainAPIListSSOEmailDomains request
+	SSOEmailDomainAPIListSSOEmailDomainsWithResponse(ctx context.Context, organizationId string, params *SSOEmailDomainAPIListSSOEmailDomainsParams) (*SSOEmailDomainAPIListSSOEmailDomainsResponse, error)
+
+	// SSOEmailDomainAPIRegenerateSSOEmailDomainsTokens request  with any body
+	SSOEmailDomainAPIRegenerateSSOEmailDomainsTokensWithBodyWithResponse(ctx context.Context, organizationId string, contentType string, body io.Reader) (*SSOEmailDomainAPIRegenerateSSOEmailDomainsTokensResponse, error)
+
+	SSOEmailDomainAPIRegenerateSSOEmailDomainsTokensWithResponse(ctx context.Context, organizationId string, body SSOEmailDomainAPIRegenerateSSOEmailDomainsTokensJSONRequestBody) (*SSOEmailDomainAPIRegenerateSSOEmailDomainsTokensResponse, error)
 }
 
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
@@ -2942,6 +3246,130 @@ func (r EnterpriseAPIOverrideUserRoleBindingsResponse) GetBody() []byte {
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
+type SettingsAPIGetSettingsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *GetSettingsResponse
+	JSONDefault  *Status
+}
+
+// Status returns HTTPResponse.Status
+func (r SettingsAPIGetSettingsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r SettingsAPIGetSettingsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r SettingsAPIGetSettingsResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type SettingsAPIUpdateSettingsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *UpdateSettingsResponse
+	JSONDefault  *Status
+}
+
+// Status returns HTTPResponse.Status
+func (r SettingsAPIUpdateSettingsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r SettingsAPIUpdateSettingsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r SettingsAPIUpdateSettingsResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type SSOEmailDomainAPIListSSOEmailDomainsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *ListSSOEmailDomainsResponse
+	JSONDefault  *Status
+}
+
+// Status returns HTTPResponse.Status
+func (r SSOEmailDomainAPIListSSOEmailDomainsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r SSOEmailDomainAPIListSSOEmailDomainsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r SSOEmailDomainAPIListSSOEmailDomainsResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type SSOEmailDomainAPIRegenerateSSOEmailDomainsTokensResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *RegenerateSSOEmailDomainsTokensResponse
+	JSONDefault  *Status
+}
+
+// Status returns HTTPResponse.Status
+func (r SSOEmailDomainAPIRegenerateSSOEmailDomainsTokensResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r SSOEmailDomainAPIRegenerateSSOEmailDomainsTokensResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r SSOEmailDomainAPIRegenerateSSOEmailDomainsTokensResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
 // EnterpriseAPIListGroupsWithResponse request returning *EnterpriseAPIListGroupsResponse
 func (c *ClientWithResponses) EnterpriseAPIListGroupsWithResponse(ctx context.Context, enterpriseId string, params *EnterpriseAPIListGroupsParams) (*EnterpriseAPIListGroupsResponse, error) {
 	rsp, err := c.EnterpriseAPIListGroups(ctx, enterpriseId, params)
@@ -3233,6 +3661,58 @@ func (c *ClientWithResponses) EnterpriseAPIOverrideUserRoleBindingsWithResponse(
 		return nil, err
 	}
 	return ParseEnterpriseAPIOverrideUserRoleBindingsResponse(rsp)
+}
+
+// SettingsAPIGetSettingsWithResponse request returning *SettingsAPIGetSettingsResponse
+func (c *ClientWithResponses) SettingsAPIGetSettingsWithResponse(ctx context.Context, organizationId string) (*SettingsAPIGetSettingsResponse, error) {
+	rsp, err := c.SettingsAPIGetSettings(ctx, organizationId)
+	if err != nil {
+		return nil, err
+	}
+	return ParseSettingsAPIGetSettingsResponse(rsp)
+}
+
+// SettingsAPIUpdateSettingsWithBodyWithResponse request with arbitrary body returning *SettingsAPIUpdateSettingsResponse
+func (c *ClientWithResponses) SettingsAPIUpdateSettingsWithBodyWithResponse(ctx context.Context, organizationId string, contentType string, body io.Reader) (*SettingsAPIUpdateSettingsResponse, error) {
+	rsp, err := c.SettingsAPIUpdateSettingsWithBody(ctx, organizationId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseSettingsAPIUpdateSettingsResponse(rsp)
+}
+
+func (c *ClientWithResponses) SettingsAPIUpdateSettingsWithResponse(ctx context.Context, organizationId string, body SettingsAPIUpdateSettingsJSONRequestBody) (*SettingsAPIUpdateSettingsResponse, error) {
+	rsp, err := c.SettingsAPIUpdateSettings(ctx, organizationId, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseSettingsAPIUpdateSettingsResponse(rsp)
+}
+
+// SSOEmailDomainAPIListSSOEmailDomainsWithResponse request returning *SSOEmailDomainAPIListSSOEmailDomainsResponse
+func (c *ClientWithResponses) SSOEmailDomainAPIListSSOEmailDomainsWithResponse(ctx context.Context, organizationId string, params *SSOEmailDomainAPIListSSOEmailDomainsParams) (*SSOEmailDomainAPIListSSOEmailDomainsResponse, error) {
+	rsp, err := c.SSOEmailDomainAPIListSSOEmailDomains(ctx, organizationId, params)
+	if err != nil {
+		return nil, err
+	}
+	return ParseSSOEmailDomainAPIListSSOEmailDomainsResponse(rsp)
+}
+
+// SSOEmailDomainAPIRegenerateSSOEmailDomainsTokensWithBodyWithResponse request with arbitrary body returning *SSOEmailDomainAPIRegenerateSSOEmailDomainsTokensResponse
+func (c *ClientWithResponses) SSOEmailDomainAPIRegenerateSSOEmailDomainsTokensWithBodyWithResponse(ctx context.Context, organizationId string, contentType string, body io.Reader) (*SSOEmailDomainAPIRegenerateSSOEmailDomainsTokensResponse, error) {
+	rsp, err := c.SSOEmailDomainAPIRegenerateSSOEmailDomainsTokensWithBody(ctx, organizationId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseSSOEmailDomainAPIRegenerateSSOEmailDomainsTokensResponse(rsp)
+}
+
+func (c *ClientWithResponses) SSOEmailDomainAPIRegenerateSSOEmailDomainsTokensWithResponse(ctx context.Context, organizationId string, body SSOEmailDomainAPIRegenerateSSOEmailDomainsTokensJSONRequestBody) (*SSOEmailDomainAPIRegenerateSSOEmailDomainsTokensResponse, error) {
+	rsp, err := c.SSOEmailDomainAPIRegenerateSSOEmailDomainsTokens(ctx, organizationId, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseSSOEmailDomainAPIRegenerateSSOEmailDomainsTokensResponse(rsp)
 }
 
 // ParseEnterpriseAPIListGroupsResponse parses an HTTP response from a EnterpriseAPIListGroupsWithResponse call
@@ -3883,6 +4363,138 @@ func ParseEnterpriseAPIOverrideUserRoleBindingsResponse(rsp *http.Response) (*En
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest OverrideUserRoleBindingsResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
+		var dest Status
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSONDefault = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseSettingsAPIGetSettingsResponse parses an HTTP response from a SettingsAPIGetSettingsWithResponse call
+func ParseSettingsAPIGetSettingsResponse(rsp *http.Response) (*SettingsAPIGetSettingsResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &SettingsAPIGetSettingsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest GetSettingsResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
+		var dest Status
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSONDefault = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseSettingsAPIUpdateSettingsResponse parses an HTTP response from a SettingsAPIUpdateSettingsWithResponse call
+func ParseSettingsAPIUpdateSettingsResponse(rsp *http.Response) (*SettingsAPIUpdateSettingsResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &SettingsAPIUpdateSettingsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest UpdateSettingsResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
+		var dest Status
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSONDefault = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseSSOEmailDomainAPIListSSOEmailDomainsResponse parses an HTTP response from a SSOEmailDomainAPIListSSOEmailDomainsWithResponse call
+func ParseSSOEmailDomainAPIListSSOEmailDomainsResponse(rsp *http.Response) (*SSOEmailDomainAPIListSSOEmailDomainsResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &SSOEmailDomainAPIListSSOEmailDomainsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest ListSSOEmailDomainsResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
+		var dest Status
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSONDefault = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseSSOEmailDomainAPIRegenerateSSOEmailDomainsTokensResponse parses an HTTP response from a SSOEmailDomainAPIRegenerateSSOEmailDomainsTokensWithResponse call
+func ParseSSOEmailDomainAPIRegenerateSSOEmailDomainsTokensResponse(rsp *http.Response) (*SSOEmailDomainAPIRegenerateSSOEmailDomainsTokensResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &SSOEmailDomainAPIRegenerateSSOEmailDomainsTokensResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest RegenerateSSOEmailDomainsTokensResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}

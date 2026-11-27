@@ -13,8 +13,9 @@ SSO Connection resource allows creating SSO trust relationship with CAST AI.
 
 ```terraform
 resource "castai_sso_connection" "aad" {
-  name         = "aad_connection"
-  email_domain = "aad_connection@test.com"
+  name            = "aad_connection"
+  organization_id = var.organization_id
+  email_domain    = "aad_connection@test.com"
   aad {
     client_id     = azuread_application.castai_sso.client_id
     client_secret = azuread_application_password.castai_sso.value
@@ -23,12 +24,25 @@ resource "castai_sso_connection" "aad" {
 }
 
 resource "castai_sso_connection" "keycloak" {
-  name         = "keycloak_connection"
-  email_domain = "example.com"
+  name              = "keycloak_connection"
+  organization_id   = var.organization_id
+  email_domain      = "example.com"
+  block_invitations = true
   oidc {
     issuer_url    = "https://keycloak.example.com/realms/my-realm"
     client_id     = "castai"
     client_secret = var.keycloak_client_secret
+  }
+}
+
+# DNS TXT records to publish for email-domain verification (one per claimed
+# domain that is still pending). CAST AI re-checks DNS automatically until each
+# claim is verified.
+output "email_domain_verification_records" {
+  value = {
+    for v in castai_sso_connection.keycloak.email_domain_validation :
+    v.domain => { name = v.txt_record_name, value = v.txt_record_value, status = v.status }
+    if v.txt_record_name != ""
   }
 }
 ```
@@ -40,11 +54,13 @@ resource "castai_sso_connection" "keycloak" {
 
 - `email_domain` (String) Email domain of the connection
 - `name` (String) Connection name
+- `organization_id` (String) CAST AI organization ID that owns this SSO connection. The organization settings endpoint is used to manage block_invitations.
 
 ### Optional
 
 - `aad` (Block List, Max: 1) Azure AD connector (see [below for nested schema](#nestedblock--aad))
 - `additional_email_domains` (List of String) Additional email domains that will be allowed to sign in via the connection
+- `block_invitations` (Boolean) When true, invitations sent by castai_organization_members are refused by the API. Managed only when explicitly set in configuration: a set value is enforced, an unset value mirrors the organization setting without producing a diff, and deleting the connection only resets the setting to false when the attribute is set.
 - `oidc` (Block List, Max: 1) OIDC connector (e.g. Keycloak) (see [below for nested schema](#nestedblock--oidc))
 - `okta` (Block List, Max: 1) Okta connector (see [below for nested schema](#nestedblock--okta))
 - `synchronize_user_groups` (Boolean) When enabled, user groups from the identity provider will be synchronized with CAST AI. A sync auth token is generated on activation and stored in sync_auth_token.
@@ -52,6 +68,7 @@ resource "castai_sso_connection" "keycloak" {
 
 ### Read-Only
 
+- `email_domain_validation` (List of Object) Verification state of the connection's claimed email domains. The verification record is returned by the API exactly once when it is issued: pending claims without a record get one issued automatically (via the regenerate-tokens endpoint) and it is persisted in state; already issued records are never rotated by the provider. For each pending domain, publish txt_record_name/txt_record_value as a DNS TXT record; CAST AI re-checks DNS automatically until the claim is verified. (see [below for nested schema](#nestedatt--email_domain_validation))
 - `id` (String) The ID of this resource.
 - `sync_auth_token` (String, Sensitive) Auth token generated when synchronize_user_groups is enabled. Only populated on the transition from false to true.
 
@@ -97,3 +114,16 @@ Optional:
 - `create` (String)
 - `delete` (String)
 - `update` (String)
+
+
+<a id="nestedatt--email_domain_validation"></a>
+### Nested Schema for `email_domain_validation`
+
+Read-Only:
+
+- `domain` (String)
+- `last_check_outcome` (String)
+- `status` (String)
+- `txt_record_name` (String)
+- `txt_record_value` (String)
+- `verified` (Boolean)

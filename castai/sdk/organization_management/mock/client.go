@@ -755,6 +755,126 @@ func (mr *MockClientInterfaceMockRecorder) EnterpriseAPIOverrideUserRoleBindings
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EnterpriseAPIOverrideUserRoleBindingsWithBody", reflect.TypeOf((*MockClientInterface)(nil).EnterpriseAPIOverrideUserRoleBindingsWithBody), varargs...)
 }
 
+// SSOEmailDomainAPIListSSOEmailDomains mocks base method.
+func (m *MockClientInterface) SSOEmailDomainAPIListSSOEmailDomains(ctx context.Context, organizationId string, params *organization_management.SSOEmailDomainAPIListSSOEmailDomainsParams, reqEditors ...organization_management.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "SSOEmailDomainAPIListSSOEmailDomains", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SSOEmailDomainAPIListSSOEmailDomains indicates an expected call of SSOEmailDomainAPIListSSOEmailDomains.
+func (mr *MockClientInterfaceMockRecorder) SSOEmailDomainAPIListSSOEmailDomains(ctx, organizationId, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SSOEmailDomainAPIListSSOEmailDomains", reflect.TypeOf((*MockClientInterface)(nil).SSOEmailDomainAPIListSSOEmailDomains), varargs...)
+}
+
+// SSOEmailDomainAPIRegenerateSSOEmailDomainsTokens mocks base method.
+func (m *MockClientInterface) SSOEmailDomainAPIRegenerateSSOEmailDomainsTokens(ctx context.Context, organizationId string, body organization_management.SSOEmailDomainAPIRegenerateSSOEmailDomainsTokensJSONRequestBody, reqEditors ...organization_management.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "SSOEmailDomainAPIRegenerateSSOEmailDomainsTokens", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SSOEmailDomainAPIRegenerateSSOEmailDomainsTokens indicates an expected call of SSOEmailDomainAPIRegenerateSSOEmailDomainsTokens.
+func (mr *MockClientInterfaceMockRecorder) SSOEmailDomainAPIRegenerateSSOEmailDomainsTokens(ctx, organizationId, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SSOEmailDomainAPIRegenerateSSOEmailDomainsTokens", reflect.TypeOf((*MockClientInterface)(nil).SSOEmailDomainAPIRegenerateSSOEmailDomainsTokens), varargs...)
+}
+
+// SSOEmailDomainAPIRegenerateSSOEmailDomainsTokensWithBody mocks base method.
+func (m *MockClientInterface) SSOEmailDomainAPIRegenerateSSOEmailDomainsTokensWithBody(ctx context.Context, organizationId, contentType string, body io.Reader, reqEditors ...organization_management.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "SSOEmailDomainAPIRegenerateSSOEmailDomainsTokensWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SSOEmailDomainAPIRegenerateSSOEmailDomainsTokensWithBody indicates an expected call of SSOEmailDomainAPIRegenerateSSOEmailDomainsTokensWithBody.
+func (mr *MockClientInterfaceMockRecorder) SSOEmailDomainAPIRegenerateSSOEmailDomainsTokensWithBody(ctx, organizationId, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SSOEmailDomainAPIRegenerateSSOEmailDomainsTokensWithBody", reflect.TypeOf((*MockClientInterface)(nil).SSOEmailDomainAPIRegenerateSSOEmailDomainsTokensWithBody), varargs...)
+}
+
+// SettingsAPIGetSettings mocks base method.
+func (m *MockClientInterface) SettingsAPIGetSettings(ctx context.Context, organizationId string, reqEditors ...organization_management.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "SettingsAPIGetSettings", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SettingsAPIGetSettings indicates an expected call of SettingsAPIGetSettings.
+func (mr *MockClientInterfaceMockRecorder) SettingsAPIGetSettings(ctx, organizationId interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SettingsAPIGetSettings", reflect.TypeOf((*MockClientInterface)(nil).SettingsAPIGetSettings), varargs...)
+}
+
+// SettingsAPIUpdateSettings mocks base method.
+func (m *MockClientInterface) SettingsAPIUpdateSettings(ctx context.Context, organizationId string, body organization_management.SettingsAPIUpdateSettingsJSONRequestBody, reqEditors ...organization_management.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "SettingsAPIUpdateSettings", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SettingsAPIUpdateSettings indicates an expected call of SettingsAPIUpdateSettings.
+func (mr *MockClientInterfaceMockRecorder) SettingsAPIUpdateSettings(ctx, organizationId, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SettingsAPIUpdateSettings", reflect.TypeOf((*MockClientInterface)(nil).SettingsAPIUpdateSettings), varargs...)
+}
+
+// SettingsAPIUpdateSettingsWithBody mocks base method.
+func (m *MockClientInterface) SettingsAPIUpdateSettingsWithBody(ctx context.Context, organizationId, contentType string, body io.Reader, reqEditors ...organization_management.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "SettingsAPIUpdateSettingsWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SettingsAPIUpdateSettingsWithBody indicates an expected call of SettingsAPIUpdateSettingsWithBody.
+func (mr *MockClientInterfaceMockRecorder) SettingsAPIUpdateSettingsWithBody(ctx, organizationId, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SettingsAPIUpdateSettingsWithBody", reflect.TypeOf((*MockClientInterface)(nil).SettingsAPIUpdateSettingsWithBody), varargs...)
+}
+
 // MockClientWithResponsesInterface is a mock of ClientWithResponsesInterface interface.
 type MockClientWithResponsesInterface struct {
 	ctrl     *gomock.Controller
@@ -1966,6 +2086,216 @@ func (m *MockClientWithResponsesInterface) EnterpriseAPIOverrideUserRoleBindings
 func (mr *MockClientWithResponsesInterfaceMockRecorder) EnterpriseAPIOverrideUserRoleBindingsWithResponse(ctx, enterpriseId, body interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EnterpriseAPIOverrideUserRoleBindingsWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).EnterpriseAPIOverrideUserRoleBindingsWithResponse), ctx, enterpriseId, body)
+}
+
+// SSOEmailDomainAPIListSSOEmailDomains mocks base method.
+func (m *MockClientWithResponsesInterface) SSOEmailDomainAPIListSSOEmailDomains(ctx context.Context, organizationId string, params *organization_management.SSOEmailDomainAPIListSSOEmailDomainsParams, reqEditors ...organization_management.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "SSOEmailDomainAPIListSSOEmailDomains", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SSOEmailDomainAPIListSSOEmailDomains indicates an expected call of SSOEmailDomainAPIListSSOEmailDomains.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) SSOEmailDomainAPIListSSOEmailDomains(ctx, organizationId, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SSOEmailDomainAPIListSSOEmailDomains", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).SSOEmailDomainAPIListSSOEmailDomains), varargs...)
+}
+
+// SSOEmailDomainAPIListSSOEmailDomainsWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) SSOEmailDomainAPIListSSOEmailDomainsWithResponse(ctx context.Context, organizationId string, params *organization_management.SSOEmailDomainAPIListSSOEmailDomainsParams) (*organization_management.SSOEmailDomainAPIListSSOEmailDomainsResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SSOEmailDomainAPIListSSOEmailDomainsWithResponse", ctx, organizationId, params)
+	ret0, _ := ret[0].(*organization_management.SSOEmailDomainAPIListSSOEmailDomainsResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SSOEmailDomainAPIListSSOEmailDomainsWithResponse indicates an expected call of SSOEmailDomainAPIListSSOEmailDomainsWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) SSOEmailDomainAPIListSSOEmailDomainsWithResponse(ctx, organizationId, params interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SSOEmailDomainAPIListSSOEmailDomainsWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).SSOEmailDomainAPIListSSOEmailDomainsWithResponse), ctx, organizationId, params)
+}
+
+// SSOEmailDomainAPIRegenerateSSOEmailDomainsTokens mocks base method.
+func (m *MockClientWithResponsesInterface) SSOEmailDomainAPIRegenerateSSOEmailDomainsTokens(ctx context.Context, organizationId string, body organization_management.SSOEmailDomainAPIRegenerateSSOEmailDomainsTokensJSONRequestBody, reqEditors ...organization_management.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "SSOEmailDomainAPIRegenerateSSOEmailDomainsTokens", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SSOEmailDomainAPIRegenerateSSOEmailDomainsTokens indicates an expected call of SSOEmailDomainAPIRegenerateSSOEmailDomainsTokens.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) SSOEmailDomainAPIRegenerateSSOEmailDomainsTokens(ctx, organizationId, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SSOEmailDomainAPIRegenerateSSOEmailDomainsTokens", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).SSOEmailDomainAPIRegenerateSSOEmailDomainsTokens), varargs...)
+}
+
+// SSOEmailDomainAPIRegenerateSSOEmailDomainsTokensWithBody mocks base method.
+func (m *MockClientWithResponsesInterface) SSOEmailDomainAPIRegenerateSSOEmailDomainsTokensWithBody(ctx context.Context, organizationId, contentType string, body io.Reader, reqEditors ...organization_management.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "SSOEmailDomainAPIRegenerateSSOEmailDomainsTokensWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SSOEmailDomainAPIRegenerateSSOEmailDomainsTokensWithBody indicates an expected call of SSOEmailDomainAPIRegenerateSSOEmailDomainsTokensWithBody.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) SSOEmailDomainAPIRegenerateSSOEmailDomainsTokensWithBody(ctx, organizationId, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SSOEmailDomainAPIRegenerateSSOEmailDomainsTokensWithBody", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).SSOEmailDomainAPIRegenerateSSOEmailDomainsTokensWithBody), varargs...)
+}
+
+// SSOEmailDomainAPIRegenerateSSOEmailDomainsTokensWithBodyWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) SSOEmailDomainAPIRegenerateSSOEmailDomainsTokensWithBodyWithResponse(ctx context.Context, organizationId, contentType string, body io.Reader) (*organization_management.SSOEmailDomainAPIRegenerateSSOEmailDomainsTokensResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SSOEmailDomainAPIRegenerateSSOEmailDomainsTokensWithBodyWithResponse", ctx, organizationId, contentType, body)
+	ret0, _ := ret[0].(*organization_management.SSOEmailDomainAPIRegenerateSSOEmailDomainsTokensResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SSOEmailDomainAPIRegenerateSSOEmailDomainsTokensWithBodyWithResponse indicates an expected call of SSOEmailDomainAPIRegenerateSSOEmailDomainsTokensWithBodyWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) SSOEmailDomainAPIRegenerateSSOEmailDomainsTokensWithBodyWithResponse(ctx, organizationId, contentType, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SSOEmailDomainAPIRegenerateSSOEmailDomainsTokensWithBodyWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).SSOEmailDomainAPIRegenerateSSOEmailDomainsTokensWithBodyWithResponse), ctx, organizationId, contentType, body)
+}
+
+// SSOEmailDomainAPIRegenerateSSOEmailDomainsTokensWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) SSOEmailDomainAPIRegenerateSSOEmailDomainsTokensWithResponse(ctx context.Context, organizationId string, body organization_management.SSOEmailDomainAPIRegenerateSSOEmailDomainsTokensJSONRequestBody) (*organization_management.SSOEmailDomainAPIRegenerateSSOEmailDomainsTokensResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SSOEmailDomainAPIRegenerateSSOEmailDomainsTokensWithResponse", ctx, organizationId, body)
+	ret0, _ := ret[0].(*organization_management.SSOEmailDomainAPIRegenerateSSOEmailDomainsTokensResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SSOEmailDomainAPIRegenerateSSOEmailDomainsTokensWithResponse indicates an expected call of SSOEmailDomainAPIRegenerateSSOEmailDomainsTokensWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) SSOEmailDomainAPIRegenerateSSOEmailDomainsTokensWithResponse(ctx, organizationId, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SSOEmailDomainAPIRegenerateSSOEmailDomainsTokensWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).SSOEmailDomainAPIRegenerateSSOEmailDomainsTokensWithResponse), ctx, organizationId, body)
+}
+
+// SettingsAPIGetSettings mocks base method.
+func (m *MockClientWithResponsesInterface) SettingsAPIGetSettings(ctx context.Context, organizationId string, reqEditors ...organization_management.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "SettingsAPIGetSettings", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SettingsAPIGetSettings indicates an expected call of SettingsAPIGetSettings.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) SettingsAPIGetSettings(ctx, organizationId interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SettingsAPIGetSettings", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).SettingsAPIGetSettings), varargs...)
+}
+
+// SettingsAPIGetSettingsWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) SettingsAPIGetSettingsWithResponse(ctx context.Context, organizationId string) (*organization_management.SettingsAPIGetSettingsResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SettingsAPIGetSettingsWithResponse", ctx, organizationId)
+	ret0, _ := ret[0].(*organization_management.SettingsAPIGetSettingsResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SettingsAPIGetSettingsWithResponse indicates an expected call of SettingsAPIGetSettingsWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) SettingsAPIGetSettingsWithResponse(ctx, organizationId interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SettingsAPIGetSettingsWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).SettingsAPIGetSettingsWithResponse), ctx, organizationId)
+}
+
+// SettingsAPIUpdateSettings mocks base method.
+func (m *MockClientWithResponsesInterface) SettingsAPIUpdateSettings(ctx context.Context, organizationId string, body organization_management.SettingsAPIUpdateSettingsJSONRequestBody, reqEditors ...organization_management.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "SettingsAPIUpdateSettings", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SettingsAPIUpdateSettings indicates an expected call of SettingsAPIUpdateSettings.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) SettingsAPIUpdateSettings(ctx, organizationId, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SettingsAPIUpdateSettings", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).SettingsAPIUpdateSettings), varargs...)
+}
+
+// SettingsAPIUpdateSettingsWithBody mocks base method.
+func (m *MockClientWithResponsesInterface) SettingsAPIUpdateSettingsWithBody(ctx context.Context, organizationId, contentType string, body io.Reader, reqEditors ...organization_management.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "SettingsAPIUpdateSettingsWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SettingsAPIUpdateSettingsWithBody indicates an expected call of SettingsAPIUpdateSettingsWithBody.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) SettingsAPIUpdateSettingsWithBody(ctx, organizationId, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SettingsAPIUpdateSettingsWithBody", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).SettingsAPIUpdateSettingsWithBody), varargs...)
+}
+
+// SettingsAPIUpdateSettingsWithBodyWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) SettingsAPIUpdateSettingsWithBodyWithResponse(ctx context.Context, organizationId, contentType string, body io.Reader) (*organization_management.SettingsAPIUpdateSettingsResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SettingsAPIUpdateSettingsWithBodyWithResponse", ctx, organizationId, contentType, body)
+	ret0, _ := ret[0].(*organization_management.SettingsAPIUpdateSettingsResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SettingsAPIUpdateSettingsWithBodyWithResponse indicates an expected call of SettingsAPIUpdateSettingsWithBodyWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) SettingsAPIUpdateSettingsWithBodyWithResponse(ctx, organizationId, contentType, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SettingsAPIUpdateSettingsWithBodyWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).SettingsAPIUpdateSettingsWithBodyWithResponse), ctx, organizationId, contentType, body)
+}
+
+// SettingsAPIUpdateSettingsWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) SettingsAPIUpdateSettingsWithResponse(ctx context.Context, organizationId string, body organization_management.SettingsAPIUpdateSettingsJSONRequestBody) (*organization_management.SettingsAPIUpdateSettingsResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SettingsAPIUpdateSettingsWithResponse", ctx, organizationId, body)
+	ret0, _ := ret[0].(*organization_management.SettingsAPIUpdateSettingsResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SettingsAPIUpdateSettingsWithResponse indicates an expected call of SettingsAPIUpdateSettingsWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) SettingsAPIUpdateSettingsWithResponse(ctx, organizationId, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SettingsAPIUpdateSettingsWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).SettingsAPIUpdateSettingsWithResponse), ctx, organizationId, body)
 }
 
 // MockResponse is a mock of Response interface.
