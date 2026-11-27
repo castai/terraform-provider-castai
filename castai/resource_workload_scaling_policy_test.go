@@ -16,6 +16,7 @@ import (
 	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	sdkterraform "github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
@@ -1723,6 +1724,130 @@ func Test_toAnomalyDetectionMap(t *testing.T) {
 	}
 }
 
+func Test_suppressInfiniteMemoryScalingRemovalDiff(t *testing.T) {
+	resource := &schema.Resource{Schema: infiniteMemoryScalingConfigSchema()}
+	configured := resource.Data(&sdkterraform.InstanceState{
+		RawConfig: cty.ObjectVal(map[string]cty.Value{
+			FieldAnomalyDetection: cty.ListVal([]cty.Value{
+				cty.ObjectVal(map[string]cty.Value{
+					FieldAnomalyDetectionInfiniteMemoryScaling: cty.ListVal([]cty.Value{
+						cty.ObjectVal(map[string]cty.Value{
+							FieldInfiniteMemoryScalingEnabled: cty.True,
+						}),
+					}),
+				}),
+			}),
+		}),
+	})
+	unconfigured := resource.Data(&sdkterraform.InstanceState{})
+
+	tests := map[string]struct {
+		d        *schema.ResourceData
+		oldValue string
+		newValue string
+		exp      bool
+	}{
+		"should suppress when the block is removed": {
+			oldValue: "1",
+			newValue: "0",
+			exp:      true,
+		},
+		"should suppress when enabled is dropped": {
+			oldValue: "true",
+			newValue: "",
+			exp:      true,
+		},
+		"should not suppress when enabled is set to false": {
+			oldValue: "true",
+			newValue: "false",
+			exp:      false,
+		},
+		"should not suppress when the block is added": {
+			oldValue: "0",
+			newValue: "1",
+			exp:      false,
+		},
+		"should suppress when the block is absent from the config": {
+			d:        unconfigured,
+			oldValue: "1",
+			newValue: "0",
+			exp:      true,
+		},
+		"should not suppress when the block is present in the config": {
+			d:        configured,
+			oldValue: "1",
+			newValue: "0",
+			exp:      false,
+		},
+		"should not suppress a configured value change": {
+			d:        configured,
+			oldValue: "true",
+			newValue: "false",
+			exp:      false,
+		},
+	}
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			r := require.New(t)
+			r.Equal(tt.exp, suppressInfiniteMemoryScalingRemovalDiff("", tt.oldValue, tt.newValue, tt.d))
+		})
+	}
+}
+
+func Test_infiniteMemoryScalingBlockRemovalProducesNoDiff(t *testing.T) {
+	sch := infiniteMemoryScalingConfigSchema()
+	sch[FieldAnomalyDetection].Elem.(*schema.Resource).Schema[FieldAnomalyDetectionInfiniteMemoryScaling].DiffSuppressFunc = suppressInfiniteMemoryScalingRemovalDiff
+
+	blockPath := FieldAnomalyDetection + ".0." + FieldAnomalyDetectionInfiniteMemoryScaling
+	state := &sdkterraform.InstanceState{
+		ID: "policy-id",
+		Attributes: map[string]string{
+			FieldAnomalyDetection + ".#":                          "1",
+			blockPath + ".#":                                      "1",
+			blockPath + ".0." + FieldInfiniteMemoryScalingEnabled: "true",
+		},
+	}
+	// The configuration no longer contains the anomaly_detection block at all.
+	config := sdkterraform.NewResourceConfigRaw(map[string]any{})
+
+	diff, err := schema.InternalMap(sch).Diff(context.Background(), state, config, nil, nil, false)
+	r := require.New(t)
+	r.NoError(err)
+	// The parent block removal is still planned; only the nested IMS entries must be suppressed.
+	r.Contains(diff.Attributes, FieldAnomalyDetection+".#")
+	for k := range diff.Attributes {
+		r.NotContains(k, FieldAnomalyDetectionInfiniteMemoryScaling,
+			"nested infinite_memory_scaling diff was not suppressed: %s", k)
+	}
+}
+
+func infiniteMemoryScalingConfigSchema() map[string]*schema.Schema {
+	return map[string]*schema.Schema{
+		FieldAnomalyDetection: {
+			Type:     schema.TypeList,
+			Optional: true,
+			MaxItems: 1,
+			Elem: &schema.Resource{
+				Schema: map[string]*schema.Schema{
+					FieldAnomalyDetectionInfiniteMemoryScaling: {
+						Type:     schema.TypeList,
+						Optional: true,
+						MaxItems: 1,
+						Elem: &schema.Resource{
+							Schema: map[string]*schema.Schema{
+								FieldInfiniteMemoryScalingEnabled: {
+									Type:     schema.TypeBool,
+									Optional: true,
+									Default:  true,
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+}
 
 func Test_toJvm(t *testing.T) {
 	tests := map[string]struct {

@@ -350,7 +350,7 @@ Optional:
 Optional:
 
 - `cpu_pressure` (Block List, Max: 1) Configures CPU pressure anomaly detection thresholds. (see [below for nested schema](#nestedblock--anomaly_detection--cpu_pressure))
-- `infinite_memory_scaling` (Block List, Max: 1) Configures the infinite memory scaling detector. When enabled, the detection is performed for workloads using this scaling policy. (see [below for nested schema](#nestedblock--anomaly_detection--infinite_memory_scaling))
+- `infinite_memory_scaling` (Block List, Max: 1) Configures the infinite memory scaling detector. When enabled, the detection is performed for workloads using this scaling policy. Omitting the block leaves the setting to the API default; set enabled = false to opt out explicitly. (see [below for nested schema](#nestedblock--anomaly_detection--infinite_memory_scaling))
 
 <a id="nestedblock--anomaly_detection--cpu_pressure"></a>
 ### Nested Schema for `anomaly_detection.cpu_pressure`
