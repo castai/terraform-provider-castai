@@ -6,7 +6,8 @@
 # Terraform-managed helm_release.
 
 locals {
-  init_script = var.gke_img_type == "COS_CONTAINERD" ? "init_cos.sh" : "init_ubuntu.sh"
+  init_script     = var.gke_img_type == "COS_CONTAINERD" ? "init_cos.sh" : "init_ubuntu.sh"
+  evictor_enabled = true
 }
 
 data "google_client_config" "default" {}
@@ -48,7 +49,7 @@ resource "helm_release" "castai_umbrella" {
   name             = "castai"
   repository       = "https://castai.github.io/helm-charts"
   chart            = "castai"
-  version          = "0.43.170"
+  version          = "0.48.0"
   namespace        = "castai-agent"
   create_namespace = true
   cleanup_on_fail  = true
@@ -69,6 +70,12 @@ resource "helm_release" "castai_umbrella" {
     {
       name  = "tags.full"
       value = "true"
+    },
+    # Required when the evictor is active from umbrella 0.48.0
+    # (castai/helm-charts#1717). Driven by the same local as castai_evictor.this.enabled.
+    {
+      name  = "autoscaler.castai-evictor.evictorEnabled"
+      value = tostring(local.evictor_enabled)
     },
   ]
 
@@ -176,7 +183,7 @@ resource "castai_autoscaler" "this" {
 resource "castai_evictor" "this" {
   cluster_id = castai_gke_cluster.this.id
 
-  enabled         = true
+  enabled         = local.evictor_enabled
   aggressive_mode = true
 
   depends_on = [helm_release.castai_umbrella]

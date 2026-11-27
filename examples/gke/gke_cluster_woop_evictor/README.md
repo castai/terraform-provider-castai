@@ -32,6 +32,7 @@ conflict between CAST AI's auto-updater and the Terraform-managed `helm_release`
 
 - **Umbrella chart instead of the `castai/gke-cluster` module** — Terraform installs a single `castai` Helm release with `tags.full = true`. The `castai_gke_cluster` resource is a direct resource (not a module) that registers the cluster and returns `cluster_token`.
 - **Evictor uses V2 API** (`castai_evictor` resource) instead of the deprecated `autoscaler_settings.node_downscaler.evictor` block to avoid dual-write conflicts.
+- **`evictorEnabled` is set explicitly** — from umbrella chart 0.48.0 the wrapper requires `autoscaler.castai-evictor.evictorEnabled` when `tags.full = true` (castai/helm-charts#1717). The example drives both `evictorEnabled` and `castai_evictor.enabled` from one `evictor_enabled` local.
 - **No evictor block in autoscaler_settings** — the `node_downscaler` block only configures `empty_nodes`; evictor config comes solely from `castai_evictor`.
 - **Single node config and template** — Live Migration is enabled on the `default_by_castai` template via `clm_enabled = true`, no separate `live` config needed.
 - **CLM init scripts** — `init_cos.sh` / `init_ubuntu.sh` install `cri-proxy` on nodes, required for Live Migration.
