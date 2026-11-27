@@ -350,6 +350,7 @@ Optional:
 Optional:
 
 - `cpu_pressure` (Block List, Max: 1) Configures CPU pressure anomaly detection thresholds. (see [below for nested schema](#nestedblock--anomaly_detection--cpu_pressure))
+- `infinite_memory_scaling` (Block List, Max: 1) Configures the infinite memory scaling detector. When enabled, the detection is performed for workloads using this scaling policy. (see [below for nested schema](#nestedblock--anomaly_detection--infinite_memory_scaling))
 
 <a id="nestedblock--anomaly_detection--cpu_pressure"></a>
 ### Nested Schema for `anomaly_detection.cpu_pressure`
@@ -358,6 +359,14 @@ Required:
 
 - `cpu_stall_threshold_percentage` (Number) Percentage of time (0-100) that a pod must experience CPU pressure to be considered under pressure.
 - `min_pressured_pod_percentage` (Number) Percentage (0-100) of pods that must be experiencing pressure for the detector to trigger.
+
+
+<a id="nestedblock--anomaly_detection--infinite_memory_scaling"></a>
+### Nested Schema for `anomaly_detection.infinite_memory_scaling`
+
+Optional:
+
+- `enabled` (Boolean) Opts the workload into infinite memory scaling detection. When false, the detector skips this workload. Defaults to true.
 
 
 

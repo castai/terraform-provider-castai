@@ -208,10 +208,6 @@ resource "helm_release" "castai_kvisor" {
       name  = "castai.grpcAddr"
       value = var.kvisor_grpc_url
     },
-    {
-      name  = "controller.extraArgs.kube-bench-cloud-provider"
-      value = "aks"
-    },
   ]
 
   set_sensitive = [

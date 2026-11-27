@@ -2096,9 +2096,9 @@ func (mr *MockClientInterfaceMockRecorder) ExternalClusterAPICreateAssumeRolePri
 }
 
 // ExternalClusterAPICreateClusterToken mocks base method.
-func (m *MockClientInterface) ExternalClusterAPICreateClusterToken(ctx context.Context, clusterId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+func (m *MockClientInterface) ExternalClusterAPICreateClusterToken(ctx context.Context, clusterId string, params *sdk.ExternalClusterAPICreateClusterTokenParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
-	varargs := []interface{}{ctx, clusterId}
+	varargs := []interface{}{ctx, clusterId, params}
 	for _, a := range reqEditors {
 		varargs = append(varargs, a)
 	}
@@ -2109,9 +2109,9 @@ func (m *MockClientInterface) ExternalClusterAPICreateClusterToken(ctx context.C
 }
 
 // ExternalClusterAPICreateClusterToken indicates an expected call of ExternalClusterAPICreateClusterToken.
-func (mr *MockClientInterfaceMockRecorder) ExternalClusterAPICreateClusterToken(ctx, clusterId interface{}, reqEditors ...interface{}) *gomock.Call {
+func (mr *MockClientInterfaceMockRecorder) ExternalClusterAPICreateClusterToken(ctx, clusterId, params interface{}, reqEditors ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, clusterId}, reqEditors...)
+	varargs := append([]interface{}{ctx, clusterId, params}, reqEditors...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPICreateClusterToken", reflect.TypeOf((*MockClientInterface)(nil).ExternalClusterAPICreateClusterToken), varargs...)
 }
 
@@ -6675,6 +6675,26 @@ func (mr *MockClientInterfaceMockRecorder) WorkloadOptimizationAPIGetWorkloadSca
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIGetWorkloadScalingPolicy", reflect.TypeOf((*MockClientInterface)(nil).WorkloadOptimizationAPIGetWorkloadScalingPolicy), varargs...)
 }
 
+// WorkloadOptimizationAPIGetWorkloadScopedRecommendationMetrics mocks base method.
+func (m *MockClientInterface) WorkloadOptimizationAPIGetWorkloadScopedRecommendationMetrics(ctx context.Context, clusterId, workloadId string, params *sdk.WorkloadOptimizationAPIGetWorkloadScopedRecommendationMetricsParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, workloadId, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "WorkloadOptimizationAPIGetWorkloadScopedRecommendationMetrics", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// WorkloadOptimizationAPIGetWorkloadScopedRecommendationMetrics indicates an expected call of WorkloadOptimizationAPIGetWorkloadScopedRecommendationMetrics.
+func (mr *MockClientInterfaceMockRecorder) WorkloadOptimizationAPIGetWorkloadScopedRecommendationMetrics(ctx, clusterId, workloadId, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, workloadId, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIGetWorkloadScopedRecommendationMetrics", reflect.TypeOf((*MockClientInterface)(nil).WorkloadOptimizationAPIGetWorkloadScopedRecommendationMetrics), varargs...)
+}
+
 // WorkloadOptimizationAPIGetWorkloadSpec mocks base method.
 func (m *MockClientInterface) WorkloadOptimizationAPIGetWorkloadSpec(ctx context.Context, clusterId, workloadId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
@@ -10794,9 +10814,9 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPICreate
 }
 
 // ExternalClusterAPICreateClusterToken mocks base method.
-func (m *MockClientWithResponsesInterface) ExternalClusterAPICreateClusterToken(ctx context.Context, clusterId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+func (m *MockClientWithResponsesInterface) ExternalClusterAPICreateClusterToken(ctx context.Context, clusterId string, params *sdk.ExternalClusterAPICreateClusterTokenParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
-	varargs := []interface{}{ctx, clusterId}
+	varargs := []interface{}{ctx, clusterId, params}
 	for _, a := range reqEditors {
 		varargs = append(varargs, a)
 	}
@@ -10807,25 +10827,25 @@ func (m *MockClientWithResponsesInterface) ExternalClusterAPICreateClusterToken(
 }
 
 // ExternalClusterAPICreateClusterToken indicates an expected call of ExternalClusterAPICreateClusterToken.
-func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPICreateClusterToken(ctx, clusterId interface{}, reqEditors ...interface{}) *gomock.Call {
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPICreateClusterToken(ctx, clusterId, params interface{}, reqEditors ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, clusterId}, reqEditors...)
+	varargs := append([]interface{}{ctx, clusterId, params}, reqEditors...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPICreateClusterToken", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPICreateClusterToken), varargs...)
 }
 
 // ExternalClusterAPICreateClusterTokenWithResponse mocks base method.
-func (m *MockClientWithResponsesInterface) ExternalClusterAPICreateClusterTokenWithResponse(ctx context.Context, clusterId string) (*sdk.ExternalClusterAPICreateClusterTokenResponse, error) {
+func (m *MockClientWithResponsesInterface) ExternalClusterAPICreateClusterTokenWithResponse(ctx context.Context, clusterId string, params *sdk.ExternalClusterAPICreateClusterTokenParams) (*sdk.ExternalClusterAPICreateClusterTokenResponse, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ExternalClusterAPICreateClusterTokenWithResponse", ctx, clusterId)
+	ret := m.ctrl.Call(m, "ExternalClusterAPICreateClusterTokenWithResponse", ctx, clusterId, params)
 	ret0, _ := ret[0].(*sdk.ExternalClusterAPICreateClusterTokenResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // ExternalClusterAPICreateClusterTokenWithResponse indicates an expected call of ExternalClusterAPICreateClusterTokenWithResponse.
-func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPICreateClusterTokenWithResponse(ctx, clusterId interface{}) *gomock.Call {
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPICreateClusterTokenWithResponse(ctx, clusterId, params interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPICreateClusterTokenWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPICreateClusterTokenWithResponse), ctx, clusterId)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPICreateClusterTokenWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPICreateClusterTokenWithResponse), ctx, clusterId, params)
 }
 
 // ExternalClusterAPIDeleteAssumeRolePrincipal mocks base method.
@@ -18791,6 +18811,41 @@ func (m *MockClientWithResponsesInterface) WorkloadOptimizationAPIGetWorkloadSca
 func (mr *MockClientWithResponsesInterfaceMockRecorder) WorkloadOptimizationAPIGetWorkloadScalingPolicyWithResponse(ctx, clusterId, policyId interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIGetWorkloadScalingPolicyWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).WorkloadOptimizationAPIGetWorkloadScalingPolicyWithResponse), ctx, clusterId, policyId)
+}
+
+// WorkloadOptimizationAPIGetWorkloadScopedRecommendationMetrics mocks base method.
+func (m *MockClientWithResponsesInterface) WorkloadOptimizationAPIGetWorkloadScopedRecommendationMetrics(ctx context.Context, clusterId, workloadId string, params *sdk.WorkloadOptimizationAPIGetWorkloadScopedRecommendationMetricsParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, workloadId, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "WorkloadOptimizationAPIGetWorkloadScopedRecommendationMetrics", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// WorkloadOptimizationAPIGetWorkloadScopedRecommendationMetrics indicates an expected call of WorkloadOptimizationAPIGetWorkloadScopedRecommendationMetrics.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) WorkloadOptimizationAPIGetWorkloadScopedRecommendationMetrics(ctx, clusterId, workloadId, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, workloadId, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIGetWorkloadScopedRecommendationMetrics", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).WorkloadOptimizationAPIGetWorkloadScopedRecommendationMetrics), varargs...)
+}
+
+// WorkloadOptimizationAPIGetWorkloadScopedRecommendationMetricsWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) WorkloadOptimizationAPIGetWorkloadScopedRecommendationMetricsWithResponse(ctx context.Context, clusterId, workloadId string, params *sdk.WorkloadOptimizationAPIGetWorkloadScopedRecommendationMetricsParams) (*sdk.WorkloadOptimizationAPIGetWorkloadScopedRecommendationMetricsResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "WorkloadOptimizationAPIGetWorkloadScopedRecommendationMetricsWithResponse", ctx, clusterId, workloadId, params)
+	ret0, _ := ret[0].(*sdk.WorkloadOptimizationAPIGetWorkloadScopedRecommendationMetricsResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// WorkloadOptimizationAPIGetWorkloadScopedRecommendationMetricsWithResponse indicates an expected call of WorkloadOptimizationAPIGetWorkloadScopedRecommendationMetricsWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) WorkloadOptimizationAPIGetWorkloadScopedRecommendationMetricsWithResponse(ctx, clusterId, workloadId, params interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIGetWorkloadScopedRecommendationMetricsWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).WorkloadOptimizationAPIGetWorkloadScopedRecommendationMetricsWithResponse), ctx, clusterId, workloadId, params)
 }
 
 // WorkloadOptimizationAPIGetWorkloadSpec mocks base method.
