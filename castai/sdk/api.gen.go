@@ -10059,7 +10059,8 @@ type WorkloadoptimizationV1Container struct {
 	// memory when JVM metrics are missing). Always exposed — anomaly windows included;
 	// the shipping state is inferable from the recommendation itself. Absent/empty when
 	// nothing is unqualified.
-	UnqualifiedResources *[]WorkloadoptimizationV1UnqualifiedResource `json:"unqualifiedResources,omitempty"`
+	UnqualifiedResources   *[]WorkloadoptimizationV1UnqualifiedResource `json:"unqualifiedResources,omitempty"`
+	WeightedRecommendation *WorkloadoptimizationV1Resources             `json:"weightedRecommendation,omitempty"`
 }
 
 // WorkloadoptimizationV1ContainerConfig ContainerConfig defines configuration settings for a specific container within a workload.
