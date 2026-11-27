@@ -469,10 +469,11 @@ It can be either:
 							},
 						},
 						FieldAnomalyDetectionInfiniteMemoryScaling: {
-							Type:        schema.TypeList,
-							Optional:    true,
-							MaxItems:    1,
-							Description: "Configures the infinite memory scaling detector. When enabled, the detection is performed for workloads using this scaling policy.",
+							Type:             schema.TypeList,
+							Optional:         true,
+							MaxItems:         1,
+							Description:      "Configures the infinite memory scaling detector. When enabled, the detection is performed for workloads using this scaling policy. Omitting the block leaves the setting to the API default; set enabled = false to opt out explicitly.",
+							DiffSuppressFunc: suppressInfiniteMemoryScalingRemovalDiff,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									FieldInfiniteMemoryScalingEnabled: {
@@ -1496,6 +1497,17 @@ func suppressAnomalyDetectionDefaultValueDiff(oldValue, newValue string, d *sche
 	}
 
 	return oldValue == newValue
+}
+
+// suppressInfiniteMemoryScalingRemovalDiff hides the diff produced when the
+// infinite_memory_scaling block is not configured. The API fills a default for
+// every policy, so without this a policy with the block unconfigured would show
+// the block being removed on every plan.
+func suppressInfiniteMemoryScalingRemovalDiff(_, _, newValue string, d *schema.ResourceData) bool {
+	if d != nil && rawConfigHasField(d.GetRawConfig(), FieldAnomalyDetection, FieldAnomalyDetectionInfiniteMemoryScaling) {
+		return false
+	}
+	return isEmpty(newValue)
 }
 
 func isEmpty(value string) bool {
