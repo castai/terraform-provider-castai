@@ -48,7 +48,7 @@ resource "helm_release" "castai_umbrella" {
   name             = "castai"
   repository       = "https://castai.github.io/helm-charts"
   chart            = "castai"
-  version          = "0.43.170"
+  version          = "0.48.0"
   namespace        = "castai-agent"
   create_namespace = true
   cleanup_on_fail  = true
@@ -68,6 +68,12 @@ resource "helm_release" "castai_umbrella" {
     },
     {
       name  = "tags.full"
+      value = "true"
+    },
+    # Required when the evictor is active from umbrella 0.48.0
+    # (castai/helm-charts#1717). Must match castai_evictor.this.enabled.
+    {
+      name  = "autoscaler.castai-evictor.evictorEnabled"
       value = "true"
     },
   ]
