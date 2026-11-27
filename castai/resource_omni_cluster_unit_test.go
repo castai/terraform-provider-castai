@@ -29,21 +29,21 @@ func TestToRegisteredClusterStatus(t *testing.T) {
 		{
 			name: "explicit agent",
 			status: &omniClusterStatusModel{
-				ProvisioningMode: types.StringValue("OMNI_AGENT"),
+				ProvisioningMode: types.StringValue("VIRTUALNODE"),
 				OmniAgentVersion: types.StringValue("1.19.16"),
 				PodCIDR:          types.StringValue("10.244.0.0/16"),
 			},
-			expectedMode:  provisioningModePointer(omni.RegisteredClusterStatusProvisioningModeOMNIAGENT),
+			expectedMode:  provisioningModePointer(omni.RegisteredClusterStatusProvisioningMode("VIRTUALNODE")),
 			expectedAgent: stringPointer("1.19.16"),
 		},
 		{
 			name: "omni connect",
 			status: &omniClusterStatusModel{
-				ProvisioningMode: types.StringValue("OMNI_CONNECT"),
+				ProvisioningMode: types.StringValue("NATIVE"),
 				OmniAgentVersion: types.StringNull(),
 				PodCIDR:          types.StringValue("10.244.0.0/16"),
 			},
-			expectedMode: provisioningModePointer(omni.RegisteredClusterStatusProvisioningModeOMNICONNECT),
+			expectedMode: provisioningModePointer(omni.RegisteredClusterStatusProvisioningMode("NATIVE")),
 		},
 	}
 
@@ -72,19 +72,19 @@ func TestValidateOmniClusterStatus(t *testing.T) {
 	}{
 		{name: "no status", expectedErrors: 0},
 		{name: "legacy agent", status: &omniClusterStatusModel{OmniAgentVersion: types.StringValue("1.19.16")}, expectedErrors: 0},
-		{name: "connect without agent version", status: &omniClusterStatusModel{
-			ProvisioningMode: types.StringValue("OMNI_CONNECT"),
+		{name: "native without agent version", status: &omniClusterStatusModel{
+			ProvisioningMode: types.StringValue("NATIVE"),
 			OmniAgentVersion: types.StringNull(),
 		}, expectedErrors: 0},
-		{name: "agent without version", status: &omniClusterStatusModel{
-			ProvisioningMode: types.StringValue("OMNI_AGENT"),
+		{name: "virtual node without version", status: &omniClusterStatusModel{
+			ProvisioningMode: types.StringValue("VIRTUALNODE"),
 			OmniAgentVersion: types.StringNull(),
 		}, expectedErrors: 1},
 		{name: "legacy empty version", status: &omniClusterStatusModel{
 			OmniAgentVersion: types.StringValue(""),
 		}, expectedErrors: 1},
-		{name: "connect with agent version", status: &omniClusterStatusModel{
-			ProvisioningMode: types.StringValue("OMNI_CONNECT"),
+		{name: "native with agent version", status: &omniClusterStatusModel{
+			ProvisioningMode: types.StringValue("NATIVE"),
 			OmniAgentVersion: types.StringValue("1.19.16"),
 		}, expectedErrors: 1},
 	}

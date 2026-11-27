@@ -37,5 +37,5 @@ Required:
 
 Optional:
 
-- `omni_agent_version` (String) Version of the omni agent running on the cluster. Required for OMNI_AGENT and omitted for OMNI_CONNECT.
-- `provisioning_mode` (String) Provisioning component used by the cluster: OMNI_AGENT or OMNI_CONNECT. Omit to preserve legacy OMNI_AGENT behavior.
+- `omni_agent_version` (String) Version of the omni agent running on the cluster. Required for VIRTUALNODE and omitted for NATIVE.
+- `provisioning_mode` (String) Cluster registration mode: VIRTUALNODE or NATIVE. Omit to preserve VIRTUALNODE behavior.
